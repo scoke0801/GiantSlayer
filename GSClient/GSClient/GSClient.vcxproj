@@ -164,6 +164,7 @@
     <ResourceCompile Include="GSClient.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="GiantSlayer.ico" />
     <Image Include="GSClient.ico" />
     <Image Include="small.ico" />
   </ItemGroup>

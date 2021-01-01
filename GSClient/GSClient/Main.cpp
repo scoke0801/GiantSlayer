@@ -1,16 +1,18 @@
 ﻿// GSClient.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 
-//#include "framework.h"
 #include "stdafx.h"
-#include "Main.h"
+#include "Main.h" 
+#include "GameFramework.h"
 
 #define MAX_LOADSTRING 100
-
+ 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
+
+CFramework* gFramework = nullptr;
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -55,7 +57,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
         else
         {
-            //gFramework->preUpdate();
+            gFramework->Update();
         }
     }
 
@@ -80,12 +82,12 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.cbClsExtra     = 0;
     wcex.cbWndExtra     = 0;
     wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GSCLIENT));
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAMEICON));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
     wcex.lpszMenuName   = nullptr;// MAKEINTRESOURCEW(IDC_GSCLIENT);
     wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_GAMEICON));
 
     return RegisterClassExW(&wcex);
 }
@@ -149,8 +151,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     {
         return FALSE;
     }
-    //gFramework = CFramework::GetInstance();
-    //gFramework->init(hWnd, hInst);
+    
+    gFramework = &(CFramework::GetInstance());
+    gFramework->Init(hWnd, hInst);
 
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
