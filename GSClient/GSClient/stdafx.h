@@ -40,47 +40,17 @@ using namespace std;
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
-
+ 
 #include "GameTimer.h"
+#include "resource.h"
 
-// 디버그 모드인 경우에
-// 클라이언트의 하위창으로 콘솔창을 사용하는 코드
-//#ifdef _DEBUG
-//#ifdef UNICODE
-//	#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
-//#else
-//	#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-//#endif
-//#endif
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
 using Microsoft::WRL::ComPtr;
-
-//#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
-
-#define FRAME_BUFFER_WIDTH		1024
-#define FRAME_BUFFER_HEIGHT		768
-
-//#define _WITH_CB_GAMEOBJECT_32BIT_CONSTANTS
-//#define _WITH_CB_GAMEOBJECT_ROOT_DESCRIPTOR
-#define _WITH_CB_WORLD_MATRIX_DESCRIPTOR_TABLE
-
-#define _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
  
-#define PARAMETER_STANDARD_TEXTURE		3
-#ifdef _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
-#define PARAMETER_SKYBOX_CUBE_TEXTURE	4
-#else
-#define PARAMETER_SKYBOX_CUBE_TEXTURE	4
-#endif
-
-#define _WITH_TERRAIN_TESSELATION
-
-#ifdef _WITH_TERRAIN_TESSELATION
-#define _WITH_TERRAIN_PARTITION
-#endif
+#include "Defines.h"
 
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
