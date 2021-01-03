@@ -21,7 +21,7 @@ public :
 	CNullScene();
 	~CNullScene();
 
-	virtual void Update(double elapsedTime) override {}
+	virtual void Update(double elapsedTime) override;
 	virtual void Draw() override {}
 
 public:

@@ -140,6 +140,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GameScene.h" />
+    <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
@@ -153,6 +155,8 @@
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GameScene.cpp" />
+    <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="GameFramework.cpp" />

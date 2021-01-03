@@ -25,6 +25,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="InputHandler">
+      <UniqueIdentifier>{583dca93-5e88-4993-a0ee-b62b64b626bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -60,6 +63,12 @@
     <ClInclude Include="Scene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="InputHandler.h">
+      <Filter>InputHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader12.cpp">
@@ -81,6 +90,12 @@
       <Filter>Timer</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="InputHandler.cpp">
+      <Filter>InputHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>

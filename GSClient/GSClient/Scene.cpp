@@ -17,3 +17,8 @@ CNullScene::CNullScene()
 CNullScene::~CNullScene()
 {
 }
+
+void CNullScene::Update(double elapsedTime)
+{
+	
+}

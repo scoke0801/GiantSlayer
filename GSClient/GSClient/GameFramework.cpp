@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "Scene.h"
+#include "InputHandler.h"
 
 CFramework::CFramework()
 {
@@ -29,6 +30,7 @@ void CFramework::Update()
 {
 	m_GameTimer.Tick();
 
+	CInputHandler::GetInstance().ProcessInput();
 
 	
 	double lag = 0.0f;

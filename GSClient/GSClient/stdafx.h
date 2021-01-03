@@ -15,6 +15,7 @@
 #include <memory.h>
 #include <tchar.h>
 #include <math.h>
+#include <iostream>
 
 #include <string>
 #include <wrl.h>
