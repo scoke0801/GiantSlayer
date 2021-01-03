@@ -42,16 +42,15 @@ using namespace std;
 #include <dxgidebug.h>
 #endif
  
-#include "GameTimer.h"
 #include "resource.h"
-
+#include "GameTimer.h"
+#include "InputHandler.h"
+#include "Defines.h"
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
 using Microsoft::WRL::ComPtr;
- 
-#include "Defines.h"
 
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "Scene.h"
-#include "InputHandler.h"
 
 CFramework::CFramework()
 {
@@ -28,32 +27,36 @@ void CFramework::Init(HWND hWnd, HINSTANCE hInst)
 
 void CFramework::Update()
 {
-	m_GameTimer.Tick();
+	m_GameTimer.UpdateElapsedTime();
 
 	CInputHandler::GetInstance().ProcessInput();
-
+	//GameInputs temp = GAME_INPUT;
 	
 	double lag = 0.0f;
 	double fps = 0.0f;
+	double elapsedTime = m_GameTimer.GetElapsedTime();
 
-	if (m_GameTimer.GetElapsedTime() > FPS)				//지정된 시간이 흘렀다면
+	if (elapsedTime > FPS)				//지정된 시간이 흘렀다면
 	{
 		//m_currentTime = std::chrono::system_clock::now();//현재시간 갱신
+		m_GameTimer.UpdateCurrentTime();
 
-		if (m_GameTimer.GetElapsedTime() > 0.0) fps = 1.0 / m_GameTimer.GetElapsedTime();
+		if (elapsedTime > 0.0)
+		{
+			fps = 1.0 / elapsedTime;
+		}
 
 		//게임 시간이 늦어진 경우 이를 따라잡을 때 까지 업데이트 시킵니다.
-		lag += m_GameTimer.GetElapsedTime();
+		lag += elapsedTime;
 		for (int i = 0; lag > FPS && i < MAX_LOOP_TIME; ++i)
 		{
-			//Communicate();
-			//update(FPS);	
+			//Communicate(); 
 			m_CurrentScene->Update(FPS);
 			lag -= FPS;
 		}
 	}
 	// 최대 FPS 미만의 시간이 경과하면 진행 생략(Frame Per Second)
-	else
+	else 
 		return;
 
 #if defined(SHOW_CAPTIONFPS)

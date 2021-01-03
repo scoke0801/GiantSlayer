@@ -8,7 +8,7 @@
 #define VK_1 0x31
 #define VK_2 0x32
  
-typedef struct GameInputs
+struct GameInputs
 {
 	bool KEY_1 = false;
 	bool KEY_2 = false;
@@ -27,7 +27,7 @@ class CInputHandler
 {
 public:
 	GameInputs m_Inputs;
-
+	
 private:
 	CInputHandler();
 	CInputHandler(const CInputHandler& other) = delete;
@@ -41,4 +41,4 @@ public:
 	}
 	void ProcessInput();
 };
-
+#define GAME_INPUT CInputHandler::GetInstance().m_Inputs
