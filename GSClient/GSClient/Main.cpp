@@ -153,7 +153,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     }
     
     gFramework = &(CFramework::GetInstance());
-    gFramework->Init(hWnd, hInst);
+    gFramework->OnCreate(hWnd, hInst);
 
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
