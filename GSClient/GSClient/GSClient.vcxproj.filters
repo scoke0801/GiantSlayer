@@ -28,6 +28,9 @@
     <Filter Include="InputHandler">
       <UniqueIdentifier>{583dca93-5e88-4993-a0ee-b62b64b626bc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sound">
+      <UniqueIdentifier>{2dfb50b3-1d89-4831-ac8a-7e350d11c027}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -72,6 +75,9 @@
     <ClInclude Include="TitleScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Sound.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader12.cpp">
@@ -103,6 +109,9 @@
     </ClCompile>
     <ClCompile Include="TitleScene.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Sound</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

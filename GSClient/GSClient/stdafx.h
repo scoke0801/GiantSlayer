@@ -26,6 +26,7 @@
 #include <chrono>
 #include <cassert>
 #include <algorithm>
+#include <map>
 
 using namespace std;
 
@@ -46,6 +47,7 @@ using namespace std;
 #include "GameTimer.h"
 #include "InputHandler.h"
 #include "Defines.h"
+#include "Sound.h"
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
