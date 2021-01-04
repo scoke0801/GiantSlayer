@@ -91,14 +91,14 @@ public:	// about scene change
 		scene->Init(m_rtClient, this);
 		scene->SendDataToNextScene(pContext);
 
-		if (m_pCurScene)
+		if (m_CurrentScene)
 		{
-			prevScene = m_pCurScene;
-			//delete m_pCurScene;
-			m_pCurScene = nullptr;
+			prevScene = m_CurrentScene;
+			//delete m_CurrentScene;
+			m_CurrentScene = nullptr;
 		}
 
-		m_pCurScene = scene;
+		m_CurrentScene = scene;
 		//LeaveCriticalSection(&m_cs);
 	} 
 };
