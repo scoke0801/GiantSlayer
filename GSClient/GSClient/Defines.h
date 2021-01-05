@@ -51,11 +51,12 @@
 
 //디버그 모드인 경우에
 //클라이언트의 하위창으로 콘솔창을 사용하는 코드
-//#ifdef _DEBUG
-//#ifdef UNICODE
-//	#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
-//#else
-//	#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-//#endif
-//#endif
+#ifdef _DEBUG
+#ifdef UNICODE
+	#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
+#else
+	#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+#endif
+#endif
 
+inline UINT CalcCBufferSize(unsigned long long size) { return ((size + 255) & ~255); /*256의 배수*/ }

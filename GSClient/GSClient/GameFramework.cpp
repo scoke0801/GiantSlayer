@@ -14,6 +14,7 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	m_hWnd = hWnd; 
 	m_hInst = hInst; 	
 
+
 	_tcscpy_s(m_pszFrameRate, _T("Giant Slayer"));
 	LoadString(m_hInst, IDS_APP_TITLE, m_captionTitle, TITLE_LENGTH);
 
@@ -270,7 +271,7 @@ void CFramework::Update()
 
 	CInputHandler::GetInstance().ProcessInput();
 	//GameInputs temp = GAME_INPUT;
-	
+
 	double lag = 0.0f;
 	double fps = 0.0f;
 	double elapsedTime = m_GameTimer.GetElapsedTime();
@@ -290,7 +291,7 @@ void CFramework::Update()
 		for (int i = 0; lag > FPS && i < MAX_LOOP_TIME; ++i)
 		{
 			//Communicate(); 
-			m_CurrentScene->Update(FPS);
+			m_CurrentScene->Update(m_pd3dCommandList, FPS);
 			lag -= FPS;
 		}
 	}
@@ -325,7 +326,7 @@ void CFramework::Animate()
 }
 
 void CFramework::Draw()
-{
+{ 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 

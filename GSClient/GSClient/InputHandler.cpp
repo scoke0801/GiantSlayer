@@ -22,3 +22,22 @@ void CInputHandler::ProcessInput()
 	if (GetAsyncKeyState(VK_C) & 0x8000)		m_Inputs.KEY_C = true;
 	if (GetAsyncKeyState(VK_SELECT) & 0x8000)	m_Inputs.KEY_SPACE = true;
 }
+
+void CInputHandler::MouseMove(WPARAM btnState, int x, int y)
+{
+	//cout << "마우스 이동\n";
+}
+
+void CInputHandler::MouseDown(WPARAM btnState, int x, int y)
+{
+	cout << "마우스 클릭 <Down>\n"; 
+	TestingMouseClick = true;
+	SetCapture(m_hTargetWND);
+}
+
+void CInputHandler::MouseUp(WPARAM btnState, int x, int y)
+{
+	cout << "마우스 클릭 <Up>\n";
+	TestingMouseClick = false;
+	ReleaseCapture();
+}

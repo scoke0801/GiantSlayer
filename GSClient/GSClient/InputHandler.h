@@ -25,9 +25,13 @@ struct GameInputs
 
 class CInputHandler
 {
+private :
+	HWND m_hTargetWND;
+
 public:
 	GameInputs m_Inputs;
-	
+	bool TestingMouseClick = false;
+
 private:
 	CInputHandler();
 	CInputHandler(const CInputHandler& other) = delete;
@@ -40,5 +44,12 @@ public:
 		return self;
 	}
 	void ProcessInput();
+
+	void MouseMove(WPARAM btnState, int x, int y);
+	void MouseDown(WPARAM btnState, int x, int y);
+	void MouseUp(WPARAM btnState, int x, int y);
+
+public:
+	void SetTargetWND(HWND hTarget) { m_hTargetWND = hTarget; }
 };
 #define GAME_INPUT CInputHandler::GetInstance().m_Inputs

@@ -16,6 +16,7 @@
 #include <tchar.h>
 #include <math.h>
 #include <iostream>
+#include <Windowsx.h>
 
 #include <string>
 #include <wrl.h>

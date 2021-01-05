@@ -155,6 +155,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     gFramework = &(CFramework::GetInstance());
     gFramework->OnCreate(hWnd, hInst);
 
+    CInputHandler::GetInstance().SetTargetWND(hWnd);
+
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
 
@@ -181,7 +183,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
-
+    case WM_LBUTTONDOWN:
+    case WM_MBUTTONDOWN:
+    case WM_RBUTTONDOWN:
+        CInputHandler::GetInstance().MouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        return 0;
+    case WM_LBUTTONUP:
+    case WM_MBUTTONUP:
+    case WM_RBUTTONUP:
+        CInputHandler::GetInstance().MouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        return 0;
+    case WM_MOUSEMOVE:
+        CInputHandler::GetInstance().MouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        return 0;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
         //return gFramework->ProcessWindowInput(hWnd, message, wParam, lParam);

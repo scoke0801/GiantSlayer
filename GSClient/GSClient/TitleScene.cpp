@@ -11,37 +11,58 @@ CTitleScene::~CTitleScene()
 {
 }
 
-void CTitleScene::Update(double elapsedTime)
+void CTitleScene::Update(ID3D12GraphicsCommandList* pd3dCommandList, double elapsedTime)
 {
+	//m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().TestingMouseClick;
+	//
+	//D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dTestData->GetGPUVirtualAddress();
+	//
+	//pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
 }
 
 void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
-{	
+{		
 	// 그래픽 루트 시그너쳐를 설정한다.
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-
 	// 파이프라인 상태를 설정한다.
 	pd3dCommandList->SetPipelineState(m_pd3dPipelineState);
+
+
+	m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().TestingMouseClick;
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dTestData->GetGPUVirtualAddress();
+
+	pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
+
 
 	// 프리미티브 토폴로지를 설정한다.
 	pd3dCommandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	// 정점 3개를 사용하여 렌더링 한다.
-	pd3dCommandList->DrawInstanced(3, 1, 0, 0);
+	// 정점 6개를 사용하여 렌더링 한다.
+	pd3dCommandList->DrawInstanced(6, 1, 0, 0);
 }
 
 void CTitleScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CreateRootSignature(pd3dDevice, pd3dCommandList);
 	CreatePipelineState(pd3dDevice, pd3dCommandList);
+	
+	BuildObjects(pd3dDevice, pd3dCommandList);
 }
 
 void CTitleScene::CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	D3D12_ROOT_PARAMETER pd3dRootParameters[1];
+
+	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; // test
+	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
-	d3dRootSignatureDesc.NumParameters = 0;
-	d3dRootSignatureDesc.pParameters = NULL;
+	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
+	d3dRootSignatureDesc.pParameters = pd3dRootParameters;
 	d3dRootSignatureDesc.NumStaticSamplers = 0;
 	d3dRootSignatureDesc.pStaticSamplers = NULL;
 	d3dRootSignatureDesc.Flags
@@ -72,10 +93,11 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 	HRESULT hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
-		"VSMain", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
-	hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
-		"PSMain", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
+		"VSTest", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
 
+	hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
+		"PSTest", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
+	
 	// 레스터라이저 상태를 설정한다.
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
@@ -134,4 +156,18 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 	if (pd3dVertexShaderBlob) pd3dVertexShaderBlob->Release();
 	if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();
+}
+
+void CTitleScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	BuildConstantsBuffers(pd3dDevice, pd3dCommandList);
+}
+
+void CTitleScene::BuildConstantsBuffers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = CalcCBufferSize(sizeof(TestData));
+	::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dTestData = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dTestData->Map(0, NULL, (void**)&m_pcbMappedTestData);
 }
