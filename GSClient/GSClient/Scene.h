@@ -8,11 +8,13 @@ public:
 
 	// just proto, fill with d3d obj
 	virtual void Update(double elapsedTime) {}
-	virtual void Draw() {}
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {}
 
 public:
-	virtual void SendDataToNextScene(void* context) {}
+	virtual void SendDataToNextScene(void* context) {}	
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 };
+
 
 
 class CNullScene : public CScene
@@ -22,8 +24,9 @@ public :
 	~CNullScene();
 
 	virtual void Update(double elapsedTime) override;
-	virtual void Draw() override {}
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override {}
 
 public:
 	virtual void SendDataToNextScene(void* context) override {}
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override {}
 };

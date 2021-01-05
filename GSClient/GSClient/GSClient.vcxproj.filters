@@ -31,6 +31,9 @@
     <Filter Include="Sound">
       <UniqueIdentifier>{2dfb50b3-1d89-4831-ac8a-7e350d11c027}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HLSL">
+      <UniqueIdentifier>{0aaf0176-b224-42b1-8683-1c7bfc44904e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -129,5 +132,10 @@
     <Image Include="GiantSlayer.ico">
       <Filter>리소스 파일</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="TitleScene.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -49,6 +49,8 @@ private:
 	ID3D12DescriptorHeap		*m_pd3dCbvSrvUavDescriptorHeap = nullptr;
 	ID3D12DescriptorHeap		*m_pd3dCbvSrvUavDescriptorHeapShadow = nullptr;
 
+	D3D12_VIEWPORT m_d3dViewport;
+	D3D12_RECT m_d3dScissorRect;
 private:
 	CFramework();
 

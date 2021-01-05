@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "Scene.h"
+#include "TitleScene.h"
 
 CFramework::CFramework()
 {
@@ -12,8 +13,6 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 { 
 	m_hWnd = hWnd; 
 	m_hInst = hInst; 	
-
-	m_CurrentScene = new CNullScene;
 
 	_tcscpy_s(m_pszFrameRate, _T("Giant Slayer"));
 	LoadString(m_hInst, IDS_APP_TITLE, m_captionTitle, TITLE_LENGTH);
@@ -30,6 +29,18 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	CreateSwapChain();
 	CreateDepthStencilView();
 
+	//m_CurrentScene = new CNullScene;
+	m_CurrentScene = new CTitleScene;
+	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList);
+
+	m_d3dViewport.TopLeftX = 0;
+	m_d3dViewport.TopLeftY = 0;
+	m_d3dViewport.Width = static_cast<float>(m_nWndClientWidth);
+	m_d3dViewport.Height = static_cast<float>(m_nWndClientHeight);
+	m_d3dViewport.MinDepth = 0.0f;
+	m_d3dViewport.MaxDepth = 1.0f;
+
+	m_d3dScissorRect = { 0, 0, m_nWndClientWidth, m_nWndClientHeight };
 	CoInitialize(NULL);
 }
 
@@ -318,6 +329,11 @@ void CFramework::Draw()
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
+	// 뷰포트와 씨저 사각형을 설정한다.
+	// 씬 클래스 내부로 옮겨야 함
+	m_pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
+	m_pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
+	
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
 	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -339,7 +355,7 @@ void CFramework::Draw()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
-	m_CurrentScene->Draw(); 
+	m_CurrentScene->Draw(m_pd3dCommandList); 
 	
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
