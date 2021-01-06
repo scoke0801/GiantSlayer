@@ -22,3 +22,6 @@ void CNullScene::Update(double elapsedTime)
 {
 	
 }
+
+
+

@@ -34,6 +34,9 @@
     <Filter Include="Shader">
       <UniqueIdentifier>{d848416e-ce44-4988-bd37-fefba4f7628c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{41d6c58e-cac2-4315-bb96-7a2187832103}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -81,6 +84,9 @@
     <ClInclude Include="Shader.h">
       <Filter>Shader</Filter>
     </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader12.cpp">
@@ -115,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
