@@ -2,6 +2,8 @@
 
 class CScene;
 
+
+
 class CFramework
 {
 private:
