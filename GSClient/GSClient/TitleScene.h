@@ -6,6 +6,11 @@ struct TestData
 	bool MouseClikced = false;
 };
 
+struct TestVertex
+{
+	XMFLOAT3 m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+};
+
 class CTitleScene : public CScene
 {
 private:

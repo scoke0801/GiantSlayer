@@ -26,20 +26,17 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	// 파이프라인 상태를 설정한다.
 	pd3dCommandList->SetPipelineState(m_pd3dPipelineState);
-
-
+	 
 	m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().TestingMouseClick;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dTestData->GetGPUVirtualAddress();
 
 	pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
-
-
+	 
 	// 프리미티브 토폴로지를 설정한다.
-	pd3dCommandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
+	pd3dCommandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
 	// 정점 6개를 사용하여 렌더링 한다.
-	pd3dCommandList->DrawInstanced(6, 1, 0, 0);
+	pd3dCommandList->DrawInstanced(12, 1, 0, 0);
 }
 
 void CTitleScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -55,7 +52,7 @@ void CTitleScene::CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	D3D12_ROOT_PARAMETER pd3dRootParameters[1];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; // test
+	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; // test
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
@@ -97,7 +94,8 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 	hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
 		"PSTest", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
-	
+
+#pragma region hide
 	// 레스터라이저 상태를 설정한다.
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
@@ -129,6 +127,7 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
 	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
+#pragma endregion
 	//	그래픽 파이프라인 상태를 설정한다.
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
 	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
@@ -141,8 +140,8 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	d3dPipelineStateDesc.BlendState = d3dBlendDesc;
 	d3dPipelineStateDesc.DepthStencilState.DepthEnable = FALSE;
 	d3dPipelineStateDesc.DepthStencilState.StencilEnable = FALSE;
-	d3dPipelineStateDesc.InputLayout.NumElements = 0;
-	d3dPipelineStateDesc.InputLayout.pInputElementDescs = NULL;
+	//d3dPipelineStateDesc.InputLayout.NumElements = 0;
+	//d3dPipelineStateDesc.InputLayout.pInputElementDescs = NULL;
 	d3dPipelineStateDesc.SampleMask = UINT_MAX;
 	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	d3dPipelineStateDesc.NumRenderTargets = 1;

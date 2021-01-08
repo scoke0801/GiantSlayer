@@ -49,6 +49,7 @@ using namespace std;
 #include "InputHandler.h"
 #include "Defines.h"
 #include "Sound.h"
+#include "FrameResource.h"
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;

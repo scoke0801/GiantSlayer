@@ -30,7 +30,7 @@ void CInputHandler::MouseMove(WPARAM btnState, int x, int y)
 
 void CInputHandler::MouseDown(WPARAM btnState, int x, int y)
 {
-	cout << "마우스 클릭 <Down>\n"; 
+	cout << "마우스 클릭 <Down> - x : " << x << " y : " << y << "\n";
 	TestingMouseClick = true;
 	SetCapture(m_hTargetWND);
 }

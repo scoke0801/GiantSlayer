@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Scene.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="GameScene.cpp" />

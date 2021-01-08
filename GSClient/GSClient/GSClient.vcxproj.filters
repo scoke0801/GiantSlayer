@@ -34,6 +34,9 @@
     <Filter Include="HLSL">
       <UniqueIdentifier>{0aaf0176-b224-42b1-8683-1c7bfc44904e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="FrameResource">
+      <UniqueIdentifier>{4b26124d-1546-4f31-8779-75260594c1bb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -81,6 +84,9 @@
     <ClInclude Include="Sound.h">
       <Filter>Sound</Filter>
     </ClInclude>
+    <ClInclude Include="FrameResource.h">
+      <Filter>FrameResource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader12.cpp">
@@ -115,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="Sound.cpp">
       <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameResource.cpp">
+      <Filter>FrameResource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
