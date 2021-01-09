@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "TitleScene.h"
+#include "GameFramework.h"
 
 CTitleScene::CTitleScene()
 {
@@ -169,4 +170,44 @@ void CTitleScene::BuildConstantsBuffers(ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_pd3dTestData = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dTestData->Map(0, NULL, (void**)&m_pcbMappedTestData);
+}
+
+void CTitleScene::ConnectToServer()
+{
+	PrepareCommunicate();
+}
+
+bool CTitleScene::PrepareCommunicate()
+{
+	CreateThread(NULL, 0, ClientMain, NULL, 0, NULL);
+	int retval = 0;
+	// 윈속 초기화
+	if (WSAStartup(MAKEWORD(2, 2), &m_WSA) != 0) return false;
+
+	// set serveraddr
+	SOCKADDR_IN serveraddr;
+	ZeroMemory(&serveraddr, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET;
+	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
+	serveraddr.sin_port = htons(SERVERPORT);
+
+	m_IsServerConnected = true;
+
+	// socket()
+	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (m_Sock == INVALID_SOCKET)
+	{
+		m_IsServerConnected = false; 
+		return false;
+	}
+	int opt_val = TRUE;
+	setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val)); 
+	retval = connect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+	if (retval == SOCKET_ERROR)
+	{
+		m_IsServerConnected = false; 
+		return false;
+	}
+
+	return true;
 }

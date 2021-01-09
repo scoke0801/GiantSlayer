@@ -109,3 +109,4 @@ public:	// about scene change
 	} 
 };
 
+DWORD WINAPI ClientMain(LPVOID arg);

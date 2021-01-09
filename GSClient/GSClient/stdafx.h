@@ -28,7 +28,8 @@
 #include <cassert>
 #include <algorithm>
 #include <map>
-
+#pragma comment(lib, "ws2_32")
+#include <WinSock2.h> 
 using namespace std;
 
 #include <d3d12.h>

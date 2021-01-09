@@ -38,5 +38,14 @@ private:
 
 	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildConstantsBuffers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+private:	// 서버와 통신하기 위한 데이터 입니다.
+	WSADATA m_WSA;
+	SOCKET m_Sock;
+	SOCKADDR m_ServerAddr;
+
+	bool m_IsServerConnected;
+	void ConnectToServer();
+	bool PrepareCommunicate();
 };
 

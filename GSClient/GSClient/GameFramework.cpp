@@ -374,3 +374,8 @@ void CFramework::Draw()
 
 	MoveToNextFrame();
 }
+
+DWORD __stdcall ClientMain(LPVOID arg)
+{
+	return 0;
+}
