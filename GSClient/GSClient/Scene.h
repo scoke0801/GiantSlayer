@@ -1,4 +1,5 @@
 #pragma once
+#include "GameObject.h"
 
 class CScene
 {
@@ -22,8 +23,11 @@ public :
 	~CNullScene();
 
 	virtual void Update(double elapsedTime) override;
-	virtual void Draw() override {}
+	virtual void Draw() override;
 
 public:
+	CGameObject testbox1;
+	CGameObject testbox2;
+
 	virtual void SendDataToNextScene(void* context) override {}
 };
