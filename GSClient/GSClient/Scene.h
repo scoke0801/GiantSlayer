@@ -1,4 +1,5 @@
 #pragma once
+#include "GameObject.h"
 
 class CScene
 {
@@ -26,7 +27,13 @@ public :
 	virtual void Update(ID3D12GraphicsCommandList* pd3dCommandList, double elapsedTime) override;
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override {}
 
+	//virtual void Update(double elapsedTime) override;
+	//virtual void Draw() override;
+
 public:
+	CGameObject testbox1;
+	CGameObject testbox2;
+
 	virtual void SendDataToNextScene(void* context) override {}
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override {}
 };

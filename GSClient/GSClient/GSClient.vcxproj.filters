@@ -36,6 +36,11 @@
     </Filter>
     <Filter Include="FrameResource">
       <UniqueIdentifier>{4b26124d-1546-4f31-8779-75260594c1bb}</UniqueIdentifier>
+    <Filter Include="Object">
+      <UniqueIdentifier>{a29d4bda-7e8b-438f-8a92-682567e06cf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="StateMachine">
+      <UniqueIdentifier>{d5daedad-8980-41d9-a3b2-422a3934caa9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +91,14 @@
     </ClInclude>
     <ClInclude Include="FrameResource.h">
       <Filter>FrameResource</Filter>
+    <ClInclude Include="GameObject.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="State.h">
+      <Filter>StateMachine</Filter>
+    </ClInclude>
+    <ClInclude Include="StateMachine.h">
+      <Filter>StateMachine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +137,14 @@
     </ClCompile>
     <ClCompile Include="FrameResource.cpp">
       <Filter>FrameResource</Filter>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="State.cpp">
+      <Filter>StateMachine</Filter>
+    </ClCompile>
+    <ClCompile Include="StateMachine.cpp">
+      <Filter>StateMachine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
