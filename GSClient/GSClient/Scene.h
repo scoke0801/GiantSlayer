@@ -25,7 +25,7 @@ public :
 	~CNullScene();
 
 	virtual void Update(ID3D12GraphicsCommandList* pd3dCommandList, double elapsedTime) override;
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override {}
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 	//virtual void Update(double elapsedTime) override;
 	//virtual void Draw() override;

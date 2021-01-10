@@ -1,60 +1,70 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Main">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Framework">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="D3D">
-      <UniqueIdentifier>{ca76541f-63c2-44b4-9262-92b687dbb872}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Main\stdafx">
-      <UniqueIdentifier>{1bff5aad-46a7-40f9-b5f1-aa523e1a2993}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Timer">
-      <UniqueIdentifier>{f080f556-dbc0-48d2-b861-568e4e00b73f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Scene">
-      <UniqueIdentifier>{b1d2f366-dc20-48bb-b4b7-aa92177f0378}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="InputHandler">
-      <UniqueIdentifier>{583dca93-5e88-4993-a0ee-b62b64b626bc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sound">
-      <UniqueIdentifier>{2dfb50b3-1d89-4831-ac8a-7e350d11c027}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="HLSL">
-      <UniqueIdentifier>{0aaf0176-b224-42b1-8683-1c7bfc44904e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="FrameResource">
-      <UniqueIdentifier>{4b26124d-1546-4f31-8779-75260594c1bb}</UniqueIdentifier>
-    <Filter Include="Object">
-      <UniqueIdentifier>{a29d4bda-7e8b-438f-8a92-682567e06cf5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="StateMachine">
-      <UniqueIdentifier>{d5daedad-8980-41d9-a3b2-422a3934caa9}</UniqueIdentifier>
-    </Filter>
+    <ClCompile Include="DDSTextureLoader12.cpp">
+      <Filter>D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameResource.cpp">
+      <Filter>FrameResource</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader12.cpp">
+      <Filter>D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Main\stdafx</Filter>
+    </ClCompile>
+    <ClCompile Include="InputHandler.cpp">
+      <Filter>InputHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="GameTimer.cpp">
+      <Filter>GameTimer</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFramework.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="State.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="StateMachine.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="TitleScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Resource.h">
-      <Filter>리소스 파일</Filter>
+    <ClInclude Include="DDSTextureLoader12.h">
+      <Filter>D3D</Filter>
     </ClInclude>
     <ClInclude Include="d3dx12.h">
       <Filter>D3D</Filter>
     </ClInclude>
-    <ClInclude Include="DDSTextureLoader12.h">
-      <Filter>D3D</Filter>
+    <ClInclude Include="FrameResource.h">
+      <Filter>FrameResource</Filter>
     </ClInclude>
     <ClInclude Include="WICTextureLoader12.h">
       <Filter>D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Main.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>리소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>Main\stdafx</Filter>
@@ -62,106 +72,93 @@
     <ClInclude Include="targetver.h">
       <Filter>Main\stdafx</Filter>
     </ClInclude>
-    <ClInclude Include="GameFramework.h">
-      <Filter>Framework</Filter>
+    <ClInclude Include="InputHandler.h">
+      <Filter>InputHandler</Filter>
     </ClInclude>
-    <ClInclude Include="Main.h">
-      <Filter>Main</Filter>
+    <ClInclude Include="Sound.h">
+      <Filter>Sound</Filter>
     </ClInclude>
     <ClInclude Include="GameTimer.h">
-      <Filter>Timer</Filter>
+      <Filter>GameTimer</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFramework.h">
+      <Filter>Framework</Filter>
     </ClInclude>
     <ClInclude Include="Defines.h">
       <Filter>Main</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Scene</Filter>
+    <ClInclude Include="GameObject.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
-    <ClInclude Include="InputHandler.h">
-      <Filter>InputHandler</Filter>
+    <ClInclude Include="State.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="StateMachine.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="TitleScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Sound.h">
-      <Filter>Sound</Filter>
-    </ClInclude>
-    <ClInclude Include="FrameResource.h">
-      <Filter>FrameResource</Filter>
-    <ClInclude Include="GameObject.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="State.h">
-      <Filter>StateMachine</Filter>
-    </ClInclude>
-    <ClInclude Include="StateMachine.h">
-      <Filter>StateMachine</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DDSTextureLoader12.cpp">
-      <Filter>D3D</Filter>
-    </ClCompile>
-    <ClCompile Include="WICTextureLoader12.cpp">
-      <Filter>D3D</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Main\stdafx</Filter>
-    </ClCompile>
-    <ClCompile Include="GameFramework.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="GameTimer.cpp">
-      <Filter>Timer</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="InputHandler.cpp">
-      <Filter>InputHandler</Filter>
-    </ClCompile>
-    <ClCompile Include="GameScene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="TitleScene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Sound.cpp">
-      <Filter>Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="FrameResource.cpp">
-      <Filter>FrameResource</Filter>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="State.cpp">
-      <Filter>StateMachine</Filter>
-    </ClCompile>
-    <ClCompile Include="StateMachine.cpp">
-      <Filter>StateMachine</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="GSClient.rc">
-      <Filter>리소스 파일</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="small.ico">
+    <Image Include="GiantSlayer.ico">
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="GSClient.ico">
       <Filter>리소스 파일</Filter>
     </Image>
-    <Image Include="GiantSlayer.ico">
+    <Image Include="small.ico">
       <Filter>리소스 파일</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="D3D">
+      <UniqueIdentifier>{32ad84cd-862c-4219-b837-5167f1ed470e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FrameResource">
+      <UniqueIdentifier>{75226de6-0e9b-46a0-9929-8de4815177ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL">
+      <UniqueIdentifier>{07f48041-08f2-4cc7-aee6-49d1b5ced61f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{9010e092-23ed-4756-b830-ffec74a07de9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{b8ed45a4-5880-4912-b29d-aad12cbcd91f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main\stdafx">
+      <UniqueIdentifier>{8c812ade-26a6-4ff9-8ef6-948344d0426a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InputHandler">
+      <UniqueIdentifier>{fe5e597f-3732-4ab6-951d-3a8d08e43216}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{51c3b493-1b74-4a8a-ba94-a13f4023e3e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sound">
+      <UniqueIdentifier>{0cd6c865-f35d-4320-8ee7-b13147439d16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameTimer">
+      <UniqueIdentifier>{d7cf4841-4512-421d-9da1-c21c208bd294}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject">
+      <UniqueIdentifier>{f11fe7f6-4b27-45c9-a979-6561fcc1752c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{2cac7ec3-8574-48aa-8aeb-d77f88e2775c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GSClient.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="TitleScene.hlsl">

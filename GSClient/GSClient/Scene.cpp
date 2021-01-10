@@ -29,7 +29,7 @@ void CNullScene::Update(ID3D12GraphicsCommandList* pd3dCommandList, double elaps
 	testbox2.Update();
 }
 
-void CNullScene::Draw()
+void CNullScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	cout << "¹Ú½º1: ";
 	testbox1.Draw();
