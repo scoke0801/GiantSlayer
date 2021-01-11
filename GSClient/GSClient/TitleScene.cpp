@@ -44,19 +44,33 @@ void CTitleScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 {
 	CreateRootSignature(pd3dDevice, pd3dCommandList);
 	CreatePipelineState(pd3dDevice, pd3dCommandList);
-	
-	BuildObjects(pd3dDevice, pd3dCommandList);
+
+	LoadTextures(pd3dDevice, pd3dCommandList);
+	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
+	BuildObjects(pd3dDevice, pd3dCommandList); 
 }
 
 void CTitleScene::CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	D3D12_ROOT_PARAMETER pd3dRootParameters[1];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
+	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[0].NumDescriptors = 1;
+	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
+	pd3dDescriptorRanges[0].RegisterSpace = 0;
+	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[2];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; // test
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
+	
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[1].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);	// Helicopter
+	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
@@ -170,6 +184,60 @@ void CTitleScene::BuildConstantsBuffers(ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_pd3dTestData = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dTestData->Map(0, NULL, (void**)&m_pcbMappedTestData);
+}
+
+void CTitleScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	auto multiButtonTex = make_unique<CTexture>();
+	multiButtonTex->m_Name = "MultiButton";
+	multiButtonTex->m_FileName = L"resources/UI/MultiPlayButton.dds";
+	multiButtonTex->m_pd3dResource = ::CreateTextureResourceFromDDSFile(pd3dDevice, pd3dCommandList,
+		multiButtonTex->m_FileName.c_str(),
+		&multiButtonTex->m_pd3dUploadHeap,
+		D3D12_RESOURCE_STATE_GENERIC_READ );
+
+	auto singleButtonTex = make_unique<CTexture>();
+	singleButtonTex->m_Name = "SingleButton";
+	singleButtonTex->m_FileName = L"resources/UI/SinglePlayButton.dds";	
+	singleButtonTex->m_pd3dResource = ::CreateTextureResourceFromDDSFile(pd3dDevice, pd3dCommandList, 
+		singleButtonTex->m_FileName.c_str(),
+		&singleButtonTex->m_pd3dUploadHeap,
+		D3D12_RESOURCE_STATE_GENERIC_READ);
+	m_Textures[multiButtonTex->m_Name] = std::move(multiButtonTex);
+	m_Textures[singleButtonTex->m_Name] = std::move(singleButtonTex);
+}
+
+void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{	
+	//
+	// Create the SRV heap.
+	//
+	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+	srvHeapDesc.NumDescriptors = 3;
+	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
+	
+	//
+	// Fill out the heap with actual descriptors.
+	//
+	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor = m_pd3dSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	 
+	auto multiBtnTex = m_Textures["MultiButton"]->m_pd3dResource;
+	auto simpleBtnTex = m_Textures["SingleButton"]->m_pd3dResource; 
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Format = multiBtnTex->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = -1;
+	pd3dDevice->CreateShaderResourceView(multiBtnTex, &srvDesc, hDescriptor); 
+	
+	// next descriptor 
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = simpleBtnTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(simpleBtnTex, &srvDesc, hDescriptor);
 }
 
 void CTitleScene::ConnectToServer()

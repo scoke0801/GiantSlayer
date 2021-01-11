@@ -21,6 +21,15 @@ private:
 	ID3D12Resource*			m_pd3dTestData = NULL;
 	TestData*				m_pcbMappedTestData = NULL;
 
+	ID3D12DescriptorHeap*	m_pd3dSrvDescriptorHeap = nullptr;
+
+private:	// 서버와 통신하기 위한 데이터 입니다.
+	WSADATA m_WSA;
+	SOCKET m_Sock;
+	SOCKADDR m_ServerAddr;
+
+	bool m_IsServerConnected;
+
 public:
 	CTitleScene();
 	~CTitleScene();
@@ -32,19 +41,17 @@ public:
 	virtual void SendDataToNextScene(void* context) override {}
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
-private:
+private: // 객체 생성 관련
 	void CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildConstantsBuffers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
-private:	// 서버와 통신하기 위한 데이터 입니다.
-	WSADATA m_WSA;
-	SOCKET m_Sock;
-	SOCKADDR m_ServerAddr;
+	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
-	bool m_IsServerConnected;
+private: // 서버 관련
 	void ConnectToServer();
 	bool PrepareCommunicate();
 };

@@ -68,3 +68,12 @@
 #endif
 
 inline UINT CalcCBufferSize(unsigned long long size) { return ((size + 255) & ~255); /*256ÀÇ ¹è¼ö*/ }
+
+#ifndef ThrowIfFailed
+#define ThrowIfFailed(x)                                              \
+{                                                                     \
+    HRESULT hr__ = (x);                                               \
+    std::wstring wfn = AnsiToWString(__FILE__);                       \
+    if(FAILED(hr__)) { throw DxException(hr__, L#x, wfn, __LINE__); } \
+}
+#endif

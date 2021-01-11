@@ -3,6 +3,10 @@
 
 class CScene
 {
+protected:
+	unordered_map<string, unique_ptr<CTexture>> m_Textures;
+	unordered_map<string, unique_ptr<CMaterial>> m_Materials;
+
 public:
 	CScene();
 	virtual ~CScene();

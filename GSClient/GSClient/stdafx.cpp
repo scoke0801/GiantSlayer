@@ -115,7 +115,7 @@ ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	return(pd3dBuffer);
 }
 
-ID3D12Resource *CreateTextureResourceFromDDSFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, wchar_t *pszFileName, ID3D12Resource **ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates)
+ID3D12Resource *CreateTextureResourceFromDDSFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, const wchar_t *pszFileName, ID3D12Resource **ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates)
 {
 	ID3D12Resource *pd3dTexture = NULL;
 	std::unique_ptr<uint8_t[]> ddsData;
@@ -125,10 +125,6 @@ ID3D12Resource *CreateTextureResourceFromDDSFile(ID3D12Device *pd3dDevice, ID3D1
 
 	HRESULT hResult = DirectX::LoadDDSTextureFromFileEx(pd3dDevice, pszFileName, 0, D3D12_RESOURCE_FLAG_NONE, DDS_LOADER_DEFAULT, &pd3dTexture, ddsData, vSubresources, &ddsAlphaMode, &bIsCubeMap);
 
-	if (hResult)
-	{
-		int stop = 3;
-	}
 	D3D12_HEAP_PROPERTIES d3dHeapPropertiesDesc;
 	::ZeroMemory(&d3dHeapPropertiesDesc, sizeof(D3D12_HEAP_PROPERTIES));
 	d3dHeapPropertiesDesc.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -182,7 +178,7 @@ ID3D12Resource *CreateTextureResourceFromDDSFile(ID3D12Device *pd3dDevice, ID3D1
 	return(pd3dTexture);
 }
 
-ID3D12Resource *CreateTextureResourceFromWICFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, wchar_t *pszFileName, ID3D12Resource **ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates)
+ID3D12Resource *CreateTextureResourceFromWICFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, const wchar_t *pszFileName, ID3D12Resource **ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates)
 {
 	ID3D12Resource *pd3dTexture = NULL;
 	std::unique_ptr<uint8_t[]> decodedData;
@@ -260,5 +256,65 @@ ID3D12Resource* CreateTexture2DResource(ID3D12Device* pd3dDevice, ID3D12Graphics
 	HRESULT hResult = pd3dDevice->CreateCommittedResource(&d3dHeapPropertiesDesc, D3D12_HEAP_FLAG_NONE, &d3dTextureResourceDesc, d3dResourceStates, pd3dClearValue, __uuidof(ID3D12Resource), (void**)&pd3dTexture);
 
 	return(pd3dTexture);
+}
+
+D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
+{
+	UINT nCompileFlags = 0;
+#if defined(_DEBUG)
+	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+
+	ID3DBlob* pd3dErrorBlob = NULL;
+	HRESULT hResult = ::D3DCompileFromFile(pszFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, pszShaderName, pszShaderProfile, nCompileFlags, 0, ppd3dShaderBlob, &pd3dErrorBlob);
+	char* pErrorString = NULL;
+	if (pd3dErrorBlob) pErrorString = (char*)pd3dErrorBlob->GetBufferPointer();
+
+	D3D12_SHADER_BYTECODE d3dShaderByteCode;
+	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
+	d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
+
+	return(d3dShaderByteCode);
+}
+
+D3D12_SHADER_BYTECODE ReadCompiledShaderFromFile(WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob)
+{
+	UINT nReadBytes = 0;
+#ifdef _WITH_WFOPEN
+	FILE* pFile = NULL;
+	::_wfopen_s(&pFile, pszFileName, L"rb");
+	::fseek(pFile, 0, SEEK_END);
+	int nFileSize = ::ftell(pFile);
+	BYTE* pByteCode = new BYTE[nFileSize];
+	::rewind(pFile);
+	nReadBytes = (UINT)::fread(pByteCode, sizeof(BYTE), nFileSize, pFile);
+	::fclose(pFile);
+#endif
+#ifdef _WITH_STD_STREAM
+	std::ifstream ifsFile;
+	ifsFile.open(pszFileName, std::ios::in | std::ios::ate | std::ios::binary);
+	nReadBytes = (int)ifsFile.tellg();
+	BYTE* pByteCode = new BYTE[*pnReadBytes];
+	ifsFile.seekg(0);
+	ifsFile.read((char*)pByteCode, nReadBytes);
+	ifsFile.close();
+#endif
+
+	D3D12_SHADER_BYTECODE d3dShaderByteCode;
+	if (ppd3dShaderBlob)
+	{
+		*ppd3dShaderBlob = NULL;
+		HRESULT hResult = D3DCreateBlob(nReadBytes, ppd3dShaderBlob);
+		memcpy((*ppd3dShaderBlob)->GetBufferPointer(), pByteCode, nReadBytes);
+		d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
+		d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
+	}
+	else
+	{
+		d3dShaderByteCode.BytecodeLength = nReadBytes;
+		d3dShaderByteCode.pShaderBytecode = pByteCode;
+	}
+
+	return(d3dShaderByteCode);
 }
 

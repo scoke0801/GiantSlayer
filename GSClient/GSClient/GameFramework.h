@@ -70,6 +70,7 @@ public: // about GetInstance , init framework
 	void OnCreate(HWND hWnd, HINSTANCE hInst);
 	void OnDestroy();
 
+private:
 	void CreateSwapChain();
 	void CreateDirect3DDevice();
 	void CreateCommandQueueAndList();
@@ -81,6 +82,8 @@ public: // about GetInstance , init framework
 
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
+
+	void BuildScene();
 
 public:	// about Update
 	void Update();

@@ -30,9 +30,7 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	CreateSwapChain();
 	CreateDepthStencilView();
 
-	//m_CurrentScene = new CNullScene;
-	m_CurrentScene = new CTitleScene;
-	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList);
+	CoInitialize(NULL);
 
 	m_d3dViewport.TopLeftX = 0;
 	m_d3dViewport.TopLeftY = 0;
@@ -42,7 +40,8 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	m_d3dViewport.MaxDepth = 1.0f;
 
 	m_d3dScissorRect = { 0, 0, m_nWndClientWidth, m_nWndClientHeight };
-	CoInitialize(NULL);
+	
+	BuildScene(); 
 }
 
 void CFramework::OnDestroy()
@@ -263,6 +262,20 @@ void CFramework::MoveToNextFrame()
 		hResult = m_pd3dFence->SetEventOnCompletion(nFenceValue, m_hFenceEvent);
 		::WaitForSingleObject(m_hFenceEvent, INFINITE);
 	}
+}
+
+void CFramework::BuildScene()
+{
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+	//m_CurrentScene = new CNullScene;
+	m_CurrentScene = new CTitleScene;
+	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList);
+	 
+	m_pd3dCommandList->Close();
+	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+	WaitForGpuComplete();
 }
 
 void CFramework::Update()
