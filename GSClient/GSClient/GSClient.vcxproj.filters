@@ -88,7 +88,7 @@
       <Filter>D3D</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Framework</Filter>
+      <Filter>D3D</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -129,7 +129,7 @@
       <Filter>D3D</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Main</Filter>
+      <Filter>D3D</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

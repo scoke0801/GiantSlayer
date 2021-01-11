@@ -14,7 +14,7 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	m_hWnd = hWnd; 
 	m_hInst = hInst; 	
 
-	m_CurrentScene = new CNullScene;
+	m_CurrentScene = new CGameScene1;
 
 	_tcscpy_s(m_pszFrameRate, _T("Giant Slayer"));
 	LoadString(m_hInst, IDS_APP_TITLE, m_captionTitle, TITLE_LENGTH);

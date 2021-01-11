@@ -57,69 +57,17 @@ struct RenderItem
 	int BaseVertexLocation = 0;
 };
 
-class CNullScene : public CScene
+class CGameScene1 : public CScene
 {
 public :
-	CNullScene();
-	~CNullScene();
+	CGameScene1();
+	~CGameScene1();
 
 
 	virtual void Update(double elapsedTime) override;
 	virtual void Draw() override {}
 
-
-public:
-	virtual void SendDataToNextScene(void* context) override {}
-
-	private:
-	std::vector<std::unique_ptr<Object>> mFrameResources;
-	Object* mCurrFrameResource = nullptr;
-	int mCurrFrameResourceIndex = 0;
-
-	ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
-	ComPtr<ID3D12DescriptorHeap> mCbvHeap = nullptr;
-
-	ComPtr<ID3D12DescriptorHeap> mSrvDescriptorHeap = nullptr;
-
-	std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeometries;
-	std::unordered_map<std::string, ComPtr<ID3DBlob>> mShaders;
-	std::unordered_map<std::string, ComPtr<ID3D12PipelineState>> mPSOs;
-
-	std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
-
-	// List of all the render items.
-	std::vector<std::unique_ptr<RenderItem>> mAllRitems;
-
-	// Render items divided by PSO.
-	std::vector<RenderItem*> mOpaqueRitems;
-
-	PassConstants mMainPassCB;
-
-	UINT mPassCbvOffset = 0;
-
-	bool mIsWireframe = false;
-
-	XMFLOAT3 mEyePos = { 0.0f, 0.0f, 0.0f };
-	XMFLOAT4X4 mView = MathHelper::Identity4x4();
-	XMFLOAT4X4 mProj = MathHelper::Identity4x4();
-
-	float mTheta = 1.5f * XM_PI;
-	float mPhi = 0.2f * XM_PI;
-	float mRadius = 15.0f;
-
-	POINT mLastMousePos;
-};
-
-
-class ShapesApp : public D3DApp
-{
-public:
-	ShapesApp(HINSTANCE hInstance);
-	ShapesApp(const ShapesApp& rhs) = delete;
-	ShapesApp& operator=(const ShapesApp& rhs) = delete;
-	~ShapesApp();
-
-	virtual bool Initialize()override;
+	virtual bool Initialize();
 
 private:
 	virtual void OnResize()override;
@@ -145,7 +93,10 @@ private:
 	void BuildRenderItems();
 	void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
 
-private:
+public:
+	virtual void SendDataToNextScene(void* context) override {}
+
+	private:
 	std::vector<std::unique_ptr<Object>> mFrameResources;
 	Object* mCurrFrameResource = nullptr;
 	int mCurrFrameResourceIndex = 0;
