@@ -46,6 +46,12 @@
     <ClCompile Include="TitleScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>GameObject\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>GameObject\Material</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DDSTextureLoader12.h">
@@ -105,6 +111,12 @@
     <ClInclude Include="TitleScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>GameObject\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>GameObject\Material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -153,6 +165,12 @@
     </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{2cac7ec3-8574-48aa-8aeb-d77f88e2775c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Texture">
+      <UniqueIdentifier>{6729757a-21a4-4b0b-a598-6638ba7c164f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Material">
+      <UniqueIdentifier>{3be84398-a9a8-49e2-ae4d-a7b223662425}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

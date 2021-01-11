@@ -45,13 +45,6 @@ using namespace std;
 #include <dxgidebug.h>
 #endif
  
-#include "resource.h"
-#include "GameTimer.h"
-#include "InputHandler.h"
-#include "Defines.h"
-#include "Sound.h"
-#include "FrameResource.h"
-
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
@@ -63,6 +56,15 @@ using Microsoft::WRL::ComPtr;
 
 #pragma comment(lib, "dxguid.lib")
 
+#include "resource.h"
+#include "GameTimer.h"
+#include "InputHandler.h"
+#include "Defines.h"
+#include "Sound.h"
+#include "FrameResource.h"
+#include "Texture.h"
+#include "Material.h"
+ 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 extern UINT gnCbvSrvDescriptorIncrementSize;
