@@ -283,7 +283,6 @@ void CFramework::Update()
 	m_GameTimer.UpdateElapsedTime();
 
 	CInputHandler::GetInstance().ProcessInput();
-	//GameInputs temp = GAME_INPUT;
 
 	double lag = 0.0f;
 	double fps = 0.0f;
@@ -304,14 +303,14 @@ void CFramework::Update()
 		for (int i = 0; lag > FPS && i < MAX_LOOP_TIME; ++i)
 		{
 			//Communicate(); 
-			m_CurrentScene->Update(m_pd3dCommandList, FPS);
+			m_CurrentScene->Update(FPS);
 			lag -= FPS;
 		}
 	}
 	// 최대 FPS 미만의 시간이 경과하면 진행 생략(Frame Per Second)
 	else 
 		return;
-
+	
 	Draw();
 
 #if defined(SHOW_CAPTIONFPS)
@@ -340,7 +339,7 @@ void CFramework::Animate()
 
 void CFramework::Draw()
 { 
-	HRESULT hResult = m_pd3dCommandAllocator->Reset();
+	HRESULT hResult= m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	// 뷰포트와 씨저 사각형을 설정한다.

@@ -23,7 +23,7 @@ CNullScene::~CNullScene()
 {
 }
 
-void CNullScene::Update(ID3D12GraphicsCommandList* pd3dCommandList, double elapsedTime)
+void CNullScene::Update(double elapsedTime)
 {
 	testbox1.Update();
 	testbox2.Update();

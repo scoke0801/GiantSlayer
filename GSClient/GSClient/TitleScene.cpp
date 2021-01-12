@@ -12,8 +12,22 @@ CTitleScene::~CTitleScene()
 {
 }
 
-void CTitleScene::Update(ID3D12GraphicsCommandList* pd3dCommandList, double elapsedTime)
+void CTitleScene::Update(double elapsedTime)
 {
+	POINT mousePos = GET_MOUSE_POS;
+
+	if ((mousePos.x >= 128 && mousePos.x <= 384)
+		&&(mousePos.y >= 508 && mousePos.y <= 585))
+	{
+		cout << "멀티 플레이\n";
+		CInputHandler::GetInstance().ResetMousePos();
+	}
+	else if ((mousePos.x >= 639 && mousePos.x <= 896)
+		&& (mousePos.y >= 508 && mousePos.y <= 585))
+	{
+		cout << "싱글 플레이\n"; 
+		CInputHandler::GetInstance().ResetMousePos();
+	}
 	//m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().TestingMouseClick;
 	//
 	//D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dTestData->GetGPUVirtualAddress();
@@ -27,7 +41,13 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	// 파이프라인 상태를 설정한다.
 	pd3dCommandList->SetPipelineState(m_pd3dPipelineState);
-	 
+	
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
+	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	pd3dCommandList->SetGraphicsRootDescriptorTable(1, tex);
+
 	m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().TestingMouseClick;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dTestData->GetGPUVirtualAddress();
@@ -37,7 +57,7 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	// 프리미티브 토폴로지를 설정한다.
 	pd3dCommandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
 	// 정점 6개를 사용하여 렌더링 한다.
-	pd3dCommandList->DrawInstanced(12, 1, 0, 0);
+	pd3dCommandList->DrawInstanced(18, 1, 0, 0);
 }
 
 void CTitleScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -54,7 +74,7 @@ void CTitleScene::CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 {
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[0].NumDescriptors = 1;
+	pd3dDescriptorRanges[0].NumDescriptors = 3;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -68,15 +88,32 @@ void CTitleScene::CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[1].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);	// Helicopter
+	pd3dRootParameters[1].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);	
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	
+
+#pragma region sampler
+	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[1];
+
+	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pd3dSamplerDescs[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pd3dSamplerDescs[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pd3dSamplerDescs[0].MipLODBias = 0;
+	pd3dSamplerDescs[0].MaxAnisotropy = 1;
+	pd3dSamplerDescs[0].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[0].MinLOD = 0;
+	pd3dSamplerDescs[0].MaxLOD = D3D12_FLOAT32_MAX;
+	pd3dSamplerDescs[0].ShaderRegister = 0;
+	pd3dSamplerDescs[0].RegisterSpace = 0;
+	pd3dSamplerDescs[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+#pragma endregion
+
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
 	d3dRootSignatureDesc.pParameters = pd3dRootParameters;
-	d3dRootSignatureDesc.NumStaticSamplers = 0;
-	d3dRootSignatureDesc.pStaticSamplers = NULL;
+	d3dRootSignatureDesc.NumStaticSamplers = _countof(pd3dSamplerDescs);
+	d3dRootSignatureDesc.pStaticSamplers = pd3dSamplerDescs;
 	d3dRootSignatureDesc.Flags
 		= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
@@ -104,45 +141,18 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
+	//HRESULT hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
+	//	"VSTest", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
+	//
+	//hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
+	//	"PSTest", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
+
 	HRESULT hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
-		"VSTest", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
-
+		"VSTextured", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
+	
 	hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
-		"PSTest", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
+		"PSTextured", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
 
-#pragma region hide
-	// 레스터라이저 상태를 설정한다.
-	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
-	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
-	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
-	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
-	d3dRasterizerDesc.DepthBias = 0;
-	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
-	d3dRasterizerDesc.SlopeScaledDepthBias = 0.0f;
-	d3dRasterizerDesc.DepthClipEnable = TRUE;
-	d3dRasterizerDesc.MultisampleEnable = FALSE;
-	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
-	d3dRasterizerDesc.ForcedSampleCount = 0;
-	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
-
-	//블렌드 상태를 설정한다.
-	D3D12_BLEND_DESC d3dBlendDesc;
-	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
-	d3dBlendDesc.AlphaToCoverageEnable = FALSE;
-	d3dBlendDesc.IndependentBlendEnable = FALSE;
-	d3dBlendDesc.RenderTarget[0].BlendEnable = FALSE;
-	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
-	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
-	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
-	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
-	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-#pragma endregion
 	//	그래픽 파이프라인 상태를 설정한다.
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
 	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
@@ -151,12 +161,11 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	d3dPipelineStateDesc.VS.BytecodeLength = pd3dVertexShaderBlob->GetBufferSize();
 	d3dPipelineStateDesc.PS.pShaderBytecode = pd3dPixelShaderBlob->GetBufferPointer();
 	d3dPipelineStateDesc.PS.BytecodeLength = pd3dPixelShaderBlob->GetBufferSize();
-	d3dPipelineStateDesc.RasterizerState = d3dRasterizerDesc;
-	d3dPipelineStateDesc.BlendState = d3dBlendDesc;
-	d3dPipelineStateDesc.DepthStencilState.DepthEnable = FALSE;
-	d3dPipelineStateDesc.DepthStencilState.StencilEnable = FALSE;
-	//d3dPipelineStateDesc.InputLayout.NumElements = 0;
-	//d3dPipelineStateDesc.InputLayout.pInputElementDescs = NULL;
+	d3dPipelineStateDesc.RasterizerState = CreateDefaultRasterizerDesc();
+	d3dPipelineStateDesc.BlendState = CreateDefaultBlendDesc();
+	d3dPipelineStateDesc.DepthStencilState = CreateDefaultDepthStencilDesc();
+	d3dPipelineStateDesc.InputLayout.NumElements = 0;
+	d3dPipelineStateDesc.InputLayout.pInputElementDescs = NULL;
 	d3dPipelineStateDesc.SampleMask = UINT_MAX;
 	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	d3dPipelineStateDesc.NumRenderTargets = 1;
@@ -189,22 +198,17 @@ void CTitleScene::BuildConstantsBuffers(ID3D12Device* pd3dDevice, ID3D12Graphics
 void CTitleScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	auto multiButtonTex = make_unique<CTexture>();
-	multiButtonTex->m_Name = "MultiButton";
-	multiButtonTex->m_FileName = L"resources/UI/MultiPlayButton.dds";
-	multiButtonTex->m_pd3dResource = ::CreateTextureResourceFromDDSFile(pd3dDevice, pd3dCommandList,
-		multiButtonTex->m_FileName.c_str(),
-		&multiButtonTex->m_pd3dUploadHeap,
-		D3D12_RESOURCE_STATE_GENERIC_READ );
+	MakeTexture(pd3dDevice, pd3dCommandList, multiButtonTex.get(), "MultiButton", L"resources/UI/MultiPlayButton.dds");
 
-	auto singleButtonTex = make_unique<CTexture>();
-	singleButtonTex->m_Name = "SingleButton";
-	singleButtonTex->m_FileName = L"resources/UI/SinglePlayButton.dds";	
-	singleButtonTex->m_pd3dResource = ::CreateTextureResourceFromDDSFile(pd3dDevice, pd3dCommandList, 
-		singleButtonTex->m_FileName.c_str(),
-		&singleButtonTex->m_pd3dUploadHeap,
-		D3D12_RESOURCE_STATE_GENERIC_READ);
+	auto singleButtonTex = make_unique<CTexture>(); 
+	MakeTexture(pd3dDevice, pd3dCommandList, singleButtonTex.get(), "SingleButton", L"resources/UI/SinglePlayButton.dds");
+ 
+	auto titleTex = make_unique<CTexture>();	
+	MakeTexture(pd3dDevice, pd3dCommandList, titleTex.get(), "Title", L"resources/UI/TitleTest.dds");
+
 	m_Textures[multiButtonTex->m_Name] = std::move(multiButtonTex);
-	m_Textures[singleButtonTex->m_Name] = std::move(singleButtonTex);
+	m_Textures[singleButtonTex->m_Name] = std::move(singleButtonTex); 
+	m_Textures[titleTex->m_Name] = std::move(titleTex);
 }
 
 void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -225,6 +229,7 @@ void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	 
 	auto multiBtnTex = m_Textures["MultiButton"]->m_pd3dResource;
 	auto simpleBtnTex = m_Textures["SingleButton"]->m_pd3dResource; 
+	auto titleTex = m_Textures["Title"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -238,6 +243,10 @@ void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = simpleBtnTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(simpleBtnTex, &srvDesc, hDescriptor);
+
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = titleTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(titleTex, &srvDesc, hDescriptor);
 }
 
 void CTitleScene::ConnectToServer()

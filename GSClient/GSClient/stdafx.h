@@ -86,6 +86,10 @@ extern ID3D12Resource* CreateTexture2DResource(ID3D12Device* pd3dDevice, ID3D12G
 extern D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
 extern D3D12_SHADER_BYTECODE ReadCompiledShaderFromFile(WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob = NULL);
 
+extern D3D12_RASTERIZER_DESC CreateDefaultRasterizerDesc();
+extern D3D12_BLEND_DESC CreateDefaultBlendDesc();
+extern D3D12_DEPTH_STENCIL_DESC CreateDefaultDepthStencilDesc();
+
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
 
 #define EPSILON					1.0e-10f

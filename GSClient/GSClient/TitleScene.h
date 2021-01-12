@@ -8,7 +8,28 @@ struct TestData
 
 struct TestVertex
 {
+	TestVertex(
+		const DirectX::XMFLOAT3& p,
+		const DirectX::XMFLOAT3& n,
+		const DirectX::XMFLOAT3& t,
+		const DirectX::XMFLOAT2& uv) :
+		m_xmf3Position(p),
+		m_xmf3Normal(n),
+		m_xmf3TangentU(t),
+		m_xmf2TexC(uv) {}
+	TestVertex(
+		float px, float py, float pz,
+		float nx, float ny, float nz,
+		float tx, float ty, float tz,
+		float u, float v) :
+		m_xmf3Position(px, py, pz),
+		m_xmf3Normal(nx, ny, nz),
+		m_xmf3TangentU(tx, ty, tz),
+		m_xmf2TexC(u, v) {}
 	XMFLOAT3 m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3 m_xmf3Normal;
+	XMFLOAT3 m_xmf3TangentU;
+	XMFLOAT2 m_xmf2TexC;
 };
 
 class CTitleScene : public CScene
@@ -34,7 +55,7 @@ public:
 	CTitleScene();
 	~CTitleScene();
 
-	virtual void Update(ID3D12GraphicsCommandList* pd3dCommandList, double elapsedTime) override;
+	virtual void Update(double elapsedTime) override;
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:

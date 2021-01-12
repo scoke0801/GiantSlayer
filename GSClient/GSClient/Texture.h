@@ -9,3 +9,6 @@ public:
 	ID3D12Resource* m_pd3dUploadHeap = nullptr;
 };
 
+void MakeTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CTexture* pTexture,
+	const string& toRegName, const wchar_t* fileName);
+

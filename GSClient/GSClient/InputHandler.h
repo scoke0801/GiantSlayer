@@ -31,6 +31,7 @@ private :
 public:
 	GameInputs m_Inputs;
 	bool TestingMouseClick = false;
+	POINT m_PrevMousePos;
 
 private:
 	CInputHandler();
@@ -51,5 +52,9 @@ public:
 
 public:
 	void SetTargetWND(HWND hTarget) { m_hTargetWND = hTarget; }
+
+	POINT GetMousePoint() const { return m_PrevMousePos; }
+	void ResetMousePos() { m_PrevMousePos = POINT(); }
 };
 #define GAME_INPUT CInputHandler::GetInstance().m_Inputs
+#define GET_MOUSE_POS CInputHandler::GetInstance().m_PrevMousePos
