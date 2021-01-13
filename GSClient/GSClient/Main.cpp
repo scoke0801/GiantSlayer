@@ -61,9 +61,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         {
             gFramework->Update();
 
-            try
+           try
             {
-                ShapesApp theApp(hInstance);
+                CGameScene1 theApp(hInstance);
                 if (!theApp.Initialize())
                     return 0;
 

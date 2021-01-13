@@ -15,16 +15,40 @@ using namespace DirectX::PackedVector;
 
 class CScene
 {
+//protected:
+//	unordered_map<string, unique_ptr<CTexture>> m_Textures;
+//	unordered_map<string, unique_ptr<CMaterial>> m_Materials;
+
 public:
 	CScene();
 	virtual ~CScene();
 
 	// just proto, fill with d3d obj
 	virtual void Update(double elapsedTime) {}
-	virtual void Draw() {}
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {}
 
 public:
 	virtual void SendDataToNextScene(void* context) {}
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+};
+
+class CNullScene : public CScene
+{
+public:
+	CNullScene();
+	~CNullScene();
+
+	virtual void Update(double elapsedTime) override;
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+	//virtual void Update(double elapsedTime) override;
+	//virtual void Draw() override;
+
+public:
+	
+
+	virtual void SendDataToNextScene(void* context) override {}
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override {}
 };
 
 
@@ -57,17 +81,15 @@ struct RenderItem
 	int BaseVertexLocation = 0;
 };
 
-class CGameScene1 : public CScene
+class CGameScene1 : public D3DApp
 {
-public :
-	CGameScene1();
+public:
+	CGameScene1(HINSTANCE hInstance);
+	CGameScene1(const CGameScene1& rhs) = delete;
+	CGameScene1& operator=(const CGameScene1& rhs) = delete;
 	~CGameScene1();
 
-
-	virtual void Update(double elapsedTime) override;
-	virtual void Draw() override {}
-
-	virtual bool Initialize();
+	virtual bool Initialize()override;
 
 private:
 	virtual void OnResize()override;
@@ -93,10 +115,8 @@ private:
 	void BuildRenderItems();
 	void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
 
-public:
-	virtual void SendDataToNextScene(void* context) override {}
+private:
 
-	private:
 	std::vector<std::unique_ptr<Object>> mFrameResources;
 	Object* mCurrFrameResource = nullptr;
 	int mCurrFrameResourceIndex = 0;

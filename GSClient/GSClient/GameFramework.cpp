@@ -14,7 +14,8 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	m_hWnd = hWnd; 
 	m_hInst = hInst; 	
 
-	m_CurrentScene = new CGameScene1;
+	m_CurrentScene = new CNullScene;
+	//m_CurrentScene = new CGameScene1;
 
 	_tcscpy_s(m_pszFrameRate, _T("Giant Slayer"));
 	LoadString(m_hInst, IDS_APP_TITLE, m_captionTitle, TITLE_LENGTH);
@@ -348,7 +349,7 @@ void CFramework::Draw()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
-	m_CurrentScene->Draw(); 
+	m_CurrentScene->Draw(m_pd3dCommandList);
 	
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
