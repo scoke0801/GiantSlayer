@@ -1,4 +1,8 @@
 #pragma once
+
+#ifndef GAMETIMER_H
+#define GAMETIMER_H
+
 class CGameTimer
 {
 public:
@@ -15,9 +19,32 @@ public:
 	double GetElapsedTime(std::chrono::system_clock::time_point lastUpdateTime) const;
 	std::chrono::duration<double> GetElapsedTimeRaw() const { return m_TimeElapsed; }
 
+	// 추가
+	float TotalTime()const; // in seconds
+	float DeltaTime()const; // in seconds
+
+	void Reset(); // Call before message loop.
+	void Start(); // Call when unpaused.
+	void Stop();  // Call when paused.
+	void Tick();  // Call every frame.
+
 private:
 	// 시간 처리를 위한 변수입니다. 
 	std::chrono::system_clock::time_point m_CurrentTime;
 	std::chrono::duration<double> m_TimeElapsed; // 시간이 얼마나 지났나
+
+	// 추가
+private:
+	double mSecondsPerCount;
+	double mDeltaTime;
+
+	__int64 mBaseTime;
+	__int64 mPausedTime;
+	__int64 mStopTime;
+	__int64 mPrevTime;
+	__int64 mCurrTime;
+
+	bool mStopped;
 };
 
+#endif // GAMETIMER_H

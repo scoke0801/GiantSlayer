@@ -1099,6 +1099,8 @@ struct CD3DX12_STATIC_SAMPLER_DESC : public D3D12_STATIC_SAMPLER_DESC
     
 };
 
+
+
 //------------------------------------------------------------------------------------------------
 struct CD3DX12_ROOT_SIGNATURE_DESC : public D3D12_ROOT_SIGNATURE_DESC
 {

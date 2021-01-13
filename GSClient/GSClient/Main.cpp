@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "Main.h" 
 #include "GameFramework.h"
+#include "d3dApp.h"
+#include "Scene.h"
 
 #define MAX_LOADSTRING 100
  
@@ -58,6 +60,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         else
         {
             gFramework->Update();
+
+           try
+            {
+                CGameScene1 theApp(hInstance);
+                if (!theApp.Initialize())
+                    return 0;
+
+                return theApp.Run();
+            }
+            catch (DxException& e)
+            {
+                MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
+                return 0;
+            }
+
+            
         }
     }
 

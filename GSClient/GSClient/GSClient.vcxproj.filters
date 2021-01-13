@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+
     <ClCompile Include="DDSTextureLoader12.cpp">
       <Filter>D3D</Filter>
     </ClCompile>
@@ -52,6 +53,41 @@
     <ClCompile Include="Material.cpp">
       <Filter>GameObject\Material</Filter>
     </ClCompile>
+
+    <Filter Include="Main">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="D3D">
+      <UniqueIdentifier>{ca76541f-63c2-44b4-9262-92b687dbb872}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main\stdafx">
+      <UniqueIdentifier>{1bff5aad-46a7-40f9-b5f1-aa523e1a2993}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Timer">
+      <UniqueIdentifier>{f080f556-dbc0-48d2-b861-568e4e00b73f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{b1d2f366-dc20-48bb-b4b7-aa92177f0378}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="InputHandler">
+      <UniqueIdentifier>{583dca93-5e88-4993-a0ee-b62b64b626bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mesh">
+      <UniqueIdentifier>{578c90d1-154d-4384-81c3-7dd4b8b149ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{41d6c58e-cac2-4315-bb96-7a2187832103}</UniqueIdentifier>
+    </Filter>
+
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DDSTextureLoader12.h">
@@ -84,12 +120,14 @@
     <ClInclude Include="Sound.h">
       <Filter>Sound</Filter>
     </ClInclude>
+
     <ClInclude Include="GameTimer.h">
       <Filter>GameTimer</Filter>
     </ClInclude>
     <ClInclude Include="GameFramework.h">
       <Filter>Framework</Filter>
     </ClInclude>
+
     <ClInclude Include="Defines.h">
       <Filter>Main</Filter>
     </ClInclude>
@@ -105,11 +143,50 @@
     <ClInclude Include="GameScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+
     <ClInclude Include="Scene.h">
+
+    <ClInclude Include="Mesh.h">
+      <Filter>Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="CGameTimer.h">
+      <Filter>Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dApp.h">
+      <Filter>D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="UploadBuffer.h">
+      <Filter>D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>D3D</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DDSTextureLoader12.cpp">
+      <Filter>D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader12.cpp">
+      <Filter>D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Main\stdafx</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFramework.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="TitleScene.h">
       <Filter>Scene</Filter>
+
     </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>GameObject\Texture</Filter>
@@ -117,6 +194,29 @@
     <ClInclude Include="Material.h">
       <Filter>GameObject\Material</Filter>
     </ClInclude>
+
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="CGameTimer.cpp">
+      <Filter>Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="d3dApp.cpp">
+      <Filter>D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>D3D</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GSClient.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">

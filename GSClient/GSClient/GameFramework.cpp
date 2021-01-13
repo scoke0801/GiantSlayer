@@ -1,7 +1,10 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "Scene.h"
+
 #include "TitleScene.h"
+#include "Mesh.h"
+
 
 CFramework::CFramework()
 {
@@ -13,7 +16,6 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 { 
 	m_hWnd = hWnd; 
 	m_hInst = hInst; 	
-
 
 	_tcscpy_s(m_pszFrameRate, _T("Giant Slayer"));
 	LoadString(m_hInst, IDS_APP_TITLE, m_captionTitle, TITLE_LENGTH);
@@ -78,22 +80,24 @@ void CFramework::CreateSwapChain()
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
 	::ZeroMemory(&dxgiSwapChainDesc, sizeof(dxgiSwapChainDesc));
 	dxgiSwapChainDesc.BufferCount = m_nSwapChainBuffers;
+
 	dxgiSwapChainDesc.BufferDesc.Width = m_nWndClientWidth;
 	dxgiSwapChainDesc.BufferDesc.Height = m_nWndClientHeight;
-	dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;			// 알파를 포함하여 채널당 8 비트를 지원하는 4 성분, 32 비트 부호없는 정규화 정수 형식
 	dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
-	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	 
+	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;			// 후면버퍼대상 
 	dxgiSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	dxgiSwapChainDesc.OutputWindow = m_hWnd;
-	dxgiSwapChainDesc.SampleDesc.Count = (m_bMsaa4xEnable) ? 4 : 1;
+	dxgiSwapChainDesc.OutputWindow = m_hWnd;									// 렌더링 결과 표시될 핸들
+	dxgiSwapChainDesc.SampleDesc.Count = (m_bMsaa4xEnable) ? 4 : 1;		
 	dxgiSwapChainDesc.SampleDesc.Quality = (m_bMsaa4xEnable) ? (m_nMsaa4xQualityLevels - 1) : 0;
-	dxgiSwapChainDesc.Windowed = TRUE;
-	dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	dxgiSwapChainDesc.Windowed = TRUE;											// 창모드 구분
+	dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;			// 알아서 가장잘맞는 디스플레이 결정해줌 요렇게 써주면
 
 	HRESULT hResult = m_pdxgiFactory->CreateSwapChain(m_pd3dCommandQueue, &dxgiSwapChainDesc, (IDXGISwapChain**)&m_pdxgiSwapChain);
 	
-	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
+	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();	// 가져온 디스플레이의 백버퍼를 가져옴
 
 	hResult = m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
 	
@@ -161,12 +165,14 @@ void CFramework::CreateCommandQueueAndList()
 
 	D3D12_COMMAND_QUEUE_DESC d3dCommandQueueDesc;
 	::ZeroMemory(&d3dCommandQueueDesc, sizeof(D3D12_COMMAND_QUEUE_DESC));
+
 	d3dCommandQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	d3dCommandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	// 명령 대기열
 	hResult = m_pd3dDevice->CreateCommandQueue(&d3dCommandQueueDesc, _uuidof(ID3D12CommandQueue), (void**)&m_pd3dCommandQueue);
-
+	// 명령 할당자
 	hResult = m_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, __uuidof(ID3D12CommandAllocator), (void**)&m_pd3dCommandAllocator);
-
+	// 명령 목록
 	hResult = m_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_pd3dCommandAllocator, NULL, __uuidof(ID3D12GraphicsCommandList), (void**)&m_pd3dCommandList);
 	hResult = m_pd3dCommandList->Close();
 }
@@ -175,14 +181,17 @@ void CFramework::CreateRtvAndDsvDescriptorHeaps()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
+
 	d3dDescriptorHeapDesc.NumDescriptors = m_nSwapChainBuffers;
-	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;	// 랜더타겟에 대한 설명자 힙
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
 	HRESULT hResult = m_pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dRtvDescriptorHeap);
 
 	d3dDescriptorHeapDesc.NumDescriptors = 1;
-	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;	// 깊이 스텐실 뷰에 대한 설명자 힙
+	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	d3dDescriptorHeapDesc.NodeMask = 0;
 	hResult = m_pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dDsvDescriptorHeap);
 }
 
@@ -207,7 +216,7 @@ void CFramework::CreateDepthStencilView()
 	d3dResourceDesc.DepthOrArraySize = 1;
 	d3dResourceDesc.MipLevels = 1;
 	d3dResourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	d3dResourceDesc.SampleDesc.Count = (m_bMsaa4xEnable) ? 4 : 1;
+	d3dResourceDesc.SampleDesc.Count = (m_bMsaa4xEnable) ? 4 : 1;		// 4x Msaa에서는 픽셀당 네개의 부분픽셀의 대한 색상과 깊이스텐실 정보를 저장
 	d3dResourceDesc.SampleDesc.Quality = (m_bMsaa4xEnable) ? (m_nMsaa4xQualityLevels - 1) : 0;
 	d3dResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	d3dResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
@@ -251,6 +260,7 @@ void CFramework::WaitForGpuComplete()
 
 void CFramework::MoveToNextFrame()
 {
+	// 백버퍼가져오기
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 	//m_nSwapChainBufferIndex = (m_nSwapChainBufferIndex + 1) % m_nSwapChainBuffers;
 
@@ -368,8 +378,9 @@ void CFramework::Draw()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
+
 	m_CurrentScene->Draw(m_pd3dCommandList); 
-	
+
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
