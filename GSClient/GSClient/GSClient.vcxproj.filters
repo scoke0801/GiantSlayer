@@ -1,286 +1,62 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-
-    <ClCompile Include="DDSTextureLoader12.cpp">
-      <Filter>D3D</Filter>
-    </ClCompile>
-    <ClCompile Include="FrameResource.cpp">
-      <Filter>FrameResource</Filter>
-    </ClCompile>
-    <ClCompile Include="WICTextureLoader12.cpp">
-      <Filter>D3D</Filter>
-    </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Main\stdafx</Filter>
-    </ClCompile>
-    <ClCompile Include="InputHandler.cpp">
-      <Filter>InputHandler</Filter>
-    </ClCompile>
-    <ClCompile Include="Sound.cpp">
-      <Filter>Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="GameTimer.cpp">
-      <Filter>GameTimer</Filter>
-    </ClCompile>
-    <ClCompile Include="GameFramework.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="State.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="StateMachine.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="GameScene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="TitleScene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>GameObject\Texture</Filter>
-    </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>GameObject\Material</Filter>
-    </ClCompile>
-
-    <Filter Include="Main">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Framework">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="D3D">
-      <UniqueIdentifier>{ca76541f-63c2-44b4-9262-92b687dbb872}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Main\stdafx">
-      <UniqueIdentifier>{1bff5aad-46a7-40f9-b5f1-aa523e1a2993}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Timer">
-      <UniqueIdentifier>{f080f556-dbc0-48d2-b861-568e4e00b73f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Scene">
-      <UniqueIdentifier>{b1d2f366-dc20-48bb-b4b7-aa92177f0378}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="InputHandler">
-      <UniqueIdentifier>{583dca93-5e88-4993-a0ee-b62b64b626bc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Mesh">
-      <UniqueIdentifier>{578c90d1-154d-4384-81c3-7dd4b8b149ee}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Object">
-      <UniqueIdentifier>{41d6c58e-cac2-4315-bb96-7a2187832103}</UniqueIdentifier>
-    </Filter>
-
+    <FxCompile Include="TitleScene.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DDSTextureLoader12.h">
-      <Filter>D3D</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dx12.h">
-      <Filter>D3D</Filter>
-    </ClInclude>
-    <ClInclude Include="FrameResource.h">
-      <Filter>FrameResource</Filter>
-    </ClInclude>
-    <ClInclude Include="WICTextureLoader12.h">
-      <Filter>D3D</Filter>
-    </ClInclude>
-    <ClInclude Include="Main.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>리소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Main\stdafx</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Main\stdafx</Filter>
-    </ClInclude>
-    <ClInclude Include="InputHandler.h">
-      <Filter>InputHandler</Filter>
-    </ClInclude>
-    <ClInclude Include="Sound.h">
-      <Filter>Sound</Filter>
-    </ClInclude>
-
-    <ClInclude Include="GameTimer.h">
-      <Filter>GameTimer</Filter>
-    </ClInclude>
-    <ClInclude Include="GameFramework.h">
-      <Filter>Framework</Filter>
-    </ClInclude>
-
-    <ClInclude Include="Defines.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="State.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="StateMachine.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="GameScene.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
-
-    <ClInclude Include="Scene.h">
-
-    <ClInclude Include="Mesh.h">
-      <Filter>Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="CGameTimer.h">
-      <Filter>Timer</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dApp.h">
-      <Filter>D3D</Filter>
-    </ClInclude>
-    <ClInclude Include="UploadBuffer.h">
-      <Filter>D3D</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>D3D</Filter>
-    </ClInclude>
+    <ClCompile Include="Material.cpp" />
+    <ClCompile Include="FrameResource.cpp" />
+    <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TitleScene.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GameScene.cpp" />
+    <ClCompile Include="InputHandler.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="DDSTextureLoader12.cpp" />
+    <ClCompile Include="GameFramework.cpp" />
+    <ClCompile Include="GameTimer.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="State.cpp" />
+    <ClCompile Include="StateMachine.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="WICTextureLoader12.cpp" />
+    <ClCompile Include="d3dApp.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Object.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DDSTextureLoader12.cpp">
-      <Filter>D3D</Filter>
-    </ClCompile>
-    <ClCompile Include="WICTextureLoader12.cpp">
-      <Filter>D3D</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Main\stdafx</Filter>
-    </ClCompile>
-    <ClCompile Include="GameFramework.cpp">
-      <Filter>Framework</Filter>
-    </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="TitleScene.h">
-      <Filter>Scene</Filter>
-
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>GameObject\Texture</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>GameObject\Material</Filter>
-    </ClInclude>
-
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="CGameTimer.cpp">
-      <Filter>Timer</Filter>
-    </ClCompile>
-    <ClCompile Include="d3dApp.cpp">
-      <Filter>D3D</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>D3D</Filter>
-    </ClCompile>
+    <ClInclude Include="FrameResource.h" />
+    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GameScene.h" />
+    <ClInclude Include="InputHandler.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="d3dx12.h" />
+    <ClInclude Include="DDSTextureLoader12.h" />
+    <ClInclude Include="Defines.h" />
+    <ClInclude Include="GameFramework.h" />
+    <ClInclude Include="GameTimer.h" />
+    <ClInclude Include="Main.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="Sound.h" />
+    <ClInclude Include="State.h" />
+    <ClInclude Include="StateMachine.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="TitleScene.h" />
+    <ClInclude Include="WICTextureLoader12.h" />
+    <ClInclude Include="d3dApp.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Object.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="GSClient.rc">
-      <Filter>리소스 파일</Filter>
-    </ResourceCompile>
-
+    <ResourceCompile Include="GSClient.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="GiantSlayer.ico">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="GSClient.ico">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="small.ico">
-      <Filter>리소스 파일</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="D3D">
-      <UniqueIdentifier>{32ad84cd-862c-4219-b837-5167f1ed470e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="FrameResource">
-      <UniqueIdentifier>{75226de6-0e9b-46a0-9929-8de4815177ba}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="HLSL">
-      <UniqueIdentifier>{07f48041-08f2-4cc7-aee6-49d1b5ced61f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{9010e092-23ed-4756-b830-ffec74a07de9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Main">
-      <UniqueIdentifier>{b8ed45a4-5880-4912-b29d-aad12cbcd91f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Main\stdafx">
-      <UniqueIdentifier>{8c812ade-26a6-4ff9-8ef6-948344d0426a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="InputHandler">
-      <UniqueIdentifier>{fe5e597f-3732-4ab6-951d-3a8d08e43216}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Framework">
-      <UniqueIdentifier>{51c3b493-1b74-4a8a-ba94-a13f4023e3e0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sound">
-      <UniqueIdentifier>{0cd6c865-f35d-4320-8ee7-b13147439d16}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GameTimer">
-      <UniqueIdentifier>{d7cf4841-4512-421d-9da1-c21c208bd294}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GameObject">
-      <UniqueIdentifier>{f11fe7f6-4b27-45c9-a979-6561fcc1752c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Scene">
-      <UniqueIdentifier>{2cac7ec3-8574-48aa-8aeb-d77f88e2775c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GameObject\Texture">
-      <UniqueIdentifier>{6729757a-21a4-4b0b-a598-6638ba7c164f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GameObject\Material">
-      <UniqueIdentifier>{3be84398-a9a8-49e2-ae4d-a7b223662425}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="GSClient.rc">
-      <Filter>리소스 파일</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="TitleScene.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
+    <Image Include="GiantSlayer.ico" />
+    <Image Include="GSClient.ico" />
+    <Image Include="small.ico" />
   </ItemGroup>
 </Project>

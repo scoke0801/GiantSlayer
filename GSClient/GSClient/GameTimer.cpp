@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "CGameTimer.h"
+#include "GameTimer.h"
 
 //Ãß°¡
 #include <windows.h>
