@@ -60,6 +60,10 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->DrawInstanced(18, 1, 0, 0);
 }
 
+void CTitleScene::ProcessInput()
+{
+}
+
 void CTitleScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CreateRootSignature(pd3dDevice, pd3dCommandList);

@@ -267,8 +267,8 @@ void CFramework::MoveToNextFrame()
 void CFramework::BuildScene()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-	//m_CurrentScene = new CNullScene;
-	m_CurrentScene = new CTitleScene;
+	m_CurrentScene = new CNullScene;
+	//m_CurrentScene = new CTitleScene;
 	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList);
 	 
 	m_pd3dCommandList->Close();

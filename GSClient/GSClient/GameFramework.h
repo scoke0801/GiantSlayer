@@ -5,18 +5,18 @@ class CScene;
 class CFramework
 {
 private:
-	HWND					m_hWnd;
-	HINSTANCE				m_hInst;
+	HWND						m_hWnd;
+	HINSTANCE					m_hInst;
 
-	CGameTimer				m_GameTimer;
-	CGameTimer				m_FPSTimer;
+	CGameTimer					m_GameTimer;
+	CGameTimer					m_FPSTimer;
 
-	CScene					*m_CurrentScene;
+	CScene						*m_CurrentScene;
 
 	// 타이틀바 출력 관련 변수입니다.
-	_TCHAR				m_pszFrameRate[50];	
-	TCHAR				m_captionTitle[50];
-	int					m_titleLength;
+	_TCHAR						m_pszFrameRate[50];	
+	TCHAR						m_captionTitle[50];
+	int							m_titleLength;
 
 	// 다이렉트X 관련 변수입니다.
 	int							m_nWndClientWidth;
@@ -94,12 +94,13 @@ public:	// about scene change
 	template <typename SceneName>
 	void ChangeScene(void* pContext = nullptr)
 	{
-		//EnterCriticalSection(&m_cs);
-		CScene* scene = new SceneName;
-		static CScene* prevScene;
-		scene->Init(m_rtClient, this);
-		scene->SendDataToNextScene(pContext);
+		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL); 
 
+		CScene* scene = new SceneName;
+		static CScene* prevScene; 
+		scene->Init(m_pd3dDevice, m_pd3dCommandList);
+		scene->SendDataToNextScene(pContext);
+		
 		if (m_CurrentScene)
 		{
 			prevScene = m_CurrentScene;
@@ -107,8 +108,13 @@ public:	// about scene change
 			m_CurrentScene = nullptr;
 		}
 
-		m_CurrentScene = scene;
-		//LeaveCriticalSection(&m_cs);
+		m_pd3dCommandList->Close();
+		ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+		m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+		WaitForGpuComplete();
+
+		m_CurrentScene = scene; 
 	} 
 };
 

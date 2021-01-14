@@ -64,7 +64,8 @@ using Microsoft::WRL::ComPtr;
 #include "FrameResource.h"
 #include "Texture.h"
 #include "Material.h"
- 
+#include "GameFramework.h"
+
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 extern UINT gnCbvSrvDescriptorIncrementSize;

@@ -21,6 +21,11 @@ struct GameInputs
 	bool KEY_C = false;
 	 
 	bool KEY_SPACE = false;
+
+	bool KEY_F1 = false;
+	bool KEY_F2 = false;	
+	bool KEY_F3 = false;
+	bool KEY_F4 = false;
 };
 
 class CInputHandler

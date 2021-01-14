@@ -14,10 +14,17 @@ public:
 	// just proto, fill with d3d obj
 	virtual void Update(double elapsedTime) {}
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void ProcessInput() {}
+
 
 public:
 	virtual void SendDataToNextScene(void* context) {}	
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+
+protected:
+	template<class SceneName>
+	void ChangeScene(void* pContext = nullptr) { CFramework::GetInstance().ChangeScene<SceneName>(pContext); }
+
 };
 
 
@@ -30,6 +37,7 @@ public :
 
 	virtual void Update(double elapsedTime) override;
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void ProcessInput();
 
 	//virtual void Update(double elapsedTime) override;
 	//virtual void Draw() override;

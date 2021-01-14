@@ -57,6 +57,7 @@ public:
 
 	virtual void Update(double elapsedTime) override;
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void ProcessInput();
 
 public:
 	virtual void SendDataToNextScene(void* context) override {}
