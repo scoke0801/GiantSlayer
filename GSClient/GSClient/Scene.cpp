@@ -3,6 +3,7 @@
 
 #include "TitleScene.h"
 #include "GameScene.h"
+#include "SceneJH.h"
 
 CScene::CScene()
 {
@@ -59,6 +60,6 @@ void CNullScene::ProcessInput()
 	}
 	if (gameInput.KEY_F4)
 	{
-		//ChangeScene<CGameRecordScene>((void*)&data);
+		ChangeScene<CSceneJH>();
 	}  
 }

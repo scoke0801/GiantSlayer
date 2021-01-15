@@ -52,6 +52,9 @@
     <ClCompile Include="Material.cpp">
       <Filter>GameObject\Material</Filter>
     </ClCompile>
+    <ClCompile Include="SceneJH.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DDSTextureLoader12.h">
@@ -116,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>GameObject\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneJH.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
