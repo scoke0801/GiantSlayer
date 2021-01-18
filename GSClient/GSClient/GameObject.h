@@ -7,28 +7,35 @@ class CCamera;
 class CGameObject
 {
 public:
-	CGameObject();
+	CGameObject(int nMeshes = 1);
 	virtual ~CGameObject();
 private:
-	int m_nReferences = 0;
+	int			m_nReferences = 0;
+	int			m_nMeshes;
 	XMFLOAT3	m_xmf3Position;
 	XMFLOAT3	m_xmf3Velocity;
+
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 protected:
 	XMFLOAT4X4 m_xmf4x4World;
 	CMesh* m_pMesh = NULL;
+	CMesh** m_ppMeshes;
 	CShader* m_pShader = NULL;
+
+	ID3D12Resource* m_pd3dcbGameObject = NULL;
+	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
 public:
 	void ReleaseUploadBuffers();
-	virtual void SetMesh(CMesh* pMesh);
+	virtual void SetMesh(int nIndex, CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender();
 	void Update();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void SetPosition(XMFLOAT3 pos);
 	void SetVelocity(XMFLOAT3 pos);
 
