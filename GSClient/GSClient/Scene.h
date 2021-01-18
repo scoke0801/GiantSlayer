@@ -8,12 +8,15 @@ using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
+#define GET_PSO(key) *m_PSOs[key].get() 
 
 class CScene
 {
 protected:
 	unordered_map<string, unique_ptr<CTexture>> m_Textures;
 	unordered_map<string, unique_ptr<CMaterial>> m_Materials;
+	unordered_map<string, unique_ptr<ID3D12PipelineState*>> m_PSOs;
+
 
 public:
 	CScene();

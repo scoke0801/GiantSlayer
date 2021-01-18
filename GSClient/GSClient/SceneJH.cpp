@@ -5,8 +5,7 @@
 
 CSceneJH::CSceneJH()
 {
-	m_pd3dGraphicsRootSignature = NULL;
-	m_pd3dPipelineState = NULL;
+	m_pd3dGraphicsRootSignature = NULL; 
 }
 
 CSceneJH::~CSceneJH()
@@ -41,7 +40,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	// 그래픽 루트 시그너쳐를 설정한다.
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	// 파이프라인 상태를 설정한다.
-	pd3dCommandList->SetPipelineState(m_pd3dPipelineState);
+	pd3dCommandList->SetPipelineState(GET_PSO("TestTitlePSO"));
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
@@ -58,11 +57,11 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	// 프리미티브 토폴로지를 설정한다.
 	pd3dCommandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// 정점 6개를 사용하여 렌더링 한다.
-	//pd3dCommandList->DrawInstanced(18, 1, 0, 0);
+	pd3dCommandList->DrawInstanced(18, 1, 0, 0);
 
-	pd3dCommandList->SetPipelineState(m_pd3dMinimapPSO);
+	pd3dCommandList->SetPipelineState(GET_PSO("MinimapPSO"));
 	pd3dCommandList->IASetVertexBuffers(0, 1, &m_d3dVertexBufferView);
-	pd3dCommandList->DrawInstanced(4, 1, 0, 0);
+	pd3dCommandList->DrawInstanced(6, 1, 0, 0);
 }
 
 void CSceneJH::ProcessInput()
@@ -144,22 +143,18 @@ void CSceneJH::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 {
 	// 정점 셰이더와 픽셸 셰이더를 생성한다.
 	ID3DBlob* pd3dVertexShaderBlob = NULL;
-	ID3DBlob* pd3dPixelShaderBlob = NULL;
+	ID3DBlob* pd3dPixelShaderBlob = NULL; 
+
+	auto pTempPSO = make_unique<ID3D12PipelineState*>();
 
 	UINT nCompileFlags = 0;
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
-	//HRESULT hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
-	//	"VSTest", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
-	//
-	//hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
-	//	"PSTest", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
-
-	HRESULT hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
+#endif 
+	HRESULT hRes = D3DCompileFromFile(L"MinimapTest.hlsl", NULL, NULL,
 		"VSTextured", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
 
-	hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
+	hRes = D3DCompileFromFile(L"MinimapTest.hlsl", NULL, NULL,
 		"PSTextured", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
 
 	//	그래픽 파이프라인 상태를 설정한다.
@@ -184,7 +179,9 @@ void CSceneJH::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	d3dPipelineStateDesc.SampleDesc.Quality = 0;
 	//d3dPipelineStateDesc.StreamOutput = 0;
 	pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
-		IID_PPV_ARGS(&m_pd3dPipelineState));
+		IID_PPV_ARGS(pTempPSO.get()));
+
+	m_PSOs["TestTitlePSO"] = std::move(pTempPSO);
 
 	if (pd3dVertexShaderBlob) pd3dVertexShaderBlob->Release();
 	if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();
@@ -262,13 +259,15 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	BasicVertex vertices[4];
-	vertices[0].xmf3Position = XMFLOAT3(-0.75f, -0.325f, 0.0f);
-	vertices[1].xmf3Position = XMFLOAT3(-0.25f, -0.325f, 0.0f);
-	vertices[2].xmf3Position = XMFLOAT3(-0.25f, -0.525f, 0.0f);
-	vertices[3].xmf3Position = XMFLOAT3(-0.75f, -0.525f, 0.0f);
-
-	int nVertices = 4;
+	BasicVertex vertices[6];
+	vertices[0].xmf3Position = XMFLOAT3(-0.5f,  0.8f, 0.0f);
+	vertices[1].xmf3Position = XMFLOAT3( 0.5f,  0.8f, 0.0f);
+	vertices[2].xmf3Position = XMFLOAT3( 0.5f, -0.8f, 0.0f);
+	vertices[3].xmf3Position = XMFLOAT3(-0.5f,  0.8f, 0.0f);
+	vertices[4].xmf3Position = XMFLOAT3( 0.5f, -0.8f, 0.0f);
+	vertices[5].xmf3Position = XMFLOAT3(-0.5f, -0.8f, 0.0f); 
+	
+	int nVertices = 6;
 	int stride = sizeof(BasicVertex);
 	int sizeInBytes = nVertices * stride;
 
@@ -283,7 +282,7 @@ void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	// 정점 셰이더와 픽셸 셰이더를 생성한다.
 	ID3DBlob* pd3dVertexShaderBlob = NULL;
 	ID3DBlob* pd3dPixelShaderBlob = NULL;
-
+	auto pTempPSO = make_unique<ID3D12PipelineState*>();
 	UINT nCompileFlags = 0;
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
@@ -325,7 +324,9 @@ void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	d3dPipelineStateDesc.SampleDesc.Quality = 0;
 	//d3dPipelineStateDesc.StreamOutput = 0;
 	pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
-		IID_PPV_ARGS(&m_pd3dMinimapPSO));
+		IID_PPV_ARGS(pTempPSO.get()));
+
+	m_PSOs["MinimapPSO"] = std::move(pTempPSO);
 
 	if (pd3dVertexShaderBlob) pd3dVertexShaderBlob->Release();
 	if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();

@@ -225,7 +225,7 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GSClient.rc">
-      <Filter>리소스 파일</Filter>
+      <Filter>Main\Resources</Filter>
     </ResourceCompile>
     <ResourceCompile Include="GSClient.rc">
       <Filter>Main\Resources</Filter>
