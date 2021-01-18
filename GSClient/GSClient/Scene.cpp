@@ -39,9 +39,9 @@ void CNullScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCame
 {
 
 	cout << "박스1: ";
-	testbox1.Draw();
+	//testbox1.Draw();
 	cout << "박스2: ";
-	testbox2.Draw();
+	//testbox2.Draw();
 	cout << endl;
 
 }

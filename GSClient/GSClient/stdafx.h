@@ -350,6 +350,7 @@ namespace Matrix4x4
 //#define RANDOM_COLOR XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() \
 /// float(RAND_MAX), rand() / float(RAND_MAX))
 #define RANDOM_COLOR XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
+#define WHITE XMFLOAT4(1 / float(RAND_MAX), 0.0f/ float(RAND_MAX), 1.0f/ float(RAND_MAX))
 inline XMFLOAT4 MyRANDOM_COLOR()
 {
 	XMFLOAT4 xmf(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX));

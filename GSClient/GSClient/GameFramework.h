@@ -1,5 +1,4 @@
 #pragma once
-#include "Player.h"
 
 class CScene;
 class CCamera;
@@ -15,8 +14,6 @@ private:
 
 	CScene* m_CurrentScene;
 	CCamera* m_pCamera = NULL;
-
-	CPlayer* m_pPlayer = NULL;
 
 	// 타이틀바 출력 관련 변수입니다.
 	_TCHAR				m_pszFrameRate[50];

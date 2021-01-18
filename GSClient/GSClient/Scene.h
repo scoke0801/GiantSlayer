@@ -32,8 +32,6 @@ public:
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) { return NULL; }
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() { return NULL; }
 
-	virtual CHeightMapTerrain* GetTerrain() { return NULL; }
-
 };
 
 

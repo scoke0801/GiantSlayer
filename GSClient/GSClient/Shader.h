@@ -49,11 +49,11 @@ protected:
 	int m_nPipelineStates = 0;
 };
 
-class CPlayerShader : public CShader
+class CDiffusedShader : public CShader
 {
 public:
-	CPlayerShader();
-	virtual ~CPlayerShader();
+	CDiffusedShader();
+	virtual ~CDiffusedShader();
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 
@@ -62,46 +62,4 @@ public:
 
 	virtual void CreateShader(ID3D12Device* pd3dDevice,
 		ID3D12RootSignature* pd3dGraphicsRootSignature);
-};
-
-//“CObjectsShader” 클래스는 게임 객체들을 포함하는 셰이더 객체이다. 
-class CObjectsShader : public CShader
-{
-public:
-	CObjectsShader();
-	virtual ~CObjectsShader();
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
-		* pd3dCommandList, void* pContext);
-
-	virtual void AnimateObjects(float fTimeElapsed);
-	virtual void ReleaseObjects();
-
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
-
-	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
-		* pd3dGraphicsRootSignature);
-	virtual void ReleaseUploadBuffers();
-
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
-protected:
-	CGameObject** m_ppObjects = NULL;
-	int m_nObjects = 0;
-};
-
-class CTerrainShader : public CShader
-{
-public:
-	CTerrainShader();
-	virtual ~CTerrainShader();
-
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
-
-	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
-		* pd3dGraphicsRootSignature);
 };

@@ -283,13 +283,23 @@ void CFramework::BuildScene()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 	//m_CurrentScene = new CNullScene;
+
+	m_pCamera = new CCamera();
+	m_pCamera->SetViewport(0, 0, m_nWndClientWidth, m_nWndClientHeight, 0.0f, 1.0f);
+	m_pCamera->SetScissorRect(0, 0, m_nWndClientWidth, m_nWndClientHeight);
+
+	m_pCamera->GenerateProjectionMatrix(1.0f, 500.0f,
+		float(m_nWndClientWidth) / float(m_nWndClientHeight), 90.0f);
+	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 15.0f, -25.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),
+		XMFLOAT3(0.0f, 1.0f, 0.0f));
+
 	m_CurrentScene = new CGameScene;
 	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList);
 
-	m_pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList,
-		m_CurrentScene->GetGraphicsRootSignature(), m_CurrentScene->GetTerrain(), 1);
+	/*m_pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList,
+		m_CurrentScene->GetGraphicsRootSignature(), m_CurrentScene->GetTerrain(), 1);*/
 
-	m_pCamera = m_pPlayer->GetCamera();
+	//m_pCamera = m_pPlayer->GetCamera();
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -393,8 +403,8 @@ void CFramework::Draw()
 
 	m_CurrentScene->Draw(m_pd3dCommandList, m_pCamera);
 
-	if (m_pPlayer)
-		m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	//if (m_pPlayer)
+	//	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;

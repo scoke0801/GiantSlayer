@@ -43,7 +43,6 @@
     </ClCompile>
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Player.cpp" />
     <ClCompile Include="TitleScene.cpp">
       <Filter>GameScene</Filter>
     </ClCompile>
@@ -98,7 +97,6 @@
     </ClInclude>
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Player.h" />
     <ClInclude Include="TitleScene.h">
       <Filter>GameScene</Filter>
     </ClInclude>
