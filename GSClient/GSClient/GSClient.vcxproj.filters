@@ -1,16 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <FxCompile Include="TitleScene.hlsl" />
+    <FxCompile Include="TitleScene.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="MinimapTest.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Material.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="InputHandler.cpp" />
-    <ClCompile Include="GameTimer.cpp" />
-    <ClCompile Include="State.cpp" />
-    <ClCompile Include="StateMachine.cpp" />
-    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp">
       <Filter>d3d</Filter>
     </ClCompile>
@@ -24,47 +22,61 @@
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="GameScene.cpp">
-      <Filter>GameScene</Filter>
-    </ClCompile>
-    <ClCompile Include="Main.cpp">
-      <Filter>d3d</Filter>
+      <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="Sound.cpp">
       <Filter>Sound</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
-      <Filter>GameScene</Filter>
+      <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="WICTextureLoader12.cpp">
       <Filter>d3d</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>d3d</Filter>
-    </ClCompile>
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="TitleScene.cpp">
-      <Filter>GameScene</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneJH.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="Font.cpp">
       <Filter>Font</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="GameTimer.cpp">
+      <Filter>Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="InputHandler.cpp">
+      <Filter>Handler</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>GameObject\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneJH.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="State.cpp">
+      <Filter>State</Filter>
+    </ClCompile>
+    <ClCompile Include="StateMachine.cpp">
+      <Filter>State</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Main\stdafx</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>GameObject\Material</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>GameObject\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>GameObject\Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="InputHandler.h" />
-    <ClInclude Include="Material.h" />
-    <ClInclude Include="GameTimer.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="State.h" />
-    <ClInclude Include="StateMachine.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Defines.h">
-      <Filter>d3d</Filter>
-    </ClInclude>
     <ClInclude Include="d3dx12.h">
       <Filter>d3d</Filter>
     </ClInclude>
@@ -81,45 +93,79 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="GameScene.h">
-      <Filter>GameScene</Filter>
-    </ClInclude>
-    <ClInclude Include="Main.h">
-      <Filter>d3d</Filter>
+      <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Sound.h">
       <Filter>Sound</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
-      <Filter>GameScene</Filter>
+      <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="WICTextureLoader12.h">
-      <Filter>d3d</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
       <Filter>d3d</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>d3d</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="Camera.h" />
     <ClInclude Include="TitleScene.h">
-      <Filter>GameScene</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneJH.h">
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Font.h">
       <Filter>Font</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="GameTimer.h">
+      <Filter>Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="InputHandler.h">
+      <Filter>Handler</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>GameObject\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneJH.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="State.h">
+      <Filter>State</Filter>
+    </ClInclude>
+    <ClInclude Include="StateMachine.h">
+      <Filter>State</Filter>
+    </ClInclude>
+    <ClInclude Include="Main.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Defines.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Main\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Main\stdafx</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>GameObject\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>GameObject\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>GameObject\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="GSClient.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="GiantSlayer.ico" />
-    <Image Include="GSClient.ico" />
-    <Image Include="small.ico" />
+    <Image Include="GiantSlayer.ico">
+      <Filter>Main\Resources</Filter>
+    </Image>
+    <Image Include="GSClient.ico">
+      <Filter>Main\Resources</Filter>
+    </Image>
+    <Image Include="small.ico">
+      <Filter>Main\Resources</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="d3d">
@@ -131,27 +177,63 @@
     <Filter Include="GameObject">
       <UniqueIdentifier>{2f01299f-2fcf-4760-acff-98907f7b22c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameScene">
-      <UniqueIdentifier>{a683e20d-9e51-4d00-aa74-4a19948e0cba}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sound">
       <UniqueIdentifier>{27fdaea7-eecb-40ed-a1e2-222ae1cdc555}</UniqueIdentifier>
     </Filter>
     <Filter Include="Font">
       <UniqueIdentifier>{377ba118-069c-4363-8fcd-7a7cbc0e70cb}</UniqueIdentifier>
     </Filter>
-  </ItemGroup> 
+    <Filter Include="Camera">
+      <UniqueIdentifier>{35f4ba56-432a-4c1f-989b-3c79de5e9416}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Timer">
+      <UniqueIdentifier>{f561f353-3e29-4747-abdc-1eea38cf6987}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Handler">
+      <UniqueIdentifier>{fe40e7a2-e7b9-4ae9-9d95-de4214e92b0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{303e1e2f-5a51-4d5c-8d4e-88cec2d96c05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Mesh">
+      <UniqueIdentifier>{bd48eed7-ce34-411c-a356-d5a13f0e4a3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLSL">
+      <UniqueIdentifier>{32e8318b-e8f6-4bf9-8127-b27799480662}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{a683e20d-9e51-4d00-aa74-4a19948e0cba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="State">
+      <UniqueIdentifier>{a79a7ffd-399d-4749-8734-1980ff1dbf8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main\Resources">
+      <UniqueIdentifier>{724f5d96-941a-497b-bccb-815c95fbbbb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main\stdafx">
+      <UniqueIdentifier>{1dceb5fc-e1ff-4602-8a50-8840502153ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Material">
+      <UniqueIdentifier>{0d0bbb18-87da-47a3-b220-7624656af5df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Texture">
+      <UniqueIdentifier>{2246ee66-e90c-4029-a56a-fb1013378e75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Shader">
+      <UniqueIdentifier>{04f39449-42c1-42ab-bb97-94aa7f89a159}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GSClient.rc">
       <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="GSClient.rc">
+      <Filter>Main\Resources</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="TitleScene.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="MinimapTest.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-  </ItemGroup> 
+  </ItemGroup>
 </Project>
