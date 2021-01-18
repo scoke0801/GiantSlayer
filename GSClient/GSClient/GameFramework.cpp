@@ -2,6 +2,7 @@
 #include "GameFramework.h"
 #include "Scene.h"
 
+#include "GameScene.h"
 #include "TitleScene.h"
 #include "Mesh.h"
 
@@ -10,12 +11,16 @@ CFramework::CFramework()
 {
 	m_GameTimer.Init();
 	m_FPSTimer.Init();
+
+	m_nWndClientWidth = FRAME_BUFFER_WIDTH;
+	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
 }
 
 void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
-{ 
-	m_hWnd = hWnd; 
-	m_hInst = hInst; 	
+{
+	m_hInst = hInst;
+	m_hWnd = hWnd;
+	
 
 	_tcscpy_s(m_pszFrameRate, _T("Giant Slayer"));
 	LoadString(m_hInst, IDS_APP_TITLE, m_captionTitle, TITLE_LENGTH);
@@ -42,8 +47,8 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	m_d3dViewport.MaxDepth = 1.0f;
 
 	m_d3dScissorRect = { 0, 0, m_nWndClientWidth, m_nWndClientHeight };
-	
-	BuildScene(); 
+
+	BuildScene();
 }
 
 void CFramework::OnDestroy()
@@ -86,21 +91,21 @@ void CFramework::CreateSwapChain()
 	dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;			// 알파를 포함하여 채널당 8 비트를 지원하는 4 성분, 32 비트 부호없는 정규화 정수 형식
 	dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
-	 
+
 	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;			// 후면버퍼대상 
 	dxgiSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	dxgiSwapChainDesc.OutputWindow = m_hWnd;									// 렌더링 결과 표시될 핸들
-	dxgiSwapChainDesc.SampleDesc.Count = (m_bMsaa4xEnable) ? 4 : 1;		
+	dxgiSwapChainDesc.SampleDesc.Count = (m_bMsaa4xEnable) ? 4 : 1;
 	dxgiSwapChainDesc.SampleDesc.Quality = (m_bMsaa4xEnable) ? (m_nMsaa4xQualityLevels - 1) : 0;
 	dxgiSwapChainDesc.Windowed = TRUE;											// 창모드 구분
 	dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;			// 알아서 가장잘맞는 디스플레이 결정해줌 요렇게 써주면
 
 	HRESULT hResult = m_pdxgiFactory->CreateSwapChain(m_pd3dCommandQueue, &dxgiSwapChainDesc, (IDXGISwapChain**)&m_pdxgiSwapChain);
-	
+
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();	// 가져온 디스플레이의 백버퍼를 가져옴
 
 	hResult = m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
-	
+
 	CreateRenderTargetViews();
 }
 
@@ -235,7 +240,7 @@ void CFramework::CreateDepthStencilView()
 	d3dClearValue.DepthStencil.Stencil = 0;
 
 	m_pd3dDevice->CreateCommittedResource(&d3dHeapProperties, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, &d3dClearValue, __uuidof(ID3D12Resource), (void**)&m_pd3dDepthStencilBuffer);
-	
+
 	D3D12_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
 	::ZeroMemory(&d3dDepthStencilViewDesc, sizeof(D3D12_DEPTH_STENCIL_VIEW_DESC));
 	d3dDepthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -277,15 +282,22 @@ void CFramework::MoveToNextFrame()
 void CFramework::BuildScene()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-	//m_CurrentScene = new CNullScene;
-	m_CurrentScene = new CTitleScene;
+	m_CurrentScene = new CNullScene;
+	//m_CurrentScene = new CGameScene;
 	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList);
-	 
+
+	m_pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList,
+		m_CurrentScene->GetGraphicsRootSignature(), m_CurrentScene->GetTerrain(), 1);
+
+	m_pCamera = m_pPlayer->GetCamera();
+
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
 	WaitForGpuComplete();
+
+	m_CurrentScene->ReleaseUploadBuffers();
 }
 
 void CFramework::Update()
@@ -318,15 +330,15 @@ void CFramework::Update()
 		}
 	}
 	// 최대 FPS 미만의 시간이 경과하면 진행 생략(Frame Per Second)
-	else 
+	else
 		return;
-	
+
 	Draw();
 
 #if defined(SHOW_CAPTIONFPS)
 
 	std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();
-	
+
 	double updateElapsed = m_FPSTimer.GetElapsedTime(lastUpdateTime);
 
 	if (updateElapsed > MAX_UPDATE_FPS)
@@ -336,10 +348,10 @@ void CFramework::Update()
 	fps = 1.0 / m_GameTimer.GetElapsedTime();
 
 	_itow_s(fps + 0.1f,
-		 m_captionTitle + m_titleLength,
+		m_captionTitle + m_titleLength,
 		TITLE_LENGTH - m_titleLength, 10);
-	wcscat_s(m_captionTitle +  m_titleLength, TITLE_LENGTH - m_titleLength, TEXT(" FPS)"));
-	SetWindowText(m_hWnd,  m_captionTitle);
+	wcscat_s(m_captionTitle + m_titleLength, TITLE_LENGTH - m_titleLength, TEXT(" FPS)"));
+	SetWindowText(m_hWnd, m_captionTitle);
 #endif
 }
 
@@ -348,15 +360,15 @@ void CFramework::Animate()
 }
 
 void CFramework::Draw()
-{ 
-	HRESULT hResult= m_pd3dCommandAllocator->Reset();
+{
+	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	// 뷰포트와 씨저 사각형을 설정한다.
 	// 씬 클래스 내부로 옮겨야 함
 	m_pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
 	m_pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
-	
+
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
 	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -379,7 +391,9 @@ void CFramework::Draw()
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
 
-	m_CurrentScene->Draw(m_pd3dCommandList); 
+	m_CurrentScene->Draw(m_pd3dCommandList, m_pCamera);
+
+
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;

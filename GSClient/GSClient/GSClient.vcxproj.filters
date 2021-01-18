@@ -5,51 +5,103 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Material.cpp" />
-    <ClCompile Include="FrameResource.cpp" />
-    <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="TitleScene.cpp" />
-    <ClCompile Include="GameObject.cpp" />
-    <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="InputHandler.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="DDSTextureLoader12.cpp" />
-    <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameTimer.cpp" />
-    <ClCompile Include="Main.cpp" />
     <ClCompile Include="State.cpp" />
     <ClCompile Include="StateMachine.cpp" />
-    <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="WICTextureLoader12.cpp" />
-    <ClCompile Include="d3dApp.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="DDSTextureLoader12.cpp">
+      <Filter>d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameResource.cpp">
+      <Filter>d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFramework.cpp">
+      <Filter>GameFramework</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
+      <Filter>GameScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="Sound.cpp">
+      <Filter>Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>GameScene</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader12.cpp">
+      <Filter>d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>d3d</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="TitleScene.cpp">
+      <Filter>GameScene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FrameResource.h" />
-    <ClInclude Include="GameObject.h" />
-    <ClInclude Include="GameScene.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Material.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="DDSTextureLoader12.h" />
-    <ClInclude Include="Defines.h" />
-    <ClInclude Include="GameFramework.h" />
     <ClInclude Include="GameTimer.h" />
-    <ClInclude Include="Main.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="Sound.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="StateMachine.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
-    <ClInclude Include="TitleScene.h" />
-    <ClInclude Include="WICTextureLoader12.h" />
-    <ClInclude Include="d3dApp.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Object.h" />
+    <ClInclude Include="Defines.h">
+      <Filter>d3d</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dx12.h">
+      <Filter>d3d</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTextureLoader12.h">
+      <Filter>d3d</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameResource.h">
+      <Filter>d3d</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFramework.h">
+      <Filter>GameFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>GameScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Main.h">
+      <Filter>d3d</Filter>
+    </ClInclude>
+    <ClInclude Include="Sound.h">
+      <Filter>Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>GameScene</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader12.h">
+      <Filter>d3d</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>d3d</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>d3d</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="TitleScene.h">
+      <Filter>GameScene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GSClient.rc" />
@@ -58,5 +110,22 @@
     <Image Include="GiantSlayer.ico" />
     <Image Include="GSClient.ico" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="d3d">
+      <UniqueIdentifier>{3333b4fd-10b4-48f6-9cf3-33ea0c572407}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameFramework">
+      <UniqueIdentifier>{44b2321e-c7f5-4498-a7a8-2201e96f1df7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject">
+      <UniqueIdentifier>{2f01299f-2fcf-4760-acff-98907f7b22c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameScene">
+      <UniqueIdentifier>{a683e20d-9e51-4d00-aa74-4a19948e0cba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sound">
+      <UniqueIdentifier>{27fdaea7-eecb-40ed-a1e2-222ae1cdc555}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

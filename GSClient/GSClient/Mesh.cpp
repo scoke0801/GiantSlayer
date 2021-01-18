@@ -1,533 +1,557 @@
 #include "stdafx.h"
 #include "Mesh.h"
-#include <algorithm>
 
-Mesh::MeshData Mesh::CreateGrid(float width, float depth, uint32 m, uint32 n)
+
+CMesh::CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	MeshData meshData;
+}
+CMesh::~CMesh()
+{
+	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
 
-	uint32 vertexCount = m * n;
-	uint32 faceCount = (m - 1) * (n - 1) * 2;
+	if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
+	if (m_pd3dIndexUploadBuffer) m_pd3dIndexUploadBuffer->Release();
+}
 
-	//
-	// Create the vertices.
-	//
+void CMesh::ReleaseUploadBuffers()
+{
+	//정점 버퍼를 위한 업로드 버퍼를 소멸시킨다. 
+	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+	m_pd3dVertexUploadBuffer = NULL;
 
-	float halfWidth = 0.5f * width;
-	float halfDepth = 0.5f * depth;
+	if (m_pd3dIndexUploadBuffer) m_pd3dIndexUploadBuffer->Release();
+	m_pd3dIndexUploadBuffer = NULL;
+};
 
-	float dx = width / (n - 1);
-	float dz = depth / (m - 1);
-
-	float du = 1.0f / (n - 1);
-	float dv = 1.0f / (m - 1);
-
-	meshData.Vertices.resize(vertexCount);
-	for (uint32 i = 0; i < m; ++i)
+void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dVertexBufferView);
+	if (m_pd3dIndexBuffer)
 	{
-		float z = halfDepth - i * dz;
-		for (uint32 j = 0; j < n; ++j)
+		pd3dCommandList->IASetIndexBuffer(&m_d3dIndexBufferView);
+		pd3dCommandList->DrawIndexedInstanced(m_nIndices, 1, 0, 0, 0);
+		//인덱스 버퍼가 있으면 인덱스 버퍼를 파이프라인(IA: 입력 조립기)에 연결하고 인덱스를 사용하여 렌더링한다. 
+	}
+	else
+	{
+		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+	}
+}
+
+CTriangleMesh::CTriangleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
+	* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	//삼각형 메쉬를 정의한다. 
+	m_nVertices = 3;
+	m_nStride = sizeof(CDiffusedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	/*정점(삼각형의 꼭지점)의 색상은 시계방향 순서대로 빨간색, 녹색, 파란색으로 지정한다. RGBA(Red, Green, Blue,
+	Alpha) 4개의 파라메터를 사용하여 색상을 표현한다. 각 파라메터는 0.0~1.0 사이의 실수값을 가진다.*/
+	CDiffusedVertex pVertices[3];
+	pVertices[0] = CDiffusedVertex(XMFLOAT3(0.0f, 0.5f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+	pVertices[1] = CDiffusedVertex(XMFLOAT3(0.5f, -0.5f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+	pVertices[2] = CDiffusedVertex(XMFLOAT3(-0.5f, -0.5f, 0.0f), XMFLOAT4(Colors::Blue));
+	//삼각형 메쉬를 리소스(정점 버퍼)로 생성한다.
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+		&m_pd3dVertexUploadBuffer);
+	//정점 버퍼 뷰를 생성한다. 
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
+	* pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice,
+		pd3dCommandList)
+{
+	//직육면체는 꼭지점(정점)이 8개이다.
+	m_nVertices = 8;
+	m_nStride = sizeof(CDiffusedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
+
+	//정점 버퍼는 직육면체의 꼭지점 8개에 대한 정점 데이터를 가진다.
+	CDiffusedVertex pVertices[8];
+	pVertices[0] = CDiffusedVertex(XMFLOAT3(-fx, +fy, -fz), RANDOM_COLOR);
+	pVertices[1] = CDiffusedVertex(XMFLOAT3(+fx, +fy, -fz), RANDOM_COLOR);
+	pVertices[2] = CDiffusedVertex(XMFLOAT3(+fx, +fy, +fz), RANDOM_COLOR);
+	pVertices[3] = CDiffusedVertex(XMFLOAT3(-fx, +fy, +fz), RANDOM_COLOR);
+	pVertices[4] = CDiffusedVertex(XMFLOAT3(-fx, -fy, -fz), RANDOM_COLOR);
+	pVertices[5] = CDiffusedVertex(XMFLOAT3(+fx, -fy, -fz), RANDOM_COLOR);
+	pVertices[6] = CDiffusedVertex(XMFLOAT3(+fx, -fy, +fz), RANDOM_COLOR);
+	pVertices[7] = CDiffusedVertex(XMFLOAT3(-fx, -fy, +fz), RANDOM_COLOR);
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+	/*인덱스 버퍼는 직육면체의 6개의 면(사각형)에 대한 기하 정보를 갖는다. 삼각형 리스트로 직육면체를 표현할 것이
+	므로 각 면은 2개의 삼각형을 가지고 각 삼각형은 3개의 정점이 필요하다. 즉, 인덱스 버퍼는 전체 36(=6*2*3)개의 인
+	덱스를 가져야 한다.*/
+	m_nIndices = 36;
+	UINT pnIndices[36];
+	//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
+	pnIndices[0] = 3; pnIndices[1] = 1; pnIndices[2] = 0;
+	//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
+	pnIndices[3] = 2; pnIndices[4] = 1; pnIndices[5] = 3;
+	//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
+	pnIndices[6] = 0; pnIndices[7] = 5; pnIndices[8] = 4;
+	//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
+	pnIndices[9] = 1; pnIndices[10] = 5; pnIndices[11] = 0;
+	//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
+	pnIndices[12] = 3; pnIndices[13] = 4; pnIndices[14] = 7;
+	//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
+	pnIndices[15] = 0; pnIndices[16] = 4; pnIndices[17] = 3;
+	//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
+	pnIndices[18] = 1; pnIndices[19] = 6; pnIndices[20] = 5;
+	//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
+	pnIndices[21] = 2; pnIndices[22] = 6; pnIndices[23] = 1;
+	//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
+	pnIndices[24] = 2; pnIndices[25] = 7; pnIndices[26] = 6;
+	//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
+	pnIndices[27] = 3; pnIndices[28] = 7; pnIndices[29] = 2;
+	//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
+	pnIndices[30] = 6; pnIndices[31] = 4; pnIndices[32] = 5;
+	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
+	pnIndices[33] = 7; pnIndices[34] = 4; pnIndices[35] = 6;
+
+	//인덱스 버퍼를 생성한다. 
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices,
+		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
+		&m_pd3dIndexUploadBuffer);
+
+	//인덱스 버퍼 뷰를 생성한다. 
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+}
+
+CCubeMeshDiffused::~CCubeMeshDiffused()
+{
+}
+
+CAirplaneMeshDiffused::CAirplaneMeshDiffused(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth,
+	XMFLOAT4 xmf4Color) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = 24 * 3;
+	m_nStride = sizeof(CDiffusedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
+
+	//위의 그림과 같은 비행기 메쉬를 표현하기 위한 정점 데이터이다. 
+	CDiffusedVertex pVertices[24 * 3];
+	float x1 = fx * 0.2f, y1 = fy * 0.2f, x2 = fx * 0.1f, y3 = fy * 0.3f, y2 = ((y1 - (fy -
+		y3)) / x1) * x2 + (fy - y3);
+	int i = 0;
+	//비행기 메쉬의 위쪽 면
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), -fz),
+		Vector4::Add(xmf4Color, RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), -fz),
+		Vector4::Add(xmf4Color, RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	//비행기 메쉬의 아래쪽 면
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(xmf4Color, RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(xmf4Color, RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	//비행기 메쉬의 오른쪽 면
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), -fz),
+		Vector4::Add(xmf4Color, RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(xmf4Color, RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(xmf4Color, RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x2, +y2, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	//비행기 메쉬의 뒤쪽/오른쪽 면
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, -y3, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+x1, -y1, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	//비행기 메쉬의 왼쪽 면
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(xmf4Color, RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), -fz),
+		Vector4::Add(xmf4Color, RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, +(fy + y3), +fz),
+		Vector4::Add(xmf4Color, RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x2, +y2, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	//비행기 메쉬의 뒤쪽/왼쪽 면
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(0.0f, 0.0f, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-x1, -y1, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, +fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(-fx, -y3, -fz), Vector4::Add(xmf4Color,
+		RANDOM_COLOR));
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+CAirplaneMeshDiffused::~CAirplaneMeshDiffused()
+{
+}
+
+CHeightMapImage::CHeightMapImage(int nWidth, int nLength, XMFLOAT3
+	xmf3Scale)
+{
+	m_nWidth = nWidth;
+	m_nLength = nLength;
+	m_xmf3Scale = xmf3Scale;
+
+	BYTE* pHeightMapPixels = new BYTE[m_nWidth * m_nLength];
+	//파일을 열고 읽는다. 
+	//높이 맵 이미지는 파일 헤더가 없는 RAW 이미지이다. 
+	/*HANDLE hFile = ::CreateFile(pFileName, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY, NULL);
+	DWORD dwBytesRead;
+	::ReadFile(hFile, pHeightMapPixels, (m_nWidth * m_nLength), &dwBytesRead, NULL);
+	::CloseHandle(hFile);*/
+
+	m_pHeightMapPixels = new BYTE[m_nWidth * m_nLength];
+	for (int y = 0; y < m_nLength; y++)
+	{
+		for (int x = 0; x < m_nWidth; x++)
 		{
-			float x = -halfWidth + j * dx;
-
-			meshData.Vertices[i * n + j].Position = XMFLOAT3(x, 0.0f, z);
-			meshData.Vertices[i * n + j].Normal = XMFLOAT3(0.0f, 1.0f, 0.0f);
-			meshData.Vertices[i * n + j].TangentU = XMFLOAT3(1.0f, 0.0f, 0.0f);
-
-			// Stretch texture over grid.
-			meshData.Vertices[i * n + j].TexC.x = j * du;
-			meshData.Vertices[i * n + j].TexC.y = i * dv;
+			m_pHeightMapPixels[x + ((m_nLength - 1 - y) * m_nWidth)] = pHeightMapPixels[x +
+				(y * m_nWidth)];
 		}
 	}
+	if (pHeightMapPixels) delete[] pHeightMapPixels;
+}
+CHeightMapImage::~CHeightMapImage()
+{
+	if (m_pHeightMapPixels) delete[] m_pHeightMapPixels;
+	m_pHeightMapPixels = NULL;
+}
 
-	//
-	// Create the indices.
-	//
+XMFLOAT3 CHeightMapImage::GetHeightMapNormal(int x, int z)
+{
+	//x-좌표와 z-좌표가 높이 맵의 범위를 벗어나면 
+	//지형의 법선 벡터는y-축 방향 벡터이다.
+	if ((x < 0.0f)
+		|| (z < 0.0f)
+		|| (x >= m_nWidth)
+		|| (z >= m_nLength))
+		return(XMFLOAT3(0.0f, 1.0f, 0.0f));
+	/*높이 맵에서 (x, z) 좌표의 픽셀 값과 인접한
+	두 개의 점 (x+1, z), (z, z+1)에 대한 픽셀 값을 사용하여
+	법선 벡터를 계산한다.*/
+	int nHeightMapIndex = x + (z * m_nWidth);
+	int xHeightMapAdd = (x < (m_nWidth - 1)) ? 1 : -1;
+	int zHeightMapAdd = (z < (m_nLength - 1)) ? m_nWidth : -m_nWidth;
 
-	meshData.Indices32.resize(faceCount * 3); // 3 indices per face
+	//(x, z), (x+1, z), (z, z+1)의 픽셀에서 지형의 높이를 구한다.
+	float y1 = (float)m_pHeightMapPixels[nHeightMapIndex] * m_xmf3Scale.y;
+	float y2 = (float)m_pHeightMapPixels[nHeightMapIndex + xHeightMapAdd] * m_xmf3Scale.y;
+	float y3 = (float)m_pHeightMapPixels[nHeightMapIndex + zHeightMapAdd] * m_xmf3Scale.y;
 
-	// Iterate over each quad and compute indices.
-	uint32 k = 0;
-	for (uint32 i = 0; i < m - 1; ++i)
+	//xmf3Edge1은 (0, y3, m_xmf3Scale.z) - (0, y1, 0) 벡터이다. 
+	XMFLOAT3 xmf3Edge1 = XMFLOAT3(0.0f, y3 - y1, m_xmf3Scale.z);
+	//xmf3Edge2는 (m_xmf3Scale.x, y2, 0) - (0, y1, 0) 벡터이다.
+	XMFLOAT3 xmf3Edge2 = XMFLOAT3(m_xmf3Scale.x, y2 - y1, 0.0f);
+	//법선 벡터는 xmf3Edge1과 xmf3Edge2의 외적을 정규화하면 된다. 
+	XMFLOAT3 xmf3Normal = Vector3::CrossProduct(xmf3Edge1, xmf3Edge2, true);
+
+	return(xmf3Normal);
+}
+
+#define _WITH_APPROXIMATE_OPPOSITE_CORNER
+float CHeightMapImage::GetHeight(float fx, float fz)
+{
+	/*지형의 좌표 (fx, fz)는 이미지 좌표계이다.
+	높이 맵의 x-좌표와 z-좌표가 높이 맵의 범위를 벗어나면
+	지형의 높이는0이다.*/
+	if ((fx < 0.0f)
+		|| (fz < 0.0f)
+		|| (fx >= m_nWidth)
+		|| (fz >= m_nLength))
+		return(0.0f);
+	//높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다.
+	int x = (int)fx;
+	int z = (int)fz;
+	float fxPercent = fx - x;
+	float fzPercent = fz - z;
+
+	float fBottomLeft = (float)m_pHeightMapPixels[x + (z * m_nWidth)];
+	float fBottomRight = (float)m_pHeightMapPixels[(x + 1) + (z * m_nWidth)];
+	float fTopLeft = (float)m_pHeightMapPixels[x + ((z + 1) * m_nWidth)];
+	float fTopRight = (float)m_pHeightMapPixels[(x + 1) + ((z + 1) * m_nWidth)];
+
+#ifdef _WITH_APPROXIMATE_OPPOSITE_CORNER
+	//z-좌표가 1, 3, 5, ...인 경우 인덱스가 오른쪽에서 왼쪽으로 나열된다.
+	bool bRightToLeft = ((z % 2) != 0);
+	if (bRightToLeft)
 	{
-		for (uint32 j = 0; j < n - 1; ++j)
+		if (fzPercent >= fxPercent)
+			fBottomRight = fBottomLeft + (fTopRight - fTopLeft);
+		else
+			fTopLeft = fTopRight + (fBottomLeft - fBottomRight);
+	}
+	else
+	{
+		if (fzPercent < (1.0f - fxPercent))
+			fTopRight = fTopLeft + (fBottomRight - fBottomLeft);
+		else
+			fBottomLeft = fTopLeft + (fBottomRight - fTopRight);
+	}
+#endif
+	//사각형의 네 점을 보간하여 높이(픽셀 값)를 계산한다.
+	float fTopHeight = fTopLeft * (1 - fxPercent) + fTopRight * fxPercent;
+	float fBottomHeight = fBottomLeft * (1 - fxPercent) + fBottomRight * fxPercent;
+	float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
+
+	return(fHeight);
+}
+
+CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int nWidth, int
+	nLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color, void* pContext) : CMesh(pd3dDevice,
+		pd3dCommandList)
+{
+	//격자의 교점(정점)의 개수는 (nWidth * nLength)이다. 
+	m_nVertices = nWidth * nLength;
+	m_nStride = sizeof(CDiffusedVertex);
+
+	//격자는 삼각형 스트립으로 구성한다.
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+
+	m_nWidth = nWidth;
+	m_nLength = nLength;
+	m_xmf3Scale = xmf3Scale;
+
+	CDiffusedVertex* pVertices = new CDiffusedVertex[m_nVertices];
+
+	/*xStart와 zStart는 격자의 시작 위치(x-좌표와 z-좌표)를 나타낸다.
+	커다란 지형은 격자들의 이차원 배열로 만들 필요가 있기 때문에
+	전체 지형에서 각 격자의 시작 위치를 나타내는 정보가 필요하다.*/
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+	for (int i = 0, z = zStart; z < (zStart + nLength); z++)
+	{
+		for (int x = xStart; x < (xStart + nWidth); x++, i++)
 		{
-			meshData.Indices32[k] = i * n + j;
-			meshData.Indices32[k + 1] = i * n + j + 1;
-			meshData.Indices32[k + 2] = (i + 1) * n + j;
-
-			meshData.Indices32[k + 3] = (i + 1) * n + j;
-			meshData.Indices32[k + 4] = i * n + j + 1;
-			meshData.Indices32[k + 5] = (i + 1) * n + j + 1;
-
-			k += 6; // next quad
+			//정점의 높이와 색상을 높이 맵으로부터 구한다. 
+			XMFLOAT3 xmf3Position = XMFLOAT3((x * m_xmf3Scale.x), OnGetHeight(x, z, pContext),
+				(z * m_xmf3Scale.z));
+			XMFLOAT4 xmf3Color = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
+			pVertices[i] = CDiffusedVertex(xmf3Position, xmf3Color);
+			if (fHeight < fMinHeight) fMinHeight = fHeight;
+			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
 		}
 	}
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
-	return meshData;
-}
-Mesh::MeshData Mesh::CreateBox(float width, float height, float depth, uint32 numSubdivisions)
-{
-	MeshData meshData;
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-	//
-	// Create the vertices.
-	//
+	delete[] pVertices;
 
-	Vertex v[24];
-
-	float w2 = 0.5f * width;
-	float h2 = 0.5f * height;
-	float d2 = 0.5f * depth;
-
-	// Fill in the front face vertex data.
-	v[0] = Vertex(-w2, -h2, -d2, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-	v[1] = Vertex(-w2, +h2, -d2, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	v[2] = Vertex(+w2, +h2, -d2, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-	v[3] = Vertex(+w2, -h2, -d2, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
-
-	// Fill in the back face vertex data.
-	v[4] = Vertex(-w2, -h2, +d2, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
-	v[5] = Vertex(+w2, -h2, +d2, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-	v[6] = Vertex(+w2, +h2, +d2, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	v[7] = Vertex(-w2, +h2, +d2, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-
-	// Fill in the top face vertex data.
-	v[8] = Vertex(-w2, +h2, -d2, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-	v[9] = Vertex(-w2, +h2, +d2, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	v[10] = Vertex(+w2, +h2, +d2, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-	v[11] = Vertex(+w2, +h2, -d2, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
-
-	// Fill in the bottom face vertex data.
-	v[12] = Vertex(-w2, -h2, -d2, 0.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
-	v[13] = Vertex(+w2, -h2, -d2, 0.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-	v[14] = Vertex(+w2, -h2, +d2, 0.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	v[15] = Vertex(-w2, -h2, +d2, 0.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-
-	// Fill in the left face vertex data.
-	v[16] = Vertex(-w2, -h2, +d2, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f);
-	v[17] = Vertex(-w2, +h2, +d2, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f);
-	v[18] = Vertex(-w2, +h2, -d2, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f);
-	v[19] = Vertex(-w2, -h2, -d2, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f);
-
-	// Fill in the right face vertex data.
-	v[20] = Vertex(+w2, -h2, -d2, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f);
-	v[21] = Vertex(+w2, +h2, -d2, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
-	v[22] = Vertex(+w2, +h2, +d2, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f);
-	v[23] = Vertex(+w2, -h2, +d2, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-
-	meshData.Vertices.assign(&v[0], &v[24]);
-
-	//
-	// Create the indices.
-	//
-
-	uint32 i[36];
-
-	// Fill in the front face index data
-	i[0] = 0; i[1] = 1; i[2] = 2;
-	i[3] = 0; i[4] = 2; i[5] = 3;
-
-	// Fill in the back face index data
-	i[6] = 4; i[7] = 5; i[8] = 6;
-	i[9] = 4; i[10] = 6; i[11] = 7;
-
-	// Fill in the top face index data
-	i[12] = 8; i[13] = 9; i[14] = 10;
-	i[15] = 8; i[16] = 10; i[17] = 11;
-
-	// Fill in the bottom face index data
-	i[18] = 12; i[19] = 13; i[20] = 14;
-	i[21] = 12; i[22] = 14; i[23] = 15;
-
-	// Fill in the left face index data
-	i[24] = 16; i[25] = 17; i[26] = 18;
-	i[27] = 16; i[28] = 18; i[29] = 19;
-
-	// Fill in the right face index data
-	i[30] = 20; i[31] = 21; i[32] = 22;
-	i[33] = 20; i[34] = 22; i[35] = 23;
-
-	meshData.Indices32.assign(&i[0], &i[36]);
-
-	// Put a cap on the number of subdivisions.
-	numSubdivisions = std::min<uint32>(numSubdivisions, 6u);
-
-	for (uint32 i = 0; i < numSubdivisions; ++i)
-		Subdivide(meshData);
-
-	return meshData;
-}
-
-Mesh::MeshData Mesh::CreateSphere(float radius, uint32 sliceCount, uint32 stackCount)
-{
-	MeshData meshData;
-
-	//
-	// Compute the vertices stating at the top pole and moving down the stacks.
-	//
-
-	// Poles: note that there will be texture coordinate distortion as there is
-	// not a unique point on the texture map to assign to the pole when mapping
-	// a rectangular texture onto a sphere.
-	Vertex topVertex(0.0f, +radius, 0.0f, 0.0f, +1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	Vertex bottomVertex(0.0f, -radius, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-
-	meshData.Vertices.push_back(topVertex);
-
-	float phiStep = XM_PI / stackCount;
-	float thetaStep = 2.0f * XM_PI / sliceCount;
-
-	// Compute vertices for each stack ring (do not count the poles as rings).
-	for (uint32 i = 1; i <= stackCount - 1; ++i)
+	m_nIndices = ((nWidth * 2) * (nLength - 1)) + ((nLength - 1) - 1);
+	UINT* pnIndices = new UINT[m_nIndices];
+	for (int j = 0, z = 0; z < nLength - 1; z++)
 	{
-		float phi = i * phiStep;
-
-		// Vertices of ring.
-		for (uint32 j = 0; j <= sliceCount; ++j)
+		if ((z % 2) == 0)
 		{
-			float theta = j * thetaStep;
+			//홀수 번째 줄이므로(z = 0, 2, 4, ...) 
+			//인덱스의 나열 순서는 왼쪽에서 오른쪽 방향이다.
+			for (int x = 0; x < nWidth; x++)
+			{
+				//첫 번째 줄을 제외하고 줄이 바뀔 때마다(x == 0) 첫 번째 인덱스를 추가한다.
+				if ((x == 0) && (z > 0)) pnIndices[j++] = (UINT)(x + (z * nWidth));
 
-			Vertex v;
-
-			// spherical to cartesian
-			v.Position.x = radius * sinf(phi) * cosf(theta);
-			v.Position.y = radius * cosf(phi);
-			v.Position.z = radius * sinf(phi) * sinf(theta);
-
-			// Partial derivative of P with respect to theta
-			v.TangentU.x = -radius * sinf(phi) * sinf(theta);
-			v.TangentU.y = 0.0f;
-			v.TangentU.z = +radius * sinf(phi) * cosf(theta);
-
-			XMVECTOR T = XMLoadFloat3(&v.TangentU);
-			XMStoreFloat3(&v.TangentU, XMVector3Normalize(T));
-
-			XMVECTOR p = XMLoadFloat3(&v.Position);
-			XMStoreFloat3(&v.Normal, XMVector3Normalize(p));
-
-			v.TexC.x = theta / XM_2PI;
-			v.TexC.y = phi / XM_PI;
-
-			meshData.Vertices.push_back(v);
+				//아래(x, z), 위(x, z+1)의 순서로 인덱스를 추가한다.
+				pnIndices[j++] = (UINT)(x + (z * nWidth));
+				pnIndices[j++] = (UINT)((x + (z * nWidth)) + nWidth);
+			}
+		}
+		else
+		{
+			//짝수 번째 줄이므로(z = 1, 3, 5, ...) 인덱스의 나열 순서는 오른쪽에서 왼쪽 방향이다. 
+			for (int x = nWidth - 1; x >= 0; x--)
+			{
+				//줄이 바뀔 때마다(x == (nWidth-1)) 첫 번째 인덱스를 추가한다.
+				if (x == (nWidth - 1)) pnIndices[j++] = (UINT)(x + (z * nWidth));
+				//아래(x, z), 위(x, z+1)의 순서로 인덱스를 추가한다. 
+				pnIndices[j++] = (UINT)(x + (z * nWidth));
+				pnIndices[j++] = (UINT)((x + (z * nWidth)) + nWidth);
+			}
 		}
 	}
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices,
+		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
+		&m_pd3dIndexUploadBuffer);
 
-	meshData.Vertices.push_back(bottomVertex);
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
-	//
-	// Compute indices for top stack.  The top stack was written first to the vertex buffer
-	// and connects the top pole to the first ring.
-	//
-
-	for (uint32 i = 1; i <= sliceCount; ++i)
-	{
-		meshData.Indices32.push_back(0);
-		meshData.Indices32.push_back(i + 1);
-		meshData.Indices32.push_back(i);
-	}
-
-	//
-	// Compute indices for inner stacks (not connected to poles).
-	//
-
-	// Offset the indices to the index of the first vertex in the first ring.
-	// This is just skipping the top pole vertex.
-	uint32 baseIndex = 1;
-	uint32 ringVertexCount = sliceCount + 1;
-	for (uint32 i = 0; i < stackCount - 2; ++i)
-	{
-		for (uint32 j = 0; j < sliceCount; ++j)
-		{
-			meshData.Indices32.push_back(baseIndex + i * ringVertexCount + j);
-			meshData.Indices32.push_back(baseIndex + i * ringVertexCount + j + 1);
-			meshData.Indices32.push_back(baseIndex + (i + 1) * ringVertexCount + j);
-
-			meshData.Indices32.push_back(baseIndex + (i + 1) * ringVertexCount + j);
-			meshData.Indices32.push_back(baseIndex + i * ringVertexCount + j + 1);
-			meshData.Indices32.push_back(baseIndex + (i + 1) * ringVertexCount + j + 1);
-		}
-	}
-
-	//
-	// Compute indices for bottom stack.  The bottom stack was written last to the vertex buffer
-	// and connects the bottom pole to the bottom ring.
-	//
-
-	// South pole vertex was added last.
-	uint32 southPoleIndex = (uint32)meshData.Vertices.size() - 1;
-
-	// Offset the indices to the index of the first vertex in the last ring.
-	baseIndex = southPoleIndex - ringVertexCount;
-
-	for (uint32 i = 0; i < sliceCount; ++i)
-	{
-		meshData.Indices32.push_back(southPoleIndex);
-		meshData.Indices32.push_back(baseIndex + i);
-		meshData.Indices32.push_back(baseIndex + i + 1);
-	}
-
-	return meshData;
+	delete[] pnIndices;
 }
 
-Mesh::MeshData Mesh::CreateCylinder(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount)
+CHeightMapGridMesh::~CHeightMapGridMesh()
 {
-	MeshData meshData;
-
-	//
-	// Build Stacks.
-	// 
-
-	float stackHeight = height / stackCount;
-
-	// Amount to increment radius as we move up each stack level from bottom to top.
-	float radiusStep = (topRadius - bottomRadius) / stackCount;
-
-	uint32 ringCount = stackCount + 1;
-
-	// Compute vertices for each stack ring starting at the bottom and moving up.
-	for (uint32 i = 0; i < ringCount; ++i)
-	{
-		float y = -0.5f * height + i * stackHeight;
-		float r = bottomRadius + i * radiusStep;
-
-		// vertices of ring
-		float dTheta = 2.0f * XM_PI / sliceCount;
-		for (uint32 j = 0; j <= sliceCount; ++j)
-		{
-			Vertex vertex;
-
-			float c = cosf(j * dTheta);
-			float s = sinf(j * dTheta);
-
-			vertex.Position = XMFLOAT3(r * c, y, r * s);
-
-			vertex.TexC.x = (float)j / sliceCount;
-			vertex.TexC.y = 1.0f - (float)i / stackCount;
-
-			// Cylinder can be parameterized as follows, where we introduce v
-			// parameter that goes in the same direction as the v tex-coord
-			// so that the bitangent goes in the same direction as the v tex-coord.
-			//   Let r0 be the bottom radius and let r1 be the top radius.
-			//   y(v) = h - hv for v in [0,1].
-			//   r(v) = r1 + (r0-r1)v
-			//
-			//   x(t, v) = r(v)*cos(t)
-			//   y(t, v) = h - hv
-			//   z(t, v) = r(v)*sin(t)
-			// 
-			//  dx/dt = -r(v)*sin(t)
-			//  dy/dt = 0
-			//  dz/dt = +r(v)*cos(t)
-			//
-			//  dx/dv = (r0-r1)*cos(t)
-			//  dy/dv = -h
-			//  dz/dv = (r0-r1)*sin(t)
-
-			// This is unit length.
-			vertex.TangentU = XMFLOAT3(-s, 0.0f, c);
-
-			float dr = bottomRadius - topRadius;
-			XMFLOAT3 bitangent(dr * c, -height, dr * s);
-
-			XMVECTOR T = XMLoadFloat3(&vertex.TangentU);
-			XMVECTOR B = XMLoadFloat3(&bitangent);
-			XMVECTOR N = XMVector3Normalize(XMVector3Cross(T, B));
-			XMStoreFloat3(&vertex.Normal, N);
-
-			meshData.Vertices.push_back(vertex);
-		}
-	}
-
-	// Add one because we duplicate the first and last vertex per ring
-	// since the texture coordinates are different.
-	uint32 ringVertexCount = sliceCount + 1;
-
-	// Compute indices for each stack.
-	for (uint32 i = 0; i < stackCount; ++i)
-	{
-		for (uint32 j = 0; j < sliceCount; ++j)
-		{
-			meshData.Indices32.push_back(i * ringVertexCount + j);
-			meshData.Indices32.push_back((i + 1) * ringVertexCount + j);
-			meshData.Indices32.push_back((i + 1) * ringVertexCount + j + 1);
-
-			meshData.Indices32.push_back(i * ringVertexCount + j);
-			meshData.Indices32.push_back((i + 1) * ringVertexCount + j + 1);
-			meshData.Indices32.push_back(i * ringVertexCount + j + 1);
-		}
-	}
-
-	BuildCylinderTopCap(bottomRadius, topRadius, height, sliceCount, stackCount, meshData);
-	BuildCylinderBottomCap(bottomRadius, topRadius, height, sliceCount, stackCount, meshData);
-
-	return meshData;
 }
 
-void Mesh::Subdivide(MeshData& meshData)
+//높이 맵 이미지의 픽셀 값을 지형의 높이로 반환한다. 
+float CHeightMapGridMesh::OnGetHeight(int x, int z, void* pContext)
 {
-	// Save a copy of the input geometry.
-	MeshData inputCopy = meshData;
-
-
-	meshData.Vertices.resize(0);
-	meshData.Indices32.resize(0);
-
-	//       v1
-	//       *
-	//      / \
-	//     /   \
-	//  m0*-----*m1
-	//   / \   / \
-	//  /   \ /   \
-	// *-----*-----*
-	// v0    m2     v2
-
-	uint32 numTris = (uint32)inputCopy.Indices32.size() / 3;
-	for (uint32 i = 0; i < numTris; ++i)
-	{
-		Vertex v0 = inputCopy.Vertices[inputCopy.Indices32[i * 3 + 0]];
-		Vertex v1 = inputCopy.Vertices[inputCopy.Indices32[i * 3 + 1]];
-		Vertex v2 = inputCopy.Vertices[inputCopy.Indices32[i * 3 + 2]];
-
-		//
-		// Generate the midpoints.
-		//
-
-		Vertex m0 = MidPoint(v0, v1);
-		Vertex m1 = MidPoint(v1, v2);
-		Vertex m2 = MidPoint(v0, v2);
-
-		//
-		// Add new geometry.
-		//
-
-		meshData.Vertices.push_back(v0); // 0
-		meshData.Vertices.push_back(v1); // 1
-		meshData.Vertices.push_back(v2); // 2
-		meshData.Vertices.push_back(m0); // 3
-		meshData.Vertices.push_back(m1); // 4
-		meshData.Vertices.push_back(m2); // 5
-
-		meshData.Indices32.push_back(i * 6 + 0);
-		meshData.Indices32.push_back(i * 6 + 3);
-		meshData.Indices32.push_back(i * 6 + 5);
-
-		meshData.Indices32.push_back(i * 6 + 3);
-		meshData.Indices32.push_back(i * 6 + 4);
-		meshData.Indices32.push_back(i * 6 + 5);
-
-		meshData.Indices32.push_back(i * 6 + 5);
-		meshData.Indices32.push_back(i * 6 + 4);
-		meshData.Indices32.push_back(i * 6 + 2);
-
-		meshData.Indices32.push_back(i * 6 + 3);
-		meshData.Indices32.push_back(i * 6 + 1);
-		meshData.Indices32.push_back(i * 6 + 4);
-	}
+	CHeightMapImage* pHeightMapImage = (CHeightMapImage*)pContext;
+	BYTE* pHeightMapPixels = pHeightMapImage->GetHeightMapPixels();
+	XMFLOAT3 xmf3Scale = pHeightMapImage->GetScale();
+	int nWidth = pHeightMapImage->GetHeightMapWidth();
+	float fHeight = pHeightMapPixels[x + (z * nWidth)] * xmf3Scale.y;
+	return(fHeight);
 }
 
-Mesh::Vertex Mesh::MidPoint(const Vertex& v0, const Vertex& v1)
+XMFLOAT4 CHeightMapGridMesh::OnGetColor(int x, int z, void* pContext)
 {
-	XMVECTOR p0 = XMLoadFloat3(&v0.Position);
-	XMVECTOR p1 = XMLoadFloat3(&v1.Position);
+	//조명의 방향 벡터(정점에서 조명까지의 벡터)이다.
+	XMFLOAT3 xmf3LightDirection = XMFLOAT3(-1.0f, 1.0f, 1.0f);
+	xmf3LightDirection = Vector3::Normalize(xmf3LightDirection);
+	CHeightMapImage* pHeightMapImage = (CHeightMapImage*)pContext;
+	XMFLOAT3 xmf3Scale = pHeightMapImage->GetScale();
 
-	XMVECTOR n0 = XMLoadFloat3(&v0.Normal);
-	XMVECTOR n1 = XMLoadFloat3(&v1.Normal);
+	//조명의 색상(세기, 밝기)이다.
+	XMFLOAT4 xmf4IncidentLightColor(0.9f, 0.8f, 0.4f, 1.0f);
 
-	XMVECTOR tan0 = XMLoadFloat3(&v0.TangentU);
-	XMVECTOR tan1 = XMLoadFloat3(&v1.TangentU);
+	float fScale = Vector3::DotProduct(pHeightMapImage->GetHeightMapNormal(x, z),
+		xmf3LightDirection);
+	fScale += Vector3::DotProduct(pHeightMapImage->GetHeightMapNormal(x + 1, z),
+		xmf3LightDirection);
+	fScale += Vector3::DotProduct(pHeightMapImage->GetHeightMapNormal(x + 1, z + 1),
+		xmf3LightDirection);
+	fScale += Vector3::DotProduct(pHeightMapImage->GetHeightMapNormal(x, z + 1),
+		xmf3LightDirection);
+	fScale = (fScale / 4.0f) + 0.05f;
+	if (fScale > 1.0f) fScale = 1.0f;
+	if (fScale < 0.25f) fScale = 0.25f;
 
-	XMVECTOR tex0 = XMLoadFloat2(&v0.TexC);
-	XMVECTOR tex1 = XMLoadFloat2(&v1.TexC);
-
-	// Compute the midpoints of all the attributes.  Vectors need to be normalized
-	// since linear interpolating can make them not unit length.  
-	XMVECTOR pos = 0.5f * (p0 + p1);
-	XMVECTOR normal = XMVector3Normalize(0.5f * (n0 + n1));
-	XMVECTOR tangent = XMVector3Normalize(0.5f * (tan0 + tan1));
-	XMVECTOR tex = 0.5f * (tex0 + tex1);
-
-	Vertex v;
-	XMStoreFloat3(&v.Position, pos);
-	XMStoreFloat3(&v.Normal, normal);
-	XMStoreFloat3(&v.TangentU, tangent);
-	XMStoreFloat2(&v.TexC, tex);
-
-	return v;
-}
-
-void Mesh::BuildCylinderTopCap(float bottomRadius, float topRadius, float height,
-	uint32 sliceCount, uint32 stackCount, MeshData& meshData)
-{
-	uint32 baseIndex = (uint32)meshData.Vertices.size();
-
-	float y = 0.5f * height;
-	float dTheta = 2.0f * XM_PI / sliceCount;
-
-	// Duplicate cap ring vertices because the texture coordinates and normals differ.
-	for (uint32 i = 0; i <= sliceCount; ++i)
-	{
-		float x = topRadius * cosf(i * dTheta);
-		float z = topRadius * sinf(i * dTheta);
-
-		// Scale down by the height to try and make top cap texture coord area
-		// proportional to base.
-		float u = x / height + 0.5f;
-		float v = z / height + 0.5f;
-
-		meshData.Vertices.push_back(Vertex(x, y, z, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, u, v));
-	}
-
-	// Cap center vertex.
-	meshData.Vertices.push_back(Vertex(0.0f, y, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f));
-
-	// Index of center vertex.
-	uint32 centerIndex = (uint32)meshData.Vertices.size() - 1;
-
-	for (uint32 i = 0; i < sliceCount; ++i)
-	{
-		meshData.Indices32.push_back(centerIndex);
-		meshData.Indices32.push_back(baseIndex + i + 1);
-		meshData.Indices32.push_back(baseIndex + i);
-	}
-}
-
-void Mesh::BuildCylinderBottomCap(float bottomRadius, float topRadius, float height,
-	uint32 sliceCount, uint32 stackCount, MeshData& meshData)
-{
-	// 
-	// Build bottom cap.
-	//
-
-	uint32 baseIndex = (uint32)meshData.Vertices.size();
-	float y = -0.5f * height;
-
-	// vertices of ring
-	float dTheta = 2.0f * XM_PI / sliceCount;
-	for (uint32 i = 0; i <= sliceCount; ++i)
-	{
-		float x = bottomRadius * cosf(i * dTheta);
-		float z = bottomRadius * sinf(i * dTheta);
-
-		// Scale down by the height to try and make top cap texture coord area
-		// proportional to base.
-		float u = x / height + 0.5f;
-		float v = z / height + 0.5f;
-
-		meshData.Vertices.push_back(Vertex(x, y, z, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, u, v));
-	}
-
-	// Cap center vertex.
-	meshData.Vertices.push_back(Vertex(0.0f, y, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, 0.5f));
-
-	// Cache the index of center vertex.
-	uint32 centerIndex = (uint32)meshData.Vertices.size() - 1;
-
-	for (uint32 i = 0; i < sliceCount; ++i)
-	{
-		meshData.Indices32.push_back(centerIndex);
-		meshData.Indices32.push_back(baseIndex + i);
-		meshData.Indices32.push_back(baseIndex + i + 1);
-	}
+	//fScale은 조명 색상(밝기)이 반사되는 비율이다. 
+	XMFLOAT4 xmf4Color = Vector4::Multiply(fScale, xmf4IncidentLightColor);
+	return(xmf4Color);
 }

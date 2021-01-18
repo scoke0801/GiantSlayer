@@ -56,7 +56,7 @@ public:
 	~CTitleScene();
 
 	virtual void Update(double elapsedTime) override;
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList,CCamera* pCamera) override;
 
 public:
 	virtual void SendDataToNextScene(void* context) override {}

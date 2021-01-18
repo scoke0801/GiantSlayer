@@ -35,7 +35,7 @@ void CTitleScene::Update(double elapsedTime)
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
 }
 
-void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
+void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {		
 	// 그래픽 루트 시그너쳐를 설정한다.
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
@@ -256,7 +256,7 @@ void CTitleScene::ConnectToServer()
 
 bool CTitleScene::PrepareCommunicate()
 {
-	CreateThread(NULL, 0, ClientMain, NULL, 0, NULL);
+	//CreateThread(NULL, 0, ClientMain, NULL, 0, NULL);
 	int retval = 0;
 	// 윈속 초기화
 	if (WSAStartup(MAKEWORD(2, 2), &m_WSA) != 0) return false;
