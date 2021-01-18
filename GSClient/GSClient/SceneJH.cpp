@@ -82,7 +82,7 @@ void CSceneJH::CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 {
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[0].NumDescriptors = 3;
+	pd3dDescriptorRanges[0].NumDescriptors = 4;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -207,16 +207,20 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 {
 	auto multiButtonTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, multiButtonTex.get(), "MultiButton", L"resources/UI/MultiPlayButton.dds");
-
+	
 	auto singleButtonTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, singleButtonTex.get(), "SingleButton", L"resources/UI/SinglePlayButton.dds");
 
 	auto titleTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, titleTex.get(), "Title", L"resources/UI/TitleTest.dds");
 
+	auto minimapTex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, minimapTex.get(), "MiniMap", L"resources/UI/Minimap.dds");
+
 	m_Textures[multiButtonTex->m_Name] = std::move(multiButtonTex);
 	m_Textures[singleButtonTex->m_Name] = std::move(singleButtonTex);
-	m_Textures[titleTex->m_Name] = std::move(titleTex);
+	m_Textures[titleTex->m_Name] = std::move(titleTex); 
+	m_Textures[minimapTex->m_Name] = std::move(minimapTex);
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -225,7 +229,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	// Create the SRV heap.
 	//
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 3;
+	srvHeapDesc.NumDescriptors = 4;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
@@ -235,9 +239,10 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	//
 	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor = m_pd3dSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
-	auto multiBtnTex = m_Textures["MultiButton"]->m_pd3dResource;
+	auto multiBtnTex  = m_Textures["MultiButton"]->m_pd3dResource;
 	auto simpleBtnTex = m_Textures["SingleButton"]->m_pd3dResource;
-	auto titleTex = m_Textures["Title"]->m_pd3dResource;
+	auto titleTex	  = m_Textures["Title"]->m_pd3dResource;
+	auto minimapTex	  = m_Textures["MiniMap"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -255,6 +260,10 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = titleTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(titleTex, &srvDesc, hDescriptor);
+	
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = minimapTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(minimapTex, &srvDesc, hDescriptor);
 }
 
 void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -266,7 +275,14 @@ void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	vertices[3].xmf3Position = XMFLOAT3(-0.5f,  0.8f, 0.0f);
 	vertices[4].xmf3Position = XMFLOAT3( 0.5f, -0.8f, 0.0f);
 	vertices[5].xmf3Position = XMFLOAT3(-0.5f, -0.8f, 0.0f); 
-	
+
+	vertices[0].m_xmf2TexC = XMFLOAT2(0, 0);
+	vertices[1].m_xmf2TexC = XMFLOAT2(1, 0);
+	vertices[2].m_xmf2TexC = XMFLOAT2(1, 1);
+	vertices[3].m_xmf2TexC = XMFLOAT2(0, 0);
+	vertices[4].m_xmf2TexC = XMFLOAT2(1, 1);
+	vertices[5].m_xmf2TexC = XMFLOAT2(0, 1);
+
 	int nVertices = 6;
 	int stride = sizeof(BasicVertex);
 	int sizeInBytes = nVertices * stride;
@@ -293,12 +309,13 @@ void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hRes = D3DCompileFromFile(L"MinimapTest.hlsl", NULL, NULL,
 		"PSMinimap", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
 
-	UINT nInputElementDescs = 2;
+	UINT nInputElementDescs = 3;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-
+	pd3dInputElementDescs[2] = { "TEXCORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 	d3dInputLayoutDesc.NumElements = nInputElementDescs;

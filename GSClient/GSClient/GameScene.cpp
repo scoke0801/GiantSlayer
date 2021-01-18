@@ -29,13 +29,15 @@ void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dC
 	CDiffusedShader* pShader = new CDiffusedShader();
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	pRotatingObject->SetShader(pShader);
+	pRotatingObject->SetShader(pShader); 
 
 	m_ppObjects[0] = pRotatingObject;
-
 }
+
 void CGameScene::ReleaseObjects()
 {
+	m_ppObjects[1]; 
+
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 	if (m_ppObjects)
 	{

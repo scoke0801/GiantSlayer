@@ -5,10 +5,11 @@ cbuffer cbTestData : register(b0)
  
 struct VS_OUT
 {
-	float4 position : SV_POSITION;
-	float2 uv : TEXCOORD; 
-	uint index : TEXTURE;
+	float4	position : SV_POSITION;
+	float2	uv		 : TEXCOORD;
+	uint	index	 : TEXTURE;
 };
+
 
 Texture2D gtxtMultipleButton : register(t0);
 Texture2D gtxtSimpleButton   : register(t1);

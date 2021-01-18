@@ -15,14 +15,12 @@ CScene::~CScene()
 }
 
 CNullScene::CNullScene()
-{
-
+{ 
 	testbox1.SetPosition({ 10, 0, 0 });
 	testbox1.SetVelocity({ 0.1f, 0, 0 });
 
 	testbox2.SetPosition({ 20, 0, 0 });
-	testbox2.SetVelocity({ -0.1f, 0, 0 });
-
+	testbox2.SetVelocity({ -0.1f, 0, 0 }); 
 }
 
 CNullScene::~CNullScene()
@@ -60,7 +58,7 @@ void CNullScene::ProcessInput()
 	}
 	if (gameInput.KEY_F3)
 	{
-		//ChangeScene<CGameScene>((void*)&data);
+		ChangeScene<CGameScene>();
 	}
 	if (gameInput.KEY_F4)
 	{

@@ -225,9 +225,9 @@ void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	//
 	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor = m_pd3dSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	 
-	auto multiBtnTex = m_Textures["MultiButton"]->m_pd3dResource;
-	auto simpleBtnTex = m_Textures["SingleButton"]->m_pd3dResource; 
-	auto titleTex = m_Textures["Title"]->m_pd3dResource;
+	auto multiBtnTex	= m_Textures["MultiButton"]->m_pd3dResource;
+	auto simpleBtnTex   = m_Textures["SingleButton"]->m_pd3dResource; 
+	auto titleTex		= m_Textures["Title"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
