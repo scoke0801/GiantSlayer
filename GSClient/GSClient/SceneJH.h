@@ -11,16 +11,12 @@ class CSceneJH : public CScene
 {
 private:
 	ID3D12RootSignature*			m_pd3dGraphicsRootSignature;
-	ID3D12PipelineState*			m_pd3dPipelineState;
 
 	// 테스트 임 시 상 수 버 퍼
 	ID3D12Resource*					m_pd3dTestData = NULL;
 	// TestData*					m_pcbMappedTestData = NULL;
 
 	ID3D12DescriptorHeap*			m_pd3dSrvDescriptorHeap = nullptr;
-
-
-	ID3D12PipelineState*			m_pd3dMinimapPSO;
 
 	ID3D12Resource*					m_pd3dVertexBuffer;
 	ID3D12Resource*					m_pd3dVertexUploadBuffer;

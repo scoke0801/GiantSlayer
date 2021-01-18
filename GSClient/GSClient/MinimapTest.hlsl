@@ -21,25 +21,25 @@ float4 VSTest(uint nVertexID : SV_VertexID) :SV_POSITION
 {
 	float4 output;
 
-	if (nVertexID == 0) { output = float4(-0.75f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 1) { output = float4(-0.25f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 2) { output = float4(-0.25f, -0.525f, 0.0f, 1.0f); }
-
-	else if (nVertexID == 3) { output = float4(-0.75f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 4) { output = float4(-0.25f, -0.525f, 0.0f, 1.0f); }
-	else if (nVertexID == 5) { output = float4(-0.75f, -0.525f, 0.0f, 1.0f); }
-
-	else if (nVertexID == 6) { output = float4(0.25f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 7) { output = float4(0.75f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 8) { output = float4(0.75f, -0.525f, 0.0f, 1.0f); }
-
-	else if (nVertexID == 9) { output = float4(0.25f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 10) { output = float4(0.75f, -0.525f, 0.0f, 1.0f); }
-	else if (nVertexID == 11) { output = float4(0.25f, -0.525f, 0.0f, 1.0f); }
-
-	else if (nVertexID == 12) { output = float4(-1.0f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 13) { output = float4(1.0f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 14) { output = float4(1.0f, -0.525f, 0.0f, 1.0f); }
+	if		(nVertexID == 0)  { output = float4(-0.75f, -0.325f, 0.2f, 1.0f); }
+	else if (nVertexID == 1)  { output = float4(-0.25f, -0.325f, 0.2f, 1.0f); }
+	else if (nVertexID == 2)  { output = float4(-0.25f, -0.525f, 0.2f, 1.0f); }
+							  									   
+	else if (nVertexID == 3)  { output = float4(-0.75f, -0.325f, 0.2f, 1.0f); }
+	else if (nVertexID == 4)  { output = float4(-0.25f, -0.525f, 0.2f, 1.0f); }
+	else if (nVertexID == 5)  { output = float4(-0.75f, -0.525f, 0.2f, 1.0f); }
+							  									   
+	else if (nVertexID == 6)  { output = float4(0.25f,  -0.325f, 0.2f, 1.0f); }
+	else if (nVertexID == 7)  { output = float4(0.75f,  -0.325f, 0.2f, 1.0f); }
+	else if (nVertexID == 8)  { output = float4(0.75f,  -0.525f, 0.2f, 1.0f); }
+							  						    		   
+	else if (nVertexID == 9)  { output = float4(0.25f,  -0.325f, 0.2f, 1.0f); }
+	else if (nVertexID == 10) { output = float4(0.75f,  -0.525f, 0.2f, 1.0f); }
+	else if (nVertexID == 11) { output = float4(0.25f,  -0.525f, 0.2f, 1.0f); }
+													    		   
+	else if (nVertexID == 12) { output = float4(-1.0f,  -0.325f, 0.2f, 1.0f); }
+	else if (nVertexID == 13) { output = float4(1.0f,   -0.325f, 0.2f, 1.0f); }
+	else if (nVertexID == 14) { output = float4(1.0f,   -0.525f, 0.2f, 1.0f); }
 
 	else if (nVertexID == 15) { output = float4(-1.0f, -0.325f, 0.0f, 1.0f); }
 	else if (nVertexID == 16) { output = float4(1.0f, -0.525f, 0.0f, 1.0f); }
@@ -61,29 +61,29 @@ VS_OUT VSTextured(uint nVertexID : SV_VertexID)
 {
 	VS_OUT outResult;
 
-	if (nVertexID == 0) { outResult.position = float4(-0.75f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 1; }
-	else if (nVertexID == 1) { outResult.position = float4(-0.25f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 1; }
-	else if (nVertexID == 2) { outResult.position = float4(-0.25f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 1; }
+	if		(nVertexID == 0)  { outResult.position = float4(-0.75f, -0.325f, 0.2f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 1; }
+	else if (nVertexID == 1)  { outResult.position = float4(-0.25f, -0.325f, 0.2f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 1; }
+	else if (nVertexID == 2)  { outResult.position = float4(-0.25f, -0.525f, 0.2f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 1; }
+							  												   
+	else if (nVertexID == 3)  { outResult.position = float4(-0.75f, -0.325f, 0.2f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 1; }
+	else if (nVertexID == 4)  { outResult.position = float4(-0.25f, -0.525f, 0.2f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 1; }
+	else if (nVertexID == 5)  { outResult.position = float4(-0.75f, -0.525f, 0.2f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 1; }
+							  												   
+	else if (nVertexID == 6)  { outResult.position = float4( 0.25f, -0.325f, 0.2f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 2; }
+	else if (nVertexID == 7)  { outResult.position = float4( 0.75f, -0.325f, 0.2f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 2; }
+	else if (nVertexID == 8)  { outResult.position = float4( 0.75f, -0.525f, 0.2f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 2; }
+							  								 				   
+	else if (nVertexID == 9)  { outResult.position = float4( 0.25f, -0.325f, 0.2f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 2; }
+	else if (nVertexID == 10) { outResult.position = float4( 0.75f, -0.525f, 0.2f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 2; }
+	else if (nVertexID == 11) { outResult.position = float4( 0.25f, -0.525f, 0.2f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 2; }
 
-	else if (nVertexID == 3) { outResult.position = float4(-0.75f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 1; }
-	else if (nVertexID == 4) { outResult.position = float4(-0.25f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 1; }
-	else if (nVertexID == 5) { outResult.position = float4(-0.75f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 1; }
-
-	else if (nVertexID == 6) { outResult.position = float4(0.25f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 2; }
-	else if (nVertexID == 7) { outResult.position = float4(0.75f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 2; }
-	else if (nVertexID == 8) { outResult.position = float4(0.75f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 2; }
-
-	else if (nVertexID == 9) { outResult.position = float4(0.25f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 2; }
-	else if (nVertexID == 10) { outResult.position = float4(0.75f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 2; }
-	else if (nVertexID == 11) { outResult.position = float4(0.25f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 2; }
-
-	else if (nVertexID == 12) { outResult.position = float4(-1.0f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 3; }
-	else if (nVertexID == 13) { outResult.position = float4(1.0f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 3; }
-	else if (nVertexID == 14) { outResult.position = float4(1.0f, -1.0f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 3; }
-
-	else if (nVertexID == 15) { outResult.position = float4(-1.0f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 3; }
-	else if (nVertexID == 16) { outResult.position = float4(1.0f, -1.0, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 3; }
-	else if (nVertexID == 17) { outResult.position = float4(-1.0f, -1.0, 0.0f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 3; }
+	else if (nVertexID == 12) { outResult.position = float4(-1.0f,   1.0f,   0.2f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 3; }
+	else if (nVertexID == 13) { outResult.position = float4( 1.0f,   1.0f,   0.2f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 3; }
+	else if (nVertexID == 14) { outResult.position = float4( 1.0f,  -1.0f,   0.2f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 3; }
+																    	       
+	else if (nVertexID == 15) { outResult.position = float4(-1.0f,   1.0f,   0.2f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 3; }
+	else if (nVertexID == 16) { outResult.position = float4( 1.0f,  -1.0f,   0.2f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 3; }
+	else if (nVertexID == 17) { outResult.position = float4(-1.0f,  -1.0f,   0.2f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 3; }
 
 	return(outResult);
 }

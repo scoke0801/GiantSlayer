@@ -40,7 +40,7 @@ void CNullScene::Update(double elapsedTime)
 void CNullScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {   
 	//cout << "박스1: ";
-	//testbox1.Draw();
+	//testbox1.Draw(pd3dCommandList, pCamera);
 	//cout << "박스2: ";
 	//testbox2.Draw(); 
 	cout << endl;

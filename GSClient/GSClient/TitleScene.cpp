@@ -144,13 +144,7 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	UINT nCompileFlags = 0;
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
-	//HRESULT hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
-	//	"VSTest", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
-	//
-	//hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
-	//	"PSTest", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
-
+#endif 
 	HRESULT hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
 		"VSTextured", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
 	
@@ -241,8 +235,8 @@ void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = -1;
-	pd3dDevice->CreateShaderResourceView(multiBtnTex, &srvDesc, hDescriptor); 
-	
+	pd3dDevice->CreateShaderResourceView(multiBtnTex, &srvDesc, hDescriptor);
+
 	// next descriptor 
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = simpleBtnTex->GetDesc().Format;
