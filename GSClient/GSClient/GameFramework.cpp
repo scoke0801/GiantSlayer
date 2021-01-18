@@ -9,18 +9,18 @@
 
 CFramework::CFramework()
 {
-	m_GameTimer.Init();
+	m_GameTimer.Init(); 
 	m_FPSTimer.Init();
 
 	m_nWndClientWidth = FRAME_BUFFER_WIDTH;
-	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
+	m_nWndClientHeight = FRAME_BUFFER_HEIGHT; 
+	m_FPSTimer.Init();  
 }
 
 void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 {
 	m_hInst = hInst;
 	m_hWnd = hWnd;
-
 
 	_tcscpy_s(m_pszFrameRate, _T("Giant Slayer"));
 	LoadString(m_hInst, IDS_APP_TITLE, m_captionTitle, TITLE_LENGTH);
@@ -38,6 +38,8 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	CreateDepthStencilView();
 
 	CoInitialize(NULL);
+
+	//CreateAboutD2D();
 
 	m_d3dViewport.TopLeftX = 0;
 	m_d3dViewport.TopLeftY = 0;
@@ -134,7 +136,7 @@ void CFramework::CreateDirect3DDevice()
 		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
 		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
 		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
-		if (SUCCEEDED(D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), (void**)&m_pd3dDevice))) break;
+		if (SUCCEEDED(D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), (void**)&m_pd3dDevice))) break; 
 	}
 
 	if (!pd3dAdapter)
@@ -281,7 +283,7 @@ void CFramework::MoveToNextFrame()
 
 void CFramework::BuildScene()
 {
-	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL); 
 	//m_CurrentScene = new CNullScene;
 
 	m_pCamera = new CCamera();
@@ -293,7 +295,9 @@ void CFramework::BuildScene()
 	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 15.0f, -25.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),
 		XMFLOAT3(0.0f, 1.0f, 0.0f));
 
-	m_CurrentScene = new CGameScene;
+	//m_CurrentScene = new CGameScene; 
+	m_CurrentScene = new CNullScene;
+	//m_CurrentScene = new CTitleScene; 
 	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList);
 
 	/*m_pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList,
@@ -308,6 +312,89 @@ void CFramework::BuildScene()
 	WaitForGpuComplete();
 
 	m_CurrentScene->ReleaseUploadBuffers();
+}
+
+void CFramework::CreateAboutD2D()
+{
+	// create the DirectWrite factory
+	if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &m_pd2dWriteFactory)))
+		assert(!"Critical error: Unable to create the DirectWrite factory!");
+
+	// create the Direct2D factory
+	D2D1_FACTORY_OPTIONS options;
+#ifndef NDEBUG
+	options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
+#else
+	options.debugLevel = D2D1_DEBUG_LEVEL_NONE;
+#endif 
+	if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED, __uuidof(ID2D1Factory2), &options, &m_pd2dFactory)))
+		assert(!"Critical error: Unable to create Direct2D Factory!");
+
+	// get the dxgi device
+	//m_pd3dDevice->As;
+
+	//m_pd3dDevice->As(&m_pdxgiDevice);
+
+	if (FAILED(m_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice), &m_pdxgiDevice)))
+		return assert(!"Critical error: Unable to get the DXGI device!");
+  
+	if (FAILED(m_pd2dFactory->CreateDevice(m_pdxgiDevice.Get(), &m_pd2Device)))
+		return assert(!"Critical error: Unable to create the Direct2D device!");
+	 
+	// create the device context
+	if (FAILED(m_pd2Device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS, &m_pd2devCon)))
+		return assert(!"Critical error: Unable to create the Direct2D device context!");
+
+	CreateBitmapRenderTarget();
+}
+
+void CFramework::CreateBitmapRenderTarget()
+{
+	// specify the desired bitmap properties
+	D2D1_BITMAP_PROPERTIES1 bp;
+	bp.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	bp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE;
+	bp.dpiX = 96.0f;
+	bp.dpiY = 96.0f;
+	bp.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
+	bp.colorContext = nullptr;
+
+	// Direct2D needs the DXGI version of the back buffer
+	Microsoft::WRL::ComPtr<IDXGISurface> dxgiBuffer;
+	
+	if (FAILED(m_pdxgiSwapChain->GetBuffer(0, __uuidof(IDXGISurface), &dxgiBuffer)))
+		return assert(!"Critical error: Unable to retrieve the back buffer!");
+	
+	//// create the bitmap
+	Microsoft::WRL::ComPtr<ID2D1Bitmap1> targetBitmap;
+	if (FAILED(m_pd2devCon->CreateBitmapFromDxgiSurface(dxgiBuffer.Get(), &bp, &targetBitmap)))
+		return assert(!"Critical error: Unable to create the Direct2D bitmap from the DXGI surface!");
+
+	// set the newly created bitmap as render target
+	m_pd2devCon->SetTarget(targetBitmap.Get()); 
+}
+
+void CFramework::InitializeTextFormats()
+{
+	ID2D1SolidColorBrush* yellowBrush, *blackBrush, *whiteBrush;
+	// create standard brushes
+	if (FAILED(m_pd2devCon->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Yellow), &yellowBrush)))
+		return assert(!"Critical error: Unable to create the yellow brush!");
+	if (FAILED(m_pd2devCon->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &blackBrush)))
+		return assert(!"Critical error: Unable to create the black brush!");
+	if (FAILED(m_pd2devCon->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &whiteBrush)))
+		return assert(!"Critical error: Unable to create the white brush!");
+	
+	// set up text formats
+
+	// FPS text
+	//if (FAILED(writeFactory.Get()->CreateTextFormat(L"Lucida Console", nullptr, DWRITE_FONT_WEIGHT_LIGHT, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.0f, L"en-GB", &textFormatFPS)))
+	//	return assert(!"Critical error: Unable to create text format for FPS information!");
+	//if (FAILED(textFormatFPS->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)))
+	//	return assert(!"Critical error: Unable to set text alignment!");
+	//if (FAILED(textFormatFPS->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR)))
+	//	return assert(!"Critical error: Unable to set paragraph alignment!");
+
 }
 
 void CFramework::Update()

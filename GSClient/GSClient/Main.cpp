@@ -2,8 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "Main.h" 
-#include "GameFramework.h"
+#include "Main.h"  
 #include "Scene.h"
 
 #define MAX_LOADSTRING 100

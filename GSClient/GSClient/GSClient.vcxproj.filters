@@ -46,6 +46,12 @@
     <ClCompile Include="TitleScene.cpp">
       <Filter>GameScene</Filter>
     </ClCompile>
+    <ClCompile Include="SceneJH.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Font</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InputHandler.h" />
@@ -100,6 +106,12 @@
     <ClInclude Include="TitleScene.h">
       <Filter>GameScene</Filter>
     </ClInclude>
+    <ClInclude Include="SceneJH.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Font</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GSClient.rc" />
@@ -125,5 +137,21 @@
     <Filter Include="Sound">
       <UniqueIdentifier>{27fdaea7-eecb-40ed-a1e2-222ae1cdc555}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Font">
+      <UniqueIdentifier>{377ba118-069c-4363-8fcd-7a7cbc0e70cb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup> 
+  <ItemGroup>
+    <ResourceCompile Include="GSClient.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="TitleScene.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="MinimapTest.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+  </ItemGroup> 
 </Project>

@@ -49,6 +49,9 @@ using namespace std;
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 #include <Mmsystem.h>
+#include <dwrite_2.h>
+#include <d2d1_2.h>
+
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
@@ -62,8 +65,9 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
-
 #pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "dwrite.lib")
+#pragma comment(lib, "D2D1.lib")
 
 #include "resource.h"
 #include "GameTimer.h"
@@ -73,7 +77,9 @@ using Microsoft::WRL::ComPtr;
 #include "FrameResource.h"
 #include "Texture.h"
 #include "Material.h"
- 
+#include "GameFramework.h"
+#include "Font.h"
+
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 extern UINT gnCbvSrvDescriptorIncrementSize;

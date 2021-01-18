@@ -20,20 +20,24 @@ public:
 	virtual ~CScene();
 
 	// just proto, fill with d3d obj
-	virtual void Update(double elapsedTime) {}
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) {}
+	virtual void Update(double elapsedTime) {} 
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) {}  
+	virtual void ProcessInput() {} 
 
 public:
 
 	virtual void SendDataToNextScene(void* context) {}	
-	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {} 
 	virtual void ReleaseUploadBuffers() {}
 
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) { return NULL; }
-	virtual ID3D12RootSignature* GetGraphicsRootSignature() { return NULL; }
+	virtual ID3D12RootSignature* GetGraphicsRootSignature() { return NULL; } 
 
-};
+protected:
+	template<class SceneName>
+	void ChangeScene(void* pContext = nullptr) { CFramework::GetInstance().ChangeScene<SceneName>(pContext); }
 
+};  
 
 class CNullScene : public CScene
 {
@@ -41,8 +45,12 @@ public:
 	CNullScene();
 	~CNullScene();
 
-	virtual void Update(double elapsedTime) override;
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+	virtual void Update(double elapsedTime) override; 
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
+	virtual void ProcessInput();
+
+	//virtual void Update(double elapsedTime) override;
+	//virtual void Draw() override; 
 
 public:
 
