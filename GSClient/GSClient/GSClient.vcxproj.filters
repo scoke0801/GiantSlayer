@@ -55,6 +55,9 @@
     <ClCompile Include="SceneJH.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Font</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DDSTextureLoader12.h">
@@ -123,6 +126,9 @@
     <ClInclude Include="SceneJH.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Font</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -178,6 +184,9 @@
     <Filter Include="GameObject\Material">
       <UniqueIdentifier>{3be84398-a9a8-49e2-ae4d-a7b223662425}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Font">
+      <UniqueIdentifier>{377ba118-069c-4363-8fcd-7a7cbc0e70cb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GSClient.rc">
@@ -186,6 +195,9 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="TitleScene.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="MinimapTest.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

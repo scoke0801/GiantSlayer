@@ -58,7 +58,11 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	// 프리미티브 토폴로지를 설정한다.
 	pd3dCommandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// 정점 6개를 사용하여 렌더링 한다.
-	pd3dCommandList->DrawInstanced(18, 1, 0, 0);
+	//pd3dCommandList->DrawInstanced(18, 1, 0, 0);
+
+	pd3dCommandList->SetPipelineState(m_pd3dMinimapPSO);
+	pd3dCommandList->IASetVertexBuffers(0, 1, &m_d3dVertexBufferView);
+	pd3dCommandList->DrawInstanced(4, 1, 0, 0);
 }
 
 void CSceneJH::ProcessInput()
@@ -189,6 +193,8 @@ void CSceneJH::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	BuildConstantsBuffers(pd3dDevice, pd3dCommandList);
+
+	BuildOBJAboutMinimap(pd3dDevice, pd3dCommandList); 
 }
 
 void CSceneJH::BuildConstantsBuffers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -253,3 +259,75 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	srvDesc.Format = titleTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(titleTex, &srvDesc, hDescriptor);
 }
+
+void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	BasicVertex vertices[4];
+	vertices[0].xmf3Position = XMFLOAT3(-0.75f, -0.325f, 0.0f);
+	vertices[1].xmf3Position = XMFLOAT3(-0.25f, -0.325f, 0.0f);
+	vertices[2].xmf3Position = XMFLOAT3(-0.25f, -0.525f, 0.0f);
+	vertices[3].xmf3Position = XMFLOAT3(-0.75f, -0.525f, 0.0f);
+
+	int nVertices = 4;
+	int stride = sizeof(BasicVertex);
+	int sizeInBytes = nVertices * stride;
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, &vertices, stride * nVertices,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+		&m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = stride;
+	m_d3dVertexBufferView.SizeInBytes = stride * nVertices;
+
+	// 정점 셰이더와 픽셸 셰이더를 생성한다.
+	ID3DBlob* pd3dVertexShaderBlob = NULL;
+	ID3DBlob* pd3dPixelShaderBlob = NULL;
+
+	UINT nCompileFlags = 0;
+#if defined(_DEBUG)
+	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif  
+	HRESULT hRes = D3DCompileFromFile(L"MinimapTest.hlsl", NULL, NULL,
+		"VSMinimap", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
+
+	hRes = D3DCompileFromFile(L"MinimapTest.hlsl", NULL, NULL,
+		"PSMinimap", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
+
+	UINT nInputElementDescs = 2;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	//	그래픽 파이프라인 상태를 설정한다.
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
+	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
+	d3dPipelineStateDesc.VS.pShaderBytecode = pd3dVertexShaderBlob->GetBufferPointer();
+	d3dPipelineStateDesc.VS.BytecodeLength = pd3dVertexShaderBlob->GetBufferSize();
+	d3dPipelineStateDesc.PS.pShaderBytecode = pd3dPixelShaderBlob->GetBufferPointer();
+	d3dPipelineStateDesc.PS.BytecodeLength = pd3dPixelShaderBlob->GetBufferSize();
+	d3dPipelineStateDesc.RasterizerState = CreateDefaultRasterizerDesc();
+	d3dPipelineStateDesc.BlendState = CreateDefaultBlendDesc();
+	d3dPipelineStateDesc.DepthStencilState = CreateDefaultDepthStencilDesc();
+	d3dPipelineStateDesc.InputLayout = d3dInputLayoutDesc; 
+	d3dPipelineStateDesc.SampleMask = UINT_MAX;
+	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	d3dPipelineStateDesc.NumRenderTargets = 1;
+	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dPipelineStateDesc.SampleDesc.Count = 1;
+	d3dPipelineStateDesc.SampleDesc.Quality = 0;
+	//d3dPipelineStateDesc.StreamOutput = 0;
+	pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		IID_PPV_ARGS(&m_pd3dMinimapPSO));
+
+	if (pd3dVertexShaderBlob) pd3dVertexShaderBlob->Release();
+	if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();
+}
+ 
