@@ -34,6 +34,8 @@ void CGameTimer::UpdateCurrentTime()
 	m_CurrentTime = std::chrono::system_clock::now();//현재시간 갱신
 }
 
+
+
 void CGameTimer::Init()
 {
 	m_CurrentTime = std::chrono::system_clock::now();//현재시간 갱신

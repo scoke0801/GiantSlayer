@@ -5,7 +5,7 @@
 #include "GameScene.h"
 #include "TitleScene.h"
 #include "Mesh.h"
-
+#include "Camera.h"
 
 CFramework::CFramework()
 {
@@ -20,7 +20,7 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 {
 	m_hInst = hInst;
 	m_hWnd = hWnd;
-	
+
 
 	_tcscpy_s(m_pszFrameRate, _T("Giant Slayer"));
 	LoadString(m_hInst, IDS_APP_TITLE, m_captionTitle, TITLE_LENGTH);
@@ -282,8 +282,8 @@ void CFramework::MoveToNextFrame()
 void CFramework::BuildScene()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-	m_CurrentScene = new CNullScene;
-	//m_CurrentScene = new CGameScene;
+	//m_CurrentScene = new CNullScene;
+	m_CurrentScene = new CGameScene;
 	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList);
 
 	m_pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList,
@@ -393,7 +393,8 @@ void CFramework::Draw()
 
 	m_CurrentScene->Draw(m_pd3dCommandList, m_pCamera);
 
-
+	if (m_pPlayer)
+		m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;

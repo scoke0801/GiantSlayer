@@ -78,6 +78,8 @@ public: // about GetInstance , init framework
 	void OnDestroy();
 
 private:
+
+
 	void CreateSwapChain();
 	void CreateDirect3DDevice();
 	void CreateCommandQueueAndList();
