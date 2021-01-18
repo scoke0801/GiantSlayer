@@ -100,3 +100,8 @@ void CRotatingObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
 }
+
+
+
+
+
