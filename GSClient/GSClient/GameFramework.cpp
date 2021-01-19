@@ -134,7 +134,9 @@ void CFramework::CreateDirect3DDevice()
 	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_pdxgiFactory->EnumAdapters1(i, &pd3dAdapter); i++)
 	{
 		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
-		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
+		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);	
+		if (lstrcmp(dxgiAdapterDesc.Description, L"AMD Radeon(TM) Vega 8 Graphics") == 0)
+			continue;
 		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
 		if (SUCCEEDED(D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), (void**)&m_pd3dDevice))) break; 
 	}

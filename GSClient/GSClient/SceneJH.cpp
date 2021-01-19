@@ -42,12 +42,17 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	// 파이프라인 상태를 설정한다.
 	pd3dCommandList->SetPipelineState(GET_PSO("TestTitlePSO"));
-
+	  
+	if (pCamera)
+	{
+			pCamera->UpdateShaderVariables(pd3dCommandList, 1);
+		pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	}
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	pd3dCommandList->SetGraphicsRootDescriptorTable(1, tex);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(2, tex);
 
 	// m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().TestingMouseClick;
 
@@ -88,17 +93,23 @@ void CSceneJH::CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[2];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[3];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; // test
+	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; // SceneData
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[1].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
-	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	pd3dRootParameters[1].Constants.Num32BitValues = 32;
+	pd3dRootParameters[1].Constants.ShaderRegister = 1;
+	pd3dRootParameters[1].Constants.RegisterSpace = 0;
+	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[2].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
+	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 #pragma region sampler
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[1];
@@ -270,21 +281,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	BasicVertex vertices[72]; 
-	float radius = 0.3f;
-	vertices[0].xmf3Position = XMFLOAT3(-0.5f,  0.8f, 0.0f);
-	vertices[1].xmf3Position = XMFLOAT3( 0.5f,  0.8f, 0.0f);
-	vertices[2].xmf3Position = XMFLOAT3( 0.5f, -0.8f, 0.0f);
-	vertices[3].xmf3Position = XMFLOAT3(-0.5f,  0.8f, 0.0f);
-	vertices[4].xmf3Position = XMFLOAT3( 0.5f, -0.8f, 0.0f);
-	vertices[5].xmf3Position = XMFLOAT3(-0.5f, -0.8f, 0.0f); 
-	 
-	//vertices[0].m_xmf2TexC = XMFLOAT2(0, 0);
-	//vertices[1].m_xmf2TexC = XMFLOAT2(1, 0);
-	//vertices[2].m_xmf2TexC = XMFLOAT2(1, 1);
-	//vertices[3].m_xmf2TexC = XMFLOAT2(0, 0);
-	//vertices[4].m_xmf2TexC = XMFLOAT2(1, 1);
-	//vertices[5].m_xmf2TexC = XMFLOAT2(0, 1);
-	 
+	float radius = 0.3f; 
 	float angle = 15;
 	for (int i = 0; i < 24; ++i)
 	{
@@ -294,7 +291,7 @@ void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		  
 		vertices[i * 3].m_xmf2TexC		 = XMFLOAT2(0.5f, 0.5f);
 		vertices[i * 3 + 1].m_xmf2TexC	 = XMFLOAT2(std::cos(GetRadian((i + 1) * angle)) * 0.5 + 0.5f, 1 -( std::sin(GetRadian(i + 1) * angle) * 0.5f + 0.5f));
-		vertices[i * 3 + 2].m_xmf2TexC   = XMFLOAT2(std::cos(GetRadian(i * angle)) * 0.5f + 0.5f,     1-( std::sin(GetRadian(i * angle)) * 0.5f + 0.5f));
+		vertices[i * 3 + 2].m_xmf2TexC   = XMFLOAT2(std::cos(GetRadian(i * angle)) * 0.5f + 0.5f,      1-( std::sin(GetRadian(i * angle)) * 0.5f + 0.5f));
 	}
 	 
 	int nVertices = 72;
@@ -361,9 +358,7 @@ void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	if (pd3dVertexShaderBlob) pd3dVertexShaderBlob->Release();
 	if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();
 }
- 
-
-
+  
 CSceneJH2::CSceneJH2()
 {
 	m_Camera == nullptr;
