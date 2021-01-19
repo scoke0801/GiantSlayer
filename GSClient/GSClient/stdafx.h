@@ -109,9 +109,7 @@ extern D3D12_BLEND_DESC CreateDefaultBlendDesc();
 extern D3D12_DEPTH_STENCIL_DESC CreateDefaultDepthStencilDesc();
 
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
-
-
-
+ 
 #define EPSILON					1.0e-10f
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }

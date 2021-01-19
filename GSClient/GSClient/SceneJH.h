@@ -4,7 +4,6 @@
 struct BasicVertex
 {
 	XMFLOAT3 xmf3Position;
-	XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 0.0f, 1.0f, 0.0f);	
 	XMFLOAT2 m_xmf2TexC;
 };
 

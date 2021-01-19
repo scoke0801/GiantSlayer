@@ -68,26 +68,29 @@ float4 PSTextured(VS_OUT input) : SV_TARGET
 
 struct VS_MIN
 {
-	float3 position : POSITION;
-	float4 color : COLOR;
-	float2 uv : TEXCORD;
+	float3 position : POSITION; 
+	float2 uv		: TEXCORD;
 
 };
 struct VS_MOUT
 {
-	float4 position : SV_POSITION;
-	float4 color : COLOR;
+	float4 position : SV_POSITION; 
+	float2 uv	 : TEXCOORD;
 };
 
 VS_MOUT VSMinimap(VS_MIN input)
 {
 	VS_MOUT outRes;
-	outRes.position = float4(input.position, 1.0f); 
-	outRes.color = input.color;
+	outRes.position = float4(input.position, 1.0f);  
+	outRes.uv = input.uv;
 	return outRes;
 }
 
 float4 PSMinimap(VS_MOUT input) : SV_TARGET
-{
-	return float4(1.0f, 1.0f, 0.0f, 0.0f);
+{	
+	float4 cColor;
+	//return cColor = gtxtTitle.Sample(gssWrap, input.uv);
+	return cColor = gtxtMiniMap.Sample(gssWrap, input.uv);
+	
+	//return float4(1.0f, 1.0f, 0.0f, 0.0f);
 }

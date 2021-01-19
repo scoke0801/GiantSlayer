@@ -61,7 +61,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	pd3dCommandList->SetPipelineState(GET_PSO("MinimapPSO"));
 	pd3dCommandList->IASetVertexBuffers(0, 1, &m_d3dVertexBufferView);
-	pd3dCommandList->DrawInstanced(6, 1, 0, 0);
+	pd3dCommandList->DrawInstanced(72, 1, 0, 0);
 }
 
 void CSceneJH::ProcessInput()
@@ -217,10 +217,10 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	auto minimapTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, minimapTex.get(), "MiniMap", L"resources/UI/Minimap.dds");
 
-	m_Textures[multiButtonTex->m_Name] = std::move(multiButtonTex);
+	m_Textures[multiButtonTex->m_Name]  = std::move(multiButtonTex);
 	m_Textures[singleButtonTex->m_Name] = std::move(singleButtonTex);
-	m_Textures[titleTex->m_Name] = std::move(titleTex); 
-	m_Textures[minimapTex->m_Name] = std::move(minimapTex);
+	m_Textures[titleTex->m_Name]		= std::move(titleTex); 
+	m_Textures[minimapTex->m_Name]		= std::move(minimapTex);
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -268,22 +268,35 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	BasicVertex vertices[6];
+	BasicVertex vertices[72]; 
+	float radius = 0.3f;
 	vertices[0].xmf3Position = XMFLOAT3(-0.5f,  0.8f, 0.0f);
 	vertices[1].xmf3Position = XMFLOAT3( 0.5f,  0.8f, 0.0f);
 	vertices[2].xmf3Position = XMFLOAT3( 0.5f, -0.8f, 0.0f);
 	vertices[3].xmf3Position = XMFLOAT3(-0.5f,  0.8f, 0.0f);
 	vertices[4].xmf3Position = XMFLOAT3( 0.5f, -0.8f, 0.0f);
 	vertices[5].xmf3Position = XMFLOAT3(-0.5f, -0.8f, 0.0f); 
-
-	vertices[0].m_xmf2TexC = XMFLOAT2(0, 0);
-	vertices[1].m_xmf2TexC = XMFLOAT2(1, 0);
-	vertices[2].m_xmf2TexC = XMFLOAT2(1, 1);
-	vertices[3].m_xmf2TexC = XMFLOAT2(0, 0);
-	vertices[4].m_xmf2TexC = XMFLOAT2(1, 1);
-	vertices[5].m_xmf2TexC = XMFLOAT2(0, 1);
-
-	int nVertices = 6;
+	 
+	//vertices[0].m_xmf2TexC = XMFLOAT2(0, 0);
+	//vertices[1].m_xmf2TexC = XMFLOAT2(1, 0);
+	//vertices[2].m_xmf2TexC = XMFLOAT2(1, 1);
+	//vertices[3].m_xmf2TexC = XMFLOAT2(0, 0);
+	//vertices[4].m_xmf2TexC = XMFLOAT2(1, 1);
+	//vertices[5].m_xmf2TexC = XMFLOAT2(0, 1);
+	 
+	float angle = 15;
+	for (int i = 0; i < 24; ++i)
+	{
+		vertices[i * 3].xmf3Position	 = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		vertices[i * 3 + 1].xmf3Position = XMFLOAT3(std::cos(GetRadian((i + 1) * angle)) * radius, std::sin(GetRadian(i + 1) * angle) * radius, 0.0f);
+		vertices[i * 3 + 2].xmf3Position = XMFLOAT3(std::cos(GetRadian(i * angle)) * radius, std::sin(GetRadian(i * angle)) * radius, 0.0f);
+		  
+		vertices[i * 3].m_xmf2TexC		 = XMFLOAT2(0.5f, 0.5f);
+		vertices[i * 3 + 1].m_xmf2TexC	 = XMFLOAT2(std::cos(GetRadian((i + 1) * angle)) * 0.5 + 0.5f, 1 -( std::sin(GetRadian(i + 1) * angle) * 0.5f + 0.5f));
+		vertices[i * 3 + 2].m_xmf2TexC   = XMFLOAT2(std::cos(GetRadian(i * angle)) * 0.5f + 0.5f,     1-( std::sin(GetRadian(i * angle)) * 0.5f + 0.5f));
+	}
+	 
+	int nVertices = 72;
 	int stride = sizeof(BasicVertex);
 	int sizeInBytes = nVertices * stride;
 
@@ -309,12 +322,11 @@ void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hRes = D3DCompileFromFile(L"MinimapTest.hlsl", NULL, NULL,
 		"PSMinimap", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
 
-	UINT nInputElementDescs = 3;
+	UINT nInputElementDescs = 2;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
-	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[2] = { "TEXCORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCORD" , 0, DXGI_FORMAT_R32G32_FLOAT,	 0,  12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
