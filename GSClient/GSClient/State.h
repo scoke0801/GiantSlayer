@@ -1,5 +1,7 @@
 #pragma once
 
+class CEnemy;
+
 template <class object_type>
 class CState
 {

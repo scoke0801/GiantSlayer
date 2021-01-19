@@ -75,6 +75,15 @@
     <ClCompile Include="Shader.cpp">
       <Filter>GameObject\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="SceneTH.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyState.cpp">
+      <Filter>State</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -154,6 +163,15 @@
     </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>GameObject\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneTH.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyState.h">
+      <Filter>State</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -144,9 +144,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup> 
-    <ClInclude Include="Camera.h" /> 
-    <ClInclude Include="Font.h" /> 
+  <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="EnemyState.h" />
+    <ClInclude Include="Font.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameScene.h" />
@@ -160,9 +162,10 @@
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="Main.h" />
-    <ClInclude Include="Resource.h" /> 
-    <ClInclude Include="Shader.h" /> 
-    <ClInclude Include="SceneJH.h" /> 
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="SceneTH.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="SceneJH.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="StateMachine.h" />
@@ -172,14 +175,17 @@
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
-  <ItemGroup> 
-    <ClCompile Include="Camera.cpp" /> 
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="EnemyState.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Shader.cpp" /> 
+    <ClCompile Include="SceneTH.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="FrameResource.cpp" />
-    <ClCompile Include="SceneJH.cpp" /> 
+    <ClCompile Include="SceneJH.cpp" />
     <ClCompile Include="Sound.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TitleScene.cpp" />

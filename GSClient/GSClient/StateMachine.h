@@ -5,13 +5,15 @@ template <class object_Type>
 class CStateMachine
 {
 private:
-	object_Type* m_pOwner;
-	CState<object_Type>* m_pCurrentState;
+	object_Type*			m_pOwner;
+	CState<object_Type>*	m_pCurrentState;
 
 public:
-	CStateMachine(object_Type* owner) :
-		m_pOwner(owner), m_pCurrentState(NULL) {};
+	CStateMachine(object_Type* owner) 
+		: m_pOwner(owner), m_pCurrentState(NULL) {};
 	~CStateMachine() {}
+
+	void SetCurrentState(CState<object_Type>* s) { m_pCurrentState = s; }
 
 	void  Update()const
 	{
@@ -21,9 +23,7 @@ public:
 	void  ChangeState(CState<object_Type>* pNewState)
 	{
 		m_pCurrentState->Exit(m_pOwner);
-
 		m_pCurrentState = pNewState;
-
 		m_pCurrentState->Enter(m_pOwner);
 	}
 
