@@ -14,7 +14,7 @@ CTitleScene::~CTitleScene()
 
 void CTitleScene::Update(double elapsedTime)
 {
-	POINT mousePos = GET_MOUSE_POS;
+	POINT mousePos = GET_CUR_MOUSE_POS;
 
 	if ((mousePos.x >= 128 && mousePos.x <= 384)
 		&&(mousePos.y >= 508 && mousePos.y <= 585))
@@ -48,7 +48,7 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	pd3dCommandList->SetGraphicsRootDescriptorTable(1, tex);
 
-	m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().TestingMouseClick;
+	m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().m_IsMouseDown;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dTestData->GetGPUVirtualAddress();
 

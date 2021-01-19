@@ -54,7 +54,7 @@ void CGameObject::Update()
 
 void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	cout << m_xmf3Position.x << "	" << m_xmf3Position.y << endl;
+	//cout << m_xmf3Position.x << "	" << m_xmf3Position.y << endl;
 
 	OnPrepareRender();
 	if (m_pShader)

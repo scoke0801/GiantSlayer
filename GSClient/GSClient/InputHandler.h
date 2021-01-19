@@ -31,12 +31,13 @@ struct GameInputs
 class CInputHandler
 {
 private :
-	HWND m_hTargetWND;
+	HWND			m_hTargetWND;
 
 public:
-	GameInputs m_Inputs;
-	bool TestingMouseClick = false;
-	POINT m_PrevMousePos;
+	GameInputs		m_Inputs;
+	bool			m_IsMouseDown = false;
+	POINT			m_PrevMousePos;
+	POINT			m_CurMousePos;
 
 private:
 	CInputHandler();
@@ -58,8 +59,16 @@ public:
 public:
 	void SetTargetWND(HWND hTarget) { m_hTargetWND = hTarget; }
 
-	POINT GetMousePoint() const { return m_PrevMousePos; }
+	POINT GetCurrentMousePoint() const { return m_CurMousePos; }
+	POINT GetPrevMousePoint() const { return m_PrevMousePos; }
+
 	void ResetMousePos() { m_PrevMousePos = POINT(); }
+
+public:
+	bool IsMouseDonw() const { return m_IsMouseDown; }
+
 };
 #define GAME_INPUT CInputHandler::GetInstance().m_Inputs
-#define GET_MOUSE_POS CInputHandler::GetInstance().m_PrevMousePos
+#define GET_CUR_MOUSE_POS CInputHandler::GetInstance().GetCurrentMousePoint()
+#define GET_PREV_MOUSE_POS CInputHandler::GetInstance().GetPrevMousePoint()
+#define IS_MOUSE_DOWN CInputHandler::GetInstance().IsMouseDonw()
