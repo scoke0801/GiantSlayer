@@ -114,7 +114,7 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* pszFileName, LPCSTR 
 	d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
 	return(d3dShaderByteCode);
 }
-
+//그래픽스 파이프라인 상태 객체를 생성한다.
 //그래픽스 파이프라인 상태 객체를 생성한다. 
 void CShader::CreateShader(ID3D12Device* pd3dDevice,
 	ID3D12RootSignature* pd3dGraphicsRootSignature)
