@@ -34,6 +34,7 @@ public:
 	}
 	~CDiffusedVertex() { }
 };
+
 class CMesh
 {
 public:

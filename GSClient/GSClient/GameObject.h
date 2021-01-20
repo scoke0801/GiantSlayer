@@ -26,12 +26,10 @@ public:
 	virtual void SetShader(CShader* pShader);
 	virtual void Animate(float fTimeElapsed);
 	virtual void OnPrepareRender();
-
-	virtual void Update();
+	void Update();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	void SetPosition(XMFLOAT3 pos);
-	XMFLOAT3 GetPosition() { return m_xmf3Position; }
 	void SetVelocity(XMFLOAT3 pos);
 
 	void Move();

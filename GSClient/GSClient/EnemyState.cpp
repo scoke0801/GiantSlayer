@@ -1,4 +1,6 @@
+#include "stdafx.h"
 #include "EnemyState.h"
+#include "Enemy.h"
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -10,20 +12,20 @@ Wandering* Wandering::Instance()
     return &instance;
 }
 
-void Wandering::Enter(CEnemy* pCEnemy)
+void Wandering::Enter(CEnemy* pEnemy)
 {
 
 }
 
-void Wandering::Execute(CEnemy* pCEnemy)
+void Wandering::Execute(CEnemy* pEnemy)
 {
-    if (pCEnemy->IsEnemyInSight())
-        pCEnemy->GetFSM()->ChangeState(Tracking::Instance());
+    if (pEnemy->IsEnemyInSight())
+        pEnemy->GetFSM()->ChangeState(Tracking::Instance());
     else
-        pCEnemy->MoveRandom();
+        pEnemy->Walking();
 }
 
-void Wandering::Exit(CEnemy* pCEnemy)
+void Wandering::Exit(CEnemy* pEnemy)
 {
 
 }
@@ -38,28 +40,24 @@ Tracking* Tracking::Instance()
     return &instance;
 }
 
-void Tracking::Enter(CEnemy* pCEnemy)
+void Tracking::Enter(CEnemy* pEnemy)
 {
 
 }
 
-void Tracking::Execute(CEnemy* pCEnemy)
+void Tracking::Execute(CEnemy* pEnemy)
 {
-    if (!pCEnemy->IsEnemyInSight())
-        pCEnemy->GetFSM()->ChangeState(Wandering::Instance());
+    /*if (!pEnemy->IsEnemyInSight())
+        pEnemy->GetFSM()->ChangeState(Wandering::Instance());
     else {
-        XMFLOAT3 pos = pCEnemy->GetPosition();
-        XMFLOAT3 tpos = pCEnemy->target->GetPosition();
-
-        if (pos.x > tpos.x) pCEnemy->SetVelocity({ -2, 0, 0 });
-        if (pos.x < tpos.x) pCEnemy->SetVelocity({ +2, 0, 0 });
-        if (pos.y > tpos.y) pCEnemy->SetVelocity({ 0, -2, 0 });
-        if (pos.y < tpos.y) pCEnemy->SetVelocity({ 0, +2, 0 });
-    }
-    pCEnemy->Move();
+        if (pEnemy->x > pEnemy->target->x) pEnemy->x -= 2;
+        if (pEnemy->x < pEnemy->target->x) pEnemy->x += 2;
+        if (pEnemy->y > pEnemy->target->y) pEnemy->y -= 2;
+        if (pEnemy->y < pEnemy->target->y) pEnemy->y += 2;
+    }*/
 }
 
-void Tracking::Exit(CEnemy* pCEnemy)
+void Tracking::Exit(CEnemy* pEnemy)
 {
 
 }

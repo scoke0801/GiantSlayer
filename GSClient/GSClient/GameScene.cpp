@@ -8,6 +8,7 @@ CGameScene::CGameScene()
 {
 	m_pd3dGraphicsRootSignature = NULL;
 }
+
 CGameScene::~CGameScene()
 {
 
@@ -32,8 +33,8 @@ void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dC
 	pRotatingObject->SetShader(pShader);
 
 	m_ppObjects[0] = pRotatingObject;
-
 }
+
 void CGameScene::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
@@ -48,12 +49,14 @@ void CGameScene::ReleaseObjects()
 
 void CGameScene::AnimateObjects(float fTimeElapsed)
 {
+
 }
 
 void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
 	if (pCamera) pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
@@ -62,9 +65,7 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCame
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, pCamera);
 	}
-
 }
-
 
 void CGameScene::ReleaseUploadBuffers()
 {
@@ -120,6 +121,7 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 
 	return(pd3dGraphicsRootSignature);
 }
+
 ID3D12RootSignature* CGameScene::GetGraphicsRootSignature()
 {
 	return(m_pd3dGraphicsRootSignature);

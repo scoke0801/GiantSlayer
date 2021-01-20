@@ -11,9 +11,9 @@ private:
 public:
 	CGameObject* target;
 public:
-	CEnemy(XMFLOAT3 pos) {
-
-		SetPosition(pos);
+	CEnemy(int a, int b) {
+		//x = a;
+		//y = b;
 
 		statemachine = new CStateMachine<CEnemy>(this);
 		statemachine->SetCurrentState(Wandering::Instance());
@@ -25,11 +25,10 @@ public:
 	CStateMachine<CEnemy>* GetFSM()const { return statemachine; }
 
 	virtual void Update();
-	virtual void Draw(HDC hdc);
-
-	void MoveRandom();
+	//virtual void Draw(HDC hdc);
 
 	bool IsEnemyInSight();
 
 	void Walking();
 };
+

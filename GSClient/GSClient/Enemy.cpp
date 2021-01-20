@@ -6,84 +6,43 @@ void CEnemy::Update()
 	statemachine->Update();
 }
 
-void CEnemy::Draw(HDC hdc)
-{
-	TCHAR t[100];
-	XMFLOAT3 pos = GetPosition();
-
-	wsprintf(t, TEXT("%d , %d"), pos.x, pos.y);
-
-	Rectangle(hdc, pos.x - 50, pos.y + 50, pos.x + 50, pos.y - 50);
-	TextOut(hdc, pos.x, pos.y, t, lstrlen(t));
-
-	if (target != nullptr) {
-		XMFLOAT3 tpos = target->GetPosition();
-		wsprintf(t, TEXT("%d , %d"), tpos.x, tpos.y);
-		TextOut(hdc, pos.x, pos.y + 15, t, lstrlen(t));
-	}
-}
+//void CEnemy::Draw(HDC hdc)
+//{
+//	/*TCHAR t[100];
+//	wsprintf(t, TEXT("%d , %d"), x, y);
+//
+//	Rectangle(hdc, x - 50, y + 50, x + 50, y - 50);
+//	TextOut(hdc, x, y, t, lstrlen(t));
+//
+//	if (target != nullptr) {
+//		wsprintf(t, TEXT("%d , %d"), target->x, target->y);
+//		TextOut(hdc, x, y + 10, t, lstrlen(t));
+//	}*/
+//}
 
 bool CEnemy::IsEnemyInSight() // Chase State
 {
-	XMFLOAT3 pos = GetPosition();
-	XMFLOAT3 tpos = target->GetPosition();
-
-	if (abs(pos.x - tpos.x) <= 300 && abs(pos.y - tpos.y) <= 300)
+	/*if (abs(x - target->x) <= 300 && abs(y - target->y) <= 300)
 		return TRUE;
 	else
-		return FALSE;
-}
+		return FALSE;*/
 
-void CEnemy::MoveRandom()
-{
-	srand((unsigned int)time(NULL));
-
-	int num = rand() % 5;
-
-	switch (num)
-	{
-	case 0:
-		SetVelocity({ +1, 0, 0 });
-		break;
-	case 1:
-		SetVelocity({ -1, 0, 0 });
-		break;
-	case 2:
-		SetVelocity({ 0, +1, 0 });
-		break;
-	case 3:
-		SetVelocity({ 0, -1, 0 });
-		break;
-	case 4:
-		break;
-	}
-
-	Move();
+	return false;
 }
 
 void CEnemy::Walking() // Moving State
 {
-	srand((unsigned int)time(NULL));
+	/*srand((unsigned int)time(NULL));
 
 	int num = rand() % 5;
 
 	switch (num)
 	{
-	case 0: 
-		SetVelocity({+1, 0, 0});
-		break;
-	case 1: 
-		SetVelocity({ -1, 0, 0 });
-		break;
-	case 2: 
-		SetVelocity({ 0, +1, 0 });
-		break;
-	case 3: 
-		SetVelocity({ 0, -1, 0 });
-		break;
-	case 4: 
-		break;
-	}
-
-	Move();
+	case 0: x += 1; break;
+	case 1: x -= 1; break;
+	case 2: y += 1; break;
+	case 3: y -= 1; break;
+	case 4: break;
+	}*/
 }
+

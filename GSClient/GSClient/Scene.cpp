@@ -4,7 +4,7 @@
 #include "TitleScene.h"
 #include "GameScene.h"
 #include "SceneJH.h" 
-#include "SceneTH.h" 
+#include "SceneTH.h"
 
 CScene::CScene()
 {

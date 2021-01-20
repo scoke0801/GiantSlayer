@@ -1,7 +1,7 @@
 #pragma once
 #include "State.h"
 
-class Enemy;
+class CEnemy;
 
 class Wandering : public CState<CEnemy>
 {
@@ -16,11 +16,11 @@ public:
 
     static Wandering* Instance();
 
-    virtual void Enter(CEnemy* CEnemy);
+    virtual void Enter(CEnemy* enemy);
 
-    virtual void Execute(CEnemy* CEnemy);
+    virtual void Execute(CEnemy* enemy);
 
-    virtual void Exit(CEnemy* CEnemy);
+    virtual void Exit(CEnemy* enemy);
 };
 
 class Tracking : public CState<CEnemy>
@@ -36,11 +36,11 @@ public:
 
     static Tracking* Instance();
 
-    virtual void Enter(CEnemy* CEnemy);
+    virtual void Enter(CEnemy* enemy);
 
-    virtual void Execute(CEnemy* CEnemy);
+    virtual void Execute(CEnemy* enemy);
 
-    virtual void Exit(CEnemy* CEnemy);
+    virtual void Exit(CEnemy* enemy);
 };
 
 class Running : public CState<CEnemy>
