@@ -48,7 +48,7 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	pd3dCommandList->SetGraphicsRootDescriptorTable(1, tex);
 
-	m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().m_IsMouseDown;
+	m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().m_IsMouseLBtnDown;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dTestData->GetGPUVirtualAddress();
 

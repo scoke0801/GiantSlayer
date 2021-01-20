@@ -299,11 +299,7 @@ void CFramework::BuildScene()
 	m_CurrentScene = new CNullScene;
 	//m_CurrentScene = new CTitleScene; 
 	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList);
-
-	/*m_pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList,
-		m_CurrentScene->GetGraphicsRootSignature(), m_CurrentScene->GetTerrain(), 1);*/
-
-	//m_pCamera = m_pPlayer->GetCamera();
+	m_CurrentScene->BuildCamera(m_nWndClientWidth, m_nWndClientHeight);
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };

@@ -82,3 +82,41 @@ public:
 	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x; m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; }
 	
 };
+
+class CTestCamera
+{
+protected: 		 
+	//ºäÆ÷Æ®¿Í ¾¾Àú »ç°¢Çü
+	D3D12_VIEWPORT					m_d3dViewport;
+	D3D12_RECT						m_d3dScissorRect;
+
+protected:
+	XMFLOAT3						m_xmf3EyePos ;
+	XMFLOAT4X4						m_xmf4x4View ;
+	XMFLOAT4X4						m_xmf4x4Proj ;
+	
+	float							m_Theta = 1.5f * XM_PI;
+	float							m_Phi = 0.2f * XM_PI;
+	float							m_Radius = 15.0f;
+
+public:
+	CTestCamera();
+
+	void Update(double elapsedTime);
+
+	void Rotate(int x, int y, int prevX, int prevY);
+	void Zoom(int x, int y, int prevX, int prevY);
+public:
+	void SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight,
+		float fMinZ = 0.0f, float fMaxZ = 1.0f);
+	void SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom);
+	void SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void CreatProjectionMatrix();
+
+public:
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+
+private:	
+	float AspectRatio()const;
+};

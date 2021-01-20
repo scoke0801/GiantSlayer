@@ -120,7 +120,8 @@ public:	// about scene change
 		static CScene* prevScene; 
 		scene->Init(m_pd3dDevice, m_pd3dCommandList);
 		scene->SendDataToNextScene(pContext);
-		
+		scene->BuildCamera(m_nWndClientWidth, m_nWndClientHeight);
+
 		if (m_CurrentScene)
 		{
 			prevScene = m_CurrentScene;

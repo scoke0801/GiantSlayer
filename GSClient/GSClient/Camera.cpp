@@ -77,3 +77,107 @@ void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommand
 	pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
 }
 
+CTestCamera::CTestCamera()
+{
+	m_xmf3EyePos = { 0.0f, 0.0f, 0.0f };
+	m_xmf4x4View = Matrix4x4::Identity();
+	m_xmf4x4Proj = Matrix4x4::Identity();
+	
+	m_Theta = 1.5f * XM_PI;
+	m_Phi = 0.2f * XM_PI;
+	m_Radius = 15.0f;
+
+}
+
+void CTestCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight,
+	float fMinZ, float fMaxZ)
+{
+	m_d3dViewport.TopLeftX = float(xTopLeft);
+	m_d3dViewport.TopLeftY = float(yTopLeft);
+	m_d3dViewport.Width = float(nWidth);
+	m_d3dViewport.Height = float(nHeight);
+	m_d3dViewport.MinDepth = fMinZ;
+	m_d3dViewport.MaxDepth = fMaxZ;
+}
+void CTestCamera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom)
+{
+	m_d3dScissorRect.left = xLeft;
+	m_d3dScissorRect.top = yTop;
+	m_d3dScissorRect.right = xRight;
+	m_d3dScissorRect.bottom = yBottom; 
+}
+
+void CTestCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
+	pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
+}
+
+void CTestCamera::CreatProjectionMatrix()
+{	
+	// The window resized, so update the aspect ratio and recompute the projection matrix.
+	XMMATRIX P = XMMatrixPerspectiveFovLH(0.55f * PI, AspectRatio(), 1.0f, 1000.0f);
+	XMStoreFloat4x4(&m_xmf4x4Proj, P);
+}
+
+void CTestCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	XMFLOAT4X4 xmf4x4View;
+	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
+
+	//루트 파라메터 인덱스 1의
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4View, 0);
+
+	XMFLOAT4X4 xmf4x4Projection;
+	XMStoreFloat4x4(&xmf4x4Projection,
+		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Proj)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4Projection, 16);
+}
+
+float CTestCamera::AspectRatio() const
+{ 
+	return static_cast<float>(m_d3dScissorRect.right - m_d3dScissorRect.left) / (m_d3dScissorRect.bottom - m_d3dScissorRect.top);
+}
+
+void CTestCamera::Update(double elapsedTime)
+{
+	// Convert Spherical to Cartesian coordinates.
+	m_xmf3EyePos.x = m_Radius * sinf(m_Phi) * cosf(m_Theta);
+	m_xmf3EyePos.z = m_Radius * sinf(m_Phi) * sinf(m_Theta);
+	m_xmf3EyePos.y = m_Radius * cosf(m_Phi);
+
+	// Build the view matrix.
+	XMVECTOR pos = XMVectorSet(m_xmf3EyePos.x, m_xmf3EyePos.y, m_xmf3EyePos.z, 1.0f);
+	XMVECTOR target = XMVectorZero();
+	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+	XMStoreFloat4x4(&m_xmf4x4View, view);
+}
+
+void CTestCamera::Rotate(int x, int y, int prevX, int prevY)
+{
+	// Make each pixel correspond to a quarter of a degree.
+	float dx = XMConvertToRadians(0.05f * static_cast<float>(x - prevX));
+	float dy = XMConvertToRadians(0.05f * static_cast<float>(y - prevY));
+
+	// Update angles based on input to orbit camera around box.
+	m_Theta += dx;
+	m_Phi += dy;
+
+	// Restrict the angle mPhi.
+	m_Phi = Clamp(m_Phi, 0.1f, float(PI - 0.1f));
+}
+
+void CTestCamera::Zoom(int x, int y, int prevX, int prevY)
+{       
+	// Make each pixel correspond to 0.2 unit in the scene.
+	float dx = 0.05f * static_cast<float>(x - prevX);
+	float dy = 0.05f * static_cast<float>(y - prevY);
+
+	// Update the camera radius based on input.
+	m_Radius += dx - dy;
+
+	// Restrict the radius.
+	m_Radius = Clamp(m_Radius, 5.0f, 150.0f);
+}

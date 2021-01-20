@@ -35,7 +35,10 @@ private :
 
 public:
 	GameInputs		m_Inputs;
-	bool			m_IsMouseDown = false;
+
+	bool			m_IsMouseRBtnDown = false;
+	bool			m_IsMouseLBtnDown = false;
+
 	POINT			m_PrevMousePos;
 	POINT			m_CurMousePos;
 
@@ -65,10 +68,11 @@ public:
 	void ResetMousePos() { m_PrevMousePos = POINT(); }
 
 public:
-	bool IsMouseDonw() const { return m_IsMouseDown; }
-
+	bool IsMouseRBtnDonw() const { return m_IsMouseRBtnDown; }
+	bool IsMouseLBtnDonw() const { return m_IsMouseLBtnDown; }
 };
 #define GAME_INPUT CInputHandler::GetInstance().m_Inputs
 #define GET_CUR_MOUSE_POS CInputHandler::GetInstance().GetCurrentMousePoint()
 #define GET_PREV_MOUSE_POS CInputHandler::GetInstance().GetPrevMousePoint()
-#define IS_MOUSE_DOWN CInputHandler::GetInstance().IsMouseDonw()
+#define IS_MOUSE_RBTN_DOWN CInputHandler::GetInstance().IsMouseRBtnDonw()
+#define IS_MOUSE_LBTN_DOWN CInputHandler::GetInstance().IsMouseLBtnDonw()	

@@ -361,12 +361,10 @@ void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	if (pd3dVertexShaderBlob) pd3dVertexShaderBlob->Release();
 	if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();
 }
- 
-
-
+  
 CSceneJH2::CSceneJH2()
 {
-	m_Camera == nullptr;
+	m_Camera = nullptr;
 	m_pd3dGraphicsRootSignature = NULL;
 }
 CSceneJH2::~CSceneJH2()
@@ -392,7 +390,15 @@ void CSceneJH2::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	pRotatingObject->SetShader(pShader); 
 
-	m_ppObjects[0] = pRotatingObject;
+	m_ppObjects[0] = pRotatingObject; 
+}
+
+void CSceneJH2::BuildCamera(int width, int height)
+{
+	m_TestCamera = new CTestCamera();
+	m_TestCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
+	m_TestCamera->SetScissorRect(0, 0, width, height); 
+	m_TestCamera->CreatProjectionMatrix();
 }
 
 void CSceneJH2::ReleaseObjects()
@@ -412,6 +418,8 @@ void CSceneJH2::ReleaseObjects()
 void CSceneJH2::Update(double elapsedTime)
 {
 	ProcessInput();
+
+	if (m_TestCamera) { m_TestCamera->Update(elapsedTime); }
 }
 
 void CSceneJH2::AnimateObjects(float fTimeElapsed)
@@ -424,7 +432,8 @@ void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-	if (pCamera) pCamera->UpdateShaderVariables(pd3dCommandList);
+	//if (pCamera) pCamera->UpdateShaderVariables(pd3dCommandList);
+	if (m_TestCamera)m_TestCamera->UpdateShaderVariables(pd3dCommandList);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
@@ -436,11 +445,18 @@ void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 void CSceneJH2::ProcessInput()
 {
-	if (m_Camera == nullptr) return;
-	float cxDelta = 0.0f, cyDelta = 0.0f;
-	POINT ptCursorPos = GET_PREV_MOUSE_POS; 
-	
-	//m_Camera->g
+	if (m_TestCamera == nullptr) return; 
+	POINT prevPos = GET_PREV_MOUSE_POS; 
+	POINT curPos = GET_CUR_MOUSE_POS;
+
+	if (IS_MOUSE_LBTN_DOWN)
+	{
+		m_TestCamera->Rotate(curPos.x, curPos.y, prevPos.x, prevPos.y);
+	}
+	if (IS_MOUSE_RBTN_DOWN)
+	{ 
+		m_TestCamera->Zoom(curPos.x, curPos.y, prevPos.x, prevPos.y);
+	}
 }
  
 void CSceneJH2::ReleaseUploadBuffers()
@@ -497,7 +513,4 @@ ID3D12RootSignature* CSceneJH2::CreateGraphicsRootSignature(ID3D12Device* pd3dDe
 
 	return(pd3dGraphicsRootSignature);
 }
-ID3D12RootSignature* CSceneJH2::GetGraphicsRootSignature()
-{
-	return(m_pd3dGraphicsRootSignature);
-}
+

@@ -360,4 +360,10 @@ inline XMFLOAT4 MyRANDOM_COLOR()
 {
 	XMFLOAT4 xmf(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX));
 	return xmf;
+}	
+
+template<typename T>
+static T Clamp(const T& x, const T& low, const T& high)
+{
+	return x < low ? low : (x > high ? high : x);
 }

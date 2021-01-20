@@ -3,7 +3,8 @@
 
 CInputHandler::CInputHandler()
 {
-
+	m_IsMouseRBtnDown = m_IsMouseLBtnDown = false; 
+	m_CurMousePos = { -1, -1 };
 }
 
 void CInputHandler::ProcessInput()
@@ -30,45 +31,48 @@ void CInputHandler::ProcessInput()
 
 void CInputHandler::MouseMove(WPARAM btnState, int x, int y)
 {
-	//cout << "마우스 이동\n";
-	if (IS_MOUSE_DOWN)
+	if (m_IsMouseLBtnDown || m_IsMouseRBtnDown)
 	{
-		m_PrevMousePos = m_CurMousePos;
-		m_CurMousePos.x = x;
-		m_CurMousePos.y = y; 
-		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_PrevMousePos.x));
-		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_PrevMousePos.y));
+		cout << "마우스 이동\n"; 
 
-		// Update angles based on input to orbit camera around box.
-		//mTheta += dx;
-		//mPhi += dy;
-		//
-		//// Restrict the angle mPhi.
-		//mPhi = MathHelper::Clamp(mPhi, 0.1f, MathHelper::Pi - 0.1f);
+		m_CurMousePos.x = x;
+		m_CurMousePos.y = y;  
 	}
 }
 
 void CInputHandler::MouseDown(WPARAM btnState, int x, int y)
-{
+{	
+	m_PrevMousePos.x = x;
+	m_PrevMousePos.y = y;
+	
+	SetCapture(m_hTargetWND);
+
 	if ((btnState & MK_LBUTTON) != 0)
 	{
+		cout << "마우스 왼쪽 클릭 <Down> - x : " << x << " y : " << y << "\n";
+	
+		m_IsMouseLBtnDown = true;
 	}
 	else if ((btnState & MK_RBUTTON) != 0)
-	{ 
+	{
+		cout << "마우스 오른쪽 클릭 <Down> - x : " << x << " y : " << y << "\n";
+
+		m_IsMouseRBtnDown = true; 
 	}
-
-	cout << "마우스 클릭 <Down> - x : " << x << " y : " << y << "\n";
-	m_PrevMousePos = m_CurMousePos;
-	m_CurMousePos.x = x;
-	m_CurMousePos.y = y;
-
-	m_IsMouseDown = true;
-	SetCapture(m_hTargetWND);
 }
 
 void CInputHandler::MouseUp(WPARAM btnState, int x, int y)
 {
-	cout << "마우스 클릭 <Up>\n";
-	m_IsMouseDown = false;
+	cout << "마우스 클릭 <Up>\n";	
+	m_IsMouseRBtnDown = false;
+	m_IsMouseLBtnDown = false;
+	if ((btnState & MK_LBUTTON) != 0)
+	{	
+		cout << "마우스 왼쪽 클릭 <Up>\n";
+	}
+	else if ((btnState & MK_RBUTTON) != 0)
+	{
+		cout << "마우스 오른쪽 클릭 <Up>\n";
+	} 
 	ReleaseCapture();
 }
