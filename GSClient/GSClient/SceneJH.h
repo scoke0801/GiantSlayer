@@ -30,7 +30,7 @@ public:
 	~CSceneJH();
 
 	virtual void Update(double elapsedTime) override;
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void ProcessInput();
 
 public:
@@ -63,9 +63,8 @@ protected:
 
 	ID3D12RootSignature*	m_pd3dGraphicsRootSignature = NULL;
 
-	CCamera*				m_Camera;
-	CTestCamera2*			m_Cameras;
-	CTestCamera2*			m_CurrentCamera = nullptr;
+	CCamera**				m_Cameras;
+	CCamera*				m_CurrentCamera = nullptr;
 
 	CMesh*					m_TestMesh;
 
@@ -84,7 +83,7 @@ public:
 	virtual void Update(double elapsedTime) override;
 	void AnimateObjects(float fTimeElapsed);
 	
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
 	// about Keyboard process

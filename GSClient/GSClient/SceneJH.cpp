@@ -22,18 +22,18 @@ void CSceneJH::Update(double elapsedTime)
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
 }
 
-void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 그래픽 루트 시그너쳐를 설정한다.
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	// 파이프라인 상태를 설정한다.
 	pd3dCommandList->SetPipelineState(GET_PSO("TestTitlePSO"));
 	  
-	if (pCamera)
-	{
-			pCamera->UpdateShaderVariables(pd3dCommandList, 1);
-		pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	}
+	//if (pCamera)
+	//{
+	//	pCamera->UpdateShaderVariables(pd3dCommandList, 1);
+	//	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	//}
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
@@ -347,7 +347,6 @@ void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
   
 CSceneJH2::CSceneJH2()
 {
-	m_Camera = nullptr;
 	m_pd3dGraphicsRootSignature = NULL;
 }
 CSceneJH2::~CSceneJH2()
@@ -388,11 +387,23 @@ void CSceneJH2::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 void CSceneJH2::BuildCamera(int width, int height)
 {
-	m_Cameras = new CTestCamera2();
-	m_Cameras->SetLens(0.25f * PI, width, height, 1.0f, 1000.0f);
-	m_Cameras->SetPosition(0.0f, 10.0f, -150.0f);
+	int nCameras = 5; 
+	m_Cameras = new CCamera * [nCameras];
+	for (int i = 0; i < nCameras; ++i)
+	{
+		CCamera* pCamera = new CCamera;
+		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 1000.0f); 
+		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
+		pCamera->SetScissorRect(0, 0, width, height);
+		m_Cameras[i] = pCamera;
+	}
+	m_Cameras[0]->SetPosition(    0.0f,    10.0f, -150.0f);
+	m_Cameras[1]->SetPosition( 1000.0f,    10.0f, -150.0f);
+	m_Cameras[2]->SetPosition(-1000.0f,    10.0f, -150.0f);
+	m_Cameras[3]->SetPosition(	  0.0f,	 1010.0f, -150.0f);
+	m_Cameras[4]->SetPosition(	  0.0f,	-1010.0f, -150.0f); 
 
-	m_CurrentCamera = m_Cameras;
+	m_CurrentCamera = m_Cameras[0];
 }
 
 void CSceneJH2::ReleaseObjects()
@@ -419,21 +430,17 @@ void CSceneJH2::AnimateObjects(float fTimeElapsed)
 {
 }
 
-void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-	m_Camera = pCamera;
-
-	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-	//if (pCamera) pCamera->UpdateShaderVariables(pd3dCommandList);
-	//if (m_TestCamera)m_TestCamera->UpdateShaderVariables(pd3dCommandList);
+void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
+{  
+	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature); 
+	if (m_CurrentCamera)m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	if (m_CurrentCamera)m_CurrentCamera->UpdateShaderVariables(pd3dCommandList);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
-			m_ppObjects[j]->Draw(pd3dCommandList, pCamera);
+			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	} 
 }
 
@@ -458,6 +465,28 @@ void CSceneJH2::ProcessInput()
 	{
 		m_CurrentCamera->Strafe(1.0f);
 	}
+
+	if (keyInput.KEY_1)
+	{
+		m_CurrentCamera = m_Cameras[0];
+	}
+	if (keyInput.KEY_2)
+	{
+		m_CurrentCamera = m_Cameras[1];
+	}
+	if (keyInput.KEY_3)
+	{
+		m_CurrentCamera = m_Cameras[2];
+	}
+	if (keyInput.KEY_4)
+	{
+		m_CurrentCamera = m_Cameras[3];
+	}
+	if (keyInput.KEY_5)
+	{
+		m_CurrentCamera = m_Cameras[4];
+	}
+
 	m_CurrentCamera->UpdateViewMatrix();
 }
  
@@ -475,8 +504,7 @@ void CSceneJH2::OnMouseUp(WPARAM btnState, int x, int y)
 }
 
 void CSceneJH2::OnMouseMove(WPARAM btnState, int x, int y)
-{
-	cout << "마우스 이동~~\n";
+{ 
 	if ((btnState & MK_LBUTTON) != 0)
 	{
 		// Make each pixel correspond to a quarter of a degree.

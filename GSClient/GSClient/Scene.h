@@ -26,7 +26,7 @@ public:
 
 	// just proto, fill with d3d obj
 	virtual void Update(double elapsedTime) {} 
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) {}  
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {}  
 	 
 public:
 	// about Keyboard process
@@ -59,7 +59,7 @@ public:
 	~CNullScene();
 
 	virtual void Update(double elapsedTime) override; 
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override; 
 
 public:
 	// about Keyboard process

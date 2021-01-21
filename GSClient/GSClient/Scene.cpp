@@ -35,7 +35,7 @@ void CNullScene::Update(double elapsedTime)
 
 }
 
-void CNullScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CNullScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {   
 	//cout << "¹Ú½º1: ";
 	//testbox1.Draw(pd3dCommandList, pCamera);

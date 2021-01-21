@@ -18,7 +18,7 @@ public:
 	void ReleaseObjects();
 
 	void AnimateObjects(float fTimeElapsed);
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 	virtual void ReleaseUploadBuffers() override;
 

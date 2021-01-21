@@ -287,16 +287,7 @@ void CFramework::BuildScene()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL); 
 	//m_CurrentScene = new CNullScene;
-
-	m_pCamera = new CCamera();
-	m_pCamera->SetViewport(0, 0, m_nWndClientWidth, m_nWndClientHeight, 0.0f, 1.0f);
-	m_pCamera->SetScissorRect(0, 0, m_nWndClientWidth, m_nWndClientHeight);
-
-	m_pCamera->GenerateProjectionMatrix(1.0f, 500.0f,
-		float(m_nWndClientWidth) / float(m_nWndClientHeight), 90.0f);
-	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 15.0f, -25.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),
-		XMFLOAT3(0.0f, 1.0f, 0.0f));
-
+  
 	//m_CurrentScene = new CGameScene; 
 	m_CurrentScene = new CNullScene;
 	//m_CurrentScene = new CTitleScene; 
@@ -485,8 +476,7 @@ void CFramework::Draw()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
-
-	m_CurrentScene->Draw(m_pd3dCommandList, m_pCamera);
+	m_CurrentScene->Draw(m_pd3dCommandList);
 
 	//if (m_pPlayer)
 	//	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);

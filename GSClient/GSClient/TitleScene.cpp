@@ -21,7 +21,7 @@ void CTitleScene::Update(double elapsedTime)
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
 }
 
-void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {		
 	// 그래픽 루트 시그너쳐를 설정한다.
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);

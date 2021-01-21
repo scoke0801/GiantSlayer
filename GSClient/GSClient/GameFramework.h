@@ -14,7 +14,6 @@ private:
 	CGameTimer					m_FPSTimer;
 	 
 	CScene*						m_CurrentScene;
-	CCamera*					m_pCamera = NULL;
 
 	// 타이틀바 출력 관련 변수입니다.
 	_TCHAR						m_pszFrameRate[50];
