@@ -68,7 +68,11 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 
 void CGameObject::SetPosition(XMFLOAT3 pos)
 {
-	m_xmf3Position = pos;
+	m_xmf3Position = pos;	
+
+	m_xmf4x4World._41 = pos.x;
+	m_xmf4x4World._42 = pos.y;
+	m_xmf4x4World._43 = pos.z;
 }
 
 void CGameObject::SetVelocity(XMFLOAT3 pos)

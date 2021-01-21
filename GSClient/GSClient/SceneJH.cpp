@@ -363,29 +363,36 @@ void CSceneJH2::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
 		50.0f, 50.0f, 50.0f);
 
-	m_nObjects = 1;
+	m_nObjects = 5; 
 	m_ppObjects = new CGameObject * [m_nObjects];
-	CRotatingObject* pRotatingObject = new CRotatingObject();
-	pRotatingObject->SetMesh(pCubeMesh);
 
 	CDiffusedShader* pShader = new CDiffusedShader();
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	pRotatingObject->SetShader(pShader); 
 
-	m_ppObjects[0] = pRotatingObject; 
+	for (int i = 0; i < m_nObjects; ++i)
+	{
+		CRotatingObject* pRotatingObject = new CRotatingObject();
+		pRotatingObject->SetMesh(pCubeMesh);
+		pRotatingObject->SetShader(pShader);
+		
+		m_ppObjects[i] = pRotatingObject;
+	}
+	
+	m_ppObjects[0]->SetPosition({    0,     0,  0});
+	m_ppObjects[1]->SetPosition({ 1000,     0,  0});
+	m_ppObjects[2]->SetPosition({-1000,     0,  0});
+	m_ppObjects[3]->SetPosition({    0,  1000,  0});
+	m_ppObjects[4]->SetPosition({    0, -1000,  0});
 }
 
 void CSceneJH2::BuildCamera(int width, int height)
 {
-	m_TestCamera = new CTestCamera();
-	m_TestCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
-	m_TestCamera->SetScissorRect(0, 0, width, height); 
-	m_TestCamera->CreatProjectionMatrix();
+	m_Cameras = new CTestCamera2();
+	m_Cameras->SetLens(0.25f * PI, width, height, 1.0f, 1000.0f);
+	m_Cameras->SetPosition(0.0f, 10.0f, -150.0f);
 
-	m_TestCamera2 = new CTestCamera2();
-	m_TestCamera2->SetLens(0.25f * PI, width, height, 1.0f, 1000.0f);
-	m_TestCamera2->SetPosition(0.0f, 10.0f, -150.0f);
+	m_CurrentCamera = m_Cameras;
 }
 
 void CSceneJH2::ReleaseObjects()
@@ -406,7 +413,6 @@ void CSceneJH2::Update(double elapsedTime)
 {
 	ProcessInput();
 
-	if (m_TestCamera) { m_TestCamera->Update(elapsedTime); }
 }
 
 void CSceneJH2::AnimateObjects(float fTimeElapsed)
@@ -421,7 +427,7 @@ void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	//if (pCamera) pCamera->UpdateShaderVariables(pd3dCommandList);
 	//if (m_TestCamera)m_TestCamera->UpdateShaderVariables(pd3dCommandList);
-	if (m_TestCamera2)m_TestCamera2->UpdateShaderVariables(pd3dCommandList);
+	if (m_CurrentCamera)m_CurrentCamera->UpdateShaderVariables(pd3dCommandList);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
@@ -433,27 +439,26 @@ void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 void CSceneJH2::ProcessInput()
 {
-	if (m_TestCamera == nullptr) return; 
-	if (m_TestCamera2 == nullptr) return;
+	if (m_CurrentCamera == nullptr) return;
 
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{
-		m_TestCamera2->Walk(1.0f);
+		m_CurrentCamera->Walk(1.0f);
 	}
 	if (keyInput.KEY_A)
 	{
-		m_TestCamera2->Strafe(-1.0f);
+		m_CurrentCamera->Strafe(-1.0f);
 	}
 	if (keyInput.KEY_S)
 	{
-		m_TestCamera2->Walk(-1.0f);
+		m_CurrentCamera->Walk(-1.0f);
 	}
 	if (keyInput.KEY_D)
 	{
-		m_TestCamera2->Strafe(1.0f);
+		m_CurrentCamera->Strafe(1.0f);
 	}
-	m_TestCamera2->UpdateViewMatrix();
+	m_CurrentCamera->UpdateViewMatrix();
 }
  
 void CSceneJH2::OnMouseDown(WPARAM btnState, int x, int y)
@@ -478,8 +483,8 @@ void CSceneJH2::OnMouseMove(WPARAM btnState, int x, int y)
 		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
 		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
 
-		m_TestCamera2->Pitch(dy);
-		m_TestCamera2->RotateY(dx);
+		m_CurrentCamera->Pitch(dy);
+		m_CurrentCamera->RotateY(dx);
 	}
 
 	m_LastMousePos.x = x;

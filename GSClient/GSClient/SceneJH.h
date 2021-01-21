@@ -64,8 +64,8 @@ protected:
 	ID3D12RootSignature*	m_pd3dGraphicsRootSignature = NULL;
 
 	CCamera*				m_Camera;
-	CTestCamera*			m_TestCamera;
-	CTestCamera2*			m_TestCamera2;
+	CTestCamera2*			m_Cameras;
+	CTestCamera2*			m_CurrentCamera = nullptr;
 
 	CMesh*					m_TestMesh;
 
