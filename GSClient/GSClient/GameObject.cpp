@@ -2,8 +2,10 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Camera.h"
+
 CGameObject::CGameObject()
 {
+	m_xmf4x4World = Matrix4x4::Identity();
 	m_xmf3Position = { 0, 0, 0 };
 	m_xmf3Velocity = { 0, 0, 0 };
 
@@ -54,8 +56,6 @@ void CGameObject::Update()
 
 void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	cout << m_xmf3Position.x << "	" << m_xmf3Position.y << endl;
-
 	OnPrepareRender();
 	if (m_pShader)
 	{
@@ -64,16 +64,6 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 		m_pShader->Render(pd3dCommandList, pCamera);
 	}
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
-}
-
-void CGameObject::SetPosition(XMFLOAT3 pos)
-{
-	m_xmf3Position = pos;
-}
-
-void CGameObject::SetVelocity(XMFLOAT3 pos)
-{
-	m_xmf3Velocity = pos;
 }
 
 void CGameObject::Move()
@@ -87,6 +77,91 @@ void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 		XMConvertToRadians(fAngle));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
+
+void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+
+}
+
+void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+
+	//객체의 월드 변환 행렬을 루트 상수(32-비트 값)를 통하여 셰이더 변수(상수 버퍼)로 복사한다.
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
+}
+
+void CGameObject::ReleaseShaderVariables()
+{
+
+}
+
+XMFLOAT3 CGameObject::GetPosition()
+{
+	return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43));
+}
+
+//게임 객체의 로컬 z-축 벡터를 반환한다.
+XMFLOAT3 CGameObject::GetLook()
+{
+	XMFLOAT3 xmfLook(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33);
+	return(Vector3::Normalize(xmfLook));
+}
+
+//게임 객체의 로컬 y-축 벡터를 반환한다. 
+XMFLOAT3 CGameObject::GetUp()
+{
+	XMFLOAT3 xmf3Up(m_xmf4x4World._21, m_xmf4x4World._22, m_xmf4x4World._23);
+	return(Vector3::Normalize(xmf3Up));
+}
+
+//게임 객체의 로컬 x-축 벡터를 반환한다.
+XMFLOAT3 CGameObject::GetRight()
+{
+	XMFLOAT3 xmf3Right(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13);
+	return(Vector3::Normalize(xmf3Right));
+}
+
+void CGameObject::SetPosition(float x, float y, float z)
+{
+	m_xmf4x4World._41 = x;
+	m_xmf4x4World._42 = y;
+	m_xmf4x4World._43 = z;
+}
+
+void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
+{
+	SetPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
+}
+
+//게임 객체를 로컬 x-축 방향으로 이동한다. 
+void CGameObject::MoveStrafe(float fDistance)
+{
+	XMFLOAT3 xmf3Position = GetPosition();
+	XMFLOAT3 xmf3Right = GetRight();
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Right, fDistance);
+	CGameObject::SetPosition(xmf3Position);
+}
+//게임 객체를 로컬 y-축 방향으로 이동한다. 
+void CGameObject::MoveUp(float fDistance)
+{
+	XMFLOAT3 xmf3Position = GetPosition();
+	XMFLOAT3 xmf3Up = GetUp();
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Up, fDistance);
+	CGameObject::SetPosition(xmf3Position);
+}
+//게임 객체를 로컬 z-축 방향으로 이동한다. 
+void CGameObject::MoveForward(float fDistance)
+{
+	XMFLOAT3 xmf3Position = GetPosition();
+	XMFLOAT3 xmf3Look = GetLook();
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fDistance);
+	CGameObject::SetPosition(xmf3Position);
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 
 CRotatingObject::CRotatingObject()
 {

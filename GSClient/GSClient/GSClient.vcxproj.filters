@@ -7,6 +7,12 @@
     <FxCompile Include="MinimapTest.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="SceneTH.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader12.cpp">
@@ -83,6 +89,9 @@
     </ClCompile>
     <ClCompile Include="SceneTH.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>GameObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +181,9 @@
     </ClInclude>
     <ClInclude Include="SceneTH.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
