@@ -357,32 +357,11 @@ CSceneJH2::~CSceneJH2()
 void CSceneJH2::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
-
-	//가로x세로x깊이가 12x12x12인 정육면체 메쉬를 생성한다.
-	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
-		50.0f, 50.0f, 50.0f);
-
-	m_nObjects = 5; 
-	m_ppObjects = new CGameObject * [m_nObjects];
-
-	CDiffusedShader* pShader = new CDiffusedShader();
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	for (int i = 0; i < m_nObjects; ++i)
-	{
-		CRotatingObject* pRotatingObject = new CRotatingObject();
-		pRotatingObject->SetMesh(pCubeMesh);
-		pRotatingObject->SetShader(pShader);
-		
-		m_ppObjects[i] = pRotatingObject;
-	}
 	
-	m_ppObjects[0]->SetPosition({    0,     0,  0});
-	m_ppObjects[1]->SetPosition({ 1000,     0,  0});
-	m_ppObjects[2]->SetPosition({-1000,     0,  0});
-	m_ppObjects[3]->SetPosition({    0,  1000,  0});
-	m_ppObjects[4]->SetPosition({    0, -1000,  0});
+	LoadTextures(pd3dDevice, pd3dCommandList);
+	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
+ 
+	BuildObjects(pd3dDevice, pd3dCommandList); 
 }
 
 void CSceneJH2::BuildCamera(int width, int height)
@@ -392,7 +371,7 @@ void CSceneJH2::BuildCamera(int width, int height)
 	for (int i = 0; i < nCameras; ++i)
 	{
 		CCamera* pCamera = new CCamera;
-		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 1000.0f); 
+		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 5000.0f); 
 		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
 		pCamera->SetScissorRect(0, 0, width, height);
 		m_Cameras[i] = pCamera;
@@ -404,6 +383,82 @@ void CSceneJH2::BuildCamera(int width, int height)
 	m_Cameras[4]->SetPosition(	  0.0f,	-1010.0f, -150.0f); 
 
 	m_CurrentCamera = m_Cameras[0];
+}
+
+void CSceneJH2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//가로x세로x깊이가 12x12x12인 정육면체 메쉬를 생성한다.
+	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
+		50.0f, 50.0f, 50.0f);
+
+	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
+		50.0f, 50.0f, 50.0f);
+
+	m_nObjects = 5;
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	CDiffusedShader* pShader = new CDiffusedShader();
+	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CGeneralShader* pGeneralShader = new CGeneralShader();
+	pGeneralShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VSTextured");
+	pGeneralShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PSTextured");
+	pGeneralShader->CreateInputLayout(0);
+	pGeneralShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+
+	for (int i = 0; i < m_nObjects; ++i)
+	{
+		CRotatingObject* pObject = new CRotatingObject();
+		//pRotatingObject->SetMesh(pCubeMesh);
+		//pRotatingObject->SetShader(pShader);
+
+		pObject->SetMesh(pCubeMeshTex);
+		pObject->SetShader(pGeneralShader);
+
+		m_ppObjects[i] = pObject;
+	}
+
+	m_ppObjects[0]->SetPosition({     0,     0,  0 });
+	m_ppObjects[1]->SetPosition({  1000,     0,  0 });
+	m_ppObjects[2]->SetPosition({ -1000,     0,  0 });
+	m_ppObjects[3]->SetPosition({	  0,  1000,  0 });
+	m_ppObjects[4]->SetPosition({	  0, -1000,  0 });
+}
+
+void CSceneJH2::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	auto boxTex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, boxTex.get(), "Box", L"resources/OBJ/Box.dds");
+	 
+	m_Textures[boxTex->m_Name] = std::move(boxTex); 
+}
+
+void CSceneJH2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{	
+	//
+	// Create the SRV heap.
+	//
+	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+	srvHeapDesc.NumDescriptors = 1;
+	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
+
+	//
+	// Fill out the heap with actual descriptors.
+	//
+	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor = m_pd3dSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+
+	auto boxTex = m_Textures["Box"]->m_pd3dResource; 
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Format = boxTex->GetDesc().Format;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = -1;
+	pd3dDevice->CreateShaderResourceView(boxTex, &srvDesc, hDescriptor); 
 }
 
 void CSceneJH2::ReleaseObjects()
@@ -422,8 +477,7 @@ void CSceneJH2::ReleaseObjects()
 
 void CSceneJH2::Update(double elapsedTime)
 {
-	ProcessInput();
-
+	ProcessInput(); 
 }
 
 void CSceneJH2::AnimateObjects(float fTimeElapsed)
@@ -433,8 +487,17 @@ void CSceneJH2::AnimateObjects(float fTimeElapsed)
 void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {  
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature); 
-	if (m_CurrentCamera)m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	if (m_CurrentCamera)m_CurrentCamera->UpdateShaderVariables(pd3dCommandList);
+	if (m_CurrentCamera)
+	{
+		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList);
+		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	} 
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
+	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	pd3dCommandList->SetGraphicsRootDescriptorTable(2, tex);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
@@ -531,19 +594,32 @@ void CSceneJH2::ReleaseUploadBuffers()
 
 ID3D12RootSignature* CSceneJH2::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
+	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[0].NumDescriptors = 1;
+	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
+	pd3dDescriptorRanges[0].RegisterSpace = 0;
+	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[2];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[3];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 16;
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[1].Constants.Num32BitValues = 32;
 	pd3dRootParameters[1].Constants.ShaderRegister = 1;
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[2].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
+	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
@@ -552,13 +628,31 @@ ID3D12RootSignature* CSceneJH2::CreateGraphicsRootSignature(ID3D12Device* pd3dDe
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
 
+#pragma region sampler
+	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[1];
+
+	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pd3dSamplerDescs[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pd3dSamplerDescs[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pd3dSamplerDescs[0].MipLODBias = 0;
+	pd3dSamplerDescs[0].MaxAnisotropy = 1;
+	pd3dSamplerDescs[0].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[0].MinLOD = 0;
+	pd3dSamplerDescs[0].MaxLOD = D3D12_FLOAT32_MAX;
+	pd3dSamplerDescs[0].ShaderRegister = 0;
+	pd3dSamplerDescs[0].RegisterSpace = 0;
+	pd3dSamplerDescs[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+#pragma endregion
+
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
 	d3dRootSignatureDesc.pParameters = pd3dRootParameters;
-	d3dRootSignatureDesc.NumStaticSamplers = 0;
-	d3dRootSignatureDesc.pStaticSamplers = NULL;
-	d3dRootSignatureDesc.Flags = d3dRootSignatureFlags;
+	d3dRootSignatureDesc.NumStaticSamplers = _countof(pd3dSamplerDescs);
+	d3dRootSignatureDesc.pStaticSamplers = pd3dSamplerDescs;
+	d3dRootSignatureDesc.Flags
+		= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	ID3DBlob* pd3dSignatureBlob = NULL;
 	ID3DBlob* pd3dErrorBlob = NULL;

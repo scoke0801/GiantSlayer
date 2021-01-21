@@ -70,11 +70,18 @@ protected:
 
 private:
 	POINT					m_LastMousePos;
+
+	ID3D12DescriptorHeap* m_pd3dSrvDescriptorHeap = nullptr;
+
 public:
 	CSceneJH2();
 	~CSceneJH2();
 
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	
+	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void BuildCamera(int width, int height) override;
 
 	void ReleaseObjects();

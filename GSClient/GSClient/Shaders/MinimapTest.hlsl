@@ -69,8 +69,7 @@ float4 PSTextured(VS_OUT input) : SV_TARGET
 struct VS_MIN
 {
 	float3 position : POSITION; 
-	float2 uv		: TEXCORD;
-
+	float2 uv		: TEXCORD; 
 };
 struct VS_MOUT
 {
