@@ -13,21 +13,7 @@ CTitleScene::~CTitleScene()
 }
 
 void CTitleScene::Update(double elapsedTime)
-{
-	POINT mousePos = GET_CUR_MOUSE_POS;
-
-	if ((mousePos.x >= 128 && mousePos.x <= 384)
-		&&(mousePos.y >= 508 && mousePos.y <= 585))
-	{
-		cout << "멀티 플레이\n";
-		CInputHandler::GetInstance().ResetMousePos();
-	}
-	else if ((mousePos.x >= 639 && mousePos.x <= 896)
-		&& (mousePos.y >= 508 && mousePos.y <= 585))
-	{
-		cout << "싱글 플레이\n"; 
-		CInputHandler::GetInstance().ResetMousePos();
-	}
+{ 
 	//m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().TestingMouseClick;
 	//
 	//D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dTestData->GetGPUVirtualAddress();
@@ -48,7 +34,7 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	pd3dCommandList->SetGraphicsRootDescriptorTable(1, tex);
 
-	m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().m_IsMouseLBtnDown;
+	//m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().m_IsMouseLBtnDown;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dTestData->GetGPUVirtualAddress();
 
@@ -61,6 +47,28 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 }
 
 void CTitleScene::ProcessInput()
+{
+}
+
+void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
+{
+	if ((x >= 128 && x <= 384)
+		&& (y >= 508 && y <= 585))
+	{
+		cout << "멀티 플레이\n"; 
+	}
+	else if ((x >= 639 && x <= 896)
+		&& (y >= 508 && y <= 585))
+	{
+		cout << "싱글 플레이\n"; 
+	}
+}
+
+void CTitleScene::OnMouseUp(WPARAM btnState, int x, int y)
+{
+}
+
+void CTitleScene::OnMouseMove(WPARAM btnState, int x, int y)
 {
 }
 
@@ -145,10 +153,10 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif 
-	HRESULT hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
+	HRESULT hRes = D3DCompileFromFile(L"Shaders/TitleScene.hlsl", NULL, NULL,
 		"VSTextured", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
 	
-	hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
+	hRes = D3DCompileFromFile(L"Shaders/TitleScene.hlsl", NULL, NULL,
 		"PSTextured", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
 
 	//	그래픽 파이프라인 상태를 설정한다.

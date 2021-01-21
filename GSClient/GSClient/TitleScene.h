@@ -57,7 +57,16 @@ public:
 
 	virtual void Update(double elapsedTime) override; 
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList,CCamera* pCamera) override; 
-	virtual void ProcessInput(); 
+
+public:
+	// about Keyboard process
+	virtual void ProcessInput();
+
+	// about Mouse process
+	virtual void OnMouseDown(WPARAM btnState, int x, int y) override;
+	virtual void OnMouseUp(WPARAM btnState, int x, int y)	override;
+	virtual void OnMouseMove(WPARAM btnState, int x, int y) override;
+
 public:
 	virtual void SendDataToNextScene(void* context) override {}
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

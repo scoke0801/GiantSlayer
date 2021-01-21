@@ -27,7 +27,15 @@ public:
 	// just proto, fill with d3d obj
 	virtual void Update(double elapsedTime) {} 
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) {}  
-	virtual void ProcessInput() {} 
+	 
+public:
+	// about Keyboard process
+	virtual void ProcessInput() {}
+
+	// about Mouse process
+	virtual void OnMouseDown(WPARAM btnState, int x, int y) { }
+	virtual void OnMouseUp(WPARAM btnState, int x, int y) { }
+	virtual void OnMouseMove(WPARAM btnState, int x, int y) { }
 
 public: 
 	virtual void SendDataToNextScene(void* context) {}	
@@ -52,10 +60,15 @@ public:
 
 	virtual void Update(double elapsedTime) override; 
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
+
+public:
+	// about Keyboard process
 	virtual void ProcessInput();
 
-	//virtual void Update(double elapsedTime) override;
-	//virtual void Draw() override; 
+	// about Mouse process
+	virtual void OnMouseDown(WPARAM btnState, int x, int y) { }
+	virtual void OnMouseUp(WPARAM btnState, int x, int y) { }
+	virtual void OnMouseMove(WPARAM btnState, int x, int y) { }
 
 public:
 

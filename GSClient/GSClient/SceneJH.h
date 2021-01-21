@@ -1,6 +1,8 @@
 #pragma once
 #include "Scene.h"
 
+class CMesh;
+
 struct BasicVertex
 {
 	XMFLOAT3 xmf3Position;
@@ -46,9 +48,7 @@ private: // 객체 생성 관련
 	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-};
-
-
+}; 
 
 class CShader;
 class CGameObject;
@@ -56,6 +56,21 @@ class CCamera;
 
 class CSceneJH2 : public CScene
 {
+protected:
+	//배치(Batch) 처리를 하기 위하여 씬을 셰이더들의 리스트로 표현한다. 
+	CGameObject**			m_ppObjects = NULL;
+	int						m_nObjects = 0;
+
+	ID3D12RootSignature*	m_pd3dGraphicsRootSignature = NULL;
+
+	CCamera*				m_Camera;
+	CTestCamera*			m_TestCamera;
+	CTestCamera2*			m_TestCamera2;
+
+	CMesh*					m_TestMesh;
+
+private:
+	POINT					m_LastMousePos;
 public:
 	CSceneJH2();
 	~CSceneJH2();
@@ -66,12 +81,19 @@ public:
 	void ReleaseObjects();
 
 public:	
-	virtual void ProcessInput();
-
 	virtual void Update(double elapsedTime) override;
 	void AnimateObjects(float fTimeElapsed);
 	
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+
+public:
+	// about Keyboard process
+	virtual void ProcessInput();
+
+	// about Mouse process
+	virtual void OnMouseDown(WPARAM btnState, int x, int y) override;
+	virtual void OnMouseUp(WPARAM btnState, int x, int y)	override;
+	virtual void OnMouseMove(WPARAM btnState, int x, int y) override;
 
 public:
 	virtual void ReleaseUploadBuffers() override;
@@ -79,15 +101,5 @@ public:
 	//그래픽 루트 시그너쳐를 생성한다.
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
-	
-protected:
-	//배치(Batch) 처리를 하기 위하여 씬을 셰이더들의 리스트로 표현한다. 
-	CGameObject**			m_ppObjects = NULL;
-	int						m_nObjects = 0;
-
-	ID3D12RootSignature*	m_pd3dGraphicsRootSignature = NULL;
-
-	CCamera*				m_Camera;
-	CTestCamera*			m_TestCamera;
 
 };

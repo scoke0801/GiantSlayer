@@ -15,20 +15,6 @@ CSceneJH::~CSceneJH()
 
 void CSceneJH::Update(double elapsedTime)
 {
-	POINT mousePos = GET_CUR_MOUSE_POS;
-
-	if ((mousePos.x >= 128 && mousePos.x <= 384)
-		&& (mousePos.y >= 508 && mousePos.y <= 585))
-	{
-		cout << "멀티 플레이\n";
-		CInputHandler::GetInstance().ResetMousePos();
-	}
-	else if ((mousePos.x >= 639 && mousePos.x <= 896)
-		&& (mousePos.y >= 508 && mousePos.y <= 585))
-	{
-		cout << "싱글 플레이\n";
-		CInputHandler::GetInstance().ResetMousePos();
-	}
 	//m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().TestingMouseClick;
 	//
 	//D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dTestData->GetGPUVirtualAddress();
@@ -163,10 +149,10 @@ void CSceneJH::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif 
-	HRESULT hRes = D3DCompileFromFile(L"MinimapTest.hlsl", NULL, NULL,
+	HRESULT hRes = D3DCompileFromFile(L"Shaders/MinimapTest.hlsl", NULL, NULL,
 		"VSTextured", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
 
-	hRes = D3DCompileFromFile(L"MinimapTest.hlsl", NULL, NULL,
+	hRes = D3DCompileFromFile(L"Shaders/MinimapTest.hlsl", NULL, NULL,
 		"PSTextured", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
 
 	//	그래픽 파이프라인 상태를 설정한다.
@@ -314,10 +300,10 @@ void CSceneJH::BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif  
-	HRESULT hRes = D3DCompileFromFile(L"MinimapTest.hlsl", NULL, NULL,
+	HRESULT hRes = D3DCompileFromFile(L"Shaders/MinimapTest.hlsl", NULL, NULL,
 		"VSMinimap", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
 
-	hRes = D3DCompileFromFile(L"MinimapTest.hlsl", NULL, NULL,
+	hRes = D3DCompileFromFile(L"Shaders/MinimapTest.hlsl", NULL, NULL,
 		"PSMinimap", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
 
 	UINT nInputElementDescs = 2;
@@ -375,7 +361,7 @@ void CSceneJH2::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 	//가로x세로x깊이가 12x12x12인 정육면체 메쉬를 생성한다.
 	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
-		100.0f, 12.0f, 200.0f);
+		50.0f, 50.0f, 50.0f);
 
 	m_nObjects = 1;
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -396,6 +382,10 @@ void CSceneJH2::BuildCamera(int width, int height)
 	m_TestCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
 	m_TestCamera->SetScissorRect(0, 0, width, height); 
 	m_TestCamera->CreatProjectionMatrix();
+
+	m_TestCamera2 = new CTestCamera2();
+	m_TestCamera2->SetLens(0.25f * PI, width, height, 1.0f, 1000.0f);
+	m_TestCamera2->SetPosition(0.0f, 10.0f, -150.0f);
 }
 
 void CSceneJH2::ReleaseObjects()
@@ -430,7 +420,8 @@ void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	//if (pCamera) pCamera->UpdateShaderVariables(pd3dCommandList);
-	if (m_TestCamera)m_TestCamera->UpdateShaderVariables(pd3dCommandList);
+	//if (m_TestCamera)m_TestCamera->UpdateShaderVariables(pd3dCommandList);
+	if (m_TestCamera2)m_TestCamera2->UpdateShaderVariables(pd3dCommandList);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
@@ -443,19 +434,58 @@ void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 void CSceneJH2::ProcessInput()
 {
 	if (m_TestCamera == nullptr) return; 
-	POINT prevPos = GET_PREV_MOUSE_POS; 
-	POINT curPos = GET_CUR_MOUSE_POS;
+	if (m_TestCamera2 == nullptr) return;
 
-	if (IS_MOUSE_LBTN_DOWN)
+	auto keyInput = GAME_INPUT;
+	if (keyInput.KEY_W)
 	{
-		m_TestCamera->Rotate(curPos.x, curPos.y, prevPos.x, prevPos.y);
+		m_TestCamera2->Walk(1.0f);
 	}
-	if (IS_MOUSE_RBTN_DOWN)
-	{ 
-		m_TestCamera->Zoom(curPos.x, curPos.y, prevPos.x, prevPos.y);
+	if (keyInput.KEY_A)
+	{
+		m_TestCamera2->Strafe(-1.0f);
 	}
+	if (keyInput.KEY_S)
+	{
+		m_TestCamera2->Walk(-1.0f);
+	}
+	if (keyInput.KEY_D)
+	{
+		m_TestCamera2->Strafe(1.0f);
+	}
+	m_TestCamera2->UpdateViewMatrix();
 }
  
+void CSceneJH2::OnMouseDown(WPARAM btnState, int x, int y)
+{
+	m_LastMousePos.x = x;
+	m_LastMousePos.y = y;
+
+	SetCapture(CFramework::GetInstance().GetHWND());
+}
+
+void CSceneJH2::OnMouseUp(WPARAM btnState, int x, int y)
+{
+	ReleaseCapture();
+}
+
+void CSceneJH2::OnMouseMove(WPARAM btnState, int x, int y)
+{
+	cout << "마우스 이동~~\n";
+	if ((btnState & MK_LBUTTON) != 0)
+	{
+		// Make each pixel correspond to a quarter of a degree.
+		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
+		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
+
+		m_TestCamera2->Pitch(dy);
+		m_TestCamera2->RotateY(dx);
+	}
+
+	m_LastMousePos.x = x;
+	m_LastMousePos.y = y;
+}
+
 void CSceneJH2::ReleaseUploadBuffers()
 {
 	if (m_ppObjects)

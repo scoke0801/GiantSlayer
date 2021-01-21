@@ -35,13 +35,7 @@ private :
 
 public:
 	GameInputs		m_Inputs;
-
-	bool			m_IsMouseRBtnDown = false;
-	bool			m_IsMouseLBtnDown = false;
-
-	POINT			m_PrevMousePos;
-	POINT			m_CurMousePos;
-
+	 
 private:
 	CInputHandler();
 	CInputHandler(const CInputHandler& other) = delete;
@@ -53,26 +47,9 @@ public:
 		static CInputHandler self;
 		return self;
 	}
-	void ProcessInput();
-
-	void MouseMove(WPARAM btnState, int x, int y);
-	void MouseDown(WPARAM btnState, int x, int y);
-	void MouseUp(WPARAM btnState, int x, int y);
-
+	void ProcessInput(); 
 public:
 	void SetTargetWND(HWND hTarget) { m_hTargetWND = hTarget; }
-
-	POINT GetCurrentMousePoint() const { return m_CurMousePos; }
-	POINT GetPrevMousePoint() const { return m_PrevMousePos; }
-
-	void ResetMousePos() { m_PrevMousePos = POINT(); }
-
-public:
-	bool IsMouseRBtnDonw() const { return m_IsMouseRBtnDown; }
-	bool IsMouseLBtnDonw() const { return m_IsMouseLBtnDown; }
 };
+
 #define GAME_INPUT CInputHandler::GetInstance().m_Inputs
-#define GET_CUR_MOUSE_POS CInputHandler::GetInstance().GetCurrentMousePoint()
-#define GET_PREV_MOUSE_POS CInputHandler::GetInstance().GetPrevMousePoint()
-#define IS_MOUSE_RBTN_DOWN CInputHandler::GetInstance().IsMouseRBtnDonw()
-#define IS_MOUSE_LBTN_DOWN CInputHandler::GetInstance().IsMouseLBtnDonw()	
