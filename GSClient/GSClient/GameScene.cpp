@@ -230,33 +230,20 @@ void CGameScene2::BuildCamera(ID3D12Device* pd3dDevice,
 }
 
 void CGameScene2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	//가로x세로x깊이가 12x12x12인 정육면체 메쉬를 생성한다.
-	/*CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
-		200.0f, 10.0f, 200.0f);*/
-
+{ 
 	CTexturedRectMesh* pCubeMeshTex = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 200.0f, 000.0f, 200.0f, 0.0f, 0.0f, 10.0f);
-	
-
-	//CTexturedRectMesh* pCubeMeshTex2 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2000.0f, 2000.0f, 00.0f, 0.0f, 0.0f, 1.0f);
-	/*pCubeMeshTex = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 200.0f, 200.0f, 0.0f, 0.0f, 0.0f, -10.0f);*/
-
+	 
 	m_nObjects = 7;
 	m_ppObjects = new CGameObject * [m_nObjects];
-
-
-	/*CDiffusedShader* pShader = new CDiffusedShader();
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);*/
-
+	 
 	CShader* pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VSTextured");
 	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PSTextured");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	// 추가 스카이박스
-
+	// 추가 스카이박스 
 	CTexturedRectMesh* pSkyBoxMesh_Front = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f, 0.0f, 0.0f, +10.0f);
 	CTexturedRectMesh* pSkyBoxMesh_Back = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f, 0.0f, 0.0f, -10.0f);
 	CTexturedRectMesh* pSkyBoxMesh_Left = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.0f, 20.0f, 20.0f, -10.0f, 0.0f, +0.0f);
@@ -264,12 +251,12 @@ void CGameScene2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	CTexturedRectMesh* pSkyBoxMesh_Top = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 00.0f, 20.0f, 0.0f, +10.0f, +0.0f);
 	CTexturedRectMesh* pSkyBoxMesh_Bottom = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 00.0f, 20.0f, 0.0f,-10.0f, +0.0f);
 
-	CSkyBoxShader* pSkyBoxShader = new CSkyBoxShader();
-	pSkyBoxShader->CreateVertexShader(L"Shaders.hlsl", "VSTextured");
-	pSkyBoxShader->CreatePixelShader(L"Shaders.hlsl", "PSSkyBox");
-	pSkyBoxShader->CreateInputLayout(0);
-	pSkyBoxShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
+	//CSkyBoxShader* pSkyBoxShader = new CSkyBoxShader();
+	//pSkyBoxShader->CreateVertexShader(L"Shaders.hlsl", "VSTextured");
+	//pSkyBoxShader->CreatePixelShader(L"Shaders.hlsl", "PSSkyBox");
+	//pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
+	////pSkyBoxShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	for (int i = 0; i < m_nObjects; ++i)
 	{
@@ -421,7 +408,7 @@ void CGameScene2::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	if (m_CurrentCamera)
 	{
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList);
+		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 
@@ -551,11 +538,16 @@ ID3D12RootSignature* CGameScene2::CreateGraphicsRootSignature(ID3D12Device* pd3d
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[1].Constants.Num32BitValues = 32;
-	pd3dRootParameters[1].Constants.ShaderRegister = 1;
-	pd3dRootParameters[1].Constants.RegisterSpace = 0;
-	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[1].Descriptor.ShaderRegister = 1; //Camera
+	pd3dRootParameters[1].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	//pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	//pd3dRootParameters[1].Constants.Num32BitValues = 32;
+	//pd3dRootParameters[1].Constants.ShaderRegister = 1;
+	//pd3dRootParameters[1].Constants.RegisterSpace = 0;
+	//pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
