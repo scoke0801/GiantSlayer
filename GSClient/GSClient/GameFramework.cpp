@@ -9,12 +9,12 @@
 
 CFramework::CFramework()
 {
-	m_GameTimer.Init(); 
+	m_GameTimer.Init();
 	m_FPSTimer.Init();
 
 	m_nWndClientWidth = FRAME_BUFFER_WIDTH;
-	m_nWndClientHeight = FRAME_BUFFER_HEIGHT; 
-	m_FPSTimer.Init();  
+	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
+	m_FPSTimer.Init();
 }
 
 void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
@@ -135,8 +135,10 @@ void CFramework::CreateDirect3DDevice()
 	{
 		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
 		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
+		if (lstrcmp(dxgiAdapterDesc.Description, L"AMD Radeon(TM) Vega 8 Graphics") == 0)
+			continue;
 		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
-		if (SUCCEEDED(D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), (void**)&m_pd3dDevice))) break; 
+		if (SUCCEEDED(D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), (void**)&m_pd3dDevice))) break;
 	}
 
 	if (!pd3dAdapter)
@@ -283,27 +285,14 @@ void CFramework::MoveToNextFrame()
 
 void CFramework::BuildScene()
 {
-	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL); 
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 	//m_CurrentScene = new CNullScene;
-
-	m_pCamera = new CCamera();
-	m_pCamera->SetViewport(0, 0, m_nWndClientWidth, m_nWndClientHeight, 0.0f, 1.0f);
-	m_pCamera->SetScissorRect(0, 0, m_nWndClientWidth, m_nWndClientHeight);
-
-	m_pCamera->GenerateProjectionMatrix(1.0f, 500.0f,
-		float(m_nWndClientWidth) / float(m_nWndClientHeight), 90.0f);
-	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 15.0f, -25.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),
-		XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 	//m_CurrentScene = new CGameScene; 
 	m_CurrentScene = new CNullScene;
 	//m_CurrentScene = new CTitleScene; 
 	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList);
-
-	/*m_pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList,
-		m_CurrentScene->GetGraphicsRootSignature(), m_CurrentScene->GetTerrain(), 1);*/
-
-	//m_pCamera = m_pPlayer->GetCamera();
+	m_CurrentScene->BuildCamera(m_nWndClientWidth, m_nWndClientHeight);
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -337,10 +326,10 @@ void CFramework::CreateAboutD2D()
 
 	if (FAILED(m_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice), &m_pdxgiDevice)))
 		return assert(!"Critical error: Unable to get the DXGI device!");
-  
+
 	if (FAILED(m_pd2dFactory->CreateDevice(m_pdxgiDevice.Get(), &m_pd2Device)))
 		return assert(!"Critical error: Unable to create the Direct2D device!");
-	 
+
 	// create the device context
 	if (FAILED(m_pd2Device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS, &m_pd2devCon)))
 		return assert(!"Critical error: Unable to create the Direct2D device context!");
@@ -361,22 +350,22 @@ void CFramework::CreateBitmapRenderTarget()
 
 	// Direct2D needs the DXGI version of the back buffer
 	Microsoft::WRL::ComPtr<IDXGISurface> dxgiBuffer;
-	
+
 	if (FAILED(m_pdxgiSwapChain->GetBuffer(0, __uuidof(IDXGISurface), &dxgiBuffer)))
 		return assert(!"Critical error: Unable to retrieve the back buffer!");
-	
+
 	//// create the bitmap
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> targetBitmap;
 	if (FAILED(m_pd2devCon->CreateBitmapFromDxgiSurface(dxgiBuffer.Get(), &bp, &targetBitmap)))
 		return assert(!"Critical error: Unable to create the Direct2D bitmap from the DXGI surface!");
 
 	// set the newly created bitmap as render target
-	m_pd2devCon->SetTarget(targetBitmap.Get()); 
+	m_pd2devCon->SetTarget(targetBitmap.Get());
 }
 
 void CFramework::InitializeTextFormats()
 {
-	ID2D1SolidColorBrush* yellowBrush, *blackBrush, *whiteBrush;
+	ID2D1SolidColorBrush* yellowBrush, * blackBrush, * whiteBrush;
 	// create standard brushes
 	if (FAILED(m_pd2devCon->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Yellow), &yellowBrush)))
 		return assert(!"Critical error: Unable to create the yellow brush!");
@@ -384,7 +373,7 @@ void CFramework::InitializeTextFormats()
 		return assert(!"Critical error: Unable to create the black brush!");
 	if (FAILED(m_pd2devCon->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &whiteBrush)))
 		return assert(!"Critical error: Unable to create the white brush!");
-	
+
 	// set up text formats
 
 	// FPS text
@@ -487,8 +476,7 @@ void CFramework::Draw()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
-
-	m_CurrentScene->Draw(m_pd3dCommandList, m_pCamera);
+	m_CurrentScene->Draw(m_pd3dCommandList);
 
 	//if (m_pPlayer)
 	//	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);

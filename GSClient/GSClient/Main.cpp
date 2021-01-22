@@ -188,15 +188,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN:
     case WM_MBUTTONDOWN:
     case WM_RBUTTONDOWN:
-        CInputHandler::GetInstance().MouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        gFramework->OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        //CInputHandler::GetInstance().MouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0;
     case WM_LBUTTONUP:
     case WM_MBUTTONUP:
     case WM_RBUTTONUP:
-        CInputHandler::GetInstance().MouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        gFramework->OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        //CInputHandler::GetInstance().MouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0;
     case WM_MOUSEMOVE:
-        CInputHandler::GetInstance().MouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        gFramework->OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+        //CInputHandler::GetInstance().MouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);

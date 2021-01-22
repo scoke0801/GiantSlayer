@@ -1,6 +1,7 @@
 #pragma once
 
-class CScene;
+#include "Scene.h"
+
 class CCamera;
 
 class CFramework
@@ -11,14 +12,13 @@ private:
 
 	CGameTimer					m_GameTimer;
 	CGameTimer					m_FPSTimer;
-	 
+
 	CScene* m_CurrentScene;
-	CCamera* m_pCamera = NULL;
 
 	// 타이틀바 출력 관련 변수입니다.
-	_TCHAR				m_pszFrameRate[50];
-	TCHAR				m_captionTitle[50];
-	int					m_titleLength; 
+	_TCHAR						m_pszFrameRate[50];
+	TCHAR						m_captionTitle[50];
+	int							m_titleLength;
 
 	// 다이렉트X 관련 변수입니다.
 	int							m_nWndClientWidth;
@@ -56,7 +56,7 @@ private:
 private:	// 텍스트 및 2D 관련~!@#!@
 	Microsoft::WRL::ComPtr<IDWriteFactory2>		m_pd2dWriteFactory;
 	Microsoft::WRL::ComPtr<ID2D1Factory2>		m_pd2dFactory;
-	Microsoft::WRL::ComPtr<IDXGIDevice>			m_pdxgiDevice; 	
+	Microsoft::WRL::ComPtr<IDXGIDevice>			m_pdxgiDevice;
 	Microsoft::WRL::ComPtr<ID2D1Device1>		m_pd2Device;
 	Microsoft::WRL::ComPtr<ID2D1DeviceContext1> m_pd2devCon;
 
@@ -84,8 +84,6 @@ public: // about GetInstance , init framework
 	void OnDestroy();
 
 private:
-
-
 	void CreateSwapChain();
 	void CreateDirect3DDevice();
 	void CreateCommandQueueAndList();
@@ -98,7 +96,6 @@ private:
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
 
-
 	void BuildScene();
 
 	void CreateAboutD2D();
@@ -110,32 +107,41 @@ public:	// about Update
 	void Animate();
 	void Draw();
 
+public: // about Mouse process
+	void OnMouseDown(WPARAM btnState, int x, int y) { if (m_CurrentScene) m_CurrentScene->OnMouseDown(btnState, x, y); }
+	void OnMouseUp(WPARAM btnState, int x, int y) { if (m_CurrentScene) m_CurrentScene->OnMouseUp(btnState, x, y); }
+	void OnMouseMove(WPARAM btnState, int x, int y) { if (m_CurrentScene) m_CurrentScene->OnMouseMove(btnState, x, y); }
+
+public:
+	HWND GetHWND() const { return m_hWnd; }
+
 public:	// about scene change
 	template <typename SceneName>
 	void ChangeScene(void* pContext = nullptr)
 	{
-		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL); 
+		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 		CScene* scene = new SceneName;
-		static CScene* prevScene; 
+		static CScene* prevScene;
 		scene->Init(m_pd3dDevice, m_pd3dCommandList);
 		scene->SendDataToNextScene(pContext);
-		
+		scene->BuildCamera(m_nWndClientWidth, m_nWndClientHeight);
+
 		if (m_CurrentScene)
 		{
 			prevScene = m_CurrentScene;
 			//delete m_CurrentScene;
 			m_CurrentScene = nullptr;
 		}
-		 
+
 		m_pd3dCommandList->Close();
 		ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 		m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
 		WaitForGpuComplete();
 
-		m_CurrentScene = scene; 
-	}  
+		m_CurrentScene = scene;
+	}
 };
 
 DWORD WINAPI ClientMain(LPVOID arg);

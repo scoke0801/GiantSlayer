@@ -5,57 +5,17 @@ cbuffer cbTestData : register(b0)
 
 struct VS_OUT
 {
-	float4 position : SV_POSITION;
-	float2 uv : TEXCOORD;
-	uint index : TEXTURE;
+	float4	position : SV_POSITION;
+	float2	uv		 : TEXCOORD;
+	uint	index	 : TEXTURE;
 };
 
 Texture2D gtxtMultipleButton : register(t0);
 Texture2D gtxtSimpleButton   : register(t1);
 Texture2D gtxtTitle		     : register(t2);
+Texture2D gtxtMiniMap		 : register(t3);
 
 SamplerState gssWrap : register(s0);
-
-// 정점 셰이더를 정의한다.
-float4 VSTest(uint nVertexID : SV_VertexID) :SV_POSITION
-{
-	float4 output;
-
-	if		(nVertexID == 0)  { output = float4(-0.75f, -0.325f, 0.2f, 1.0f); }
-	else if (nVertexID == 1)  { output = float4(-0.25f, -0.325f, 0.2f, 1.0f); }
-	else if (nVertexID == 2)  { output = float4(-0.25f, -0.525f, 0.2f, 1.0f); }
-							  									   
-	else if (nVertexID == 3)  { output = float4(-0.75f, -0.325f, 0.2f, 1.0f); }
-	else if (nVertexID == 4)  { output = float4(-0.25f, -0.525f, 0.2f, 1.0f); }
-	else if (nVertexID == 5)  { output = float4(-0.75f, -0.525f, 0.2f, 1.0f); }
-							  									   
-	else if (nVertexID == 6)  { output = float4(0.25f,  -0.325f, 0.2f, 1.0f); }
-	else if (nVertexID == 7)  { output = float4(0.75f,  -0.325f, 0.2f, 1.0f); }
-	else if (nVertexID == 8)  { output = float4(0.75f,  -0.525f, 0.2f, 1.0f); }
-							  						    		   
-	else if (nVertexID == 9)  { output = float4(0.25f,  -0.325f, 0.2f, 1.0f); }
-	else if (nVertexID == 10) { output = float4(0.75f,  -0.525f, 0.2f, 1.0f); }
-	else if (nVertexID == 11) { output = float4(0.25f,  -0.525f, 0.2f, 1.0f); }
-													    		   
-	else if (nVertexID == 12) { output = float4(-1.0f,  -0.325f, 0.2f, 1.0f); }
-	else if (nVertexID == 13) { output = float4(1.0f,   -0.325f, 0.2f, 1.0f); }
-	else if (nVertexID == 14) { output = float4(1.0f,   -0.525f, 0.2f, 1.0f); }
-
-	else if (nVertexID == 15) { output = float4(-1.0f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 16) { output = float4(1.0f, -0.525f, 0.0f, 1.0f); }
-	else if (nVertexID == 17) { output = float4(-1.0f, -0.525f, 0.0f, 1.0f); }
-
-	return(output);
-}
-
-// 픽셀 셰이더를 정의한다.
-float4 PSTest(float4 input : SV_POSITION) : SV_TARGET
-{
-	float4 color = float4(0.0f, 0.0f, 0.5f, 1.0f);
-	if (gMouseClick)color = float4(0.5f, 0.0f, 0.0f, 1.0f);
-
-	return color;
-}
 
 VS_OUT VSTextured(uint nVertexID : SV_VertexID)
 {
@@ -108,24 +68,28 @@ float4 PSTextured(VS_OUT input) : SV_TARGET
 
 struct VS_MIN
 {
-	float3 position : POSITION;
-	float4 color : COLOR;
+	float3 position : POSITION; 
+	float2 uv		: TEXCORD; 
 };
 struct VS_MOUT
 {
-	float4 position : SV_POSITION;
-	float4 color : COLOR;
+	float4 position : SV_POSITION; 
+	float2 uv	 : TEXCOORD;
 };
 
 VS_MOUT VSMinimap(VS_MIN input)
 {
 	VS_MOUT outRes;
-	outRes.position = float4(input.position, 1.0f); 
-	outRes.color = input.color;
+	outRes.position = float4(input.position, 1.0f);  
+	outRes.uv = input.uv;
 	return outRes;
 }
 
 float4 PSMinimap(VS_MOUT input) : SV_TARGET
-{
-	return float4(1.0f, 1.0f, 0.0f, 0.0f);
+{	
+	float4 cColor;
+	//return cColor = gtxtTitle.Sample(gssWrap, input.uv);
+	return cColor = gtxtMiniMap.Sample(gssWrap, input.uv);
+	
+	//return float4(1.0f, 1.0f, 0.0f, 0.0f);
 }

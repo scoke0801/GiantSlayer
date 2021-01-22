@@ -28,7 +28,7 @@ public:
 	~CSceneJH();
 
 	virtual void Update(double elapsedTime) override;
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void ProcessInput();
 
 public:
