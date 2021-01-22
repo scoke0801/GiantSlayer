@@ -14,6 +14,7 @@ cbuffer cbCameraInfo : register(b1)
 
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
+
 Texture2D gtxtBox : register(t0);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
@@ -68,7 +69,7 @@ VS_TEXTURE_OUT VSTextured(VS_TEXTURE_IN input)
 float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 {
 	float4 cColor;
- 
+
 	return gtxtBox.Sample(gssWrap, input.uv); 
 }
 
@@ -150,3 +151,4 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 //
 //	return(cColor);
 //}
+

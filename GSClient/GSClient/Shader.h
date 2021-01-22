@@ -43,7 +43,9 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+
 	D3D12_INPUT_LAYOUT_DESC CreateInputLayout(ShaderTypes type);
+
 
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
 	virtual D3D12_BLEND_DESC CreateBlendState();
@@ -76,7 +78,10 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 protected:
+	D3D12_INPUT_LAYOUT_DESC			m_d3dInputLayoutDesc;
 	ID3D12PipelineState** m_ppd3dPipelineStates = NULL;
+
+	
 	int m_nPipelineStates = 0;
 };
 
@@ -93,6 +98,22 @@ public:
 
 	virtual void CreateShader(ID3D12Device* pd3dDevice,
 		ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+class CTexturedShader : public CShader
+{
+private:
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+public:
+	CTexturedShader();
+	virtual ~CTexturedShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int index);
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+
 };
 
 class CDiffusedShader : public CShader
@@ -110,6 +131,7 @@ public:
 		ID3D12RootSignature* pd3dGraphicsRootSignature);
 };
 
+
 class CBillboardShader : public CShader
 {
 private:
@@ -120,4 +142,51 @@ public:
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
+
+class CGeneralShader :public CShader
+{
+private:
+	D3D12_SHADER_BYTECODE			m_d3dVSBytecode;
+	D3D12_SHADER_BYTECODE			m_d3dPSBytecode;
+
+	ID3DBlob* m_pd3dVertexShaderBlob;
+	ID3DBlob* m_pd3dPixelShaderBlob;
+
+	D3D12_INPUT_LAYOUT_DESC			m_d3dInputLayoutDesc;
+
+public:
+	CGeneralShader();
+	virtual ~CGeneralShader();
+
+	D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nIndex);
+
+	D3D12_SHADER_BYTECODE CreateVertexShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+	D3D12_SHADER_BYTECODE CreatePixelShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice,
+		ID3D12RootSignature* pd3dGraphicsRootSignature);
+};
+
+class CSkyBoxShader : public CTexturedShader
+{
+private:
+	D3D12_SHADER_BYTECODE			m_d3dPSBytecode;
+	D3D12_SHADER_BYTECODE			m_d3dVSBytecode;
+
+	ID3DBlob						* m_pd3dVertexShaderBlob;
+	ID3DBlob						* m_pd3dPixelShaderBlob;
+
+	D3D12_INPUT_LAYOUT_DESC			m_d3dInputLayoutDesc;
+public:
+	CSkyBoxShader();
+	virtual ~CSkyBoxShader();
+
+	D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nIndex);
+
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
 };

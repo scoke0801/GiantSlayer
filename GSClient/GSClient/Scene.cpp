@@ -49,7 +49,9 @@ void CNullScene::ProcessInput()
 	}
 	if (gameInput.KEY_F3)
 	{
-		ChangeScene<CGameScene>();
+
+		ChangeScene<CGameScene2>();
+
 	}
 	if (gameInput.KEY_F4)
 	{
