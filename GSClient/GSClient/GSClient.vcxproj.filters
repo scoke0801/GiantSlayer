@@ -1,19 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <FxCompile Include="Shaders\JHTestShader.hlsl">
+    <FxCompile Include="TitleScene.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\MinimapTest.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\TitleScene.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="SceneTH.hlsl">
+    <FxCompile Include="MinimapTest.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\JHTestShader.hlsl">
@@ -89,21 +80,6 @@
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>GameObject\Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="Enemy.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="EnemyState.cpp">
-      <Filter>State</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneTH.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="UI.cpp">
-      <Filter>GameObject\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -185,21 +161,6 @@
     <ClInclude Include="Shader.h">
       <Filter>GameObject\Shader</Filter>
     </ClInclude>
-    <ClInclude Include="Enemy.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="EnemyState.h">
-      <Filter>State</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneTH.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="UI.h">
-      <Filter>GameObject\UI</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -267,9 +228,6 @@
     <Filter Include="GameObject\Shader">
       <UniqueIdentifier>{04f39449-42c1-42ab-bb97-94aa7f89a159}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameObject\UI">
-      <UniqueIdentifier>{0f2e0bb2-bc7d-46f7-8183-915daeb08be4}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GSClient.rc">
@@ -278,5 +236,10 @@
     <ResourceCompile Include="GSClient.rc">
       <Filter>Main\Resources</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="TitleScene.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

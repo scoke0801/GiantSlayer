@@ -4,10 +4,9 @@
 
 struct VS_CB_CAMERA_INFO
 {
-	XMFLOAT4X4	m_xmf4x4View;
-	XMFLOAT4X4	m_xmf4x4Projection;	
-	XMFLOAT3	m_xmf3Position;
-}; 
+	XMFLOAT4X4 m_xmf4x4View;
+	XMFLOAT4X4 m_xmf4x4Projection;
+};
 class CCamera
 {
 private:
@@ -34,12 +33,7 @@ private:
 	//ºäÆ÷Æ®¿Í ¾¾Àú »ç°¢Çü
 	D3D12_VIEWPORT					m_d3dViewport;
 	D3D12_RECT						m_d3dScissorRect;
-
-private:
-	ID3D12Resource* m_pd3dcbCamera = NULL;
-	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
-
-public: 
+public:
 	CCamera();
 	~CCamera();
 
@@ -94,7 +88,7 @@ public:
 	void RotateY(float angle);
 
 	// After modifying camera position/orientation, call to rebuild the view matrix.
-	void UpdateViewMatrix(); 
+	void UpdateViewMatrix();
 
 public:
 	void SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight,
@@ -102,8 +96,6 @@ public:
 	void SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom);
 	void SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList);
 
-public:	
-	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	void ReleaseShaderVariables();
+public:
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, int rootParameterIndex = 1);
 };

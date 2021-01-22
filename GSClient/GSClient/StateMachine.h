@@ -9,22 +9,21 @@ private:
 	CState<object_Type>* m_pCurrentState;
 
 public:
-	CStateMachine(object_Type* owner) : m_pOwner(owner), m_pCurrentState(NULL) {};
+	CStateMachine(object_Type* owner) :
+		m_pOwner(owner), m_pCurrentState(NULL) {};
 	~CStateMachine() {}
-
-	void SetCurrentState(CState<object_Type>* s) { m_pCurrentState = s; }
 
 	void  Update()const
 	{
-		if (m_pCurrentState) {
-			m_pCurrentState->Execute(m_pOwner);
-		}
+		if (m_pCurrentState) m_pCurrentState->Execute(m_pOwner);
 	}
 
 	void  ChangeState(CState<object_Type>* pNewState)
 	{
 		m_pCurrentState->Exit(m_pOwner);
+
 		m_pCurrentState = pNewState;
+
 		m_pCurrentState->Enter(m_pOwner);
 	}
 

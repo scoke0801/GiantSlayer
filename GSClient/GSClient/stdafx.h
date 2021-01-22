@@ -79,7 +79,6 @@ using Microsoft::WRL::ComPtr;
 #include "Material.h"
 #include "GameFramework.h"
 #include "Font.h"
-#include "Camera.h"
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
@@ -110,7 +109,9 @@ extern D3D12_BLEND_DESC CreateDefaultBlendDesc();
 extern D3D12_DEPTH_STENCIL_DESC CreateDefaultDepthStencilDesc();
 
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
- 
+
+
+
 #define EPSILON					1.0e-10f
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
@@ -360,10 +361,4 @@ inline XMFLOAT4 MyRANDOM_COLOR()
 {
 	XMFLOAT4 xmf(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX));
 	return xmf;
-}	
-
-template<typename T>
-static T Clamp(const T& x, const T& low, const T& high)
-{
-	return x < low ? low : (x > high ? high : x);
 }

@@ -7,14 +7,11 @@ cbuffer cbGameObjectInfo : register(b0)
 //카메라의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbCameraInfo : register(b1)
 {
-	matrix	gmtxView : packoffset(c0);
-	matrix	gmtxProjection : packoffset(c4);	
-	float3	gvCameraPosition : packoffset(c8);
+	matrix gmtxView : packoffset(c0);
+	matrix gmtxProjection : packoffset(c4);
 };
 
 SamplerState gssWrap : register(s0);
-SamplerState gssClamp : register(s1);
-
 Texture2D gtxtBox : register(t0);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
@@ -70,85 +67,8 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 {
 	float4 cColor;
 
-	return gtxtBox.Sample(gssWrap, input.uv); 
+//return cColor = gtxtTitle.Sample(gssWrap, input.uv);
+//return cColor = gtxtMiniMap.Sample(gssWrap, input.uv);
+	return gtxtBox.Sample(gssWrap, input.uv);
+	return float4(1.0f, 1.0f, 0.0f, 0.0f);
 }
-
-/////////////////////////////////////////////////////////////////
-/////
-
-struct VS_BILLBOARD_INPUT
-{
-	float3 center : POSITION;
-	float2 size : TEXCOORD;
-	uint index : TEXTURE;
-};
-
-VS_BILLBOARD_INPUT VSBillboard(VS_BILLBOARD_INPUT input)
-{
-	return(input);
-}
-
-VS_BILLBOARD_INPUT VSExBillboard(VS_BILLBOARD_INPUT input)
-{
-	input.center.x = gmtxWorld._41;
-	input.center.y = gmtxWorld._42;
-	input.center.z = gmtxWorld._43;
-	return(input);
-}
-
-struct GS_BILLBOARD_GEOMETRY_OUTPUT
-{
-	float4 position : SV_POSITION;
-	float3 positionW : POSITION;
-	float3 normal : NORMAL;
-	float2 uv : TEXCOORD;
-	uint index : TEXTURE;
-};
-
-static float2 pf2UVs[4] = { float2(0.0f,1.0f), float2(0.0f,0.0f), float2(1.0f,1.0f), float2(1.0f,0.0f) };
-
-[maxvertexcount(4)]
-void GSBillboard(point VS_BILLBOARD_INPUT input[1], inout TriangleStream<GS_BILLBOARD_GEOMETRY_OUTPUT> outStream)
-{
-	float3 f3Up = float3(0.0f, 1.0f, 0.0f);
-	float3 f3Look = normalize(gvCameraPosition - input[0].center.xyz);
-	float3 f3Right = cross(f3Up, f3Look);
-	float fHalfWidth = input[0].size.x * 0.5f;
-	float fHalfHeight = input[0].size.y * 0.5f; 
-
-	float4 pf4Vertices[4];
-	pf4Vertices[0] = float4(input[0].center.xyz + (fHalfWidth * f3Right) - (fHalfHeight * f3Up), 1.0f);
-	pf4Vertices[1] = float4(input[0].center.xyz + (fHalfWidth * f3Right) + (fHalfHeight * f3Up), 1.0f);
-	pf4Vertices[2] = float4(input[0].center.xyz - (fHalfWidth * f3Right) - (fHalfHeight * f3Up), 1.0f);
-	pf4Vertices[3] = float4(input[0].center.xyz - (fHalfWidth * f3Right) + (fHalfHeight * f3Up), 1.0f);
-
-	GS_BILLBOARD_GEOMETRY_OUTPUT output;
-	for (int i = 0; i < 4; i++)
-	{
-		output.positionW = pf4Vertices[i].xyz;
-		output.position = mul(mul(pf4Vertices[i], gmtxView), gmtxProjection);
-		output.normal = f3Look;
-		output.uv = pf2UVs[i];
-		output.index = input[0].index;
-
-		outStream.Append(output);
-	}
-} 
-Texture2D gtxtPlayerInfoTest : register(t1);
-
-float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
-{
-	float4 cColor = gtxtPlayerInfoTest.Sample(gssClamp, input.uv); 
-	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
-
-	return(cColor);
-}
-//
-//float4 PSExBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
-//{
-//	float4 cColor = gtxtExBillboardTextures[input.index].Sample(gssClamp, input.uv);
-//	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
-//
-//	return(cColor);
-//}
-

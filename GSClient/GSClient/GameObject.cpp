@@ -2,7 +2,6 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Camera.h"
-
 CGameObject::CGameObject()
 {
 	m_xmf3Position = { 0, 0, 0 };
@@ -10,7 +9,6 @@ CGameObject::CGameObject()
 
 	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
 }
-
 CGameObject::~CGameObject()
 {
 	if (m_pMesh) m_pMesh->Release();
@@ -36,49 +34,36 @@ void CGameObject::SetMesh(CMesh* pMesh)
 
 	if (m_pMesh) m_pMesh->AddRef();
 }
-
+void CGameObject::ReleaseUploadBuffers()
+{
+	//정점 버퍼를 위한 업로드 버퍼를 소멸시킨다.
+	if (m_pMesh) m_pMesh->ReleaseUploadBuffers();
+}
 void CGameObject::Animate(float fTimeElapsed)
 {
-
-}
-
-void CGameObject::Move(XMFLOAT3 pos)
-{
-	SetPosition(Vector3::Add(GetPosition(), pos));
-}
-
-void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
-{
-	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis),
-		XMConvertToRadians(fAngle));
-	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
 void CGameObject::OnPrepareRender()
 {
+}
 
+void CGameObject::Update()
+{
+	Move();
 }
 
 void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	OnPrepareRender();
+	//cout << m_xmf3Position.x << "	" << m_xmf3Position.y << endl;
 
+	OnPrepareRender();
 	if (m_pShader)
 	{
+		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
 		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 		m_pShader->Render(pd3dCommandList, pCamera);
 	}
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
-}
-
-void CGameObject::ReleaseUploadBuffers()
-{
-	if (m_pMesh) m_pMesh->ReleaseUploadBuffers();
-}
-
-XMFLOAT3 CGameObject::GetPosition()
-{
-	return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43));
 }
 
 void CGameObject::SetPosition(XMFLOAT3 pos)
@@ -90,13 +75,22 @@ void CGameObject::SetPosition(XMFLOAT3 pos)
 	m_xmf4x4World._43 = pos.z;
 }
 
-void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
+void CGameObject::SetVelocity(XMFLOAT3 pos)
 {
-	//m_pMesh->
+	m_xmf3Velocity = pos;
 }
 
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
+void CGameObject::Move()
+{
+	m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
+}
+
+void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis),
+		XMConvertToRadians(fAngle));
+	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+}
 
 CRotatingObject::CRotatingObject()
 {
@@ -109,17 +103,4 @@ CRotatingObject::~CRotatingObject()
 void CRotatingObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
-}
-
-CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	float width, float height, float depth)
-{
-	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
-		width, height, depth);
-
-	SetMesh(pCubeMeshTex);
-}
-
-CBox::~CBox()
-{
 }
