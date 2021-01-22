@@ -6,6 +6,7 @@ struct VS_CB_CAMERA_INFO
 {
 	XMFLOAT4X4 m_xmf4x4View;
 	XMFLOAT4X4 m_xmf4x4Projection;
+	XMFLOAT3   m_xmf3Position;
 };
 class CCamera
 {
@@ -32,7 +33,12 @@ private:
 
 	//ºäÆ÷Æ®¿Í ¾¾Àú »ç°¢Çü
 	D3D12_VIEWPORT					m_d3dViewport;
-	D3D12_RECT						m_d3dScissorRect;
+	D3D12_RECT						m_d3dScissorRect; 
+
+private:
+	ID3D12Resource* m_pd3dcbCamera = NULL;
+	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
+
 public:
 	CCamera();
 	~CCamera();
@@ -97,5 +103,7 @@ public:
 	void SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList);
 
 public:
+	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void ReleaseShaderVariables();
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, int rootParameterIndex = 1);
 };

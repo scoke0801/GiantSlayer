@@ -13,6 +13,9 @@
     <FxCompile Include="Shaders.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="SceneTH.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader12.cpp">
@@ -80,6 +83,12 @@
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>GameObject\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneTH.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>GameObject\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -161,6 +170,12 @@
     <ClInclude Include="Shader.h">
       <Filter>GameObject\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="SceneTH.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>GameObject\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -227,6 +242,9 @@
     </Filter>
     <Filter Include="GameObject\Shader">
       <UniqueIdentifier>{04f39449-42c1-42ab-bb97-94aa7f89a159}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\UI">
+      <UniqueIdentifier>{957b4eb7-391b-4bc8-9c0d-74a018cb3ce4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

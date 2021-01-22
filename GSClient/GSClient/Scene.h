@@ -2,11 +2,7 @@
 #include "GameObject.h"
 #include "d3dx12.h"
 #include "UploadBuffer.h"
-#include "Mesh.h"
-
-using Microsoft::WRL::ComPtr;
-using namespace DirectX;
-using namespace DirectX::PackedVector;
+#include "Mesh.h" 
 
 #define GET_PSO(key) *m_PSOs[key].get() 
 
@@ -41,7 +37,7 @@ public:
 	virtual void SendDataToNextScene(void* context) {}	
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {} 
 	virtual void ReleaseUploadBuffers() {}
-	virtual void BuildCamera(int width, int height) {}
+	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) {}
 
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) { return NULL; }
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() { return NULL; } 
@@ -49,7 +45,6 @@ public:
 protected:
 	template<class SceneName>
 	void ChangeScene(void* pContext = nullptr) { CFramework::GetInstance().ChangeScene<SceneName>(pContext); }
-
 };  
 
 class CNullScene : public CScene
@@ -70,11 +65,7 @@ public:
 	virtual void OnMouseUp(WPARAM btnState, int x, int y) { }
 	virtual void OnMouseMove(WPARAM btnState, int x, int y) { }
 
-public:
-
-	CGameObject testbox1;
-	CGameObject testbox2;
-
+public:   
 	virtual void SendDataToNextScene(void* context) override {}
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override {}
 };
