@@ -6,36 +6,51 @@ class CCamera;
 
 class CGameObject
 {
+private:
+	int			m_nReferences = 0;
+	 
+protected:
+	XMFLOAT4X4	m_xmf4x4World;
+
+	XMFLOAT3	m_xmf3Position;
+	XMFLOAT3	m_xmf3Velocity;
+
+	CMesh*		m_pMesh = NULL;
+	CShader*	m_pShader = NULL;
+
 public:
 	CGameObject();
 	virtual ~CGameObject();
-private:
-	int m_nReferences = 0;
-	XMFLOAT3	m_xmf3Position;
-	XMFLOAT3	m_xmf3Velocity;
+
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
-protected:
-	XMFLOAT4X4 m_xmf4x4World;
-	CMesh* m_pMesh = NULL;
-	CShader* m_pShader = NULL;
-public:
+
+	virtual void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+	
 	void ReleaseUploadBuffers();
-	virtual void SetMesh(CMesh* pMesh);
-	virtual void SetShader(CShader* pShader);
+
+public:
 	virtual void Animate(float fTimeElapsed);
+	virtual void Update() {};
+
 	virtual void OnPrepareRender();
-	void Update();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
-	void SetPosition(XMFLOAT3 pos);
-	void SetVelocity(XMFLOAT3 pos);
-
+public:
+	virtual void Move(XMFLOAT3 pos);
 	void Move();
+	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
+	bool CollisionCheck() { return false; };
 
 public:
-	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
+	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
+
+	virtual void SetMesh(CMesh* pMesh);
+	virtual void SetShader(CShader* pShader);
+	void SetPosition(XMFLOAT3 pos);
+	void SetVelocity(XMFLOAT3 pos);
+	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 };
 
 class CRotatingObject : public CGameObject

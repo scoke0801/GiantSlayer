@@ -90,6 +90,15 @@
     <ClCompile Include="UI.cpp">
       <Filter>GameObject\UI</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>GameObject\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>GameObject\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyState.cpp">
+      <Filter>State</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -176,6 +185,15 @@
     <ClInclude Include="UI.h">
       <Filter>GameObject\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>GameObject\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>GameObject\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyState.h">
+      <Filter>State</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -245,6 +263,12 @@
     </Filter>
     <Filter Include="GameObject\UI">
       <UniqueIdentifier>{957b4eb7-391b-4bc8-9c0d-74a018cb3ce4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Player">
+      <UniqueIdentifier>{5e448174-df10-42b2-b84c-e96412b22c3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Enemy">
+      <UniqueIdentifier>{947bf519-a036-4da5-b861-4d8bf7ea6137}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

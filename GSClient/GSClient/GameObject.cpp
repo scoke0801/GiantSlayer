@@ -47,16 +47,10 @@ void CGameObject::OnPrepareRender()
 {
 }
 
-void CGameObject::Update()
-{
-	Move();
-}
-
 void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	//cout << m_xmf3Position.x << "	" << m_xmf3Position.y << endl;
-
 	OnPrepareRender();
+
 	if (m_pShader)
 	{
 		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
@@ -78,6 +72,16 @@ void CGameObject::SetPosition(XMFLOAT3 pos)
 void CGameObject::SetVelocity(XMFLOAT3 pos)
 {
 	m_xmf3Velocity = pos;
+}
+
+void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
+{	
+	//m_pMesh->
+}
+
+void CGameObject::Move(XMFLOAT3 pos)
+{
+	SetPosition(Vector3::Add(GetPosition(), pos));
 }
 
 void CGameObject::Move()
