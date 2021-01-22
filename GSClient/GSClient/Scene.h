@@ -2,6 +2,7 @@
 #include "d3dx12.h"
 #include "UploadBuffer.h"
 #include "Mesh.h"
+#include "Shader.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;

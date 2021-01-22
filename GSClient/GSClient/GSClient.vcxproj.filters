@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <FxCompile Include="Shaders.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\JHTestShader.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
@@ -98,6 +95,7 @@
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>GameObject</Filter>
+    </ClCompile>
     <ClCompile Include="UI.cpp">
       <Filter>GameObject\UI</Filter>
     </ClCompile>
@@ -192,6 +190,7 @@
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>GameObject</Filter>
+    </ClInclude>
     <ClInclude Include="UI.h">
       <Filter>GameObject\UI</Filter>
     </ClInclude>

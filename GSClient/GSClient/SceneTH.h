@@ -12,6 +12,9 @@ private:
 	CGameObject** m_ppObjects = NULL;
 	CPlayer** m_ppPlayers = NULL;
 
+	CCamera** m_Cameras;
+	CCamera* m_CurrentCamera = nullptr;
+
 	int m_nObjects = 0;
 	int m_nPlayers = 0;
 
@@ -20,12 +23,14 @@ public:
 	~CSceneTH();
 
 	virtual void Update(double elapsedTime) override;
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void ProcessInput();
 
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void ReleaseUploadBuffers() override;
 	void ReleaseObjects();
+
+	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override;
 
 	//그래픽 루트 시그너쳐를 생성한다.
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;

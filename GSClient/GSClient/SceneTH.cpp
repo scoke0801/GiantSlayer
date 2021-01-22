@@ -25,22 +25,26 @@ void CSceneTH::Update(double elapsedTime)
 	}
 }
 
-void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-	if (pCamera) pCamera->UpdateShaderVariables(pd3dCommandList);
+	
+	if (m_CurrentCamera)
+	{
+		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList);
+		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	}
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
-			m_ppObjects[j]->Draw(pd3dCommandList, pCamera);
+			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 
 	for (int j = 0; j < m_nPlayers; j++)
 	{
 		if (m_ppPlayers[j])
-			m_ppPlayers[j]->Draw(pd3dCommandList, pCamera);
+			m_ppPlayers[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 
@@ -154,6 +158,29 @@ void CSceneTH::ReleaseObjects()
 				delete m_ppPlayers[j];
 		delete[] m_ppPlayers;
 	}
+}
+
+void CSceneTH::BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	int width, int height)
+{
+	int nCameras = 5;
+	m_Cameras = new CCamera * [nCameras];
+	for (int i = 0; i < nCameras; ++i)
+	{
+		CCamera* pCamera = new CCamera;
+		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 5000.0f);
+		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
+		pCamera->SetScissorRect(0, 0, width, height);
+		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+		m_Cameras[i] = pCamera;
+	}
+	m_Cameras[0]->SetPosition(0.0f, 10.0f, -150.0f);
+	m_Cameras[1]->SetPosition(1000.0f, 10.0f, -150.0f);
+	m_Cameras[2]->SetPosition(-1000.0f, 10.0f, -150.0f);
+	m_Cameras[3]->SetPosition(0.0f, 1010.0f, -150.0f);
+	m_Cameras[4]->SetPosition(0.0f, -1010.0f, -150.0f);
+
+	m_CurrentCamera = m_Cameras[0];
 }
 
 ID3D12RootSignature* CSceneTH::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)

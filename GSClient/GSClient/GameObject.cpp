@@ -74,12 +74,6 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 void CGameObject::ReleaseUploadBuffers()
 {
 	if (m_pMesh) m_pMesh->ReleaseUploadBuffers();
-
-	m_xmf3Position = pos;	
-
-	m_xmf4x4World._41 = pos.x;
-	m_xmf4x4World._42 = pos.y;
-	m_xmf4x4World._43 = pos.z;
 }
 
 XMFLOAT3 CGameObject::GetPosition()

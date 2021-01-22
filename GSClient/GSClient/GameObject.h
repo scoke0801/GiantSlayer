@@ -38,8 +38,6 @@ public:
 	virtual void OnPrepareRender();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
-	virtual void ReleaseUploadBuffers();
-
 	XMFLOAT3 GetPosition();
 
 	void SetPosition(XMFLOAT3 pos);
