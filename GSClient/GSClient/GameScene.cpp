@@ -30,13 +30,15 @@ void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dC
 	CDiffusedShader* pShader = new CDiffusedShader();
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	pRotatingObject->SetShader(pShader);
+	pRotatingObject->SetShader(pShader); 
 
 	m_ppObjects[0] = pRotatingObject;
 }
 
 void CGameScene::ReleaseObjects()
 {
+	m_ppObjects[1]; 
+
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 	if (m_ppObjects)
 	{
@@ -52,12 +54,13 @@ void CGameScene::AnimateObjects(float fTimeElapsed)
 
 }
 
-void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	CCamera* pCamera = nullptr;
+	//pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
-	if (pCamera) pCamera->UpdateShaderVariables(pd3dCommandList);
+	//if (pCamera) pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)

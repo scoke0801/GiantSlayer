@@ -65,7 +65,6 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 
 	if (m_pShader)
 	{
-		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
 		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 		m_pShader->Render(pd3dCommandList, pCamera);
 	}
@@ -75,6 +74,12 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 void CGameObject::ReleaseUploadBuffers()
 {
 	if (m_pMesh) m_pMesh->ReleaseUploadBuffers();
+
+	m_xmf3Position = pos;	
+
+	m_xmf4x4World._41 = pos.x;
+	m_xmf4x4World._42 = pos.y;
+	m_xmf4x4World._43 = pos.z;
 }
 
 XMFLOAT3 CGameObject::GetPosition()
@@ -110,4 +115,17 @@ CRotatingObject::~CRotatingObject()
 void CRotatingObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
+}
+
+CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	float width, float height, float depth)
+{
+	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
+		width, height, depth);
+
+	SetMesh(pCubeMeshTex);
+}
+
+CBox::~CBox()
+{
 }

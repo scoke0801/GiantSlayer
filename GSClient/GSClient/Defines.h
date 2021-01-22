@@ -78,3 +78,10 @@ inline UINT CalcCBufferSize(unsigned long long size) { return ((size + 255) & ~2
     if(FAILED(hr__)) { throw DxException(hr__, L#x, wfn, __LINE__); } \
 }
 #endif
+
+#define PI 3.1415926535897
+
+inline double GetRadian(int num)
+{
+	return num * (PI / 180);
+}

@@ -7,11 +7,19 @@
 #define VK_C 0x43
 #define VK_1 0x31
 #define VK_2 0x32
- 
+#define VK_3 0x33
+#define VK_4 0x34
+#define VK_5 0x35 
+
+#define VK_B 0x42 
+
 struct GameInputs
 {
 	bool KEY_1 = false;
 	bool KEY_2 = false;
+	bool KEY_3 = false;
+	bool KEY_4 = false;
+	bool KEY_5 = false;
 
 	bool KEY_W = false;
 	bool KEY_A = false;
@@ -19,7 +27,9 @@ struct GameInputs
 	bool KEY_D = false;
 
 	bool KEY_C = false;
-	 
+
+	bool KEY_B = false;
+
 	bool KEY_SPACE = false;
 
 	bool KEY_F1 = false;
@@ -31,13 +41,11 @@ struct GameInputs
 class CInputHandler
 {
 private :
-	HWND m_hTargetWND;
+	HWND			m_hTargetWND;
 
 public:
-	GameInputs m_Inputs;
-	bool TestingMouseClick = false;
-	POINT m_PrevMousePos;
-
+	GameInputs		m_Inputs;
+	 
 private:
 	CInputHandler();
 	CInputHandler(const CInputHandler& other) = delete;
@@ -49,17 +57,9 @@ public:
 		static CInputHandler self;
 		return self;
 	}
-	void ProcessInput();
-
-	void MouseMove(WPARAM btnState, int x, int y);
-	void MouseDown(WPARAM btnState, int x, int y);
-	void MouseUp(WPARAM btnState, int x, int y);
-
+	void ProcessInput(); 
 public:
 	void SetTargetWND(HWND hTarget) { m_hTargetWND = hTarget; }
-
-	POINT GetMousePoint() const { return m_PrevMousePos; }
-	void ResetMousePos() { m_PrevMousePos = POINT(); }
 };
+
 #define GAME_INPUT CInputHandler::GetInstance().m_Inputs
-#define GET_MOUSE_POS CInputHandler::GetInstance().m_PrevMousePos

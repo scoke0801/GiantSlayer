@@ -134,7 +134,9 @@ void CFramework::CreateDirect3DDevice()
 	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_pdxgiFactory->EnumAdapters1(i, &pd3dAdapter); i++)
 	{
 		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
-		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
+		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);	
+		if (lstrcmp(dxgiAdapterDesc.Description, L"AMD Radeon(TM) Vega 8 Graphics") == 0)
+			continue;
 		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
 		if (SUCCEEDED(D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), (void**)&m_pd3dDevice))) break; 
 	}
@@ -285,25 +287,13 @@ void CFramework::BuildScene()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL); 
 	//m_CurrentScene = new CNullScene;
-
-	m_pCamera = new CCamera();
-	m_pCamera->SetViewport(0, 0, m_nWndClientWidth, m_nWndClientHeight, 0.0f, 1.0f);
-	m_pCamera->SetScissorRect(0, 0, m_nWndClientWidth, m_nWndClientHeight);
-
-	m_pCamera->GenerateProjectionMatrix(1.0f, 500.0f,
-		float(m_nWndClientWidth) / float(m_nWndClientHeight), 90.0f);
-	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 15.0f, -25.0f), XMFLOAT3(0.0f, 0.0f, 0.0f),
-		XMFLOAT3(0.0f, 1.0f, 0.0f));
-
+  
 	//m_CurrentScene = new CGameScene; 
 	m_CurrentScene = new CNullScene;
 	//m_CurrentScene = new CTitleScene; 
 	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList);
-
-	/*m_pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList,
-		m_CurrentScene->GetGraphicsRootSignature(), m_CurrentScene->GetTerrain(), 1);*/
-
-	//m_pCamera = m_pPlayer->GetCamera();
+	m_CurrentScene->BuildCamera(m_pd3dDevice, m_pd3dCommandList, 
+		m_nWndClientWidth, m_nWndClientHeight);
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -487,8 +477,7 @@ void CFramework::Draw()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
-
-	m_CurrentScene->Draw(m_pd3dCommandList, m_pCamera);
+	m_CurrentScene->Draw(m_pd3dCommandList);
 
 	//if (m_pPlayer)
 	//	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);

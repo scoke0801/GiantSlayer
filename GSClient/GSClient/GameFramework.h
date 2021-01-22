@@ -1,6 +1,7 @@
 #pragma once
 
-class CScene;
+#include "Scene.h"
+
 class CCamera;
 
 class CFramework
@@ -12,21 +13,20 @@ private:
 	CGameTimer					m_GameTimer;
 	CGameTimer					m_FPSTimer;
 	 
-	CScene* m_CurrentScene;
-	CCamera* m_pCamera = NULL;
+	CScene*						m_CurrentScene;
 
 	// 타이틀바 출력 관련 변수입니다.
-	_TCHAR				m_pszFrameRate[50];
-	TCHAR				m_captionTitle[50];
-	int					m_titleLength; 
+	_TCHAR						m_pszFrameRate[50];
+	TCHAR						m_captionTitle[50];
+	int							m_titleLength; 
 
 	// 다이렉트X 관련 변수입니다.
 	int							m_nWndClientWidth;
 	int							m_nWndClientHeight;
 
-	IDXGIFactory4* m_pdxgiFactory = NULL;
-	IDXGISwapChain3* m_pdxgiSwapChain = NULL;
-	ID3D12Device* m_pd3dDevice = NULL;
+	IDXGIFactory4*				m_pdxgiFactory = NULL;
+	IDXGISwapChain3*			m_pdxgiSwapChain = NULL;
+	ID3D12Device*				m_pd3dDevice = NULL;
 
 	bool						m_bMsaa4xEnable = false;
 	UINT						m_nMsaa4xQualityLevels = 0;
@@ -34,19 +34,19 @@ private:
 	static const UINT			m_nSwapChainBuffers = SWAP_BUFFER_COUNT;
 	UINT						m_nSwapChainBufferIndex;
 
-	ID3D12Resource* m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
-	ID3D12DescriptorHeap* m_pd3dRtvDescriptorHeap = NULL;
+	ID3D12Resource*				m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
+	ID3D12DescriptorHeap*		m_pd3dRtvDescriptorHeap = NULL;
 
-	ID3D12PipelineState* m_pd3dPipelineState = NULL;
+	ID3D12PipelineState*		m_pd3dPipelineState = NULL;
 
-	ID3D12Resource* m_pd3dDepthStencilBuffer = NULL;
-	ID3D12DescriptorHeap* m_pd3dDsvDescriptorHeap = NULL;
+	ID3D12Resource*				m_pd3dDepthStencilBuffer = NULL;
+	ID3D12DescriptorHeap*		m_pd3dDsvDescriptorHeap = NULL;
 
-	ID3D12CommandAllocator* m_pd3dCommandAllocator = NULL;
-	ID3D12CommandQueue* m_pd3dCommandQueue = NULL;
-	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
+	ID3D12CommandAllocator*		m_pd3dCommandAllocator = NULL;
+	ID3D12CommandQueue*			m_pd3dCommandQueue = NULL;
+	ID3D12GraphicsCommandList*	m_pd3dCommandList = NULL;
 
-	ID3D12Fence* m_pd3dFence = NULL;
+	ID3D12Fence*				m_pd3dFence = NULL;
 	UINT64						m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE						m_hFenceEvent;
 
@@ -84,8 +84,6 @@ public: // about GetInstance , init framework
 	void OnDestroy();
 
 private:
-
-
 	void CreateSwapChain();
 	void CreateDirect3DDevice();
 	void CreateCommandQueueAndList();
@@ -98,7 +96,6 @@ private:
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
 
-
 	void BuildScene();
 
 	void CreateAboutD2D();
@@ -110,6 +107,14 @@ public:	// about Update
 	void Animate();
 	void Draw();
 
+public: // about Mouse process
+	void OnMouseDown(WPARAM btnState, int x, int y) { if(m_CurrentScene) m_CurrentScene->OnMouseDown(btnState, x, y);}
+	void OnMouseUp(WPARAM btnState, int x, int y)	{ if(m_CurrentScene) m_CurrentScene->OnMouseUp  (btnState, x, y);}
+	void OnMouseMove(WPARAM btnState, int x, int y) { if(m_CurrentScene) m_CurrentScene->OnMouseMove(btnState, x, y);}
+
+public:
+	HWND GetHWND() const { return m_hWnd; }
+
 public:	// about scene change
 	template <typename SceneName>
 	void ChangeScene(void* pContext = nullptr)
@@ -120,7 +125,9 @@ public:	// about scene change
 		static CScene* prevScene; 
 		scene->Init(m_pd3dDevice, m_pd3dCommandList);
 		scene->SendDataToNextScene(pContext);
-		
+		scene->BuildCamera(m_pd3dDevice, m_pd3dCommandList,
+			m_nWndClientWidth, m_nWndClientHeight);
+
 		if (m_CurrentScene)
 		{
 			prevScene = m_CurrentScene;

@@ -31,7 +31,7 @@ void CNullScene::Update(double elapsedTime)
 	ProcessInput();
 }
 
-void CNullScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CNullScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {   
 	cout << endl;
 }
@@ -53,6 +53,6 @@ void CNullScene::ProcessInput()
 	}
 	if (gameInput.KEY_F4)
 	{
-		ChangeScene<CSceneJH>();
-	}
+		ChangeScene<CSceneJH2>();
+	}  
 }
