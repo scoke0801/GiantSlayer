@@ -3,7 +3,7 @@
 //정점을 표현하기 위한 클래스를 선언한다. 
 class CVertex
 {
-protected:
+public:
 	//정점의 위치 벡터이다(모든 정점은 최소한 위치 벡터를 가져야 한다).
 	XMFLOAT3 m_xmf3Position;
 public:
@@ -13,7 +13,7 @@ public:
 };
 class CDiffusedVertex : public CVertex
 {
-protected:
+public:
 	//정점의 색상이다.
 	XMFLOAT4 m_xmf4Diffuse;
 public:

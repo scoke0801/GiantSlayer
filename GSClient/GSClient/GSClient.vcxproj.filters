@@ -81,6 +81,9 @@
     <ClCompile Include="Shader.cpp">
       <Filter>GameObject\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>GameObject\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -160,6 +163,9 @@
     </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>GameObject\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>GameObject\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

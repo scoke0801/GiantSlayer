@@ -94,7 +94,18 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout(ShaderTypes type)
 		pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		pd3dInputElementDescs[1] = { "TEXCORD" , 0, DXGI_FORMAT_R32G32_FLOAT,	 0,  12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
-		m_d3dInputLayoutDesc;
+		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+		m_d3dInputLayoutDesc.NumElements = nInputElementDescs;
+	}
+	if (type == ShaderTypes::Billboard)
+	{
+		UINT nInputElementDescs = 3;
+		D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+		pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		pd3dInputElementDescs[2] = { "TEXTURE", 0, DXGI_FORMAT_R32_UINT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	
 		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 		m_d3dInputLayoutDesc.NumElements = nInputElementDescs;
 	}
@@ -130,9 +141,9 @@ D3D12_SHADER_BYTECODE CShader::CreatePixelShader(WCHAR* pszFileName, LPCSTR pszS
 }
 D3D12_SHADER_BYTECODE CShader::CreateGeometryShader(WCHAR* pszFileName, LPCSTR pszShaderName)
 {
-	m_d3dPSBytecode = (CShader::CompileShaderFromFile(pszFileName, pszShaderName, "gs_5_1",
-		&m_pd3dPixelShaderBlob));
-	return m_d3dPSBytecode;
+	m_d3dGSBytecode = (CShader::CompileShaderFromFile(pszFileName, pszShaderName, "gs_5_1",
+		&m_pd3dGeometryShaderBlob));
+	return m_d3dGSBytecode;
 }
 
 //셰이더 소스 코드를 컴파일하여 바이트 코드 구조체를 반환한다. 
@@ -197,7 +208,7 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	d3dPipelineStateDesc.pRootSignature = pd3dGraphicsRootSignature;
 	d3dPipelineStateDesc.VS = m_d3dVSBytecode;
 	d3dPipelineStateDesc.PS = m_d3dPSBytecode; 
-	//d3dPipelineStateDesc.GS = m_d3dGSBytecode;
+	if(m_pd3dGeometryShaderBlob)d3dPipelineStateDesc.GS = m_d3dGSBytecode;
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
