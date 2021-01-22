@@ -55,8 +55,7 @@ using namespace std;
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
- 
-
+  
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 

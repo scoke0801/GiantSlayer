@@ -205,7 +205,9 @@ void CGameScene2::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	BuildObjects(pd3dDevice, pd3dCommandList);
 }
 
-void CGameScene2::BuildCamera(int width, int height)
+void CGameScene2::BuildCamera(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList, 
+	int width, int height)
 {
 	int nCameras = 5;
 	m_Cameras = new CCamera * [nCameras];
@@ -214,7 +216,8 @@ void CGameScene2::BuildCamera(int width, int height)
 		CCamera* pCamera = new CCamera;
 		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 5000.0f);
 		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
-		pCamera->SetScissorRect(0, 0, width, height);
+		pCamera->SetScissorRect(0, 0, width, height);	
+		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		m_Cameras[i] = pCamera;
 	}
 	m_Cameras[0]->SetPosition(0.0f, 10.0f, -150.0f);
@@ -246,11 +249,11 @@ void CGameScene2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);*/
 
-	CGeneralShader* pGeneralShader = new CGeneralShader();
-	pGeneralShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VSTextured");
-	pGeneralShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PSTextured");
-	pGeneralShader->CreateInputLayout(0);
-	pGeneralShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	CShader* pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VSTextured");
+	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PSTextured");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	// 추가 스카이박스
 
@@ -273,7 +276,7 @@ void CGameScene2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		CRotatingObject* pObject = new CRotatingObject();
 
 		pObject->SetMesh(pCubeMeshTex);
-		pObject->SetShader(pGeneralShader);
+		pObject->SetShader(pShader);
 	
 		m_ppObjects[i] = pObject;
 		
