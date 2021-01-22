@@ -61,17 +61,19 @@ protected:
 	CGameObject**			m_ppObjects = NULL;
 	int						m_nObjects = 0;
 
+	CGameObject**			m_ppUIs = NULL;
+	int						m_nUIs = 0;
+
 	ID3D12RootSignature*	m_pd3dGraphicsRootSignature = NULL;
 
 	CCamera**				m_Cameras;
 	CCamera*				m_CurrentCamera = nullptr;
-
-	CMesh*					m_TestMesh;
-
+	 
+	bool					m_DrawUI = true;
 private:
 	POINT					m_LastMousePos;
 
-	ID3D12DescriptorHeap* m_pd3dSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap*	m_pd3dSrvDescriptorHeap = nullptr;
 
 public:
 	CSceneJH2();

@@ -9,7 +9,9 @@
 #define VK_2 0x32
 #define VK_3 0x33
 #define VK_4 0x34
-#define VK_5 0x35
+#define VK_5 0x35 
+
+#define VK_B 0x42 
 
 struct GameInputs
 {
@@ -25,7 +27,9 @@ struct GameInputs
 	bool KEY_D = false;
 
 	bool KEY_C = false;
-	 
+
+	bool KEY_B = false;
+
 	bool KEY_SPACE = false;
 
 	bool KEY_F1 = false;

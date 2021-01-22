@@ -492,13 +492,13 @@ void CSceneJH2::AnimateObjects(float fTimeElapsed)
 }
 
 void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
-{  
-	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature); 
+{
+	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	if (m_CurrentCamera)
 	{
 		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList);
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	} 
+	}
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
@@ -507,11 +507,16 @@ void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRootDescriptorTable(2, tex);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
-	for (int j = 0; j < m_nObjects; j++)
+	for (int j = 0; j < m_nObjects - 1; j++)
 	{
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
-	} 
+	}
+	if (m_DrawUI)
+	{
+		if (m_ppObjects[5])
+			m_ppObjects[5]->Draw(pd3dCommandList, m_CurrentCamera);
+	}
 }
 
 void CSceneJH2::ProcessInput()
@@ -555,6 +560,12 @@ void CSceneJH2::ProcessInput()
 	if (keyInput.KEY_5)
 	{
 		m_CurrentCamera = m_Cameras[4];
+	}
+	///////////////////////////////////////////////////////////////
+	//
+	if (keyInput.KEY_B)
+	{
+		m_DrawUI = true - m_DrawUI;
 	}
 
 	m_CurrentCamera->UpdateViewMatrix();
