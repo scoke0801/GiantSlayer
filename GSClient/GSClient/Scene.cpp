@@ -3,7 +3,7 @@
  
 #include "TitleScene.h"
 #include "GameScene.h"
-#include "SceneJH.h" 
+#include "SceneJH.h"
 #include "SceneTH.h"
 
 CScene::CScene()
@@ -13,6 +13,7 @@ CScene::CScene()
 
 CScene::~CScene()
 {
+
 }
 
 CNullScene::CNullScene()
@@ -22,24 +23,17 @@ CNullScene::CNullScene()
 
 CNullScene::~CNullScene()
 {
+
 }
 
 void CNullScene::Update(double elapsedTime)
 { 
-	ProcessInput(); 
-	testbox1.Update();
-	testbox2.Update();
-
+	ProcessInput();
 }
 
 void CNullScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {   
-	//cout << "박스1: ";
-	//testbox1.Draw(pd3dCommandList, pCamera);
-	//cout << "박스2: ";
-	//testbox2.Draw(); 
 	cout << endl;
-
 }
 
 void CNullScene::ProcessInput()
@@ -60,5 +54,5 @@ void CNullScene::ProcessInput()
 	if (gameInput.KEY_F4)
 	{
 		ChangeScene<CSceneJH>();
-	}  
+	}
 }

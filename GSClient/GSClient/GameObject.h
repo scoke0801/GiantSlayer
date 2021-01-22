@@ -10,50 +10,37 @@ public:
 	CGameObject();
 	virtual ~CGameObject();
 
-private:
-	int m_nReferences = 0;
-	XMFLOAT3	m_xmf3Position;
-	XMFLOAT3	m_xmf3Velocity;
+protected:
+	XMFLOAT3				m_xmf3Position;
+	XMFLOAT3				m_xmf3Velocity;
+
+	int						m_nReferences = 0;
+
+	XMFLOAT4X4				m_xmf4x4World;
+	CMesh*					m_pMesh = NULL;
+	CShader*				m_pShader = NULL;
+
+	BoundingBox				m_BoundingBox;
 
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
-protected:
-	XMFLOAT4X4 m_xmf4x4World;
-	CMesh* m_pMesh = NULL;
-	CShader* m_pShader = NULL;
+	void SetMesh(CMesh* pMesh);
+	void SetShader(CShader* pShader);
 
-public:
-	void ReleaseUploadBuffers();
-	virtual void SetMesh(CMesh* pMesh);
-	virtual void SetShader(CShader* pShader);
+	virtual void Update() {};
 	virtual void Animate(float fTimeElapsed);
+	virtual void Move(XMFLOAT3 pos);
+	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	virtual void OnPrepareRender();
-	void Update();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
-public:
+	virtual void ReleaseUploadBuffers();
+
 	XMFLOAT3 GetPosition();
-	XMFLOAT3 GetLook();
-	XMFLOAT3 GetUp();
-	XMFLOAT3 GetRight();
 
-	void SetPosition(float x, float y, float z);
-	void SetPosition(XMFLOAT3 xmf3Position);
-
-	void MoveStrafe(float fDistance = 1.0f);
-	void MoveUp(float fDistance = 1.0f);
-	void MoveForward(float fDistance = 1.0f);
-
-	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
-
-	void Move();
-
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice,
-		ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void ReleaseShaderVariables();
+	void SetPosition(XMFLOAT3 pos);
 };
 
 class CRotatingObject : public CGameObject

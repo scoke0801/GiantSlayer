@@ -162,10 +162,14 @@ void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 void CShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	* pd3dCommandList)
 {
+
 }
+
 void CShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+
 }
+
 void CShader::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList,
 	XMFLOAT4X4* pxmf4x4World)
 {

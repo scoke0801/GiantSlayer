@@ -14,7 +14,7 @@ Wandering* Wandering::Instance()
 
 void Wandering::Enter(CEnemy* pEnemy)
 {
-
+    cout << "방황중..." << endl;
 }
 
 void Wandering::Execute(CEnemy* pEnemy)
@@ -22,12 +22,12 @@ void Wandering::Execute(CEnemy* pEnemy)
     if (pEnemy->IsEnemyInSight())
         pEnemy->GetFSM()->ChangeState(Tracking::Instance());
     else
-        pEnemy->Walking();
+        pEnemy->MoveRandom();
 }
 
 void Wandering::Exit(CEnemy* pEnemy)
 {
-
+    cout << "플레이어 발견!" << endl;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -42,22 +42,43 @@ Tracking* Tracking::Instance()
 
 void Tracking::Enter(CEnemy* pEnemy)
 {
-
+    cout << "플레이어 추적 시작" << endl;
 }
 
 void Tracking::Execute(CEnemy* pEnemy)
 {
-    /*if (!pEnemy->IsEnemyInSight())
+    if (!pEnemy->IsEnemyInSight())
         pEnemy->GetFSM()->ChangeState(Wandering::Instance());
-    else {
-        if (pEnemy->x > pEnemy->target->x) pEnemy->x -= 2;
-        if (pEnemy->x < pEnemy->target->x) pEnemy->x += 2;
-        if (pEnemy->y > pEnemy->target->y) pEnemy->y -= 2;
-        if (pEnemy->y < pEnemy->target->y) pEnemy->y += 2;
-    }*/
+    else
+        pEnemy->TrackingTarget();
 }
 
 void Tracking::Exit(CEnemy* pEnemy)
+{
+    cout << "플레이어 추적 종료" << endl;
+}
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+RunAway* RunAway::Instance()
+{
+    static RunAway instance;
+
+    return &instance;
+}
+
+void RunAway::Enter(CEnemy* pEnemy)
+{
+
+}
+
+void RunAway::Execute(CEnemy* pEnemy)
+{
+    
+}
+
+void RunAway::Exit(CEnemy* pEnemy)
 {
 
 }

@@ -43,9 +43,24 @@ public:
     virtual void Exit(CEnemy* enemy);
 };
 
-class Running : public CState<CEnemy>
+class RunAway : public CState<CEnemy>
 {
+private:
 
+    RunAway() {};
+
+    RunAway(const Tracking&);
+    RunAway& operator=(const RunAway&);
+
+public:
+
+    static RunAway* Instance();
+
+    virtual void Enter(CEnemy* enemy);
+
+    virtual void Execute(CEnemy* enemy);
+
+    virtual void Exit(CEnemy* enemy);
 };
 
 class Attack : public CState<CEnemy>
