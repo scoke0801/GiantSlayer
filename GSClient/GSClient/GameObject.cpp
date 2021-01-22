@@ -104,3 +104,16 @@ void CRotatingObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
 }
+
+CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	float width, float height, float depth)
+{
+	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
+		width, height, depth);
+
+	SetMesh(pCubeMeshTex);
+}
+
+CBox::~CBox()
+{
+}

@@ -228,6 +228,9 @@
     <Filter Include="GameObject\Shader">
       <UniqueIdentifier>{04f39449-42c1-42ab-bb97-94aa7f89a159}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameObject\UI">
+      <UniqueIdentifier>{0f2e0bb2-bc7d-46f7-8183-915daeb08be4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GSClient.rc">
@@ -236,10 +239,5 @@
     <ResourceCompile Include="GSClient.rc">
       <Filter>Main\Resources</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="TitleScene.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>

@@ -386,37 +386,22 @@ void CSceneJH2::BuildCamera(int width, int height)
 }
 
 void CSceneJH2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	//가로x세로x깊이가 12x12x12인 정육면체 메쉬를 생성한다.
-	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
-		50.0f, 50.0f, 50.0f);
-
-	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
-		50.0f, 50.0f, 50.0f);
-
+{ 
 	m_nObjects = 5;
 	m_ppObjects = new CGameObject * [m_nObjects];
-
-	CDiffusedShader* pShader = new CDiffusedShader();
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	CGeneralShader* pGeneralShader = new CGeneralShader();
-	pGeneralShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VSTextured");
-	pGeneralShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PSTextured");
-	pGeneralShader->CreateInputLayout(0);
-	pGeneralShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	 
+	CShader* pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VSTextured");
+	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PSTextured");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	for (int i = 0; i < m_nObjects; ++i)
-	{
-		CRotatingObject* pObject = new CRotatingObject();
-		//pRotatingObject->SetMesh(pCubeMesh);
-		//pRotatingObject->SetShader(pShader);
-
-		pObject->SetMesh(pCubeMeshTex);
-		pObject->SetShader(pGeneralShader);
-
-		m_ppObjects[i] = pObject;
+	{ 
+		CBox* pBox = new CBox(pd3dDevice, pd3dCommandList,  
+			50.0f, 50.0f, 50.0f);
+		pBox->SetShader(pShader);
+		m_ppObjects[i] = pBox;
 	}
 
 	m_ppObjects[0]->SetPosition({     0,     0,  0 });

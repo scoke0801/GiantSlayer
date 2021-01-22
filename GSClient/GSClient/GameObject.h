@@ -6,20 +6,26 @@ class CCamera;
 
 class CGameObject
 {
-public:
-	CGameObject();
-	virtual ~CGameObject();
 private:
 	int m_nReferences = 0;
 	XMFLOAT3	m_xmf3Position;
 	XMFLOAT3	m_xmf3Velocity;
-public:
-	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
+
 protected:
 	XMFLOAT4X4 m_xmf4x4World;
 	CMesh* m_pMesh = NULL;
 	CShader* m_pShader = NULL;
+
+public:
+	CGameObject();
+	virtual ~CGameObject();
+
+public:
+	void AddRef() { m_nReferences++; }
+	void Release() { if (--m_nReferences <= 0) delete this; }
+
+	virtual void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+
 public:
 	void ReleaseUploadBuffers();
 	virtual void SetMesh(CMesh* pMesh);
@@ -51,4 +57,28 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
 	virtual void Animate(float fTimeElapsed);
+};
+
+
+class CBox : public CGameObject 
+{
+public:
+	CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		float width, float height, float depth);
+	virtual ~CBox();
+
+private:
+	XMFLOAT3 m_xmf3RotationAxis;
+	float m_fRotationSpeed;
+
+public:
+	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
+	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
+
+	virtual void Animate(float fTimeElapsed) {}
+};
+
+class CGauge : public CGameObject
+{
+
 };

@@ -46,6 +46,18 @@ public:
 	CTexturedVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2TexCoord = XMFLOAT2(0.0f, 0.0f)) { m_xmf3Position = xmf3Position; m_xmf2TexCoord = xmf2TexCoord; }
 	~CTexturedVertex() { }
 };
+class CBillboardVertex : public CVertex
+{
+public:
+	XMFLOAT2						m_xmf2Size;
+	UINT							m_nTexture;
+
+public:
+	CBillboardVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf2Size = XMFLOAT2(5.0f, 10.0f); m_nTexture = 0; }
+	CBillboardVertex(float x, float y, float z, XMFLOAT2 xmf2Size = XMFLOAT2(5.0f, 10.0f), UINT nTexture = 0) { m_xmf3Position = XMFLOAT3(x, y, z); m_xmf2Size = xmf2Size; m_nTexture = nTexture; }
+	CBillboardVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size = XMFLOAT2(5.0f, 10.0f), UINT nTexture = 0) { m_xmf3Position = xmf3Position; m_xmf2Size = xmf2Size; m_nTexture = nTexture; }
+	~CBillboardVertex() { }
+};
 
 class CMesh
 {
@@ -76,14 +88,9 @@ protected:
 public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 };
-
-class CTriangleMesh : public CMesh
-{
-public:
-	CTriangleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual ~CTriangleMesh() { }
-};
-
+  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 class CCubeMeshDiffused : public CMesh
 {
 public:
@@ -101,4 +108,14 @@ public:
 	CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
 		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CCubeMeshTextured();
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CBillboardMesh : public CMesh
+{
+public:
+	CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+		CBillboardVertex* pGeometryBillboardVertices, UINT nGeometryBillboardVertices);
+	virtual ~CBillboardMesh();
 };
