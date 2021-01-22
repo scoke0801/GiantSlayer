@@ -71,3 +71,48 @@ void CEnemy::TrackingTarget()
 	if (m_xmf4x4World._43 < tpos.z) Move({ 0, 0, +0.1 });
 }
 
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CEnemyRangeATK::CEnemyRangeATK()
+{
+
+}
+
+CEnemyRangeATK::CEnemyRangeATK(CGameObject* ptarget)
+{
+
+}
+
+CEnemyRangeATK::~CEnemyRangeATK()
+{
+
+}
+
+void CEnemyRangeATK::Update()
+{
+	statemachine->Update();
+}
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+CEnemyCloseATK::CEnemyCloseATK()
+{
+
+}
+
+CEnemyCloseATK::CEnemyCloseATK(CGameObject* ptarget)
+{
+
+}
+
+CEnemyCloseATK::~CEnemyCloseATK()
+{
+
+}
+
+void CEnemyCloseATK::Update()
+{
+	statemachine->Update();
+}

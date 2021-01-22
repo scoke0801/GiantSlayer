@@ -60,8 +60,15 @@ protected:
 	UINT m_nVertices = 0;
 	UINT m_nStride = 0;
 	UINT m_nOffset = 0;
+
+	BoundingBox m_bBox;
+
 public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	BoundingBox GetBoundingBox() { return m_bBox; };
+
+	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 externs) {  };
 };
 
 class CTriangleMesh : public CMesh

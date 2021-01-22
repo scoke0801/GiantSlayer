@@ -20,8 +20,6 @@ protected:
 	CMesh*					m_pMesh = NULL;
 	CShader*				m_pShader = NULL;
 
-	BoundingBox				m_BoundingBox;
-
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
@@ -41,6 +39,8 @@ public:
 	XMFLOAT3 GetPosition();
 
 	void SetPosition(XMFLOAT3 pos);
+	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
+	bool CollisionCheck() { return false; };
 };
 
 class CRotatingObject : public CGameObject
