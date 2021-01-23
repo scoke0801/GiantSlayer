@@ -28,7 +28,7 @@ void CSceneTH::Update(double elapsedTime)
 void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-	
+
 	if (m_CurrentCamera)
 	{
 		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList);
@@ -67,6 +67,18 @@ void CSceneTH::ProcessInput()
 	{
 		m_ppPlayers[0]->Move({ +0.3, 0, 0 });
 	}
+
+
+	if (gameInput.KEY_1)
+	{
+		m_CurrentCamera = m_Cameras[0];
+	}
+	if (gameInput.KEY_2)
+	{
+		m_CurrentCamera = m_Cameras[1];
+	}
+
+	m_CurrentCamera->UpdateViewMatrix();
 }
 
 void CSceneTH::OnMouseDown(WPARAM btnState, int x, int y)
@@ -107,7 +119,7 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	m_nPlayers = 1;
 	m_ppPlayers = new CPlayer * [m_nPlayers];
 
-	// 메쉬 =============================================================================
+	//메쉬 =============================================================================
 	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
 		5.0f, 5.0f, 5.0f);
 
@@ -118,7 +130,7 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	CDiffusedShader* pDiffusedShader = new CDiffusedShader();
 	pDiffusedShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pDiffusedShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	
+
 	CPlayerShader* pPlayerShader = new CPlayerShader();
 	pPlayerShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -135,7 +147,7 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	CGameObject* platform = new CGameObject();
 	platform->SetMesh(pPlatformMesh);
 	platform->SetShader(pDiffusedShader);
-	
+
 	CEnemy* emey1 = new CEnemy(player1);
 	emey1->SetMesh(pCubeMesh);
 	emey1->SetShader(pDiffusedShader);
@@ -191,7 +203,7 @@ void CSceneTH::ReleaseObjects()
 void CSceneTH::BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	int width, int height)
 {
-	int nCameras = 5;
+	int nCameras = 2;
 	m_Cameras = new CCamera * [nCameras];
 	for (int i = 0; i < nCameras; ++i)
 	{
@@ -202,11 +214,8 @@ void CSceneTH::BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		m_Cameras[i] = pCamera;
 	}
-	m_Cameras[0]->SetPosition(0.0f, 10.0f, -150.0f);
-	m_Cameras[1]->SetPosition(1000.0f, 10.0f, -150.0f);
-	m_Cameras[2]->SetPosition(-1000.0f, 10.0f, -150.0f);
-	m_Cameras[3]->SetPosition(0.0f, 1010.0f, -150.0f);
-	m_Cameras[4]->SetPosition(0.0f, -1010.0f, -150.0f);
+	m_Cameras[0]->SetPosition(0.0f, 10.0f, -50.0f);
+	m_Cameras[1]->SetPosition(0.0f, 100.0f, -100.0f);
 
 	m_CurrentCamera = m_Cameras[0];
 }
@@ -216,13 +225,13 @@ ID3D12RootSignature* CSceneTH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[2];
-	
+
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 16;
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	
+
 	/*pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[1].Constants.Num32BitValues = 32;
 	pd3dRootParameters[1].Constants.ShaderRegister = 1;
