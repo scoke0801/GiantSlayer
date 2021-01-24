@@ -99,7 +99,21 @@ public:
 
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 externs) {  };
 };
-  
+//////////////////////////////////////////////////////////////////////////////
+//
+class CPlaneMeshTextured : public CMesh
+{
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CPlaneMeshTextured(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+
+	virtual ~CPlaneMeshTextured();
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//
 class CCubeMeshDiffused : public CMesh
 {
 public:
@@ -119,6 +133,8 @@ public:
 	virtual ~CCubeMeshTextured();
 };
 
+//////////////////////////////////////////////////////////////////////////////
+//
 class CTexturedRectMesh : public CMesh
 {
 public:
@@ -126,6 +142,8 @@ public:
 	virtual ~CTexturedRectMesh();
 };
 
+//////////////////////////////////////////////////////////////////////////////
+//
 class CBillboardMesh : public CMesh
 {
 public:

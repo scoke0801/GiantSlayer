@@ -29,6 +29,8 @@ public:
 
 	virtual void Update(double elapsedTime) override;
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
+
 	virtual void ProcessInput();
 
 public:
@@ -57,22 +59,22 @@ class CSceneJH2 : public CScene
 {
 protected:
 	//배치(Batch) 처리를 하기 위하여 씬을 셰이더들의 리스트로 표현한다. 
-	CGameObject** m_ppObjects = NULL;
+	CGameObject**			m_ppObjects = NULL;
 	int						m_nObjects = 0;
 
-	CGameObject** m_ppUIs = NULL;
+	CGameObject**			m_ppUIs = NULL;
 	int						m_nUIs = 0;
 
-	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
+	ID3D12RootSignature*	m_pd3dGraphicsRootSignature = NULL;
 
-	CCamera** m_Cameras;
-	CCamera* m_CurrentCamera = nullptr;
+	CCamera**				m_Cameras;
+	CCamera*				m_CurrentCamera = nullptr;
 
 	bool					m_DrawUI = true;
 private:
 	POINT					m_LastMousePos;
 
-	ID3D12DescriptorHeap* m_pd3dSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap*	m_pd3dSrvDescriptorHeap = nullptr;
 
 public:
 	CSceneJH2();
@@ -92,6 +94,7 @@ public:
 	void AnimateObjects(float fTimeElapsed);
 
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
 	// about Keyboard process

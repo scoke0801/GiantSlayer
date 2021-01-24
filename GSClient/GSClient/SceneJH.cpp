@@ -58,6 +58,10 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->DrawInstanced(72, 1, 0, 0);
 }
 
+void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
 void CSceneJH::ProcessInput()
 {
 }
@@ -414,14 +418,21 @@ void CSceneJH2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_ppObjects[3]->SetPosition({	  0,  1000,  0 });
 	m_ppObjects[4]->SetPosition({	  0, -1000,  0 });
 
-	m_ppObjects[5] = new UI(pd3dDevice, pd3dCommandList);
+	//pShader = new CBillboardShader();
+	//pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VSBillboard");
+	//pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PSBillboard");
+	//pShader->CreateGeometryShader(L"Shaders/JHTestShader.hlsl", "GSBillboard");
+	//pShader->CreateInputLayout(ShaderTypes::Billboard);
+	//pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POIsNT);
 
-	pShader = new CBillboardShader();
-	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VSBillboard");
-	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PSBillboard");
-	pShader->CreateGeometryShader(L"Shaders/JHTestShader.hlsl", "GSBillboard");
-	pShader->CreateInputLayout(ShaderTypes::Billboard);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);
+	m_ppObjects[5] = new UI(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.0f);
+
+	pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VS_UI_Textured");
+	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PS_UI_Textured");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+
 	m_ppObjects[5]->SetShader(pShader);
 }
 
@@ -514,6 +525,28 @@ void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
+	/*if (m_DrawUI)
+	{
+		if (m_ppObjects[5])
+			m_ppObjects[5]->Draw(pd3dCommandList, m_CurrentCamera);
+	}*/
+}
+
+void CSceneJH2::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+	if (m_CurrentCamera)
+	{
+		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
+		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	}
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
+	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	pd3dCommandList->SetGraphicsRootDescriptorTable(2, tex);
+
 	if (m_DrawUI)
 	{
 		if (m_ppObjects[5])
