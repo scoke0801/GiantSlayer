@@ -396,7 +396,7 @@ void CSceneJH2::BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 void CSceneJH2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_nObjects = 7;
+	m_nObjects = 9;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CShader* pShader = new CShader();
@@ -427,12 +427,20 @@ void CSceneJH2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	m_nUIStartIndex = 5;
 	m_ppObjects[5] = new UI(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.0f);
-	m_ppObjects[5]->SetPosition({ -0.75, 0.75,  0 });
+	m_ppObjects[5]->SetPosition({ -0.75, 0.75,  0.9 });
 	m_ppObjects[5]->SetTextureIndex(0x01);
 
-	m_ppObjects[6] = new UI(pd3dDevice, pd3dCommandList, 2.0f, 1.0f, 0.0f);
-	//m_ppObjects[6]->SetPosition({ 0.0f, -0.5f,  0 });
+	m_ppObjects[6] = new UI(pd3dDevice, pd3dCommandList, 2.0f, 1.0f, 0.0f); 
+	m_ppObjects[6]->SetPosition({ -0.0, -0.5,  0.9 });
 	m_ppObjects[6]->SetTextureIndex(0x02);
+
+	m_ppObjects[7] = new UI(pd3dDevice, pd3dCommandList, 0.3f);
+	m_ppObjects[7]->SetPosition({ 0.7, 0.7,  0.9 });
+	m_ppObjects[7]->SetTextureIndex(0x04);
+
+	m_ppObjects[8] = new UI(pd3dDevice, pd3dCommandList, 0.26f);
+	m_ppObjects[8]->SetPosition({ 0.7, 0.7,  0.8 }); 
+	m_ppObjects[8]->SetTextureIndex(0x01);
 
 	pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VS_UI_Textured");
@@ -442,6 +450,8 @@ void CSceneJH2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	m_ppObjects[5]->SetShader(pShader);	
 	m_ppObjects[6]->SetShader(pShader);
+	m_ppObjects[7]->SetShader(pShader);
+	m_ppObjects[8]->SetShader(pShader);
 }
 
 void CSceneJH2::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -454,10 +464,14 @@ void CSceneJH2::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	auto testTextBGUITex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, testTextBGUITex.get(), "TextBGUI", L"resources/UI/[Test]TextBG2.dds");
+	
+	auto minimapTex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, minimapTex.get(), "MiniMap", L"resources/UI/Minimap.dds");
 
 	m_Textures[boxTex->m_Name] = std::move(boxTex);
 	m_Textures[testPlayerUITex->m_Name] = std::move(testPlayerUITex);
-	m_Textures[testTextBGUITex->m_Name] = std::move(testTextBGUITex);
+	m_Textures[testTextBGUITex->m_Name] = std::move(testTextBGUITex); 
+	m_Textures[minimapTex->m_Name] = std::move(minimapTex);
 }
 
 void CSceneJH2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -479,6 +493,7 @@ void CSceneJH2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	auto boxTex = m_Textures["Box"]->m_pd3dResource;
 	auto testPlayerUITex = m_Textures["PlayerTestUI"]->m_pd3dResource;
 	auto testTextBGUITex = m_Textures["TextBGUI"]->m_pd3dResource;
+	auto minimapTex = m_Textures["MiniMap"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -497,6 +512,11 @@ void CSceneJH2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = testTextBGUITex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(testTextBGUITex, &srvDesc, hDescriptor);
+
+	// next descriptor 
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = minimapTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(minimapTex, &srvDesc, hDescriptor);
 }
 
 void CSceneJH2::ReleaseObjects()
@@ -695,8 +715,7 @@ ID3D12RootSignature* CSceneJH2::CreateGraphicsRootSignature(ID3D12Device* pd3dDe
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
 #pragma region sampler
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];

@@ -151,3 +151,13 @@ public:
 		CBillboardVertex* pGeometryBillboardVertices, UINT nGeometryBillboardVertices);
 	virtual ~CBillboardMesh();
 };
+
+//////////////////////////////////////////////////////////////////////////////
+//
+class CMinimapMesh : public CMesh
+{
+public:
+	CMinimapMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		float radius);
+	~CMinimapMesh();
+};
