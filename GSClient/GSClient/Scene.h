@@ -23,7 +23,8 @@ public:
 	// just proto, fill with d3d obj
 	virtual void Update(double elapsedTime) {} 
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {}  
-	 
+	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) {}
+
 public:
 	// about Keyboard process
 	virtual void ProcessInput() {}

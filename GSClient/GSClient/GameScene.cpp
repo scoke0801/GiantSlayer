@@ -294,8 +294,7 @@ void CGameScene2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_ppObjects[5]->SetPosition({ 0,  00,  00 });
 
 	// ÁöÇü
-	m_ppObjects[6]->SetPosition({ 0,  0,  0 });
-
+	m_ppObjects[6]->SetPosition({ 0,  0,  0 }); 
 }
 
 void CGameScene2::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
