@@ -138,6 +138,7 @@ void GSBillboard(point VS_BILLBOARD_INPUT input[1], inout TriangleStream<GS_BILL
 }
 Texture2D gtxtPlayerInfoTest : register(t1);
 Texture2D gtxtTextBGTest : register(t2);
+Texture2D gtxtMinimapBGTest : register(t3);
 
 float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 {
@@ -173,10 +174,15 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	if (gnTexturesMask & 0x01)
 	{
 		cColor = gtxtPlayerInfoTest.Sample(gssWrap, input.uv);
+		
 	}
 	if (gnTexturesMask & 0x02)
 	{
-		cColor = gtxtTextBGTest.Sample(gssWrap, input.uv);
+		cColor = gtxtTextBGTest.Sample(gssWrap, input.uv); 
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gtxtMinimapBGTest.Sample(gssWrap, input.uv);
 	}
 	return cColor;
 }

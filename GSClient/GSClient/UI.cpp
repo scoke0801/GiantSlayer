@@ -23,6 +23,13 @@ UI::UI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, flo
 	SetMesh(pPlaneMeshTex);
 }
 
+UI::UI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float radius)
+{
+	CMinimapMesh* pMinimapMeshTex = new CMinimapMesh(pd3dDevice, pd3dCommandList, radius);
+
+	SetMesh(pMinimapMeshTex);
+}
+
 UI::~UI()
 {
 }
