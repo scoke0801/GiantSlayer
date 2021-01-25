@@ -362,11 +362,6 @@ CSkyBoxShader::~CSkyBoxShader()
 {
 }
 
-D3D12_INPUT_LAYOUT_DESC CSkyBoxShader::CreateInputLayout(int nIndex)
-{
-	return D3D12_INPUT_LAYOUT_DESC();
-}
-
 D3D12_DEPTH_STENCIL_DESC CSkyBoxShader::CreateDepthStencilState()
 {
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
@@ -387,32 +382,6 @@ D3D12_DEPTH_STENCIL_DESC CSkyBoxShader::CreateDepthStencilState()
 
 	return(d3dDepthStencilDesc);
 }
-
-D3D12_SHADER_BYTECODE CSkyBoxShader::CreateVertexShader(WCHAR* pszFileName, LPCSTR pszShaderName)
-{
-	m_d3dVSBytecode = (CShader::CompileShaderFromFile(pszFileName, pszShaderName, "vs_5_1",
-		&m_pd3dVertexShaderBlob));
-	return m_d3dVSBytecode;
-}
-
-
-D3D12_SHADER_BYTECODE CSkyBoxShader::CreatePixelShader(WCHAR* pszFileName, LPCSTR pszShaderName)
-{
-	m_d3dPSBytecode = (CShader::CompileShaderFromFile(pszFileName, pszShaderName, "ps_5_1",
-		&m_pd3dPixelShaderBlob));
-	return m_d3dPSBytecode;
-}
-
-
-
-void CSkyBoxShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
-{
-	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-
-	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
-}
-
 
 CPlayerShader::CPlayerShader()
 {

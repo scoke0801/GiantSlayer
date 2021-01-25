@@ -38,8 +38,9 @@ void CGameScene::BuildCamera(ID3D12Device* pd3dDevice,
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		m_Cameras[i] = pCamera;
 	}
-	m_Cameras[0]->SetPosition(0.0f, 150.0f, -100.0f);
-	m_Cameras[0]->Pitch(XMConvertToRadians(45));
+	m_Cameras[0]->SetPosition(0.0f, 300.0f, 0.0f); 
+	//m_Cameras[0]->RotateY(XMConvertToRadians(180));
+	m_Cameras[0]->Pitch(XMConvertToRadians(90));
 	m_Cameras[1]->SetPosition(1000.0f, 10.0f, -150.0f);
 	m_Cameras[2]->SetPosition(-1000.0f, 10.0f, -150.0f);
 	m_Cameras[3]->SetPosition(0.0f, 1010.0f, -150.0f);
@@ -49,10 +50,8 @@ void CGameScene::BuildCamera(ID3D12Device* pd3dDevice,
 }
 
 void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
-	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 200.0f, 10.0f,200.0f );
-	
-	CPlaneMeshTextured* pCubeMeshTex = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 200.0f, 200.0f, 00.0f);
+{  
+	CPlaneMeshTextured* pPlaneMeshTex = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 200.0f, 200.0f, 0.0f, false);
 
 	m_nObjects = 8;
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -60,11 +59,15 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CShader* pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders.hlsl", "VSTextured");
 	pShader->CreatePixelShader(L"Shaders.hlsl", "PSTextured");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	//pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader->CreateInputLayout(ShaderTypes::Textured); 
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	
+	CShader* pSkyBoxShader = new CSkyBoxShader();
+	pSkyBoxShader->CreateVertexShader(L"Shaders.hlsl", "VSTextured");
+	pSkyBoxShader->CreatePixelShader(L"Shaders.hlsl", "PSTextured");
+	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
+	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+
 	// 추가 스카이박스 
 	CTexturedRectMesh* pSkyBoxMesh_Front = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f, 0.0f, 0.0f, +10.0f);
 	CTexturedRectMesh* pSkyBoxMesh_Back = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f, 0.0f, 0.0f, -10.0f);
@@ -72,13 +75,12 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CTexturedRectMesh* pSkyBoxMesh_Right = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.0f, 20.0f, 20.0f, 10.0f, 0.0f, +0.0f);
 	CTexturedRectMesh* pSkyBoxMesh_Top = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 00.0f, 20.0f, 0.0f, +10.0f, +0.0f);
 	CTexturedRectMesh* pSkyBoxMesh_Bottom = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 00.0f, 20.0f, 0.0f,-10.0f, +0.0f);
-
-
+	 
 	for (int i = 0; i < m_nObjects; ++i)
 	{
 		CRotatingObject* pObject = new CRotatingObject();
 
-		pObject->SetMesh(pCubeMeshTex);
+		pObject->SetMesh(pPlaneMeshTex);
 		//pObject->SetShader(pShader);
 	
 		m_ppObjects[i] = pObject;
@@ -87,34 +89,33 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// 스카이박스
 	m_ppObjects[0]->SetMesh(pSkyBoxMesh_Front);
 	m_ppObjects[0]->SetTextureIndex(0x02);
-	m_ppObjects[0]->SetShader(pShader);
+	m_ppObjects[0]->SetShader(pSkyBoxShader);
 	
 	m_ppObjects[1]->SetMesh(pSkyBoxMesh_Back);
 	m_ppObjects[1]->SetTextureIndex(0x04);
-	m_ppObjects[1]->SetShader(pShader);
+	m_ppObjects[1]->SetShader(pSkyBoxShader);
 
 	m_ppObjects[2]->SetMesh(pSkyBoxMesh_Left);
 	m_ppObjects[2]->SetTextureIndex(0x08);
-	m_ppObjects[2]->SetShader(pShader);
+	m_ppObjects[2]->SetShader(pSkyBoxShader);
 
 	m_ppObjects[3]->SetMesh(pSkyBoxMesh_Right);
 	m_ppObjects[3]->SetTextureIndex(0x10);
-	m_ppObjects[3]->SetShader(pShader);
+	m_ppObjects[3]->SetShader(pSkyBoxShader);
 
 	m_ppObjects[4]->SetMesh(pSkyBoxMesh_Top);
 	m_ppObjects[4]->SetTextureIndex(0x20);
-	m_ppObjects[4]->SetShader(pShader);
+	m_ppObjects[4]->SetShader(pSkyBoxShader);
 
 	m_ppObjects[5]->SetMesh(pSkyBoxMesh_Bottom);
 	m_ppObjects[5]->SetTextureIndex(0x40);
-	m_ppObjects[5]->SetShader(pShader);
+	m_ppObjects[5]->SetShader(pSkyBoxShader);
 
 	// 지형
-	m_ppObjects[6]->SetMesh(pCubeMeshTex);
+	m_ppObjects[6]->SetMesh(pPlaneMeshTex);
 	m_ppObjects[6]->SetPosition({ 0,  0,  0 }); 
 	m_ppObjects[6]->SetTextureIndex(0x01);
-	m_ppObjects[6]->SetShader(pShader);
-
+	m_ppObjects[6]->SetShader(pShader); 
 }
 
 void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

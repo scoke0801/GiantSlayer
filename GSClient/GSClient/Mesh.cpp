@@ -290,7 +290,8 @@ CBillboardMesh::~CBillboardMesh()
 }
 
 CPlaneMeshTextured::CPlaneMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
-	float fWidth, float fHeight, float fDepth)
+	float fWidth, float fHeight, float fDepth,
+	bool isVertical)
 	: CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = 6;
@@ -302,12 +303,24 @@ CPlaneMeshTextured::CPlaneMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	float widthHalf = fWidth * 0.5f;
 	float heightHalf = fHeight * 0.5f;
 
-	pVertices[0] = CTexturedVertex(XMFLOAT3(-widthHalf,  heightHalf, fDepth), XMFLOAT2(0.0f, 0.0f));
-	pVertices[1] = CTexturedVertex(XMFLOAT3( widthHalf,  heightHalf, fDepth), XMFLOAT2(1.0f, 0.0f));
-	pVertices[2] = CTexturedVertex(XMFLOAT3( widthHalf, -heightHalf, fDepth), XMFLOAT2(1.0f, 1.0f));
-	pVertices[3] = CTexturedVertex(XMFLOAT3(-widthHalf,  heightHalf, fDepth), XMFLOAT2(0.0f, 0.0f));
-	pVertices[4] = CTexturedVertex(XMFLOAT3( widthHalf, -heightHalf, fDepth), XMFLOAT2(1.0f, 1.0f));
-	pVertices[5] = CTexturedVertex(XMFLOAT3(-widthHalf, -heightHalf, fDepth), XMFLOAT2(0.0f, 1.0f));
+	if (isVertical)
+	{
+		pVertices[0] = CTexturedVertex(XMFLOAT3(-widthHalf,  heightHalf, fDepth), XMFLOAT2(0.0f, 0.0f));
+		pVertices[1] = CTexturedVertex(XMFLOAT3( widthHalf,  heightHalf, fDepth), XMFLOAT2(1.0f, 0.0f));
+		pVertices[2] = CTexturedVertex(XMFLOAT3( widthHalf, -heightHalf, fDepth), XMFLOAT2(1.0f, 1.0f));
+		pVertices[3] = CTexturedVertex(XMFLOAT3(-widthHalf,  heightHalf, fDepth), XMFLOAT2(0.0f, 0.0f));
+		pVertices[4] = CTexturedVertex(XMFLOAT3( widthHalf, -heightHalf, fDepth), XMFLOAT2(1.0f, 1.0f));
+		pVertices[5] = CTexturedVertex(XMFLOAT3(-widthHalf, -heightHalf, fDepth), XMFLOAT2(0.0f, 1.0f));
+	}
+	else	// horizon
+	{
+		pVertices[0] = CTexturedVertex(XMFLOAT3(-widthHalf, 0.0, heightHalf), XMFLOAT2(0.0f, 0.0f));
+		pVertices[1] = CTexturedVertex(XMFLOAT3(widthHalf, 0.0, heightHalf), XMFLOAT2(1.0f, 0.0f));
+		pVertices[2] = CTexturedVertex(XMFLOAT3(widthHalf, 0.0, -heightHalf), XMFLOAT2(1.0f, 1.0f));
+		pVertices[3] = CTexturedVertex(XMFLOAT3(-widthHalf, 0.0, heightHalf), XMFLOAT2(0.0f, 0.0f));
+		pVertices[4] = CTexturedVertex(XMFLOAT3(widthHalf, 0.0, -heightHalf), XMFLOAT2(1.0f, 1.0f));
+		pVertices[5] = CTexturedVertex(XMFLOAT3(-widthHalf, 0.0, -heightHalf), XMFLOAT2(0.0f, 1.0f));
+	}
 
 	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, 
 		pVertices, m_nStride * m_nVertices, 

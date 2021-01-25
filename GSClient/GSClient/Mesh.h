@@ -107,7 +107,8 @@ public:
 	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
 	CPlaneMeshTextured(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
-		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f,
+		bool isVertical = true);
 
 	virtual ~CPlaneMeshTextured();
 };
