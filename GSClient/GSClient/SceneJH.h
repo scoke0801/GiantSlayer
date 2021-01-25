@@ -71,6 +71,8 @@ protected:
 	CCamera*				m_CurrentCamera = nullptr;
 
 	bool					m_DrawUI = true;
+	int						m_nUIStartIndex;
+
 private:
 	POINT					m_LastMousePos;
 

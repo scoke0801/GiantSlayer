@@ -2,7 +2,8 @@
 //게임 객체의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbGameObjectInfo : register(b0)
 {
-	matrix gmtxWorld : packoffset(c0);
+	matrix	gmtxWorld : packoffset(c0);
+	uint	gnTexturesMask : packoffset(c4);
 };
 
 //카메라의 정보를 위한 상수 버퍼를 선언한다. 
@@ -136,6 +137,7 @@ void GSBillboard(point VS_BILLBOARD_INPUT input[1], inout TriangleStream<GS_BILL
 	}
 }
 Texture2D gtxtPlayerInfoTest : register(t1);
+Texture2D gtxtTextBGTest : register(t2);
 
 float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 {
@@ -168,5 +170,13 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 {
 	float4 cColor;
 
-	return gtxtPlayerInfoTest.Sample(gssWrap, input.uv);
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtPlayerInfoTest.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtTextBGTest.Sample(gssWrap, input.uv);
+	}
+	return cColor;
 }

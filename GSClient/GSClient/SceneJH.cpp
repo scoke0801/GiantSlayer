@@ -396,7 +396,7 @@ void CSceneJH2::BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 void CSceneJH2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_nObjects = 6;
+	m_nObjects = 7;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CShader* pShader = new CShader();
@@ -425,8 +425,14 @@ void CSceneJH2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	//pShader->CreateInputLayout(ShaderTypes::Billboard);
 	//pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POIsNT);
 
+	m_nUIStartIndex = 5;
 	m_ppObjects[5] = new UI(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.0f);
 	m_ppObjects[5]->SetPosition({ -0.75, 0.75,  0 });
+	m_ppObjects[5]->SetTextureIndex(0x01);
+
+	m_ppObjects[6] = new UI(pd3dDevice, pd3dCommandList, 2.0f, 1.0f, 0.0f);
+	m_ppObjects[6]->SetPosition({ 0.0f, -0.5f,  0 });
+	m_ppObjects[6]->SetTextureIndex(0x02);
 
 	pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VS_UI_Textured");
@@ -434,7 +440,8 @@ void CSceneJH2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	m_ppObjects[5]->SetShader(pShader);
+	m_ppObjects[5]->SetShader(pShader);	
+	m_ppObjects[6]->SetShader(pShader);
 }
 
 void CSceneJH2::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -445,8 +452,12 @@ void CSceneJH2::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	auto testPlayerUITex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, testPlayerUITex.get(), "PlayerTestUI", L"resources/UI/[Test]PlayerInfo.dds");
 
+	auto testTextBGUITex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, testTextBGUITex.get(), "TextBGUI", L"resources/UI/[Test]TextBG.dds");
+
 	m_Textures[boxTex->m_Name] = std::move(boxTex);
 	m_Textures[testPlayerUITex->m_Name] = std::move(testPlayerUITex);
+	m_Textures[testTextBGUITex->m_Name] = std::move(testTextBGUITex);
 }
 
 void CSceneJH2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -467,6 +478,7 @@ void CSceneJH2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	auto boxTex = m_Textures["Box"]->m_pd3dResource;
 	auto testPlayerUITex = m_Textures["PlayerTestUI"]->m_pd3dResource;
+	auto testTextBGUITex = m_Textures["TextBGUI"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -480,6 +492,11 @@ void CSceneJH2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = testPlayerUITex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(testPlayerUITex, &srvDesc, hDescriptor);
+
+	// next descriptor 
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = testTextBGUITex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(testTextBGUITex, &srvDesc, hDescriptor);
 }
 
 void CSceneJH2::ReleaseObjects()
@@ -521,7 +538,7 @@ void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRootDescriptorTable(2, tex);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
-	for (int j = 0; j < m_nObjects - 1; j++)
+	for (int j = 0; j < m_nUIStartIndex; j++)
 	{
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
@@ -547,8 +564,11 @@ void CSceneJH2::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	if (m_DrawUI)
 	{
-		if (m_ppObjects[5])
-			m_ppObjects[5]->Draw(pd3dCommandList, m_CurrentCamera);
+		for (int j = m_nUIStartIndex; j < m_nObjects; j++)
+		{
+			if (m_ppObjects[j])
+				m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
+		} 
 	}
 }
 
@@ -656,14 +676,14 @@ ID3D12RootSignature* CSceneJH2::CreateGraphicsRootSignature(ID3D12Device* pd3dDe
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[3];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[0].Constants.Num32BitValues = 16;
+	pd3dRootParameters[0].Constants.Num32BitValues = 17;
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
-	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-
+	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	 
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[1].Descriptor.ShaderRegister = 1; //Camera
-	pd3dRootParameters[1].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[1].Descriptor.RegisterSpace = 0; 
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; 
 
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -676,7 +696,7 @@ ID3D12RootSignature* CSceneJH2::CreateGraphicsRootSignature(ID3D12Device* pd3dDe
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 #pragma region sampler
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];

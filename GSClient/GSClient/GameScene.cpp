@@ -374,8 +374,6 @@ void CGameScene2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = -1;
 	pd3dDevice->CreateShaderResourceView(SkyTex_Back, &srvDesc, hDescriptor);*/
-
-
 }
 
 void CGameScene2::ReleaseObjects()

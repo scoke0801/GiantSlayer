@@ -18,6 +18,8 @@ protected:
 	CMesh*		m_pMesh = NULL;
 	CShader*	m_pShader = NULL;
 
+	UINT		m_nTextureIndex = 0x00;
+
 public:
 	CGameObject();
 	virtual ~CGameObject();
@@ -51,6 +53,7 @@ public:
 	void SetPosition(XMFLOAT3 pos);
 	void SetVelocity(XMFLOAT3 pos);
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
+	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }
 };
 
 class CRotatingObject : public CGameObject

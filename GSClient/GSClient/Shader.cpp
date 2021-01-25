@@ -223,7 +223,7 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	d3dPipelineStateDesc.SampleDesc.Count = 1;
 	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-	pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+	HRESULT hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
 		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[0]);
 
 	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
@@ -238,8 +238,7 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	//파이프라인에 그래픽스 상태 객체를 설정한다.
-	pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]);
-	
+	pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]); 
 }
 
 void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -255,11 +254,13 @@ void CShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 void CShader::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList,
-	XMFLOAT4X4* pxmf4x4World)
+	XMFLOAT4X4* pxmf4x4World, UINT textureIndex)
 {
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
+	  
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &textureIndex, 16);
 }
 void CShader::ReleaseShaderVariables()
 {
