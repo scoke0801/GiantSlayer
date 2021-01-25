@@ -1,15 +1,30 @@
+
 //게임 객체의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbGameObjectInfo : register(b0)
 {
 	matrix gmtxWorld : packoffset(c0);
+	uint	gnTexturesMask : packoffset(c4);
 };
 
 //카메라의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbCameraInfo : register(b1)
 {
-	matrix gmtxView : packoffset(c0);
-	matrix gmtxProjection : packoffset(c4);
+	matrix	gmtxView : packoffset(c0);
+	matrix	gmtxProjection : packoffset(c4);
+	float3	gvCameraPosition : packoffset(c8);
 };
+
+SamplerState gssWrap : register(s0);
+SamplerState gssClamp : register(s1);
+
+
+Texture2D gtxtBox : register(t0);
+Texture2D gSkyBox_Front : register(t1);
+Texture2D gSkyBox_Back : register(t2);
+Texture2D gSkyBox_Right : register(t3);
+Texture2D gSkyBox_Left : register(t4);
+Texture2D gSkyBox_Top : register(t5);
+Texture2D gSkyBox_Bottom : register(t6);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_INPUT
@@ -41,64 +56,72 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 	return(input.color);
 }
 
-Texture2D gtxtTextures[6] : register(t0);
-
-SamplerState gWrapSamplerState : register(s0);
-SamplerState gClampSamplerState : register(s1);
-
-struct VS_TEXTURED_INPUT
+struct VS_TEXTURE_IN
 {
 	float3 position : POSITION;
-	float2 uv : TEXCOORD;
+	float2 uv		: TEXCORD;
 };
-
-struct VS_TEXTURED_OUTPUT
+struct VS_TEXTURE_OUT
 {
 	float4 position : SV_POSITION;
-	float2 uv : TEXCOORD;
+	float2 uv	 : TEXCOORD;
 };
 
-VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
+VS_TEXTURE_OUT VSTextured(VS_TEXTURE_IN input)
 {
-	VS_TEXTURED_OUTPUT output;
-
-#ifdef _WITH_CONSTANT_BUFFER_SYNTAX
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gcbGameObjectInfo.mtxWorld), gcbCameraInfo.mtxView), gcbCameraInfo.mtxProjection);
-#else
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
-#endif
-	output.uv = input.uv;
-
-	return(output);
+	VS_TEXTURE_OUT outRes;
+	outRes.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	outRes.uv = input.uv;
+	return outRes;
 }
 
-float4 PSTextured(VS_TEXTURED_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 {
-	/*
-		float4 cColor;
-		if (nPrimitiveID < 2)
-			cColor = gtxtTextures[0].Sample(gWrapSamplerState, input.uv);
-		else if (nPrimitiveID < 4)
-			cColor = gtxtTextures[1].Sample(gWrapSamplerState, input.uv);
-		else if (nPrimitiveID < 6)
-			cColor = gtxtTextures[2].Sample(gWrapSamplerState, input.uv);
-		else if (nPrimitiveID < 8)
-			cColor = gtxtTextures[3].Sample(gWrapSamplerState, input.uv);
-		else if (nPrimitiveID < 10)
-			cColor = gtxtTextures[4].Sample(gWrapSamplerState, input.uv);
-		else
-			cColor = gtxtTextures[5].Sample(gWrapSamplerState, input.uv);
-	*/
-		float4 cColor = gtxtTextures[NonUniformResourceIndex(nPrimitiveID / 2)].Sample(gWrapSamplerState, input.uv);
+	float4 cColor;
 
-		return(cColor);
+	if (gnTexturesMask & 0x00)
+	{
+	cColor = gtxtBox.Sample(gssWrap, input.uv);
+	}
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gSkyBox_Front.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gSkyBox_Back.Sample(gssWrap, input.uv);
+	}
+
+	if (gnTexturesMask & 0x03)
+	{
+		cColor = gSkyBox_Right.Sample(gssWrap, input.uv);
+	}
+
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gSkyBox_Left.Sample(gssWrap, input.uv);
+	}
+
+	if (gnTexturesMask & 0x05)
+	{
+		cColor = gSkyBox_Top.Sample(gssWrap, input.uv);
+	}
+
+	if (gnTexturesMask & 0x06)
+	{
+		cColor = gSkyBox_Bottom.Sample(gssWrap, input.uv);
+	}
+
+	return cColor;
+	//return gtxtBox.Sample(gssWrap, input.uv);
 }
 
-Texture2D gtxtSkyBox : register(t8);
-
-float4 PSSkyBox(VS_TEXTURED_OUTPUT input) : SV_TARGET
-{
-	float4 cColor = gtxtSkyBox.Sample(gClampSamplerState, input.uv);
-
-	return(cColor);
-}
+//Texture2D gtxtSkyBox : register(t8);
+//
+//float4 PSSkyBox(VS_TEXTURED_OUTPUT input) : SV_TARGET
+//{
+//	float4 cColor = gtxtSkyBox.Sample(gClampSamplerState, input.uv);
+//
+//	return(cColor);
+//}
