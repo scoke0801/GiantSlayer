@@ -385,11 +385,11 @@ void CSceneJH2::BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		m_Cameras[i] = pCamera;
 	}
-	m_Cameras[0]->SetPosition(0.0f, 10.0f, -150.0f);
-	m_Cameras[1]->SetPosition(1000.0f, 10.0f, -150.0f);
-	m_Cameras[2]->SetPosition(-1000.0f, 10.0f, -150.0f);
-	m_Cameras[3]->SetPosition(0.0f, 1010.0f, -150.0f);
-	m_Cameras[4]->SetPosition(0.0f, -1010.0f, -150.0f);
+	m_Cameras[0]->SetPosition(	  0.0f,    10.0f, -150.0f);
+	m_Cameras[1]->SetPosition( 1000.0f,    10.0f, -150.0f);
+	m_Cameras[2]->SetPosition(-1000.0f,    10.0f, -150.0f);
+	m_Cameras[3]->SetPosition(	  0.0f,  1010.0f, -150.0f);
+	m_Cameras[4]->SetPosition(	  0.0f, -1010.0f, -150.0f);
 
 	m_CurrentCamera = m_Cameras[0];
 }
@@ -431,7 +431,7 @@ void CSceneJH2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_ppObjects[5]->SetTextureIndex(0x01);
 
 	m_ppObjects[6] = new UI(pd3dDevice, pd3dCommandList, 2.0f, 1.0f, 0.0f);
-	m_ppObjects[6]->SetPosition({ 0.0f, -0.5f,  0 });
+	//m_ppObjects[6]->SetPosition({ 0.0f, -0.5f,  0 });
 	m_ppObjects[6]->SetTextureIndex(0x02);
 
 	pShader = new CShader();
@@ -453,7 +453,7 @@ void CSceneJH2::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	MakeTexture(pd3dDevice, pd3dCommandList, testPlayerUITex.get(), "PlayerTestUI", L"resources/UI/[Test]PlayerInfo.dds");
 
 	auto testTextBGUITex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, testTextBGUITex.get(), "TextBGUI", L"resources/UI/[Test]TextBG.dds");
+	MakeTexture(pd3dDevice, pd3dCommandList, testTextBGUITex.get(), "TextBGUI", L"resources/UI/[Test]TextBG2.dds");
 
 	m_Textures[boxTex->m_Name] = std::move(boxTex);
 	m_Textures[testPlayerUITex->m_Name] = std::move(testPlayerUITex);

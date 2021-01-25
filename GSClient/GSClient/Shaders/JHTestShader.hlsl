@@ -173,10 +173,12 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	if (gnTexturesMask & 0x01)
 	{
 		cColor = gtxtPlayerInfoTest.Sample(gssWrap, input.uv);
+		
 	}
 	if (gnTexturesMask & 0x02)
 	{
-		cColor = gtxtTextBGTest.Sample(gssWrap, input.uv);
+		cColor = gtxtTextBGTest.Sample(gssWrap, input.uv); 
+		cColor.a = 1.0f;
 	}
 	return cColor;
 }
