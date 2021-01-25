@@ -155,6 +155,9 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 
 VS_TEXTURE_OUT VS_UI_Textured(VS_TEXTURE_IN input)
 {
+	input.position.x += gmtxWorld._41;
+	input.position.y += gmtxWorld._42;
+	input.position.z += gmtxWorld._43;
 	VS_TEXTURE_OUT outRes;
 	outRes.position = float4(input.position, 1.0f);
 	outRes.uv = input.uv;

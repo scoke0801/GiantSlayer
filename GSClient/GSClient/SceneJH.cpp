@@ -426,6 +426,7 @@ void CSceneJH2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	//pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POIsNT);
 
 	m_ppObjects[5] = new UI(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.0f);
+	m_ppObjects[5]->SetPosition({ -0.75, 0.75,  0 });
 
 	pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VS_UI_Textured");
@@ -524,16 +525,12 @@ void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	{
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
-	}
-	/*if (m_DrawUI)
-	{
-		if (m_ppObjects[5])
-			m_ppObjects[5]->Draw(pd3dCommandList, m_CurrentCamera);
-	}*/
+	} 
 }
 
 void CSceneJH2::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	/*
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	if (m_CurrentCamera)
 	{
@@ -545,7 +542,8 @@ void CSceneJH2::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	pd3dCommandList->SetGraphicsRootDescriptorTable(2, tex);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(2, tex); 
+	*/
 
 	if (m_DrawUI)
 	{
@@ -598,10 +596,10 @@ void CSceneJH2::ProcessInput()
 	}
 	///////////////////////////////////////////////////////////////
 	//
-	//if (keyInput.KEY_B)
-	//{
-	//	m_DrawUI = true - m_DrawUI;
-	//}
+	if (keyInput.KEY_B)
+	{
+		m_DrawUI = true - m_DrawUI;
+	}
 
 	m_CurrentCamera->UpdateViewMatrix();
 }
