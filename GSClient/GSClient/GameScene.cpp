@@ -38,7 +38,8 @@ void CGameScene::BuildCamera(ID3D12Device* pd3dDevice,
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		m_Cameras[i] = pCamera;
 	}
-	m_Cameras[0]->SetPosition(0.0f, 10.0f, -150.0f);
+	m_Cameras[0]->SetPosition(0.0f, 150.0f, -100.0f);
+	m_Cameras[0]->Pitch(XMConvertToRadians(45));
 	m_Cameras[1]->SetPosition(1000.0f, 10.0f, -150.0f);
 	m_Cameras[2]->SetPosition(-1000.0f, 10.0f, -150.0f);
 	m_Cameras[3]->SetPosition(0.0f, 1010.0f, -150.0f);
@@ -49,9 +50,9 @@ void CGameScene::BuildCamera(ID3D12Device* pd3dDevice,
 
 void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 { 
-	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 200.0f,10.0f,200.0f );
+	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, 200.0f, 10.0f,200.0f );
 	
-	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 200.0f, 10.0f, 200.0f);
+	CPlaneMeshTextured* pCubeMeshTex = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 200.0f, 200.0f, 00.0f);
 
 	m_nObjects = 8;
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -60,7 +61,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pShader->CreateVertexShader(L"Shaders.hlsl", "VSTextured");
 	pShader->CreatePixelShader(L"Shaders.hlsl", "PSTextured");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	
@@ -72,18 +73,12 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CTexturedRectMesh* pSkyBoxMesh_Top = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 00.0f, 20.0f, 0.0f, +10.0f, +0.0f);
 	CTexturedRectMesh* pSkyBoxMesh_Bottom = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 00.0f, 20.0f, 0.0f,-10.0f, +0.0f);
 
-	/*pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders.hlsl", "VSTextured");
-	pShader->CreatePixelShader(L"Shaders.hlsl", "PSTextured");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);*/
 
 	for (int i = 0; i < m_nObjects; ++i)
 	{
 		CRotatingObject* pObject = new CRotatingObject();
 
-		//pObject->SetMesh(pCubeMeshTex);
+		pObject->SetMesh(pCubeMeshTex);
 		//pObject->SetShader(pShader);
 	
 		m_ppObjects[i] = pObject;
@@ -91,32 +86,33 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	}
 	// 스카이박스
 	m_ppObjects[0]->SetMesh(pSkyBoxMesh_Front);
-	m_ppObjects[0]->SetTextureIndex(0x01);
+	m_ppObjects[0]->SetTextureIndex(0x02);
 	m_ppObjects[0]->SetShader(pShader);
 	
 	m_ppObjects[1]->SetMesh(pSkyBoxMesh_Back);
-	m_ppObjects[1]->SetTextureIndex(0x02);
+	m_ppObjects[1]->SetTextureIndex(0x04);
 	m_ppObjects[1]->SetShader(pShader);
 
 	m_ppObjects[2]->SetMesh(pSkyBoxMesh_Left);
-	m_ppObjects[2]->SetTextureIndex(0x03);
+	m_ppObjects[2]->SetTextureIndex(0x08);
 	m_ppObjects[2]->SetShader(pShader);
 
 	m_ppObjects[3]->SetMesh(pSkyBoxMesh_Right);
-	m_ppObjects[3]->SetTextureIndex(0x04);
+	m_ppObjects[3]->SetTextureIndex(0x10);
 	m_ppObjects[3]->SetShader(pShader);
 
 	m_ppObjects[4]->SetMesh(pSkyBoxMesh_Top);
-	m_ppObjects[4]->SetTextureIndex(0x05);
+	m_ppObjects[4]->SetTextureIndex(0x20);
 	m_ppObjects[4]->SetShader(pShader);
 
 	m_ppObjects[5]->SetMesh(pSkyBoxMesh_Bottom);
-	m_ppObjects[5]->SetTextureIndex(0x06);
+	m_ppObjects[5]->SetTextureIndex(0x40);
 	m_ppObjects[5]->SetShader(pShader);
 
 	// 지형
+	m_ppObjects[6]->SetMesh(pCubeMeshTex);
 	m_ppObjects[6]->SetPosition({ 0,  0,  0 }); 
-	m_ppObjects[6]->SetTextureIndex(0x00);
+	m_ppObjects[6]->SetTextureIndex(0x01);
 	m_ppObjects[6]->SetShader(pShader);
 
 }
@@ -180,7 +176,7 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = boxTex->GetDesc().Format;//boxTex->GetDesc().Format;
+	srvDesc.Format = boxTex->GetDesc().Format;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = -1;
@@ -260,7 +256,7 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
 	{
-
+		//m_ppObjects[6]->Draw(pd3dCommandList, m_CurrentCamera);
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
@@ -365,7 +361,7 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[3];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[0].Constants.Num32BitValues = 22;
+	pd3dRootParameters[0].Constants.Num32BitValues = 17;
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -389,7 +385,7 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
 
 #pragma region sampler
-	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[1];
+	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
 
 	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -403,6 +399,19 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dSamplerDescs[0].ShaderRegister = 0;
 	pd3dSamplerDescs[0].RegisterSpace = 0;
 	pd3dSamplerDescs[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dSamplerDescs[1].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	pd3dSamplerDescs[1].MipLODBias = 0;
+	pd3dSamplerDescs[1].MaxAnisotropy = 1;
+	pd3dSamplerDescs[1].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[1].MinLOD = 0;
+	pd3dSamplerDescs[1].MaxLOD = D3D12_FLOAT32_MAX;
+	pd3dSamplerDescs[1].ShaderRegister = 1;
+	pd3dSamplerDescs[1].RegisterSpace = 0;
+	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 #pragma endregion
 
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;

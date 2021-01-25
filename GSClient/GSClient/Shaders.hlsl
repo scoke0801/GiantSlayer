@@ -79,38 +79,38 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 {
 	float4 cColor;
 
-	if (gnTexturesMask & 0x00)
-	{
-	cColor = gtxtBox.Sample(gssWrap, input.uv);
-	}
-
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gSkyBox_Front.Sample(gssWrap, input.uv);
+		cColor = gtxtBox.Sample(gssClamp, input.uv);
 	}
+
 	if (gnTexturesMask & 0x02)
 	{
-		cColor = gSkyBox_Back.Sample(gssWrap, input.uv);
+		cColor = gSkyBox_Front.Sample(gssClamp, input.uv);
 	}
-
-	if (gnTexturesMask & 0x03)
-	{
-		cColor = gSkyBox_Right.Sample(gssWrap, input.uv);
-	}
-
 	if (gnTexturesMask & 0x04)
 	{
-		cColor = gSkyBox_Left.Sample(gssWrap, input.uv);
+		cColor = gSkyBox_Back.Sample(gssClamp, input.uv);
 	}
 
-	if (gnTexturesMask & 0x05)
+	if (gnTexturesMask & 0x08)
 	{
-		cColor = gSkyBox_Top.Sample(gssWrap, input.uv);
+		cColor = gSkyBox_Right.Sample(gssClamp, input.uv);
 	}
 
-	if (gnTexturesMask & 0x06)
+	if (gnTexturesMask & 0x10)
 	{
-		cColor = gSkyBox_Bottom.Sample(gssWrap, input.uv);
+		cColor = gSkyBox_Left.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x20)
+	{
+		cColor = gSkyBox_Top.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x40)
+	{
+		cColor = gSkyBox_Bottom.Sample(gssClamp, input.uv);
 	}
 
 	return cColor;
