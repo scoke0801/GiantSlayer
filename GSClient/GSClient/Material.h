@@ -1,4 +1,15 @@
 #pragma once
+
+struct MaterialInfo
+{
+	DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+	DirectX::XMFLOAT3 FresnelR0 = { 0.01f, 0.01f, 0.01f };
+	float Roughness = 0.25f;
+
+	// Used in texture mapping.
+	DirectX::XMFLOAT4X4 MatTransform = Matrix4x4::Identity();
+};
+
 class CMaterial
 {
 public:
@@ -21,11 +32,20 @@ public:
 	// update to each FrameResource.  Thus, when we modify a material we should set 
 	// NumFramesDirty = gNumFrameResources so that each frame resource gets the update.
 	// int NumFramesDirty = gNumFrameResources;
+	bool m_DirtyFlag = false;
 
 	// Material constant buffer data used for shading.
-	XMFLOAT4	m_xmf4DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-	XMFLOAT3	m_xmf3FresnelR0 = { 0.01f, 0.01f, 0.01f };
-	float		m_Roughness = 0.25f;
-	XMFLOAT4X4	m_xmf4x4MatTransform;  
+	XMFLOAT4		m_xmf4DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+	XMFLOAT3		m_xmf3FresnelR0 = { 0.01f, 0.01f, 0.01f };
+	float			m_Roughness = 0.25f;
+	XMFLOAT4X4		m_xmf4x4MatTransform;  
+	 
+	ID3D12Resource* m_pd3dcbMaterial = NULL;
+	MaterialInfo*	m_pcbMappedMaterial = NULL;
+
+public:
+	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void ReleaseShaderVariables();
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, int rootParameterIndex = 1);
 };
 

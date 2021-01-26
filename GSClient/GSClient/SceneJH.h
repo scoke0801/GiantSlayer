@@ -6,7 +6,7 @@ struct BasicVertex
 	XMFLOAT3 xmf3Position;
 	XMFLOAT2 m_xmf2TexC;
 };
-
+#pragma region minimap_Test
 class CSceneJH : public CScene
 {
 private:
@@ -49,8 +49,9 @@ private: // 객체 생성 관련
 
 	void BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
+#pragma endregion
 
-
+#pragma region UI_TEST
 class CShader;
 class CGameObject;
 class CCamera;
@@ -113,5 +114,59 @@ public:
 	//그래픽 루트 시그너쳐를 생성한다.
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
-
 };
+#pragma endregion
+
+#pragma region SceneJH3 - About Terrain and Lights
+class CSceneJH3 : public CScene
+{
+protected:
+	CGameObject**			m_ppObjects = NULL;
+	int						m_nObjects = 0;
+
+	ID3D12RootSignature*	m_pd3dGraphicsRootSignature = NULL;
+
+	CCamera**				m_Cameras;
+	CCamera*				m_CurrentCamera = nullptr;
+
+private:
+	POINT					m_LastMousePos;
+
+	ID3D12DescriptorHeap*	m_pd3dSrvDescriptorHeap = nullptr; 
+
+public:
+	CSceneJH3();
+	~CSceneJH3();
+
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height);
+	
+	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	
+	void ReleaseObjects();
+
+public:
+	virtual void Update(double elapsedTime) override;
+	void AnimateObjects(float fTimeElapsed);
+
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+public:
+	virtual void ProcessInput();
+
+	virtual void OnMouseDown(WPARAM btnState, int x, int y) override;
+	virtual void OnMouseUp(WPARAM btnState, int x, int y)	override;
+	virtual void OnMouseMove(WPARAM btnState, int x, int y) override;
+
+public:
+	virtual void ReleaseUploadBuffers() override;
+
+	//그래픽 루트 시그너쳐를 생성한다.
+	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
+	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
+};
+#pragma endregion

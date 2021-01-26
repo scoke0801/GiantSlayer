@@ -10,7 +10,7 @@ class CScene
 {
 protected:
 	unordered_map<string, unique_ptr<CTexture>> m_Textures;
-	unordered_map<string, unique_ptr<CMaterial>> m_Materials;
+	unordered_map<string, unique_ptr<CMaterial>> m_Materials; 
 
 	unordered_map<string, unique_ptr<ID3D12PipelineState*>> m_PSOs;
 	
@@ -38,8 +38,11 @@ public:
 	virtual void SendDataToNextScene(void* context) {}	
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {} 
 	virtual void ReleaseUploadBuffers() {}
+	
 	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) {}
-
+	
+	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+	
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) { return NULL; }
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() { return NULL; } 
 

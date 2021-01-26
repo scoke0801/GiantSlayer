@@ -2,6 +2,22 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Camera.h"
+
+string ConvertToObjectName(const OBJ_NAME& name)
+{
+	switch (name)
+	{
+	case OBJ_NAME::None:
+		return "None";
+	case OBJ_NAME::Box:
+		return "Box";
+	case OBJ_NAME::Terrain:
+		return "Terrain";
+	default:
+		assert(!"UnDefinedObjectName");
+	}
+}
+
 CGameObject::CGameObject()
 {
 	m_xmf3Position = { 0, 0, 0 };
@@ -98,6 +114,7 @@ void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 
 CRotatingObject::CRotatingObject()
 {
+	m_Name = OBJ_NAME::None;
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fRotationSpeed = 90.0f;
 }
@@ -112,6 +129,7 @@ void CRotatingObject::Animate(float fTimeElapsed)
 CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float width, float height, float depth)
 {
+	m_Name = OBJ_NAME::Box;
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
 		width, height, depth);
 
@@ -121,3 +139,4 @@ CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 CBox::~CBox()
 {
 }
+
