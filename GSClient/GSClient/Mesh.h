@@ -66,6 +66,7 @@ class CMesh
 {
 private:
 	int m_nReferences = 0;
+	int m_Meshes = 0;
 
 protected:
 	UINT m_nSlot = 0;
@@ -79,13 +80,23 @@ protected:
 	ID3D12Resource* m_pd3dVertexBuffer = NULL;
 	ID3D12Resource* m_pd3dVertexUploadBuffer = NULL;
 
+	ID3D12Resource* m_pd3dIndexBuffer = NULL;
+	ID3D12Resource* m_pd3dIndexUploadBuffer = NULL;
+
 	D3D12_VERTEX_BUFFER_VIEW m_d3dVertexBufferView;
 	D3D12_PRIMITIVE_TOPOLOGY m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	UINT m_nIndices;
+
+	
+
+
+	D3D12_INDEX_BUFFER_VIEW m_d3dIndexBufferView;
 
 public:
 	CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual ~CMesh();
-	 
+
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
@@ -161,4 +172,18 @@ public:
 	CMinimapMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		float radius);
 	~CMinimapMesh();
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//
+class CTerrainMesh : public CMesh
+{
+public:
+	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		int xStart, int zStart, int nWidth, int nLength);
+	~CTerrainMesh();
+
+	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
+	virtual float OnGetHeight(int x, int z);
+
 };
