@@ -41,4 +41,7 @@ void CMaterial::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList
 	XMMATRIX matTransform = XMLoadFloat4x4(&m_xmf4x4MatTransform);
 	XMStoreFloat4x4(&m_pcbMappedMaterial->MatTransform, XMMatrixTranspose(matTransform));
 	::memcpy(&m_pcbMappedMaterial->MatTransform, &matTransform, sizeof(XMFLOAT4X4));
+	 
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbMaterial->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(rootParameterIndex, d3dGpuVirtualAddress);
 }

@@ -133,7 +133,14 @@ private:
 	POINT					m_LastMousePos;
 
 	ID3D12DescriptorHeap*	m_pd3dSrvDescriptorHeap = nullptr; 
+	
+private:	// about Lights
+	DirectX::XMFLOAT4		m_AmbientLight = { 0.0f, 0.0f, 0.0f, 1.0f };
+	 
+	LightInfo*				m_Light = nullptr;
 
+	LightInfo*				m_pcbMappedLight;
+	ID3D12Resource*			m_pd3dcbLight;
 public:
 	CSceneJH3();
 	~CSceneJH3();
@@ -146,7 +153,8 @@ public:
 	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height);
 	
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
-	
+	virtual void BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+
 	void ReleaseObjects();
 
 public:

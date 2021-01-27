@@ -6,17 +6,17 @@
 
 #define MaxLights 16
 
-struct Light
+struct light
 {
-    float3 Strength;
-    float FalloffStart; // point/spot light only
-    float3 Direction;   // directional/spot light only
-    float FalloffEnd;   // point/spot light only
-    float3 Position;    // point light only
-    float SpotPower;    // spot light only
+    float3 strength;
+    float falloffstart; // point/spot light only
+    float3 direction;   // directional/spot light only
+    float falloffend;   // point/spot light only
+    float3 position;    // point light only
+    float spotpower;    // spot light only
 };
 
-struct Material
+struct material
 {
     float4 DiffuseAlbedo;
     float3 FresnelR0;

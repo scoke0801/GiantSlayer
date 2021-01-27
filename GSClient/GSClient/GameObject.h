@@ -29,7 +29,8 @@ protected:
 
 	UINT		m_nTextureIndex = 0x00;
 
-	CMaterial*	m_Material;
+	CMaterial*	m_Material = nullptr;
+	int			m_MaterialParameterIndex = 2;
 
 	OBJ_NAME	m_Name;
 public:
@@ -67,7 +68,7 @@ public:
 	void SetVelocity(XMFLOAT3 pos);
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }
-	void SetMaterial(CMaterial* pMaterial) { m_Material = pMaterial; }
+	void SetMaterial(CMaterial* pMaterial, int rootParameterIndex) { m_Material = pMaterial; m_MaterialParameterIndex = rootParameterIndex; }
 	void SetObjectName(const OBJ_NAME& name) { m_Name = name; }
 };
 

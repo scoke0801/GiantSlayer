@@ -67,6 +67,10 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 {
 	OnPrepareRender();
 
+	if (m_Material)
+	{
+		m_Material->UpdateShaderVariables(pd3dCommandList, m_MaterialParameterIndex);
+	}
 	if (m_pShader)
 	{
 		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.

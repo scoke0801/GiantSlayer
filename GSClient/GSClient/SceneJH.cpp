@@ -781,6 +781,11 @@ CSceneJH3::CSceneJH3()
 
 CSceneJH3::~CSceneJH3()
 {
+	if (m_pd3dcbLight)
+	{
+		m_pd3dcbLight->Unmap(0, NULL);
+		m_pd3dcbLight->Release();
+	} 
 }
 
 void CSceneJH3::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -791,6 +796,7 @@ void CSceneJH3::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	BuildMaterials(pd3dDevice, pd3dCommandList);
+	BuildLights(pd3dDevice, pd3dCommandList);
 	BuildObjects(pd3dDevice, pd3dCommandList);
 }
 
@@ -842,6 +848,26 @@ void CSceneJH3::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_Materials["Box"] = std::move(box);
 	m_Materials["Terrain"] = std::move(terrain);
+}
+
+void CSceneJH3::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_Light = new LightInfo();
+	m_Light->AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
+	m_Light->Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
+	m_Light->Lights[0].Strength = { 0.6f, 0.6f, 0.6f };
+	m_Light->Lights[1].Direction = { -0.57735f, -0.57735f, 0.57735f };
+	m_Light->Lights[1].Strength = { 0.3f, 0.3f, 0.3f };
+	m_Light->Lights[2].Direction = { 0.0f, -0.707f, -0.707f };
+	m_Light->Lights[2].Strength = { 0.15f, 0.15f, 0.15f };
+
+	UINT ncbElementBytes = ((sizeof(LightInfo) + 255) & ~255); //256의 배수
+	m_pd3dcbLight = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, 
+		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	 
+	m_pd3dcbLight->Map(0, NULL, (void**)&m_pcbMappedLight);
+
+	::memcpy(m_pcbMappedLight, m_Light, sizeof(LightInfo)); 
 }
 
 void CSceneJH3::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -906,6 +932,7 @@ void CSceneJH3::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	// 지형
 	m_ppObjects[6]->SetMesh(pPlaneMeshTex);
 	m_ppObjects[6]->SetObjectName(OBJ_NAME::Terrain);
+	m_ppObjects[6]->SetMaterial(m_Materials[m_ppObjects[6]->GetObjectName()].get(), 2);
 	m_ppObjects[6]->SetPosition({ 0,  0,  0 });
 	m_ppObjects[6]->SetTextureIndex(0x01);
 	m_ppObjects[6]->SetShader(pShader);
@@ -961,6 +988,7 @@ void CSceneJH3::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
 		pBox->SetShader(pShader);
 		pBox->SetObjectName(OBJ_NAME::Box);
+		pBox->SetMaterial(m_Materials[pBox->GetObjectName()].get(), 2);
 		m_ppObjects[i] = pBox;
 	}
 
@@ -1108,12 +1136,16 @@ void CSceneJH3::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	pd3dCommandList->SetGraphicsRootDescriptorTable(2, tex);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(4, tex);
 
 	for (int i = 0; i < 6; i++)
 	{
 		m_ppObjects[i]->SetPosition(xmf3CameraPos);
 	}
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbLight->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(3, d3dGpuVirtualAddress);
+
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
 	{ 
@@ -1219,7 +1251,7 @@ ID3D12RootSignature* CSceneJH3::CreateGraphicsRootSignature(ID3D12Device* pd3dDe
 
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[3];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[5];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 17;
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
@@ -1231,10 +1263,20 @@ ID3D12RootSignature* CSceneJH3::CreateGraphicsRootSignature(ID3D12Device* pd3dDe
 	pd3dRootParameters[1].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[2].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
-	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[2].Descriptor.ShaderRegister = 2; //Material
+	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[3].Descriptor.ShaderRegister = 3; //Light
+	pd3dRootParameters[3].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; 
+
+	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[4].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
+	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
