@@ -55,11 +55,17 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	//CPlaneMeshTextured* pPlaneMeshTex = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 200.0f, 200.0f, 0.0f, false);
 
 	
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 20, 20, 200, 200);
+	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 160.0f, 160.0f, 50, 50);
 
 	m_nObjects = 8;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	 
+	/*CShader* TerrainShader = new CShader();
+	TerrainShader->CreateVertexShader(L"Shaders.hlsl", "VSDiffused");
+	TerrainShader->CreatePixelShader(L"Shaders.hlsl", "PSDiffused");
+	TerrainShader->CreateInputLayout(ShaderTypes::Diffused);
+	TerrainShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);*/
+
 	CShader* pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders.hlsl", "VSTextured");
 	pShader->CreatePixelShader(L"Shaders.hlsl", "PSTextured");
@@ -119,7 +125,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_ppObjects[6]->SetMesh(pPlaneMeshTex);
 	m_ppObjects[6]->SetPosition({ 0,  0,  0 }); 
 	m_ppObjects[6]->SetTextureIndex(0x01);
-	m_ppObjects[6]->SetShader(pShader); 
+	m_ppObjects[6]->SetShader(pShader);
 }
 
 void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -262,8 +268,8 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		m_ppObjects[6]->Draw(pd3dCommandList, m_CurrentCamera);
-		/*if (m_ppObjects[j])
-			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);*/
+		//if (m_ppObjects[j])
+			//m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 

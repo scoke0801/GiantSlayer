@@ -371,33 +371,38 @@ CMinimapMesh::~CMinimapMesh()
 {
 }
 
-CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int nWidth, int
-	nLength)
+CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float Width, float Depth, int m, int n)
 	:CMesh(pd3dDevice, pd3dCommandList)
 {
 	//격자의 교점(정점)의 개수는 (nWidth * nLength)이다. 
-	m_nVertices = nWidth * nLength;
+	m_nVertices = m * n;
 	m_nStride = sizeof(CDiffusedVertex);
-	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	faceCount = (m - 1) * (n - 1) * 2;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 
 	CDiffusedVertex* pVertices = new CDiffusedVertex[m_nVertices];
 
-	//
-	// Create the vertices.
-	//
-	
-	// 메쉬 추가 해야할듯
+	float halfWidth = 0.5f * Width;
+	float halfDepth = 0.5f * Depth;
+
+	float dx = Width / (n - 1);
+	float dz = Depth / (m - 1);
+
+	float du = 1.0f / (n - 1);
+	float dv = 1.0f / (m - 1);
 
 	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
-	for (int i = 0, z = zStart; z < (zStart + nLength); z++)
+	for (int i = 0; i < m; ++i)
 	{
-		for (int x = xStart; x < (xStart + nWidth); x++, i++)
+		float z = halfDepth - i * dz;
+		for (int j = 0; j < n; ++j)
 		{
+			float x = -halfWidth + j * dx;
 			//정점의 높이와 색상을 높이 맵으로부터 구한다. 
 			XMFLOAT3 xmf3Position = XMFLOAT3(x, 10, z) ;
-			XMFLOAT4 xmf3Color = XMFLOAT4(0.1f,0.2f,0.0f,0.0f);
+			XMFLOAT4 xmf3Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
+			pVertices[i * n + j] = CDiffusedVertex(xmf3Position, xmf3Color);
 
-			pVertices[i] = CDiffusedVertex(xmf3Position, xmf3Color);
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
 		}
@@ -419,36 +424,23 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	//// Create the indices.
 	////
 
-	m_nIndices = ((nWidth * 2) * (nLength - 1)) + ((nLength - 1) - 1);
+	m_nIndices = (faceCount * 3);
 	UINT* pnIndices = new UINT[m_nIndices];
 
-	for (int j = 0, z = 0; z < nLength - 1; z++)
+	UINT k = 0;
+	for (UINT i = 0; i < m - 1; ++i)
 	{
-		if ((z % 2) == 0)
+		for (UINT j = 0; j < n - 1; ++j)
 		{
-			//홀수 번째 줄이므로(z = 0, 2, 4, ...) 
-			//인덱스의 나열 순서는 왼쪽에서 오른쪽 방향이다.
-			for (int x = 0; x < nWidth; x++)
-			{
-				//첫 번째 줄을 제외하고 줄이 바뀔 때마다(x == 0) 첫 번째 인덱스를 추가한다.
-				if ((x == 0) && (z > 0)) pnIndices[j++] = (UINT)(x + (z * nWidth));
+			pnIndices[k] = i * n + j;
+			pnIndices[k + 1] = i * n + j + 1;
+			pnIndices[k + 2] = (i + 1) * n + j;
 
-				//아래(x, z), 위(x, z+1)의 순서로 인덱스를 추가한다.
-				pnIndices[j++] = (UINT)(x + (z * nWidth));
-				pnIndices[j++] = (UINT)((x + (z * nWidth)) + nWidth);
-			}
-		}
-		else
-		{
-			//짝수 번째 줄이므로(z = 1, 3, 5, ...) 인덱스의 나열 순서는 오른쪽에서 왼쪽 방향이다. 
-			for (int x = nWidth - 1; x >= 0; x--)
-			{
-				//줄이 바뀔 때마다(x == (nWidth-1)) 첫 번째 인덱스를 추가한다.
-				if (x == (nWidth - 1)) pnIndices[j++] = (UINT)(x + (z * nWidth));
-				//아래(x, z), 위(x, z+1)의 순서로 인덱스를 추가한다. 
-				pnIndices[j++] = (UINT)(x + (z * nWidth));
-				pnIndices[j++] = (UINT)((x + (z * nWidth)) + nWidth);
-			}
+			pnIndices[k + 3] = (i + 1) * n + j;
+			pnIndices[k + 4] = i * n + j + 1;
+			pnIndices[k + 5] = (i + 1) * n + j + 1;
+
+			k += 6; // next quad
 		}
 	}
 

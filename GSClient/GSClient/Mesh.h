@@ -74,6 +74,7 @@ protected:
 	UINT m_nStride = 0;
 	UINT m_nOffset = 0;
 
+
 	BoundingBox m_bBox;
 
 protected:
@@ -96,6 +97,8 @@ protected:
 public:
 	CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual ~CMesh();
+
+	int	faceCount = 0;
 
 public:
 	void AddRef() { m_nReferences++; }
@@ -180,7 +183,7 @@ class CTerrainMesh : public CMesh
 {
 public:
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		int xStart, int zStart, int nWidth, int nLength);
+		float Width, float Depth, int m, int n);
 	~CTerrainMesh();
 
 	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
