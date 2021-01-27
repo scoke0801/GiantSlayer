@@ -38,6 +38,7 @@
 #include <cstdint>
 #include <sstream>
 
+#include <fbxsdk.h>
 
 using namespace std;
 
@@ -138,6 +139,7 @@ namespace Vector3
 			XMStoreFloat3(&xmf3Result, XMLoadFloat3(&xmf3Vector) * fScalar);
 		return(xmf3Result);
 	}
+
 	inline XMFLOAT3 Add(const XMFLOAT3& xmf3Vector1, const XMFLOAT3& xmf3Vector2)
 	{
 		XMFLOAT3 xmf3Result;

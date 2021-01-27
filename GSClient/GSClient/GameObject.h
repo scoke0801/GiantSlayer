@@ -19,6 +19,9 @@ protected:
 	CShader*	m_pShader = NULL;
 
 public:
+	FbxScene*	m_pfbxScene = NULL;
+
+public:
 	CGameObject();
 	virtual ~CGameObject();
 
@@ -84,4 +87,14 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
 	virtual void Animate(float fTimeElapsed) {}
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//
+
+class CTree : public CGameObject
+{
+public:
+	CTree(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, FbxScene* pfbxScene);
+	virtual ~CTree();
 };

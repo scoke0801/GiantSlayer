@@ -19,6 +19,13 @@ private:
 	int						m_nPlayers = 0;
 
 	POINT					m_LastMousePos;
+
+	// FBX
+	FbxManager*				m_pfbxManager;
+	FbxScene*				m_pfbxScene;
+	FbxIOSettings*			m_pfbxIOs;
+	FbxImporter*			m_pfbxImporter;
+
 public:
 	CSceneTH();
 	~CSceneTH();

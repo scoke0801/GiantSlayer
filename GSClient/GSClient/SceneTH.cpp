@@ -162,6 +162,19 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	m_ppObjects[1]->SetPosition({ -10, 0, 20 });
 	m_ppObjects[2] = emey2;
 	m_ppObjects[2]->SetPosition({ +10, 0, 20 });
+
+	/*m_pfbxManager->Create();
+	m_pfbxScene->Create(m_pfbxManager, "");
+	m_pfbxIOs->Create(m_pfbxManager, "");
+	m_pfbxManager->SetIOSettings(m_pfbxIOs);
+	m_pfbxImporter->Create(m_pfbxManager, "");
+
+	//fbx 씬 생성 및 임포터 초기화
+	//씬 루트노드는 GetRootNode()로 호출
+
+	m_pfbxImporter->Initialize("", -1, m_pfbxIOs);
+	m_pfbxImporter->Import(m_pfbxScene);*/
+
 }
 
 void CSceneTH::ReleaseUploadBuffers()
@@ -198,6 +211,10 @@ void CSceneTH::ReleaseObjects()
 				delete m_ppPlayers[j];
 		delete[] m_ppPlayers;
 	}
+
+	/*m_pfbxIOs->Destroy();
+	m_pfbxScene->Destroy();
+	m_pfbxManager->Destroy();*/
 }
 
 void CSceneTH::BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,

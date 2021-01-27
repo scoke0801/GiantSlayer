@@ -99,6 +99,9 @@
     <ClCompile Include="EnemyState.cpp">
       <Filter>State</Filter>
     </ClCompile>
+    <ClCompile Include="FBXLoader.cpp">
+      <Filter>FBXLoader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -194,6 +197,9 @@
     <ClInclude Include="EnemyState.h">
       <Filter>State</Filter>
     </ClInclude>
+    <ClInclude Include="FBXLoader.h">
+      <Filter>FBXLoader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -269,6 +275,9 @@
     </Filter>
     <Filter Include="GameObject\Enemy">
       <UniqueIdentifier>{947bf519-a036-4da5-b861-4d8bf7ea6137}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FBXLoader">
+      <UniqueIdentifier>{2a81f814-64ba-44ff-b6d7-50b1454fafe0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -58,6 +58,8 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 		m_pShader->Render(pd3dCommandList, pCamera);
 	}
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
+
+	//if (m_pfbxScene) RenderFbxNodeHierarchy(pd3dCommandList, m_pfbxScene->GetRootNode(), m_pAnimationController->GetCurrentTime(), fbxf4x4World);
 }
 
 void CGameObject::SetPosition(XMFLOAT3 pos)
@@ -120,4 +122,19 @@ CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 
 CBox::~CBox()
 {
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+CTree::CTree(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, FbxScene* pfbxScene)
+{
+	m_pfbxScene = pfbxScene;
+
+	//m_pfbxScene = LoadFbxSceneFromFile(pd3dDevice, pd3dCommandList, pfbxSdkManager, "파일이름.fbx");
+	//CreateMeshFromFbxNodeHierarchy(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, m_pfbxScene->GetRootNode());
+}
+
+CTree::~CTree()
+{
+
 }
