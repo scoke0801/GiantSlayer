@@ -834,7 +834,7 @@ void CSceneJH3::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	box->m_DiffuseSrvHeapIndex = 0;
 	box->m_xmf4DiffuseAlbedo = XMFLOAT4(Colors::BurlyWood);
 	box->m_xmf3FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
-	box->m_Roughness = 0.1f;
+	box->m_Roughness = 0.9f;
 	box->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	auto terrain = std::make_unique<CMaterial>();
@@ -978,8 +978,8 @@ void CSceneJH3::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_ppObjects[14]->SetShader(pShader);
 
 	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/[TestJH]TerrainAndLight.hlsl", "VSTextured");
-	pShader->CreatePixelShader(L"Shaders/[TestJH]TerrainAndLight.hlsl", "PSTextured");
+	pShader->CreateVertexShader(L"Shaders/[TestJH]TerrainAndLight.hlsl", "VSLighted");
+	pShader->CreatePixelShader(L"Shaders/[TestJH]TerrainAndLight.hlsl", "PSLighted");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	 

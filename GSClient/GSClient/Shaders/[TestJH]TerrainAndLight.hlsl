@@ -219,8 +219,7 @@ Texture2D gSkyBox_Left : register(t4);
 Texture2D gSkyBox_Top : register(t5);
 Texture2D gSkyBox_Bottom : register(t6);
 Texture2D gtxtBox : register(t7);
-
-
+ 
 struct VS_TEXTURE_IN
 {
 	float3 position : POSITION;
@@ -319,5 +318,34 @@ float4 PSTexIndex(VS_TEXTURE_OUT input) : SV_TARGET
 	//return gtxtBox.Sample(gssWrap, input.uv);
 }
 
+float4 PSLighted(VS_LIGHT_OUT pin) : SV_Target
+{ 
+    float4 diffuseAlbedo = gtxtBox.Sample(gssWrap, pin.uv) * gDiffuseAlbedo;
 
+    // Interpolating normal can unnormalize it, so renormalize it.
+    pin.Normal = normalize(pin.Normal);
 
+    float3 EyePosW = float3(0.0f, 300.0f, -150.0f);
+    float4 EyePos = mul(mul(mul(float4(EyePosW, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+    EyePosW = EyePos.xyz;
+    // Vector from point being lit to eye. 
+    float3 toEyeW = normalize(EyePosW - pin.PosW);
+
+    //float4 diffuseAlbedo = gtxtBox.Sample(gssWrap, pin.uv);
+    // Indirect lighting.
+    float4 ambient = gAmbientLight * diffuseAlbedo;
+    //
+    const float shininess = 1.0f - gRoughness;
+    Material mat = { diffuseAlbedo, gFresnelR0, shininess };
+    float3 shadowFactor = 1.0f;
+    float4 directLight = ComputeLighting(gLights, mat, pin.PosW,
+        pin.Normal, toEyeW, shadowFactor);
+    
+    float4 litColor = ambient * directLight;// *diffuseAlbedo;
+    //
+    //// Common convention to take alpha from diffuse material.
+    litColor.a = diffuseAlbedo.a;
+    //
+    return litColor;
+   // return float4(1.0f, 1.0f, 1.0f, 0.0f);
+}
