@@ -50,6 +50,30 @@ void CGameObject::SetMesh(CMesh* pMesh)
 
 	if (m_pMesh) m_pMesh->AddRef();
 }
+void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, 
+		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObjInfo);
+}
+void CGameObject::ReleaseShaderVariables()
+{
+	if (m_pd3dcbGameObject)
+	{
+		m_pd3dcbGameObject->Unmap(0, NULL);
+		m_pd3dcbGameObject->Release();
+	}
+}
+void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{ 
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World))); 
+	::memcpy(&m_pcbMappedGameObjInfo->m_xmf4x4World, &xmf4x4World, sizeof(XMFLOAT4X4)); 
+	::memcpy(&m_pcbMappedGameObjInfo->m_Material, m_Material, sizeof(MATERIAL));
+	::memcpy(&m_pcbMappedGameObjInfo->m_nTextureIndex, &m_nTextureIndex, sizeof(UINT)); 
+}
 void CGameObject::ReleaseUploadBuffers()
 {
 	//정점 버퍼를 위한 업로드 버퍼를 소멸시킨다.
@@ -133,11 +157,14 @@ void CRotatingObject::Animate(float fTimeElapsed)
 CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float width, float height, float depth)
 {
+	
 	m_Name = OBJ_NAME::Box;
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
 		width, height, depth);
 
 	SetMesh(pCubeMeshTex);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 CBox::~CBox()

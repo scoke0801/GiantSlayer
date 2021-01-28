@@ -13,33 +13,37 @@ enum class OBJ_NAME
 
 string ConvertToObjectName(const OBJ_NAME& name);
 
-//struct CB_GAMEOBJECT_INFO
-//{
-//	XMFLOAT4X4						m_xmf4x4World;
-//	UINT							m_nObjectID;
-//	UINT							m_nMaterialID;
-//};
+struct GAMEOBJECT_INFO
+{
+	XMFLOAT4X4						m_xmf4x4World;
+	MATERIAL						m_Material;
+	UINT							m_nTextureIndex;
+};
 
 class CGameObject
 {
 private:
-	int			m_nReferences = 0;
+	int					m_nReferences = 0;
 	 
 protected:
-	XMFLOAT4X4	m_xmf4x4World;
+	XMFLOAT4X4			m_xmf4x4World;
 
-	XMFLOAT3	m_xmf3Position;
-	XMFLOAT3	m_xmf3Velocity;
+	XMFLOAT3			m_xmf3Position;
+	XMFLOAT3			m_xmf3Velocity;
 
-	CMesh*		m_pMesh = NULL;
-	CShader*	m_pShader = NULL;
+	CMesh*				m_pMesh = NULL;
+	CShader*			m_pShader = NULL;
 
-	UINT		m_nTextureIndex = 0x00;
+	UINT				m_nTextureIndex = 0x00;
+	 
+	MATERIAL*			m_Material;
 
-//CMaterial*	m_Material = nullptr;
-//int			m_MaterialParameterIndex = 2;
+	OBJ_NAME			m_Name;
 
-	OBJ_NAME	m_Name;
+private:
+	ID3D12Resource*		m_pd3dcbGameObject = NULL;
+	GAMEOBJECT_INFO*	m_pcbMappedGameObjInfo = NULL;
+
 public:
 	CGameObject();
 	virtual ~CGameObject();
@@ -49,7 +53,10 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 	virtual void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
-	
+
+	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void ReleaseShaderVariables();
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseUploadBuffers();
 
 public:
