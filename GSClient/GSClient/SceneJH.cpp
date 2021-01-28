@@ -6,6 +6,11 @@
 #include "UI.h"
 #include "Camera.h"
 
+#define ROOT_PARAMETER_OBJECT			0
+#define ROOT_PARAMETER_CAMERA			1
+#define ROOT_PARAMETER_MATERIAL			2
+#define ROOT_PARAMETER_LIGHT			3
+
 #pragma region SceneJH - About Minimap
 CSceneJH::CSceneJH()
 {
@@ -781,11 +786,11 @@ CSceneJH3::CSceneJH3()
 
 CSceneJH3::~CSceneJH3()
 {
-	if (m_pd3dcbLight)
+	if (m_pd3dcbLights)
 	{
-		m_pd3dcbLight->Unmap(0, NULL);
-		m_pd3dcbLight->Release();
-	} 
+		m_pd3dcbLights->Unmap(0, NULL);
+		m_pd3dcbLights->Release();
+	}
 }
 
 void CSceneJH3::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -828,46 +833,80 @@ void CSceneJH3::BuildCamera(ID3D12Device* pd3dDevice,
 
 void CSceneJH3::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	auto box = std::make_unique<CMaterial>();
-	box->m_Name = "Box";
-	box->m_MatCBIndex = 0;
-	box->m_DiffuseSrvHeapIndex = 0;
-	box->m_xmf4DiffuseAlbedo = XMFLOAT4(Colors::BurlyWood);
-	box->m_xmf3FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
-	box->m_Roughness = 0.9f;
-	box->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pMaterials = new MATERIALS;
+	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
 
-	auto terrain = std::make_unique<CMaterial>();
-	terrain->m_Name = "Terrain";
-	terrain->m_MatCBIndex = 1;
-	terrain->m_DiffuseSrvHeapIndex = 2;
-	terrain->m_xmf4DiffuseAlbedo = XMFLOAT4(Colors::DarkGreen);
-	terrain->m_xmf3FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
-	terrain->m_Roughness = 0.2f;
-	terrain->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pMaterials->m_pReflections[0] = { XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 5.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[1] = { XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[2] = { XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 15.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[3] = { XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 20.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[4] = { XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 25.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[5] = { XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 30.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[6] = { XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 35.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[7] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 
-	m_Materials["Box"] = std::move(box);
-	m_Materials["Terrain"] = std::move(terrain);
+	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256의 배수
+	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
+
+	::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
 }
 
 void CSceneJH3::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_Light = new LightInfo();
-	m_Light->AmbientLight = { 0.25f, 0.25f, 0.35f, 1.0f };
-	m_Light->Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
-	m_Light->Lights[0].Strength = { 0.6f, 0.6f, 0.6f };
-	m_Light->Lights[1].Direction = { -0.57735f, -0.57735f, 0.57735f };
-	m_Light->Lights[1].Strength = { 0.3f, 0.3f, 0.3f };
-	m_Light->Lights[2].Direction = { 0.0f, -0.707f, -0.707f };
-	m_Light->Lights[2].Strength = { 0.15f, 0.15f, 0.15f };
+	m_pLights = new LIGHTS;
+	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 
-	UINT ncbElementBytes = ((sizeof(LightInfo) + 255) & ~255); //256의 배수
-	m_pd3dcbLight = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, 
-		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+
+	m_pLights->m_pLights[0].m_bEnable = true;
+	m_pLights->m_pLights[0].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[0].m_fRange = 100.0f;
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(130.0f, 30.0f, 30.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+	m_pLights->m_pLights[1].m_bEnable = true;
+	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
+	m_pLights->m_pLights[1].m_fRange = 50.0f;
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights->m_pLights[1].m_fFalloff = 8.0f;
+	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[2].m_bEnable = true;
+	m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
+	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	m_pLights->m_pLights[3].m_bEnable = true;
+	m_pLights->m_pLights[3].m_nType = SPOT_LIGHT;
+	m_pLights->m_pLights[3].m_fRange = 60.0f;
+	m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(-150.0f, 30.0f, 30.0f);
+	m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 1.0f);
+	m_pLights->m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights->m_pLights[3].m_fFalloff = 8.0f;
+	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(90.0f));
+	m_pLights->m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 	 
-	m_pd3dcbLight->Map(0, NULL, (void**)&m_pcbMappedLight);
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
+	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes,
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
-	::memcpy(m_pcbMappedLight, m_Light, sizeof(LightInfo)); 
+	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
+
+	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 }
 
 void CSceneJH3::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -878,14 +917,14 @@ void CSceneJH3::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/[TestJH]TerrainAndLight.hlsl", "VSTextured");
-	pShader->CreatePixelShader(L"Shaders/[TestJH]TerrainAndLight.hlsl", "PSTexIndex");
+	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTextured");
+	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexIndex");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	CShader* pSkyBoxShader = new CSkyBoxShader();
-	pSkyBoxShader->CreateVertexShader(L"Shaders/[TestJH]TerrainAndLight.hlsl", "VSTextured");
-	pSkyBoxShader->CreatePixelShader(L"Shaders/[TestJH]TerrainAndLight.hlsl", "PSTexIndex");
+	pSkyBoxShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTextured");
+	pSkyBoxShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexIndex");
 	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -931,8 +970,7 @@ void CSceneJH3::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	// 지형
 	m_ppObjects[6]->SetMesh(pPlaneMeshTex);
-	m_ppObjects[6]->SetObjectName(OBJ_NAME::Terrain);
-	m_ppObjects[6]->SetMaterial(m_Materials[m_ppObjects[6]->GetObjectName()].get(), 2);
+	m_ppObjects[6]->SetObjectName(OBJ_NAME::Terrain); 
 	m_ppObjects[6]->SetPosition({ 0,  0,  0 });
 	m_ppObjects[6]->SetTextureIndex(0x01);
 	m_ppObjects[6]->SetShader(pShader);
@@ -978,8 +1016,8 @@ void CSceneJH3::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_ppObjects[14]->SetShader(pShader);
 
 	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/[TestJH]TerrainAndLight.hlsl", "VSLighted");
-	pShader->CreatePixelShader(L"Shaders/[TestJH]TerrainAndLight.hlsl", "PSLighted");
+	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	 
@@ -987,8 +1025,7 @@ void CSceneJH3::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	{
 		CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
 		pBox->SetShader(pShader);
-		pBox->SetObjectName(OBJ_NAME::Box);
-		pBox->SetMaterial(m_Materials[pBox->GetObjectName()].get(), 2);
+		pBox->SetObjectName(OBJ_NAME::Box); 
 		m_ppObjects[i] = pBox;
 	}
 
@@ -1142,10 +1179,13 @@ void CSceneJH3::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	{
 		m_ppObjects[i]->SetPosition(xmf3CameraPos);
 	}
+	
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbLight->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(3, d3dGpuVirtualAddress);
-
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
+	  
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
 	{ 
@@ -1253,7 +1293,7 @@ ID3D12RootSignature* CSceneJH3::CreateGraphicsRootSignature(ID3D12Device* pd3dDe
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[5];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[0].Constants.Num32BitValues = 17;
+	pd3dRootParameters[0].Constants.Num32BitValues = 18;
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;

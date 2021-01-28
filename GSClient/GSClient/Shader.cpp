@@ -157,7 +157,7 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* pszFileName,
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
-	HRESULT hResult = ::D3DCompileFromFile(pszFileName, NULL, NULL, pszShaderName, pszShaderProfile,
+	HRESULT hResult = ::D3DCompileFromFile(pszFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, pszShaderName, pszShaderProfile,
 		nCompileFlags, 0, ppd3dShaderBlob, NULL);
 
 	D3D12_SHADER_BYTECODE d3dShaderByteCode;
@@ -255,13 +255,15 @@ void CShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 void CShader::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList,
-	XMFLOAT4X4* pxmf4x4World, UINT textureIndex)
+	XMFLOAT4X4* pxmf4x4World, UINT textureIndex, UINT materialIndex)
 {
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
 	  
-	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &textureIndex, 16);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &textureIndex, 16);	
+	
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &materialIndex, 17);
 }
 void CShader::ReleaseShaderVariables()
 {

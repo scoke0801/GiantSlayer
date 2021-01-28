@@ -134,13 +134,18 @@ private:
 
 	ID3D12DescriptorHeap*	m_pd3dSrvDescriptorHeap = nullptr; 
 	
-private:	// about Lights
-	DirectX::XMFLOAT4		m_AmbientLight = { 0.0f, 0.0f, 0.0f, 1.0f };
-	 
-	LightInfo*				m_Light = nullptr;
+private:	// about Meterail
+	MATERIALS*				m_pMaterials = NULL;
 
-	LightInfo*				m_pcbMappedLight;
-	ID3D12Resource*			m_pd3dcbLight;
+	ID3D12Resource*			m_pd3dcbMaterials = NULL;
+	MATERIAL*				m_pcbMappedMaterials = NULL;
+
+private:	// about Lights
+	LIGHTS*					m_pLights = NULL;
+
+	ID3D12Resource*			m_pd3dcbLights = NULL;
+	LIGHTS*					m_pcbMappedLights = NULL;
+
 public:
 	CSceneJH3();
 	~CSceneJH3();

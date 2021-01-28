@@ -13,6 +13,13 @@ enum class OBJ_NAME
 
 string ConvertToObjectName(const OBJ_NAME& name);
 
+//struct CB_GAMEOBJECT_INFO
+//{
+//	XMFLOAT4X4						m_xmf4x4World;
+//	UINT							m_nObjectID;
+//	UINT							m_nMaterialID;
+//};
+
 class CGameObject
 {
 private:
@@ -29,8 +36,8 @@ protected:
 
 	UINT		m_nTextureIndex = 0x00;
 
-	CMaterial*	m_Material = nullptr;
-	int			m_MaterialParameterIndex = 2;
+//CMaterial*	m_Material = nullptr;
+//int			m_MaterialParameterIndex = 2;
 
 	OBJ_NAME	m_Name;
 public:
@@ -68,7 +75,7 @@ public:
 	void SetVelocity(XMFLOAT3 pos);
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }
-	void SetMaterial(CMaterial* pMaterial, int rootParameterIndex) { m_Material = pMaterial; m_MaterialParameterIndex = rootParameterIndex; }
+	//void SetMaterial(CMaterial* pMaterial, int rootParameterIndex) { m_Material = pMaterial; m_MaterialParameterIndex = rootParameterIndex; }
 	void SetObjectName(const OBJ_NAME& name) { m_Name = name; }
 };
 

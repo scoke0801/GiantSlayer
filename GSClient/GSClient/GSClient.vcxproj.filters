@@ -16,10 +16,13 @@
     <FxCompile Include="SceneTH.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\[TestJH]TerrainAndLight.hlsl">
+    <FxCompile Include="Shaders\LightingUtil.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\LightingUtil.hlsl">
+    <FxCompile Include="Shaders\Light.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TerrainAndLight.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
