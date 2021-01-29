@@ -31,9 +31,11 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 		pd3dCommandList->DrawIndexedInstanced(m_nIndices, 1, 0, 0, 0);
 		//인덱스 버퍼가 있으면 인덱스 버퍼를 파이프라인(IA: 입력 조립기)에 연결하고 인덱스를 사용하여 렌더링한다. 
 	}
+	else
+	{
+		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+	}
 
-	//메쉬의 정점 버퍼 뷰를 렌더링한다(파이프라인(입력 조립기)을 작동하게 한다).
-	pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 }
 CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float fWidth , float fHeight , float fDepth )
@@ -377,6 +379,8 @@ CMinimapMesh::~CMinimapMesh()
 {
 }
 
+
+
 CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart,int zStart,int WidthBlock_Count,int DepthBlock_Count)
 	:CMesh(pd3dDevice, pd3dCommandList)
 {
@@ -400,12 +404,14 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		{
 			// 정점의 높이와 색상을 높이 맵으로부터 구한다.
 			float tempheight = OnGetHeight(x, z);
-
+			//float tempheight = m_fHeightMapVertexs[z][x];
 			pVertices[i].m_xmf3Position = XMFLOAT3(x*10 , tempheight, z*10 );
+			pVertices[i].m_xmf3Normal= XMFLOAT3(x * 10, tempheight, z * 10);
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x)/float(100.0f), float(z)/float(100.0f));
 			
-			if (fHeight < fMinHeight) fMinHeight = fHeight;
-			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
+			
+			if (tempheight < fMinHeight) tempheight = fMinHeight ;
+			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
 		}
 	}
 
@@ -469,4 +475,17 @@ CTerrainMesh::~CTerrainMesh()
 float CTerrainMesh::OnGetHeight(float x, float z)
 {
 	return 0.5f * (z * sinf(0.1f * x) + x * cosf(0.1f * z));
+}
+
+//CTerrainMesh2::CTerrainMesh2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int BlockWidth, int BlockDepth)
+//{
+//}
+//
+//CTerrainMesh2::~CTerrainMesh2()
+//{
+//}
+
+float CTerrainMesh2::OnGetHeight(float x, float z)
+{
+	return 0.0f;
 }

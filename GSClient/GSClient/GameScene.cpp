@@ -54,8 +54,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 {  
 	// 지형 메쉬
 	//CPlaneMeshTextured* pPlaneMeshTex = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 200.0f, 200.0f, 0.0f, false);
-
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0 , 0, 100, 100);
+	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
 
 	m_nObjects = 8;
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -267,9 +266,9 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		//m_ppObjects[6]->Draw(pd3dCommandList, m_CurrentCamera);
-		if (m_ppObjects[j])
-			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
+		m_ppObjects[6]->Draw(pd3dCommandList, m_CurrentCamera);
+		//if (m_ppObjects[j])
+			//m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 
