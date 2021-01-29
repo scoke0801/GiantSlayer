@@ -73,7 +73,7 @@ public:
 		ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World, UINT textureIndex = 0);
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World, UINT textureIndex = 0, UINT materialIndex = 0);
 	virtual void ReleaseShaderVariables();
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);

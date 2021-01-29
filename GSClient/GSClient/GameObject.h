@@ -4,6 +4,22 @@
 class CShader;
 class CCamera;
 
+enum class OBJ_NAME
+{
+	None = 0,
+	Terrain = 1,
+	Box = 2
+};
+
+string ConvertToObjectName(const OBJ_NAME& name);
+
+//struct CB_GAMEOBJECT_INFO
+//{
+//	XMFLOAT4X4						m_xmf4x4World;
+//	UINT							m_nObjectID;
+//	UINT							m_nMaterialID;
+//};
+
 class CGameObject
 {
 private:
@@ -19,10 +35,11 @@ protected:
 	CShader*	m_pShader = NULL;
 
 	UINT		m_nTextureIndex = 0x00;
+	 
+//CMaterial*	m_Material = nullptr;
+//int			m_MaterialParameterIndex = 2;
 
-	CMesh** m_ppMeshes = NULL;
-	int m_nMeshes = 0;
-
+	OBJ_NAME	m_Name; 
 public:
 	CGameObject();
 	virtual ~CGameObject();
@@ -52,14 +69,16 @@ public:
 
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
+	string GetObjectName() const { return ConvertToObjectName(m_Name); }
 
 	virtual void SetMesh(CMesh* pMesh);
-	virtual void SetMesh(int nIndex, CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
 	void SetPosition(XMFLOAT3 pos);
 	void SetVelocity(XMFLOAT3 pos);
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }
+	//void SetMaterial(CMaterial* pMaterial, int rootParameterIndex) { m_Material = pMaterial; m_MaterialParameterIndex = rootParameterIndex; }
+	void SetObjectName(const OBJ_NAME& name) { m_Name = name; }
 };
 
 class CRotatingObject : public CGameObject

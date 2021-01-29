@@ -17,7 +17,6 @@ cbuffer cbCameraInfo : register(b1)
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
 
-
 Texture2D gtxtBox : register(t0);
 Texture2D gSkyBox_Front : register(t1);
 Texture2D gSkyBox_Back : register(t2);

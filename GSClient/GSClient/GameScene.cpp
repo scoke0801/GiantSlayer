@@ -13,13 +13,14 @@ CGameScene::~CGameScene()
 {
 }
 
-void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	LoadTextures(pd3dDevice, pd3dCommandList);
 	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
 
+	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
 	BuildObjects(pd3dDevice, pd3dCommandList);
 }
 
@@ -371,7 +372,7 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[3];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[0].Constants.Num32BitValues = 17;
+	pd3dRootParameters[0].Constants.Num32BitValues = 18;
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;

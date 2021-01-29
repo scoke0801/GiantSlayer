@@ -2,6 +2,22 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Camera.h"
+
+string ConvertToObjectName(const OBJ_NAME& name)
+{
+	switch (name)
+	{
+	case OBJ_NAME::None:
+		return "None";
+	case OBJ_NAME::Box:
+		return "Box";
+	case OBJ_NAME::Terrain:
+		return "Terrain";
+	default:
+		assert(!"UnDefinedObjectName");
+	}
+}
+
 CGameObject::CGameObject()
 {
 	m_xmf3Position = { 0, 0, 0 };
@@ -34,15 +50,7 @@ void CGameObject::SetMesh(CMesh* pMesh)
 
 	if (m_pMesh) m_pMesh->AddRef();
 }
-void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
-{
-	if (m_ppMeshes)
-	{
-		if (m_ppMeshes[nIndex]) m_ppMeshes[nIndex]->Release();
-		m_ppMeshes[nIndex] = pMesh;
-		if (pMesh) pMesh->AddRef();
-	}
-}
+
 void CGameObject::ReleaseUploadBuffers()
 {
 	//정점 버퍼를 위한 업로드 버퍼를 소멸시킨다.
@@ -60,13 +68,17 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 {
 	OnPrepareRender();
 
+	//if (m_Material)
+	//{
+	//	m_Material->UpdateShaderVariables(pd3dCommandList, m_MaterialParameterIndex);
+	//}
 	if (m_pShader)
 	{
 		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
-		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex);
+		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
 		m_pShader->Render(pd3dCommandList, pCamera);
 	}
-	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList); 
 }
 
 void CGameObject::SetPosition(XMFLOAT3 pos)
@@ -107,6 +119,7 @@ void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 
 CRotatingObject::CRotatingObject()
 {
+	m_Name = OBJ_NAME::None;
 	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	m_fRotationSpeed = 90.0f;
 }
@@ -121,6 +134,7 @@ void CRotatingObject::Animate(float fTimeElapsed)
 CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float width, float height, float depth)
 {
+	m_Name = OBJ_NAME::Box;
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
 		width, height, depth);
 
@@ -130,5 +144,4 @@ CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 CBox::~CBox()
 {
 }
-
-
+ 

@@ -67,20 +67,7 @@ using Microsoft::WRL::ComPtr;
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dwrite.lib")
 #pragma comment(lib, "D2D1.lib")
-
-#include "resource.h"
-#include "GameTimer.h"
-#include "InputHandler.h"
-#include "Defines.h"
-#include "Sound.h"
-#include "FrameResource.h"
-#include "Texture.h"
-#include "Material.h"
-#include "GameFramework.h"
-#include "Font.h"
-
-// TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
-
+ 
 extern UINT gnCbvSrvDescriptorIncrementSize;
 extern UINT	gnRtvDescriptorIncrementSize;
 extern UINT gnDsvDescriptorIncrementSize;
@@ -108,9 +95,7 @@ extern D3D12_BLEND_DESC CreateDefaultBlendDesc();
 extern D3D12_DEPTH_STENCIL_DESC CreateDefaultDepthStencilDesc();
 
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
-
-
-
+ 
 #define EPSILON					1.0e-10f
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
@@ -361,3 +346,17 @@ inline XMFLOAT4 MyRANDOM_COLOR()
 	XMFLOAT4 xmf(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX));
 	return xmf;
 }
+ 
+#include "resource.h"
+#include "GameTimer.h"
+#include "InputHandler.h"
+#include "Defines.h"
+#include "Sound.h"
+#include "FrameResource.h"
+#include "Texture.h"
+#include "Material.h"
+#include "GameFramework.h"
+#include "Font.h"
+#include "Light.h"
+
+// TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
