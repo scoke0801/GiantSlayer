@@ -35,6 +35,19 @@ public:
 	~CDiffusedVertex() { }
 };
 
+class CDiffused2TexturedVertex : public CDiffusedVertex
+{
+public:
+	XMFLOAT2						m_xmf2TexCoord0;
+	XMFLOAT2						m_xmf2TexCoord1;
+
+public:
+	CDiffused2TexturedVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf4Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f); m_xmf2TexCoord0 = m_xmf2TexCoord1 = XMFLOAT2(0.0f, 0.0f); }
+	CDiffused2TexturedVertex(float x, float y, float z, XMFLOAT4 xmf4Diffuse, XMFLOAT2 xmf2TexCoord0, XMFLOAT2 xmf2TexCoord1) { m_xmf3Position = XMFLOAT3(x, y, z); m_xmf4Diffuse = xmf4Diffuse; m_xmf2TexCoord0 = xmf2TexCoord0; m_xmf2TexCoord1 = xmf2TexCoord1; }
+	CDiffused2TexturedVertex(XMFLOAT3 xmf3Position, XMFLOAT4 xmf4Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), XMFLOAT2 xmf2TexCoord0 = XMFLOAT2(0.0f, 0.0f), XMFLOAT2 xmf2TexCoord1 = XMFLOAT2(0.0f, 0.0f)) { m_xmf3Position = xmf3Position; m_xmf4Diffuse = xmf4Diffuse; m_xmf2TexCoord0 = xmf2TexCoord0; m_xmf2TexCoord1 = xmf2TexCoord1; }
+	~CDiffused2TexturedVertex() { }
+};
+
 class CTexturedVertex : public CVertex
 {
 public:
@@ -66,14 +79,17 @@ class CMesh
 {
 private:
 	int m_nReferences = 0;
-	int m_Meshes = 0;
+	
 
 protected:
 	UINT m_nSlot = 0;
 	UINT m_nVertices = 0;
+	UINT m_nIndices=0;
 	UINT m_nStride = 0;
 	UINT m_nOffset = 0;
 
+	CMesh** m_ppMeshes = NULL;
+	int m_Meshes = 0;
 
 	BoundingBox m_bBox;
 
@@ -86,10 +102,6 @@ protected:
 
 	D3D12_VERTEX_BUFFER_VIEW m_d3dVertexBufferView;
 	D3D12_PRIMITIVE_TOPOLOGY m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	UINT m_nIndices;
-
-	
 
 
 	D3D12_INDEX_BUFFER_VIEW m_d3dIndexBufferView;
@@ -181,12 +193,22 @@ public:
 //
 class CTerrainMesh : public CMesh
 {
+protected:
+	float m_fHeightMapVertexs[9+ 1][9 + 1];
+
+	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+
+	int m_nWidth;
+	int m_nDepth;
+
 public:
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		float Width, float Depth, int m, int n);
+		int nWidth, int nLength, int BlockWidth, int BlockDepth);
 	~CTerrainMesh();
 
+	
+
 	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
-	virtual float OnGetHeight(int x, int z);
+	virtual float OnGetHeight(float x, float z);
 
 };

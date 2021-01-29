@@ -34,6 +34,15 @@ void CGameObject::SetMesh(CMesh* pMesh)
 
 	if (m_pMesh) m_pMesh->AddRef();
 }
+void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
+{
+	if (m_ppMeshes)
+	{
+		if (m_ppMeshes[nIndex]) m_ppMeshes[nIndex]->Release();
+		m_ppMeshes[nIndex] = pMesh;
+		if (pMesh) pMesh->AddRef();
+	}
+}
 void CGameObject::ReleaseUploadBuffers()
 {
 	//정점 버퍼를 위한 업로드 버퍼를 소멸시킨다.
@@ -76,7 +85,7 @@ void CGameObject::SetVelocity(XMFLOAT3 pos)
 
 void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
 {	
-	//m_pMesh->
+	
 }
 
 void CGameObject::Move(XMFLOAT3 pos)
@@ -121,3 +130,5 @@ CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 CBox::~CBox()
 {
 }
+
+

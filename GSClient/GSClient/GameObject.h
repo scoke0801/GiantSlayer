@@ -20,9 +20,13 @@ protected:
 
 	UINT		m_nTextureIndex = 0x00;
 
+	CMesh** m_ppMeshes = NULL;
+	int m_nMeshes = 0;
+
 public:
 	CGameObject();
 	virtual ~CGameObject();
+
 
 public:
 	void AddRef() { m_nReferences++; }
@@ -31,6 +35,7 @@ public:
 	virtual void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 	
 	void ReleaseUploadBuffers();
+
 
 public:
 	virtual void Animate(float fTimeElapsed);
@@ -49,6 +54,7 @@ public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
 
 	virtual void SetMesh(CMesh* pMesh);
+	virtual void SetMesh(int nIndex, CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
 	void SetPosition(XMFLOAT3 pos);
 	void SetVelocity(XMFLOAT3 pos);
@@ -88,3 +94,4 @@ public:
 
 	virtual void Animate(float fTimeElapsed) {}
 };
+
