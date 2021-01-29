@@ -280,6 +280,14 @@ void CCamera::UpdateViewMatrix()
 		m_xmf4x4View(3, 3) = 1.0f;
 
 		m_ViewDirty = false;
+
+		if (m_Lights.size() < 0) return;
+
+		for(auto light : m_Lights)
+		{
+			light->m_xmf3Position = GetPosition3f();
+			light->m_xmf3Direction = GetLook3f();
+		}
 	}
 }
 void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight,

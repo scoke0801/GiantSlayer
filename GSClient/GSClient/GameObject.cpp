@@ -77,7 +77,7 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
 		m_pShader->Render(pd3dCommandList, pCamera);
 	}
-	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList); 
 }
 
 void CGameObject::SetPosition(XMFLOAT3 pos)

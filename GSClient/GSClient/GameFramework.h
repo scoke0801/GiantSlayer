@@ -123,9 +123,9 @@ public:	// about scene change
 
 		CScene* scene = new SceneName;
 		static CScene* prevScene;
-		scene->BuildCamera(m_pd3dDevice, m_pd3dCommandList,
-			m_nWndClientWidth, m_nWndClientHeight);
-		scene->Init(m_pd3dDevice, m_pd3dCommandList);
+		//scene->BuildCamera(m_pd3dDevice, m_pd3dCommandList,
+		//	m_nWndClientWidth, m_nWndClientHeight);
+		scene->Init(m_pd3dDevice, m_pd3dCommandList, m_nWndClientWidth, m_nWndClientHeight);
 		scene->SendDataToNextScene(pContext);
 		
 
