@@ -574,22 +574,7 @@ void CSceneJH2::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 }
 
 void CSceneJH2::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	/*
-	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-	if (m_CurrentCamera)
-	{
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
-		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	}
-
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
-	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
-	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	pd3dCommandList->SetGraphicsRootDescriptorTable(2, tex); 
-	*/
-
+{ 
 	if (m_DrawUI)
 	{
 		for (int j = m_nUIStartIndex; j < m_nObjects; j++)
@@ -1229,6 +1214,10 @@ void CSceneJH3::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
+}
+
+void CSceneJH3::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
+{
 }
 
 void CSceneJH3::ProcessInput()

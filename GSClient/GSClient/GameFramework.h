@@ -54,19 +54,19 @@ private:
 	ID3D12DescriptorHeap* m_pd3dCbvSrvUavDescriptorHeapShadow = nullptr;
 
 private:	// 텍스트 및 2D 관련~!@#!@
-	Microsoft::WRL::ComPtr<IDWriteFactory2>		m_pd2dWriteFactory;
-	Microsoft::WRL::ComPtr<ID2D1Factory2>		m_pd2dFactory;
-	Microsoft::WRL::ComPtr<IDXGIDevice>			m_pdxgiDevice;
-	Microsoft::WRL::ComPtr<ID2D1Device1>		m_pd2Device;
-	Microsoft::WRL::ComPtr<ID2D1DeviceContext1> m_pd2devCon;
+	Microsoft::WRL::ComPtr<IDWriteFactory2>			m_pd2dWriteFactory;
+	Microsoft::WRL::ComPtr<ID2D1Factory2>			m_pd2dFactory;
+	Microsoft::WRL::ComPtr<IDXGIDevice>				m_pdxgiDevice;
+	Microsoft::WRL::ComPtr<ID2D1Device1>			m_pd2Device;
+	Microsoft::WRL::ComPtr<ID2D1DeviceContext1>		m_pd2devCon;
 
 private:	// 임시 테스트용!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	D3D12_VIEWPORT				m_d3dViewport;
-	D3D12_RECT					m_d3dScissorRect;
+	D3D12_VIEWPORT									m_d3dViewport;
+	D3D12_RECT										m_d3dScissorRect;
 
-	std::vector<std::unique_ptr<CFrameResource>> mFrameResources;
+	std::vector<std::unique_ptr<CFrameResource>>	mFrameResources;
 	CFrameResource* mCurrFrameResource = nullptr;
-	int mCurrFrameResourceIndex = 0;
+	int												mCurrFrameResourceIndex = 0;
 
 private:
 	CFramework();
@@ -127,7 +127,6 @@ public:	// about scene change
 		//	m_nWndClientWidth, m_nWndClientHeight);
 		scene->Init(m_pd3dDevice, m_pd3dCommandList, m_nWndClientWidth, m_nWndClientHeight);
 		scene->SendDataToNextScene(pContext);
-		
 
 		if (m_CurrentScene)
 		{

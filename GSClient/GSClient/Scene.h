@@ -24,6 +24,7 @@ public:
 	virtual void Update(double elapsedTime) {} 
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {}  
 	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) {}
 
 public:
 	// about Keyboard process

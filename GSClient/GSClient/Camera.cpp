@@ -19,18 +19,18 @@ void CCamera::Update(float elapsedTime)
 		m_TimerForShake.UpdateElapsedTime();
 		auto res = m_TimerForShake.GetElapsedTime();
 		cout << res << "\n";
-		/*if (res >= 0.1 && res < 0.3)
-		{ 
-			Strafe(-5.0f); 
-		}
-		else if (res >= 0.4)
-		{
-			SetShake(false, 0.0f); 
-		}
-		else
-		{ 
-			Strafe(5.0f); 
-		} */
+		//if (res >= 0.1 && res < 0.3)
+		//{ 
+		//	Strafe(-5.0f); 
+		//}
+		//else if (res >= 0.4)
+		//{
+		//	SetShake(false, 0.0f, 0.0f); 
+		//}
+		//else
+		//{ 
+		//	Strafe(5.0f); 
+		//} 
 		if (res >= m_ShakeTime)
 		{
 			SetShake(false, 0.0f, 0.0f);
@@ -41,6 +41,10 @@ void CCamera::Update(float elapsedTime)
 			xmf3Pos.x += RandomRange(-m_ShakePower, m_ShakePower);
 			xmf3Pos.y += RandomRange(-m_ShakePower, m_ShakePower);
 			xmf3Pos.z += RandomRange(-m_ShakePower, m_ShakePower);
+			
+			//Strafe(xmf3Pos.x - m_xmf3PrevPos.x);
+			//UpDown(xmf3Pos.y - m_xmf3PrevPos.y);
+			//Walk(xmf3Pos.z - m_xmf3PrevPos.z);
 			SetPosition(xmf3Pos);
 		}
 		UpdateViewMatrix(); 
@@ -411,6 +415,7 @@ void CCamera::SetShake(bool isOnShake, float shakeTime, float power)
 	else
 	{
 		shakeTime = 0.0f;
-		m_xmf3Position = m_xmf3PrevPos;
+		m_xmf3Position = m_xmf3PrevPos; 
+		SetPosition(m_xmf3Position);
 	}
 }
