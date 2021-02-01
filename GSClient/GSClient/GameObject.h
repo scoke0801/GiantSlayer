@@ -37,16 +37,22 @@ protected:
 	UINT				m_nTextureIndex = 0x00;
 	 
 	MATERIAL*			m_Material;
-
+	 
 	OBJ_NAME			m_Name;
 
 private:
 	ID3D12Resource*		m_pd3dcbGameObject = NULL;
 	GAMEOBJECT_INFO*	m_pcbMappedGameObjInfo = NULL;
-
+	 
+	UINT		m_nTextureIndex = 0x00;
+	 
+//CMaterial*	m_Material = nullptr;
+//int			m_MaterialParameterIndex = 2;
+	 
 public:
 	CGameObject();
 	virtual ~CGameObject();
+
 
 public:
 	void AddRef() { m_nReferences++; }
@@ -58,6 +64,7 @@ public:
 	void ReleaseShaderVariables();
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseUploadBuffers();
+
 
 public:
 	virtual void Animate(float fTimeElapsed);
@@ -118,3 +125,4 @@ public:
 
 	virtual void Animate(float fTimeElapsed) {}
 };
+

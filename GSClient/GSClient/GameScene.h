@@ -21,6 +21,8 @@ protected:
 	CCamera					* m_Camera;
 	CCamera					* m_CurrentCamera = nullptr;
 
+	
+
 private:
 	POINT					m_LastMousePos;
 
@@ -30,7 +32,7 @@ public:
 	CGameScene();
 	~CGameScene();
 
-	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override;
 
 	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -58,4 +60,5 @@ public:
 	//그래픽 루트 시그너쳐를 생성한다.
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
-};
+ 
+}; 

@@ -36,7 +36,7 @@ public:
 
 public: 
 	virtual void SendDataToNextScene(void* context) {}	
-	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {} 
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) {}
 	virtual void ReleaseUploadBuffers() {}
 	
 	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) {}
@@ -72,5 +72,5 @@ public:
 
 public:   
 	virtual void SendDataToNextScene(void* context) override {}
-	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override {}
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override {}
 };

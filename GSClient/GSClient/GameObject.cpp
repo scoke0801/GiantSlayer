@@ -49,7 +49,7 @@ void CGameObject::SetMesh(CMesh* pMesh)
 	m_pMesh = pMesh;
 
 	if (m_pMesh) m_pMesh->AddRef();
-}
+} 
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
@@ -73,7 +73,7 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLi
 	::memcpy(&m_pcbMappedGameObjInfo->m_xmf4x4World, &xmf4x4World, sizeof(XMFLOAT4X4)); 
 	::memcpy(&m_pcbMappedGameObjInfo->m_Material, m_Material, sizeof(MATERIAL));
 	::memcpy(&m_pcbMappedGameObjInfo->m_nTextureIndex, &m_nTextureIndex, sizeof(UINT)); 
-}
+} 
 void CGameObject::ReleaseUploadBuffers()
 {
 	//정점 버퍼를 위한 업로드 버퍼를 소멸시킨다.
@@ -101,7 +101,7 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
 		m_pShader->Render(pd3dCommandList, pCamera);
 	}
-	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList); 
 }
 
 void CGameObject::SetPosition(XMFLOAT3 pos)
@@ -120,7 +120,7 @@ void CGameObject::SetVelocity(XMFLOAT3 pos)
 
 void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
 {	
-	//m_pMesh->
+	
 }
 
 void CGameObject::Move(XMFLOAT3 pos)
@@ -170,4 +170,4 @@ CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 CBox::~CBox()
 {
 }
-
+ 
