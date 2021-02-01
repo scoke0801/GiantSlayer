@@ -14,7 +14,7 @@ public:
 
 	void SetCurrentState(CState<object_Type>* s) { m_pCurrentState = s; }
 
-	void  Update()const
+	void  Update(double elapsedTime)const
 	{
 		if (m_pCurrentState) {
 			m_pCurrentState->Execute(m_pOwner);

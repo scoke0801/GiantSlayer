@@ -42,9 +42,19 @@ private:
 private:
 	vector<LIGHT*>				m_Lights;
 
+private:	// For Shake
+	CGameTimer					m_TimerForShake;
+	bool						m_isOnShake = false;
+	float						m_ShakePower = 0.0f;
+	float						m_ShakeTime = 0.0f;
+	XMFLOAT3					m_xmf3PrevPos;
+
 public:
 	CCamera();
 	~CCamera();
+
+	// for Update Loop
+	void Update(float elapsedTime);
 
 	// Get/Set world camera position.
 	DirectX::XMVECTOR GetPosition()const;
@@ -91,6 +101,7 @@ public:
 	// Strafe/Walk the camera a distance d.
 	void Strafe(float d);
 	void Walk(float d);
+	void UpDown(float d);
 
 	// Rotate the camera.
 	void Pitch(float angle);
@@ -112,4 +123,7 @@ public:
 
 public:
 	void SetLight(LIGHT* light) { if (light) m_Lights.push_back(light); }
+
+public:
+	void SetShake(bool isOnShake, float shakeTime, float power);
 };

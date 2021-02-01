@@ -21,7 +21,7 @@ void CSceneTH::Update(double elapsedTime)
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
-			m_ppObjects[j]->Update();
+			m_ppObjects[j]->Update(elapsedTime);
 	}
 }
 

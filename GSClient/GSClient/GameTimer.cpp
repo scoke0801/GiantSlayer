@@ -15,6 +15,8 @@ CGameTimer::CGameTimer()
 	: mSecondsPerCount(0.0), mDeltaTime(-1.0), mBaseTime(0),
 	mPausedTime(0), mPrevTime(0), mCurrTime(0), mStopped(false)
 {
+	Init();
+
 	__int64 countsPerSec;
 	QueryPerformanceFrequency((LARGE_INTEGER*)&countsPerSec);
 	mSecondsPerCount = 1.0 / (double)countsPerSec;
@@ -33,9 +35,12 @@ void CGameTimer::UpdateCurrentTime()
 {
 	m_CurrentTime = std::chrono::system_clock::now();//현재시간 갱신
 }
-
-
-
+void CGameTimer::UpdateTime()
+{
+	m_TimeElapsed = std::chrono::system_clock::now() - m_CurrentTime; 
+	m_CurrentTime = std::chrono::system_clock::now();
+}
+ 
 void CGameTimer::Init()
 {
 	m_CurrentTime = std::chrono::system_clock::now();//현재시간 갱신

@@ -346,7 +346,13 @@ inline XMFLOAT4 MyRANDOM_COLOR()
 	XMFLOAT4 xmf(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX));
 	return xmf;
 }
- 
+
+inline float RandomRange(int min, int max)
+{
+	int n = min + rand() % ((max + 1) - min);
+	float f = (float)rand() / RAND_MAX;
+	return n + f;
+}
 #include "resource.h"
 #include "GameTimer.h"
 #include "InputHandler.h"

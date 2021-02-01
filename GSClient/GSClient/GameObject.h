@@ -56,7 +56,7 @@ public:
 
 public:
 	virtual void Animate(float fTimeElapsed);
-	virtual void Update() {};
+	virtual void Update(double fTimeElapsed) {};
 
 	virtual void OnPrepareRender();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);

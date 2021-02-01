@@ -1180,6 +1180,13 @@ void CSceneJH3::ReleaseObjects()
 void CSceneJH3::Update(double elapsedTime)
 {
 	ProcessInput();
+
+	for (int i = 0; i < m_nObjects; ++i)
+	{
+		m_ppObjects[i]->Update(elapsedTime);
+	}
+
+	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 }
 
 void CSceneJH3::AnimateObjects(float fTimeElapsed)
@@ -1245,7 +1252,10 @@ void CSceneJH3::ProcessInput()
 	{
 		m_CurrentCamera->Strafe(1.0f);
 	}
-
+	if (keyInput.KEY_B)
+	{
+		m_CurrentCamera->SetShake(true, 0.5f, 5.0f);
+	}
 	if (keyInput.KEY_1)
 	{
 		m_CurrentCamera = m_Cameras[0];
