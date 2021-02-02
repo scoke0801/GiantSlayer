@@ -54,9 +54,12 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 {  
 	// 지형 메쉬
 	//CPlaneMeshTextured* pPlaneMeshTex = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 200.0f, 200.0f, 0.0f, false);
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
+	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 50, 50);
 
-	m_nObjects = 8;
+	CTerrainWayMesh* pWayMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 10, 100);
+	
+
+	m_nObjects = 14;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	 
 	/*CShader* TerrainShader = new CShader();
@@ -125,12 +128,36 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_ppObjects[6]->SetPosition({ 0,  0,  0 }); 
 	m_ppObjects[6]->SetTextureIndex(0x01);
 	m_ppObjects[6]->SetShader(pShader);
+
+	m_ppObjects[7]->SetMesh(pPlaneMeshTex);
+	m_ppObjects[7]->SetPosition({ 500,  0,  0 });
+	m_ppObjects[7]->SetTextureIndex(0x01);
+	m_ppObjects[7]->SetShader(pShader);
+
+	m_ppObjects[8]->SetMesh(pPlaneMeshTex);
+	m_ppObjects[8]->SetPosition({ 0,  0,  500 });
+	m_ppObjects[8]->SetTextureIndex(0x01);
+	m_ppObjects[8]->SetShader(pShader);
+
+	m_ppObjects[9]->SetMesh(pPlaneMeshTex);
+	m_ppObjects[9]->SetPosition({ 500,  0,  500 });
+	m_ppObjects[9]->SetTextureIndex(0x01);
+	m_ppObjects[9]->SetShader(pShader);
+	
+	
+	XMFLOAT3 RotateY = XMFLOAT3(0, 1, 0);
+	m_ppObjects[10]->SetMesh(pWayMeshTex);
+	m_ppObjects[10]->SetPosition({ 0,  0,  0 });
+	m_ppObjects[10]->Rotate(&RotateY, 90);
+	m_ppObjects[10]->SetTextureIndex(0x01);
+	m_ppObjects[10]->SetShader(pShader);
+
 }
 
 void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	auto boxTex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, boxTex.get(), "Box", L"resources/OBJ/rockygrass00.dds");
+	MakeTexture(pd3dDevice, pd3dCommandList, boxTex.get(), "Box", L"resources/OBJ/Terrain.dds");
 
 	auto SkyTex_Front = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Front.get(), "Sky_Front", L"resources/OBJ/SkyBox_Front_0.dds");
@@ -266,9 +293,8 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		m_ppObjects[6]->Draw(pd3dCommandList, m_CurrentCamera);
-		//if (m_ppObjects[j])
-			//m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
+		if (m_ppObjects[j])
+			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 
@@ -293,7 +319,6 @@ void CGameScene::ProcessInput()
 	{
 		m_CurrentCamera->Strafe(1.0f);
 	}
-
 	if (keyInput.KEY_1)
 	{
 		m_CurrentCamera = m_Cameras[0];
