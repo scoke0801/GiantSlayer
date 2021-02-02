@@ -15,6 +15,8 @@ protected:
 	CGameObject**				m_ppObjects = NULL;
 	int							m_nObjects = 0;
 
+	CSkyBox* m_Skybox;
+
 	ID3D12RootSignature*		m_pd3dGraphicsRootSignature = NULL;
 
 	CCamera**					m_Cameras;
