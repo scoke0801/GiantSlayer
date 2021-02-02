@@ -178,8 +178,8 @@ void CGameSceneProto::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 #pragma region Create Skybox
 	CShader* pSkyBoxShader = new CSkyBoxShader();
-	pSkyBoxShader->CreateVertexShader(L"Shaders.hlsl", "VSTextured");
-	pSkyBoxShader->CreatePixelShader(L"Shaders.hlsl", "PSTextured");
+	pSkyBoxShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
+	pSkyBoxShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
 	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
