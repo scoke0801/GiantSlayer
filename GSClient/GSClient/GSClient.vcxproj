@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="GameSceneProto.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="EnemyState.h" />
     <ClInclude Include="Font.h" />
@@ -182,6 +183,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="GameSceneProto.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="EnemyState.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -237,9 +239,6 @@
     <FxCompile Include="SceneTH.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Shaders.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </FxCompile>
     <FxCompile Include="Shaders\JHTestShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
@@ -247,6 +246,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\LightingUtil.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\Shaders.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\TerrainAndLight.hlsl">
