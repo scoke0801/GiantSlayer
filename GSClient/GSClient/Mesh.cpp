@@ -405,7 +405,7 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			// 정점의 높이와 색상을 높이 맵으로부터 구한다.
 			float tempheight = OnGetHeight(x, z);
 			//float tempheight = m_fHeightMapVertexs[z][x];
-			pVertices[i].m_xmf3Position = XMFLOAT3(x*10 , tempheight, z*10 );
+			pVertices[i].m_xmf3Position = XMFLOAT3(x*10 ,0 , z*10 );
 			pVertices[i].m_xmf3Normal= XMFLOAT3(x * 10, tempheight, z * 10);
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x)/float(100.0f), float(z)/float(100.0f));
 			
@@ -500,7 +500,7 @@ CTerrainWayMesh::CTerrainWayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		{
 			// 정점의 높이와 색상을 높이 맵으로부터 구한다.
 			float tempheight = OnGetHeight(x, z);
-			pVertices[i].m_xmf3Position = XMFLOAT3(x * 10, tempheight+7.0f, z * 10);
+			pVertices[i].m_xmf3Position = XMFLOAT3(x * 10, 20, z * 30);
 			pVertices[i].m_xmf3Normal = XMFLOAT3(x * 10, 10, z * 10);
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x) / float(100.0f), float(z) / float(100.0f));
 
@@ -569,5 +569,5 @@ CTerrainWayMesh::~CTerrainWayMesh()
 
 float CTerrainWayMesh::OnGetHeight(float x, float z)
 {
-	return 0.5f * (z * sinf(0.1f * x) + x * cosf(0.1f * z));
+	return x+z;
 }
