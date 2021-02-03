@@ -305,13 +305,13 @@ D3D12_INPUT_LAYOUT_DESC CDiffusedShader::CreateInputLayout()
 }
 D3D12_SHADER_BYTECODE CDiffusedShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
-	WCHAR fileName[] = L"Shaders.hlsl";
+	WCHAR fileName[] = L"Shaders\\Shaders.hlsl";
 	return(CShader::CompileShaderFromFile(fileName, "VSDiffused", "vs_5_1",
 		ppd3dShaderBlob));
 }
 D3D12_SHADER_BYTECODE CDiffusedShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
-	WCHAR fileName[] = L"Shaders.hlsl";
+	WCHAR fileName[] = L"Shaders\\Shaders.hlsl";
 	return(CShader::CompileShaderFromFile(fileName, "PSDiffused", "ps_5_1",
 		ppd3dShaderBlob));
 }
@@ -422,13 +422,13 @@ D3D12_INPUT_LAYOUT_DESC CPlayerShader::CreateInputLayout()
 }
 D3D12_SHADER_BYTECODE CPlayerShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
-	WCHAR fileName[] = L"Shaders.hlsl";
+	WCHAR fileName[] = L"Shaders\\Shaders.hlsl";
 	return(CShader::CompileShaderFromFile(fileName, "VSDiffused", "vs_5_1",
 		ppd3dShaderBlob));
 }
 D3D12_SHADER_BYTECODE CPlayerShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
-	WCHAR fileName[] = L"Shaders.hlsl";
+	WCHAR fileName[] = L"Shaders\\Shaders.hlsl";
 	return(CShader::CompileShaderFromFile(fileName, "PSDiffused", "ps_5_1",
 		ppd3dShaderBlob));
 }

@@ -1,5 +1,6 @@
 #include "stdafx.h"
-#include "GameScene.h"
+#include "GameSceneProto.h"
+
 #include "Shader.h"
 #include "GameObject.h"
 #include "Camera.h"
@@ -10,29 +11,29 @@
 #define ROOT_PARAMETER_LIGHT			3
 #define ROOT_PARAMETER_TEXTURE			4
 
-CGameScene::CGameScene()
+CGameSceneProto::CGameSceneProto()
 {
 	m_pd3dGraphicsRootSignature = NULL;
 }
 
-CGameScene::~CGameScene()
+CGameSceneProto::~CGameSceneProto()
 {
 }
 
-void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
-{
+void CGameSceneProto::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
+{	
 	LoadTextures(pd3dDevice, pd3dCommandList);
 	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
-
+	
 	BuildMaterials(pd3dDevice, pd3dCommandList);
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
 	BuildLights(pd3dDevice, pd3dCommandList);
-	BuildObjects(pd3dDevice, pd3dCommandList);
+	BuildObjects(pd3dDevice, pd3dCommandList); 
 }
 
-void CGameScene::BuildCamera(ID3D12Device* pd3dDevice,
+void CGameSceneProto::BuildCamera(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	int width, int height)
 {
@@ -61,7 +62,7 @@ void CGameScene::BuildCamera(ID3D12Device* pd3dDevice,
 	m_CurrentCamera = m_Cameras[0];
 }
 
-void CGameScene::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CGameSceneProto::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pMaterials = new MATERIALS;
 	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
@@ -83,7 +84,7 @@ void CGameScene::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
 }
 
-void CGameScene::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CGameSceneProto::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pLights = new LIGHTS;
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
@@ -166,7 +167,7 @@ void CGameScene::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 }
 
-void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CGameSceneProto::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 지형 메쉬
 	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 50, 50);
@@ -187,7 +188,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, pSkyBoxShader);
+	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, pSkyBoxShader); 
 
 	CShader* pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
@@ -219,7 +220,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_ppObjects[4]->SetMesh(pEdgeMeshTex);
 	m_ppObjects[4]->SetPosition({ 0,  0,  0 });
-	m_ppObjects[4]->Rotate(XMFLOAT3(0, 1, 0), 90);
+	m_ppObjects[4]->Rotate(XMFLOAT3( 0,1,0 ), 90);
 	m_ppObjects[4]->SetTextureIndex(0x01);
 	m_ppObjects[4]->SetShader(pShader);
 #pragma endregion 
@@ -227,13 +228,13 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
 	pBox->SetShader(pShader);
 	pBox->SetObjectName(OBJ_NAME::Box);
-
+	
 	m_ppObjects[5] = pBox;
-	m_ppObjects[5]->SetPosition({ 250,  25, 250 });
+	m_ppObjects[5]->SetPosition({ 250,  25, 250 });	
 	m_ppObjects[5]->SetTextureIndex(0x80);
 }
 
-void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CGameSceneProto::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	auto terrainTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, terrainTex.get(), "Terrain", L"resources/OBJ/Terrain.dds");
@@ -255,7 +256,7 @@ void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	auto SkyTex_Bottom = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Bottom.get(), "Sky_Bottom", L"resources/OBJ/SkyBox_Bottom_0.dds");
-
+	
 	auto boxTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, boxTex.get(), "Box", L"resources/OBJ/Box.dds");
 
@@ -269,7 +270,7 @@ void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_Textures[boxTex->m_Name] = std::move(boxTex);
 }
 
-void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CGameSceneProto::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	//
 	// Create the SRV heap.
@@ -325,13 +326,13 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = SkyTex_Bottom->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(SkyTex_Bottom, &srvDesc, hDescriptor);
-
+	
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = boxTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(boxTex, &srvDesc, hDescriptor);
 }
 
-void CGameScene::ReleaseObjects()
+void CGameSceneProto::ReleaseObjects()
 {
 	m_ppObjects[1];
 
@@ -345,7 +346,7 @@ void CGameScene::ReleaseObjects()
 	}
 }
 
-void CGameScene::Update(double elapsedTime)
+void CGameSceneProto::Update(double elapsedTime)
 {
 	ProcessInput();
 
@@ -357,11 +358,11 @@ void CGameScene::Update(double elapsedTime)
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 }
 
-void CGameScene::AnimateObjects(float fTimeElapsed)
+void CGameSceneProto::AnimateObjects(float fTimeElapsed)
 {
 }
 
-void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
+void CGameSceneProto::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
@@ -383,7 +384,7 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
-
+	 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
@@ -394,7 +395,7 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
-void CGameScene::ProcessInput()
+void CGameSceneProto::ProcessInput()
 {
 	if (m_CurrentCamera == nullptr) return;
 
@@ -443,7 +444,7 @@ void CGameScene::ProcessInput()
 	m_CurrentCamera->UpdateViewMatrix();
 }
 
-void CGameScene::OnMouseDown(WPARAM btnState, int x, int y)
+void CGameSceneProto::OnMouseDown(WPARAM btnState, int x, int y)
 {
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
@@ -451,12 +452,12 @@ void CGameScene::OnMouseDown(WPARAM btnState, int x, int y)
 	SetCapture(CFramework::GetInstance().GetHWND());
 }
 
-void CGameScene::OnMouseUp(WPARAM btnState, int x, int y)
+void CGameSceneProto::OnMouseUp(WPARAM btnState, int x, int y)
 {
 	ReleaseCapture();
 }
 
-void CGameScene::OnMouseMove(WPARAM btnState, int x, int y)
+void CGameSceneProto::OnMouseMove(WPARAM btnState, int x, int y)
 {
 	if ((btnState & MK_LBUTTON) != 0)
 	{
@@ -472,7 +473,7 @@ void CGameScene::OnMouseMove(WPARAM btnState, int x, int y)
 	m_LastMousePos.y = y;
 }
 
-void CGameScene::ReleaseUploadBuffers()
+void CGameSceneProto::ReleaseUploadBuffers()
 {
 	if (m_ppObjects)
 	{
@@ -482,7 +483,7 @@ void CGameScene::ReleaseUploadBuffers()
 	}
 }
 
-ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
+ID3D12RootSignature* CGameSceneProto::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
 	// Ground
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
@@ -505,7 +506,7 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dRootParameters[1].Descriptor.ShaderRegister = 1; //Camera
 	pd3dRootParameters[1].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
+	
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[2].Descriptor.ShaderRegister = 2; //Material
 	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;

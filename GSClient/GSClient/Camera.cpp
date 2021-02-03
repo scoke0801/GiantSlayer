@@ -414,8 +414,8 @@ void CCamera::SetShake(bool isOnShake, float shakeTime, float power)
 	}
 	else
 	{
-		shakeTime = 0.0f;
-		m_xmf3Position = m_xmf3PrevPos; 
+		shakeTime = 0.0f; 
+		m_xmf3Position = m_xmf3PrevPos;   
 		SetPosition(m_xmf3Position);
 	}
 }

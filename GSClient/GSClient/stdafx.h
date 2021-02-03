@@ -358,11 +358,9 @@ inline float RandomRange(int min, int max)
 #include "InputHandler.h"
 #include "Defines.h"
 #include "Sound.h"
-#include "FrameResource.h"
 #include "Texture.h"
 #include "Material.h"
 #include "GameFramework.h"
-#include "Font.h"
 #include "Light.h"
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.

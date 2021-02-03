@@ -8,7 +8,8 @@ enum class OBJ_NAME
 {
 	None = 0,
 	Terrain = 1,
-	Box = 2
+	Box = 2,
+	SkyBox = 10,
 };
 
 string ConvertToObjectName(const OBJ_NAME& name);
@@ -64,7 +65,8 @@ public:
 public:
 	virtual void Move(XMFLOAT3 pos);
 	void Move();
-	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
+	//void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
+	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
 	bool CollisionCheck() { return false; };
 
 public:
@@ -114,3 +116,16 @@ public:
 	virtual void Animate(float fTimeElapsed) {}
 };
 
+class CSkyBox  
+{
+private:
+	int						m_nObjects;
+	CGameObject**			m_ppObjects;
+
+public:
+	CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		CShader* pShader);
+	virtual ~CSkyBox();
+
+	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+};

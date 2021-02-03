@@ -198,8 +198,6 @@ public:
 class CTerrainMesh : public CMesh
 {
 protected:
-	float m_fHeightMapVertexs[9+ 1][9 + 1];
-
 	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
 
 	int m_nWidth;
@@ -218,21 +216,19 @@ public:
 
 };
 
-class CTerrainMesh2 : public CMesh
+class CTerrainWayMesh : public CMesh
 {
 protected:
-	float m_fHeightMapVertexs[9 + 1][9 + 1];
-
 	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
 
 	int m_nWidth;
 	int m_nDepth;
 
 public:
-	CTerrainMesh2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	CTerrainWayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		int nWidth, int nLength, int BlockWidth, int BlockDepth);
 
-	~CTerrainMesh2();
+	~CTerrainWayMesh();
 
 
 

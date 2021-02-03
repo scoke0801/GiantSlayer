@@ -2,8 +2,9 @@
 //게임 객체의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbGameObjectInfo : register(b0)
 {
-	matrix gmtxWorld : packoffset(c0);
-	uint	gnTexturesMask : packoffset(c4);
+	matrix	gmtxWorld : packoffset(c0);
+	uint	gnTexturesMask : packoffset(c4);	
+	uint	gnMaterialID : packoffset(c4.y);
 };
 
 //카메라의 정보를 위한 상수 버퍼를 선언한다. 
@@ -14,16 +15,19 @@ cbuffer cbCameraInfo : register(b1)
 	float3	gvCameraPosition : packoffset(c8);
 };
 
+#include "Light.hlsl"
+
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
 
-Texture2D gtxtBox : register(t0);
+Texture2D gtxtTerrain : register(t0);
 Texture2D gSkyBox_Front : register(t1);
 Texture2D gSkyBox_Back : register(t2);
 Texture2D gSkyBox_Right : register(t3);
 Texture2D gSkyBox_Left : register(t4);
 Texture2D gSkyBox_Top : register(t5);
 Texture2D gSkyBox_Bottom : register(t6);
+Texture2D gtxtBox : register(t7);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_INPUT
@@ -80,7 +84,7 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtBox.Sample(gssClamp, input.uv);
+		cColor = gtxtTerrain.Sample(gssClamp, input.uv);
 	}
 
 	if (gnTexturesMask & 0x02)
@@ -111,16 +115,10 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 	{
 		cColor = gSkyBox_Bottom.Sample(gssClamp, input.uv);
 	}
-
-	return cColor;
-	//return gtxtBox.Sample(gssWrap, input.uv);
+	if (gnTexturesMask & 0x80) 
+	{
+		cColor = gtxtBox.Sample(gssWrap, input.uv);
+	}
+	return cColor; 
 }
-
-//Texture2D gtxtSkyBox : register(t8);
-//
-//float4 PSSkyBox(VS_TEXTURED_OUTPUT input) : SV_TARGET
-//{
-//	float4 cColor = gtxtSkyBox.Sample(gClampSamplerState, input.uv);
-//
-//	return(cColor);
-//}
+ 

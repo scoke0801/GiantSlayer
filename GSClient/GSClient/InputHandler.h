@@ -34,7 +34,7 @@ struct GameInputs
 	bool KEY_F2 = false;	
 	bool KEY_F3 = false;
 	bool KEY_F4 = false;
-	
+	bool KEY_F5 = false;
 };
 
 class CInputHandler

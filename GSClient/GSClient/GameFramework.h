@@ -60,14 +60,10 @@ private:	// 텍스트 및 2D 관련~!@#!@
 	Microsoft::WRL::ComPtr<ID2D1Device1>			m_pd2Device;
 	Microsoft::WRL::ComPtr<ID2D1DeviceContext1>		m_pd2devCon;
 
-private:	// 임시 테스트용!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+private:	// 임시 테스트용!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 	D3D12_VIEWPORT									m_d3dViewport;
-	D3D12_RECT										m_d3dScissorRect;
-
-	std::vector<std::unique_ptr<CFrameResource>>	mFrameResources;
-	CFrameResource* mCurrFrameResource = nullptr;
-	int												mCurrFrameResourceIndex = 0;
-
+	D3D12_RECT										m_d3dScissorRect; 
+	   
 private:
 	CFramework();
 

@@ -110,9 +110,10 @@ void CGameObject::Move()
 	m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
 }
 
-void CGameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
+
+void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 {
-	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis),
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
 		XMConvertToRadians(fAngle));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
@@ -128,7 +129,7 @@ CRotatingObject::~CRotatingObject()
 }
 void CRotatingObject::Animate(float fTimeElapsed)
 {
-	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
+	CGameObject::Rotate(m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
 }
   
 CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -143,5 +144,65 @@ CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 
 CBox::~CBox()
 {
+}
+
+
+CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
+{
+	m_nObjects = 6;
+	m_ppObjects = new CGameObject * [m_nObjects];
+	for (int i = 0; i < m_nObjects; ++i)
+	{
+		CGameObject* pObject = new CGameObject();
+
+		m_ppObjects[i] = pObject;
+	}	
+	
+	CTexturedRectMesh* pSkyBoxMesh_Front = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f, 0.0f, 0.0f, +10.0f);
+	CTexturedRectMesh* pSkyBoxMesh_Back = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f, 0.0f, 0.0f, -10.0f);
+	CTexturedRectMesh* pSkyBoxMesh_Left = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.0f, 20.0f, 20.0f, -10.0f, 0.0f, +0.0f);
+	CTexturedRectMesh* pSkyBoxMesh_Right = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.0f, 20.0f, 20.0f, 10.0f, 0.0f, +0.0f);
+	CTexturedRectMesh* pSkyBoxMesh_Top = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 00.0f, 20.0f, 0.0f, +10.0f, +0.0f);
+	CTexturedRectMesh* pSkyBoxMesh_Bottom = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 00.0f, 20.0f, 0.0f, -10.0f, +0.0f);
+
+	// 스카이박스
+	m_ppObjects[0]->SetMesh(pSkyBoxMesh_Front);
+	m_ppObjects[0]->SetTextureIndex(0x02);
+	m_ppObjects[0]->SetShader(pShader);
+
+	m_ppObjects[1]->SetMesh(pSkyBoxMesh_Back);
+	m_ppObjects[1]->SetTextureIndex(0x04);
+	m_ppObjects[1]->SetShader(pShader);
+
+	m_ppObjects[2]->SetMesh(pSkyBoxMesh_Left);
+	m_ppObjects[2]->SetTextureIndex(0x08);
+	m_ppObjects[2]->SetShader(pShader);
+
+	m_ppObjects[3]->SetMesh(pSkyBoxMesh_Right);
+	m_ppObjects[3]->SetTextureIndex(0x10);
+	m_ppObjects[3]->SetShader(pShader);
+
+	m_ppObjects[4]->SetMesh(pSkyBoxMesh_Top);
+	m_ppObjects[4]->SetTextureIndex(0x20);
+	m_ppObjects[4]->SetShader(pShader);
+
+	m_ppObjects[5]->SetMesh(pSkyBoxMesh_Bottom);
+	m_ppObjects[5]->SetTextureIndex(0x40);
+	m_ppObjects[5]->SetShader(pShader); 
+}
+
+CSkyBox::~CSkyBox()
+{
+}
+
+void CSkyBox::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition3f();
+
+	for (int i = 0; i < m_nObjects; ++i)
+		m_ppObjects[i]->SetPosition(xmf3CameraPos);
+
+	for (int i = 0; i < m_nObjects; ++i)
+		m_ppObjects[i]->Draw(pd3dCommandList, pCamera);
 }
  
