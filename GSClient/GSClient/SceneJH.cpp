@@ -184,19 +184,16 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	}
 
 	CShader* pSkyBoxShader = new CSkyBoxShader();
-	pSkyBoxShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
-	pSkyBoxShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
+	pSkyBoxShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTextured");
+	pSkyBoxShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured");
 	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, pSkyBoxShader);
 
-	CShader* pShader = new CShader();
-	
-	//pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTextured");
-	//pShader->CreatePixelShader(L"Shaders\\ JHTestShader.hlsl", "PSTextured");
-	pShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
-	pShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
+	CShader* pShader = new CShader(); 
+	pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTextured");
+	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured"); 
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -228,6 +225,11 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ppObjects[4]->SetTextureIndex(0x01);
 	m_ppObjects[4]->SetShader(pShader);
 #pragma endregion 
+	pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
 	pBox->SetShader(pShader);

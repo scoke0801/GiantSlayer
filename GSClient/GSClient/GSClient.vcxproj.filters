@@ -4,16 +4,10 @@
     <FxCompile Include="TitleScene.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="MinimapTest.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\JHTestShader.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="SceneTH.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\LightingUtil.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Light.hlsl">
