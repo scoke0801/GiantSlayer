@@ -46,6 +46,7 @@ public:
 	CTexturedVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2TexCoord = XMFLOAT2(0.0f, 0.0f)) { m_xmf3Position = xmf3Position; m_xmf2TexCoord = xmf2TexCoord; }
 	~CTexturedVertex() { }
 };
+
 class CBillboardVertex : public CVertex
 {
 public:
@@ -72,6 +73,7 @@ protected:
 	UINT m_nVertices = 0;
 	UINT m_nStride = 0;
 	UINT m_nOffset = 0;
+	UINT m_nPolygons = 0;
 
 	BoundingBox m_bBox;
 
@@ -154,6 +156,13 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 //
+
+class CMeshFbx : public CMesh
+{
+public:
+	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
+	virtual ~CMeshFbx();
+};
 
 class CMeshFromFbx
 {

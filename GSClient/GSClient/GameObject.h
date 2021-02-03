@@ -1,5 +1,6 @@
 #pragma once
 #include "Mesh.h"
+#include "FBXLoader.h"
 
 class CShader;
 class CCamera;
@@ -95,6 +96,8 @@ public:
 class CTree : public CGameObject
 {
 public:
-	CTree(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, FbxScene* pfbxScene);
+	CTree(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, FbxScene* pfbxScene);
 	virtual ~CTree();
+
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 };

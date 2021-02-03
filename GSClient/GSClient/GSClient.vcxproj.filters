@@ -102,6 +102,9 @@
     <ClCompile Include="FBXLoader.cpp">
       <Filter>FBXLoader</Filter>
     </ClCompile>
+    <ClCompile Include="FbxSceneContext.cpp">
+      <Filter>FBXLoader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -198,6 +201,9 @@
       <Filter>State</Filter>
     </ClInclude>
     <ClInclude Include="FBXLoader.h">
+      <Filter>FBXLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="FbxSceneContext.h">
       <Filter>FBXLoader</Filter>
     </ClInclude>
   </ItemGroup>

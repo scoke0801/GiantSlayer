@@ -113,11 +113,16 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	m_nObjects = 3;
+	m_nObjects = 4;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	m_nPlayers = 1;
 	m_ppPlayers = new CPlayer * [m_nPlayers];
+
+	m_pfbxManager = FbxManager::Create();
+	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
+	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
+	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
 	//메쉬 =============================================================================
 	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
@@ -125,6 +130,8 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 
 	CCubeMeshDiffused* pPlatformMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
 		500.0f, 0.0f, 500.0f);
+
+	CMeshFbx* treeMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/TestTree.fbx");
 
 	//셰이더 ============================================================================
 	CDiffusedShader* pDiffusedShader = new CDiffusedShader();
@@ -156,24 +163,18 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	emey2->SetMesh(pCubeMesh);
 	emey2->SetShader(pDiffusedShader);
 
+	CGameObject* tree1 = new CGameObject();
+	tree1->SetMesh(treeMesh);
+	tree1->SetShader(pDiffusedShader);
+
 	m_ppObjects[0] = platform;
-	m_ppObjects[0]->SetPosition({ 0, -2.5, 0 });
+	m_ppObjects[0]->SetPosition({ 0, 200000.5, 0 });
 	m_ppObjects[1] = emey1;
 	m_ppObjects[1]->SetPosition({ -10, 0, 20 });
 	m_ppObjects[2] = emey2;
 	m_ppObjects[2]->SetPosition({ +10, 0, 20 });
-
-	/*m_pfbxManager->Create();
-	m_pfbxScene->Create(m_pfbxManager, "");
-	m_pfbxIOs->Create(m_pfbxManager, "");
-	m_pfbxManager->SetIOSettings(m_pfbxIOs);
-	m_pfbxImporter->Create(m_pfbxManager, "");
-
-	//fbx 씬 생성 및 임포터 초기화
-	//씬 루트노드는 GetRootNode()로 호출
-
-	m_pfbxImporter->Initialize("", -1, m_pfbxIOs);
-	m_pfbxImporter->Import(m_pfbxScene);*/
+	m_ppObjects[3] = tree1;
+	m_ppObjects[3]->SetPosition({ 0, 0, 0 });
 
 }
 
@@ -212,9 +213,9 @@ void CSceneTH::ReleaseObjects()
 		delete[] m_ppPlayers;
 	}
 
-	/*m_pfbxIOs->Destroy();
+	m_pfbxIOs->Destroy();
 	m_pfbxScene->Destroy();
-	m_pfbxManager->Destroy();*/
+	m_pfbxManager->Destroy();
 }
 
 void CSceneTH::BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,

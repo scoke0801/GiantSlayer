@@ -21,10 +21,10 @@ private:
 	POINT					m_LastMousePos;
 
 	// FBX
-	FbxManager*				m_pfbxManager;
-	FbxScene*				m_pfbxScene;
-	FbxIOSettings*			m_pfbxIOs;
-	FbxImporter*			m_pfbxImporter;
+	FbxManager*				m_pfbxManager = nullptr;
+	FbxScene*				m_pfbxScene = nullptr;
+	FbxIOSettings*			m_pfbxIOs = nullptr;
+	FbxImporter*			m_pfbxImporter = nullptr;
 
 public:
 	CSceneTH();

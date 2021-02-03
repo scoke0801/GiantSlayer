@@ -38,6 +38,7 @@
 #include <cstdint>
 #include <sstream>
 
+#define KFBX_DLLINFO
 #include <fbxsdk.h>
 
 using namespace std;
