@@ -52,7 +52,7 @@ void CNullScene::ProcessInput()
 	}
 	if (gameInput.KEY_F4)
 	{
-		ChangeScene<CSceneJH3>();
+		ChangeScene<CSceneJH>();
 	}  
 	if (gameInput.KEY_F5)
 	{
