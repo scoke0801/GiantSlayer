@@ -17,6 +17,8 @@ private:
 	DirectX::XMFLOAT3			m_xmf3Up = { 0.0f, 1.0f, 0.0f };
 	DirectX::XMFLOAT3			m_xmf3Look = { 0.0f, 0.0f, 1.0f };
 
+	float						m_Speed = 1.0f;
+
 	// Cache frustum properties.
 	float						m_NearZ = 0.0f;
 	float						m_FarZ = 0.0f;
@@ -25,7 +27,7 @@ private:
 	float						m_NearWindowHeight = 0.0f;
 	float						m_FarWindowHeight = 0.0f;
 
-	bool m_ViewDirty = true;
+	bool						m_ViewDirty = true;
 
 	// Cache View/Proj matrices.
 	DirectX::XMFLOAT4X4			m_xmf4x4View;
@@ -82,6 +84,10 @@ public:
 	float GetNearWindowHeight()const;
 	float GetFarWindowWidth()const;
 	float GetFarWindowHeight()const;
+
+	// Get/Set Camera speed.
+	float GetSpeed() const { return m_Speed; }
+	void SetSpeed(float speed) { m_Speed = speed; }
 
 	// Set frustum.
 	void SetLens(float fovY, float aspect, float zn, float zf);

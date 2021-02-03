@@ -18,7 +18,6 @@ protected:
 
 	CCamera**					m_Cameras;
 	CCamera*					m_CurrentCamera = nullptr;
-
 private:
 	POINT						m_LastMousePos;
 

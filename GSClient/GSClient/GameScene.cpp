@@ -397,23 +397,23 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 void CGameScene::ProcessInput()
 {
 	if (m_CurrentCamera == nullptr) return;
-
+	float cameraSpeed = m_CurrentCamera->GetSpeed();
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{
-		m_CurrentCamera->Walk(1.0f);
+		m_CurrentCamera->Walk(cameraSpeed);
 	}
 	if (keyInput.KEY_A)
 	{
-		m_CurrentCamera->Strafe(-1.0f);
+		m_CurrentCamera->Strafe(-cameraSpeed);
 	}
 	if (keyInput.KEY_S)
 	{
-		m_CurrentCamera->Walk(-1.0f);
+		m_CurrentCamera->Walk(-cameraSpeed);
 	}
 	if (keyInput.KEY_D)
 	{
-		m_CurrentCamera->Strafe(1.0f);
+		m_CurrentCamera->Strafe(cameraSpeed);
 	}
 	if (keyInput.KEY_B)
 	{
@@ -439,7 +439,14 @@ void CGameScene::ProcessInput()
 	{
 		m_CurrentCamera = m_Cameras[4];
 	}
-
+	if (keyInput.KEY_ADD)
+	{
+		m_CurrentCamera->SetSpeed(min(cameraSpeed + 1.0f, 15.0f));
+	}
+	if (keyInput.KEY_SUBTRACT)
+	{
+		m_CurrentCamera->SetSpeed(max(cameraSpeed - 1.0f, 1.0f));
+	}
 	m_CurrentCamera->UpdateViewMatrix();
 }
 
