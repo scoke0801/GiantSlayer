@@ -17,7 +17,7 @@ private:
 	DirectX::XMFLOAT3			m_xmf3Up = { 0.0f, 1.0f, 0.0f };
 	DirectX::XMFLOAT3			m_xmf3Look = { 0.0f, 0.0f, 1.0f };
 
-	float						m_Speed = 1.0f;
+	float						m_Speed = 5.0f;
 
 	// Cache frustum properties.
 	float						m_NearZ = 0.0f;

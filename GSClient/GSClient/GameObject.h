@@ -41,6 +41,10 @@ protected:
 //int			m_MaterialParameterIndex = 2;
 
 	OBJ_NAME	m_Name; 
+
+protected:
+	CCamera*	m_Camera = nullptr;
+
 public:
 	CGameObject();
 	virtual ~CGameObject();
@@ -53,8 +57,7 @@ public:
 	virtual void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 	
 	void ReleaseUploadBuffers();
-
-
+	 
 public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(double fTimeElapsed) {};
@@ -81,6 +84,10 @@ public:
 	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }
 	//void SetMaterial(CMaterial* pMaterial, int rootParameterIndex) { m_Material = pMaterial; m_MaterialParameterIndex = rootParameterIndex; }
 	void SetObjectName(const OBJ_NAME& name) { m_Name = name; }
+
+	// Set / Get connected Camera
+	void SetCamera(CCamera* camera) { m_Camera = camera; }
+	CCamera* GetCamera() const { return m_Camera; }
 };
 
 class CRotatingObject : public CGameObject
