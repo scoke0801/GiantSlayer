@@ -274,7 +274,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	CPlaneMeshDiffused* planeDiffusedMesh = new CPlaneMeshDiffused(pd3dDevice, pd3dCommandList,
-		1.8f, 1.8f, 0.0f, XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), true);
+		1.8f, 1.8f, 0.0f, XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f), true);
 	m_ppObjects[9]->SetShader(pShader);
 	m_ppObjects[9]->SetMesh(planeDiffusedMesh);
 }
@@ -433,11 +433,11 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
-	//for (int j = 0; j < m_nObjects; j++)
-	//{
-	//	if (m_ppObjects[j])
-	//		m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
-	//}
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
+	}
 }
 
 void CSceneJH::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
