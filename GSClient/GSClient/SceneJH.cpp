@@ -128,7 +128,7 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	}
 	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[1].m_fFalloff = 16.0f;
+	m_pLights->m_pLights[1].m_fFalloff = 14.0f;
 	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
@@ -170,9 +170,6 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	// 지형 메쉬 
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000);
-	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -190,14 +187,17 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, pSkyBoxShader);
+	 
+#pragma region Create Terrain
+	// 지형 메쉬 
+	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000);
+	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
 
 	CShader* pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTextured");
 	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
-#pragma region Create Terrain
 	// 지형
 	m_ppObjects[0]->SetMesh(pPlaneMeshTex);
 	m_ppObjects[0]->SetPosition({ 0,  0,  0 });
@@ -266,6 +266,17 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ppObjects[5] = pBox;
 	m_ppObjects[5]->SetPosition({ 250,  25, 250 });
 	m_ppObjects[5]->SetTextureIndex(0x80); 
+	 
+	pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSColor");
+	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSColor");
+	pShader->CreateInputLayout(ShaderTypes::Diffused);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+
+	CPlaneMeshDiffused* planeDiffusedMesh = new CPlaneMeshDiffused(pd3dDevice, pd3dCommandList,
+		1.8f, 1.8f, 0.0f, XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), true);
+	m_ppObjects[9]->SetShader(pShader);
+	m_ppObjects[9]->SetMesh(planeDiffusedMesh);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -422,10 +433,18 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
-	for (int j = 0; j < m_nObjects; j++)
+	//for (int j = 0; j < m_nObjects; j++)
+	//{
+	//	if (m_ppObjects[j])
+	//		m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
+	//}
+}
+
+void CSceneJH::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (m_ppObjects[9])
 	{
-		if (m_ppObjects[j])
-			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
+		m_ppObjects[9]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 

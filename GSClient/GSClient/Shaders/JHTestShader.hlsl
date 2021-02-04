@@ -28,14 +28,14 @@ Texture2D gSkyBox_Bottom : register(t6);
 Texture2D gtxtBox : register(t7);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
-struct VS_INPUT
+struct VS_COLOR_INPUT
 {
 	float3 position : POSITION;
 	float4 color : COLOR;
 };
 
 //정점 셰이더의 출력(픽셀 셰이더의 입력)을 위한 구조체를 선언한다.
-struct VS_OUTPUT
+struct VS_COLOR_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float4 color : COLOR;
@@ -52,6 +52,28 @@ struct VS_TEXTURE_OUT
 	float2 uv	 : TEXCOORD;
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+VS_COLOR_OUTPUT VSColor(VS_COLOR_INPUT input)
+{
+	input.position.x += gmtxWorld._41;
+	input.position.y += gmtxWorld._42;
+	input.position.z += gmtxWorld._43; 
+
+	VS_COLOR_OUTPUT outRes;
+	outRes.position = float4(input.position, 1.0f);
+	outRes.color = input.color;
+	return outRes;
+}
+
+float4 PSColor(VS_COLOR_OUTPUT input) : SV_TARGET
+{
+	float4 cColor = input.color;
+	return cColor;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 VS_TEXTURE_OUT VSTextured(VS_TEXTURE_IN input)
 {
 	VS_TEXTURE_OUT outRes;
