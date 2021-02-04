@@ -103,7 +103,7 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	{
 		m_pLights->m_pLights[0].m_xmf3Position = m_CurrentCamera->GetPosition3f();
 		m_pLights->m_pLights[0].m_xmf3Direction = m_CurrentCamera->GetLook3f();
-		m_CurrentCamera->SetLight(&m_pLights->m_pLights[0]);
+		//m_CurrentCamera->SetLight(&m_pLights->m_pLights[0]);
 	}
 	else
 	{
@@ -116,13 +116,13 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	//if (m_CurrentCamera)
-	//{
-	//	m_pLights->m_pLights[1].m_xmf3Position = m_CurrentCamera->GetPosition3f();
-	//	m_pLights->m_pLights[1].m_xmf3Direction = m_CurrentCamera->GetLook3f();
-	//	m_CurrentCamera->SetLight(&m_pLights->m_pLights[1]);
-	//}
-	//else
+	if (m_CurrentCamera)
+	{
+		m_pLights->m_pLights[1].m_xmf3Position = m_CurrentCamera->GetPosition3f();
+		m_pLights->m_pLights[1].m_xmf3Direction = m_CurrentCamera->GetLook3f();
+		m_CurrentCamera->SetLight(&m_pLights->m_pLights[1]);
+	}
+	else
 	{
 		m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(0.0f, 300.0f, -150.0f);
 		m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -170,9 +170,9 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	// 지형 메쉬
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 50, 50);
-	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 10, 100);
+	// 지형 메쉬 
+	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000);
+	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -191,9 +191,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, pSkyBoxShader);
 
-	CShader* pShader = new CShader(); 
+	CShader* pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTextured");
-	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured"); 
+	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -204,27 +204,55 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ppObjects[0]->SetTextureIndex(0x01);
 	m_ppObjects[0]->SetShader(pShader);
 
-	m_ppObjects[1]->SetMesh(pPlaneMeshTex);
-	m_ppObjects[1]->SetPosition({ 500,  0,  0 });
-	m_ppObjects[1]->SetTextureIndex(0x01);
-	m_ppObjects[1]->SetShader(pShader);
+	//m_ppObjects[1]->SetMesh(pPlaneMeshTex);
+	//m_ppObjects[1]->SetPosition({ 500,  0,  0 });
+	//m_ppObjects[1]->SetTextureIndex(0x01);
+	//m_ppObjects[1]->SetShader(pShader);
+	//
+	//m_ppObjects[2]->SetMesh(pPlaneMeshTex);
+	//m_ppObjects[2]->SetPosition({ 0,  0,  500 });
+	//m_ppObjects[2]->SetTextureIndex(0x01);
+	//m_ppObjects[2]->SetShader(pShader);
+	//
+	//m_ppObjects[3]->SetMesh(pPlaneMeshTex);
+	//m_ppObjects[3]->SetPosition({ 500,  0,  500 });
+	//m_ppObjects[3]->SetTextureIndex(0x01);
+	//m_ppObjects[3]->SetShader(pShader);
+	//
+	////// 아래
+	//m_ppObjects[4]->SetMesh(pEdgeMeshTex);
+	//m_ppObjects[4]->SetPosition({ -800,  -20,  0 });
+	//m_ppObjects[4]->Rotate(XMFLOAT3(0, 1, 0), 90);
+	//m_ppObjects[4]->Rotate(XMFLOAT3(0, 0, 1), 30);
+	//m_ppObjects[4]->SetTextureIndex(0x01);
+	//m_ppObjects[4]->SetShader(pShader);
+	//
+	//// 왼쪽
+	//m_ppObjects[6]->SetMesh(pEdgeMeshTex);
+	//m_ppObjects[6]->SetPosition({ 0,  -20,  1700 });
+	//m_ppObjects[6]->Rotate(XMFLOAT3(0, 1, 0), 180);
+	//m_ppObjects[6]->Rotate(XMFLOAT3(0, 0, 1), 30);
+	//m_ppObjects[6]->SetTextureIndex(0x01);
+	//m_ppObjects[6]->SetShader(pShader);
+	//
+	////// 오른쪽
+	//m_ppObjects[7]->SetMesh(pEdgeMeshTex);
+	//m_ppObjects[7]->SetPosition({ 1810,  470,  1700 });
+	//m_ppObjects[7]->Rotate(XMFLOAT3(0, 1, 0), 180);
+	//m_ppObjects[7]->Rotate(XMFLOAT3(0, 0, 1), -30);
+	//m_ppObjects[7]->SetTextureIndex(0x01);
+	//m_ppObjects[7]->SetShader(pShader);
+	//
+	////// 모서리 위
+	//m_ppObjects[8]->SetMesh(pEdgeMeshTex);
+	//m_ppObjects[8]->SetPosition({ -1200,  470,  1820 });
+	//m_ppObjects[8]->Rotate(XMFLOAT3(0, 1, 0), 90);
+	//m_ppObjects[8]->Rotate(XMFLOAT3(0, 0, 1), -30);
+	//m_ppObjects[8]->SetTextureIndex(0x01);
+	//m_ppObjects[8]->SetShader(pShader);
 
-	m_ppObjects[2]->SetMesh(pPlaneMeshTex);
-	m_ppObjects[2]->SetPosition({ 0,  0,  500 });
-	m_ppObjects[2]->SetTextureIndex(0x01);
-	m_ppObjects[2]->SetShader(pShader);
+#pragma endregion  
 
-	m_ppObjects[3]->SetMesh(pPlaneMeshTex);
-	m_ppObjects[3]->SetPosition({ 500,  0,  500 });
-	m_ppObjects[3]->SetTextureIndex(0x01);
-	m_ppObjects[3]->SetShader(pShader);
-
-	m_ppObjects[4]->SetMesh(pEdgeMeshTex);
-	m_ppObjects[4]->SetPosition({ 0,  0,  0 });
-	m_ppObjects[4]->Rotate(XMFLOAT3(0, 1, 0), 90);
-	m_ppObjects[4]->SetTextureIndex(0x01);
-	m_ppObjects[4]->SetShader(pShader);
-#pragma endregion 
 	pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
 	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
@@ -237,7 +265,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_ppObjects[5] = pBox;
 	m_ppObjects[5]->SetPosition({ 250,  25, 250 });
-	m_ppObjects[5]->SetTextureIndex(0x80);
+	m_ppObjects[5]->SetTextureIndex(0x80); 
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

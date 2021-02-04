@@ -62,6 +62,7 @@ public:
 	void AnimateObjects(float fTimeElapsed);
 
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
 	virtual void ProcessInput();

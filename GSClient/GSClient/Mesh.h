@@ -131,6 +131,18 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////////
 //
+class CPlaneMeshDiffused : public CMesh
+{
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CPlaneMeshDiffused(ID3D12Device * pd3dDevice,
+		ID3D12GraphicsCommandList * pd3dCommandList,
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f,
+		XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f),
+		bool isVertical = true);
+
+	virtual ~CPlaneMeshDiffused();
+};
 class CPlaneMeshTextured : public CMesh
 {
 public:
@@ -209,13 +221,10 @@ public:
 	
 	~CTerrainMesh();
 
-	
-
 	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
 	virtual float OnGetHeight(float x, float z);
 
 };
-
 class CTerrainWayMesh : public CMesh
 {
 protected:
@@ -229,10 +238,7 @@ public:
 		int nWidth, int nLength, int BlockWidth, int BlockDepth);
 
 	~CTerrainWayMesh();
-
-
-
+	 
 	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
-	virtual float OnGetHeight(float x, float z);
-
+	virtual float OnGetHeight(float x, float z); 
 };
