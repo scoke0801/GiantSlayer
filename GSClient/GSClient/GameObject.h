@@ -3,12 +3,14 @@
 
 class CShader;
 class CCamera;
+#define OBJECT_MAX_VELOCITY 120.0f
 
 enum class OBJ_NAME
 {
 	None = 0,
 	Terrain = 1,
 	Box = 2,
+	Player = 3,
 	SkyBox = 10,
 };
 
@@ -60,26 +62,29 @@ public:
 	 
 public:
 	virtual void Animate(float fTimeElapsed);
-	virtual void Update(double fTimeElapsed) {};
+	virtual void Update(double fTimeElapsed);
 
 	virtual void OnPrepareRender();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 public:
-	virtual void Move(XMFLOAT3 pos);
+	virtual void Move(XMFLOAT3 shift);
 	void Move();
+
 	//void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
+
 	bool CollisionCheck() { return false; };
 
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
 	string GetObjectName() const { return ConvertToObjectName(m_Name); }
+	XMFLOAT3 GetVelocity() const { return m_xmf3Velocity; }
 
 	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
 	void SetPosition(XMFLOAT3 pos);
-	void SetVelocity(XMFLOAT3 pos);
+	void SetVelocity(XMFLOAT3 vel);
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }
 	//void SetMaterial(CMaterial* pMaterial, int rootParameterIndex) { m_Material = pMaterial; m_MaterialParameterIndex = rootParameterIndex; }
@@ -88,6 +93,11 @@ public:
 	// Set / Get connected Camera
 	void SetCamera(CCamera* camera) { m_Camera = camera; }
 	CCamera* GetCamera() const { return m_Camera; }
+
+public:
+	void AddVelocityX(float velX) {}
+	void AddVelocityY(float velY) {}
+	void AddVelocityZ(float velZ) {}
 };
 
 class CRotatingObject : public CGameObject

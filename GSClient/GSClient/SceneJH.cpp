@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "UI.h"
 #include "Camera.h"
+#include "Player.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_CAMERA			1
@@ -259,24 +260,30 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
-	pBox->SetShader(pShader);
-	pBox->SetObjectName(OBJ_NAME::Box);
-
-	m_ppObjects[5] = pBox;
-	m_ppObjects[5]->SetPosition({ 250,  25, 250 });
-	m_ppObjects[5]->SetTextureIndex(0x80); 
+	//CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
+	//pBox->SetShader(pShader);
+	//pBox->SetObjectName(OBJ_NAME::Box);
+	//
+	//m_ppObjects[5] = pBox;
+	//m_ppObjects[5]->SetPosition({ 250,  25, 250 });
+	//m_ppObjects[5]->SetTextureIndex(0x80); 
 	 
-	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSColor");
-	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSColor");
-	pShader->CreateInputLayout(ShaderTypes::Diffused);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//pShader = new CShader();
+	//pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSColor");
+	//pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSColor");
+	//pShader->CreateInputLayout(ShaderTypes::Diffused);
+	//pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//
+	//CPlaneMeshDiffused* planeDiffusedMesh = new CPlaneMeshDiffused(pd3dDevice, pd3dCommandList,
+	//	1.8f, 1.8f, 0.0f, XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f), true);
+	//m_ppObjects[9]->SetShader(pShader);
+	//m_ppObjects[9]->SetMesh(planeDiffusedMesh);
 
-	CPlaneMeshDiffused* planeDiffusedMesh = new CPlaneMeshDiffused(pd3dDevice, pd3dCommandList,
-		1.8f, 1.8f, 0.0f, XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f), true);
-	m_ppObjects[9]->SetShader(pShader);
-	m_ppObjects[9]->SetMesh(planeDiffusedMesh);
+	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
+	m_Player->SetShader(pShader);
+	m_Player->SetObjectName(OBJ_NAME::Player );
+	m_Player->SetPosition({ 250,  25, 250 });
+	m_Player->SetCamera(m_CurrentCamera);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -440,11 +447,16 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
+void CSceneJH::DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (m_Player) m_Player->Draw(pd3dCommandList, m_CurrentCamera);
+}
+
 void CSceneJH::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_ppObjects[9])
 	{
-		m_ppObjects[9]->Draw(pd3dCommandList, m_CurrentCamera);
+		//m_ppObjects[9]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 
@@ -453,10 +465,12 @@ void CSceneJH::ProcessInput()
 	if (m_CurrentCamera == nullptr) return;
 
 	float cameraSpeed = m_CurrentCamera->GetSpeed();
+	XMFLOAT3 velocity = m_Player->GetVelocity();
 
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{
+		//m_Player->SetVelocity(velocity.x, velocity.y);
 		m_CurrentCamera->Walk(cameraSpeed);
 	}
 	if (keyInput.KEY_A)

@@ -125,7 +125,7 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	pPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	//플레이어 ==========================================================================
-	CPlayer* player1 = new CPlayer();
+	CPlayer* player1 = new CPlayer(pd3dDevice, pd3dCommandList);
 	player1->SetMesh(pCubeMesh);
 	player1->SetShader(pPlayerShader);
 

@@ -60,6 +60,36 @@ void CGameObject::Animate(float fTimeElapsed)
 {
 }
 
+void CGameObject::Update(double fTimeElapsed)
+{
+	static float MaxVelocityXZ = 120.0f;
+	static float MaxVelocityY = 120.0f;
+	static float Friction = 50.0f;	
+
+	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Gravity, fTimeElapsed, false));
+	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ =  MaxVelocityXZ * fTimeElapsed;
+	if (fLength > MaxVelocityXZ)
+	{
+		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+	}
+	float fMaxVelocityY =  MaxVelocityY * fTimeElapsed;
+	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+	if (fLength > MaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
+
+	Move(m_xmf3Velocity);
+	 
+	//m_Camera->Update(m_xmf3Position, fTimeElapsed);
+	//m_Camera->SetLookAt(m_xmf3Position);
+	//m_Camera->RegenerateViewMatrix();
+
+	fLength = Vector3::Length(m_xmf3Velocity);
+	float fDeceleration = ( Friction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
+}
+
 void CGameObject::OnPrepareRender()
 {
 }
@@ -90,9 +120,9 @@ void CGameObject::SetPosition(XMFLOAT3 pos)
 	m_xmf4x4World._43 = pos.z;
 }
 
-void CGameObject::SetVelocity(XMFLOAT3 pos)
+void CGameObject::SetVelocity(XMFLOAT3 vel)
 {
-	m_xmf3Velocity = pos;
+	m_xmf3Velocity = vel;
 }
 
 void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
@@ -100,9 +130,9 @@ void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
 	
 }
 
-void CGameObject::Move(XMFLOAT3 pos)
+void CGameObject::Move(XMFLOAT3 shift)
 {
-	SetPosition(Vector3::Add(GetPosition(), pos));
+	SetPosition(Vector3::Add(m_xmf3Position, shift));
 }
 
 void CGameObject::Move()

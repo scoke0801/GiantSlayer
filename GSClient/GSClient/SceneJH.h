@@ -5,12 +5,15 @@
 class CShader;
 class CGameObject;
 class CCamera;
+class CPlayer;
 
 class CSceneJH : public CScene
 {
 protected:
 	CGameObject**				m_ppObjects = NULL;
 	int							m_nObjects = 0;
+
+	CPlayer*					m_Player = nullptr;
 
 	CSkyBox*					m_Skybox;
 
@@ -57,7 +60,8 @@ public:
 	virtual void Update(double elapsedTime) override;
 	void AnimateObjects(float fTimeElapsed);
 
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;	
+	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
