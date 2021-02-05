@@ -169,7 +169,7 @@ void CGameScene::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 지형 메쉬
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 50, 50);
+	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
 	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
 
 	m_nObjects = 10;
@@ -195,59 +195,72 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
+	CShader* pTerrainShader = new CTerrainTessellationShader();
+	pTerrainShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
+	pTerrainShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
+	pTerrainShader->CreateDomainShader(L"Shaders\\Shaders.hlsl", "PSTextured");
+	pTerrainShader->CreateHullShader(L"Shaders\\Shaders.hlsl", "PSTextured");
+	pTerrainShader->CreateInputLayout(ShaderTypes::Diffused);
+	pTerrainShader->CreateTerrainShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+
 #pragma region Create Terrain
 	// 지형
 	m_ppObjects[0]->SetMesh(pPlaneMeshTex);
 	m_ppObjects[0]->SetPosition({ 0,  0,  0 });
 	m_ppObjects[0]->SetTextureIndex(0x01);
-	m_ppObjects[0]->SetShader(pShader);
-
-	m_ppObjects[1]->SetMesh(pPlaneMeshTex);
-	m_ppObjects[1]->SetPosition({ 500,  0,  0 });
+	m_ppObjects[0]->SetShader(pTerrainShader);
+	
+	/*m_ppObjects[1]->SetMesh(pPlaneMeshTex);
+	m_ppObjects[1]->SetPosition({ 1000,  0,  0 });
 	m_ppObjects[1]->SetTextureIndex(0x01);
-	m_ppObjects[1]->SetShader(pShader);
+	m_ppObjects[1]->SetShader(pShader);*/
+	// 임시 지형 3개
+	//m_ppObjects[1]->SetMesh(pPlaneMeshTex);
+	//m_ppObjects[1]->SetPosition({ 500,  0,  0 });
+	//m_ppObjects[1]->SetTextureIndex(0x01);
+	//m_ppObjects[1]->SetShader(pShader);
 
-	m_ppObjects[2]->SetMesh(pPlaneMeshTex);
-	m_ppObjects[2]->SetPosition({ 0,  0,  500 });
-	m_ppObjects[2]->SetTextureIndex(0x01);
-	m_ppObjects[2]->SetShader(pShader);
+	//m_ppObjects[2]->SetMesh(pPlaneMeshTex);
+	//m_ppObjects[2]->SetPosition({ 0,  0,  500 });
+	//m_ppObjects[2]->SetTextureIndex(0x01);
+	//m_ppObjects[2]->SetShader(pShader);
 
-	m_ppObjects[3]->SetMesh(pPlaneMeshTex);
-	m_ppObjects[3]->SetPosition({ 500,  0,  500 });
-	m_ppObjects[3]->SetTextureIndex(0x01);
-	m_ppObjects[3]->SetShader(pShader);
+	//m_ppObjects[3]->SetMesh(pPlaneMeshTex);
+	//m_ppObjects[3]->SetPosition({ 500,  0,  500 });
+	//m_ppObjects[3]->SetTextureIndex(0x01);
+	//m_ppObjects[3]->SetShader(pShader);
 
 	//// 아래
-	m_ppObjects[4]->SetMesh(pEdgeMeshTex);
-	m_ppObjects[4]->SetPosition({ -800,  -20,  0 });
-	m_ppObjects[4]->Rotate(XMFLOAT3(0, 1, 0), 90);
-	m_ppObjects[4]->Rotate(XMFLOAT3(0, 0, 1), 30);
-	m_ppObjects[4]->SetTextureIndex(0x01);
-	m_ppObjects[4]->SetShader(pShader);
+	//m_ppObjects[4]->SetMesh(pEdgeMeshTex);
+	//m_ppObjects[4]->Rotate(XMFLOAT3(0, 1, 0), 90);
+	//m_ppObjects[4]->Rotate(XMFLOAT3(0, 0, 1), 30);
+	//m_ppObjects[4]->SetPosition({ -800,  -20,  0 });
+	//m_ppObjects[4]->SetTextureIndex(0x01);
+	//m_ppObjects[4]->SetShader(pShader);
 
-	// 왼쪽
-	m_ppObjects[6]->SetMesh(pEdgeMeshTex);
-	m_ppObjects[6]->SetPosition({ 0,  -20,  1700 });
-	m_ppObjects[6]->Rotate(XMFLOAT3(0, 1, 0), 180);
-	m_ppObjects[6]->Rotate(XMFLOAT3(0, 0, 1), 30);
-	m_ppObjects[6]->SetTextureIndex(0x01);
-	m_ppObjects[6]->SetShader(pShader);
+	////// 왼쪽
+	//m_ppObjects[6]->SetMesh(pEdgeMeshTex);
+	//m_ppObjects[6]->Rotate(XMFLOAT3(0, 1, 0), 180);
+	//m_ppObjects[6]->Rotate(XMFLOAT3(0, 0, 1), 30);
+	//m_ppObjects[6]->SetPosition({ 0,  -20,  1700 });
+	//m_ppObjects[6]->SetTextureIndex(0x01);
+	//m_ppObjects[6]->SetShader(pShader);
 
-	//// 오른쪽
-	m_ppObjects[7]->SetMesh(pEdgeMeshTex);
-	m_ppObjects[7]->SetPosition({ 1810,  470,  1700 });
-	m_ppObjects[7]->Rotate(XMFLOAT3(0, 1, 0), 180);
-	m_ppObjects[7]->Rotate(XMFLOAT3(0, 0, 1), -30);
-	m_ppObjects[7]->SetTextureIndex(0x01);
-	m_ppObjects[7]->SetShader(pShader);
+	////// 오른쪽
+	//m_ppObjects[7]->SetMesh(pEdgeMeshTex);
+	//m_ppObjects[7]->SetPosition({ 1810,  470,  1700 });
+	//m_ppObjects[7]->Rotate(XMFLOAT3(0, 1, 0), 180);
+	//m_ppObjects[7]->Rotate(XMFLOAT3(0, 0, 1), -30);
+	//m_ppObjects[7]->SetTextureIndex(0x01);
+	//m_ppObjects[7]->SetShader(pShader);
 
-	//// 모서리 위
-	m_ppObjects[8]->SetMesh(pEdgeMeshTex);
-	m_ppObjects[8]->SetPosition({ -1200,  470,  1820 });
-	m_ppObjects[8]->Rotate(XMFLOAT3(0, 1, 0), 90);
-	m_ppObjects[8]->Rotate(XMFLOAT3(0, 0, 1), -30);
-	m_ppObjects[8]->SetTextureIndex(0x01);
-	m_ppObjects[8]->SetShader(pShader);
+	////// 모서리 위
+	//m_ppObjects[8]->SetMesh(pEdgeMeshTex);
+	//m_ppObjects[8]->SetPosition({ -1200,  470,  1820 });
+	//m_ppObjects[8]->Rotate(XMFLOAT3(0, 1, 0), 90);
+	//m_ppObjects[8]->Rotate(XMFLOAT3(0, 0, 1), -30);
+	//m_ppObjects[8]->SetTextureIndex(0x01);
+	//m_ppObjects[8]->SetShader(pShader);
 #pragma endregion 
 
 	CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
@@ -410,11 +423,12 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
 
-	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
+	//m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
 	{
+		//m_ppObjects[0]->Draw(pd3dCommandList, m_CurrentCamera);
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
@@ -424,22 +438,24 @@ void CGameScene::ProcessInput()
 {
 	if (m_CurrentCamera == nullptr) return;
 
+	float cameraSpeed = m_CurrentCamera->GetSpeed();
+
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{
-		m_CurrentCamera->Walk(5.0f);
+		m_CurrentCamera->Walk(cameraSpeed);
 	}
 	if (keyInput.KEY_A)
 	{
-		m_CurrentCamera->Strafe(-5.0f);
+		m_CurrentCamera->Strafe(-cameraSpeed);
 	}
 	if (keyInput.KEY_S)
 	{
-		m_CurrentCamera->Walk(-5.0f);
+		m_CurrentCamera->Walk(-cameraSpeed);
 	}
 	if (keyInput.KEY_D)
 	{
-		m_CurrentCamera->Strafe(5.0f);
+		m_CurrentCamera->Strafe(cameraSpeed);
 	}
 	if (keyInput.KEY_B)
 	{
@@ -464,6 +480,14 @@ void CGameScene::ProcessInput()
 	if (keyInput.KEY_5)
 	{
 		m_CurrentCamera = m_Cameras[4];
+	}
+	if (keyInput.KEY_ADD)
+	{
+		m_CurrentCamera->SetSpeed(min(cameraSpeed + 1.0f, 15.0f));
+	}
+	if (keyInput.KEY_SUBTRACT)
+	{
+		m_CurrentCamera->SetSpeed(max(cameraSpeed - 1.0f, 1.0f));
 	}
 
 	m_CurrentCamera->UpdateViewMatrix();
