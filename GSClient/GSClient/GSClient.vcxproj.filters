@@ -99,10 +99,10 @@
     <ClCompile Include="EnemyState.cpp">
       <Filter>State</Filter>
     </ClCompile>
-    <ClCompile Include="FBXLoader.cpp">
+    <ClCompile Include="FbxSceneContext.cpp">
       <Filter>FBXLoader</Filter>
     </ClCompile>
-    <ClCompile Include="FbxSceneContext.cpp">
+    <ClCompile Include="FBXLoader.cpp">
       <Filter>FBXLoader</Filter>
     </ClCompile>
   </ItemGroup>
@@ -200,10 +200,10 @@
     <ClInclude Include="EnemyState.h">
       <Filter>State</Filter>
     </ClInclude>
-    <ClInclude Include="FBXLoader.h">
+    <ClInclude Include="FbxSceneContext.h">
       <Filter>FBXLoader</Filter>
     </ClInclude>
-    <ClInclude Include="FbxSceneContext.h">
+    <ClInclude Include="FBXLoader.h">
       <Filter>FBXLoader</Filter>
     </ClInclude>
   </ItemGroup>

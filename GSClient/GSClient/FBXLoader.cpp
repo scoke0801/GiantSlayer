@@ -55,7 +55,7 @@ FbxScene* LoadFbxScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	return(pfbxScene);
 }
 
-void LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pfbxNode, CMesh* pmesh)
+void LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pfbxNode)
 {
 	FbxNodeAttribute* pfbxNodeAttribute = pfbxNode->GetNodeAttribute();
 
@@ -114,7 +114,7 @@ void LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	int nChilds = pfbxNode->GetChildCount();
 	cout <<"[남은 차일드]: " << nChilds << "개" << endl;
-	for (int i = 0; i < nChilds; i++) LoadFbxMesh(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pfbxNode->GetChild(i), pmesh);
+	for (int i = 0; i < nChilds; i++) LoadFbxMesh(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pfbxNode->GetChild(i));
 }
 
 void CreateFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pfbxNode)

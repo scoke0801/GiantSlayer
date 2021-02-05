@@ -113,7 +113,7 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	m_nObjects = 4;
+	m_nObjects = 5;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	m_nPlayers = 1;
@@ -131,7 +131,7 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	CCubeMeshDiffused* pPlatformMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
 		500.0f, 0.0f, 500.0f);
 
-	CMeshFbx* treeMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/TestTree.fbx");
+	//CMeshFbx* treeMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/TestTree.fbx");
 
 	//¼ÎÀÌ´õ ============================================================================
 	CDiffusedShader* pDiffusedShader = new CDiffusedShader();
@@ -163,9 +163,10 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	emey2->SetMesh(pCubeMesh);
 	emey2->SetShader(pDiffusedShader);
 
-	CGameObject* tree1 = new CGameObject();
-	tree1->SetMesh(treeMesh);
-	tree1->SetShader(pDiffusedShader);
+	CTree* tree1 = new CTree(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, m_pfbxScene);
+
+	CAngrybotObject* bot1 = new CAngrybotObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, m_pfbxScene);
+
 
 	m_ppObjects[0] = platform;
 	m_ppObjects[0]->SetPosition({ 0, 200000.5, 0 });
@@ -175,6 +176,12 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	m_ppObjects[2]->SetPosition({ +10, 0, 20 });
 	m_ppObjects[3] = tree1;
 	m_ppObjects[3]->SetPosition({ 0, 0, 0 });
+	m_ppObjects[3]->SetAnimationStack(0);
+	m_ppObjects[3]->m_pAnimationController->SetPosition(0, 0.0f);
+	m_ppObjects[4] = bot1;
+	m_ppObjects[4]->SetPosition({ 0, 0, 0 });
+	m_ppObjects[4]->SetAnimationStack(0);
+	m_ppObjects[4]->m_pAnimationController->SetPosition(0, 0.0f);
 
 }
 

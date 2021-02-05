@@ -1,8 +1,10 @@
 #include "stdafx.h"
-#include "Shader.h"
 #include "GameObject.h"
+#include "Shader.h"
 #include "FbxSceneContext.h"
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 class CFbxRenderInfo
 {
 public:
@@ -20,6 +22,8 @@ CFbxRenderInfo::~CFbxRenderInfo()
 	if (m_pMesh) m_pMesh->Release();
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 XMFLOAT4X4 FbxMatrixToXmFloat4x4Matrix(FbxAMatrix* pfbxmtxSource)
 {
 	FbxVector4 S = pfbxmtxSource->GetS();
@@ -403,7 +407,7 @@ void RenderFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxMesh* pfbxMesh
 		int nSkinDeformers = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
 		if (nSkinDeformers == 0) fbxmtxTransform = fbxmtxWorld * fbxmtxNodeToRoot * fbxmtxGeometryOffset;
 
-		//CGameObject::UpdateShaderVariable(pd3dCommandList, &fbxmtxTransform);
+		CGameObject::UpdateShaderVariable(pd3dCommandList, &fbxmtxTransform);
 
 		CFbxRenderInfo* pFbxRenderInfo = (CFbxRenderInfo*)pfbxMesh->GetUserDataPtr();
 		if (pFbxRenderInfo->m_pShader) pFbxRenderInfo->m_pShader->Render(pd3dCommandList, NULL);
@@ -529,10 +533,8 @@ FbxScene* LoadFbxSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	//	if (fbxSceneAxisSystem != fbxDirectXAxisSystem) fbxDirectXAxisSystem.ConvertScene(pfbxScene);
 	//	fbxSceneAxisSystem = pfbxScene->GetGlobalSettings().GetAxisSystem();
 
-
-
-	//FbxSystemUnit fbxSceneSystemUnit = pfbxScene->GetGlobalSettings().GetSystemUnit();
-	//if (fbxSceneSystemUnit.GetScaleFactor() != 1.0) FbxSystemUnit::cm.ConvertScene(pfbxScene);
+	FbxSystemUnit fbxSceneSystemUnit = pfbxScene->GetGlobalSettings().GetSystemUnit();
+	if (fbxSceneSystemUnit.GetScaleFactor() != 1.0) FbxSystemUnit::cm.ConvertScene(pfbxScene);
 
 	pfbxImporter->Destroy();
 
