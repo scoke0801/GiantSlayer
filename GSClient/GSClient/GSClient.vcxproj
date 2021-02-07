@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Bridge.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="GameSceneProto.h" />
     <ClInclude Include="Enemy.h" />
@@ -180,6 +181,7 @@
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Bridge.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GameSceneProto.cpp" />
     <ClCompile Include="Enemy.cpp" />

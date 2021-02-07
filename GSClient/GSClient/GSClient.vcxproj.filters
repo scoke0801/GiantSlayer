@@ -102,6 +102,9 @@
     <ClCompile Include="GameSceneProto.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Bridge.cpp">
+      <Filter>GameObject\MapObjects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -197,6 +200,9 @@
     <ClInclude Include="GameSceneProto.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Bridge.h">
+      <Filter>GameObject\MapObjects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -272,6 +278,9 @@
     </Filter>
     <Filter Include="Light">
       <UniqueIdentifier>{76bf6ead-7ce3-40d6-9316-71c6d9f7879e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\MapObjects">
+      <UniqueIdentifier>{38ed0ea0-17b1-400c-8353-3f568979694b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

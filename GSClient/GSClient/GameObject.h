@@ -10,8 +10,9 @@ enum class OBJ_NAME
 	None = 0,
 	Terrain = 1,
 	Box = 2,
-	Player = 3,
+	Player = 3, 
 	SkyBox = 10,
+	Bridge = 11
 };
 
 string ConvertToObjectName(const OBJ_NAME& name);

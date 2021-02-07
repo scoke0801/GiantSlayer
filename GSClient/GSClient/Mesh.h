@@ -151,7 +151,11 @@ public:
 		ID3D12GraphicsCommandList* pd3dCommandList,
 		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f,
 		bool isVertical = true);
-
+	CPlaneMeshTextured(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		XMFLOAT3 startPos,
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f,
+		bool isVertical = true);
 	virtual ~CPlaneMeshTextured();
 };
 
@@ -172,6 +176,9 @@ class CCubeMeshTextured : public CMesh
 {
 public:
 	CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		XMFLOAT3 startPos,
 		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CCubeMeshTextured();
 };

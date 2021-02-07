@@ -6,6 +6,7 @@
 #include "UI.h"
 #include "Camera.h"
 #include "Player.h"
+#include "Bridge.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_CAMERA			1
@@ -259,6 +260,14 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	
+	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+
+	m_ppObjects[6] = pBridge;
+	m_ppObjects[6]->SetPosition({ 500,  01,  1500});
+	m_ppObjects[6]->SetTextureIndex(0x100);
 
 	//CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
 	//pBox->SetShader(pShader);
@@ -282,8 +291,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player->SetShader(pShader);
 	m_Player->SetObjectName(OBJ_NAME::Player );
-	m_Player->SetPosition({ 250,  25, 250 });
+	m_Player->SetPosition({ 500,  250 + 82.5, 1500 });
 	m_Player->SetCamera(m_CurrentCamera);
+	m_Player->SetTextureIndex(0x80);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -312,6 +322,9 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	auto boxTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, boxTex.get(), "Box", L"resources/OBJ/Box.dds");
 
+	auto woodTex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, woodTex.get(), "Wood", L"resources/OBJ/Wood2.dds");
+
 	m_Textures[terrainTex->m_Name] = std::move(terrainTex);
 	m_Textures[SkyTex_Back->m_Name] = std::move(SkyTex_Back);
 	m_Textures[SkyTex_Front->m_Name] = std::move(SkyTex_Front);
@@ -319,7 +332,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Textures[SkyTex_Right->m_Name] = std::move(SkyTex_Right);
 	m_Textures[SkyTex_Top->m_Name] = std::move(SkyTex_Top);
 	m_Textures[SkyTex_Bottom->m_Name] = std::move(SkyTex_Bottom);
-	m_Textures[boxTex->m_Name] = std::move(boxTex);
+	m_Textures[boxTex->m_Name] = std::move(boxTex); 
+	m_Textures[woodTex->m_Name] = std::move(woodTex);
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -346,6 +360,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	auto SkyTex_Top = m_Textures["Sky_Top"]->m_pd3dResource;
 	auto SkyTex_Bottom = m_Textures["Sky_Bottom"]->m_pd3dResource;
 	auto boxTex = m_Textures["Box"]->m_pd3dResource;
+	auto woodTex = m_Textures["Wood"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -382,6 +397,10 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = boxTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(boxTex, &srvDesc, hDescriptor);
+
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = woodTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(woodTex, &srvDesc, hDescriptor);
 }
 
 void CSceneJH::ReleaseObjects()
