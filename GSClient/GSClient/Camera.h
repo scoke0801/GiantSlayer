@@ -12,36 +12,49 @@ class CCamera
 {
 private:
 	// Camera coordinate system with coordinates relative to world space.
-	DirectX::XMFLOAT3 m_xmf3Position = { 0.0f, 0.0f, 0.0f };
-	DirectX::XMFLOAT3 m_xmf3Right = { 1.0f, 0.0f, 0.0f };
-	DirectX::XMFLOAT3 m_xmf3Up = { 0.0f, 1.0f, 0.0f };
-	DirectX::XMFLOAT3 m_xmf3Look = { 0.0f, 0.0f, 1.0f };
+	DirectX::XMFLOAT3			m_xmf3Position = { 0.0f, 0.0f, 0.0f };
+	DirectX::XMFLOAT3			m_xmf3Right = { 1.0f, 0.0f, 0.0f };
+	DirectX::XMFLOAT3			m_xmf3Up = { 0.0f, 1.0f, 0.0f };
+	DirectX::XMFLOAT3			m_xmf3Look = { 0.0f, 0.0f, 1.0f };
 
 	// Cache frustum properties.
-	float m_NearZ = 0.0f;
-	float m_FarZ = 0.0f;
-	float m_Aspect = 0.0f;
-	float m_FovY = 0.0f;
-	float m_NearWindowHeight = 0.0f;
-	float m_FarWindowHeight = 0.0f;
+	float						m_NearZ = 0.0f;
+	float						m_FarZ = 0.0f;
+	float						m_Aspect = 0.0f;
+	float						m_FovY = 0.0f;
+	float						m_NearWindowHeight = 0.0f;
+	float						m_FarWindowHeight = 0.0f;
 
 	bool m_ViewDirty = true;
 
 	// Cache View/Proj matrices.
-	DirectX::XMFLOAT4X4 m_xmf4x4View;
-	DirectX::XMFLOAT4X4 m_xmf4x4Proj;
+	DirectX::XMFLOAT4X4			m_xmf4x4View;
+	DirectX::XMFLOAT4X4			m_xmf4x4Proj;
 
 	//ºäÆ÷Æ®¿Í ¾¾Àú »ç°¢Çü
-	D3D12_VIEWPORT					m_d3dViewport;
-	D3D12_RECT						m_d3dScissorRect; 
+	D3D12_VIEWPORT				m_d3dViewport;
+	D3D12_RECT					m_d3dScissorRect; 
 
 private:
-	ID3D12Resource* m_pd3dcbCamera = NULL;
-	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
+	ID3D12Resource*				m_pd3dcbCamera = NULL;
+	VS_CB_CAMERA_INFO*			m_pcbMappedCamera = NULL;
+
+private:
+	vector<LIGHT*>				m_Lights;
+
+private:	// For Shake
+	CGameTimer					m_TimerForShake;
+	bool						m_isOnShake = false;
+	float						m_ShakePower = 0.0f;
+	float						m_ShakeTime = 0.0f;
+	XMFLOAT3					m_xmf3PrevPos;
 
 public:
 	CCamera();
 	~CCamera();
+
+	// for Update Loop
+	void Update(float elapsedTime);
 
 	// Get/Set world camera position.
 	DirectX::XMVECTOR GetPosition()const;
@@ -88,6 +101,7 @@ public:
 	// Strafe/Walk the camera a distance d.
 	void Strafe(float d);
 	void Walk(float d);
+	void UpDown(float d);
 
 	// Rotate the camera.
 	void Pitch(float angle);
@@ -106,4 +120,10 @@ public:
 	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseShaderVariables();
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, int rootParameterIndex = 1);
+
+public:
+	void SetLight(LIGHT* light) { if (light) m_Lights.push_back(light); }
+
+public:
+	void SetShake(bool isOnShake, float shakeTime, float power);
 };

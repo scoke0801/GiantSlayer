@@ -36,6 +36,23 @@ public:
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
+enum class OBJ_NAME
+{
+	None = 0,
+	Terrain = 1,
+	Box = 2,
+	SkyBox = 10,
+};
+
+string ConvertToObjectName(const OBJ_NAME& name);
+
+//struct CB_GAMEOBJECT_INFO
+//{
+//	XMFLOAT4X4						m_xmf4x4World;
+//	UINT							m_nObjectID;
+//	UINT							m_nMaterialID;
+//};
+
 class CGameObject
 {
 private:
@@ -50,6 +67,12 @@ protected:
 	CMesh*		m_pMesh = NULL;
 	CShader*	m_pShader = NULL;
 
+	UINT		m_nTextureIndex = 0x00;
+	 
+//CMaterial*	m_Material = nullptr;
+//int			m_MaterialParameterIndex = 2;
+
+	OBJ_NAME	m_Name; 
 public:
 	FbxScene*				m_pfbxScene = NULL;
 	CAnimationController*	m_pAnimationController = NULL;
@@ -57,6 +80,7 @@ public:
 public:
 	CGameObject();
 	virtual ~CGameObject();
+
 
 public:
 	void AddRef() { m_nReferences++; }
@@ -66,9 +90,10 @@ public:
 	
 	void ReleaseUploadBuffers();
 
+
 public:
 	virtual void Animate(float fTimeElapsed);
-	virtual void Update() {};
+	virtual void Update(double fTimeElapsed) {};
 
 	virtual void OnPrepareRender();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
@@ -79,11 +104,13 @@ public:
 public:
 	virtual void Move(XMFLOAT3 pos);
 	void Move();
-	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
+	//void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
+	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
 	bool CollisionCheck() { return false; };
 
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
+	string GetObjectName() const { return ConvertToObjectName(m_Name); }
 
 	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
@@ -91,6 +118,9 @@ public:
 	void SetVelocity(XMFLOAT3 pos);
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetAnimationStack(int nAnimationStack) { m_pAnimationController->SetAnimationStack(m_pfbxScene, nAnimationStack); }
+	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }
+	//void SetMaterial(CMaterial* pMaterial, int rootParameterIndex) { m_Material = pMaterial; m_MaterialParameterIndex = rootParameterIndex; }
+	void SetObjectName(const OBJ_NAME& name) { m_Name = name; }
 };
 
 class CRotatingObject : public CGameObject
@@ -142,3 +172,18 @@ public:
 	CAngrybotObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, FbxScene* pfbxScene);
 	virtual ~CAngrybotObject();
 };
+
+class CSkyBox  
+{
+private:
+	int						m_nObjects;
+	CGameObject**			m_ppObjects;
+
+public:
+	CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		CShader* pShader);
+	virtual ~CSkyBox();
+
+	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+};
+

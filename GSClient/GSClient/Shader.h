@@ -73,7 +73,7 @@ public:
 		ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World, UINT textureIndex = 0, UINT materialIndex = 0);
 	virtual void ReleaseShaderVariables();
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -131,27 +131,13 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //
-class CSkyBoxShader : public CTexturedShader
+class CSkyBoxShader : public CShader
 {
-private:
-	D3D12_SHADER_BYTECODE			m_d3dPSBytecode;
-	D3D12_SHADER_BYTECODE			m_d3dVSBytecode;
-
-	ID3DBlob						* m_pd3dVertexShaderBlob;
-	ID3DBlob						* m_pd3dPixelShaderBlob;
-
-	D3D12_INPUT_LAYOUT_DESC			m_d3dInputLayoutDesc;
 public:
 	CSkyBoxShader();
 	virtual ~CSkyBoxShader();
 
-	D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nIndex);
-
-	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(WCHAR* pszFileName, LPCSTR pszShaderName);
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(WCHAR* pszFileName, LPCSTR pszShaderName);
-
-	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState() override;
 }; 
 
 ///////////////////////////////////////////////////////////////////////////////////////

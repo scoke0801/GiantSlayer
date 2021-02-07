@@ -6,7 +6,7 @@ struct BasicVertex
 	XMFLOAT3 xmf3Position;
 	XMFLOAT2 m_xmf2TexC;
 };
-
+#pragma region minimap_Test
 class CSceneJH : public CScene
 {
 private:
@@ -35,7 +35,7 @@ public:
 
 public:
 	virtual void SendDataToNextScene(void* context) override {}
-	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height);
 
 private: // 객체 생성 관련
 	void CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -49,8 +49,9 @@ private: // 객체 생성 관련
 
 	void BuildOBJAboutMinimap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
+#pragma endregion
 
-
+#pragma region UI_TEST
 class CShader;
 class CGameObject;
 class CCamera;
@@ -71,6 +72,8 @@ protected:
 	CCamera*				m_CurrentCamera = nullptr;
 
 	bool					m_DrawUI = true;
+	int						m_nUIStartIndex;
+
 private:
 	POINT					m_LastMousePos;
 
@@ -80,7 +83,7 @@ public:
 	CSceneJH2();
 	~CSceneJH2();
 
-	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override;
 
 	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -111,5 +114,73 @@ public:
 	//그래픽 루트 시그너쳐를 생성한다.
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
-
 };
+#pragma endregion
+
+#pragma region SceneJH3 - About Terrain and Lights
+class CSceneJH3 : public CScene
+{
+protected:
+	CGameObject**			m_ppObjects = NULL;
+	int						m_nObjects = 0;
+
+	ID3D12RootSignature*	m_pd3dGraphicsRootSignature = NULL;
+
+	CCamera**				m_Cameras;
+	CCamera*				m_CurrentCamera = nullptr;
+
+private:
+	POINT					m_LastMousePos;
+
+	ID3D12DescriptorHeap*	m_pd3dSrvDescriptorHeap = nullptr; 
+	
+private:	// about Meterail
+	MATERIALS*				m_pMaterials = NULL;
+
+	ID3D12Resource*			m_pd3dcbMaterials = NULL;
+	MATERIAL*				m_pcbMappedMaterials = NULL;
+
+private:	// about Lights
+	LIGHTS*					m_pLights = NULL;
+
+	ID3D12Resource*			m_pd3dcbLights = NULL;
+	LIGHTS*					m_pcbMappedLights = NULL;
+
+public:
+	CSceneJH3();
+	~CSceneJH3();
+
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override;
+
+	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height);
+	
+	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+	void ReleaseObjects();
+
+public:
+	virtual void Update(double elapsedTime) override;
+	void AnimateObjects(float fTimeElapsed);
+
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+public:
+	virtual void ProcessInput();
+
+	virtual void OnMouseDown(WPARAM btnState, int x, int y) override;
+	virtual void OnMouseUp(WPARAM btnState, int x, int y)	override;
+	virtual void OnMouseMove(WPARAM btnState, int x, int y) override;
+
+public:
+	virtual void ReleaseUploadBuffers() override;
+
+	//그래픽 루트 시그너쳐를 생성한다.
+	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
+	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
+	 
+};
+#pragma endregion

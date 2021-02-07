@@ -63,11 +63,7 @@ private:	// 텍스트 및 2D 관련~!@#!@
 private:	// 임시 테스트용!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	D3D12_VIEWPORT				m_d3dViewport;
 	D3D12_RECT					m_d3dScissorRect;
-
-	std::vector<std::unique_ptr<CFrameResource>> mFrameResources;
-	CFrameResource* mCurrFrameResource = nullptr;
-	int mCurrFrameResourceIndex = 0;
-
+	  
 private:
 	CFramework();
 
@@ -123,10 +119,11 @@ public:	// about scene change
 
 		CScene* scene = new SceneName;
 		static CScene* prevScene;
-		scene->Init(m_pd3dDevice, m_pd3dCommandList);
+		//scene->BuildCamera(m_pd3dDevice, m_pd3dCommandList,
+		//	m_nWndClientWidth, m_nWndClientHeight);
+		scene->Init(m_pd3dDevice, m_pd3dCommandList, m_nWndClientWidth, m_nWndClientHeight);
 		scene->SendDataToNextScene(pContext);
-		scene->BuildCamera(m_pd3dDevice, m_pd3dCommandList,
-			m_nWndClientWidth, m_nWndClientHeight);
+		
 
 		if (m_CurrentScene)
 		{

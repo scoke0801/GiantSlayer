@@ -10,18 +10,24 @@
     <FxCompile Include="Shaders\JHTestShader.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders.hlsl">
+    <FxCompile Include="SceneTH.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="SceneTH.hlsl">
+    <FxCompile Include="Shaders\LightingUtil.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Light.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TerrainAndLight.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Shaders.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader12.cpp">
-      <Filter>d3d</Filter>
-    </ClCompile>
-    <ClCompile Include="FrameResource.cpp">
       <Filter>d3d</Filter>
     </ClCompile>
     <ClCompile Include="GameFramework.cpp">
@@ -44,9 +50,6 @@
     </ClCompile>
     <ClCompile Include="TitleScene.cpp">
       <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Font.cpp">
-      <Filter>Font</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
@@ -104,6 +107,9 @@
     </ClCompile>
     <ClCompile Include="FBXLoader.cpp">
       <Filter>FBXLoader</Filter>
+	</ClCompile>
+    <ClCompile Include="GameSceneProto.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -111,9 +117,6 @@
       <Filter>d3d</Filter>
     </ClInclude>
     <ClInclude Include="DDSTextureLoader12.h">
-      <Filter>d3d</Filter>
-    </ClInclude>
-    <ClInclude Include="FrameResource.h">
       <Filter>d3d</Filter>
     </ClInclude>
     <ClInclude Include="GameFramework.h">
@@ -139,9 +142,6 @@
     </ClInclude>
     <ClInclude Include="TitleScene.h">
       <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Font.h">
-      <Filter>Font</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
       <Filter>Camera</Filter>
@@ -205,6 +205,12 @@
     </ClInclude>
     <ClInclude Include="FBXLoader.h">
       <Filter>FBXLoader</Filter>
+	</ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Light</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSceneProto.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -230,9 +236,6 @@
     </Filter>
     <Filter Include="Sound">
       <UniqueIdentifier>{27fdaea7-eecb-40ed-a1e2-222ae1cdc555}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Font">
-      <UniqueIdentifier>{377ba118-069c-4363-8fcd-7a7cbc0e70cb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Camera">
       <UniqueIdentifier>{35f4ba56-432a-4c1f-989b-3c79de5e9416}</UniqueIdentifier>
@@ -284,6 +287,8 @@
     </Filter>
     <Filter Include="FBXLoader">
       <UniqueIdentifier>{2a81f814-64ba-44ff-b6d7-50b1454fafe0}</UniqueIdentifier>
+    <Filter Include="Light">
+      <UniqueIdentifier>{76bf6ead-7ce3-40d6-9316-71c6d9f7879e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

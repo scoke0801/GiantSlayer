@@ -91,11 +91,23 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout(ShaderTypes type)
 {
 	if (type == ShaderTypes::Textured)
 	{
-		UINT nInputElementDescs = 2;
+		UINT nInputElementDescs = 3;
 		D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 		pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		pd3dInputElementDescs[1] = { "TEXCORD" , 0, DXGI_FORMAT_R32G32_FLOAT,	 0,  12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		pd3dInputElementDescs[2] = { "NORMAL" , 0, DXGI_FORMAT_R32G32B32_FLOAT,	 0,  20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+		m_d3dInputLayoutDesc.NumElements = nInputElementDescs;
+	}
+	if (type == ShaderTypes::Diffused)
+	{
+		UINT nInputElementDescs = 2;
+		D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+		pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		pd3dInputElementDescs[1] = { "COLOR" , 0, DXGI_FORMAT_R32G32_FLOAT,	 0,  12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 		m_d3dInputLayoutDesc.NumElements = nInputElementDescs;
@@ -159,7 +171,7 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* pszFileName,
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
-	HRESULT hResult = ::D3DCompileFromFile(pszFileName, NULL, NULL, pszShaderName, pszShaderProfile,
+	HRESULT hResult = ::D3DCompileFromFile(pszFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, pszShaderName, pszShaderProfile,
 		nCompileFlags, 0, ppd3dShaderBlob, NULL);
 
 	D3D12_SHADER_BYTECODE d3dShaderByteCode;
@@ -226,7 +238,7 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	d3dPipelineStateDesc.SampleDesc.Count = 1;
 	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-	pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+	HRESULT hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
 		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[0]);
 
 	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
@@ -241,8 +253,7 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	//파이프라인에 그래픽스 상태 객체를 설정한다.
-	pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]);
-	
+	pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]); 
 }
 
 void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -258,11 +269,15 @@ void CShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 void CShader::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList,
-	XMFLOAT4X4* pxmf4x4World)
+	XMFLOAT4X4* pxmf4x4World, UINT textureIndex, UINT materialIndex)
 {
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
+	  
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &textureIndex, 16);	
+	
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &materialIndex, 17);
 }
 void CShader::ReleaseShaderVariables()
 {
@@ -293,13 +308,13 @@ D3D12_INPUT_LAYOUT_DESC CDiffusedShader::CreateInputLayout()
 }
 D3D12_SHADER_BYTECODE CDiffusedShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
-	WCHAR fileName[] = L"Shaders.hlsl";
+	WCHAR fileName[] = L"Shaders\\Shaders.hlsl";
 	return(CShader::CompileShaderFromFile(fileName, "VSDiffused", "vs_5_1",
 		ppd3dShaderBlob));
 }
 D3D12_SHADER_BYTECODE CDiffusedShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
-	WCHAR fileName[] = L"Shaders.hlsl";
+	WCHAR fileName[] = L"Shaders\\Shaders.hlsl";
 	return(CShader::CompileShaderFromFile(fileName, "PSDiffused", "ps_5_1",
 		ppd3dShaderBlob));
 }
@@ -364,11 +379,6 @@ CSkyBoxShader::~CSkyBoxShader()
 {
 }
 
-D3D12_INPUT_LAYOUT_DESC CSkyBoxShader::CreateInputLayout(int nIndex)
-{
-	return D3D12_INPUT_LAYOUT_DESC();
-}
-
 D3D12_DEPTH_STENCIL_DESC CSkyBoxShader::CreateDepthStencilState()
 {
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
@@ -389,32 +399,6 @@ D3D12_DEPTH_STENCIL_DESC CSkyBoxShader::CreateDepthStencilState()
 
 	return(d3dDepthStencilDesc);
 }
-
-D3D12_SHADER_BYTECODE CSkyBoxShader::CreateVertexShader(WCHAR* pszFileName, LPCSTR pszShaderName)
-{
-	m_d3dVSBytecode = (CShader::CompileShaderFromFile(pszFileName, pszShaderName, "vs_5_1",
-		&m_pd3dVertexShaderBlob));
-	return m_d3dVSBytecode;
-}
-
-
-D3D12_SHADER_BYTECODE CSkyBoxShader::CreatePixelShader(WCHAR* pszFileName, LPCSTR pszShaderName)
-{
-	m_d3dPSBytecode = (CShader::CompileShaderFromFile(pszFileName, pszShaderName, "ps_5_1",
-		&m_pd3dPixelShaderBlob));
-	return m_d3dPSBytecode;
-}
-
-
-
-void CSkyBoxShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
-{
-	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-
-	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
-}
-
 
 CPlayerShader::CPlayerShader()
 {
@@ -441,13 +425,13 @@ D3D12_INPUT_LAYOUT_DESC CPlayerShader::CreateInputLayout()
 }
 D3D12_SHADER_BYTECODE CPlayerShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
-	WCHAR fileName[] = L"Shaders.hlsl";
+	WCHAR fileName[] = L"Shaders\\Shaders.hlsl";
 	return(CShader::CompileShaderFromFile(fileName, "VSDiffused", "vs_5_1",
 		ppd3dShaderBlob));
 }
 D3D12_SHADER_BYTECODE CPlayerShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
-	WCHAR fileName[] = L"Shaders.hlsl";
+	WCHAR fileName[] = L"Shaders\\Shaders.hlsl";
 	return(CShader::CompileShaderFromFile(fileName, "PSDiffused", "ps_5_1",
 		ppd3dShaderBlob));
 }

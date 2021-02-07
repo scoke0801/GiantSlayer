@@ -21,7 +21,7 @@ void CSceneTH::Update(double elapsedTime)
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
-			m_ppObjects[j]->Update();
+			m_ppObjects[j]->Update(elapsedTime);
 	}
 }
 
@@ -109,8 +109,9 @@ void CSceneTH::OnMouseMove(WPARAM btnState, int x, int y)
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
 }
-void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
+void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
+{ 
+	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	m_nObjects = 5;
@@ -252,7 +253,7 @@ ID3D12RootSignature* CSceneTH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	D3D12_ROOT_PARAMETER pd3dRootParameters[2];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[0].Constants.Num32BitValues = 16;
+	pd3dRootParameters[0].Constants.Num32BitValues = 18;
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;

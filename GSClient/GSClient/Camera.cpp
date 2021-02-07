@@ -12,6 +12,41 @@ CCamera::~CCamera()
 {
 }
 
+void CCamera::Update(float elapsedTime)
+{
+	if (m_isOnShake)
+	{
+		m_TimerForShake.UpdateElapsedTime();
+		auto res = m_TimerForShake.GetElapsedTime();
+		cout << res << "\n";
+		/*if (res >= 0.1 && res < 0.3)
+		{ 
+			Strafe(-5.0f); 
+		}
+		else if (res >= 0.4)
+		{
+			SetShake(false, 0.0f); 
+		}
+		else
+		{ 
+			Strafe(5.0f); 
+		} */
+		if (res >= m_ShakeTime)
+		{
+			SetShake(false, 0.0f, 0.0f);
+		}
+		else
+		{
+			XMFLOAT3 xmf3Pos = m_xmf3PrevPos;
+			xmf3Pos.x += RandomRange(-m_ShakePower, m_ShakePower);
+			xmf3Pos.y += RandomRange(-m_ShakePower, m_ShakePower);
+			xmf3Pos.z += RandomRange(-m_ShakePower, m_ShakePower);
+			SetPosition(xmf3Pos);
+		}
+		UpdateViewMatrix(); 
+	} 
+}
+
 XMVECTOR CCamera::GetPosition()const
 {
 	return XMLoadFloat3(&m_xmf3Position);
@@ -209,6 +244,17 @@ void CCamera::Walk(float d)
 	m_ViewDirty = true;
 }
 
+void CCamera::UpDown(float d)
+{
+	// mPosition += d*mLook
+	XMVECTOR s = XMVectorReplicate(d);
+	XMVECTOR u = XMLoadFloat3(&m_xmf3Up);
+	XMVECTOR p = XMLoadFloat3(&m_xmf3Position);
+	XMStoreFloat3(&m_xmf3Position, XMVectorMultiplyAdd(s, u, p));
+
+	m_ViewDirty = true;
+}
+
 void CCamera::Pitch(float angle)
 {
 	// Rotate up and look vector about the right vector.
@@ -280,6 +326,14 @@ void CCamera::UpdateViewMatrix()
 		m_xmf4x4View(3, 3) = 1.0f;
 
 		m_ViewDirty = false;
+
+		if (m_Lights.size() < 0) return;
+
+		for(auto light : m_Lights)
+		{
+			light->m_xmf3Position = GetPosition3f();
+			light->m_xmf3Direction = GetLook3f();
+		}
 	}
 }
 void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight,
@@ -337,4 +391,27 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, 
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(rootParameterIndex, d3dGpuVirtualAddress);
+}
+
+void CCamera::SetShake(bool isOnShake, float shakeTime, float power)
+{
+	if (m_isOnShake != isOnShake)
+	{ 
+		m_TimerForShake.Init();
+		m_isOnShake = isOnShake; 
+	}
+	else return;
+
+	if (m_isOnShake)
+	{
+		m_ShakeTime = shakeTime;
+		m_ShakePower = power;
+		m_xmf3PrevPos = m_xmf3Position;
+	}
+	else
+	{
+		shakeTime = 0.0f;
+		m_xmf3Position = m_xmf3PrevPos;
+		SetPosition(m_xmf3Position);
+	}
 }
