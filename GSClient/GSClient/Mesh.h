@@ -11,6 +11,7 @@ public:
 	CVertex(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
 	~CVertex() { }
 };
+
 class CDiffusedVertex : public CVertex
 {
 public:
@@ -131,8 +132,10 @@ public:
 
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 externs) {  };
 };
+
 //////////////////////////////////////////////////////////////////////////////
 //
+
 class CPlaneMeshTextured : public CMesh
 {
 public:
@@ -147,6 +150,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 //
+
 class CCubeMeshDiffused : public CMesh
 {
 public:
@@ -232,7 +236,10 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-}
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//
 
 class CMinimapMesh : public CMesh
 {
@@ -242,8 +249,6 @@ public:
 	~CMinimapMesh();
 };
 
-//////////////////////////////////////////////////////////////////////////////
-//
 class CTerrainMesh : public CMesh
 {
 protected:

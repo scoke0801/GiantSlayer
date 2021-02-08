@@ -14,6 +14,7 @@ CScene::CScene()
 
 CScene::~CScene()
 {
+
 }
 
 CNullScene::CNullScene()
@@ -23,6 +24,7 @@ CNullScene::CNullScene()
 
 CNullScene::~CNullScene()
 {
+
 }
 
 void CNullScene::Update(double elapsedTime)
