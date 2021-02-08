@@ -491,22 +491,18 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_W)
 	{
 		m_Player->SetVelocity(OBJ_DIRECTION::Front);
-		//m_CurrentCamera->Walk(cameraSpeed);
 	}
 	if (keyInput.KEY_A)
 	{
 		m_Player->SetVelocity(OBJ_DIRECTION::Left);
-		//m_CurrentCamera->Strafe(-cameraSpeed);
 	}
 	if (keyInput.KEY_S)
 	{
 		m_Player->SetVelocity(OBJ_DIRECTION::Back);
-		//m_CurrentCamera->Walk(-cameraSpeed);
 	}
 	if (keyInput.KEY_D)
 	{
 		m_Player->SetVelocity(OBJ_DIRECTION::Right);
-		//m_CurrentCamera->Strafe(cameraSpeed);
 	}
 	if (keyInput.KEY_B)
 	{
@@ -567,6 +563,9 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 
 		m_CurrentCamera->Pitch(dy);
 		m_CurrentCamera->RotateY(dx);
+
+		m_Player->Rotate(dy, 0.0f, -dx);
+		//m_Player->Rotate(cyDelta, cxDelta, 0.0f); 
 	}
 
 	m_LastMousePos.x = x;

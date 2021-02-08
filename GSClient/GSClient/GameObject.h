@@ -86,6 +86,7 @@ public:
 
 	//void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
+	void Rotate(float x, float y, float z);
 
 	bool CollisionCheck() { return false; };
 
