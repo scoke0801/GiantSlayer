@@ -27,12 +27,15 @@ void CPlayer::Update(double fTimeElapsed)
 	//m_Camera->Update(m_xmf3Position, fTimeElapsed);
 	//m_Camera->SetLookAt(m_xmf3Position);
 	//m_Camera->RegenerateViewMatrix();
+
+	XMFLOAT3 xmf3Offset = (XMFLOAT3(0.0f, 70.0f, -300.0f));
 	//m_Camera->Update(m_xmf3Position, fTimeElapsed, this);
-	//m_Camera->UpdateViewMatrix();
+	
+	m_Camera->SetPosition(Vector3::Add(m_xmf3Position, xmf3Offset));
+	m_Camera->UpdateViewMatrix();
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = (Friction * fTimeElapsed);
-	cout << "Length : " << fLength << " " << "Decl : " << fDeceleration << "\n";
+	float fDeceleration = (Friction * fTimeElapsed); 
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 }
