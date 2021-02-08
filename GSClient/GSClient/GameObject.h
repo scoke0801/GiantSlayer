@@ -99,7 +99,7 @@ public:
 	virtual void SetShader(CShader* pShader);
 	virtual void SetPosition(XMFLOAT3 pos);
 	void SetVelocity(XMFLOAT3 vel); 
-	void SetVelocity(OBJ_DIRECTION direction);
+	virtual void SetVelocity(OBJ_DIRECTION direction);
 
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }

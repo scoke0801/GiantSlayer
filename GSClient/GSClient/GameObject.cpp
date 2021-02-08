@@ -129,30 +129,27 @@ void CGameObject::SetVelocity(XMFLOAT3 vel)
 void CGameObject::SetVelocity(OBJ_DIRECTION direction)
 {
 	XMFLOAT3 look = GetLook();
-	XMFLOAT3 right = GetRight();
-	//cout << "Look : " <<look.x << " " << look.y << " " << look.z << "\n";
-	//
-	//XMFLOAT3 lookRev = Vector3::Multifly(look, -1.0f);
-	//cout << "LookRev : " << lookRev.x << " " << lookRev.y << " " << lookRev.z << "\n";
+	XMFLOAT3 right = GetRight(); 
 
 	switch (direction)
 	{
 	case OBJ_DIRECTION::Front: 
-		m_xmf3Velocity = Vector3::Multifly(look, PLAYER_RUN_VELOCITY); 
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(look, PLAYER_RUN_VELOCITY));
 		break;
 	case OBJ_DIRECTION::Back:
-		m_xmf3Velocity = Vector3::Multifly(Vector3::Multifly(look, -1), PLAYER_RUN_VELOCITY);
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(Vector3::Multifly(look, -1), PLAYER_RUN_VELOCITY));
 		break;
 	case OBJ_DIRECTION::Left:
-		m_xmf3Velocity = Vector3::Multifly(Vector3::Multifly(right, -1), PLAYER_RUN_VELOCITY);
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(Vector3::Multifly(right, -1), PLAYER_RUN_VELOCITY));
 		break;
 	case OBJ_DIRECTION::Right:
-		m_xmf3Velocity = Vector3::Multifly(right, PLAYER_RUN_VELOCITY);
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(right, PLAYER_RUN_VELOCITY));
 		break;
 	default:
 		assert("잘못된 방향으로 이동할 수 없어요~");
 		break;
-	}
+	} 
+	
 }
 
 void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)

@@ -20,4 +20,7 @@ public:
 	
 public:
 	virtual void Update(double fTimeElapsed);
+
+public:
+	virtual void SetVelocity(OBJ_DIRECTION direction) override;
 };
