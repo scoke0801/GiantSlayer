@@ -60,7 +60,6 @@ public:
 	virtual void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 	
 	void ReleaseUploadBuffers();
-	 
 public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(double fTimeElapsed);

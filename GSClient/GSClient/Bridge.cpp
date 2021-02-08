@@ -1,17 +1,30 @@
 #include "stdafx.h"
 #include "Bridge.h"
 #include "Shader.h" 
-CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width, float height, float depth)
+CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dRootSignature)
 {
-	m_Name = OBJ_NAME::Bridge;
-	  
+	m_Name = OBJ_NAME::Bridge; 
+
+	CShader* pShader = new CShader();	
+	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSBridgeLight"); 
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateGeneralShader(pd3dDevice, pd3dRootSignature);
+
+	CGameObject* pGameObject = new CGameObject();	 
+	 
 // 官蹿 积己
 	for (int i = 0; i < 10; ++i)
 	{
 		CPlaneMeshTextured* pPlaneMeshTex = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList,
 			XMFLOAT3(0.0f, -450.0f + 100.0f * i, 0.0f),
 			500, 100.0, 250.0f, false); 
-		m_Meshes.push_back(pPlaneMeshTex);
+		m_Meshes.push_back(pPlaneMeshTex);	
+
+		//pGameObject->SetMesh(pPlaneMeshTex);
+		//pGameObject->SetTextureIndex(0x02);
+		//pGameObject->SetShader(pShader);
 	}
 // 抄埃 积己
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
@@ -47,6 +60,7 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 			50, 100, 50);
 		m_Meshes.push_back(pCubeMeshTex);
 	}
+
 // 促府 罐魔 积己
 	for (int i = 0; i < 3; ++i)
 	{

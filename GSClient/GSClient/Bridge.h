@@ -6,9 +6,12 @@ private:
 	vector<CMesh*> m_Meshes;
 	vector<CBox*> m_Handles;
 
+	vector<CGameObject*> m_Objects;
+
 public:
 	CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		float width, float height, float depth);
+		ID3D12RootSignature* pd3dRootSignature);
+
 	virtual ~CBridge(); 
 
 public:
