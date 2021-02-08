@@ -1,3 +1,5 @@
+#pragma
+#pragma enable_d3d12_debug_symbols
 
 //게임 객체의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbGameObjectInfo : register(b0)
@@ -124,13 +126,15 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 	return cColor; 
 }
 
-
-
+///////////////////////////////////////////
+// VS
 struct VS_TERRAIN_TESSELLATION_OUTPUT
 {
 	float3 position : POSITION;
 	float3 positionW : POSITION1;
 	float4 color : COLOR;
+	float2 uv0 : TEXCOORD0;
+	float2 uv1 : TEXCOORD1;
 };
 
 VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_INPUT input)
@@ -138,11 +142,13 @@ VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_INPUT input)
 	VS_TERRAIN_TESSELLATION_OUTPUT output;
 
 	output.position = input.position;
-	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
+	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
 	output.color = input.color;
 
 	return(output);
 }
+
+
 
 struct HS_TERRAIN_TESSELLATION_CONSTANT
 {
@@ -193,6 +199,7 @@ float CalculateTessFactor(float3 f3Position)
 	return(lerp(64.0f, 5.0f, s));
 }
 
+// HS
 [domain("quad")]
 [partitioning("fractional_even")]
 [outputtopology("triangle_cw")]
@@ -232,6 +239,7 @@ HS_TERRAIN_TESSELLATION_CONSTANT HSTerrainTessellationConstant(InputPatch<VS_TER
 	return (output);
 }
 
+// DS
 [domain("quad")]
 DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CONSTANT patchConstant, float2 uv : SV_DomainLocation, OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch)
 {
@@ -244,7 +252,7 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 	output.color = lerp(lerp(patch[0].color, patch[4].color, uv.x), lerp(patch[20].color, patch[24].color, uv.x), uv.y);
 
 	float3 position = CubicBezierSum5x5(patch, uB, vB);
-	matrix mtxWorldViewProjection = mul(mul(gmtxGameObject, gmtxView), gmtxProjection);
+	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
 	output.position = mul(float4(position, 1.0f), mtxWorldViewProjection);
 
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
@@ -252,6 +260,7 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 	return(output);
 }
 
+// PS
 float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);

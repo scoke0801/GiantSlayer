@@ -389,13 +389,11 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_nWidth = WidthBlock_Count + 1;
 	m_nDepth = DepthBlock_Count + 1;
 
-	//격자의 교점(정점)의 개수는 (nWidth * nLength)이다. 
 	m_nVertices = 25;
-	//m_nVertices = m_nWidth * m_nDepth;
-	m_nStride = sizeof(CTexturedVertex);
+	m_nStride = sizeof(CDiffusedVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST;
 
-	CTexturedVertex* pVertices = new CTexturedVertex[m_nVertices];
+	CDiffusedVertex* pVertices = new CDiffusedVertex[m_nVertices];
 
 	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
 	
@@ -406,31 +404,15 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			if (i >= 25) break;
 			//정점의 높이와 색상을 높이 맵으로부터 구한다.
 			float tempheight = OnGetHeight(x, z);
-			pVertices[i].m_xmf3Position = XMFLOAT3(x , 10 , z );
-			pVertices[i].m_xmf3Normal= XMFLOAT3(x , 10, z );
-			pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x)/float(WidthBlock_Count), float(z)/float(DepthBlock_Count));
-			
+			XMFLOAT3 m_Scale = XMFLOAT3(5.0f, 5.0f, 2.0f);
+			pVertices[i].m_xmf3Position = XMFLOAT3(x , tempheight , z );
+			pVertices[i].m_xmf4Diffuse = m_xmf4Color;
 			
 			if (tempheight < fMinHeight) tempheight = fMinHeight ;
 			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
 		}
 	}
 
-	//for (int i = 0, z = zStart; z < (zStart + m_nDepth); z++)
-	//{
-	//	for (int x = xStart; x < (xStart + m_nWidth); x++, i++)
-	//	{
-	//		// 정점의 높이와 색상을 높이 맵으로부터 구한다.
-	//		float tempheight = OnGetHeight(x, z);
-	//		pVertices[i].m_xmf3Position = XMFLOAT3(x , 0, z );
-	//		pVertices[i].m_xmf3Normal= XMFLOAT3(x , 0, z );
-	//		pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x)/float(WidthBlock_Count), float(z)/float(DepthBlock_Count));
-	//		
-	//		
-	//		if (tempheight < fMinHeight) tempheight = fMinHeight ;
-	//		if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
-	//	}
-	//}
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
@@ -442,47 +424,6 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	delete[] pVertices;
 
-
-	//m_nIndices = ((m_nWidth * 2) * (m_nDepth - 1)) + ((m_nDepth - 1) - 1);
-	//UINT* pnIndices = new UINT[m_nIndices];
-
-	//for (int j = 0, z = 0; z < m_nDepth - 1; z++)
-	//{
-	//	if ((z % 2) == 0)
-	//	{
-	//		// 홀수 번째 줄이므로(z = 0, 2, 4, ...) 인덱스의 나열 순서는 왼쪽에서 오른쪽 방향
-	//		for (int x = 0; x < m_nWidth; x++)
-	//		{
-	//			// 첫 번째 줄을 제외하고 줄이 바뀔 때마다(x == 0) 첫 번째 인덱스를 추가
-	//			if ((x == 0) && (z > 0)) pnIndices[j++] = (UINT)(x + (z * m_nWidth));
-	//			// 아래(x, z), 위(x, z+1)의 순서로 인덱스를 추가
-	//			pnIndices[j++] = (UINT)(x + (z * m_nWidth));
-	//			pnIndices[j++] = (UINT)((x + (z * m_nWidth)) + m_nWidth);
-	//		}
-	//	}
-	//	else
-	//	{
-	//		// 짝수 번째 줄이므로(z = 1, 3, 5, ...) 인덱스의 나열 순서는 오른쪽에서 왼쪽 방향
-	//		for (int x = m_nWidth - 1; x >= 0; x--)
-	//		{
-	//			// 줄이 바뀔 때마다(x == (nwidth-1)) 첫 번째 인덱스를 추가
-	//			if (x == (m_nWidth - 1)) pnIndices[j++] = (UINT)(x + (z * m_nWidth));
-	//			// 아래(x, z), 위(x, z+1)의 순서로 인덱스를 추가
-	//			pnIndices[j++] = (UINT)(x + (z * m_nWidth));
-	//			pnIndices[j++] = (UINT)((x + (z * m_nWidth)) + m_nWidth);
-	//		}
-	//	}
-	//}
-	//m_pd3dIndexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList,
-	//	pnIndices, sizeof(UINT) * m_nIndices,
-	//	D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
-	//	&m_pd3dIndexUploadBuffer);
-
-	//m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
-	//m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	//m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
-
-	//delete[] pnIndices;
 }
 
 CTerrainMesh::~CTerrainMesh()

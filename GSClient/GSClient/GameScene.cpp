@@ -169,7 +169,7 @@ void CGameScene::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 지형 메쉬
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
+	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 9, 9, 257, 257);
 	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
 
 	m_nObjects = 10;
@@ -189,6 +189,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, pSkyBoxShader);
 
+	
 	CShader* pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
 	pShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
@@ -196,17 +197,19 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	CShader* pTerrainShader = new CTerrainTessellationShader();
-	pTerrainShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
-	pTerrainShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
-	pTerrainShader->CreateDomainShader(L"Shaders\\Shaders.hlsl", "PSTextured");
-	pTerrainShader->CreateHullShader(L"Shaders\\Shaders.hlsl", "PSTextured");
+	pTerrainShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTerrainTessellation");
+	pTerrainShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTerrainTessellation");
+	pTerrainShader->CreateDomainShader(L"Shaders\\Shaders.hlsl", "DSTerrainTessellation");
+	pTerrainShader->CreateHullShader(L"Shaders\\Shaders.hlsl", "HSTerrainTessellation");
 	pTerrainShader->CreateInputLayout(ShaderTypes::Diffused);
 	pTerrainShader->CreateTerrainShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+
+	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, 257,257, 9, 9, pTerrainShader);
 
 #pragma region Create Terrain
 	// 지형
 	m_ppObjects[0]->SetMesh(pPlaneMeshTex);
-	m_ppObjects[0]->SetPosition({ 0,  0,  0 });
+	m_ppObjects[0]->SetPosition({ 10,  0,  0 });
 	m_ppObjects[0]->SetTextureIndex(0x01);
 	m_ppObjects[0]->SetShader(pTerrainShader);
 	
@@ -424,13 +427,14 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
 
 	//m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		//m_ppObjects[0]->Draw(pd3dCommandList, m_CurrentCamera);
-		if (m_ppObjects[j])
-			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
+		/*if (m_ppObjects[j])
+			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);*/
 	}
 }
 
