@@ -54,9 +54,10 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	//m_Cameras[0]->SetPosition(0.0f, 300.0f, 0.0f);
 	////m_Cameras[0]->RotateY(XMConvertToRadians(180));
 	//m_Cameras[0]->Pitch(XMConvertToRadians(90));
-	m_Cameras[0]->SetPosition(125.0f, 250.0f, 140.0f);
-	m_Cameras[0]->RotateY(XMConvertToRadians(45));
-	m_Cameras[0]->Pitch(XMConvertToRadians(65));
+	//m_Cameras[0]->SetPosition(125.0f, 250.0f, 500.0f);
+	m_Cameras[0]->SetPosition({ 500,  250 + 150, 1200 });
+	//m_Cameras[0]->RotateY(XMConvertToRadians(45));
+	m_Cameras[0]->Pitch(XMConvertToRadians(15));
 	m_Cameras[1]->SetPosition(1000.0f, 10.0f, -150.0f);
 	m_Cameras[2]->SetPosition(-1000.0f, 10.0f, -150.0f);
 	m_Cameras[3]->SetPosition(0.0f, 1010.0f, -150.0f);
@@ -101,13 +102,13 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
-	if (m_CurrentCamera)
-	{
-		m_pLights->m_pLights[0].m_xmf3Position = m_CurrentCamera->GetPosition3f();
-		m_pLights->m_pLights[0].m_xmf3Direction = m_CurrentCamera->GetLook3f();
-		//m_CurrentCamera->SetLight(&m_pLights->m_pLights[0]);
-	}
-	else
+	//if (m_CurrentCamera)
+	//{
+	//	m_pLights->m_pLights[0].m_xmf3Position = m_CurrentCamera->GetPosition3f();
+	//	m_pLights->m_pLights[0].m_xmf3Direction = m_CurrentCamera->GetLook3f();
+	//	//m_CurrentCamera->SetLight(&m_pLights->m_pLights[0]);
+	//}
+	//else
 	{
 		m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(0.0f, 300.0f, -150.0f);
 		m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -267,16 +268,14 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_ppObjects[6] = pBridge;
 	m_ppObjects[6]->SetPosition({ 500,  01,  1500});
-	m_ppObjects[6]->SetTextureIndex(0x100);
 
-	//CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
-	//pBox->SetShader(pShader);
-	//pBox->SetObjectName(OBJ_NAME::Box);
-	//
-	//m_ppObjects[5] = pBox;
-	//m_ppObjects[5]->SetPosition({ 250,  25, 250 });
-	//m_ppObjects[5]->SetTextureIndex(0x80); 
-	 
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+
+	m_ppObjects[7] = pBridge;
+	m_ppObjects[7]->SetPosition({ 500,  01,  2500 }); 
+
 	//pShader = new CShader();
 	//pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSColor");
 	//pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSColor");
@@ -323,7 +322,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	MakeTexture(pd3dDevice, pd3dCommandList, boxTex.get(), "Box", L"resources/OBJ/Box.dds");
 
 	auto woodTex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, woodTex.get(), "Wood", L"resources/OBJ/Wood2.dds");
+	MakeTexture(pd3dDevice, pd3dCommandList, woodTex.get(), "Wood", L"resources/OBJ/Wood.dds");
 
 	m_Textures[terrainTex->m_Name] = std::move(terrainTex);
 	m_Textures[SkyTex_Back->m_Name] = std::move(SkyTex_Back);
@@ -426,6 +425,8 @@ void CSceneJH::Update(double elapsedTime)
 		m_ppObjects[i]->Update(elapsedTime);
 	}
 
+	m_Player->Update(elapsedTime);
+
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 }
 
@@ -489,20 +490,23 @@ void CSceneJH::ProcessInput()
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{
-		//m_Player->SetVelocity(velocity.x, velocity.y);
-		m_CurrentCamera->Walk(cameraSpeed);
+		m_Player->SetVelocity(OBJ_DIRECTION::Front);
+		//m_CurrentCamera->Walk(cameraSpeed);
 	}
 	if (keyInput.KEY_A)
 	{
-		m_CurrentCamera->Strafe(-cameraSpeed);
+		m_Player->SetVelocity(OBJ_DIRECTION::Left);
+		//m_CurrentCamera->Strafe(-cameraSpeed);
 	}
 	if (keyInput.KEY_S)
 	{
-		m_CurrentCamera->Walk(-cameraSpeed);
+		m_Player->SetVelocity(OBJ_DIRECTION::Back);
+		//m_CurrentCamera->Walk(-cameraSpeed);
 	}
 	if (keyInput.KEY_D)
 	{
-		m_CurrentCamera->Strafe(cameraSpeed);
+		m_Player->SetVelocity(OBJ_DIRECTION::Right);
+		//m_CurrentCamera->Strafe(cameraSpeed);
 	}
 	if (keyInput.KEY_B)
 	{

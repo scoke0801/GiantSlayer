@@ -126,9 +126,54 @@ void CGameObject::SetVelocity(XMFLOAT3 vel)
 	m_xmf3Velocity = vel;
 }
 
+void CGameObject::SetVelocity(OBJ_DIRECTION direction)
+{
+	XMFLOAT3 look = GetLook();
+	XMFLOAT3 right = GetRight();
+	//cout << "Look : " <<look.x << " " << look.y << " " << look.z << "\n";
+	//
+	//XMFLOAT3 lookRev = Vector3::Multifly(look, -1.0f);
+	//cout << "LookRev : " << lookRev.x << " " << lookRev.y << " " << lookRev.z << "\n";
+
+	switch (direction)
+	{
+	case OBJ_DIRECTION::Front: 
+		m_xmf3Velocity = Vector3::Multifly(look, PLAYER_RUN_VELOCITY); 
+		break;
+	case OBJ_DIRECTION::Back:
+		m_xmf3Velocity = Vector3::Multifly(Vector3::Multifly(look, -1), PLAYER_RUN_VELOCITY);
+		break;
+	case OBJ_DIRECTION::Left:
+		m_xmf3Velocity = Vector3::Multifly(Vector3::Multifly(right, -1), PLAYER_RUN_VELOCITY);
+		break;
+	case OBJ_DIRECTION::Right:
+		m_xmf3Velocity = Vector3::Multifly(right, PLAYER_RUN_VELOCITY);
+		break;
+	default:
+		assert("잘못된 방향으로 이동할 수 없어요~");
+		break;
+	}
+}
+
 void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
 {	
 	
+}
+  
+XMFLOAT3 CGameObject::GetRight()const
+{
+	return XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13);
+}
+
+
+XMFLOAT3 CGameObject::GetUp()const
+{
+	return XMFLOAT3(m_xmf4x4World._21, m_xmf4x4World._22, m_xmf4x4World._23);
+}
+
+XMFLOAT3 CGameObject::GetLook()const
+{
+	return XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33);
 }
 
 void CGameObject::Move(XMFLOAT3 shift)

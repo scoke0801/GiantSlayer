@@ -234,7 +234,10 @@ namespace Vector3
 			return(true);
 		return(false);
 	}
-
+	inline XMFLOAT3 Multifly(XMFLOAT3& xmf3Vector, float scalar)
+	{
+		return(XMFLOAT3(xmf3Vector.x * scalar, xmf3Vector.y * scalar, xmf3Vector.z * scalar));
+	}
 }
 //4차원 벡터의 연산
 namespace Vector4

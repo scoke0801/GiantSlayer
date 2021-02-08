@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Camera.h"
+#include "Player.h"
 
 CCamera::CCamera()
 {
@@ -19,18 +20,7 @@ void CCamera::Update(float elapsedTime)
 		m_TimerForShake.UpdateElapsedTime();
 		auto res = m_TimerForShake.GetElapsedTime();
 		cout << res << "\n";
-		//if (res >= 0.1 && res < 0.3)
-		//{ 
-		//	Strafe(-5.0f); 
-		//}
-		//else if (res >= 0.4)
-		//{
-		//	SetShake(false, 0.0f, 0.0f); 
-		//}
-		//else
-		//{ 
-		//	Strafe(5.0f); 
-		//} 
+	 
 		if (res >= m_ShakeTime)
 		{
 			SetShake(false, 0.0f, 0.0f);
@@ -41,14 +31,40 @@ void CCamera::Update(float elapsedTime)
 			xmf3Pos.x += RandomRange(-m_ShakePower, m_ShakePower);
 			xmf3Pos.y += RandomRange(-m_ShakePower, m_ShakePower);
 			xmf3Pos.z += RandomRange(-m_ShakePower, m_ShakePower);
-			
-			//Strafe(xmf3Pos.x - m_xmf3PrevPos.x);
-			//UpDown(xmf3Pos.y - m_xmf3PrevPos.y);
-			//Walk(xmf3Pos.z - m_xmf3PrevPos.z);
+			 
 			SetPosition(xmf3Pos);
 		}
 		UpdateViewMatrix(); 
 	} 
+}
+
+void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed, CPlayer* player)
+{
+	XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
+	XMFLOAT3 xmf3Right = player->GetRight();
+	XMFLOAT3 xmf3Up = player->GetUp();
+	XMFLOAT3 xmf3Look = player->GetLook();
+	xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
+	xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
+	xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
+
+	XMFLOAT3 xmf3Offset = (XMFLOAT3(0.0f, 15.0f, -30.0f));
+	xmf3Offset = Vector3::TransformCoord(xmf3Offset, xmf4x4Rotate);
+
+	XMFLOAT3 xmf3Position = Vector3::Add(player->GetPosition(), xmf3Offset);
+	XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
+	float fLength = Vector3::Length(xmf3Direction);
+	xmf3Direction = Vector3::Normalize(xmf3Direction);
+	//float fTimeLagScale = (m_fTimeLag) ? fTimeElapsed * (1.0f / m_fTimeLag) : 1.0f;
+	float fTimeLagScale = 1.0f;
+	float fDistance = fLength * fTimeLagScale;
+	if (fDistance > fLength) fDistance = fLength;
+	if (fLength < 0.01f) fDistance = fLength;
+	if (fDistance > 0)
+	{
+		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
+		LookAt(xmf3LookAt, player->GetUp());
+	}
 }
 
 XMVECTOR CCamera::GetPosition()const
@@ -203,6 +219,15 @@ void CCamera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3
 
 	m_ViewDirty = true;
 }
+
+void CCamera::LookAt(const XMFLOAT3& lookAt, const XMFLOAT3& up)
+{
+	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, lookAt, up);
+	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
+	m_xmf3Up = XMFLOAT3(mtxLookAt._12, mtxLookAt._22, mtxLookAt._32);
+	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
+}
+
 
 XMMATRIX CCamera::GetView()const
 {

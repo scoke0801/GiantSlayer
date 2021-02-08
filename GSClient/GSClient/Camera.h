@@ -8,6 +8,9 @@ struct VS_CB_CAMERA_INFO
 	XMFLOAT4X4 m_xmf4x4Projection;
 	XMFLOAT3   m_xmf3Position;
 };
+
+class CPlayer;
+
 class CCamera
 {
 private:
@@ -57,6 +60,7 @@ public:
 
 	// for Update Loop
 	void Update(float elapsedTime);
+	void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed, CPlayer* player);
 
 	// Get/Set world camera position.
 	DirectX::XMVECTOR GetPosition()const;
@@ -96,6 +100,7 @@ public:
 	// Define camera space via LookAt parameters.
 	void LookAt(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR target, DirectX::FXMVECTOR worldUp);
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
+	void LookAt(const XMFLOAT3& lookAt, const XMFLOAT3& up);
 
 	// Get View/Proj matrices.
 	DirectX::XMMATRIX GetView()const;

@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include <DirectXCollision.h>
 class CBridge : public CGameObject
 {
 private:
@@ -16,5 +17,11 @@ public:
 
 public:
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+
+public:
+	virtual void SetPosition(XMFLOAT3 pos) override;
+
+private:
+	void AddObject(CMesh* pMesh, CShader* pShader, UINT textureIndex);
 };
 

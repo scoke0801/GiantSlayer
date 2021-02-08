@@ -125,21 +125,21 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtTerrain.Sample(gssClamp, input.uv);
+		cColor = gtxtWood.Sample(gssClamp, input.uv);
 	}
 
 	if (gnTexturesMask & 0x02)
 	{
-		cColor = gSkyBox_Front.Sample(gssClamp, input.uv);
+		cColor = gtxtBox.Sample(gssClamp, input.uv);
 	}
 	if (gnTexturesMask & 0x04)
 	{
-		cColor = gSkyBox_Back.Sample(gssClamp, input.uv);
+		cColor = gtxtBox.Sample(gssClamp, input.uv);
 	}
 
 	if (gnTexturesMask & 0x08)
 	{
-		cColor = gSkyBox_Right.Sample(gssClamp, input.uv);
+		cColor = gtxtBox.Sample(gssClamp, input.uv);
 	}
 
 	if (gnTexturesMask & 0x10)

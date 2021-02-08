@@ -3,7 +3,10 @@
 
 class CShader;
 class CCamera;
+
 #define OBJECT_MAX_VELOCITY 120.0f
+#define PLAYER_RUN_VELOCITY 250.0f
+#define PLAYER_WALK_VELOCITY 80.0f
 
 enum class OBJ_NAME
 {
@@ -15,6 +18,13 @@ enum class OBJ_NAME
 	Bridge = 11
 };
 
+enum class OBJ_DIRECTION
+{
+	Front = 0,
+	Back,
+	Left,
+	Right
+};
 string ConvertToObjectName(const OBJ_NAME& name);
 
 //struct CB_GAMEOBJECT_INFO
@@ -33,6 +43,9 @@ protected:
 	XMFLOAT4X4	m_xmf4x4World;
 
 	XMFLOAT3	m_xmf3Position;
+	XMFLOAT3	m_xmf3Right = { 1.0f, 0.0f, 0.0f };
+	XMFLOAT3	m_xmf3Up = { 0.0f, 1.0f, 0.0f };
+	XMFLOAT3	m_xmf3Look = { 0.0f, 0.0f, 1.0f };
 	XMFLOAT3	m_xmf3Velocity;
 
 	CMesh*		m_pMesh = NULL;
@@ -83,8 +96,10 @@ public:
 
 	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
-	void SetPosition(XMFLOAT3 pos);
-	void SetVelocity(XMFLOAT3 vel);
+	virtual void SetPosition(XMFLOAT3 pos);
+	void SetVelocity(XMFLOAT3 vel); 
+	void SetVelocity(OBJ_DIRECTION direction);
+
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }
 	//void SetMaterial(CMaterial* pMaterial, int rootParameterIndex) { m_Material = pMaterial; m_MaterialParameterIndex = rootParameterIndex; }
@@ -95,9 +110,9 @@ public:
 	CCamera* GetCamera() const { return m_Camera; }
 
 public:
-	void AddVelocityX(float velX) {}
-	void AddVelocityY(float velY) {}
-	void AddVelocityZ(float velZ) {}
+	DirectX::XMFLOAT3 GetRight()const;
+	DirectX::XMFLOAT3 GetUp()const;
+	DirectX::XMFLOAT3 GetLook()const; 
 };
 
 class CRotatingObject : public CGameObject
