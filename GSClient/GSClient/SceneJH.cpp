@@ -58,6 +58,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	m_Cameras[0]->SetPosition({ 500,  250 + 150, 1200 });
 	//m_Cameras[0]->RotateY(XMConvertToRadians(45));
 	m_Cameras[0]->Pitch(XMConvertToRadians(15));
+	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 70.0f, -300.0f));
 	m_Cameras[1]->SetPosition(1000.0f, 10.0f, -150.0f);
 	m_Cameras[2]->SetPosition(-1000.0f, 10.0f, -150.0f);
 	m_Cameras[3]->SetPosition(0.0f, 1010.0f, -150.0f);
@@ -293,6 +294,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetPosition({ 500,  250 + 82.5, 1500 });
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
+
+	m_CurrentCamera->SetTarget(m_Player);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -554,20 +557,28 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 }
 
 void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
-{
+{ 
 	if ((btnState & MK_LBUTTON) != 0)
 	{
 		// Make each pixel correspond to a quarter of a degree.
 		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
 		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
 
-		m_CurrentCamera->Pitch(dy);
-		m_CurrentCamera->RotateY(dx);
+		//m_CurrentCamera->Pitch(dy);
+		//m_CurrentCamera->RotateY(dx);
+		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 100);
 
-		m_Player->Rotate(dy, 0.0f, -dx);
-		//m_Player->Rotate(cyDelta, cxDelta, 0.0f); 
+		if(m_Player->IsMoving())
+			m_Player->Rotate(XMFLOAT3(0, 1, 0), dx*100); 
 	}
+	if ((btnState & MK_RBUTTON) != 0)
+	{
+		// Make each pixel correspond to 0.005 unit in the scene.
+		float dx = static_cast<float>(x - m_LastMousePos.x);
+		float dy = static_cast<float>(y - m_LastMousePos.y);
 
+		m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, dy));
+	}
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
 }

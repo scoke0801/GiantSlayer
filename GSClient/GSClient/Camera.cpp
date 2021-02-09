@@ -38,20 +38,41 @@ void CCamera::Update(float elapsedTime)
 	} 
 }
 
-void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed, CPlayer* player)
+void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
+	if (m_TargetPlayer == nullptr) return;
+
 	XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
-	XMFLOAT3 xmf3Right = player->GetRight();
-	XMFLOAT3 xmf3Up = player->GetUp();
-	XMFLOAT3 xmf3Look = player->GetLook();
+
+	XMFLOAT3 xmf3Right, xmf3Up, xmf3Look;
+	cout << boolalpha << m_TargetPlayer->IsMoving() << "\n";
+	if (m_TargetPlayer->IsMoving())
+	{
+		xmf3Right = m_TargetPlayer->GetRight();
+		xmf3Up = m_TargetPlayer->GetUp();
+		xmf3Look = m_TargetPlayer->GetLook();
+	}
+	else 
+	{
+		xmf3Right = CalcTargetRight();
+		xmf3Up = CalcTargetUp();
+		xmf3Look = CalcTargetLook();
+	}
+	//XMFLOAT3 xmf3Right = m_TargetPlayer->GetRight();
+	//XMFLOAT3 xmf3Up = m_TargetPlayer->GetUp();
+	//XMFLOAT3 xmf3Look = m_TargetPlayer->GetLook();
+	///////////////////////////////////////////////////
+	//XMFLOAT3 xmf3Right = CalcTargetRight();
+	//XMFLOAT3 xmf3Up = CalcTargetUp();
+	//XMFLOAT3 xmf3Look = CalcTargetLook();
+
 	xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
 	xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
 	xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
+	
+	XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
 
-	XMFLOAT3 xmf3Offset = (XMFLOAT3(0.0f, 15.0f, -30.0f));
-	xmf3Offset = Vector3::TransformCoord(xmf3Offset, xmf4x4Rotate);
-
-	XMFLOAT3 xmf3Position = Vector3::Add(player->GetPosition(), xmf3Offset);
+	XMFLOAT3 xmf3Position = Vector3::Add(m_TargetPlayer->GetPosition(), xmf3Offset);
 	XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
 	float fLength = Vector3::Length(xmf3Direction);
 	xmf3Direction = Vector3::Normalize(xmf3Direction);
@@ -63,7 +84,7 @@ void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed, CPlayer* player)
 	if (fDistance > 0)
 	{
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
-		LookAt(xmf3LookAt, player->GetUp());
+		LookAt(xmf3LookAt, m_TargetPlayer->GetUp());
 	}
 }
 
@@ -251,6 +272,12 @@ XMFLOAT4X4 CCamera::GetProj4x4f()const
 	return m_xmf4x4Proj;
 }
 
+void CCamera::SetTarget(CPlayer* target)
+{
+	m_TargetPlayer = target;
+	m_TargetTransform = m_TargetPlayer->GetWorldTransform();
+}
+
 void CCamera::Strafe(float d)
 {
 	// mPosition += d*mRight
@@ -307,6 +334,16 @@ void CCamera::RotateY(float angle)
 	XMStoreFloat3(&m_xmf3Look, XMVector3TransformNormal(XMLoadFloat3(&m_xmf3Look), R));
 
 	m_ViewDirty = true;
+}
+
+void CCamera::RotateAroundTarget(XMFLOAT3 pxmf3Axis, float fAngle)
+{
+	if (m_TargetPlayer == nullptr) return;
+
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
+		XMConvertToRadians(fAngle));
+	
+	m_TargetTransform = Matrix4x4::Multiply(mtxRotate, m_TargetTransform);
 }
 
 void CCamera::UpdateViewMatrix()
@@ -443,4 +480,19 @@ void CCamera::SetShake(bool isOnShake, float shakeTime, float power)
 		m_xmf3Position = m_xmf3PrevPos;   
 		SetPosition(m_xmf3Position);
 	}
+}
+
+XMFLOAT3 CCamera::CalcTargetRight()
+{
+	return XMFLOAT3(m_TargetTransform._11, m_TargetTransform._12, m_TargetTransform._13);
+}
+
+XMFLOAT3 CCamera::CalcTargetUp()
+{
+	return XMFLOAT3(m_TargetTransform._21, m_TargetTransform._22, m_TargetTransform._23);
+}
+
+XMFLOAT3 CCamera::CalcTargetLook()
+{
+	return XMFLOAT3(m_TargetTransform._31, m_TargetTransform._32, m_TargetTransform._33);
 }

@@ -65,7 +65,6 @@ public:
 	CGameObject();
 	virtual ~CGameObject();
 
-
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
@@ -94,6 +93,7 @@ public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
 	string GetObjectName() const { return ConvertToObjectName(m_Name); }
 	XMFLOAT3 GetVelocity() const { return m_xmf3Velocity; }
+	XMFLOAT4X4 GetWorldTransform() const { return m_xmf4x4World; }
 
 	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);

@@ -54,13 +54,18 @@ private:	// For Shake
 	float						m_ShakeTime = 0.0f;
 	XMFLOAT3					m_xmf3PrevPos;
 
+private:
+	CPlayer*					m_TargetPlayer = nullptr;
+	XMFLOAT4X4					m_TargetTransform;
+	XMFLOAT3					m_xmf3Offset = { 0.0f, 0.0f, 0.0f };
+
 public:
 	CCamera();
 	~CCamera();
 
 	// for Update Loop
 	void Update(float elapsedTime);
-	void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed, CPlayer* player);
+	void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 
 	// Get/Set world camera position.
 	DirectX::XMVECTOR GetPosition()const;
@@ -109,6 +114,13 @@ public:
 	DirectX::XMFLOAT4X4 GetView4x4f()const;
 	DirectX::XMFLOAT4X4 GetProj4x4f()const;
 
+	void SetTarget(CPlayer* target); 
+	CPlayer* GetTarget() const { return m_TargetPlayer; }
+
+	void SetOffset(XMFLOAT3 offset) { m_xmf3Offset = offset; }
+	XMFLOAT3 GetOffset() const { return m_xmf3Offset; }
+
+	void MoveOffset(XMFLOAT3 shift) { m_xmf3Offset = Vector3::Add(m_xmf3Offset, shift); }
 public:
 	// Strafe/Walk the camera a distance d.
 	void Strafe(float d);
@@ -118,6 +130,7 @@ public:
 	// Rotate the camera.
 	void Pitch(float angle);
 	void RotateY(float angle);
+	void RotateAroundTarget(XMFLOAT3 pxmf3Axis, float fAngle);
 
 	// After modifying camera position/orientation, call to rebuild the view matrix.
 	void UpdateViewMatrix();
@@ -138,4 +151,9 @@ public:
 
 public:
 	void SetShake(bool isOnShake, float shakeTime, float power);
+
+private:
+	XMFLOAT3 CalcTargetRight();
+	XMFLOAT3 CalcTargetUp();
+	XMFLOAT3 CalcTargetLook();
 };

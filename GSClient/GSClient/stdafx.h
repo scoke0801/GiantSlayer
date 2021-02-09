@@ -183,7 +183,7 @@ namespace Vector3
 		XMStoreFloat3(&m_xmf3Normal, XMVector3Normalize(XMLoadFloat3(&xmf3Vector)));
 		return(m_xmf3Normal);
 	}
-	inline float Length(XMFLOAT3& xmf3Vector)
+	inline float Length(const XMFLOAT3& xmf3Vector)
 	{
 		XMFLOAT3 xmf3Result;
 		XMStoreFloat3(&xmf3Result, XMVector3Length(XMLoadFloat3(&xmf3Vector)));
@@ -355,6 +355,11 @@ inline float RandomRange(int min, int max)
 	int n = min + rand() % ((max + 1) - min);
 	float f = (float)rand() / RAND_MAX;
 	return n + f;
+}
+
+inline void DisplayVector3(const XMFLOAT3& vector)
+{
+	cout << "x : " << vector.x << " y : " << vector.y << " z : " << vector.z << "\n";
 }
 #include "resource.h"
 #include "GameTimer.h"

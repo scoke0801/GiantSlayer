@@ -28,10 +28,9 @@ void CPlayer::Update(double fTimeElapsed)
 	//m_Camera->SetLookAt(m_xmf3Position);
 	//m_Camera->RegenerateViewMatrix();
 
-	XMFLOAT3 xmf3Offset = (XMFLOAT3(0.0f, 70.0f, -300.0f));
-	//m_Camera->Update(m_xmf3Position, fTimeElapsed, this);
-	
-	m_Camera->SetPosition(Vector3::Add(m_xmf3Position, xmf3Offset));
+	m_Camera->Update(m_xmf3Position, fTimeElapsed);
+	 
+	m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
 	m_Camera->UpdateViewMatrix();
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
@@ -44,6 +43,7 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 {
 	XMFLOAT3 look = GetLook();
 	XMFLOAT3 right = GetRight();
+	bool isMoving = IsMoving();
 
 	switch (direction)
 	{
