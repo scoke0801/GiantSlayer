@@ -517,12 +517,12 @@ D3D12_RASTERIZER_DESC CFbxModelShader::CreateRasterizerState()
 
 D3D12_SHADER_BYTECODE CFbxModelShader::CreateVertexShader()
 {
-	return(CShader::CompileShaderFromFile(L"SceneTH.hlsl", "VSFbxModel", "vs_5_1", &m_pd3dVertexShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSFbxModel", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CFbxModelShader::CreatePixelShader()
 {
-	return(CShader::CompileShaderFromFile(L"SceneTH.hlsl", "PSFbxModel", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSFbxModel", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -571,10 +571,10 @@ D3D12_RASTERIZER_DESC CFbxSkinnedModelShader::CreateRasterizerState()
 
 D3D12_SHADER_BYTECODE CFbxSkinnedModelShader::CreateVertexShader()
 {
-	return(CShader::CompileShaderFromFile(L"SceneTH.hlsl", "VSFbxSkinnedModel", "vs_5_1", &m_pd3dVertexShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSFbxSkinnedModel", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CFbxSkinnedModelShader::CreatePixelShader()
 {
-	return(CShader::CompileShaderFromFile(L"SceneTH.hlsl", "PSFbxSkinnedModel", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSFbxSkinnedModel", "ps_5_1", &m_pd3dPixelShaderBlob));
 }

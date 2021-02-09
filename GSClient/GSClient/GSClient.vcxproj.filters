@@ -287,6 +287,7 @@
     </Filter>
     <Filter Include="FBXLoader">
       <UniqueIdentifier>{2a81f814-64ba-44ff-b6d7-50b1454fafe0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Light">
       <UniqueIdentifier>{76bf6ead-7ce3-40d6-9316-71c6d9f7879e}</UniqueIdentifier>
     </Filter>

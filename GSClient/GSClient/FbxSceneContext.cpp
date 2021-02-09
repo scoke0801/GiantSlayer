@@ -434,9 +434,11 @@ void RenderFbxNodeHierarchy(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode*
 void CreateMeshFromFbxNodeHierarchy(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pfbxNode)
 {
 	FbxNodeAttribute* pfbxNodeAttribute = pfbxNode->GetNodeAttribute();
+	cout << "노드 정보 불러옴" << endl;
 	if (pfbxNodeAttribute && (pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
 	{
 		FbxMesh* pfbxMesh = pfbxNode->GetMesh();
+		cout << "현재 노드 메쉬 불러옴" << endl;
 		if (pfbxMesh)
 		{
 			int nVertices = pfbxMesh->GetControlPointsCount();
@@ -468,6 +470,7 @@ void CreateMeshFromFbxNodeHierarchy(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	}
 
 	int nChilds = pfbxNode->GetChildCount();
+	cout << "연결된 차일드 노드 수: " << nChilds << endl;
 	for (int i = 0; i < nChilds; i++) CreateMeshFromFbxNodeHierarchy(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pfbxNode->GetChild(i));
 }
 

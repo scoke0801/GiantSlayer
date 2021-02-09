@@ -192,11 +192,20 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 //
 
+typedef struct Meshinfo
+{
+	vector<CDiffusedVertex> vertex;
+	int vertics;
+};
+
 class CMeshFbx : public CMesh
 {
 public:
 	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
 	virtual ~CMeshFbx();
+
+public:
+	void LoadMesh(FbxNode* node, Meshinfo* info);
 };
 
 class CMeshFromFbx

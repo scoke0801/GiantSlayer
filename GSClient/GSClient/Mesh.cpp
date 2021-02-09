@@ -356,65 +356,73 @@ CPlaneMeshTextured::~CPlaneMeshTextured()
 
 CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName) : CMesh(pd3dDevice, pd3dCommandList)
 {
-	//FbxScene* m_pfbxScene = FbxScene::Create(pfbxSdkManager, "");
-	//m_pfbxScene = LoadFbxScene(pd3dDevice, pd3dCommandList, pfbxSdkManager, pstrFbxFileName);
-	//
-	//FbxMesh* pfbxMesh = m_pfbxScene->GetRootNode()->GetChild(0)->GetMesh();
-	////씬 노드, 루트노드->메쉬노드->끝
+	FbxScene* m_pfbxScene = FbxScene::Create(pfbxSdkManager, "");
+	m_pfbxScene = LoadFbxSceneFromFile(pd3dDevice, pd3dCommandList, pfbxSdkManager, pstrFbxFileName);
 
-	//FbxNode* pfbxNode = m_pfbxScene->GetRootNode();
+	Meshinfo fbxmesh;
+	fbxmesh.vertics = 0;
 
-	//FbxNodeAttribute* pfbxNodeAttribute = pfbxNode->GetNodeAttribute();
+	Meshinfo* temp = &fbxmesh;
 
-	//m_nVertices = pfbxMesh->GetControlPointsCount();
-	//m_nPolygons = pfbxMesh->GetPolygonCount();
-	//m_nStride = sizeof(CDiffusedVertex);
-	//m_nOffset = 0;
-	//m_nSlot = 0;
-	//m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	cout << "-메쉬 로드:" << pstrFbxFileName << endl;
 
-	//cout << "-메쉬 로드:" << pstrFbxFileName << " [정점]: " << m_nVertices << "개 " << 
-	//	"[폴리곤]: " << m_nPolygons << "개" << endl;
+	LoadMesh(m_pfbxScene->GetRootNode(), temp);
 
-	////CDiffusedVertex* pVertices = new CDiffusedVertex[m_nVertices];
-	//vector<CDiffusedVertex> Vertices;
+	m_nVertices = fbxmesh.vertics;
+	m_nStride = sizeof(CDiffusedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	//for (int pindex = 0; pindex < m_nPolygons; pindex++) {
-	//	//pVertices[i].m_xmf3Position.x = pfbxMesh->GetControlPointAt(pindex).mData[0];
-	//	//pVertices[i].m_xmf3Position.y = pfbxMesh->GetControlPointAt(pindex).mData[1];
-	//	//pVertices[i].m_xmf3Position.z = pfbxMesh->GetControlPointAt(pindex).mData[2];
-	//	/*pVertices[pindex] = CDiffusedVertex(XMFLOAT3(pfbxMesh->GetControlPointAt(pindex).mData[0],
-	//												 pfbxMesh->GetControlPointAt(pindex).mData[1],
-	//												 pfbxMesh->GetControlPointAt(pindex).mData[2]),
-	//												 XMFLOAT4(0.5, 0.5, 0.5, 0));*/
-	//	for (int vindex = 0; vindex < 3; vindex++) {
-	//		int pvindex = pfbxMesh->GetPolygonVertex(pindex, vindex);
+	cout << "-메쉬 로드 끝 ||| [정점]: " << m_nVertices << "개 " << endl;
 
-	//		Vertices.push_back(CDiffusedVertex(XMFLOAT3(
-	//			pfbxMesh->GetControlPointAt(pvindex).mData[0],
-	//			pfbxMesh->GetControlPointAt(pvindex).mData[2],
-	//			pfbxMesh->GetControlPointAt(pvindex).mData[1]),
-	//			XMFLOAT4(0.5, 0.5, 0.5, 0)));
-	//		//cout << pindex << " " << pfbxMesh->GetControlPointAt(pindex).mData[0] << " " << pfbxMesh->GetControlPointAt(pindex).mData[1] << " " << pfbxMesh->GetControlPointAt(pindex).mData[2] << endl;
-	//	}
-	//}
+	CDiffusedVertex* pVertices = new CDiffusedVertex[fbxmesh.vertex.size()];
+	copy(fbxmesh.vertex.begin(), fbxmesh.vertex.end(), pVertices);
 
-	//CDiffusedVertex* pVertices = new CDiffusedVertex[Vertices.size()];
-	//copy(Vertices.begin(), Vertices.end(), pVertices);
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
-	//m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
-	//	m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
-	//	D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
-
-	////정점 버퍼 뷰를 생성한다. 
-	//m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-	//m_d3dVertexBufferView.StrideInBytes = m_nStride;
-	//m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+	//정점 버퍼 뷰를 생성한다. 
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 }
 
 CMeshFbx::~CMeshFbx()
 {
 
+}
+
+void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
+{
+	FbxNodeAttribute* pfbxNodeAttribute = node->GetNodeAttribute();
+
+	if (pfbxNodeAttribute && (pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
+	{
+		FbxMesh* pfbxMesh = node->GetMesh();
+		info->vertics += pfbxMesh->GetControlPointsCount();
+		int nPolygons = pfbxMesh->GetPolygonCount();
+
+		cout << " [정점]: " << info->vertics << "개 " << "[폴리곤]: " << nPolygons << "개" << endl;
+
+		for (int pindex = 0; pindex < nPolygons; pindex++) {
+			for (int vindex = 0; vindex < 3; vindex++) {
+				int pvindex = pfbxMesh->GetPolygonVertex(pindex, vindex);
+
+					info->vertex.push_back(CDiffusedVertex(XMFLOAT3(
+						pfbxMesh->GetControlPointAt(pvindex).mData[0],
+						pfbxMesh->GetControlPointAt(pvindex).mData[2],
+						pfbxMesh->GetControlPointAt(pvindex).mData[1]),
+						XMFLOAT4(0.5, 0.5, 0.5, 0)));
+			}
+		}
+	}
+
+	int nChilds = node->GetChildCount();
+	cout << "연결된 차일드 노드 수: " << nChilds << endl;
+	for (int i = 0; i < nChilds; i++) 
+		LoadMesh(node->GetChild(i), info);
 }
 
 CMeshFromFbx::CMeshFromFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices)
