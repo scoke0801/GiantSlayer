@@ -44,7 +44,19 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	XMFLOAT3 look = GetLook();
 	XMFLOAT3 right = GetRight();
 	bool isMoving = IsMoving();
-
+	if (!isMoving)
+	{
+		if (m_Camera != nullptr)
+		{
+			cout << " Áö ³ª °¨\n";
+			XMFLOAT3 xmf3Right = m_Camera->CalcTargetRight();
+			XMFLOAT3 xmf3Up    = m_Camera->CalcTargetUp();
+			XMFLOAT3 xmf3Look  = m_Camera->CalcTargetLook();
+			m_xmf4x4World._11 = xmf3Right.x; m_xmf4x4World._12 = xmf3Right.y; m_xmf4x4World._13 = xmf3Right.z;
+			//m_xmf4x4World._21 = 0;    m_xmf4x4World._22 = 1;	  m_xmf4x4World._23 =0;
+			m_xmf4x4World._31 = xmf3Look.x;  m_xmf4x4World._32 = xmf3Look.y;  m_xmf4x4World._33 = xmf3Look.z;
+		}
+	}
 	switch (direction)
 	{
 	case OBJ_DIRECTION::Front:

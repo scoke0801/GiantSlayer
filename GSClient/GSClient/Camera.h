@@ -152,7 +152,7 @@ public:
 public:
 	void SetShake(bool isOnShake, float shakeTime, float power);
 
-private:
+public:
 	XMFLOAT3 CalcTargetRight();
 	XMFLOAT3 CalcTargetUp();
 	XMFLOAT3 CalcTargetLook();

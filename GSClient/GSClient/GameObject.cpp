@@ -130,7 +130,7 @@ void CGameObject::SetVelocity(OBJ_DIRECTION direction)
 {
 	XMFLOAT3 look = GetLook();
 	XMFLOAT3 right = GetRight(); 
-
+	
 	switch (direction)
 	{
 	case OBJ_DIRECTION::Front: 
@@ -183,9 +183,19 @@ void CGameObject::Move()
 	m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
 }
 
-
 void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 {
+	//if (Vector3::Length(m_xmf3Velocity) < 0.1f)
+	{
+		//if (m_Camera != nullptr)
+		//{
+		//	cout << " Áö ³ª °¨\n";
+		//	XMFLOAT3 xmf3Right = m_Camera->CalcTargetRight();
+		//	XMFLOAT3 xmf3Look = m_Camera->CalcTargetLook();
+		//	m_xmf4x4World._11 = xmf3Right.x; m_xmf4x4World._12 = xmf3Right.y; m_xmf4x4World._13 = xmf3Right.z;
+		//	m_xmf4x4World._31 = xmf3Look.x;  m_xmf4x4World._32 = xmf3Look.y;  m_xmf4x4World._33 = xmf3Look.z;
+		//}
+	}
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
 		XMConvertToRadians(fAngle));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);

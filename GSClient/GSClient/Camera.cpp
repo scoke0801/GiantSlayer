@@ -44,8 +44,7 @@ void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 
 	XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
 
-	XMFLOAT3 xmf3Right, xmf3Up, xmf3Look;
-	cout << boolalpha << m_TargetPlayer->IsMoving() << "\n";
+	XMFLOAT3 xmf3Right, xmf3Up, xmf3Look; 
 	if (m_TargetPlayer->IsMoving())
 	{
 		xmf3Right = m_TargetPlayer->GetRight();
@@ -57,14 +56,7 @@ void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		xmf3Right = CalcTargetRight();
 		xmf3Up = CalcTargetUp();
 		xmf3Look = CalcTargetLook();
-	}
-	//XMFLOAT3 xmf3Right = m_TargetPlayer->GetRight();
-	//XMFLOAT3 xmf3Up = m_TargetPlayer->GetUp();
-	//XMFLOAT3 xmf3Look = m_TargetPlayer->GetLook();
-	///////////////////////////////////////////////////
-	//XMFLOAT3 xmf3Right = CalcTargetRight();
-	//XMFLOAT3 xmf3Up = CalcTargetUp();
-	//XMFLOAT3 xmf3Look = CalcTargetLook();
+	} 
 
 	xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
 	xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
