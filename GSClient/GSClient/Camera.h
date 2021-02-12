@@ -66,6 +66,7 @@ public:
 	// for Update Loop
 	void Update(float elapsedTime);
 	void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
+	void UpdateLights(float elapsedTime);
 
 	// Get/Set world camera position.
 	DirectX::XMVECTOR GetPosition()const;

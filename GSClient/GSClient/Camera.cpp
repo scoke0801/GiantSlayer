@@ -36,6 +36,8 @@ void CCamera::Update(float elapsedTime)
 		}
 		UpdateViewMatrix(); 
 	} 
+
+	UpdateLights(elapsedTime);
 }
 
 void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
@@ -77,6 +79,18 @@ void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	{
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
 		LookAt(xmf3LookAt, m_TargetPlayer->GetUp());
+	}
+}
+
+void CCamera::UpdateLights(float elapsedTime)
+{
+	for (auto light : m_Lights)
+	{
+		if (light->m_nType == SPOT_LIGHT)
+		{
+			light->m_xmf3Position = GetPosition3f();
+			light->m_xmf3Direction = GetLook3f();
+		}
 	}
 }
 
