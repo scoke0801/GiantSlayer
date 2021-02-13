@@ -43,9 +43,9 @@ protected:
 	XMFLOAT4X4	m_xmf4x4World;
 
 	XMFLOAT3	m_xmf3Position;
-	XMFLOAT3	m_xmf3Right = { 1.0f, 0.0f, 0.0f };
-	XMFLOAT3	m_xmf3Up = { 0.0f, 1.0f, 0.0f };
-	XMFLOAT3	m_xmf3Look = { 0.0f, 0.0f, 1.0f };
+	//XMFLOAT3	m_xmf3Right = { 1.0f, 0.0f, 0.0f };
+	//XMFLOAT3	m_xmf3Up = { 0.0f, 1.0f, 0.0f };
+	//XMFLOAT3	m_xmf3Look = { 0.0f, 0.0f, 1.0f };
 	XMFLOAT3	m_xmf3Velocity;
 
 	CMesh*		m_pMesh = NULL;
@@ -85,7 +85,7 @@ public:
 
 	//void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
-	void Rotate(float x, float y, float z);
+	//void Rotate(float x, float y, float z);
 
 	bool CollisionCheck() { return false; };
 

@@ -79,11 +79,7 @@ void CGameObject::Update(double fTimeElapsed)
 	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
 	if (fLength > MaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
 
-	Move(m_xmf3Velocity);
-	 
-	//m_Camera->Update(m_xmf3Position, fTimeElapsed);
-	//m_Camera->SetLookAt(m_xmf3Position);
-	//m_Camera->RegenerateViewMatrix();
+	Move(m_xmf3Velocity); 
 
 	fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = ( Friction * fTimeElapsed);
@@ -185,57 +181,46 @@ void CGameObject::Move()
 
 void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 {
-	//if (Vector3::Length(m_xmf3Velocity) < 0.1f)
-	{
-		//if (m_Camera != nullptr)
-		//{
-		//	cout << " Áö ³ª °¨\n";
-		//	XMFLOAT3 xmf3Right = m_Camera->CalcTargetRight();
-		//	XMFLOAT3 xmf3Look = m_Camera->CalcTargetLook();
-		//	m_xmf4x4World._11 = xmf3Right.x; m_xmf4x4World._12 = xmf3Right.y; m_xmf4x4World._13 = xmf3Right.z;
-		//	m_xmf4x4World._31 = xmf3Look.x;  m_xmf4x4World._32 = xmf3Look.y;  m_xmf4x4World._33 = xmf3Look.z;
-		//}
-	}
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
 		XMConvertToRadians(fAngle));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
-void CGameObject::Rotate(float x, float y, float z)
-{
-	static float pitch, yaw, roll;
-	if (x != 0.0f)
-	{
-		pitch += x;
-		if (pitch > +89.0f) { x -= (pitch - 89.0f); pitch = +89.0f; }
-		if (pitch < -89.0f) { x -= (pitch + 89.0f); pitch = -89.0f; }
-	}
-	if (y != 0.0f)
-	{
-		yaw += y;
-		if (yaw > 360.0f) yaw -= 360.0f;
-		if (yaw < 0.0f) yaw += 360.0f;
-	}
-	if (z != 0.0f)
-	{
-		roll += z;
-		if (roll > +20.0f) { z -= (roll - 20.0f); roll = +20.0f; }
-		if (roll < -20.0f) { z -= (roll + 20.0f); roll = -20.0f; }
-	}
-	//m_pCamera->Rotate(x, y, z);
-	if (y != 0.0f)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
-		XMFLOAT3 xmf3Look = Vector3::TransformNormal(GetLook(), xmmtxRotate);
-		XMFLOAT3 xmf3Right = Vector3::TransformNormal(GetRight(), xmmtxRotate);
-	}
-	XMFLOAT3 xmf3Look = GetLook();
-	XMFLOAT3 xmf3Right = GetRight();
-	XMFLOAT3 xmf3Up = GetUp();
-	m_xmf4x4World._11 = xmf3Right.x; m_xmf4x4World._12 = xmf3Right.y; m_xmf4x4World._13 = xmf3Right.z;
-	m_xmf4x4World._21 = xmf3Up.x;    m_xmf4x4World._22 = xmf3Up.y;	  m_xmf4x4World._23 = xmf3Up.z;
-	m_xmf4x4World._31 = xmf3Look.x;  m_xmf4x4World._32 = xmf3Look.y;  m_xmf4x4World._33 = xmf3Look.z;
-}
+//void CGameObject::Rotate(float x, float y, float z)
+//{
+//	static float pitch, yaw, roll;
+//	if (x != 0.0f)
+//	{
+//		pitch += x;
+//		if (pitch > +89.0f) { x -= (pitch - 89.0f); pitch = +89.0f; }
+//		if (pitch < -89.0f) { x -= (pitch + 89.0f); pitch = -89.0f; }
+//	}
+//	if (y != 0.0f)
+//	{
+//		yaw += y;
+//		if (yaw > 360.0f) yaw -= 360.0f;
+//		if (yaw < 0.0f) yaw += 360.0f;
+//	}
+//	if (z != 0.0f)
+//	{
+//		roll += z;
+//		if (roll > +20.0f) { z -= (roll - 20.0f); roll = +20.0f; }
+//		if (roll < -20.0f) { z -= (roll + 20.0f); roll = -20.0f; }
+//	}
+//	//m_pCamera->Rotate(x, y, z);
+//	if (y != 0.0f)
+//	{
+//		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
+//		XMFLOAT3 xmf3Look = Vector3::TransformNormal(GetLook(), xmmtxRotate);
+//		XMFLOAT3 xmf3Right = Vector3::TransformNormal(GetRight(), xmmtxRotate);
+//	}
+//	XMFLOAT3 xmf3Look = GetLook();
+//	XMFLOAT3 xmf3Right = GetRight();
+//	XMFLOAT3 xmf3Up = GetUp();
+//	m_xmf4x4World._11 = xmf3Right.x; m_xmf4x4World._12 = xmf3Right.y; m_xmf4x4World._13 = xmf3Right.z;
+//	m_xmf4x4World._21 = xmf3Up.x;    m_xmf4x4World._22 = xmf3Up.y;	  m_xmf4x4World._23 = xmf3Up.z;
+//	m_xmf4x4World._31 = xmf3Look.x;  m_xmf4x4World._32 = xmf3Look.y;  m_xmf4x4World._33 = xmf3Look.z;
+//}
 
 CRotatingObject::CRotatingObject()
 {

@@ -188,25 +188,20 @@ namespace Vector3
 		XMFLOAT3 xmf3Result;
 		XMStoreFloat3(&xmf3Result, XMVector3Length(XMLoadFloat3(&xmf3Vector)));
 		return(xmf3Result.x);
-	}
-	inline float Angle(XMVECTOR& xmvVector1, XMVECTOR& xmvVector2)
-	{
-		XMVECTOR xmvAngle = XMVector3AngleBetweenNormals(xmvVector1, xmvVector2);
-		return(XMConvertToDegrees(acosf(XMVectorGetX(xmvAngle))));
-	}
+	} 
 	inline float Angle(const XMVECTOR& xmvVector1, const XMVECTOR& xmvVector2)
 	{
 		XMVECTOR xmvAngle = XMVector3AngleBetweenNormals(xmvVector1, xmvVector2);
 		return(XMConvertToDegrees(acosf(XMVectorGetX(xmvAngle))));
-	}
-	inline float Angle(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
-	{
-		return(Angle(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2)));
-
-	}
+	}  
 	inline float Angle(const XMFLOAT3& xmf3Vector1, const XMFLOAT3& xmf3Vector2)
 	{
 		return(Angle(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2)));
+	}
+	inline float AngleAtan(const XMFLOAT3& from, const XMFLOAT3& to)
+	{
+		XMFLOAT3 xmf3Result = Subtract(to, from);
+		return XMConvertToDegrees(atan2f(xmf3Result.x, xmf3Result.z));
 	}
 	inline XMFLOAT3 TransformNormal(XMFLOAT3& xmf3Vector, XMMATRIX& xmmtxTransform)
 	{
@@ -357,9 +352,17 @@ inline float RandomRange(int min, int max)
 	return n + f;
 }
 
-inline void DisplayVector3(const XMFLOAT3& vector)
+inline void DisplayVector3(const XMFLOAT3& vector, bool newLine = true)
 {
-	cout << "x : " << vector.x << " y : " << vector.y << " z : " << vector.z << "\n";
+	if (newLine)
+		cout << "x : " << vector.x << " y : " << vector.y << " z : " << vector.z << "\n";
+	else
+		cout << "x : " << vector.x << " y : " << vector.y << " z : " << vector.z;
+} 
+template<typename T>
+static T Clamp(const T& x, const T& low, const T& high)
+{
+	return x < low ? low : (x > high ? high : x);
 }
 #include "resource.h"
 #include "GameTimer.h"

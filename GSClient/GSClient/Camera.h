@@ -58,7 +58,9 @@ private:
 	CPlayer*					m_TargetPlayer = nullptr;
 	XMFLOAT4X4					m_TargetTransform;
 	XMFLOAT3					m_xmf3Offset = { 0.0f, 0.0f, 0.0f };
-
+	 
+	float						m_TestXAngle = 0.0f;
+	float						m_TestYAngle = 0.0f;
 public:
 	CCamera();
 	~CCamera();
@@ -118,10 +120,10 @@ public:
 	void SetTarget(CPlayer* target); 
 	CPlayer* GetTarget() const { return m_TargetPlayer; }
 
-	void SetOffset(XMFLOAT3 offset) { m_xmf3Offset = offset; }
+	void SetOffset(XMFLOAT3 offset);
 	XMFLOAT3 GetOffset() const { return m_xmf3Offset; }
 
-	void MoveOffset(XMFLOAT3 shift) { m_xmf3Offset = Vector3::Add(m_xmf3Offset, shift); }
+	void MoveOffset(XMFLOAT3 shift);
 public:
 	// Strafe/Walk the camera a distance d.
 	void Strafe(float d);
@@ -132,7 +134,7 @@ public:
 	void Pitch(float angle);
 	void RotateY(float angle);
 	void RotateAroundTarget(XMFLOAT3 pxmf3Axis, float fAngle);
-
+	   
 	// After modifying camera position/orientation, call to rebuild the view matrix.
 	void UpdateViewMatrix();
 

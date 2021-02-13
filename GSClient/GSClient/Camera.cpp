@@ -34,9 +34,12 @@ void CCamera::Update(float elapsedTime)
 			 
 			SetPosition(xmf3Pos);
 		}
-		UpdateViewMatrix(); 
+		m_ViewDirty = true;
 	} 
-
+	if (m_ViewDirty)
+	{
+		UpdateViewMatrix();
+	}
 	UpdateLights(elapsedTime);
 }
 
@@ -45,21 +48,11 @@ void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	if (m_TargetPlayer == nullptr) return;
 
 	XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
-
-	XMFLOAT3 xmf3Right, xmf3Up, xmf3Look; 
-	if (m_TargetPlayer->IsMoving())
-	{
-		xmf3Right = m_TargetPlayer->GetRight();
-		xmf3Up = m_TargetPlayer->GetUp();
-		xmf3Look = m_TargetPlayer->GetLook();
-	}
-	else 
-	{
-		xmf3Right = CalcTargetRight();
-		xmf3Up = CalcTargetUp();
-		xmf3Look = CalcTargetLook();
-	} 
-
+	 
+	XMFLOAT3 xmf3Right = CalcTargetRight();
+	XMFLOAT3 xmf3Up	  = CalcTargetUp();
+	XMFLOAT3 xmf3Look  = CalcTargetLook();
+	
 	xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
 	xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
 	xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
@@ -284,6 +277,16 @@ void CCamera::SetTarget(CPlayer* target)
 	m_TargetTransform = m_TargetPlayer->GetWorldTransform();
 }
 
+void CCamera::SetOffset(XMFLOAT3 offset)
+{ 
+	m_xmf3Offset = offset; 
+}
+
+void CCamera::MoveOffset(XMFLOAT3 shift)
+{
+	m_xmf3Offset = Vector3::Add(m_xmf3Offset, shift);	
+}
+
 void CCamera::Strafe(float d)
 {
 	// mPosition += d*mRight
@@ -348,65 +351,65 @@ void CCamera::RotateAroundTarget(XMFLOAT3 pxmf3Axis, float fAngle)
 
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
 		XMConvertToRadians(fAngle));
-	
+
 	m_TargetTransform = Matrix4x4::Multiply(mtxRotate, m_TargetTransform);
 }
 
 void CCamera::UpdateViewMatrix()
 {
-	if (m_ViewDirty)
+	if (!m_ViewDirty) return;
+
+	XMVECTOR R = XMLoadFloat3(&m_xmf3Right);
+	XMVECTOR U = XMLoadFloat3(&m_xmf3Up);
+	XMVECTOR L = XMLoadFloat3(&m_xmf3Look);
+	XMVECTOR P = XMLoadFloat3(&m_xmf3Position);
+
+	// Keep camera's axes orthogonal to each other and of unit length.
+	L = XMVector3Normalize(L);
+	U = XMVector3Normalize(XMVector3Cross(L, R));
+
+	// U, L already ortho-normal, so no need to normalize cross product.
+	R = XMVector3Cross(U, L);
+
+	// Fill in the view matrix entries.
+	float x = -XMVectorGetX(XMVector3Dot(P, R));
+	float y = -XMVectorGetX(XMVector3Dot(P, U));
+	float z = -XMVectorGetX(XMVector3Dot(P, L));
+
+	XMStoreFloat3(&m_xmf3Right, R);
+	XMStoreFloat3(&m_xmf3Up, U);
+	XMStoreFloat3(&m_xmf3Look, L);
+
+	m_xmf4x4View(0, 0) = m_xmf3Right.x;
+	m_xmf4x4View(1, 0) = m_xmf3Right.y;
+	m_xmf4x4View(2, 0) = m_xmf3Right.z;
+	m_xmf4x4View(3, 0) = x;
+
+	m_xmf4x4View(0, 1) = m_xmf3Up.x;
+	m_xmf4x4View(1, 1) = m_xmf3Up.y;
+	m_xmf4x4View(2, 1) = m_xmf3Up.z;
+	m_xmf4x4View(3, 1) = y;
+
+	m_xmf4x4View(0, 2) = m_xmf3Look.x;
+	m_xmf4x4View(1, 2) = m_xmf3Look.y;
+	m_xmf4x4View(2, 2) = m_xmf3Look.z;
+	m_xmf4x4View(3, 2) = z;
+
+	m_xmf4x4View(0, 3) = 0.0f;
+	m_xmf4x4View(1, 3) = 0.0f;
+	m_xmf4x4View(2, 3) = 0.0f;
+	m_xmf4x4View(3, 3) = 1.0f;
+
+	m_ViewDirty = false;
+
+	if (m_Lights.size() < 0) return;
+
+	for (auto light : m_Lights)
 	{
-		XMVECTOR R = XMLoadFloat3(&m_xmf3Right);
-		XMVECTOR U = XMLoadFloat3(&m_xmf3Up);
-		XMVECTOR L = XMLoadFloat3(&m_xmf3Look);
-		XMVECTOR P = XMLoadFloat3(&m_xmf3Position);
-
-		// Keep camera's axes orthogonal to each other and of unit length.
-		L = XMVector3Normalize(L);
-		U = XMVector3Normalize(XMVector3Cross(L, R));
-
-		// U, L already ortho-normal, so no need to normalize cross product.
-		R = XMVector3Cross(U, L);
-
-		// Fill in the view matrix entries.
-		float x = -XMVectorGetX(XMVector3Dot(P, R));
-		float y = -XMVectorGetX(XMVector3Dot(P, U));
-		float z = -XMVectorGetX(XMVector3Dot(P, L));
-
-		XMStoreFloat3(&m_xmf3Right, R);
-		XMStoreFloat3(&m_xmf3Up, U);
-		XMStoreFloat3(&m_xmf3Look, L);
-
-		m_xmf4x4View(0, 0) = m_xmf3Right.x;
-		m_xmf4x4View(1, 0) = m_xmf3Right.y;
-		m_xmf4x4View(2, 0) = m_xmf3Right.z;
-		m_xmf4x4View(3, 0) = x;
-
-		m_xmf4x4View(0, 1) = m_xmf3Up.x;
-		m_xmf4x4View(1, 1) = m_xmf3Up.y;
-		m_xmf4x4View(2, 1) = m_xmf3Up.z;
-		m_xmf4x4View(3, 1) = y;
-
-		m_xmf4x4View(0, 2) = m_xmf3Look.x;
-		m_xmf4x4View(1, 2) = m_xmf3Look.y;
-		m_xmf4x4View(2, 2) = m_xmf3Look.z;
-		m_xmf4x4View(3, 2) = z;
-
-		m_xmf4x4View(0, 3) = 0.0f;
-		m_xmf4x4View(1, 3) = 0.0f;
-		m_xmf4x4View(2, 3) = 0.0f;
-		m_xmf4x4View(3, 3) = 1.0f;
-
-		m_ViewDirty = false;
-
-		if (m_Lights.size() < 0) return;
-
-		for(auto light : m_Lights)
-		{
-			light->m_xmf3Position = GetPosition3f();
-			light->m_xmf3Direction = GetLook3f();
-		}
+		light->m_xmf3Position = GetPosition3f();
+		light->m_xmf3Direction = GetLook3f();
 	}
+
 }
 void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight,
 	float fMinZ, float fMaxZ)

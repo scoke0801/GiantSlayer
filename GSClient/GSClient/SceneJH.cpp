@@ -444,7 +444,6 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
 
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
-	cout << m_pcbMappedLights->m_pLights[0].m_xmf3Position.x << " " << m_pcbMappedLights->m_pLights[0].m_xmf3Direction.x <<" \n";
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
 
@@ -552,12 +551,13 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
 		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
 		 
-		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
+		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30 );
 		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 100);
-
-		if(m_Player->IsMoving())
+		 
+		if(m_Player->IsMoving()) 
 			m_Player->Rotate(XMFLOAT3(0, 1, 0), dx*100); 
 	}
+
 	if ((btnState & MK_RBUTTON) != 0)
 	{
 		// Make each pixel correspond to 0.005 unit in the scene.
