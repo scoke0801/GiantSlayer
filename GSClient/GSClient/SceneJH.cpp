@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Player.h"
 #include "Bridge.h"
+#include "Wall.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_CAMERA			1
@@ -160,8 +161,7 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-
+{ 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	for (int i = 0; i < m_nObjects; ++i)
@@ -242,8 +242,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//m_ppObjects[8]->SetTextureIndex(0x01);
 	//m_ppObjects[8]->SetShader(pShader);
 
-#pragma endregion  
-
+#pragma endregion   
 	pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
 	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
@@ -264,6 +263,18 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ppObjects[7] = pBridge;
 	m_ppObjects[7]->SetPosition({ 500,  01,  2500 }); 
 
+	//CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, 2000, 1000, 0);
+	CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, 700, 1000, 0);
+	pWall->SetShader(pShader);
+	pWall->SetObjectName(OBJ_NAME::Wall);
+	pWall->SetTextureIndex(0x200);
+
+	m_ppObjects[8] = pWall;
+	m_ppObjects[8]->SetPosition({ 350,  500,  500 });
+	 
+
+	//m_ppObjects[9] = pWall;
+	//m_ppObjects[9]->SetPosition({ 3000,  500,  500 });
 	//pShader = new CShader();
 	//pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSColor");
 	//pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSColor");
@@ -313,7 +324,12 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	auto woodTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, woodTex.get(), "Wood", L"resources/OBJ/Wood.dds");
+	
+	auto wallTex = make_unique<CTexture>();
+	//MakeTexture(pd3dDevice, pd3dCommandList, wallTex.get(), "Wall", L"resources/OBJ/StoneWall.dds");
+	//MakeTexture(pd3dDevice, pd3dCommandList, wallTex.get(), "Wall", L"resources/OBJ/WallTest2.dds");
 
+	MakeTexture(pd3dDevice, pd3dCommandList, wallTex.get(), "Wall", L"resources/OBJ/Door.dds");
 	m_Textures[terrainTex->m_Name] = std::move(terrainTex);
 	m_Textures[SkyTex_Back->m_Name] = std::move(SkyTex_Back);
 	m_Textures[SkyTex_Front->m_Name] = std::move(SkyTex_Front);
@@ -322,7 +338,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Textures[SkyTex_Top->m_Name] = std::move(SkyTex_Top);
 	m_Textures[SkyTex_Bottom->m_Name] = std::move(SkyTex_Bottom);
 	m_Textures[boxTex->m_Name] = std::move(boxTex); 
-	m_Textures[woodTex->m_Name] = std::move(woodTex);
+	m_Textures[woodTex->m_Name] = std::move(woodTex); 
+	m_Textures[wallTex->m_Name] = std::move(wallTex);
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -350,6 +367,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	auto SkyTex_Bottom = m_Textures["Sky_Bottom"]->m_pd3dResource;
 	auto boxTex = m_Textures["Box"]->m_pd3dResource;
 	auto woodTex = m_Textures["Wood"]->m_pd3dResource;
+	auto wallTex = m_Textures["Wall"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -390,6 +408,10 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = woodTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(woodTex, &srvDesc, hDescriptor);
+
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = wallTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(wallTex, &srvDesc, hDescriptor);
 }
 
 void CSceneJH::ReleaseObjects()

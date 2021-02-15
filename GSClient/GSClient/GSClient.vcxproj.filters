@@ -105,6 +105,9 @@
     <ClCompile Include="Bridge.cpp">
       <Filter>GameObject\MapObjects</Filter>
     </ClCompile>
+    <ClCompile Include="Wall.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -202,6 +205,9 @@
     </ClInclude>
     <ClInclude Include="Bridge.h">
       <Filter>GameObject\MapObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="Wall.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

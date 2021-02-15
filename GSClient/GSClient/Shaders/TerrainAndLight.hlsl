@@ -28,6 +28,8 @@ Texture2D gSkyBox_Top : register(t5);
 Texture2D gSkyBox_Bottom : register(t6);
 Texture2D gtxtBox : register(t7); 
 Texture2D gtxtWood : register(t8); 
+Texture2D gtxtWall : register(t9);
+
 struct VS_LIGHT_OUT
 {
     float4 PosH    : SV_POSITION;
@@ -111,7 +113,10 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	{
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
 	}
-
+	if (gnTexturesMask & 0x200)
+	{
+		cColor = gtxtWall.Sample(gssWrap, input.uv);
+	}
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 	
