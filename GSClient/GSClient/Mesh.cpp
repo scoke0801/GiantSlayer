@@ -390,26 +390,31 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_nDepth = DepthBlock_Count + 1;
 
 	m_nVertices = 25;
-	m_nStride = sizeof(CDiffusedVertex);
+	m_nStride = sizeof(CTexturedVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST;
 
-	CDiffusedVertex* pVertices = new CDiffusedVertex[m_nVertices];
+	CTexturedVertex* pVertices = new CTexturedVertex[m_nVertices];
 
 	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
 	
 	for (int i = 0, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2)
 	{
+
 		for (int x = xStart; x < (xStart + m_nWidth); x += 2, i++)
 		{
+			float tempheight = OnGetHeight(x, z);
 			if (i >= 25) break;
 			//정점의 높이와 색상을 높이 맵으로부터 구한다.
-			float tempheight = OnGetHeight(x, z);
-			XMFLOAT3 m_Scale = XMFLOAT3(5.0f, 5.0f, 2.0f);
-			pVertices[i].m_xmf3Position = XMFLOAT3(x , tempheight , z );
-			pVertices[i].m_xmf4Diffuse = m_xmf4Color;
 			
-			if (tempheight < fMinHeight) tempheight = fMinHeight ;
-			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
+			XMFLOAT3 m_Scale = XMFLOAT3(10.0f, 5.0f, 10.0f);
+			pVertices[i].m_xmf3Position = XMFLOAT3(x*m_Scale.x,10,z*m_Scale.z );
+			//pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x) / float(10.0f), float(z) / float(10.0f));
+			
+			//pVertices[i].m_xmf2TexCoord=
+			//pVertices[i].m_xmf4Diffuse = m_xmf4Color;
+			
+			/*if (tempheight < fMinHeight) tempheight = fMinHeight ;
+			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;*/
 		}
 	}
 
@@ -432,23 +437,9 @@ CTerrainMesh::~CTerrainMesh()
 
 float CTerrainMesh::OnGetHeight(float x, float z)
 {
-	if (x<200 && x>100)
-	{
-		return cos(45);
-	}
-	else if (x <= 100)
-	{
-		return 0.1f * ((z / 10) * sinf(0.1f * 100) + (100 / 10) * cosf(0.01f * z));
-	}
-	else if(x>=900)
-	{
-		
-		return 0.1f * ((z / 10) * sinf(0.1f * 900) + (900 / 10) * cosf(0.01f * z));
-	}
-	else
-	{
-		return 0.1f * ((z / 10) * sinf(0.1f * x) + (x / 10) * cosf(0.01f * z));
-	}
+	
+	return 0.7f * (z * sinf(0.1f * x*10)) ;
+	
 }
 
 CTerrainWayMesh::CTerrainWayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int WidthBlock_Count, int DepthBlock_Count)

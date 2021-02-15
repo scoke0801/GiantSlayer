@@ -15,6 +15,7 @@ enum class ShaderTypes
 	Diffused,
 	Textured,
 	Billboard,
+	Terrain,
 	Count
 };
 

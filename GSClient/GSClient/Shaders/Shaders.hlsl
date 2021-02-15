@@ -66,7 +66,7 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 struct VS_TEXTURE_IN
 {
 	float3 position : POSITION;
-	float2 uv		: TEXCORD;
+	float2 uv		: TEXCOORD;
 };
 struct VS_TEXTURE_OUT
 {
@@ -126,6 +126,20 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 	return cColor; 
 }
 
+struct VS_TERRAIN_INPUT
+{
+    float3 position : POSITION;
+    float4 color : COLOR;
+    float2 uv0 : TEXCOORD0;
+};
+
+struct VS_TERRAIN_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+    float2 uv0 : TEXCOORD0;
+};
+
 ///////////////////////////////////////////
 // VS
 struct VS_TERRAIN_TESSELLATION_OUTPUT
@@ -133,21 +147,21 @@ struct VS_TERRAIN_TESSELLATION_OUTPUT
 	float3 position : POSITION;
 	float3 positionW : POSITION1;
 	float4 color : COLOR;
-	float2 uv0 : TEXCOORD0;
-	float2 uv1 : TEXCOORD1;
+    float2 uv0 : TEXCOORD0;
+
 };
 
-VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_INPUT input)
+VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
 {
 	VS_TERRAIN_TESSELLATION_OUTPUT output;
 
 	output.position = input.position;
 	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
 	output.color = input.color;
-
+    output.uv0 = input.uv0;
+    
 	return(output);
 }
-
 
 
 struct HS_TERRAIN_TESSELLATION_CONSTANT
@@ -160,12 +174,14 @@ struct HS_TERRAIN_TESSELLATION_OUTPUT
 {
 	float3 position : POSITION;
 	float4 color : COLOR;
+    float2 uv0 : TEXCOORD0;
 };
 
 struct DS_TERRAIN_TESSELLATION_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float4 color : COLOR;
+    float2 uv0 : TEXCOORD0;
 	float4 tessellation : TEXCOORD2;
 };
 
@@ -212,7 +228,9 @@ HS_TERRAIN_TESSELLATION_OUTPUT HSTerrainTessellation(InputPatch<VS_TERRAIN_TESSE
 
 	output.position = input[i].position;
 	output.color = input[i].color;
-
+    output.uv0 = input[i].uv0;
+   
+	
 	return(output);
 }
 
@@ -250,7 +268,8 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 	BernsteinCoeffcient5x5(uv.y, vB);
 
 	output.color = lerp(lerp(patch[0].color, patch[4].color, uv.x), lerp(patch[20].color, patch[24].color, uv.x), uv.y);
-
+    output.uv0 = lerp(lerp(patch[0].uv0, patch[4].uv0, uv.x), lerp(patch[20].uv0, patch[24].uv0, uv.x), uv.y);
+   
 	float3 position = CubicBezierSum5x5(patch, uB, vB);
 	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
 	output.position = mul(float4(position, 1.0f), mtxWorldViewProjection);
@@ -265,15 +284,28 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	if (input.tessellation.w <= 5.0f) cColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
-	else if (input.tessellation.w <= 10.0f) cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	else if (input.tessellation.w <= 20.0f) cColor = float4(0.0f, 0.0f, 1.0f, 1.0f);
-	else if (input.tessellation.w <= 30.0f) cColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
-	else if (input.tessellation.w <= 40.0f) cColor = float4(1.0f, 1.0f, 0.0f, 1.0f);
-	else if (input.tessellation.w <= 50.0f) cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	else if (input.tessellation.w <= 55.0f) cColor = float4(0.2f, 0.2f, 0.72f, 1.0f);
-	else if (input.tessellation.w <= 60.0f) cColor = float4(0.5f, 0.75f, 0.75f, 1.0f);
-	else cColor = float4(0.87f, 0.17f, 1.0f, 1.0f);
-
-	return (input.color);
+	//if (input.tessellation.w <= 5.0f) cColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	//else if (input.tessellation.w <= 10.0f) cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	//else if (input.tessellation.w <= 20.0f) cColor = float4(0.0f, 0.0f, 1.0f, 1.0f);
+	//else if (input.tessellation.w <= 30.0f) cColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
+	//else if (input.tessellation.w <= 40.0f) cColor = float4(1.0f, 1.0f, 0.0f, 1.0f);
+	//else if (input.tessellation.w <= 50.0f) cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	//else if (input.tessellation.w <= 55.0f) cColor = float4(0.2f, 0.2f, 0.72f, 1.0f);
+	//else if (input.tessellation.w <= 60.0f) cColor = float4(0.5f, 0.75f, 0.75f, 1.0f);
+	//else cColor = float4(0.87f, 0.17f, 1.0f, 1.0f);
+    if (gnTexturesMask & 0x01)
+    {
+        cColor = gtxtTerrain.Sample(gssClamp, input.uv0);
+    }
+	
+    //if (gnTexturesMask & 0x02)
+    //{
+    //    cColor = gSkyBox_Front.Sample(gssClamp, input.uv0);
+    //}
+	else
+    {
+        cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
+		
+    }
+	return (cColor);
 }

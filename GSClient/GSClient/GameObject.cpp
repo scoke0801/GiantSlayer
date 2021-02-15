@@ -214,8 +214,6 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	int cxQuadsPerBlock = nBlockWidth - 1;
 	int czQuadsPerBlock = nBlockLength - 1;
 	
-	//m_pHeightMapImage = new CHeightMapImage(pFileName, nWidth, nLength, xmf3Scale);
-
 	long cxBlocks = (m_nWidth - 1) / cxQuadsPerBlock;	// 32
 	long czBlocks = (m_nLength - 1) / czQuadsPerBlock;	// 32
 
@@ -240,16 +238,39 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 
 			pTerrainMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList, xStart, zStart,
 				nBlockWidth, nBlockLength);
+
+			/*m_ppObjects[x + (z * cxBlocks)]->SetTextureIndex(0x01);
+			m_ppObjects[x + (z * cxBlocks)]->SetMesh(pTerrainMesh);
+			m_ppObjects[x + (z * cxBlocks)]->SetShader(pShader);*/
+
 		}
 	}
+
+	m_ppObjects[0]->SetTextureIndex(0x01);
 	m_ppObjects[0]->SetMesh(pTerrainMesh);
 	m_ppObjects[0]->SetShader(pShader);
 
-	//CTerrainTessellationShader* pShader = new CTerrainTessellationShader();
-	//pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
-	////CTerrainShader *pShader = new CTerrainShader();
-	////pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	//SetShader(pShader);
+	m_ppObjects[1]->SetPosition(XMFLOAT3(80.0f, 0.0f, 0.0f));
+	m_ppObjects[1]->SetMesh(pTerrainMesh);
+	m_ppObjects[1]->SetShader(pShader);
+
+	m_ppObjects[2]->SetPosition(XMFLOAT3(160.0f, 0.0f, 0.0f));
+	m_ppObjects[2]->SetMesh(pTerrainMesh);
+	m_ppObjects[2]->SetShader(pShader);
+
+	m_ppObjects[3]->SetPosition(XMFLOAT3(80.0f, 0.0f, 80.0f));
+	m_ppObjects[3]->SetMesh(pTerrainMesh);
+	m_ppObjects[3]->SetShader(pShader);
+
+	m_ppObjects[4]->SetPosition(XMFLOAT3(160.0f, 0.0f, 80.0f));
+	m_ppObjects[4]->SetMesh(pTerrainMesh);
+	m_ppObjects[4]->SetShader(pShader);
+	
+	m_ppObjects[5]->SetPosition(XMFLOAT3(0.0f, 0.0f, 80.0f));
+	m_ppObjects[5]->SetMesh(pTerrainMesh);
+	m_ppObjects[5]->SetShader(pShader);
+
+	
 }
 
 CTerrain::~CTerrain()
