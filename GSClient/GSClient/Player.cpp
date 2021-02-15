@@ -36,8 +36,7 @@ void CPlayer::Update(double fTimeElapsed)
 }
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)
-{
-
+{ 
 	bool isMoving = IsMoving();
 	if (!isMoving)
 	{

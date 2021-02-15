@@ -46,7 +46,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	for (int i = 0; i < nCameras; ++i)
 	{
 		CCamera* pCamera = new CCamera;
-		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 5000.0f);
+		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 10000.0f);
 		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
 		pCamera->SetScissorRect(0, 0, width, height);
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -162,7 +162,7 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 { 
-	m_nObjects = 10;
+	m_nObjects = 15;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	for (int i = 0; i < m_nObjects; ++i)
 	{
@@ -194,54 +194,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ppObjects[0]->SetPosition({ 0,  0,  0 });
 	m_ppObjects[0]->SetTextureIndex(0x01);
 	m_ppObjects[0]->SetShader(pShader);
-
-	//m_ppObjects[1]->SetMesh(pPlaneMeshTex);
-	//m_ppObjects[1]->SetPosition({ 500,  0,  0 });
-	//m_ppObjects[1]->SetTextureIndex(0x01);
-	//m_ppObjects[1]->SetShader(pShader);
-	//
-	//m_ppObjects[2]->SetMesh(pPlaneMeshTex);
-	//m_ppObjects[2]->SetPosition({ 0,  0,  500 });
-	//m_ppObjects[2]->SetTextureIndex(0x01);
-	//m_ppObjects[2]->SetShader(pShader);
-	//
-	//m_ppObjects[3]->SetMesh(pPlaneMeshTex);
-	//m_ppObjects[3]->SetPosition({ 500,  0,  500 });
-	//m_ppObjects[3]->SetTextureIndex(0x01);
-	//m_ppObjects[3]->SetShader(pShader);
-	//
-	////// 아래
-	//m_ppObjects[4]->SetMesh(pEdgeMeshTex);
-	//m_ppObjects[4]->SetPosition({ -800,  -20,  0 });
-	//m_ppObjects[4]->Rotate(XMFLOAT3(0, 1, 0), 90);
-	//m_ppObjects[4]->Rotate(XMFLOAT3(0, 0, 1), 30);
-	//m_ppObjects[4]->SetTextureIndex(0x01);
-	//m_ppObjects[4]->SetShader(pShader);
-	//
-	//// 왼쪽
-	//m_ppObjects[6]->SetMesh(pEdgeMeshTex);
-	//m_ppObjects[6]->SetPosition({ 0,  -20,  1700 });
-	//m_ppObjects[6]->Rotate(XMFLOAT3(0, 1, 0), 180);
-	//m_ppObjects[6]->Rotate(XMFLOAT3(0, 0, 1), 30);
-	//m_ppObjects[6]->SetTextureIndex(0x01);
-	//m_ppObjects[6]->SetShader(pShader);
-	//
-	////// 오른쪽
-	//m_ppObjects[7]->SetMesh(pEdgeMeshTex);
-	//m_ppObjects[7]->SetPosition({ 1810,  470,  1700 });
-	//m_ppObjects[7]->Rotate(XMFLOAT3(0, 1, 0), 180);
-	//m_ppObjects[7]->Rotate(XMFLOAT3(0, 0, 1), -30);
-	//m_ppObjects[7]->SetTextureIndex(0x01);
-	//m_ppObjects[7]->SetShader(pShader);
-	//
-	////// 모서리 위
-	//m_ppObjects[8]->SetMesh(pEdgeMeshTex);
-	//m_ppObjects[8]->SetPosition({ -1200,  470,  1820 });
-	//m_ppObjects[8]->Rotate(XMFLOAT3(0, 1, 0), 90);
-	//m_ppObjects[8]->Rotate(XMFLOAT3(0, 0, 1), -30);
-	//m_ppObjects[8]->SetTextureIndex(0x01);
-	//m_ppObjects[8]->SetShader(pShader);
-
+	  
 #pragma endregion   
 	pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
@@ -249,43 +202,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	
-	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pBridge->SetShader(pShader);
-	pBridge->SetObjectName(OBJ_NAME::Bridge);
-
-	m_ppObjects[6] = pBridge;
-	m_ppObjects[6]->SetPosition({ 500,  01,  1500});
-
-	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pBridge->SetShader(pShader);
-	pBridge->SetObjectName(OBJ_NAME::Bridge);
-
-	m_ppObjects[7] = pBridge;
-	m_ppObjects[7]->SetPosition({ 500,  01,  2500 }); 
-
-	//CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, 2000, 1000, 0);
-	CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, 700, 1000, 0);
-	pWall->SetShader(pShader);
-	pWall->SetObjectName(OBJ_NAME::Wall);
-	pWall->SetTextureIndex(0x200);
-
-	m_ppObjects[8] = pWall;
-	m_ppObjects[8]->SetPosition({ 350,  500,  500 });
-	 
-
-	//m_ppObjects[9] = pWall;
-	//m_ppObjects[9]->SetPosition({ 3000,  500,  500 });
-	//pShader = new CShader();
-	//pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSColor");
-	//pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSColor");
-	//pShader->CreateInputLayout(ShaderTypes::Diffused);
-	//pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	//
-	//CPlaneMeshDiffused* planeDiffusedMesh = new CPlaneMeshDiffused(pd3dDevice, pd3dCommandList,
-	//	1.8f, 1.8f, 0.0f, XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f), true);
-	//m_ppObjects[9]->SetShader(pShader);
-	//m_ppObjects[9]->SetMesh(planeDiffusedMesh);
-
+	int index = BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 6, pShader);
+	index = BuildDoorWall(pd3dDevice, pd3dCommandList, index, pShader);
+	  
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player->SetShader(pShader);
 	m_Player->SetObjectName(OBJ_NAME::Player );
@@ -327,9 +246,11 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	
 	auto wallTex = make_unique<CTexture>();
 	//MakeTexture(pd3dDevice, pd3dCommandList, wallTex.get(), "Wall", L"resources/OBJ/StoneWall.dds");
-	//MakeTexture(pd3dDevice, pd3dCommandList, wallTex.get(), "Wall", L"resources/OBJ/WallTest2.dds");
+	MakeTexture(pd3dDevice, pd3dCommandList, wallTex.get(), "Wall", L"resources/OBJ/WallTest2.dds"); 
 
-	MakeTexture(pd3dDevice, pd3dCommandList, wallTex.get(), "Wall", L"resources/OBJ/Door.dds");
+	auto doorTex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, doorTex.get(), "Door", L"resources/OBJ/Door2.dds");
+
 	m_Textures[terrainTex->m_Name] = std::move(terrainTex);
 	m_Textures[SkyTex_Back->m_Name] = std::move(SkyTex_Back);
 	m_Textures[SkyTex_Front->m_Name] = std::move(SkyTex_Front);
@@ -340,6 +261,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Textures[boxTex->m_Name] = std::move(boxTex); 
 	m_Textures[woodTex->m_Name] = std::move(woodTex); 
 	m_Textures[wallTex->m_Name] = std::move(wallTex);
+	m_Textures[doorTex->m_Name] = std::move(doorTex);
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -368,6 +290,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	auto boxTex = m_Textures["Box"]->m_pd3dResource;
 	auto woodTex = m_Textures["Wood"]->m_pd3dResource;
 	auto wallTex = m_Textures["Wall"]->m_pd3dResource;
+	auto doorTex = m_Textures["Door"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -412,6 +335,10 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = wallTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(wallTex, &srvDesc, hDescriptor);
+
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = doorTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(doorTex, &srvDesc, hDescriptor);
 }
 
 void CSceneJH::ReleaseObjects()
@@ -474,6 +401,8 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
 	{
+		if (j == 9)
+			int stop = 3;
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
@@ -700,4 +629,69 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 
 	return(pd3dGraphicsRootSignature);
+}
+
+int CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature,
+	int startIndex, CShader* pShader)
+{
+	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+
+	m_ppObjects[startIndex] = pBridge;
+	m_ppObjects[startIndex++]->SetPosition({ 500,  01,  1500 });
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge); 
+
+	m_ppObjects[startIndex] = pBridge;
+	m_ppObjects[startIndex++]->SetPosition({ 500,  01,  2500 });
+
+	return startIndex;
+}
+
+int CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList,
+	int startIndex, CShader* pShader)
+{
+	CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, 2000, 1000, 500);
+
+	pWall->SetShader(pShader);
+	pWall->SetObjectName(OBJ_NAME::Wall);
+	pWall->SetTextureIndex(0x200);
+
+	m_ppObjects[startIndex] = pWall;
+	m_ppObjects[startIndex++]->SetPosition({ 1000,  500,  500 });
+
+	pWall = new CWall(pd3dDevice, pd3dCommandList, 2000, 1000, 500);
+
+	pWall->SetShader(pShader);
+	pWall->SetObjectName(OBJ_NAME::Wall);
+	pWall->SetTextureIndex(0x200);
+
+	m_ppObjects[startIndex] = pWall;
+	m_ppObjects[startIndex++]->SetPosition({ 3700,  500,  500 });
+
+	CDoor* pDoorLeft = new CDoor(pd3dDevice, pd3dCommandList, 350, 1000, 100, true);
+	pDoorLeft->SetShader(pShader);
+	pDoorLeft->SetObjectName(OBJ_NAME::Wall);
+	pDoorLeft->SetTextureIndex(0x400);
+
+	m_ppObjects[startIndex] = pDoorLeft;
+	m_ppObjects[startIndex++]->SetPosition({ 2175,  500,  501 });
+	//m_ppObjects[startIndex++]->SetPosition({ 175,  500,  500 });
+
+	CDoor* pDoorRight = new CDoor(pd3dDevice, pd3dCommandList, 350, 1000, 100, false);
+	pDoorRight->SetShader(pShader);
+	pDoorRight->SetObjectName(OBJ_NAME::Wall);
+	pDoorRight->SetTextureIndex(0x400); 
+
+	m_ppObjects[startIndex] = pDoorRight; 
+	//m_ppObjects[startIndex]->Rotate(XMFLOAT3(0, 1, 0), XMConvertToRadians(4000));
+	m_ppObjects[startIndex++]->SetPosition({ 2350 + 175,  500,  501 });
+	//m_ppObjects[startIndex++]->SetPosition({ 525,  500,  500 });
+	return startIndex;
 }

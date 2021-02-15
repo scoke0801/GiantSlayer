@@ -176,11 +176,20 @@ class CCubeMeshTextured : public CMesh
 {
 public:
 	CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f, bool sameBackFace = false);
 	CCubeMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		XMFLOAT3 startPos,
 		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CCubeMeshTextured();
+};
+
+class CDoorMesh : public CMesh
+{
+public:
+	CDoorMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f,
+		bool isLeft = false);
+	virtual ~CDoorMesh();
 };
 
 //////////////////////////////////////////////////////////////////////////////

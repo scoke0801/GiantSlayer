@@ -16,7 +16,8 @@ enum class OBJ_NAME
 	Player = 3, 
 	SkyBox = 10,
 	Bridge = 11,
-	Wall = 12
+	Wall = 12,
+	Door = 13
 };
 
 enum class OBJ_DIRECTION

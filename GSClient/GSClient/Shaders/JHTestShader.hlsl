@@ -28,6 +28,7 @@ Texture2D gSkyBox_Bottom : register(t6);
 Texture2D gtxtBox : register(t7);
 Texture2D gtxtWood : register(t8);
 Texture2D gtxtWall : register(t9);
+Texture2D gtxtDoor : register(t10);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
