@@ -655,38 +655,8 @@ int CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	int startIndex, CShader* pShader)
 {
-	CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, 2000, 1000, 500);
-
-	pWall->SetShader(pShader);
-	pWall->SetObjectName(OBJ_NAME::Wall);
-	pWall->SetTextureIndex(0x200);
-
-	m_ppObjects[startIndex] = pWall;
-	m_ppObjects[startIndex++]->SetPosition({ 1000,  500,  500 });
-
-	pWall = new CWall(pd3dDevice, pd3dCommandList, 2000, 1000, 500);
-
-	pWall->SetShader(pShader);
-	pWall->SetObjectName(OBJ_NAME::Wall);
-	pWall->SetTextureIndex(0x200);
-
-	m_ppObjects[startIndex] = pWall;
-	m_ppObjects[startIndex++]->SetPosition({ 3700,  500,  500 });
-
-	CDoor* pDoorLeft = new CDoor(pd3dDevice, pd3dCommandList, 350, 1000, 100, true);
-	pDoorLeft->SetShader(pShader);
-	pDoorLeft->SetObjectName(OBJ_NAME::Wall);
-	pDoorLeft->SetTextureIndex(0x400);
-
-	m_ppObjects[startIndex] = pDoorLeft;
-	m_ppObjects[startIndex++]->SetPosition({ 2000,  500,  500 });
-
-	CDoor* pDoorRight = new CDoor(pd3dDevice, pd3dCommandList, 350, 1000, 100, false);
-	pDoorRight->SetShader(pShader);
-	pDoorRight->SetObjectName(OBJ_NAME::Wall);
-	pDoorRight->SetTextureIndex(0x400); 
-	
-	m_ppObjects[startIndex] = pDoorRight;  
-	m_ppObjects[startIndex++]->SetPosition({ 2700,  500,  500 }); 
+	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5000, 1000, 500, pShader);
+	m_ppObjects[startIndex++] = pDoorWall;
+	 
 	return startIndex;
 }

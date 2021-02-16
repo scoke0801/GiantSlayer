@@ -26,3 +26,20 @@ public:
     virtual void Update(double fTimeElapsed);
 };
  
+class CDoorWall : public CGameObject
+{
+private:
+    CDoor*          m_LeftDoor;
+    CDoor*          m_RightDoor;
+    vector<CWall*>  m_Walls;
+
+public:
+    CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+        float width, float height, float depth,
+        CShader* pShader);
+    ~CDoorWall();
+
+public:
+    virtual void Update(double fTimeElapsed) override;
+    virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
+};
