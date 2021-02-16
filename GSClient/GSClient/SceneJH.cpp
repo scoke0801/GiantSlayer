@@ -35,6 +35,7 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
 	BuildLights(pd3dDevice, pd3dCommandList);
 	BuildObjects(pd3dDevice, pd3dCommandList);
+	BuildUIs(pd3dDevice, pd3dCommandList);
 }
 
 void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
@@ -212,7 +213,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
 
-	m_CurrentCamera->SetTarget(m_Player);
+	m_CurrentCamera->SetTarget(m_Player); 
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -250,6 +251,12 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	auto doorTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, doorTex.get(), "Door", L"resources/OBJ/Door3.dds");
+	
+	auto playerInfoTex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, playerInfoTex.get(), "PlayerInfo", L"resources/UI/[Test]PlayerInfo.dds");
+	
+	auto minimapTex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, minimapTex.get(), "Minimap", L"resources/UI/Minimap.dds");
 
 	m_Textures[terrainTex->m_Name] = std::move(terrainTex);
 	m_Textures[SkyTex_Back->m_Name] = std::move(SkyTex_Back);
@@ -262,6 +269,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Textures[woodTex->m_Name] = std::move(woodTex); 
 	m_Textures[wallTex->m_Name] = std::move(wallTex);
 	m_Textures[doorTex->m_Name] = std::move(doorTex);
+	m_Textures[playerInfoTex->m_Name] = std::move(playerInfoTex);	
+	m_Textures[minimapTex->m_Name] = std::move(minimapTex);
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -291,6 +300,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	auto woodTex = m_Textures["Wood"]->m_pd3dResource;
 	auto wallTex = m_Textures["Wall"]->m_pd3dResource;
 	auto doorTex = m_Textures["Door"]->m_pd3dResource;
+	auto playerInfoTex = m_Textures["PlayerInfo"]->m_pd3dResource;
+	auto minimapTex = m_Textures["Minimap"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -339,6 +350,14 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = doorTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(doorTex, &srvDesc, hDescriptor);
+	
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = playerInfoTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(playerInfoTex, &srvDesc, hDescriptor);
+
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = minimapTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(minimapTex, &srvDesc, hDescriptor);
 }
 
 void CSceneJH::ReleaseObjects()
@@ -405,6 +424,14 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 			int stop = 3;
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+}
+
+void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	for (UI* pUI : m_UIs)
+	{
+		pUI->Draw(pd3dCommandList, nullptr);
 	}
 }
 
@@ -659,4 +686,33 @@ int CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	m_ppObjects[startIndex++] = pDoorWall;
 	 
 	return startIndex;
+}
+
+int CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CShader* pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VS_UI_Textured");
+	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PS_UI_Textured");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+
+	UI* pUI = new UI(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.0f);
+	pUI->SetPosition({ -0.75, 0.75,  0 });
+	pUI->SetTextureIndex(0x01);
+	pUI->SetShader(pShader);
+	m_UIs.push_back(pUI);
+
+	//pShader = new CShader();
+	//pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VS_UI_Textured");
+	//pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PS_UI_Textured");
+	//pShader->CreateInputLayout(ShaderTypes::Textured);
+	//pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.3f);
+	pUI->SetPosition({ 0.7f, -0.7f,  0 });
+	pUI->SetTextureIndex(0x04);
+	pUI->SetShader(pShader);
+	m_UIs.push_back(pUI);
+	 
+	return 0;
 }

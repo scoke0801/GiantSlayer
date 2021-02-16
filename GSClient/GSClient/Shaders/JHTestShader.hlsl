@@ -30,6 +30,9 @@ Texture2D gtxtWood : register(t8);
 Texture2D gtxtWall : register(t9);
 Texture2D gtxtDoor : register(t10);
 
+Texture2D gtxtPlayerInfo : register(t11);
+Texture2D gtxtMinimap : register(t12);
+
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
 {
@@ -198,14 +201,11 @@ void GSBillboard(point VS_BILLBOARD_INPUT input[1], inout TriangleStream<GS_BILL
 
 		outStream.Append(output);
 	}
-}
-Texture2D gtxtPlayerInfoTest : register(t111);
-Texture2D gtxtTextBGTest : register(t112);
-Texture2D gtxtMinimapBGTest : register(t113);
+} 
 
 float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 {
-	float4 cColor = gtxtPlayerInfoTest.Sample(gssClamp, input.uv);
+	float4 cColor = gtxtPlayerInfo.Sample(gssClamp, input.uv);
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
 
 	return(cColor);
@@ -236,16 +236,43 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtPlayerInfoTest.Sample(gssWrap, input.uv);
+		cColor = gtxtPlayerInfo.Sample(gssWrap, input.uv);
 		
 	}
 	if (gnTexturesMask & 0x02)
 	{
-		cColor = gtxtTextBGTest.Sample(gssWrap, input.uv); 
+		//cColor = gtxtTextBGTest.Sample(gssWrap, input.uv); 
 	}
 	if (gnTexturesMask & 0x04)
 	{
-		cColor = gtxtMinimapBGTest.Sample(gssWrap, input.uv);
+		cColor = gtxtMinimap.Sample(gssWrap, input.uv);
 	}
 	return cColor;
 }
+/////////////////////////////////////////////////////
+// Minimap
+
+struct VS_MIN
+{
+	float3 position : POSITION;
+	float2 uv		: TEXCORD;
+};
+struct VS_MOUT
+{
+	float4 position : SV_POSITION;
+	float2 uv	 : TEXCOORD;
+};
+//
+//VS_MOUT VSMinimap(VS_MIN input)
+//{
+//	VS_MOUT outRes;
+//	outRes.position = float4(input.position, 1.0f);
+//	outRes.uv = input.uv;
+//	return outRes;
+//}
+//
+//float4 PSMinimap(VS_MOUT input) : SV_TARGET
+//{
+//	float4 cColor; 
+//	return cColor = gtxtMiniMap.Sample(gssWrap, input.uv); 
+//}

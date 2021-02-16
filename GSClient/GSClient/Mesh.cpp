@@ -587,8 +587,7 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x)/float(WidthBlock_Count), float(z)/float(DepthBlock_Count));
 			 
 			if (tempheight < fMinHeight) tempheight = fMinHeight ;
-			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
-
+			if (tempheight > fMaxHeight)  tempheight = fMaxHeight; 
 		}
 	}
 
@@ -601,7 +600,6 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
 	delete[] pVertices;
-
 
 	m_nIndices = ((m_nWidth * 2) * (m_nDepth - 1)) + ((m_nDepth - 1) - 1);
 	UINT* pnIndices = new UINT[m_nIndices];

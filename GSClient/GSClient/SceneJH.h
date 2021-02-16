@@ -6,6 +6,7 @@ class CShader;
 class CGameObject;
 class CCamera;
 class CPlayer;
+class UI;
 
 class CSceneJH : public CScene
 {
@@ -14,7 +15,7 @@ protected:
 	int							m_nObjects = 0;
 
 	CPlayer*					m_Player = nullptr;
-
+	vector<UI*>					m_UIs;
 	CSkyBox*					m_Skybox;
 
 	ID3D12RootSignature*		m_pd3dGraphicsRootSignature = NULL;
@@ -61,6 +62,7 @@ public:
 	void AnimateObjects(float fTimeElapsed);
 
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;	
+	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
@@ -83,4 +85,5 @@ private:
 	int BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
 		int startIndex, CShader* pShader);
 	int BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int startIndex, CShader* pShader);
+	int BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
