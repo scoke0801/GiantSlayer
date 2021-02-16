@@ -22,10 +22,11 @@ CDoor::CDoor(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 	:m_IsLeft(isLeft)
 {
 	m_Name = OBJ_NAME::Door;
-	CDoorMesh* pCubeMeshTex = new CDoorMesh(pd3dDevice, pd3dCommandList,
+	CDoorMeshTest* pCubeMeshTex = new CDoorMeshTest(pd3dDevice, pd3dCommandList,
 		width, height, depth, isLeft);
 
 	SetMesh(pCubeMeshTex);
+	if (!m_IsLeft) Rotate(XMFLOAT3(0, 1, 0), 180.0);
 }
 
 CDoor::~CDoor()
@@ -33,13 +34,37 @@ CDoor::~CDoor()
 }
 
 void CDoor::Update(double fTimeElapsed)
-{
+{ 
 	if (m_IsLeft)
 	{
-		Rotate(XMFLOAT3(0, 1, 0), -50 * fTimeElapsed);
+		float rotateAngle = 50;
+		if (!m_IsOpening) rotateAngle *= -1;
+		Rotate(XMFLOAT3(0, 1, 0), rotateAngle * fTimeElapsed);
+
+		m_fAngle += rotateAngle * fTimeElapsed;
+		if (m_fAngle > 89.0f)
+		{
+			m_IsOpening = false;
+		}
+		else if (m_fAngle < -89.0f)
+		{
+			m_IsOpening = true;
+		}
 	}
 	else
 	{
-		Rotate(XMFLOAT3(0, 1, 0), 50 * fTimeElapsed);
+		float rotateAngle = -50;
+		if (!m_IsOpening) rotateAngle *= -1;
+		Rotate(XMFLOAT3(0, 1, 0), rotateAngle * fTimeElapsed);
+
+		m_fAngle += rotateAngle * fTimeElapsed;
+		if (m_fAngle > 89.0f)
+		{
+			m_IsOpening = true;
+		}
+		else if (m_fAngle < -89.0f)
+		{
+			m_IsOpening = false;
+		}
 	}
 }

@@ -61,6 +61,8 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	}	
 	XMFLOAT3 look = GetLook();// m_Camera->GetLook3f(); 
 	XMFLOAT3 right = GetRight();//m_Camera->GetRight3f();
+	look = Vector3::Normalize(look);
+	right = Vector3::Normalize(right);
 	switch (direction)
 	{
 	case OBJ_DIRECTION::Front:

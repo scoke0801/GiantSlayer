@@ -249,7 +249,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	MakeTexture(pd3dDevice, pd3dCommandList, wallTex.get(), "Wall", L"resources/OBJ/WallTest2.dds"); 
 
 	auto doorTex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, doorTex.get(), "Door", L"resources/OBJ/Door2.dds");
+	MakeTexture(pd3dDevice, pd3dCommandList, doorTex.get(), "Door", L"resources/OBJ/Door3.dds");
 
 	m_Textures[terrainTex->m_Name] = std::move(terrainTex);
 	m_Textures[SkyTex_Back->m_Name] = std::move(SkyTex_Back);
@@ -501,12 +501,10 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		// Make each pixel correspond to a quarter of a degree.
 		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
 		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
-		 
-		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30 );
-		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 100);
-		 
-		if(m_Player->IsMoving()) 
-			m_Player->Rotate(XMFLOAT3(0, 1, 0), dx*100); 
+
+		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
+		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+		if(m_Player->IsMoving()) m_Player->Rotate(XMFLOAT3(0, 1, 0), dx*150); 
 	}
 
 	if ((btnState & MK_RBUTTON) != 0)
@@ -681,17 +679,14 @@ int CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pDoorLeft->SetTextureIndex(0x400);
 
 	m_ppObjects[startIndex] = pDoorLeft;
-	m_ppObjects[startIndex++]->SetPosition({ 2175,  500,  501 });
-	//m_ppObjects[startIndex++]->SetPosition({ 175,  500,  500 });
+	m_ppObjects[startIndex++]->SetPosition({ 2000,  500,  500 });
 
 	CDoor* pDoorRight = new CDoor(pd3dDevice, pd3dCommandList, 350, 1000, 100, false);
 	pDoorRight->SetShader(pShader);
 	pDoorRight->SetObjectName(OBJ_NAME::Wall);
 	pDoorRight->SetTextureIndex(0x400); 
-
-	m_ppObjects[startIndex] = pDoorRight; 
-	//m_ppObjects[startIndex]->Rotate(XMFLOAT3(0, 1, 0), XMConvertToRadians(4000));
-	m_ppObjects[startIndex++]->SetPosition({ 2350 + 175,  500,  501 });
-	//m_ppObjects[startIndex++]->SetPosition({ 525,  500,  500 });
+	
+	m_ppObjects[startIndex] = pDoorRight;  
+	m_ppObjects[startIndex++]->SetPosition({ 2700,  500,  500 }); 
 	return startIndex;
 }

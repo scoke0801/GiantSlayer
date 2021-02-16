@@ -15,6 +15,8 @@ class CDoor : public CGameObject
 private:
     bool m_IsLeft;
 
+    float m_fAngle = 0.0f;
+    float m_IsOpening = true;
 public:
     CDoor(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
         float width, float height, float depth, bool isLeft = true);
