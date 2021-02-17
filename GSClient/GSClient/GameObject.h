@@ -57,15 +57,12 @@ protected:
 	 
 	OBJ_NAME			m_Name;
 
+	CCamera*			m_Camera = nullptr;
+
 private:
 	ID3D12Resource*		m_pd3dcbGameObject = NULL;
 	GAMEOBJECT_INFO*	m_pcbMappedGameObjInfo = NULL;
-	 
-	UINT		m_nTextureIndex = 0x00;
-	 
-//CMaterial*	m_Material = nullptr;
-//int			m_MaterialParameterIndex = 2;
- 
+
 public:
 	CGameObject();
 	virtual ~CGameObject();
