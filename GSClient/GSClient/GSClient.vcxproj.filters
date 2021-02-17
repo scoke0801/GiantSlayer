@@ -96,6 +96,12 @@
     <ClCompile Include="EnemyState.cpp">
       <Filter>State</Filter>
     </ClCompile>
+    <ClCompile Include="FbxSceneContext.cpp">
+      <Filter>FBXLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="FBXLoader.cpp">
+      <Filter>FBXLoader</Filter>
+	</ClCompile>
     <ClCompile Include="GameSceneProto.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -188,6 +194,12 @@
     <ClInclude Include="EnemyState.h">
       <Filter>State</Filter>
     </ClInclude>
+    <ClInclude Include="FbxSceneContext.h">
+      <Filter>FBXLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="FBXLoader.h">
+      <Filter>FBXLoader</Filter>
+	</ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Light</Filter>
     </ClInclude>
@@ -266,6 +278,9 @@
     </Filter>
     <Filter Include="GameObject\Enemy">
       <UniqueIdentifier>{947bf519-a036-4da5-b861-4d8bf7ea6137}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FBXLoader">
+      <UniqueIdentifier>{2a81f814-64ba-44ff-b6d7-50b1454fafe0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Light">
       <UniqueIdentifier>{76bf6ead-7ce3-40d6-9316-71c6d9f7879e}</UniqueIdentifier>

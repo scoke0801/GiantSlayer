@@ -19,6 +19,13 @@ private:
 	int						m_nPlayers = 0;
 
 	POINT					m_LastMousePos;
+
+	// FBX
+	FbxManager*				m_pfbxManager = nullptr;
+	FbxScene*				m_pfbxScene = nullptr;
+	FbxIOSettings*			m_pfbxIOs = nullptr;
+	FbxImporter*			m_pfbxImporter = nullptr;
+
 public:
 	CSceneTH();
 	~CSceneTH();
@@ -45,4 +52,3 @@ public:
 	virtual void OnMouseUp(WPARAM btnState, int x, int y)	override;
 	virtual void OnMouseMove(WPARAM btnState, int x, int y) override; 
 };
-
