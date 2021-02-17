@@ -26,16 +26,22 @@ Texture2D gSkyBox_Left : register(t4);
 Texture2D gSkyBox_Top : register(t5);
 Texture2D gSkyBox_Bottom : register(t6);
 Texture2D gtxtBox : register(t7);
+Texture2D gtxtWood : register(t8);
+Texture2D gtxtWall : register(t9);
+Texture2D gtxtDoor : register(t10);
 
+Texture2D gtxtPlayerInfo : register(t11);
+Texture2D gtxtMinimap : register(t12);
+Texture2D gtxtMap : register(t13); 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
-struct VS_INPUT
+struct VS_COLOR_INPUT
 {
 	float3 position : POSITION;
 	float4 color : COLOR;
 };
 
 //정점 셰이더의 출력(픽셀 셰이더의 입력)을 위한 구조체를 선언한다.
-struct VS_OUTPUT
+struct VS_COLOR_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float4 color : COLOR;
@@ -52,6 +58,28 @@ struct VS_TEXTURE_OUT
 	float2 uv	 : TEXCOORD;
 };
 
+//////////////////////////////////////////////////////////////////////
+//
+VS_COLOR_OUTPUT VSColor(VS_COLOR_INPUT input)
+{
+	input.position.x += gmtxWorld._41;
+	input.position.y += gmtxWorld._42;
+	input.position.z += gmtxWorld._43; 
+
+	VS_COLOR_OUTPUT outRes;
+	outRes.position = float4(input.position, 1.0f);
+	outRes.color = input.color;
+	return outRes;
+}
+
+float4 PSColor(VS_COLOR_OUTPUT input) : SV_TARGET
+{
+	float4 cColor = input.color;
+	return cColor;
+}
+
+//////////////////////////////////////////////////////////////////////
+//
 VS_TEXTURE_OUT VSTextured(VS_TEXTURE_IN input)
 {
 	VS_TEXTURE_OUT outRes;
@@ -101,6 +129,14 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 	{
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
 	}
+	if (gnTexturesMask & 0x100)
+	{
+		cColor = gtxtWood.Sample(gssWrap, input.uv);
+	}	
+	if (gnTexturesMask & 0x200)
+	{
+		cColor = gtxtWall.Sample(gssWrap, input.uv);
+	} 
 	return cColor;
 }
  
@@ -165,14 +201,11 @@ void GSBillboard(point VS_BILLBOARD_INPUT input[1], inout TriangleStream<GS_BILL
 
 		outStream.Append(output);
 	}
-}
-Texture2D gtxtPlayerInfoTest : register(t111);
-Texture2D gtxtTextBGTest : register(t112);
-Texture2D gtxtMinimapBGTest : register(t113);
+} 
 
 float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 {
-	float4 cColor = gtxtPlayerInfoTest.Sample(gssClamp, input.uv);
+	float4 cColor = gtxtPlayerInfo.Sample(gssClamp, input.uv);
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
 
 	return(cColor);
@@ -203,16 +236,54 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtPlayerInfoTest.Sample(gssWrap, input.uv);
-		
+		cColor = gtxtPlayerInfo.Sample(gssWrap, input.uv); 
 	}
 	if (gnTexturesMask & 0x02)
 	{
-		cColor = gtxtTextBGTest.Sample(gssWrap, input.uv); 
+		//cColor = gtxtTextBGTest.Sample(gssWrap, input.uv); 
 	}
 	if (gnTexturesMask & 0x04)
 	{
-		cColor = gtxtMinimapBGTest.Sample(gssWrap, input.uv);
+		cColor = gtxtMinimap.Sample(gssWrap, input.uv);
+	}
+	return cColor;
+}
+/////////////////////////////////////////////////////
+// Minimap
+
+struct VS_MIN
+{
+	float3 position : POSITION;
+	float2 uv		: TEXCORD;
+};
+struct VS_MOUT
+{
+	float4 position : SV_POSITION;
+	float2 uv	 : TEXCOORD;
+};
+
+VS_MOUT VSMinimap(VS_MIN input)
+{
+	input.position.x += gmtxWorld._41;
+	input.position.y += gmtxWorld._42;
+	input.position.z += gmtxWorld._43;
+
+	VS_MOUT outRes;
+	outRes.position = float4(input.position, 1.0f);
+	outRes.uv = input.uv; 
+	return outRes;
+}
+
+float4 PSMinimap(VS_MOUT input) : SV_TARGET
+{
+	float4 cColor;
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtMinimap.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtMap.Sample(gssWrap, input.uv);
 	}
 	return cColor;
 }

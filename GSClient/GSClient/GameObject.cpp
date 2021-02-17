@@ -65,6 +65,32 @@ void CGameObject::Animate(float fTimeElapsed)
 
 }
 
+void CGameObject::Update(double fTimeElapsed)
+{
+	static float MaxVelocityXZ = 120.0f;
+	static float MaxVelocityY = 120.0f;
+	static float Friction = 50.0f;	
+
+	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Gravity, fTimeElapsed, false));
+	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ =  MaxVelocityXZ * fTimeElapsed;
+	if (fLength > MaxVelocityXZ)
+	{
+		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+	}
+	float fMaxVelocityY =  MaxVelocityY * fTimeElapsed;
+	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+	if (fLength > MaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
+
+	Move(m_xmf3Velocity); 
+
+	fLength = Vector3::Length(m_xmf3Velocity);
+	float fDeceleration = ( Friction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
+}
+
 void CGameObject::OnPrepareRender()
 {
 
@@ -93,19 +119,61 @@ void CGameObject::SetPosition(XMFLOAT3 pos)
 	m_xmf4x4World._43 = pos.z;
 }
 
-void CGameObject::SetVelocity(XMFLOAT3 pos)
+void CGameObject::SetVelocity(XMFLOAT3 vel)
 {
-	m_xmf3Velocity = pos;
+	m_xmf3Velocity = vel;
+}
+
+void CGameObject::SetVelocity(OBJ_DIRECTION direction)
+{
+	XMFLOAT3 look = GetLook();
+	XMFLOAT3 right = GetRight(); 
+	
+	switch (direction)
+	{
+	case OBJ_DIRECTION::Front: 
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(look, PLAYER_RUN_VELOCITY));
+		break;
+	case OBJ_DIRECTION::Back:
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(Vector3::Multifly(look, -1), PLAYER_RUN_VELOCITY));
+		break;
+	case OBJ_DIRECTION::Left:
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(Vector3::Multifly(right, -1), PLAYER_RUN_VELOCITY));
+		break;
+	case OBJ_DIRECTION::Right:
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(right, PLAYER_RUN_VELOCITY));
+		break;
+	default:
+		assert("잘못된 방향으로 이동할 수 없어요~");
+		break;
+	} 
+	
 }
 
 void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
 {	
 	
 }
-
-void CGameObject::Move(XMFLOAT3 pos)
+  
+XMFLOAT3 CGameObject::GetRight()const
 {
-	SetPosition(Vector3::Add(GetPosition(), pos));
+	return XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13);
+}
+
+
+XMFLOAT3 CGameObject::GetUp()const
+{
+	return XMFLOAT3(m_xmf4x4World._21, m_xmf4x4World._22, m_xmf4x4World._23);
+}
+
+XMFLOAT3 CGameObject::GetLook()const
+{
+	return XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33);
+}
+
+void CGameObject::Move(XMFLOAT3 shift)
+{
+	SetPosition(Vector3::Add(m_xmf3Position, shift));
 }
 
 void CGameObject::Move()
@@ -113,13 +181,48 @@ void CGameObject::Move()
 	m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
 }
 
-
 void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
 		XMConvertToRadians(fAngle));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
+
+//void CGameObject::Rotate(float x, float y, float z)
+//{
+//	static float pitch, yaw, roll;
+//	if (x != 0.0f)
+//	{
+//		pitch += x;
+//		if (pitch > +89.0f) { x -= (pitch - 89.0f); pitch = +89.0f; }
+//		if (pitch < -89.0f) { x -= (pitch + 89.0f); pitch = -89.0f; }
+//	}
+//	if (y != 0.0f)
+//	{
+//		yaw += y;
+//		if (yaw > 360.0f) yaw -= 360.0f;
+//		if (yaw < 0.0f) yaw += 360.0f;
+//	}
+//	if (z != 0.0f)
+//	{
+//		roll += z;
+//		if (roll > +20.0f) { z -= (roll - 20.0f); roll = +20.0f; }
+//		if (roll < -20.0f) { z -= (roll + 20.0f); roll = -20.0f; }
+//	}
+//	//m_pCamera->Rotate(x, y, z);
+//	if (y != 0.0f)
+//	{
+//		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
+//		XMFLOAT3 xmf3Look = Vector3::TransformNormal(GetLook(), xmmtxRotate);
+//		XMFLOAT3 xmf3Right = Vector3::TransformNormal(GetRight(), xmmtxRotate);
+//	}
+//	XMFLOAT3 xmf3Look = GetLook();
+//	XMFLOAT3 xmf3Right = GetRight();
+//	XMFLOAT3 xmf3Up = GetUp();
+//	m_xmf4x4World._11 = xmf3Right.x; m_xmf4x4World._12 = xmf3Right.y; m_xmf4x4World._13 = xmf3Right.z;
+//	m_xmf4x4World._21 = xmf3Up.x;    m_xmf4x4World._22 = xmf3Up.y;	  m_xmf4x4World._23 = xmf3Up.z;
+//	m_xmf4x4World._31 = xmf3Look.x;  m_xmf4x4World._32 = xmf3Look.y;  m_xmf4x4World._33 = xmf3Look.z;
+//}
 
 CRotatingObject::CRotatingObject()
 {

@@ -8,6 +8,9 @@ struct VS_CB_CAMERA_INFO
 	XMFLOAT4X4 m_xmf4x4Projection;
 	XMFLOAT3   m_xmf3Position;
 };
+
+class CPlayer;
+
 class CCamera
 {
 private:
@@ -17,7 +20,7 @@ private:
 	DirectX::XMFLOAT3			m_xmf3Up = { 0.0f, 1.0f, 0.0f };
 	DirectX::XMFLOAT3			m_xmf3Look = { 0.0f, 0.0f, 1.0f };
 
-	float						m_Speed = 1.0f;
+	float						m_Speed = 15.0f;
 
 	// Cache frustum properties.
 	float						m_NearZ = 0.0f;
@@ -51,12 +54,21 @@ private:	// For Shake
 	float						m_ShakeTime = 0.0f;
 	XMFLOAT3					m_xmf3PrevPos;
 
+private:
+	CPlayer*					m_TargetPlayer = nullptr;
+	XMFLOAT4X4					m_TargetTransform;
+	XMFLOAT3					m_xmf3Offset = { 0.0f, 0.0f, 0.0f };
+	 
+	float						m_TestXAngle = 0.0f;
+	float						m_TestYAngle = 0.0f;
 public:
 	CCamera();
 	~CCamera();
 
 	// for Update Loop
 	void Update(float elapsedTime);
+	void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
+	void UpdateLights(float elapsedTime);
 
 	// Get/Set world camera position.
 	DirectX::XMVECTOR GetPosition()const;
@@ -96,6 +108,7 @@ public:
 	// Define camera space via LookAt parameters.
 	void LookAt(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR target, DirectX::FXMVECTOR worldUp);
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
+	void LookAt(const XMFLOAT3& lookAt, const XMFLOAT3& up);
 
 	// Get View/Proj matrices.
 	DirectX::XMMATRIX GetView()const;
@@ -104,6 +117,14 @@ public:
 	DirectX::XMFLOAT4X4 GetView4x4f()const;
 	DirectX::XMFLOAT4X4 GetProj4x4f()const;
 
+	void SetTarget(CPlayer* target); 
+	CPlayer* GetTarget() const { return m_TargetPlayer; }
+
+	void SetOffset(XMFLOAT3 offset);
+	XMFLOAT3 GetOffset() const { return m_xmf3Offset; }
+
+	void MoveOffset(XMFLOAT3 shift);
+public:
 	// Strafe/Walk the camera a distance d.
 	void Strafe(float d);
 	void Walk(float d);
@@ -112,7 +133,8 @@ public:
 	// Rotate the camera.
 	void Pitch(float angle);
 	void RotateY(float angle);
-
+	void RotateAroundTarget(XMFLOAT3 pxmf3Axis, float fAngle);
+	   
 	// After modifying camera position/orientation, call to rebuild the view matrix.
 	void UpdateViewMatrix();
 
@@ -132,4 +154,9 @@ public:
 
 public:
 	void SetShake(bool isOnShake, float shakeTime, float power);
+
+public:
+	XMFLOAT3 CalcTargetRight();
+	XMFLOAT3 CalcTargetUp();
+	XMFLOAT3 CalcTargetLook();
 };
