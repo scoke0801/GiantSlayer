@@ -26,10 +26,12 @@ CSceneJH::~CSceneJH()
 
 void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
 {
+	BuildMinimapResource(pd3dDevice);
 	LoadTextures(pd3dDevice, pd3dCommandList);
 	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+
 
 	BuildMaterials(pd3dDevice, pd3dCommandList);
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
@@ -61,12 +63,17 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	//m_Cameras[0]->RotateY(XMConvertToRadians(45));
 	m_Cameras[0]->Pitch(XMConvertToRadians(15));
 	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 70.0f, -300.0f));
-	m_Cameras[1]->SetPosition(1000.0f, 10.0f, -150.0f);
+
+	m_Cameras[1]->SetPosition({ 500,  2000, 1500 }); 
+	m_Cameras[1]->Pitch(XMConvertToRadians(90)); 
+	//m_Cameras[1]->SetViewport(0, 0, 200, 200, 0.0f, 1.0f);
+	//m_Cameras[1]->SetScissorRect(0, 0, 200, 200);
 	m_Cameras[2]->SetPosition(-1000.0f, 10.0f, -150.0f);
 	m_Cameras[3]->SetPosition(0.0f, 1010.0f, -150.0f);
 	m_Cameras[4]->SetPosition(0.0f, -1010.0f, -150.0f);
 
 	m_CurrentCamera = m_Cameras[0];
+	m_MinimapCamera = m_Cameras[1];
 }
 
 void CSceneJH::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -209,11 +216,12 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player->SetShader(pShader);
 	m_Player->SetObjectName(OBJ_NAME::Player );
-	m_Player->SetPosition({ 500,  250 + 82.5, 1500 });
+	m_Player->SetPosition({ 500,  250 + 82.5, 1501 });
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
 
 	m_CurrentCamera->SetTarget(m_Player); 
+	m_MinimapCamera->SetTarget(m_Player);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -258,6 +266,9 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	auto minimapTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, minimapTex.get(), "Minimap", L"resources/UI/Minimap.dds");
 
+	auto mapText = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, mapText.get(), "Map", L"resources/UI/[Test]Map.dds");
+
 	m_Textures[terrainTex->m_Name] = std::move(terrainTex);
 	m_Textures[SkyTex_Back->m_Name] = std::move(SkyTex_Back);
 	m_Textures[SkyTex_Front->m_Name] = std::move(SkyTex_Front);
@@ -270,7 +281,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Textures[wallTex->m_Name] = std::move(wallTex);
 	m_Textures[doorTex->m_Name] = std::move(doorTex);
 	m_Textures[playerInfoTex->m_Name] = std::move(playerInfoTex);	
-	m_Textures[minimapTex->m_Name] = std::move(minimapTex);
+	m_Textures[minimapTex->m_Name] = std::move(minimapTex);	
+	m_Textures[mapText->m_Name] = std::move(mapText);
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -302,6 +314,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	auto doorTex = m_Textures["Door"]->m_pd3dResource;
 	auto playerInfoTex = m_Textures["PlayerInfo"]->m_pd3dResource;
 	auto minimapTex = m_Textures["Minimap"]->m_pd3dResource;
+	auto mapText = m_Textures["Map"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -358,6 +371,10 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = minimapTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(minimapTex, &srvDesc, hDescriptor);
+	
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = m_pd3dMinimapTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(m_pd3dMinimapTex, &srvDesc, hDescriptor);
 }
 
 void CSceneJH::ReleaseObjects()
@@ -384,8 +401,20 @@ void CSceneJH::Update(double elapsedTime)
 	}
 
 	m_Player->Update(elapsedTime);
-
+	
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
+	if (m_MinimapCamera) 
+	{
+		XMFLOAT3 pos = m_Player->GetPosition();
+		pos.y = m_MinimapCamera->GetPosition3f().y;
+		pos.z += 1;
+
+		m_MinimapCamera->LookAt(pos,
+			m_Player->GetPosition(), 
+			m_Player->GetUp());
+		m_MinimapCamera->UpdateViewMatrix(); 
+	}
+	
 }
 
 void CSceneJH::AnimateObjects(float fTimeElapsed)
@@ -431,7 +460,7 @@ void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	for (UI* pUI : m_UIs)
 	{
-		pUI->Draw(pd3dCommandList, nullptr);
+		pUI->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 
@@ -445,6 +474,62 @@ void CSceneJH::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
 	if (m_ppObjects[9])
 	{
 		//m_ppObjects[9]->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+}
+
+void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
+{
+	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	if (m_MinimapCamera)
+	{
+		m_MinimapCamera->UpdateShaderVariables(pd3dCommandList, 1);
+		m_MinimapCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	}
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
+	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
+
+	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
+
+	m_Skybox->Draw(pd3dCommandList, m_MinimapCamera);
+
+	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
+	for (int j = 0; j < m_nObjects; j++)
+	{ 
+		if (m_ppObjects[j])
+			m_ppObjects[j]->Draw(pd3dCommandList, m_MinimapCamera);
+	}
+
+	m_Player->Draw(pd3dCommandList, m_MinimapCamera);
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMinimapTex,
+		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
+
+	// Copy the input (back-buffer in this example) to BlurMap0.
+	pd3dCommandList->CopyResource(m_pd3dMinimapTex, pd3dRTV);
+	
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMinimapTex,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON));
+	
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
+		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	
+	if (m_CurrentCamera)
+	{
+		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
+		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 }
 
@@ -531,6 +616,9 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 
 		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
 		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+		 
+		m_MinimapCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), dy * 30);
+		//m_MinimapCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
 		if(m_Player->IsMoving()) m_Player->Rotate(XMFLOAT3(0, 1, 0), dx*150); 
 	}
 
@@ -702,17 +790,48 @@ int CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	pUI->SetShader(pShader);
 	m_UIs.push_back(pUI);
 
-	//pShader = new CShader();
-	//pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VS_UI_Textured");
-	//pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PS_UI_Textured");
-	//pShader->CreateInputLayout(ShaderTypes::Textured);
-	//pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VSMinimap");  
+	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PSMinimap");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature); 
 
-	pUI = new UI(pd3dDevice, pd3dCommandList, 0.3f);
-	pUI->SetPosition({ 0.7f, -0.7f,  0 });
-	pUI->SetTextureIndex(0x04);
+	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.3f);
+	pUI->SetPosition({ 0.7f, -0.7f, 0.9 });
+	pUI->SetTextureIndex(0x01);
 	pUI->SetShader(pShader);
 	m_UIs.push_back(pUI);
-	 
+
+	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.25f);
+	pUI->SetPosition({ 0.7f, -0.7f,  0.8});
+	pUI->SetTextureIndex(0x02);
+	pUI->SetShader(pShader);
+	m_UIs.push_back(pUI);
+
 	return 0;
+}
+
+void CSceneJH::BuildMinimapResource(ID3D12Device* pd3dDevice)
+{
+	D3D12_RESOURCE_DESC texDesc;
+	ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
+	texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	texDesc.Alignment = 0;
+	texDesc.Width = FRAME_BUFFER_WIDTH;
+	texDesc.Height = FRAME_BUFFER_HEIGHT;
+	texDesc.DepthOrArraySize = 1;
+	texDesc.MipLevels = 1;
+	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+
+	pd3dDevice->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&texDesc,
+		D3D12_RESOURCE_STATE_COMMON,
+		nullptr,
+		IID_PPV_ARGS(&m_pd3dMinimapTex));
 }

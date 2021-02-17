@@ -22,6 +22,7 @@ protected:
 
 	CCamera**					m_Cameras;
 	CCamera*					m_CurrentCamera = nullptr;
+	CCamera*					m_MinimapCamera = nullptr;
 private:
 	POINT						m_LastMousePos;
 
@@ -38,6 +39,9 @@ private:	// about Lights
 
 	ID3D12Resource*				m_pd3dcbLights = NULL;
 	LIGHTS*						m_pcbMappedLights = NULL;
+
+private:	// about Minimap
+	ID3D12Resource*				m_pd3dMinimapTex = NULL;
 
 public:
 	CSceneJH();
@@ -65,6 +69,7 @@ public:
 	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 
 public:
 	virtual void ProcessInput();
@@ -86,4 +91,6 @@ private:
 		int startIndex, CShader* pShader);
 	int BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int startIndex, CShader* pShader);
 	int BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 };

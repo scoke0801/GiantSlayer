@@ -32,6 +32,7 @@ Texture2D gtxtDoor : register(t10);
 
 Texture2D gtxtPlayerInfo : register(t11);
 Texture2D gtxtMinimap : register(t12);
+Texture2D gtxtMap : register(t13);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -236,8 +237,7 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtPlayerInfo.Sample(gssWrap, input.uv);
-		
+		cColor = gtxtPlayerInfo.Sample(gssWrap, input.uv); 
 	}
 	if (gnTexturesMask & 0x02)
 	{
@@ -262,17 +262,29 @@ struct VS_MOUT
 	float4 position : SV_POSITION;
 	float2 uv	 : TEXCOORD;
 };
-//
-//VS_MOUT VSMinimap(VS_MIN input)
-//{
-//	VS_MOUT outRes;
-//	outRes.position = float4(input.position, 1.0f);
-//	outRes.uv = input.uv;
-//	return outRes;
-//}
-//
-//float4 PSMinimap(VS_MOUT input) : SV_TARGET
-//{
-//	float4 cColor; 
-//	return cColor = gtxtMiniMap.Sample(gssWrap, input.uv); 
-//}
+
+VS_MOUT VSMinimap(VS_MIN input)
+{
+	input.position.x += gmtxWorld._41;
+	input.position.y += gmtxWorld._42;
+	input.position.z += gmtxWorld._43;
+
+	VS_MOUT outRes;
+	outRes.position = float4(input.position, 1.0f);
+	outRes.uv = input.uv; 
+	return outRes;
+}
+
+float4 PSMinimap(VS_MOUT input) : SV_TARGET
+{
+	float4 cColor;
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtMinimap.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtMap.Sample(gssWrap, input.uv);
+	}
+	return cColor;
+}
