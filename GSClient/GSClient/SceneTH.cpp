@@ -53,22 +53,6 @@ void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 void CSceneTH::ProcessInput()
 {
 	auto gameInput = GAME_INPUT;
-	/*if (gameInput.KEY_W)
-	{
-		m_ppPlayers[0]->Move({ 0, 0, +0.3 });
-	}
-	if (gameInput.KEY_A)
-	{
-		m_ppPlayers[0]->Move({ -0.3, 0, 0 });
-	}
-	if (gameInput.KEY_S)
-	{
-		m_ppPlayers[0]->Move({ 0, 0, -0.3 });
-	}
-	if (gameInput.KEY_D)
-	{
-		m_ppPlayers[0]->Move({ +0.3, 0, 0 });
-	}*/
 
 	if (gameInput.KEY_W)
 	{
@@ -127,6 +111,7 @@ void CSceneTH::OnMouseMove(WPARAM btnState, int x, int y)
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
 }
+
 void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
 { 
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
@@ -150,13 +135,17 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	CCubeMeshDiffused* pPlatformMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
 		500.0f, 0.0f, 500.0f);
 
-	CMeshFbx* meshbot = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/angrybot.fbx");
+	CMeshFbx* meshbot = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Medieval tower_Mid.fbx");
 	//CMeshFbx* meshtree = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/testtree.fbx");
 	//CMeshFbx* meshcar = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/cars.fbx");
 	//¼ÎÀÌ´õ ============================================================================
 	CDiffusedShader* pDiffusedShader = new CDiffusedShader();
 	pDiffusedShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pDiffusedShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	//CTexturedShader* pTexturedShader = new CTexturedShader();
+	//pTexturedShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//pTexturedShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CPlayerShader* pPlayerShader = new CPlayerShader();
 	pPlayerShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);

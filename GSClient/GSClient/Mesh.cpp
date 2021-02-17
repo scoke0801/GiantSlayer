@@ -374,14 +374,12 @@ CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	LoadMesh(m_pfbxScene->GetRootNode(), temp);
 
 	m_nVertices = fbxmesh.vertics;
-	m_nStride = sizeof(CDiffusedVertex);
-	m_nOffset = 0;
-	m_nSlot = 0;
+	m_nStride = sizeof(CTexturedVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	cout << "-메쉬 로드 끝 ||| [정점]: " << m_nVertices << "개 " << endl;
 
-	CDiffusedVertex* pVertices = new CDiffusedVertex[fbxmesh.vertex.size()];
+	CTexturedVertex* pVertices = new CTexturedVertex[fbxmesh.vertex.size()];
 	copy(fbxmesh.vertex.begin(), fbxmesh.vertex.end(), pVertices);
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
@@ -419,12 +417,52 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
 		for (int pindex = 0; pindex < nPolygons; pindex++) {
 			for (int vindex = 0; vindex < 3; vindex++) {
 				int pvindex = pfbxMesh->GetPolygonVertex(pindex, vindex);
+				int uvindex = pfbxMesh->GetTextureUVIndex(pindex, vindex, FbxLayerElement::eTextureDiffuse);
 
-					info->vertex.push_back(CDiffusedVertex(XMFLOAT3(
-						pfbxMesh->GetControlPointAt(pvindex).mData[0],
-						pfbxMesh->GetControlPointAt(pvindex).mData[2],
-						pfbxMesh->GetControlPointAt(pvindex).mData[1]),
-						XMFLOAT4(0.3, 0.3, 0.3, 0)));
+				FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
+				FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
+
+				fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
+
+				float uv1 = fbxUV[0];
+				float uv2 = 1.0f - fbxUV[1];
+
+				
+				info->vertex.push_back(
+					CTexturedVertex(
+						XMFLOAT3(
+							pfbxMesh->GetControlPointAt(pvindex).mData[0],
+							pfbxMesh->GetControlPointAt(pvindex).mData[2],
+							pfbxMesh->GetControlPointAt(pvindex).mData[1]
+						),
+						XMFLOAT2(
+							uv1,
+							uv2
+						)
+					)
+				);
+				
+				
+
+				/*
+				info->vertex.push_back(
+					CDiffusedVertex(
+						XMFLOAT3(
+							pfbxMesh->GetControlPointAt(pvindex).mData[0],
+							pfbxMesh->GetControlPointAt(pvindex).mData[2],
+							pfbxMesh->GetControlPointAt(pvindex).mData[1]
+						),
+						XMFLOAT4(
+							0.3,
+							0.3,
+							0.3,
+							1.0f
+						)
+					)
+				);
+				*/
+				
+
 			}
 		}
 

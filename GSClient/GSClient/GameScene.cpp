@@ -172,6 +172,13 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 50, 50);
 	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 10, 100);
 
+	m_pfbxManager = FbxManager::Create();
+	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
+	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
+	m_pfbxManager->SetIOSettings(m_pfbxIOs);
+
+	CMeshFbx* pTowerMeshTex = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Medieval tower_Mid.fbx");
+
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	for (int i = 0; i < m_nObjects; ++i)
@@ -231,6 +238,14 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_ppObjects[5] = pBox;
 	m_ppObjects[5]->SetPosition({ 250,  25, 250 });
 	m_ppObjects[5]->SetTextureIndex(0x80);
+
+	CGameObject* ptower = new CGameObject();
+	ptower->SetShader(pShader);
+
+	m_ppObjects[6] = ptower;
+	m_ppObjects[6]->SetMesh(pTowerMeshTex);
+	m_ppObjects[6]->SetPosition({ 250,  125, 250 });
+	m_ppObjects[6]->SetTextureIndex(0x100);
 }
 
 void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -259,6 +274,9 @@ void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	auto boxTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, boxTex.get(), "Box", L"resources/OBJ/Box.dds");
 
+	auto towerTex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, towerTex.get(), "Tower", L"resources/OBJ/Medieval-tower_Mid.dds");
+
 	m_Textures[terrainTex->m_Name] = std::move(terrainTex);
 	m_Textures[SkyTex_Back->m_Name] = std::move(SkyTex_Back);
 	m_Textures[SkyTex_Front->m_Name] = std::move(SkyTex_Front);
@@ -267,6 +285,7 @@ void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_Textures[SkyTex_Top->m_Name] = std::move(SkyTex_Top);
 	m_Textures[SkyTex_Bottom->m_Name] = std::move(SkyTex_Bottom);
 	m_Textures[boxTex->m_Name] = std::move(boxTex);
+	m_Textures[towerTex->m_Name] = std::move(towerTex);
 }
 
 void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -293,6 +312,7 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	auto SkyTex_Top = m_Textures["Sky_Top"]->m_pd3dResource;
 	auto SkyTex_Bottom = m_Textures["Sky_Bottom"]->m_pd3dResource;
 	auto boxTex = m_Textures["Box"]->m_pd3dResource;
+	auto towerTex = m_Textures["Tower"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -329,6 +349,10 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = boxTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(boxTex, &srvDesc, hDescriptor);
+
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = towerTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(towerTex, &srvDesc, hDescriptor);
 }
 
 void CGameScene::ReleaseObjects()
@@ -401,19 +425,19 @@ void CGameScene::ProcessInput()
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{
-		m_CurrentCamera->Walk(1.0f);
+		m_CurrentCamera->Walk(2.0f);
 	}
 	if (keyInput.KEY_A)
 	{
-		m_CurrentCamera->Strafe(-1.0f);
+		m_CurrentCamera->Strafe(-2.0f);
 	}
 	if (keyInput.KEY_S)
 	{
-		m_CurrentCamera->Walk(-1.0f);
+		m_CurrentCamera->Walk(-2.0f);
 	}
 	if (keyInput.KEY_D)
 	{
-		m_CurrentCamera->Strafe(1.0f);
+		m_CurrentCamera->Strafe(2.0f);
 	}
 	if (keyInput.KEY_B)
 	{
