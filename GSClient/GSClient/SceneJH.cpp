@@ -265,10 +265,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	
 	auto minimapTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, minimapTex.get(), "Minimap", L"resources/UI/Minimap.dds");
-
-	auto mapText = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, mapText.get(), "Map", L"resources/UI/[Test]Map.dds");
-
+	  
 	m_Textures[terrainTex->m_Name] = std::move(terrainTex);
 	m_Textures[SkyTex_Back->m_Name] = std::move(SkyTex_Back);
 	m_Textures[SkyTex_Front->m_Name] = std::move(SkyTex_Front);
@@ -281,8 +278,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Textures[wallTex->m_Name] = std::move(wallTex);
 	m_Textures[doorTex->m_Name] = std::move(doorTex);
 	m_Textures[playerInfoTex->m_Name] = std::move(playerInfoTex);	
-	m_Textures[minimapTex->m_Name] = std::move(minimapTex);	
-	m_Textures[mapText->m_Name] = std::move(mapText);
+	m_Textures[minimapTex->m_Name] = std::move(minimapTex);	 
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -291,7 +287,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	// Create the SRV heap.
 	//
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = m_Textures.size();
+	srvHeapDesc.NumDescriptors = m_Textures.size() + 1;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
@@ -314,7 +310,6 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	auto doorTex = m_Textures["Door"]->m_pd3dResource;
 	auto playerInfoTex = m_Textures["PlayerInfo"]->m_pd3dResource;
 	auto minimapTex = m_Textures["Minimap"]->m_pd3dResource;
-	auto mapText = m_Textures["Map"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -649,7 +644,7 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	// Ground
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size();
+	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size() + 1;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;

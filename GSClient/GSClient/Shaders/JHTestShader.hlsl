@@ -32,8 +32,7 @@ Texture2D gtxtDoor : register(t10);
 
 Texture2D gtxtPlayerInfo : register(t11);
 Texture2D gtxtMinimap : register(t12);
-Texture2D gtxtMap : register(t13);
-
+Texture2D gtxtMap : register(t13); 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
 {
@@ -137,7 +136,7 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 	if (gnTexturesMask & 0x200)
 	{
 		cColor = gtxtWall.Sample(gssWrap, input.uv);
-	}
+	} 
 	return cColor;
 }
  
