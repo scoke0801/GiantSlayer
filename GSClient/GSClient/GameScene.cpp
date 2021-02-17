@@ -466,7 +466,7 @@ void CGameScene::ProcessInput()
 		m_CurrentCamera->Strafe(5.0f);
 	}
 
-	}
+	
 	if (keyInput.KEY_B)
 	{
 		m_CurrentCamera->SetShake(true, 0.5f, 5.0f);
