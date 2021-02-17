@@ -23,6 +23,8 @@ void CSceneTH::Update(double elapsedTime)
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Update(elapsedTime);
 	}
+
+	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 }
 
 void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -41,17 +43,17 @@ void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 
-	for (int j = 0; j < m_nPlayers; j++)
+	/*for (int j = 0; j < m_nPlayers; j++)
 	{
 		if (m_ppPlayers[j])
 			m_ppPlayers[j]->Draw(pd3dCommandList, m_CurrentCamera);
-	}
+	}*/
 }
 
 void CSceneTH::ProcessInput()
 {
 	auto gameInput = GAME_INPUT;
-	if (gameInput.KEY_W)
+	/*if (gameInput.KEY_W)
 	{
 		m_ppPlayers[0]->Move({ 0, 0, +0.3 });
 	}
@@ -66,8 +68,24 @@ void CSceneTH::ProcessInput()
 	if (gameInput.KEY_D)
 	{
 		m_ppPlayers[0]->Move({ +0.3, 0, 0 });
-	}
+	}*/
 
+	if (gameInput.KEY_W)
+	{
+		m_CurrentCamera->Walk(2.0f);
+	}
+	if (gameInput.KEY_A)
+	{
+		m_CurrentCamera->Strafe(-2.0f);
+	}
+	if (gameInput.KEY_S)
+	{
+		m_CurrentCamera->Walk(-2.0f);
+	}
+	if (gameInput.KEY_D)
+	{
+		m_CurrentCamera->Strafe(2.0f);
+	}
 
 	if (gameInput.KEY_1)
 	{
@@ -114,7 +132,7 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	m_nObjects = 4;
+	m_nObjects = 1;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	m_nPlayers = 1;
@@ -132,8 +150,9 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	CCubeMeshDiffused* pPlatformMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
 		500.0f, 0.0f, 500.0f);
 
-	CMeshFbx* treeMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Angrybot.fbx");
-
+	CMeshFbx* meshbot = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/angrybot.fbx");
+	//CMeshFbx* meshtree = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/testtree.fbx");
+	//CMeshFbx* meshcar = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/cars.fbx");
 	//셰이더 ============================================================================
 	CDiffusedShader* pDiffusedShader = new CDiffusedShader();
 	pDiffusedShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
@@ -144,15 +163,15 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	pPlayerShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	//플레이어 ==========================================================================
-	CPlayer* player1 = new CPlayer();
+	/*CPlayer* player1 = new CPlayer();
 	player1->SetMesh(pCubeMesh);
 	player1->SetShader(pPlayerShader);
 
 	m_ppPlayers[0] = player1;
-	m_ppPlayers[0]->SetPosition({ 0, 0, -15 });
+	m_ppPlayers[0]->SetPosition({ 0, 0, -15 });*/
 
 	//오브젝트 ==========================================================================
-	CGameObject* platform = new CGameObject();
+	/*CGameObject* platform = new CGameObject();
 	platform->SetMesh(pPlatformMesh);
 	platform->SetShader(pDiffusedShader);
 
@@ -162,23 +181,28 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 
 	CEnemy* emey2 = new CEnemy(player1);
 	emey2->SetMesh(pCubeMesh);
-	emey2->SetShader(pDiffusedShader);
+	emey2->SetShader(pDiffusedShader);*/
 
-	CGameObject* tree1 = new CGameObject();
-	tree1->SetMesh(treeMesh);
-	tree1->SetShader(pDiffusedShader);
+	CGameObject* objbot = new CGameObject();
+	objbot->SetMesh(meshbot);
+	objbot->SetShader(pDiffusedShader);
+
+	//CGameObject* objtree = new CGameObject();
+	//objbot->SetMesh(meshtree);
+	//objbot->SetShader(pDiffusedShader);
+
+	//CGameObject* objcar = new CGameObject();
+	//objbot->SetMesh(meshcar);
+	//objbot->SetShader(pDiffusedShader);
 
 	//CAngrybotObject* bot1 = new CAngrybotObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, m_pfbxScene);
 
-
-	m_ppObjects[0] = platform;
-	m_ppObjects[0]->SetPosition({ 0, 200000.5, 0 });
-	m_ppObjects[1] = emey1;
-	m_ppObjects[1]->SetPosition({ -10, 0, 20 });
-	m_ppObjects[2] = emey2;
-	m_ppObjects[2]->SetPosition({ +10, 0, 20 });
-	m_ppObjects[3] = tree1;
-	m_ppObjects[3]->SetPosition({ 0, 0, 0 });
+	m_ppObjects[0] = objbot;
+	m_ppObjects[0]->SetPosition({ 0, 0, 0 });
+	//m_ppObjects[1] = objtree;
+	//m_ppObjects[1]->SetPosition({ 0, 0, 0 });
+	//m_ppObjects[2] = objcar;
+	//m_ppObjects[2]->SetPosition({ 0, 0, 0 });
 	//m_ppObjects[4] = bot1;
 	//m_ppObjects[4]->SetPosition({ 0, 0, 0 });
 	//m_ppObjects[4]->SetAnimationStack(0);

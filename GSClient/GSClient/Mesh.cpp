@@ -359,9 +359,14 @@ CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	FbxScene* m_pfbxScene = FbxScene::Create(pfbxSdkManager, "");
 	m_pfbxScene = LoadFbxSceneFromFile(pd3dDevice, pd3dCommandList, pfbxSdkManager, pstrFbxFileName);
 
+	FbxGeometryConverter geometryConverter(pfbxSdkManager);
+	geometryConverter.Triangulate(m_pfbxScene, true);
+
+	FbxAxisSystem sceneAxisSystem = m_pfbxScene->GetGlobalSettings().GetAxisSystem();
+	FbxAxisSystem::DirectX.ConvertScene(m_pfbxScene);
+
 	Meshinfo fbxmesh;
 	fbxmesh.vertics = 0;
-
 	Meshinfo* temp = &fbxmesh;
 
 	cout << "-메쉬 로드:" << pstrFbxFileName << endl;
@@ -398,13 +403,18 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
 {
 	FbxNodeAttribute* pfbxNodeAttribute = node->GetNodeAttribute();
 
-	if (pfbxNodeAttribute && (pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
+	if ((pfbxNodeAttribute != NULL) && 
+		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
 	{
 		FbxMesh* pfbxMesh = node->GetMesh();
-		info->vertics += pfbxMesh->GetControlPointsCount();
-		int nPolygons = pfbxMesh->GetPolygonCount();
 
-		cout << " [정점]: " << info->vertics << "개 " << "[폴리곤]: " << nPolygons << "개" << endl;
+		//info->vertics += pfbxMesh->GetControlPointsCount();
+		int nPolygons = pfbxMesh->GetPolygonCount();
+		int v = pfbxMesh->GetControlPointsCount();
+		int vv = info->vertics;
+		int vvv = v + vv;
+
+		cout << "[메쉬발견] 현재 노드 정점 수: " << v << "  기존 정점 수: " << vv << "  합: " << vvv << endl;
 
 		for (int pindex = 0; pindex < nPolygons; pindex++) {
 			for (int vindex = 0; vindex < 3; vindex++) {
@@ -414,9 +424,11 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
 						pfbxMesh->GetControlPointAt(pvindex).mData[0],
 						pfbxMesh->GetControlPointAt(pvindex).mData[2],
 						pfbxMesh->GetControlPointAt(pvindex).mData[1]),
-						XMFLOAT4(0.5, 0.5, 0.5, 0)));
+						XMFLOAT4(0.3, 0.3, 0.3, 0)));
 			}
 		}
+
+		info->vertics += nPolygons*3;
 	}
 
 	int nChilds = node->GetChildCount();
@@ -503,8 +515,6 @@ CMinimapMesh::CMinimapMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 CMinimapMesh::~CMinimapMesh()
 {
 }
-
-
 
 CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart,int zStart,int WidthBlock_Count,int DepthBlock_Count)
 	:CMesh(pd3dDevice, pd3dCommandList)
