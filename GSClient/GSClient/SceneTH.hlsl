@@ -1,42 +1,55 @@
-//게임 객체의 정보를 위한 상수 버퍼를 선언한다. 
-cbuffer cbGameObjectInfo : register(b0)
-{
-	matrix gmtxWorld : packoffset(c0);
-};
-
-//카메라의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbCameraInfo : register(b1)
 {
-	matrix gmtxView : packoffset(c0);
-	matrix gmtxProjection : packoffset(c4);
+	matrix					gmtxView : packoffset(c0);
+	matrix					gmtxProjection : packoffset(c4);
+	float3					gvCameraPosition : packoffset(c8);
 };
 
-//정점 셰이더의 입력을 위한 구조체를 선언한다. 
-struct VS_INPUT
+cbuffer cbGameObjectInfo : register(b2)
 {
-	float3 position : POSITION;
-	float4 color : COLOR;
+	matrix 					gmtxGameObject : packoffset(c0);
 };
 
-//정점 셰이더의 출력(픽셀 셰이더의 입력)을 위한 구조체를 선언한다.
-struct VS_OUTPUT
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+struct VS_FBX_MODEL_INPUT
 {
-	float4 position : SV_POSITION;
-	float4 color : COLOR;
+	float4 position : POSITION;
 };
 
-//정점 셰이더를 정의한다. 
-VS_OUTPUT VSDiffused(VS_INPUT input)
+struct VS_FBX_MODEL_OUTPUT
 {
-	VS_OUTPUT output;
-	//정점을 변환(월드 변환, 카메라 변환, 투영 변환)한다. 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
-	output.color = input.color;
+	float4	position : SV_POSITION;
+};
+
+VS_FBX_MODEL_OUTPUT VSFbxModel(VS_FBX_MODEL_INPUT input)
+{
+	VS_FBX_MODEL_OUTPUT output;
+
+	output.position = mul(mul(mul(input.position, gmtxGameObject), gmtxView), gmtxProjection);
+
 	return(output);
 }
 
-//픽셀 셰이더를 정의한다. 
-float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
+float4 PSFbxModel(VS_FBX_MODEL_OUTPUT input) : SV_TARGET
 {
-	return(input.color);
+	float4 cColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	return(cColor);
+}
+
+VS_FBX_MODEL_OUTPUT VSFbxSkinnedModel(VS_FBX_MODEL_INPUT input)
+{
+	VS_FBX_MODEL_OUTPUT output;
+
+	output.position = mul(mul(mul(input.position, gmtxGameObject), gmtxView), gmtxProjection);
+
+	return(output);
+}
+
+float4 PSFbxSkinnedModel(VS_FBX_MODEL_OUTPUT input) : SV_TARGET
+{
+	float4 cColor = float4(0.0f, 0.0f, 1.0f, 1.0f);
+
+	return(cColor);
 }

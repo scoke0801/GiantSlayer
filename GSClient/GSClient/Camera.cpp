@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Camera.h"
+#include "Player.h"
 
 CCamera::CCamera()
 {
@@ -10,6 +11,80 @@ CCamera::CCamera()
 
 CCamera::~CCamera()
 {
+}
+
+void CCamera::Update(float elapsedTime)
+{
+	if (m_isOnShake)
+	{
+		m_TimerForShake.UpdateElapsedTime();
+		auto res = m_TimerForShake.GetElapsedTime();
+		cout << res << "\n";
+	 
+		if (res >= m_ShakeTime)
+		{
+			SetShake(false, 0.0f, 0.0f);
+		}
+		else
+		{
+			XMFLOAT3 xmf3Pos = m_xmf3PrevPos;
+			xmf3Pos.x += RandomRange(-m_ShakePower, m_ShakePower);
+			xmf3Pos.y += RandomRange(-m_ShakePower, m_ShakePower);
+			xmf3Pos.z += RandomRange(-m_ShakePower, m_ShakePower);
+			 
+			SetPosition(xmf3Pos);
+		}
+		m_ViewDirty = true;
+	} 
+	if (m_ViewDirty)
+	{
+		UpdateViewMatrix();
+	}
+	UpdateLights(elapsedTime);
+}
+
+void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
+{
+	if (m_TargetPlayer == nullptr) return;
+
+	XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
+	 
+	XMFLOAT3 xmf3Right = CalcTargetRight();
+	XMFLOAT3 xmf3Up	  = CalcTargetUp();
+	XMFLOAT3 xmf3Look  = CalcTargetLook();
+	
+	xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
+	xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
+	xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
+	
+	XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
+
+	XMFLOAT3 xmf3Position = Vector3::Add(m_TargetPlayer->GetPosition(), xmf3Offset);
+	XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
+	float fLength = Vector3::Length(xmf3Direction);
+	xmf3Direction = Vector3::Normalize(xmf3Direction);
+	//float fTimeLagScale = (m_fTimeLag) ? fTimeElapsed * (1.0f / m_fTimeLag) : 1.0f;
+	float fTimeLagScale = 1.0f;
+	float fDistance = fLength * fTimeLagScale;
+	if (fDistance > fLength) fDistance = fLength;
+	if (fLength < 0.01f) fDistance = fLength;
+	if (fDistance > 0)
+	{
+		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
+		LookAt(xmf3LookAt, m_TargetPlayer->GetUp());
+	}
+}
+
+void CCamera::UpdateLights(float elapsedTime)
+{
+	for (auto light : m_Lights)
+	{
+		if (light->m_nType == SPOT_LIGHT)
+		{
+			light->m_xmf3Position = GetPosition3f();
+			light->m_xmf3Direction = GetLook3f();
+		}
+	}
 }
 
 XMVECTOR CCamera::GetPosition()const
@@ -165,6 +240,15 @@ void CCamera::LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3
 	m_ViewDirty = true;
 }
 
+void CCamera::LookAt(const XMFLOAT3& lookAt, const XMFLOAT3& up)
+{
+	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, lookAt, up);
+	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
+	m_xmf3Up = XMFLOAT3(mtxLookAt._12, mtxLookAt._22, mtxLookAt._32);
+	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
+}
+
+
 XMMATRIX CCamera::GetView()const
 {
 	assert(!m_ViewDirty);
@@ -187,6 +271,22 @@ XMFLOAT4X4 CCamera::GetProj4x4f()const
 	return m_xmf4x4Proj;
 }
 
+void CCamera::SetTarget(CPlayer* target)
+{
+	m_TargetPlayer = target;
+	m_TargetTransform = m_TargetPlayer->GetWorldTransform();
+}
+
+void CCamera::SetOffset(XMFLOAT3 offset)
+{ 
+	m_xmf3Offset = offset; 
+}
+
+void CCamera::MoveOffset(XMFLOAT3 shift)
+{
+	m_xmf3Offset = Vector3::Add(m_xmf3Offset, shift);	
+}
+
 void CCamera::Strafe(float d)
 {
 	// mPosition += d*mRight
@@ -205,6 +305,17 @@ void CCamera::Walk(float d)
 	XMVECTOR l = XMLoadFloat3(&m_xmf3Look);
 	XMVECTOR p = XMLoadFloat3(&m_xmf3Position);
 	XMStoreFloat3(&m_xmf3Position, XMVectorMultiplyAdd(s, l, p));
+
+	m_ViewDirty = true;
+}
+
+void CCamera::UpDown(float d)
+{
+	// mPosition += d*mLook
+	XMVECTOR s = XMVectorReplicate(d);
+	XMVECTOR u = XMLoadFloat3(&m_xmf3Up);
+	XMVECTOR p = XMLoadFloat3(&m_xmf3Position);
+	XMStoreFloat3(&m_xmf3Position, XMVectorMultiplyAdd(s, u, p));
 
 	m_ViewDirty = true;
 }
@@ -234,61 +345,71 @@ void CCamera::RotateY(float angle)
 	m_ViewDirty = true;
 }
 
+void CCamera::RotateAroundTarget(XMFLOAT3 pxmf3Axis, float fAngle)
+{
+	if (m_TargetPlayer == nullptr) return;
+
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
+		XMConvertToRadians(fAngle));
+
+	m_TargetTransform = Matrix4x4::Multiply(mtxRotate, m_TargetTransform);
+}
+
 void CCamera::UpdateViewMatrix()
 {
-	if (m_ViewDirty)
+	if (!m_ViewDirty) return;
+
+	XMVECTOR R = XMLoadFloat3(&m_xmf3Right);
+	XMVECTOR U = XMLoadFloat3(&m_xmf3Up);
+	XMVECTOR L = XMLoadFloat3(&m_xmf3Look);
+	XMVECTOR P = XMLoadFloat3(&m_xmf3Position);
+
+	// Keep camera's axes orthogonal to each other and of unit length.
+	L = XMVector3Normalize(L);
+	U = XMVector3Normalize(XMVector3Cross(L, R));
+
+	// U, L already ortho-normal, so no need to normalize cross product.
+	R = XMVector3Cross(U, L);
+
+	// Fill in the view matrix entries.
+	float x = -XMVectorGetX(XMVector3Dot(P, R));
+	float y = -XMVectorGetX(XMVector3Dot(P, U));
+	float z = -XMVectorGetX(XMVector3Dot(P, L));
+
+	XMStoreFloat3(&m_xmf3Right, R);
+	XMStoreFloat3(&m_xmf3Up, U);
+	XMStoreFloat3(&m_xmf3Look, L);
+
+	m_xmf4x4View(0, 0) = m_xmf3Right.x;
+	m_xmf4x4View(1, 0) = m_xmf3Right.y;
+	m_xmf4x4View(2, 0) = m_xmf3Right.z;
+	m_xmf4x4View(3, 0) = x;
+
+	m_xmf4x4View(0, 1) = m_xmf3Up.x;
+	m_xmf4x4View(1, 1) = m_xmf3Up.y;
+	m_xmf4x4View(2, 1) = m_xmf3Up.z;
+	m_xmf4x4View(3, 1) = y;
+
+	m_xmf4x4View(0, 2) = m_xmf3Look.x;
+	m_xmf4x4View(1, 2) = m_xmf3Look.y;
+	m_xmf4x4View(2, 2) = m_xmf3Look.z;
+	m_xmf4x4View(3, 2) = z;
+
+	m_xmf4x4View(0, 3) = 0.0f;
+	m_xmf4x4View(1, 3) = 0.0f;
+	m_xmf4x4View(2, 3) = 0.0f;
+	m_xmf4x4View(3, 3) = 1.0f;
+
+	m_ViewDirty = false;
+
+	if (m_Lights.size() < 0) return;
+
+	for (auto light : m_Lights)
 	{
-		XMVECTOR R = XMLoadFloat3(&m_xmf3Right);
-		XMVECTOR U = XMLoadFloat3(&m_xmf3Up);
-		XMVECTOR L = XMLoadFloat3(&m_xmf3Look);
-		XMVECTOR P = XMLoadFloat3(&m_xmf3Position);
-
-		// Keep camera's axes orthogonal to each other and of unit length.
-		L = XMVector3Normalize(L);
-		U = XMVector3Normalize(XMVector3Cross(L, R));
-
-		// U, L already ortho-normal, so no need to normalize cross product.
-		R = XMVector3Cross(U, L);
-
-		// Fill in the view matrix entries.
-		float x = -XMVectorGetX(XMVector3Dot(P, R));
-		float y = -XMVectorGetX(XMVector3Dot(P, U));
-		float z = -XMVectorGetX(XMVector3Dot(P, L));
-
-		XMStoreFloat3(&m_xmf3Right, R);
-		XMStoreFloat3(&m_xmf3Up, U);
-		XMStoreFloat3(&m_xmf3Look, L);
-
-		m_xmf4x4View(0, 0) = m_xmf3Right.x;
-		m_xmf4x4View(1, 0) = m_xmf3Right.y;
-		m_xmf4x4View(2, 0) = m_xmf3Right.z;
-		m_xmf4x4View(3, 0) = x;
-
-		m_xmf4x4View(0, 1) = m_xmf3Up.x;
-		m_xmf4x4View(1, 1) = m_xmf3Up.y;
-		m_xmf4x4View(2, 1) = m_xmf3Up.z;
-		m_xmf4x4View(3, 1) = y;
-
-		m_xmf4x4View(0, 2) = m_xmf3Look.x;
-		m_xmf4x4View(1, 2) = m_xmf3Look.y;
-		m_xmf4x4View(2, 2) = m_xmf3Look.z;
-		m_xmf4x4View(3, 2) = z;
-
-		m_xmf4x4View(0, 3) = 0.0f;
-		m_xmf4x4View(1, 3) = 0.0f;
-		m_xmf4x4View(2, 3) = 0.0f;
-		m_xmf4x4View(3, 3) = 1.0f;
-
-		m_ViewDirty = false;
-
-		if (m_Lights.size() < 0) return;
-
-		for(auto light : m_Lights)
-		{
-			light->m_xmf3Position = GetPosition3f();
-			light->m_xmf3Direction = GetLook3f();
-		}
+		light->m_xmf3Position = GetPosition3f();
+		light->m_xmf3Direction = GetLook3f();
 	}
+
 }
 void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight,
 	float fMinZ, float fMaxZ)
@@ -345,4 +466,42 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, 
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(rootParameterIndex, d3dGpuVirtualAddress);
+}
+
+void CCamera::SetShake(bool isOnShake, float shakeTime, float power)
+{
+	if (m_isOnShake != isOnShake)
+	{ 
+		m_TimerForShake.Init();
+		m_isOnShake = isOnShake; 
+	}
+	else return;
+
+	if (m_isOnShake)
+	{
+		m_ShakeTime = shakeTime;
+		m_ShakePower = power;
+		m_xmf3PrevPos = m_xmf3Position;
+	}
+	else
+	{
+		shakeTime = 0.0f; 
+		m_xmf3Position = m_xmf3PrevPos;   
+		SetPosition(m_xmf3Position);
+	}
+}
+
+XMFLOAT3 CCamera::CalcTargetRight()
+{
+	return XMFLOAT3(m_TargetTransform._11, m_TargetTransform._12, m_TargetTransform._13);
+}
+
+XMFLOAT3 CCamera::CalcTargetUp()
+{
+	return XMFLOAT3(m_TargetTransform._21, m_TargetTransform._22, m_TargetTransform._23);
+}
+
+XMFLOAT3 CCamera::CalcTargetLook()
+{
+	return XMFLOAT3(m_TargetTransform._31, m_TargetTransform._32, m_TargetTransform._33);
 }

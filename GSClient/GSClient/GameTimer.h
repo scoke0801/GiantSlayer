@@ -10,7 +10,7 @@ protected:
 	std::chrono::system_clock::time_point m_CurrentTime;
 	std::chrono::duration<double> m_TimeElapsed; // 시간이 얼마나 지났나
 
-	// 추가
+	// 확장성, 다른 방식 시간 측정
 protected:
 	double mSecondsPerCount;
 	double mDeltaTime;
@@ -29,13 +29,17 @@ public:
 	void Init();
 
 	void UpdateElapsedTime();
-	void UpdateCurrentTime();	
+	void UpdateCurrentTime();
+	void UpdateTime();
+
 	std::chrono::system_clock::time_point CurrentTime() { return m_CurrentTime; }
 	
 	double GetElapsedTime() const { return m_TimeElapsed.count(); }
 	double GetElapsedTime(std::chrono::system_clock::time_point lastUpdateTime) const;
 	std::chrono::duration<double> GetElapsedTimeRaw() const { return m_TimeElapsed; }
 
+	// 확장성, 다른 방식 시간 측정
+public:
 	// 추가
 	float TotalTime()const; // in seconds
 	float DeltaTime()const; // in seconds

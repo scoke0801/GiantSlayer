@@ -5,6 +5,7 @@
 #include "GameScene.h"
 #include "SceneJH.h" 
 #include "SceneTH.h"
+#include "GameSceneProto.h"
 
 CScene::CScene()
 {
@@ -13,6 +14,7 @@ CScene::CScene()
 
 CScene::~CScene()
 {
+
 }
 
 CNullScene::CNullScene()
@@ -22,6 +24,7 @@ CNullScene::CNullScene()
 
 CNullScene::~CNullScene()
 {
+
 }
 
 void CNullScene::Update(double elapsedTime)
@@ -51,6 +54,10 @@ void CNullScene::ProcessInput()
 	}
 	if (gameInput.KEY_F4)
 	{
-		ChangeScene<CSceneJH3>();
+		ChangeScene<CSceneJH>();
 	}  
+	if (gameInput.KEY_F5)
+	{
+		ChangeScene<CGameSceneProto>();
+	}
 }

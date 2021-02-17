@@ -22,9 +22,9 @@ CEnemy::~CEnemy()
 
 }
 
-void CEnemy::Update()
+void CEnemy::Update(double elapsedTime)
 {
-	statemachine->Update();
+	statemachine->Update(elapsedTime);
 }
 
 bool CEnemy::IsEnemyInSight() // Chase State
@@ -89,9 +89,9 @@ CEnemyRangeATK::~CEnemyRangeATK()
 
 }
 
-void CEnemyRangeATK::Update()
+void CEnemyRangeATK::Update(double elapsedTime)
 {
-	statemachine->Update();
+	statemachine->Update(elapsedTime);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -112,7 +112,7 @@ CEnemyCloseATK::~CEnemyCloseATK()
 
 }
 
-void CEnemyCloseATK::Update()
+void CEnemyCloseATK::Update(double elapsedTime)
 {
-	statemachine->Update();
+	statemachine->Update(elapsedTime);
 }

@@ -10,8 +10,8 @@
 #define VK_2 0x32
 #define VK_3 0x33
 #define VK_4 0x34
-#define VK_5 0x35
- 
+#define VK_5 0x35 
+
 struct GameInputs
 {
 	bool KEY_1 = false;
@@ -34,7 +34,10 @@ struct GameInputs
 	bool KEY_F2 = false;	
 	bool KEY_F3 = false;
 	bool KEY_F4 = false;
-	
+	bool KEY_F5 = false;
+
+	bool KEY_ADD = false;
+	bool KEY_SUBTRACT = false;
 };
 
 class CInputHandler

@@ -31,6 +31,10 @@ void CInputHandler::ProcessInput()
 	if (GetAsyncKeyState(VK_F2) & 0x8000)		m_Inputs.KEY_F2 = true;
 	if (GetAsyncKeyState(VK_F3) & 0x8000)		m_Inputs.KEY_F3 = true;
 	if (GetAsyncKeyState(VK_F4) & 0x8000)		m_Inputs.KEY_F4 = true;
+	if (GetAsyncKeyState(VK_F5) & 0x8000)		m_Inputs.KEY_F5 = true;
+
+	if (GetAsyncKeyState(VK_ADD) & 0x8000)		m_Inputs.KEY_ADD = true;
+	if (GetAsyncKeyState(VK_SUBTRACT) & 0x8000) m_Inputs.KEY_SUBTRACT = true;
 }
 
 void CInputHandler::MouseMove(WPARAM btnState, int x, int y)
