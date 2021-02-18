@@ -13,7 +13,7 @@ private:
 	CGameTimer					m_GameTimer;
 	CGameTimer					m_FPSTimer;
 
-	CScene* m_CurrentScene;
+	CScene*						m_CurrentScene;
 
 	// 타이틀바 출력 관련 변수입니다.
 	_TCHAR						m_pszFrameRate[50];
@@ -24,9 +24,9 @@ private:
 	int							m_nWndClientWidth;
 	int							m_nWndClientHeight;
 
-	IDXGIFactory4* m_pdxgiFactory = NULL;
-	IDXGISwapChain3* m_pdxgiSwapChain = NULL;
-	ID3D12Device* m_pd3dDevice = NULL;
+	IDXGIFactory4*				m_pdxgiFactory = NULL;
+	IDXGISwapChain3*			m_pdxgiSwapChain = NULL;
+	ID3D12Device*				m_pd3dDevice = NULL;
 
 	bool						m_bMsaa4xEnable = false;
 	UINT						m_nMsaa4xQualityLevels = 0;
@@ -34,24 +34,24 @@ private:
 	static const UINT			m_nSwapChainBuffers = SWAP_BUFFER_COUNT;
 	UINT						m_nSwapChainBufferIndex;
 
-	ID3D12Resource* m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
-	ID3D12DescriptorHeap* m_pd3dRtvDescriptorHeap = NULL;
+	ID3D12Resource*				m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
+	ID3D12DescriptorHeap*		m_pd3dRtvDescriptorHeap = NULL;
 
-	ID3D12PipelineState* m_pd3dPipelineState = NULL;
+	ID3D12PipelineState*		m_pd3dPipelineState = NULL;
 
-	ID3D12Resource* m_pd3dDepthStencilBuffer = NULL;
-	ID3D12DescriptorHeap* m_pd3dDsvDescriptorHeap = NULL;
+	ID3D12Resource*				m_pd3dDepthStencilBuffer = NULL;
+	ID3D12DescriptorHeap*		m_pd3dDsvDescriptorHeap = NULL;
 
-	ID3D12CommandAllocator* m_pd3dCommandAllocator = NULL;
-	ID3D12CommandQueue* m_pd3dCommandQueue = NULL;
-	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
+	ID3D12CommandAllocator*		m_pd3dCommandAllocator = NULL;
+	ID3D12CommandQueue*			m_pd3dCommandQueue = NULL;
+	ID3D12GraphicsCommandList*	m_pd3dCommandList = NULL;
 
-	ID3D12Fence* m_pd3dFence = NULL;
+	ID3D12Fence*				m_pd3dFence = NULL;
 	UINT64						m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE						m_hFenceEvent;
 
-	ID3D12DescriptorHeap* m_pd3dCbvSrvUavDescriptorHeap = nullptr;
-	ID3D12DescriptorHeap* m_pd3dCbvSrvUavDescriptorHeapShadow = nullptr;
+	ID3D12DescriptorHeap*		m_pd3dCbvSrvUavDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap*		m_pd3dCbvSrvUavDescriptorHeapShadow = nullptr;
 
 private:	// 텍스트 및 2D 관련~!@#!@
 	Microsoft::WRL::ComPtr<IDWriteFactory2>			m_pd2dWriteFactory;
@@ -60,10 +60,12 @@ private:	// 텍스트 및 2D 관련~!@#!@
 	Microsoft::WRL::ComPtr<ID2D1Device1>			m_pd2Device;
 	Microsoft::WRL::ComPtr<ID2D1DeviceContext1>		m_pd2devCon;
 
-private:	// 임시 테스트용!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-	D3D12_VIEWPORT									m_d3dViewport;
-	D3D12_RECT										m_d3dScissorRect; 
-	   
+private:	// 서버와 통신하기 위한 데이터 입니다.
+	WSADATA					m_WSA;
+	SOCKET					m_Sock;
+	SOCKADDR				m_ServerAddr;
+
+	bool					m_IsServerConnected;
 private:
 	CFramework();
 
@@ -110,6 +112,10 @@ public: // about Mouse process
 
 public:
 	HWND GetHWND() const { return m_hWnd; }
+
+public:	// about server
+	bool ConnectToServer();
+	void Communicate();
 
 public:	// about scene change
 	template <typename SceneName>

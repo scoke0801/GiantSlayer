@@ -6,7 +6,7 @@
 #include "TitleScene.h"
 #include "Mesh.h"
 #include "Camera.h"
-
+#include "Communicates.h"
 CFramework::CFramework()
 {
 	m_GameTimer.Init();
@@ -40,16 +40,7 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	CoInitialize(NULL);
 
 	//CreateAboutD2D();
-
-	m_d3dViewport.TopLeftX = 0;
-	m_d3dViewport.TopLeftY = 0;
-	m_d3dViewport.Width = static_cast<float>(m_nWndClientWidth);
-	m_d3dViewport.Height = static_cast<float>(m_nWndClientHeight);
-	m_d3dViewport.MinDepth = 0.0f;
-	m_d3dViewport.MaxDepth = 1.0f;
-
-	m_d3dScissorRect = { 0, 0, m_nWndClientWidth, m_nWndClientHeight };
-
+	 
 	BuildScene();
 }
 
@@ -383,8 +374,7 @@ void CFramework::InitializeTextFormats()
 	//if (FAILED(textFormatFPS->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)))
 	//	return assert(!"Critical error: Unable to set text alignment!");
 	//if (FAILED(textFormatFPS->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR)))
-	//	return assert(!"Critical error: Unable to set paragraph alignment!");
-
+	//	return assert(!"Critical error: Unable to set paragraph alignment!"); 
 }
 
 void CFramework::Update()
@@ -450,12 +440,7 @@ void CFramework::Draw()
 {
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-
-	// 뷰포트와 씨저 사각형을 설정한다.
-	// 씬 클래스 내부로 옮겨야 함
-	m_pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
-	m_pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
-
+	 
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
 	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -474,17 +459,21 @@ void CFramework::Draw()
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+
+	m_CurrentScene->DrawMinimap(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex]);
 	
+	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);
+	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+	//m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 	m_CurrentScene->Draw(m_pd3dCommandList);
 
-	//if (m_pPlayer)
-	//	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	m_CurrentScene->DrawPlayer(m_pd3dCommandList);
 
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	//m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
+	//m_CurrentScene->DrawMinimap(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex]);
 	m_CurrentScene->DrawUI(m_pd3dCommandList);
 
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
@@ -507,7 +496,57 @@ void CFramework::Draw()
 	MoveToNextFrame();
 }
 
+bool CFramework::ConnectToServer()
+{
+	//CreateThread(NULL, 0, ClientMain, NULL, 0, NULL);
+	int retval = 0;
+	// 윈속 초기화
+	if (WSAStartup(MAKEWORD(2, 2), &m_WSA) != 0) return false;
+
+	// set serveraddr
+	SOCKADDR_IN serveraddr;
+	ZeroMemory(&serveraddr, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET;
+	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
+	serveraddr.sin_port = htons(SERVERPORT);
+
+	m_IsServerConnected = true;
+
+	// socket()
+	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (m_Sock == INVALID_SOCKET)
+	{
+		m_IsServerConnected = false;
+		return false;
+	}
+	int opt_val = TRUE;
+	setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
+	retval = connect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+	if (retval == SOCKET_ERROR)
+	{
+		m_IsServerConnected = false; 
+		cout << "서버 연결 실패\n";
+		return false;
+	}
+
+	// 소켓 통신 스레드 생성
+	CreateThread(NULL, 0, ClientMain,
+		NULL/*reinterpret_cast<LPVOID>(&gFramework)*/, 0, NULL);
+	return true;	
+}
+
+void CFramework::Communicate()
+{
+	if (m_CurrentScene) m_CurrentScene->Communicate(m_Sock);
+}
+
 DWORD __stdcall ClientMain(LPVOID arg)
 {
+	cout << "ClientMain()\n";
+	int retVal;
+	while (1)
+	{
+		CFramework::GetInstance().Communicate(); 
+	}
 	return 0;
 }

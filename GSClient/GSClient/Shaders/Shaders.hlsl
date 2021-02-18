@@ -30,6 +30,7 @@ Texture2D gSkyBox_Left : register(t4);
 Texture2D gSkyBox_Top : register(t5);
 Texture2D gSkyBox_Bottom : register(t6);
 Texture2D gtxtBox : register(t7);
+Texture2D gtxtTower : register(t8);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_INPUT
@@ -122,7 +123,12 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 	{
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
 	}
+	if (gnTexturesMask & 0x100)
+	{
+		cColor = gtxtTower.Sample(gssWrap, input.uv);
+	}
 	return cColor; 
+
 }
 
 struct VS_TERRAIN_INPUT

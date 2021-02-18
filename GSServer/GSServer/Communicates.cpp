@@ -51,6 +51,51 @@ int recvn(SOCKET s, char* buf, int len, int flags)
 
 	return (len - left);
 }
+bool RecvFrameData(SOCKET& client_sock, char* buf, int& retval)
+{
+	// 데이터 받기(고정 길이)
+	int len;
+	retval = recvn(client_sock, (char*)&len, sizeof(int), 0);
+
+	if (retval == SOCKET_ERROR)
+	{
+		err_display("recv()");
+		return false;
+	}
+	else if (retval == 0) return false;
+
+	// 데이터 받기(가변 길이)
+	retval = recvn(client_sock, buf, len, 0);
+	if (retval == SOCKET_ERROR)
+	{
+		err_display("recv()");
+		return false;
+	}
+
+	buf[retval] = '\0';
+	return true;
+}
+bool SendFrameData(SOCKET& sock, string& str, int& retval)
+{
+	int len = str.length();
+
+	// 데이터 보내기(고정 길이)
+	retval = send(sock, (char*)&len, sizeof(int), 0);
+	if (retval == SOCKET_ERROR)
+	{
+		err_display("send()");
+		return false;
+	}
+
+	// 데이터 보내기(가변 길이)
+	retval = send(sock, str.c_str(), len, 0);
+	if (retval == SOCKET_ERROR)
+	{
+		err_display("send()");
+		return false;
+	}
+	return true;
+}
 DWORD __stdcall ClientThread(LPVOID arg)
 {
 	SOCKET client_sock = (SOCKET)arg;
@@ -73,8 +118,15 @@ DWORD __stdcall ClientThread(LPVOID arg)
 		timeElapsed = std::chrono::system_clock::now() - currentTime;
 		currentTime = std::chrono::system_clock::now();
 		//cout << "TimeElapsed: " << timeElapsed.count() << " \n";
-		 
-		break; 
+		RecvFrameData(client_sock, buffer, receivedSize);
+		
+		int retval = 0;
+
+		// 3 현재 접속한 플레이어의 수를 넘겨준다.
+		string temp = to_string(0);
+		temp += " ";
+
+		SendFrameData(client_sock, temp, retval); 
 	}
 
 	// closesocket()

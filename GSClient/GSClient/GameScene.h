@@ -41,6 +41,12 @@ private:	// about Lights
 	ID3D12Resource*				m_pd3dcbLights = NULL;
 	LIGHTS*						m_pcbMappedLights = NULL;
 
+private: // FBX
+	FbxManager*					m_pfbxManager = nullptr;
+	FbxScene*					m_pfbxScene = nullptr;
+	FbxIOSettings*				m_pfbxIOs = nullptr;
+	FbxImporter*				m_pfbxImporter = nullptr;
+
 public:
 	CGameScene();
 	~CGameScene();
@@ -64,6 +70,7 @@ public:
 	void AnimateObjects(float fTimeElapsed);
 
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
 	virtual void ProcessInput();

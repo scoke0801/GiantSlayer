@@ -11,4 +11,7 @@ void err_display(const char* msg);
 // recv를 이용한 사용자 정의함수
 int recvn(SOCKET s, char* buf, int len, int flags);
 
+bool RecvFrameData(SOCKET& client_sock, char* buf, int& retval);
+bool SendFrameData(SOCKET& sock, string& str, int& retval);
+
 DWORD WINAPI ClientThread(LPVOID arg);
