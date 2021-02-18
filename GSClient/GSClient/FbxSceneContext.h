@@ -1,5 +1,4 @@
-#pragma once
-
+#pragma once 
 extern void AnimateFbxMesh(FbxMesh* pfbxMesh, FbxTime& fbxCurrentTime);
 extern void AnimateFbxNodeHierarchy(FbxNode* pfbxNode, FbxTime& fbxCurrentTime);
 

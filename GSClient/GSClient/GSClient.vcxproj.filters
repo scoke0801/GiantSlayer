@@ -10,13 +10,16 @@
     <FxCompile Include="Shaders\TerrainAndLight.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Shaders.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile> 
-    <FxCompile Include="Shaders\Light.hlsl"> 
+    <FxCompile Include="Shaders\Light.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\SceneTH.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\MinimapTest.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TitleScene.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
@@ -101,7 +104,7 @@
     </ClCompile>
     <ClCompile Include="FBXLoader.cpp">
       <Filter>FBXLoader</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="GameSceneProto.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -205,7 +208,7 @@
     </ClInclude>
     <ClInclude Include="FBXLoader.h">
       <Filter>FBXLoader</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Light</Filter>
     </ClInclude>
@@ -218,6 +221,8 @@
     <ClInclude Include="Wall.h">
       <Filter>GameObject</Filter>
     </ClInclude>
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="FrameResource.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
