@@ -35,7 +35,7 @@ struct VS_LIGHT_OUT
 {
     float4 PosH    : SV_POSITION;
     float3 PosW    : POSITION;
-    float2 uv	   : TEXCORD;
+    float2 uv	   : TEXCOORD;
     float3 Normal  : NORMAL;
 };
 
@@ -44,7 +44,7 @@ struct VS_LIGHT_OUT
 struct VS_TEXTURED_LIGHTING_INPUT
 {
 	float3 position : POSITION;
-	float2 uv : TEXCORD;
+	float2 uv : TEXCOORD;
 	float3 normal : NORMAL;
 };
 
@@ -53,7 +53,7 @@ struct VS_TEXTURED_LIGHTING_OUTPUT
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
-	float2 uv : TEXCORD;
+	float2 uv : TEXCOORD;
 };
 
 VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)

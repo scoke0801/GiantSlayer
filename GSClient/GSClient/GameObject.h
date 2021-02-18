@@ -227,3 +227,21 @@ public:
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 };
 
+
+class CTerrain
+{
+public:
+	CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int nBlockWidth, int nBlockLength,CShader* pShader);
+	virtual ~CTerrain();
+
+	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
+private:
+	int						m_nWidth;
+	int						m_nLength;
+	int						m_nObjects;
+	CGameObject**			m_ppObjects;
+
+
+};
+

@@ -484,4 +484,67 @@ void CSkyBox::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 
 	for (int i = 0; i < m_nObjects; ++i)
 		m_ppObjects[i]->Draw(pd3dCommandList, pCamera);
+
 }
+
+CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int nBlockWidth, int nBlockLength,CShader* pShader)
+{
+	m_nWidth = nWidth;			// 257
+	m_nLength = nLength;		// 257
+
+	int cxQuadsPerBlock = nBlockWidth - 1;
+	int czQuadsPerBlock = nBlockLength - 1;
+	
+	long cxBlocks = (m_nWidth - 1) / cxQuadsPerBlock;	// 32
+	long czBlocks = (m_nLength - 1) / czQuadsPerBlock;	// 32
+
+	m_nObjects = cxBlocks * czBlocks;
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	for (int i = 0; i < m_nObjects; i++) 
+	{
+		CGameObject* pObject = new CGameObject();
+
+		m_ppObjects[i] = pObject;
+	}
+
+	CTerrainMesh* pTerrainMesh = NULL;
+
+	for (int z = 0, zStart = 0; z < czBlocks; z++)
+	{
+		for (int x = 0, xStart = 0; x < cxBlocks; x++)
+		{
+			pTerrainMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks);
+		}
+	}
+
+	/*CTerrainMesh** pTerrainMesh = new CTerrainMesh * [cxBlocks * czBlocks];
+
+	for (int z = 0, zStart = 0; z < czBlocks; z++)
+	{
+		for (int x = 0, xStart = 0; x < cxBlocks; x++)
+		{
+			pTerrainMesh[x+(cxBlocks*z)] = new CTerrainMesh(pd3dDevice, pd3dCommandList, x, z, nBlockWidth, nBlockLength,cxBlocks,czBlocks);
+		}
+	}*/
+
+	for (int i = 0; i < 10; i++)
+	{
+		m_ppObjects[i]->SetTextureIndex(0x01);
+		m_ppObjects[i]->SetMesh(pTerrainMesh);
+		m_ppObjects[i]->SetShader(pShader);
+		m_ppObjects[i]->SetPosition(XMFLOAT3(i, 200.0f,i*200.0f));
+
+	}
+}
+
+CTerrain::~CTerrain()
+{
+}
+
+void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	for (int i = 0; i < m_nObjects; ++i)
+		m_ppObjects[i]->Draw(pd3dCommandList, pCamera);
+}
+

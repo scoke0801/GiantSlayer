@@ -60,10 +60,12 @@ private:	// 텍스트 및 2D 관련~!@#!@
 	Microsoft::WRL::ComPtr<ID2D1Device1>			m_pd2Device;
 	Microsoft::WRL::ComPtr<ID2D1DeviceContext1>		m_pd2devCon;
 
-private:	// 임시 테스트용!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-	D3D12_VIEWPORT									m_d3dViewport;
-	D3D12_RECT										m_d3dScissorRect; 
-	   
+private:	// 서버와 통신하기 위한 데이터 입니다.
+	WSADATA					m_WSA;
+	SOCKET					m_Sock;
+	SOCKADDR				m_ServerAddr;
+
+	bool					m_IsServerConnected;
 private:
 	CFramework();
 
@@ -110,6 +112,10 @@ public: // about Mouse process
 
 public:
 	HWND GetHWND() const { return m_hWnd; }
+
+public:	// about server
+	bool ConnectToServer();
+	void Communicate();
 
 public:	// about scene change
 	template <typename SceneName>
