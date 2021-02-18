@@ -760,10 +760,11 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	{
 		for (int x = xStart; x < (xStart + m_nWidth - 1); x+=2, i++)
 		{
+			if (i >= 25) break;
 			// 정점의 높이와 색상을 높이 맵으로부터 구한다.
 			float tempheight = OnGetHeight(x, z);
 			pVertices[i].m_xmf3Position = XMFLOAT3(x ,0, z);
-			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x, z*10000.0f);
+			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x, z*10.0f);
 			
 			if (tempheight < fMinHeight) tempheight = fMinHeight;
 			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
