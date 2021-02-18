@@ -52,8 +52,31 @@ void CGameObject::SetMesh(CMesh* pMesh)
 	m_pMesh = pMesh;
 
 	if (m_pMesh) m_pMesh->AddRef();
-}
+} 
+void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, 
+		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
+	m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObjInfo);
+}
+void CGameObject::ReleaseShaderVariables()
+{
+	if (m_pd3dcbGameObject)
+	{
+		m_pd3dcbGameObject->Unmap(0, NULL);
+		m_pd3dcbGameObject->Release();
+	}
+}
+void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{ 
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World))); 
+	::memcpy(&m_pcbMappedGameObjInfo->m_xmf4x4World, &xmf4x4World, sizeof(XMFLOAT4X4)); 
+	::memcpy(&m_pcbMappedGameObjInfo->m_Material, m_Material, sizeof(MATERIAL));
+	::memcpy(&m_pcbMappedGameObjInfo->m_nTextureIndex, &m_nTextureIndex, sizeof(UINT)); 
+} 
 void CGameObject::ReleaseUploadBuffers()
 {
 	//정점 버퍼를 위한 업로드 버퍼를 소멸시킨다.
@@ -244,11 +267,14 @@ void CRotatingObject::Animate(float fTimeElapsed)
 CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float width, float height, float depth)
 {
+	
 	m_Name = OBJ_NAME::Box;
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
 		width, height, depth);
 
 	SetMesh(pCubeMeshTex);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 CBox::~CBox()
@@ -458,4 +484,67 @@ void CSkyBox::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 
 	for (int i = 0; i < m_nObjects; ++i)
 		m_ppObjects[i]->Draw(pd3dCommandList, pCamera);
+
 }
+
+CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int nBlockWidth, int nBlockLength,CShader* pShader)
+{
+	m_nWidth = nWidth;			// 257
+	m_nLength = nLength;		// 257
+
+	int cxQuadsPerBlock = nBlockWidth - 1;
+	int czQuadsPerBlock = nBlockLength - 1;
+	
+	long cxBlocks = (m_nWidth - 1) / cxQuadsPerBlock;	// 32
+	long czBlocks = (m_nLength - 1) / czQuadsPerBlock;	// 32
+
+	m_nObjects = cxBlocks * czBlocks;
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	for (int i = 0; i < m_nObjects; i++) 
+	{
+		CGameObject* pObject = new CGameObject();
+
+		m_ppObjects[i] = pObject;
+	}
+
+	CTerrainMesh* pTerrainMesh = NULL;
+
+	for (int z = 0, zStart = 0; z < czBlocks; z++)
+	{
+		for (int x = 0, xStart = 0; x < cxBlocks; x++)
+		{
+			pTerrainMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks);
+		}
+	}
+
+	/*CTerrainMesh** pTerrainMesh = new CTerrainMesh * [cxBlocks * czBlocks];
+
+	for (int z = 0, zStart = 0; z < czBlocks; z++)
+	{
+		for (int x = 0, xStart = 0; x < cxBlocks; x++)
+		{
+			pTerrainMesh[x+(cxBlocks*z)] = new CTerrainMesh(pd3dDevice, pd3dCommandList, x, z, nBlockWidth, nBlockLength,cxBlocks,czBlocks);
+		}
+	}*/
+
+	for (int i = 0; i < 10; i++)
+	{
+		m_ppObjects[i]->SetTextureIndex(0x01);
+		m_ppObjects[i]->SetMesh(pTerrainMesh);
+		m_ppObjects[i]->SetShader(pShader);
+		m_ppObjects[i]->SetPosition(XMFLOAT3(i, 200.0f,i*200.0f));
+
+	}
+}
+
+CTerrain::~CTerrain()
+{
+}
+
+void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	for (int i = 0; i < m_nObjects; ++i)
+		m_ppObjects[i]->Draw(pd3dCommandList, pCamera);
+}
+

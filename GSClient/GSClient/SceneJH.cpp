@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "Bridge.h"
 #include "Wall.h"
+#include "Communicates.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_CAMERA			1
@@ -169,8 +170,10 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+
 { 
 	m_nObjects = 15;
+
 	m_ppObjects = new CGameObject * [m_nObjects];
 	for (int i = 0; i < m_nObjects; ++i)
 	{
@@ -189,7 +192,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	 
 #pragma region Create Terrain
 	// 지형 메쉬 
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000);
+	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000,10,10);
 	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
 
 	CShader* pShader = new CShader();
@@ -526,6 +529,18 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
+}
+
+void CSceneJH::Communicate(SOCKET& sock)
+{
+	int retVal = 0;
+
+	string toSendData = to_string((int)0);
+	SendFrameData(sock, toSendData, retVal);
+
+	char buffer[BUFSIZE + 1];
+	 
+	RecvFrameData(sock, buffer, retVal);
 }
 
 void CSceneJH::ProcessInput()

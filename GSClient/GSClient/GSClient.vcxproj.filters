@@ -10,16 +10,16 @@
     <FxCompile Include="Shaders\TerrainAndLight.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\Shaders.hlsl">
+    <FxCompile Include="Shaders\Light.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SceneTH.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\MinimapTest.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\TitleScene.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SceneTH.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
@@ -104,7 +104,7 @@
     </ClCompile>
     <ClCompile Include="FBXLoader.cpp">
       <Filter>FBXLoader</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="GameSceneProto.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -113,6 +113,9 @@
     </ClCompile>
     <ClCompile Include="Wall.cpp">
       <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Communicates.cpp">
+      <Filter>Communicate</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -208,7 +211,7 @@
     </ClInclude>
     <ClInclude Include="FBXLoader.h">
       <Filter>FBXLoader</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Light</Filter>
     </ClInclude>
@@ -220,6 +223,11 @@
     </ClInclude>
     <ClInclude Include="Wall.h">
       <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="FrameResource.h" />
+    <ClInclude Include="Communicates.h">
+      <Filter>Communicate</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -302,6 +310,9 @@
     </Filter>
     <Filter Include="GameObject\MapObjects">
       <UniqueIdentifier>{38ed0ea0-17b1-400c-8353-3f568979694b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Communicate">
+      <UniqueIdentifier>{14b67835-0384-4268-979f-06d1d744c3b1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

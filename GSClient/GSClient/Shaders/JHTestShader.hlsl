@@ -50,7 +50,7 @@ struct VS_COLOR_OUTPUT
 struct VS_TEXTURE_IN
 {
 	float3 position : POSITION;
-	float2 uv		: TEXCORD;
+	float2 uv		: TEXCOORD;
 };
 struct VS_TEXTURE_OUT
 {
@@ -254,7 +254,7 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 struct VS_MIN
 {
 	float3 position : POSITION;
-	float2 uv		: TEXCORD;
+	float2 uv		: TEXCOORD;
 };
 struct VS_MOUT
 {

@@ -72,6 +72,9 @@ public:
 	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 
 public:
+	virtual void Communicate(SOCKET& sock) override;
+
+public:
 	virtual void ProcessInput();
 
 	virtual void OnMouseDown(WPARAM btnState, int x, int y) override;

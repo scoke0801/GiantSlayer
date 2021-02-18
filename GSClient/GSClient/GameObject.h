@@ -30,41 +30,38 @@ enum class OBJ_DIRECTION
 };
 string ConvertToObjectName(const OBJ_NAME& name);
 
-//struct CB_GAMEOBJECT_INFO
-//{
-//	XMFLOAT4X4						m_xmf4x4World;
-//	UINT							m_nObjectID;
-//	UINT							m_nMaterialID;
-//};
+struct GAMEOBJECT_INFO
+{
+	XMFLOAT4X4						m_xmf4x4World;
+	MATERIAL						m_Material;
+	UINT							m_nTextureIndex;
+};
 
 class CGameObject
 {
 private:
-	int			m_nReferences = 0;
+	int					m_nReferences = 0;
 	 
 protected:
-	XMFLOAT4X4	m_xmf4x4World;
+	XMFLOAT4X4			m_xmf4x4World;
 
-	XMFLOAT3	m_xmf3Position;
-	//XMFLOAT3	m_xmf3Right = { 1.0f, 0.0f, 0.0f };
-	//XMFLOAT3	m_xmf3Up = { 0.0f, 1.0f, 0.0f };
-	//XMFLOAT3	m_xmf3Look = { 0.0f, 0.0f, 1.0f };
-	XMFLOAT3	m_xmf3Velocity;
-
-	CMesh*		m_pMesh = NULL;
-	CShader*	m_pShader = NULL;
-
-	UINT		m_nTextureIndex = 0x00;
+	XMFLOAT3			m_xmf3Position;
+	XMFLOAT3			m_xmf3Velocity;
 	 
-//CMaterial*	m_Material = nullptr;
-//int			m_MaterialParameterIndex = 2;
+	CMesh*				m_pMesh = NULL;
+	CShader*			m_pShader = NULL;
+ 
+	UINT				m_nTextureIndex = 0x00;
+	 
+	MATERIAL*			m_Material;
+	 
+	OBJ_NAME			m_Name;
 
-	OBJ_NAME	m_Name; 
+	CCamera*			m_Camera = nullptr;
 
-protected:
-	CCamera*	m_Camera = nullptr;
-
-public:
+private:
+	ID3D12Resource*		m_pd3dcbGameObject = NULL;
+	GAMEOBJECT_INFO*	m_pcbMappedGameObjInfo = NULL;
 
 public:
 	CGameObject();
@@ -75,8 +72,12 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 	virtual void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
-	 
-	virtual void ReleaseUploadBuffers(); 
+
+	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void ReleaseShaderVariables();
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	void ReleaseUploadBuffers(); 
+
 public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(double fTimeElapsed);
@@ -224,5 +225,23 @@ public:
 	virtual ~CSkyBox();
 
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+};
+
+
+class CTerrain
+{
+public:
+	CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int nBlockWidth, int nBlockLength,CShader* pShader);
+	virtual ~CTerrain();
+
+	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
+private:
+	int						m_nWidth;
+	int						m_nLength;
+	int						m_nObjects;
+	CGameObject**			m_ppObjects;
+
+
 };
 
