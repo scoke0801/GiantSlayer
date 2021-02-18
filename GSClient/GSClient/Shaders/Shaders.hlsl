@@ -62,7 +62,6 @@ float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
 }
 
 
-
 struct VS_TEXTURE_IN
 {
 	float3 position : POSITION;
@@ -159,7 +158,7 @@ VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
 	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
 	output.color = input.color;
     output.uv0 = input.uv0;
-    
+	
 	return(output);
 }
 
@@ -212,7 +211,7 @@ float CalculateTessFactor(float3 f3Position)
 	float fDistToCamera = distance(f3Position, gvCameraPosition);
 	float s = saturate((fDistToCamera - 10.0f) / (500.0f - 10.0f));
 
-	return(lerp(64.0f, 5.0f, s));
+	return(lerp(64.0f, 1.0f, s));
 }
 
 // HS
@@ -230,7 +229,6 @@ HS_TERRAIN_TESSELLATION_OUTPUT HSTerrainTessellation(InputPatch<VS_TERRAIN_TESSE
 	output.color = input[i].color;
     output.uv0 = input[i].uv0;
    
-	
 	return(output);
 }
 
@@ -295,17 +293,12 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	//else cColor = float4(0.87f, 0.17f, 1.0f, 1.0f);
     if (gnTexturesMask & 0x01)
     {
-        cColor = gtxtTerrain.Sample(gssClamp, input.uv0);
+        cColor = gtxtTerrain.Sample(gssWrap, input.uv0);
     }
-	
-    //if (gnTexturesMask & 0x02)
-    //{
-    //    cColor = gSkyBox_Front.Sample(gssClamp, input.uv0);
-    //}
 	else
     {
         cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
-		
     }
+	
 	return (cColor);
 }

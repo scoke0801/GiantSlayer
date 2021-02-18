@@ -170,7 +170,7 @@ void CGameSceneProto::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 void CGameSceneProto::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 지형 메쉬
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 50, 50);
+	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 50, 50,10,10);
 	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 10, 100);
 
 	m_nObjects = 10;

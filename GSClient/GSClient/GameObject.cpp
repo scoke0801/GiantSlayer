@@ -229,48 +229,25 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 
 	CTerrainMesh* pTerrainMesh = NULL;
 
+	pTerrainMesh= new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks);
+
+	/*CTerrainMesh** pTerrainMesh = new CTerrainMesh * [cxBlocks * czBlocks];
+
 	for (int z = 0, zStart = 0; z < czBlocks; z++)
 	{
 		for (int x = 0, xStart = 0; x < cxBlocks; x++)
 		{
-			xStart = x * (nBlockWidth - 1);
-			zStart = z * (nBlockLength - 1);
-
-			pTerrainMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList, xStart, zStart,
-				nBlockWidth, nBlockLength);
-
-			/*m_ppObjects[x + (z * cxBlocks)]->SetTextureIndex(0x01);
-			m_ppObjects[x + (z * cxBlocks)]->SetMesh(pTerrainMesh);
-			m_ppObjects[x + (z * cxBlocks)]->SetShader(pShader);*/
-
+			pTerrainMesh[x+(cxBlocks*z)] = new CTerrainMesh(pd3dDevice, pd3dCommandList, x, z, nBlockWidth, nBlockLength,cxBlocks,czBlocks);
 		}
+	}*/
+
+	for (int i = 0; i < 10; i++)
+	{
+		m_ppObjects[i]->SetTextureIndex(0x01);
+		m_ppObjects[i]->SetMesh(pTerrainMesh);
+		m_ppObjects[i]->SetShader(pShader);
+		m_ppObjects[i]->SetPosition(XMFLOAT3(i*20.0f+150.0f,-150.0f,200.0f+i*20.0f));
 	}
-
-	m_ppObjects[0]->SetTextureIndex(0x01);
-	m_ppObjects[0]->SetMesh(pTerrainMesh);
-	m_ppObjects[0]->SetShader(pShader);
-
-	m_ppObjects[1]->SetPosition(XMFLOAT3(80.0f, 0.0f, 0.0f));
-	m_ppObjects[1]->SetMesh(pTerrainMesh);
-	m_ppObjects[1]->SetShader(pShader);
-
-	m_ppObjects[2]->SetPosition(XMFLOAT3(160.0f, 0.0f, 0.0f));
-	m_ppObjects[2]->SetMesh(pTerrainMesh);
-	m_ppObjects[2]->SetShader(pShader);
-
-	m_ppObjects[3]->SetPosition(XMFLOAT3(80.0f, 0.0f, 80.0f));
-	m_ppObjects[3]->SetMesh(pTerrainMesh);
-	m_ppObjects[3]->SetShader(pShader);
-
-	m_ppObjects[4]->SetPosition(XMFLOAT3(160.0f, 0.0f, 80.0f));
-	m_ppObjects[4]->SetMesh(pTerrainMesh);
-	m_ppObjects[4]->SetShader(pShader);
-	
-	m_ppObjects[5]->SetPosition(XMFLOAT3(0.0f, 0.0f, 80.0f));
-	m_ppObjects[5]->SetMesh(pTerrainMesh);
-	m_ppObjects[5]->SetShader(pShader);
-
-	
 }
 
 CTerrain::~CTerrain()
