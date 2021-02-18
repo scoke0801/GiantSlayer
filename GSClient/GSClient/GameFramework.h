@@ -115,6 +115,7 @@ public:
 
 public:	// about server
 	bool ConnectToServer();
+	void Communicate();
 
 public:	// about scene change
 	template <typename SceneName>

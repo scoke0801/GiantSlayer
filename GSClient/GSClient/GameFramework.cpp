@@ -6,7 +6,7 @@
 #include "TitleScene.h"
 #include "Mesh.h"
 #include "Camera.h"
-
+#include "Communicates.h"
 CFramework::CFramework()
 {
 	m_GameTimer.Init();
@@ -501,8 +501,7 @@ bool CFramework::ConnectToServer()
 	//CreateThread(NULL, 0, ClientMain, NULL, 0, NULL);
 	int retval = 0;
 	// 윈속 초기화
-	if (WSAStartup(MAKEWORD(2, 2), &m_WSA) != 0)
-		return false;
+	if (WSAStartup(MAKEWORD(2, 2), &m_WSA) != 0) return false;
 
 	// set serveraddr
 	SOCKADDR_IN serveraddr;
@@ -530,10 +529,24 @@ bool CFramework::ConnectToServer()
 		return false;
 	}
 
-	return true;
+	// 소켓 통신 스레드 생성
+	CreateThread(NULL, 0, ClientMain,
+		NULL/*reinterpret_cast<LPVOID>(&gFramework)*/, 0, NULL);
+	return true;	
+}
+
+void CFramework::Communicate()
+{
+	if (m_CurrentScene) m_CurrentScene->Communicate(m_Sock);
 }
 
 DWORD __stdcall ClientMain(LPVOID arg)
 {
+	cout << "ClientMain()\n";
+	int retVal;
+	while (1)
+	{
+		CFramework::GetInstance().Communicate(); 
+	}
 	return 0;
 }

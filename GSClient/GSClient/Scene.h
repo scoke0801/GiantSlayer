@@ -37,6 +37,9 @@ public:
 	virtual void OnMouseUp(WPARAM btnState, int x, int y) { }
 	virtual void OnMouseMove(WPARAM btnState, int x, int y) { }
 
+public:
+	virtual void Communicate(SOCKET& sock) {}
+
 public: 
 	virtual void SendDataToNextScene(void* context) {}	
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) {}

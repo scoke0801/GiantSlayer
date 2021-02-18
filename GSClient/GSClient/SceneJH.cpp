@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "Bridge.h"
 #include "Wall.h"
+#include "Communicates.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_CAMERA			1
@@ -526,6 +527,18 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
+}
+
+void CSceneJH::Communicate(SOCKET& sock)
+{
+	int retVal = 0;
+
+	string toSendData = to_string((int)0);
+	SendFrameData(sock, toSendData, retVal);
+
+	char buffer[BUFSIZE + 1];
+	 
+	RecvFrameData(sock, buffer, retVal);
 }
 
 void CSceneJH::ProcessInput()
