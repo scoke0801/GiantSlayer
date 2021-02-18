@@ -7,8 +7,6 @@
 #define SERVERPORT 9000
 #define MAX_FILE_NAME_LAN 256
 
-#define UV_TEX 100.0F
-
 //-------------------------------------------------------------------
 //
 #define FPS 1 / 60.0f
