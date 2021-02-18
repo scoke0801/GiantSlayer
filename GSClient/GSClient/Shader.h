@@ -15,6 +15,7 @@ enum class ShaderTypes
 	Diffused,
 	Textured,
 	Billboard,
+	Terrain,
 	Count
 };
 
@@ -26,10 +27,14 @@ private:
 protected:
 	D3D12_SHADER_BYTECODE			m_d3dVSBytecode;
 	D3D12_SHADER_BYTECODE			m_d3dPSBytecode;
+	D3D12_SHADER_BYTECODE			m_d3dHSBytecode;
+	D3D12_SHADER_BYTECODE			m_d3dDSBytecode;
 	D3D12_SHADER_BYTECODE			m_d3dGSBytecode;
 
 	ID3DBlob*						m_pd3dVertexShaderBlob = nullptr;
 	ID3DBlob*						m_pd3dPixelShaderBlob = nullptr;
+	ID3DBlob*						m_pd3dHullShaderBlob = nullptr;
+	ID3DBlob*						m_pd3dDomainShaderBlob = nullptr;
 	ID3DBlob*						m_pd3dGeometryShaderBlob = nullptr;
 
 	D3D12_INPUT_LAYOUT_DESC			m_d3dInputLayoutDesc; 
@@ -58,6 +63,14 @@ public:
 	
 	D3D12_SHADER_BYTECODE CreateVertexShader(WCHAR* pszFileName, LPCSTR pszShaderName);
 	D3D12_SHADER_BYTECODE CreatePixelShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+
+	virtual D3D12_SHADER_BYTECODE CreateDomainShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreateHullShader(ID3DBlob** ppd3dShaderBlob);
+
+	// Å×¼¿ Ãß°¡
+	D3D12_SHADER_BYTECODE CreateDomainShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+	D3D12_SHADER_BYTECODE CreateHullShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+
 	D3D12_SHADER_BYTECODE CreateGeometryShader(WCHAR* pszFileName, LPCSTR pszShaderName);
 
 	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* pszFileName, LPCSTR pszShaderName,
@@ -68,6 +81,7 @@ public:
 	virtual void CreateGeneralShader(ID3D12Device* pd3dDevice,
 		ID3D12RootSignature* pd3dGraphicsRootSignature,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	virtual void CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList);
@@ -183,3 +197,19 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 
 };
+
+class CTerrainTessellationShader : public CShader
+{
+public:
+	CTerrainTessellationShader();
+	virtual ~CTerrainTessellationShader();
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	virtual D3D12_SHADER_BYTECODE CreateDomainShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreateHullShader(ID3DBlob** ppd3dShaderBlob);
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
+};
+
