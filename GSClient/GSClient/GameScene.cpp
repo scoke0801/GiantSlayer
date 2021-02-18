@@ -190,7 +190,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pTerrainShader->CreateTerrainShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 #pragma region Create Terrain
-	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, 257, 257, 9, 9, pTerrainShader);
+	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, 128, 128, 9, 9, pTerrainShader);
 #pragma endregion 
 
 	CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);

@@ -402,20 +402,20 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	
 	XMFLOAT2 Terrain_Base_Tex_Coord = { (float)x_Index/WidthBlock_Index , (float)z_Index/DepthBlock_Index };
 
-	for (int i = 0, z = (zStart + 9 - 1); z >= zStart; z -= 2)
+	for (int i = 0, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2)
 	{
-		for (int x = xStart; x < (xStart + 9); x+=2, i++)
+		for (int x = xStart; x < (xStart + m_nWidth - 1); x+=2, i++)
 		{
-			if (i > 25) break;
 			// 정점의 높이와 색상을 높이 맵으로부터 구한다.
 			float tempheight = OnGetHeight(x, z);
 			pVertices[i].m_xmf3Position = XMFLOAT3(x ,0, z);
-			pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x), 1000.0f);
+			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x, z*10000.0f);
 			
 			if (tempheight < fMinHeight) tempheight = fMinHeight;
 			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
 		}
 	}
+	
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,

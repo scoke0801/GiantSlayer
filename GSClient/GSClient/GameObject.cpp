@@ -229,7 +229,13 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 
 	CTerrainMesh* pTerrainMesh = NULL;
 
-	pTerrainMesh= new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks);
+	for (int z = 0, zStart = 0; z < czBlocks; z++)
+	{
+		for (int x = 0, xStart = 0; x < cxBlocks; x++)
+		{
+			pTerrainMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks);
+		}
+	}
 
 	/*CTerrainMesh** pTerrainMesh = new CTerrainMesh * [cxBlocks * czBlocks];
 
@@ -246,7 +252,8 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 		m_ppObjects[i]->SetTextureIndex(0x01);
 		m_ppObjects[i]->SetMesh(pTerrainMesh);
 		m_ppObjects[i]->SetShader(pShader);
-		m_ppObjects[i]->SetPosition(XMFLOAT3(i*20.0f+150.0f,-150.0f,200.0f+i*20.0f));
+		m_ppObjects[i]->SetPosition(XMFLOAT3(i, 200.0f,i*200.0f));
+
 	}
 }
 
