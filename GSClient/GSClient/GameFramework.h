@@ -6,6 +6,11 @@ class CCamera;
 
 class CFramework
 {
+public:// 타이틀바 출력 관련 변수입니다.
+	_TCHAR						m_pszFrameRate[50];
+	TCHAR						m_captionTitle[50];
+	int							m_titleLength;
+
 private:
 	HWND						m_hWnd;
 	HINSTANCE					m_hInst;
@@ -15,11 +20,7 @@ private:
 
 	CScene*						m_CurrentScene;
 
-	// 타이틀바 출력 관련 변수입니다.
-	_TCHAR						m_pszFrameRate[50];
-	TCHAR						m_captionTitle[50];
-	int							m_titleLength;
-
+	
 	// 다이렉트X 관련 변수입니다.
 	int							m_nWndClientWidth;
 	int							m_nWndClientHeight;

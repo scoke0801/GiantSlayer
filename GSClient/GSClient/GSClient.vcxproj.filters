@@ -11,15 +11,18 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Light.hlsl">
-      <Filter>HLSL</Filter> 
+      <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\SceneTH.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\MinimapTest.hlsl"> 
+    <FxCompile Include="Shaders\MinimapTest.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\TitleScene.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Shaders.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

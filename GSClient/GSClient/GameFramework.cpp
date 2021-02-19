@@ -545,16 +545,70 @@ void CFramework::Communicate()
 
 DWORD __stdcall ClientMain(LPVOID arg)
 {
+	cout << "---Enter ClientMain()\n";
+
 	CGameTimer					m_GameTimer;
 	CGameTimer					m_FPSTimer;	
 	m_GameTimer.Init();
 	m_FPSTimer.Init();
-
-	cout << "ClientMain()\n";
-	int retVal;
+	  
+	  
+	double lag = 0.0f;
+	double fps = 0.0f;
+	double elapsedTime = m_GameTimer.GetElapsedTime();
+	
 	while (1)
 	{
-		CFramework::GetInstance().Communicate(); 
-	}
+		m_GameTimer.UpdateElapsedTime();
+
+		CInputHandler::GetInstance().ProcessInput();
+
+		lag = 0.0f;
+		fps = 0.0f;
+		elapsedTime = m_GameTimer.GetElapsedTime();
+
+		if (elapsedTime > FPS)				//지정된 시간이 흘렀다면
+		{
+			m_GameTimer.UpdateCurrentTime();
+
+			if (elapsedTime > 0.0)
+			{
+				fps = 1.0 / elapsedTime;
+			}
+
+			//게임 시간이 늦어진 경우 이를 따라잡을 때 까지 업데이트 시킵니다.
+			lag += elapsedTime;
+			for (int i = 0; lag > FPS && i < MAX_LOOP_TIME; ++i)
+			{
+				//Communicate(); 
+				CFramework::GetInstance().Communicate();
+				lag -= FPS;
+			}
+		}
+		// 최대 FPS 미만의 시간이 경과하면 진행 생략(Frame Per Second)
+		else
+			continue;
+		 
+#if defined(SHOW_CAPTIONFPS)
+
+		std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();
+
+		double updateElapsed = m_FPSTimer.GetElapsedTime(lastUpdateTime);
+
+		if (updateElapsed > MAX_UPDATE_FPS)
+			m_FPSTimer.UpdateCurrentTime();
+		else
+			continue;
+		fps = 1.0 / m_GameTimer.GetElapsedTime();
+
+		_itow_s(fps + 0.1f,
+			CFramework::GetInstance().m_captionTitle +
+			CFramework::GetInstance().m_titleLength,
+			TITLE_LENGTH - CFramework::GetInstance().m_titleLength, 10);
+		wcscat_s(CFramework::GetInstance().m_captionTitle + CFramework::GetInstance().m_titleLength, 
+			TITLE_LENGTH - CFramework::GetInstance().m_titleLength, TEXT(" FPS)"));
+		SetWindowText(CFramework::GetInstance().GetHWND(), CFramework::GetInstance().m_captionTitle);
+#endif
+	} 
 	return 0;
 }
