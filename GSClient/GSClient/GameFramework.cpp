@@ -376,12 +376,13 @@ void CFramework::InitializeTextFormats()
 	//	return assert(!"Critical error: Unable to set paragraph alignment!"); 
 }
 
-void CFramework::Update()
+void CFramework::SinglePlayUpdate()
 {
-	// 서버와 연결되어 있다면
-	// ClientMain()함수에서 처리합니다
-	if (m_IsServerConnected) return;
-	
+	if (IsOnConntected())
+	{
+		//Draw();
+		return;
+	}
 	m_GameTimer.UpdateElapsedTime();
 
 	CInputHandler::GetInstance().ProcessInput();
@@ -433,6 +434,16 @@ void CFramework::Update()
 	wcscat_s(m_captionTitle + m_titleLength, TITLE_LENGTH - m_titleLength, TEXT(" FPS)"));
 	SetWindowText(m_hWnd, m_captionTitle);
 #endif
+}
+
+void CFramework::MultiplayUpdate()
+{
+	//Draw();
+}
+
+void CFramework::SceneUpdate()
+{
+	m_CurrentScene->Update(FPS);
 }
 
 void CFramework::Animate()
@@ -501,7 +512,9 @@ void CFramework::Draw()
 
 bool CFramework::ConnectToServer()
 {
-	//CreateThread(NULL, 0, ClientMain, NULL, 0, NULL);
+	static bool isFirst = true;
+	if (!isFirst) return 0;
+
 	int retval = 0;
 	// 윈속 초기화
 	if (WSAStartup(MAKEWORD(2, 2), &m_WSA) != 0) return false;
@@ -512,9 +525,7 @@ bool CFramework::ConnectToServer()
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
 	serveraddr.sin_port = htons(SERVERPORT);
-
-	m_IsServerConnected = true;
-
+	 
 	// socket()
 	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_Sock == INVALID_SOCKET)
@@ -535,6 +546,9 @@ bool CFramework::ConnectToServer()
 	// 소켓 통신 스레드 생성
 	CreateThread(NULL, 0, ClientMain,
 		NULL/*reinterpret_cast<LPVOID>(&gFramework)*/, 0, NULL);
+	isFirst = false;
+	m_IsServerConnected = true;
+
 	return true;	
 }
 
@@ -551,8 +565,7 @@ DWORD __stdcall ClientMain(LPVOID arg)
 	CGameTimer					m_FPSTimer;	
 	m_GameTimer.Init();
 	m_FPSTimer.Init();
-	  
-	  
+	   
 	double lag = 0.0f;
 	double fps = 0.0f;
 	double elapsedTime = m_GameTimer.GetElapsedTime();
@@ -581,14 +594,16 @@ DWORD __stdcall ClientMain(LPVOID arg)
 			for (int i = 0; lag > FPS && i < MAX_LOOP_TIME; ++i)
 			{
 				//Communicate(); 
-				CFramework::GetInstance().Communicate();
+				CFramework::GetInstance().Communicate(); 
+				CFramework::GetInstance().SceneUpdate();
 				lag -= FPS;
 			}
 		}
 		// 최대 FPS 미만의 시간이 경과하면 진행 생략(Frame Per Second)
 		else
 			continue;
-		 
+
+		CFramework::GetInstance().Draw();
 #if defined(SHOW_CAPTIONFPS)
 
 		std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();

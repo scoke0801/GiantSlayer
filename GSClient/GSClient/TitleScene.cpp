@@ -62,15 +62,18 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CTitleScene::ProcessInput()
 {
+	static bool isFirst = true;
+	if (!isFirst) return;
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_SPACE)
 	{
 		if (!m_IsSingleplay)
 		{
-			CFramework::GetInstance().ConnectToServer();
+			isFirst = false;
+			CFramework::GetInstance().ConnectToServer(); 
 		}
-		cout << "CHangeScene to CSceneJH\n";
-		ChangeScene<CSceneJH>((void*)m_IsSingleplay);
+		cout << "ChangeScene to CSceneJH\n";
+		ChangeScene<CSceneJH>((void*)m_IsSingleplay); 
 	}
 }
 
@@ -298,44 +301,4 @@ void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	srvDesc.Format = titleTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(titleTex, &srvDesc, hDescriptor);
 }
-
-void CTitleScene::ConnectToServer()
-{
-	PrepareCommunicate();
-}
-
-bool CTitleScene::PrepareCommunicate()
-{
-	//CreateThread(NULL, 0, ClientMain, NULL, 0, NULL);
-	int retval = 0;
-	// 윈속 초기화
-	if (WSAStartup(MAKEWORD(2, 2), &m_WSA) != 0)
-		return false;
-
-	// set serveraddr
-	SOCKADDR_IN serveraddr;
-	ZeroMemory(&serveraddr, sizeof(serveraddr));
-	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
-	serveraddr.sin_port = htons(SERVERPORT);
-
-	m_IsServerConnected = true;
-
-	// socket()
-	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (m_Sock == INVALID_SOCKET)
-	{
-		m_IsServerConnected = false; 
-		return false;
-	}
-	int opt_val = TRUE;
-	setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val)); 
-	retval = connect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
-	if (retval == SOCKET_ERROR)
-	{
-		m_IsServerConnected = false; 
-		return false;
-	}
-
-	return true;
-}
+ 

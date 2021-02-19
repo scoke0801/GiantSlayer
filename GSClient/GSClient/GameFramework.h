@@ -102,7 +102,9 @@ private:
 	void InitializeTextFormats();
 
 public:	// about Update
-	void Update();
+	void SinglePlayUpdate();
+	void MultiplayUpdate();
+	void SceneUpdate();
 	void Animate();
 	void Draw();
 
@@ -117,6 +119,7 @@ public:
 public:	// about server
 	bool ConnectToServer();
 	void Communicate();
+	bool IsOnConntected() const { return m_IsServerConnected; }
 
 public:	// about scene change
 	template <typename SceneName>

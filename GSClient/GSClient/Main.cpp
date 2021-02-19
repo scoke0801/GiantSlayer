@@ -58,7 +58,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
         else
         {
-            gFramework->Update(); 
+            if (gFramework->IsOnConntected()) continue;
+            gFramework->SinglePlayUpdate(); 
         }
     }
 

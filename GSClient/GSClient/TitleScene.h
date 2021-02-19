@@ -86,9 +86,5 @@ private: // 按眉 积己 包访
 
 	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-
-private: // 辑滚 包访
-	void ConnectToServer();
-	bool PrepareCommunicate();
 };
 
