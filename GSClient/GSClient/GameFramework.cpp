@@ -13,8 +13,7 @@ CFramework::CFramework()
 	m_FPSTimer.Init();
 
 	m_nWndClientWidth = FRAME_BUFFER_WIDTH;
-	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
-	m_FPSTimer.Init();
+	m_nWndClientHeight = FRAME_BUFFER_HEIGHT; 
 }
 
 void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
@@ -379,6 +378,10 @@ void CFramework::InitializeTextFormats()
 
 void CFramework::Update()
 {
+	// 서버와 연결되어 있다면
+	// ClientMain()함수에서 처리합니다
+	if (m_IsServerConnected) return;
+	
 	m_GameTimer.UpdateElapsedTime();
 
 	CInputHandler::GetInstance().ProcessInput();
@@ -542,6 +545,11 @@ void CFramework::Communicate()
 
 DWORD __stdcall ClientMain(LPVOID arg)
 {
+	CGameTimer					m_GameTimer;
+	CGameTimer					m_FPSTimer;	
+	m_GameTimer.Init();
+	m_FPSTimer.Init();
+
 	cout << "ClientMain()\n";
 	int retVal;
 	while (1)

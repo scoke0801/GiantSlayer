@@ -58,8 +58,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
         else
         {
-            gFramework->Update();
-
+            gFramework->Update(); 
         }
     }
 

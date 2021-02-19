@@ -33,7 +33,6 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-
 	BuildMaterials(pd3dDevice, pd3dCommandList);
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
 	BuildLights(pd3dDevice, pd3dCommandList);
@@ -170,8 +169,12 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pfbxManager = FbxManager::Create();
+	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
+	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
+	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
-{ 
 	m_nObjects = 15;
 
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -192,22 +195,22 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	 
 #pragma region Create Terrain
 	// 지형 메쉬 
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000,10,10);
-	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
+	//CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000,10,10);
+	//CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
 
-	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTextured");
-	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	// 지형
-	m_ppObjects[0]->SetMesh(pPlaneMeshTex);
-	m_ppObjects[0]->SetPosition({ 0,  0,  0 });
-	m_ppObjects[0]->SetTextureIndex(0x01);
-	m_ppObjects[0]->SetShader(pShader);
+	//CShader* pShader = new CShader();
+	//pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTextured");
+	//pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured");
+	//pShader->CreateInputLayout(ShaderTypes::Textured);
+	//pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//// 지형
+	//m_ppObjects[0]->SetMesh(pPlaneMeshTex);
+	//m_ppObjects[0]->SetPosition({ 0,  0,  0 });
+	//m_ppObjects[0]->SetTextureIndex(0x01);
+	//m_ppObjects[0]->SetShader(pShader);
 	  
 #pragma endregion   
-	pShader = new CShader();
+	CShader*  pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
 	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
@@ -215,16 +218,34 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	
 	int index = BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 6, pShader);
 	index = BuildDoorWall(pd3dDevice, pd3dCommandList, index, pShader);
-	  
+
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player->SetShader(pShader);
 	m_Player->SetObjectName(OBJ_NAME::Player );
 	m_Player->SetPosition({ 500,  250 + 82.5, 1501 });
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
+	//m_Player->SetMesh(fbxMesh);
 
 	m_CurrentCamera->SetTarget(m_Player); 
 	m_MinimapCamera->SetTarget(m_Player);
+
+	///
+	/// FBX Model Test
+	///
+	pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+
+	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
+
+	m_ppObjects[1]->SetMesh(fbxMesh);
+	m_ppObjects[1]->SetPosition({ 500,  250 + 82.5, 1501 });
+	m_ppObjects[1]->SetTextureIndex(0x01);
+	m_ppObjects[1]->SetShader(pShader); 
+	m_ppObjects[1]->SetTextureIndex(0x80);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
