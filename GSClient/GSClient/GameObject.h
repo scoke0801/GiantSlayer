@@ -95,6 +95,8 @@ public:
 
 	bool CollisionCheck() { return false; };
 
+	void Scale(float x, float y, float z);
+
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
 	string GetObjectName() const { return ConvertToObjectName(m_Name); }

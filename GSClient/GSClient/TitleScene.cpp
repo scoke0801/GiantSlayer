@@ -5,6 +5,7 @@
 #include "SceneJH.h"
 CTitleScene::CTitleScene()
 {
+	cout << "Enter CSceneJH \n";
 	m_pd3dGraphicsRootSignature = NULL;
 	m_pd3dPipelineState = NULL;
 
@@ -19,7 +20,7 @@ CTitleScene::CTitleScene()
 }
 
 CTitleScene::~CTitleScene()
-{
+{ 
 }
 
 void CTitleScene::Update(double elapsedTime)

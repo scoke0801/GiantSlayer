@@ -211,6 +211,12 @@ void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
+void CGameObject::Scale(float x, float y, float z)
+{
+	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
+	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World);
+}
+
 //void CGameObject::Rotate(float x, float y, float z)
 //{
 //	static float pitch, yaw, roll;

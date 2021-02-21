@@ -18,6 +18,7 @@
 
 CSceneJH::CSceneJH()
 {
+	cout << "Enter CSceneJH \n";
 	m_pd3dGraphicsRootSignature = NULL;
 }
 
@@ -242,10 +243,11 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
 
 	m_ppObjects[1]->SetMesh(fbxMesh);
-	m_ppObjects[1]->SetPosition({ 500,  250 + 82.5, 1501 });
+	m_ppObjects[1]->SetPosition({ 500,  250, 1650 });
 	m_ppObjects[1]->SetTextureIndex(0x01);
 	m_ppObjects[1]->SetShader(pShader); 
 	m_ppObjects[1]->SetTextureIndex(0x80);
+	m_ppObjects[1]->Scale(20, 20, 20);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -254,21 +256,27 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	MakeTexture(pd3dDevice, pd3dCommandList, terrainTex.get(), "Terrain", L"resources/OBJ/Terrain.dds");
 
 	auto SkyTex_Front = make_unique<CTexture>();
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Front.get(), "Sky_Front", L"resources/skybox/front.dds");
 	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Front.get(), "Sky_Front", L"resources/OBJ/SkyBox_Front_0.dds");
 
 	auto SkyTex_Back = make_unique<CTexture>();
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Back.get(), "Sky_Back", L"resources/skybox/back.dds");
 	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Back.get(), "Sky_Back", L"resources/OBJ/SkyBox_Back_0.dds");
 
 	auto SkyTex_Left = make_unique<CTexture>();
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Left.get(), "Sky_Left", L"resources/skybox/left.dds");
 	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Left.get(), "Sky_Left", L"resources/OBJ/SkyBox_Left_0.dds");
 
 	auto SkyTex_Right = make_unique<CTexture>();
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Right.get(), "Sky_Right", L"resources/skybox/right.dds");
 	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Right.get(), "Sky_Right", L"resources/OBJ/SkyBox_Right_0.dds");
 
 	auto SkyTex_Top = make_unique<CTexture>();
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Top.get(), "Sky_Top", L"resources/skybox/top.dds");
 	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Top.get(), "Sky_Top", L"resources/OBJ/SkyBox_Top_0.dds");
 
 	auto SkyTex_Bottom = make_unique<CTexture>();
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Bottom.get(), "Sky_Bottom", L"resources/skybox/bottom.dds");
 	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Bottom.get(), "Sky_Bottom", L"resources/OBJ/SkyBox_Bottom_0.dds");
 
 	auto boxTex = make_unique<CTexture>();

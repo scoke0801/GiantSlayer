@@ -41,6 +41,8 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	//CreateAboutD2D();
 	 
 	BuildScene();
+	
+	InitializeCriticalSection(&m_cs);
 }
 
 void CFramework::OnDestroy()
@@ -65,6 +67,8 @@ void CFramework::OnDestroy()
 	if (m_pdxgiFactory) m_pdxgiFactory->Release();
 
 	CoUninitialize();
+
+	DeleteCriticalSection(&m_cs);
 }
 
 void CFramework::CreateSwapChain()
@@ -380,7 +384,7 @@ void CFramework::SinglePlayUpdate()
 {
 	if (IsOnConntected())
 	{
-		//Draw();
+		Draw();
 		return;
 	}
 	m_GameTimer.UpdateElapsedTime();
@@ -452,6 +456,7 @@ void CFramework::Animate()
 
 void CFramework::Draw()
 {
+	EnterCriticalSection(&m_cs);
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 	 
@@ -508,6 +513,8 @@ void CFramework::Draw()
 	m_pdxgiSwapChain->Present(0, 0);
 
 	MoveToNextFrame();
+
+	LeaveCriticalSection(&m_cs);
 }
 
 bool CFramework::ConnectToServer()
@@ -603,7 +610,7 @@ DWORD __stdcall ClientMain(LPVOID arg)
 		else
 			continue;
 
-		CFramework::GetInstance().Draw();
+		//CFramework::GetInstance().Draw();
 #if defined(SHOW_CAPTIONFPS)
 
 		std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();
