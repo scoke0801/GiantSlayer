@@ -1,10 +1,8 @@
 #pragma once
 #include "Communicates.h"
+#include "Player.h"
 
-#define MAX_CLIENT_NUM 4
-
-class CPlayer;
-
+#define MAX_CLIENT_NUM 4 
 class GameSceneProcessor
 {
 private:
