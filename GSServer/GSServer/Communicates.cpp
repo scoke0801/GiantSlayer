@@ -119,7 +119,7 @@ DWORD __stdcall ClientThread(LPVOID arg)
 		currentTime = std::chrono::system_clock::now();
 		//cout << "TimeElapsed: " << timeElapsed.count() << " \n";
 		RecvFrameData(client_sock, buffer, receivedSize);
-		
+		cout << buffer << "\n";
 		int retval = 0;
 
 		// 3 현재 접속한 플레이어의 수를 넘겨준다.

@@ -565,6 +565,22 @@ void CSceneJH::Communicate(SOCKET& sock)
 	int retVal = 0;
 
 	string toSendData = to_string((int)0);
+	XMFLOAT3 xmf3PlayerPos = m_Player->GetPosition();
+	XMFLOAT3 xmf3PlayerLook = m_Player->GetLook();
+	toSendData = "<PlayerPosition>:\n";
+	toSendData += to_string(xmf3PlayerPos.x);
+	toSendData += " ";
+	toSendData += to_string(xmf3PlayerPos.y);
+	toSendData += " ";
+	toSendData += to_string(xmf3PlayerPos.z);
+	toSendData += "\n";
+	toSendData = "<PlayerLook>:\n";
+	toSendData += to_string(xmf3PlayerLook.x);
+	toSendData += " ";
+	toSendData += to_string(xmf3PlayerLook.y);
+	toSendData += " ";
+	toSendData += to_string(xmf3PlayerLook.z);
+	toSendData += "\n";
 	SendFrameData(sock, toSendData, retVal);
 
 	char buffer[BUFSIZE + 1];
