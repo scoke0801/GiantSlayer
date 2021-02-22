@@ -721,8 +721,11 @@ CMinimapMesh::~CMinimapMesh()
 
 }
 
-CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int x_Index,int z_Index,int WidthBlock_Count,int DepthBlock_Count,int WidthBlock_Index,int DepthBlock_Index)
-
+CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList,
+	int x_Index,int z_Index,
+	int WidthBlock_Count,int DepthBlock_Count,
+	int WidthBlock_Index,int DepthBlock_Index)
 	:CMesh(pd3dDevice, pd3dCommandList)
 {
 	int xStart = x_Index * (WidthBlock_Count - 1);
@@ -759,8 +762,7 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 		}
 	}
-	
-
+	 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
@@ -1079,8 +1081,7 @@ CTerrainSinMesh::CTerrainSinMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			if (tempheight < fMinHeight) tempheight = fMinHeight;
 			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
 		}
-	}
-
+	} 
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
@@ -1206,7 +1207,11 @@ CSphereMesh::CSphereMesh(ID3D12Device* pd3dDevice,
 	pVertices[idx++] = bottomVertex;
 
 	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
-  
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
 	vector<UINT> pnVecIndices;
 
 	for (UINT32 i = 1; i <= sliceCount; ++i)
@@ -1225,7 +1230,7 @@ CSphereMesh::CSphereMesh(ID3D12Device* pd3dDevice,
 			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j);
 			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j + 1);
 			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j);
-			
+
 			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j);
 			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j + 1);
 			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j + 1);
@@ -1262,4 +1267,4 @@ CSphereMesh::CSphereMesh(ID3D12Device* pd3dDevice,
 
 CSphereMesh::~CSphereMesh()
 {
-} 
+}
