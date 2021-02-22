@@ -61,6 +61,11 @@ public:
 		m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f); 
 		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f); 
 	}
+	CTexturedVertex(float x, float y, float z, float uvX, float uvY)
+	{
+		m_xmf3Position = XMFLOAT3(x, y, z);
+		m_xmf2TexCoord = XMFLOAT2(uvX, uvY);
+	}
 	CTexturedVertex(float x, float y, float z, XMFLOAT2 xmf2TexCoord) 
 	{ 
 		m_xmf3Position = XMFLOAT3(x, y, z); 
@@ -184,6 +189,17 @@ public:
 		bool isVertical = true);
 	virtual ~CPlaneMeshTextured();
 };
+//////////////////////////////////////////////////////////////////////////////
+//
+class CSphereMesh : public CMesh
+{
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CSphereMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float radius, UINT32 sliceCount, UINT32 stackCount);
+	virtual ~CSphereMesh();
+};
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -256,6 +272,8 @@ typedef struct Meshinfo
 	int vertics;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+//
 class CMeshFbx : public CMesh
 {
 public:

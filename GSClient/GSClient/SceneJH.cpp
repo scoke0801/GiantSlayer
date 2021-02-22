@@ -191,9 +191,10 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pSkyBoxShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured");
 	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
+	//pSkyBoxShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, pSkyBoxShader);
-	 
+	//m_Skybox = new CSkyBoxSphere(pd3dDevice, pd3dCommandList, pSkyBoxShader, 10, 15, 15);
+
 #pragma region Create Terrain
 	// 지형 메쉬 
 	//CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000,10,10);
@@ -219,7 +220,6 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	
 	int index = BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 6, pShader);
 	index = BuildDoorWall(pd3dDevice, pd3dCommandList, index, pShader);
-
 	 
 	///
 	/// FBX Model Test
@@ -247,6 +247,13 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//_ppObjects[1]->Rotate(XMFLOAT3(1, 0, 0), -90);
 	//m_ppObjects[2]->Scale(20, 20, 20)
 
+	CSphereMesh* pSphereMesh = new CSphereMesh(pd3dDevice, pd3dCommandList,
+		30, 20, 20);
+	m_ppObjects[3]->SetMesh(pSphereMesh);
+	m_ppObjects[3]->SetPosition({ 500,  250 + 82.5, 1401 });
+	m_ppObjects[3]->SetTextureIndex(0x80);
+	m_ppObjects[3]->SetShader(pShader);
+
 	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player->SetShader(pShader);
@@ -271,28 +278,28 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	MakeTexture(pd3dDevice, pd3dCommandList, terrainTex.get(), "Terrain", L"resources/OBJ/Terrain.dds");
 
 	auto SkyTex_Front = make_unique<CTexture>();
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Front.get(), "Sky_Front", L"resources/skybox/front.dds");
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Front.get(), "Sky_Front", L"resources/OBJ/SkyBox_Front_0.dds");
+	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Front.get(), "Sky_Front", L"resources/skybox/front.dds");
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Front.get(), "Sky_Front", L"resources/OBJ/SkyBox_Front_0.dds");
 
 	auto SkyTex_Back = make_unique<CTexture>();
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Back.get(), "Sky_Back", L"resources/skybox/back.dds");
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Back.get(), "Sky_Back", L"resources/OBJ/SkyBox_Back_0.dds");
+	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Back.get(), "Sky_Back", L"resources/skybox/back.dds");
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Back.get(), "Sky_Back", L"resources/OBJ/SkyBox_Back_0.dds");
 
 	auto SkyTex_Left = make_unique<CTexture>();
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Left.get(), "Sky_Left", L"resources/skybox/left.dds");
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Left.get(), "Sky_Left", L"resources/OBJ/SkyBox_Left_0.dds");
+	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Left.get(), "Sky_Left", L"resources/skybox/left.dds");
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Left.get(), "Sky_Left", L"resources/OBJ/SkyBox_Left_0.dds");
 
 	auto SkyTex_Right = make_unique<CTexture>();
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Right.get(), "Sky_Right", L"resources/skybox/right.dds");
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Right.get(), "Sky_Right", L"resources/OBJ/SkyBox_Right_0.dds");
+	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Right.get(), "Sky_Right", L"resources/skybox/right.dds");
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Right.get(), "Sky_Right", L"resources/OBJ/SkyBox_Right_0.dds");
 
 	auto SkyTex_Top = make_unique<CTexture>();
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Top.get(), "Sky_Top", L"resources/skybox/top.dds");
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Top.get(), "Sky_Top", L"resources/OBJ/SkyBox_Top_0.dds");
+	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Top.get(), "Sky_Top", L"resources/skybox/top.dds");
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Top.get(), "Sky_Top", L"resources/OBJ/SkyBox_Top_0.dds");
 
 	auto SkyTex_Bottom = make_unique<CTexture>();
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Bottom.get(), "Sky_Bottom", L"resources/skybox/bottom.dds");
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Bottom.get(), "Sky_Bottom", L"resources/OBJ/SkyBox_Bottom_0.dds");
+	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Bottom.get(), "Sky_Bottom", L"resources/skybox/bottom.dds");
+	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Bottom.get(), "Sky_Bottom", L"resources/OBJ/SkyBox_Bottom_0.dds");
 
 	auto boxTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, boxTex.get(), "Box", L"resources/OBJ/Box.dds");
@@ -436,7 +443,8 @@ void CSceneJH::ReleaseObjects()
 void CSceneJH::Update(double elapsedTime)
 {
 	ProcessInput();
-
+	
+	//m_Skybox->Rotate(XMFLOAT3(0, 1, 0), 10 * elapsedTime);
 	for (int i = 0; i < m_nObjects; ++i)
 	{
 		m_ppObjects[i]->Update(elapsedTime);

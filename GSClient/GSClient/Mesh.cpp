@@ -1044,3 +1044,112 @@ CDoorMeshTest::CDoorMeshTest(ID3D12Device* pd3dDevice,
 CDoorMeshTest::~CDoorMeshTest()
 {
 }
+
+CSphereMesh::CSphereMesh(ID3D12Device* pd3dDevice, 
+	ID3D12GraphicsCommandList* pd3dCommandList, 
+	float radius, UINT32 sliceCount, UINT32 stackCount)
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = stackCount * sliceCount + 1;
+	m_nStride = sizeof(CTexturedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	CTexturedVertex topVertex(0.0f, +radius, 0.0f, XMFLOAT2{ 0.0f, 0.0f });
+	CTexturedVertex bottomVertex(0.0f, -radius, 0.0f, XMFLOAT2{ 0.0f, 1.0f });
+	 
+	const int a = m_nVertices;
+	CTexturedVertex *pVertices = new CTexturedVertex[m_nVertices];
+	pVertices[0] = topVertex;
+
+	float phiStep = XM_PI / stackCount;
+	float thetaStep = 2.0f * XM_PI / sliceCount;
+	// Compute vertices for each stack ring (do not count the poles as rings).
+	int idx = 1;
+	for (UINT32 i = 1; i <= stackCount - 1; ++i)
+	{
+		float phi = i * phiStep;
+
+		// Vertices of ring.
+		for (UINT32 j = 0; j <= sliceCount; ++j)
+		{
+			float theta = j * thetaStep;
+			 
+			// spherical to cartesian
+			float x = radius * sinf(phi) * cosf(theta);
+			float y = radius * cosf(phi);
+			float z = radius * sinf(phi) * sinf(theta);
+			 
+			float uvX = theta / XM_2PI;
+			float uvY = phi / XM_PI;
+			pVertices[idx++] = CTexturedVertex(
+				x, y, z,
+				uvX, uvY
+			); 
+		}
+	} 
+	pVertices[idx++] = bottomVertex;
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+	 
+	vector<UINT> pnVecIndices;
+
+	for (UINT32 i = 1; i <= sliceCount; ++i)
+	{
+		pnVecIndices.push_back(0);
+		pnVecIndices.push_back(i + 1);
+		pnVecIndices.push_back(i);
+	}
+
+	UINT32 baseIndex = 1;
+	UINT32 ringVertexCount = sliceCount + 1;
+	for (UINT32 i = 0; i < stackCount - 2; ++i)
+	{
+		for (UINT32 j = 0; j < sliceCount; ++j)
+		{
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j);
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j + 1);
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j);
+			
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j);
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j + 1);
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j + 1);
+		}
+	}
+
+	UINT32 southPoleIndex = (UINT32)m_nVertices - 1;
+
+	// Offset the indices to the index of the first vertex in the last ring.
+	baseIndex = southPoleIndex - ringVertexCount;
+
+	for (UINT32 i = 0; i < sliceCount; ++i)
+	{
+		pnVecIndices.push_back(southPoleIndex);
+		pnVecIndices.push_back(baseIndex + i);
+		pnVecIndices.push_back(baseIndex + i + 1);
+	}
+	m_nIndices = pnVecIndices.size();
+	UINT* pnIndices = new UINT[m_nIndices];
+
+	copy(pnVecIndices.begin(), pnVecIndices.end(), pnIndices);
+
+	m_pd3dIndexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList,
+		pnIndices, sizeof(UINT) * m_nIndices,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
+		&m_pd3dIndexUploadBuffer);
+
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+	delete[] pnIndices;
+}
+
+CSphereMesh::~CSphereMesh()
+{
+}
