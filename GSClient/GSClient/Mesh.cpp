@@ -533,7 +533,10 @@ CPlaneMeshTextured::~CPlaneMeshTextured()
 //////////////////////////////////////////////////////////////////////////////
 //
 
-CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName) : CMesh(pd3dDevice, pd3dCommandList)
+CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	FbxManager* pfbxSdkManager, char* pstrFbxFileName,
+	bool rotateFlag)
+	: CMesh(pd3dDevice, pd3dCommandList)
 {
 	FbxScene* m_pfbxScene = FbxScene::Create(pfbxSdkManager, "");
 	m_pfbxScene = LoadFbxSceneFromFile(pd3dDevice, pd3dCommandList, pfbxSdkManager, pstrFbxFileName);
@@ -550,7 +553,7 @@ CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 
 	cout << "-메쉬 로드:" << pstrFbxFileName << endl;
 
-	LoadMesh(m_pfbxScene->GetRootNode(), temp);
+	LoadMesh(m_pfbxScene->GetRootNode(), temp, rotateFlag);
 
 	m_nVertices = fbxmesh.vertics;
 	m_nStride = sizeof(CTexturedVertex);
@@ -576,7 +579,7 @@ CMeshFbx::~CMeshFbx()
 
 }
 
-void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
+void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag)
 {
 	FbxNodeAttribute* pfbxNodeAttribute = node->GetNodeAttribute();
 
@@ -606,52 +609,36 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
 				float uv1 = fbxUV[0];
 				float uv2 = 1.0f - fbxUV[1];
 
-				
+				float y = pfbxMesh->GetControlPointAt(pvindex).mData[2];
+				float z = pfbxMesh->GetControlPointAt(pvindex).mData[1];
+				if (rotateFlag)
+				{
+					y = pfbxMesh->GetControlPointAt(pvindex).mData[1];
+					z = pfbxMesh->GetControlPointAt(pvindex).mData[2];
+				} 
+
 				info->vertex.push_back(
 					CTexturedVertex(
 						XMFLOAT3(
 							pfbxMesh->GetControlPointAt(pvindex).mData[0],
-							pfbxMesh->GetControlPointAt(pvindex).mData[2],
-							pfbxMesh->GetControlPointAt(pvindex).mData[1]
+							y,
+							z
 						),
 						XMFLOAT2(
 							uv1,
 							uv2
 						)
 					)
-				);
-				
-				
-
-				/*
-				info->vertex.push_back(
-					CDiffusedVertex(
-						XMFLOAT3(
-							pfbxMesh->GetControlPointAt(pvindex).mData[0],
-							pfbxMesh->GetControlPointAt(pvindex).mData[2],
-							pfbxMesh->GetControlPointAt(pvindex).mData[1]
-						),
-						XMFLOAT4(
-							0.3,
-							0.3,
-							0.3,
-							1.0f
-						)
-					)
-				);
-				*/
-				
-
+				); 
 			}
-		}
-
+		} 
 		info->vertics += nPolygons*3;
 	}
 
 	int nChilds = node->GetChildCount();
 	cout << "연결된 차일드 노드 수: " << nChilds << endl;
 	for (int i = 0; i < nChilds; i++) 
-		LoadMesh(node->GetChild(i), info);
+		LoadMesh(node->GetChild(i), info, rotateFlag);
 }
 
 CMeshFromFbx::CMeshFromFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices)

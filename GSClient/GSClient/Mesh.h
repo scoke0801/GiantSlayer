@@ -259,11 +259,14 @@ typedef struct Meshinfo
 class CMeshFbx : public CMesh
 {
 public:
-	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
+	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName,
+		bool rotateFlag = false);
+
+
 	virtual ~CMeshFbx();
 
 public:
-	void LoadMesh(FbxNode* node, Meshinfo* info);
+	void LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag = false);
 };
 
 class CMeshFromFbx

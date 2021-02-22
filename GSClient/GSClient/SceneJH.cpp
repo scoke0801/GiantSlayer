@@ -220,34 +220,49 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	int index = BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 6, pShader);
 	index = BuildDoorWall(pd3dDevice, pd3dCommandList, index, pShader);
 
-	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
-	m_Player->SetShader(pShader);
-	m_Player->SetObjectName(OBJ_NAME::Player );
-	m_Player->SetPosition({ 500,  250 + 82.5, 1501 });
-	m_Player->SetCamera(m_CurrentCamera);
-	m_Player->SetTextureIndex(0x80);
-	//m_Player->SetMesh(fbxMesh);
-
-	m_CurrentCamera->SetTarget(m_Player); 
-	m_MinimapCamera->SetTarget(m_Player);
-
+	 
 	///
 	/// FBX Model Test
 	///
-	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	CShader* pFBXShader = new CShader();
+	pFBXShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
+	pFBXShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
+	pFBXShader->CreateInputLayout(ShaderTypes::Textured);
+	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
-
 	m_ppObjects[1]->SetMesh(fbxMesh);
 	m_ppObjects[1]->SetPosition({ 500,  250, 1650 });
 	m_ppObjects[1]->SetTextureIndex(0x01);
-	m_ppObjects[1]->SetShader(pShader); 
+	m_ppObjects[1]->SetShader(pFBXShader);
 	m_ppObjects[1]->SetTextureIndex(0x80);
+	//m_ppObjects[1]->Rotate(XMFLOAT3(1, 0, 0), -90);
 	m_ppObjects[1]->Scale(20, 20, 20);
+
+	m_ppObjects[2]->SetMesh(fbxMesh);
+	m_ppObjects[2]->SetPosition({ 500,  250, 1750 });
+	m_ppObjects[2]->SetTextureIndex(0x01);
+	m_ppObjects[2]->SetShader(pFBXShader);
+	m_ppObjects[2]->SetTextureIndex(0x80);
+	//_ppObjects[1]->Rotate(XMFLOAT3(1, 0, 0), -90);
+	//m_ppObjects[2]->Scale(20, 20, 20)
+
+	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
+	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
+	m_Player->SetShader(pShader);
+	m_Player->SetObjectName(OBJ_NAME::Player);
+	m_Player->SetPosition({ 500,  250 + 82.5, 1501 });
+	m_Player->SetCamera(m_CurrentCamera);
+	m_Player->SetTextureIndex(0x80);
+	m_Player->SetMesh(fbxMesh);
+	m_Player->Rotate(XMFLOAT3(0, 1, 0), 180);
+
+	//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), -90);
+	 
+	m_CurrentCamera->SetTarget(m_Player);
+	m_MinimapCamera->SetTarget(m_Player); 
+	
+	//m_CurrentCamera->LookAt(m_CurrentCamera->GetPosition3f(), m_Player->GetPosition(), m_Player->GetUp());
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
