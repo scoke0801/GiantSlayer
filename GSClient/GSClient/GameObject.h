@@ -167,14 +167,14 @@ public:
 	float 					m_fTime = 0.0f;
 
 	int 					m_nAnimationStacks = 0;
-	FbxAnimStack**			m_ppfbxAnimationStacks = NULL;
+	FbxAnimStack** m_ppfbxAnimationStacks = NULL;
 
 	int 					m_nAnimationStack = 0;
 
-	FbxTime*				m_pfbxStartTimes = NULL;
-	FbxTime*				m_pfbxStopTimes = NULL;
+	FbxTime* m_pfbxStartTimes = NULL;
+	FbxTime* m_pfbxStopTimes = NULL;
 
-	FbxTime*				m_pfbxCurrentTimes = NULL;
+	FbxTime* m_pfbxCurrentTimes = NULL;
 
 public:
 	void SetAnimationStack(FbxScene* pfbxScene, int nAnimationStack);
@@ -185,12 +185,19 @@ public:
 	void SetPosition(int nAnimationStack, float fPosition);
 };
 
+typedef struct Joint {
+	int mParentIndex;
+	char* pstrFbxFileName;
+	FbxAMatrix mGlobalBindposeInverse;
+	FbxNode mNode;
+};
+
 class CFbxObject : public CGameObject
 {
 public:
 	CFbxObject();
-	CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
-		FbxManager* pfbxSdkManager, FbxScene* pfbxScene, char* pstrFbxFileName);
+	CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+			FbxManager* pfbxSdkManager, char* pstrFbxFileName);
 	virtual ~CFbxObject();
 
 public:
@@ -198,6 +205,10 @@ public:
 	CAnimationController*	m_pAnimationController = NULL;
 
 public:
+	void LoadSkeletonHierarchy(FbxNode* inRootNode);
+	void LoadSkeletonHierarchyRecursively(FbxNode* inNode, int inDepth, int myIndex, int inParentIndex);
+
+	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	

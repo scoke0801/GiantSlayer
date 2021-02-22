@@ -18,6 +18,9 @@ string ConvertToObjectName(const OBJ_NAME& name)
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 CGameObject::CGameObject()
 {
 	m_xmf3Position = { 0, 0, 0 };
@@ -271,6 +274,8 @@ CAnimationController::CAnimationController(FbxScene* pfbxScene)
 	m_pfbxStopTimes = new FbxTime[m_nAnimationStacks];
 	m_pfbxCurrentTimes = new FbxTime[m_nAnimationStacks];
 
+	cout << "애니메이션 스택 사이즈: " << m_nAnimationStacks << endl;
+
 	for (int i = 0; i < m_nAnimationStacks; i++)
 	{
 		FbxString* pfbxStackName = fbxAnimationStackNames[i];
@@ -316,7 +321,7 @@ void CAnimationController::SetAnimationStack(FbxScene* pfbxScene, int nAnimation
 
 void CAnimationController::SetPosition(int nAnimationStack, float fPosition)
 {
-	m_pfbxCurrentTimes[nAnimationStack].SetSecondDouble(fPosition);;
+	m_pfbxCurrentTimes[nAnimationStack].SetSecondDouble(fPosition);
 }
 
 void CAnimationController::AdvanceTime(float fTimeElapsed)
@@ -330,53 +335,111 @@ void CAnimationController::AdvanceTime(float fTimeElapsed)
 	if (m_pfbxCurrentTimes[m_nAnimationStack] > m_pfbxStopTimes[m_nAnimationStack]) m_pfbxCurrentTimes[m_nAnimationStack] = m_pfbxStartTimes[m_nAnimationStack];
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 CFbxObject::CFbxObject()
 {
-	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf3Position = { 0, 0, 0 };
+	m_xmf3Velocity = { 0, 0, 0 };
+
+	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
 }
 
-CFbxObject::CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, FbxScene* pfbxScene, char* pstrFbxFileName)
+CFbxObject::CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName)
 {
-	m_pfbxScene = pfbxScene;
-	if (!m_pfbxScene)
-	{
-		m_pfbxScene = ::LoadFbxSceneFromFile(pd3dDevice, pd3dCommandList, pfbxSdkManager, pstrFbxFileName);
-		::CreateMeshFromFbxNodeHierarchy(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, m_pfbxScene->GetRootNode());
-	}
-	else
-	{
-		cout << "씬 없음..." << endl;
-	}
+	FbxScene* m_pfbxScene = FbxScene::Create(pfbxSdkManager, "");
+	m_pfbxScene = LoadFbxSceneFromFile(pd3dDevice, pd3dCommandList, pfbxSdkManager, pstrFbxFileName);
+
+	CMeshFbx* pFbxtestMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, pfbxSdkManager, pstrFbxFileName);
+
+	SetMesh(pFbxtestMesh);
+
 	m_pAnimationController = new CAnimationController(m_pfbxScene);
 }
 
 CFbxObject::~CFbxObject()
 {
-	if (m_pfbxScene) ::ReleaseMeshFromFbxNodeHierarchy(m_pfbxScene->GetRootNode());
-	if (m_pfbxScene) m_pfbxScene->Destroy();
-
+	if (m_pMesh) m_pMesh->Release();
+	if (m_pShader)
+	{
+		m_pShader->ReleaseShaderVariables();
+		m_pShader->Release();
+	}
 	if (m_pAnimationController) delete m_pAnimationController;
 }
 
-void CFbxObject::Update(float fTimeElapsed)
+void CFbxObject::LoadSkeletonHierarchy(FbxNode* inRootNode)
+{
+	for (int childIndex = 0; childIndex < inRootNode->GetChildCount(); ++childIndex)
+	{
+		FbxNode* currNode = inRootNode->GetChild(childIndex);
+		LoadSkeletonHierarchyRecursively(currNode, 0, 0, -1);
+	}
+}
+
+void CFbxObject::LoadSkeletonHierarchyRecursively(FbxNode* inNode, int inDepth, int myIndex, int inParentIndex)
+{
+	if (inNode->GetNodeAttribute() && inNode->GetNodeAttribute()->GetAttributeType() && inNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+	{
+		int mParentIndex = inParentIndex;
+		string mName = inNode->GetName();
+		//FbxObject mSkeleton
+		//mSkeleton.mJoints.push_back(mSkeleton);
+	}
+
+	for (int i = 0; i < inNode->GetChildCount(); i++)
+	{
+		//LoadSkeletonHierarchyRecursively(inNode->GetChild(i), inDepth + 1, mSkeleton.mJoints.size(), myIndex);
+	}
+}
+
+void CFbxObject::Animate(float fTimeElapsed)
 {
 	if (m_pAnimationController)
 	{
 		m_pAnimationController->AdvanceTime(fTimeElapsed);
 		FbxTime fbxCurrentTime = m_pAnimationController->GetCurrentTime();
-		::AnimateFbxNodeHierarchy(m_pfbxScene->GetRootNode(), fbxCurrentTime);
+		//::AnimateFbxNodeHierarchy(m_pfbxScene->GetRootNode(), fbxCurrentTime);
 	}
+}
+
+void CFbxObject::Update(float fTimeElapsed)
+{
+	static float MaxVelocityXZ = 120.0f;
+	static float MaxVelocityY = 120.0f;
+	static float Friction = 50.0f;
+
+	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Gravity, fTimeElapsed, false));
+	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ = MaxVelocityXZ * fTimeElapsed;
+	if (fLength > MaxVelocityXZ)
+	{
+		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+	}
+	float fMaxVelocityY = MaxVelocityY * fTimeElapsed;
+	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+	if (fLength > MaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
+
+	Move(m_xmf3Velocity);
+
+	fLength = Vector3::Length(m_xmf3Velocity);
+	float fDeceleration = (Friction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+
+	Animate(fTimeElapsed);
 }
 
 void CFbxObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	OnPrepareRender();
 
-	FbxAMatrix fbxf4x4World = ::XmFloat4x4MatrixToFbxMatrix(m_xmf4x4World);
-	if (m_pfbxScene) ::RenderFbxNodeHierarchy(pd3dCommandList, m_pfbxScene->GetRootNode(), m_pAnimationController->GetCurrentTime(), fbxf4x4World);
+	if (m_pShader)
+	{
+		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
+		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
+		m_pShader->Render(pd3dCommandList, pCamera);
+	}
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
 }
 
 void CFbxObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)

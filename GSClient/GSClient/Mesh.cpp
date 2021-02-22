@@ -601,25 +601,38 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
 				FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
 				FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
 
-				fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
+				if (fbxLayerUV != NULL) {
+					fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
 
-				float uv1 = fbxUV[0];
-				float uv2 = 1.0f - fbxUV[1];
+					float uv1 = fbxUV[0];
+					float uv2 = 1.0f - fbxUV[1];
 
-				
-				info->vertex.push_back(
-					CTexturedVertex(
-						XMFLOAT3(
-							pfbxMesh->GetControlPointAt(pvindex).mData[0],
-							pfbxMesh->GetControlPointAt(pvindex).mData[2],
-							pfbxMesh->GetControlPointAt(pvindex).mData[1]
-						),
-						XMFLOAT2(
-							uv1,
-							uv2
+
+					info->vertex.push_back(
+						CTexturedVertex(
+							XMFLOAT3(
+								pfbxMesh->GetControlPointAt(pvindex).mData[0],
+								pfbxMesh->GetControlPointAt(pvindex).mData[2],
+								pfbxMesh->GetControlPointAt(pvindex).mData[1]
+							),
+							XMFLOAT2(
+								uv1,
+								uv2
+							)
 						)
-					)
-				);
+					);
+				}
+				else {
+					info->vertex.push_back(
+						CTexturedVertex(
+							XMFLOAT3(
+								pfbxMesh->GetControlPointAt(pvindex).mData[0],
+								pfbxMesh->GetControlPointAt(pvindex).mData[2],
+								pfbxMesh->GetControlPointAt(pvindex).mData[1]
+							)
+						)
+					);
+				}
 				
 				
 
