@@ -214,8 +214,7 @@ void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 void CGameObject::Scale(float x, float y, float z)
 {
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
-	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World);
-	
+	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World); 
 }
 
 //void CGameObject::Rotate(float x, float y, float z)
@@ -481,19 +480,50 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 CSkyBox::~CSkyBox()
 {
 }
-
+  
 void CSkyBox::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition3f();
 
 	for (int i = 0; i < m_nObjects; ++i)
 		m_ppObjects[i]->SetPosition(xmf3CameraPos);
-
+ 
 	for (int i = 0; i < m_nObjects; ++i)
-		m_ppObjects[i]->Draw(pd3dCommandList, pCamera);
-
+		m_ppObjects[i]->Draw(pd3dCommandList, pCamera); 
 }
 
+void CSkyBox::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
+{
+	//for (int i = 0; i < m_nObjects; ++i)
+		m_ppObjects[4]->Rotate(pxmf3Axis, fAngle);
+}
+
+CSkyBoxSphere::CSkyBoxSphere(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList,
+	CShader* pShader,
+	float radius, UINT32 sliceCount, UINT32 stackCount)
+{
+	m_nObjects = 1;
+	m_ppObjects = new CGameObject * [m_nObjects];
+	for (int i = 0; i < m_nObjects; ++i)
+	{
+		CGameObject* pObject = new CGameObject();
+
+		m_ppObjects[i] = pObject;
+	} 
+
+	// 스카이박스  
+	CSphereMesh* pSphereMesh = new CSphereMesh(pd3dDevice, pd3dCommandList,
+		radius, sliceCount, stackCount);
+	m_ppObjects[0]->SetMesh(pSphereMesh); 
+	m_ppObjects[0]->SetTextureIndex(0x02);
+	m_ppObjects[0]->SetShader(pShader);
+}
+
+CSkyBoxSphere::~CSkyBoxSphere()
+{
+}
+ 
 CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int nBlockWidth, int nBlockLength,CShader* pShader)
 {
 	m_nWidth = nWidth;			// 257
@@ -607,4 +637,3 @@ void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 			m_VectorObjects[i][j].Draw(pd3dCommandList, pCamera);
 	}
 }
-

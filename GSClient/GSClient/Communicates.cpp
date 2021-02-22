@@ -109,3 +109,8 @@ int ConvertoIntFromText(const char* text, const char* token)
     strncpy(buf, text + tokenLen, strlen(text) - tokenLen);
     return atoi(buf);
 }
+
+XMFLOAT3 GetVectorFromText(const char* text)
+{
+    return XMFLOAT3();
+}

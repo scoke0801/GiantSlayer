@@ -1,13 +1,8 @@
 #include "stdafx.h"
-#include "Player.h"
-#include "Shader.h"
+#include "Player.h" 
 
-CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+CPlayer::CPlayer()
 {
-	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
-		 50.0f, 165.0f, 50.0f );
-
-	//SetMesh(pCubeMeshTex);
 }
 
 CPlayer::~CPlayer()
@@ -23,11 +18,7 @@ void CPlayer::Update(double fTimeElapsed)
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
-	Move(vel);
-	 
-	m_Camera->Update(m_xmf3Position, fTimeElapsed);
-	m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
-	m_Camera->UpdateViewMatrix();
+	Move(vel); 
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 
@@ -36,29 +27,7 @@ void CPlayer::Update(double fTimeElapsed)
 }
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)
-{ 
-	bool isMoving = IsMoving();
-	if (!isMoving)
-	{
-		if (m_Camera != nullptr)
-		{
-			cout << "이동전 Look벡터 ";
-			DisplayVector3(GetLook());
-			DisplayVector3(m_Camera->GetLook3f());
-			 
-			XMFLOAT3 cameraLookAt = Vector3::Normalize(m_Camera->GetLook3f()); 
-			XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook());
-	
-			//float angle = Vector3::Angle(cameraLookAt, playerLookAt);
-			float angle = Vector3::AngleAtan(cameraLookAt, playerLookAt) ;
-			cout << "각도 : " << angle << "\n";
-	
-			Rotate(XMFLOAT3(0, 1, 0), XMConvertToRadians(-angle)); 
-	
-			cout <<  " 이동후Look벡터 ";
-			DisplayVector3(GetLook());
-		}
-	}	
+{   
 	XMFLOAT3 look = GetLook();// m_Camera->GetLook3f(); 
 	XMFLOAT3 right = GetRight();//m_Camera->GetRight3f();
 	look = Vector3::Normalize(look);

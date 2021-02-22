@@ -533,7 +533,10 @@ CPlaneMeshTextured::~CPlaneMeshTextured()
 //////////////////////////////////////////////////////////////////////////////
 //
 
-CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName) : CMesh(pd3dDevice, pd3dCommandList)
+CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	FbxManager* pfbxSdkManager, char* pstrFbxFileName,
+	bool rotateFlag)
+	: CMesh(pd3dDevice, pd3dCommandList)
 {
 	FbxScene* m_pfbxScene = FbxScene::Create(pfbxSdkManager, "");
 	m_pfbxScene = LoadFbxSceneFromFile(pd3dDevice, pd3dCommandList, pfbxSdkManager, pstrFbxFileName);
@@ -550,7 +553,7 @@ CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 
 	cout << "-메쉬 로드:" << pstrFbxFileName << endl;
 
-	LoadMesh(m_pfbxScene->GetRootNode(), temp);
+	LoadMesh(m_pfbxScene->GetRootNode(), temp, rotateFlag);
 
 	m_nVertices = fbxmesh.vertics;
 	m_nStride = sizeof(CTexturedVertex);
@@ -576,7 +579,7 @@ CMeshFbx::~CMeshFbx()
 
 }
 
-void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
+void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag)
 {
 	FbxNodeAttribute* pfbxNodeAttribute = node->GetNodeAttribute();
 
@@ -606,52 +609,36 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
 				float uv1 = fbxUV[0];
 				float uv2 = 1.0f - fbxUV[1];
 
-				
+				float y = pfbxMesh->GetControlPointAt(pvindex).mData[2];
+				float z = pfbxMesh->GetControlPointAt(pvindex).mData[1];
+				if (rotateFlag)
+				{
+					y = pfbxMesh->GetControlPointAt(pvindex).mData[1];
+					z = pfbxMesh->GetControlPointAt(pvindex).mData[2];
+				} 
+
 				info->vertex.push_back(
 					CTexturedVertex(
 						XMFLOAT3(
 							pfbxMesh->GetControlPointAt(pvindex).mData[0],
-							pfbxMesh->GetControlPointAt(pvindex).mData[2],
-							pfbxMesh->GetControlPointAt(pvindex).mData[1]
+							y,
+							z
 						),
 						XMFLOAT2(
 							uv1,
 							uv2
 						)
 					)
-				);
-				
-				
-
-				/*
-				info->vertex.push_back(
-					CDiffusedVertex(
-						XMFLOAT3(
-							pfbxMesh->GetControlPointAt(pvindex).mData[0],
-							pfbxMesh->GetControlPointAt(pvindex).mData[2],
-							pfbxMesh->GetControlPointAt(pvindex).mData[1]
-						),
-						XMFLOAT4(
-							0.3,
-							0.3,
-							0.3,
-							1.0f
-						)
-					)
-				);
-				*/
-				
-
+				); 
 			}
-		}
-
+		} 
 		info->vertics += nPolygons*3;
 	}
 
 	int nChilds = node->GetChildCount();
 	cout << "연결된 차일드 노드 수: " << nChilds << endl;
 	for (int i = 0; i < nChilds; i++) 
-		LoadMesh(node->GetChild(i), info);
+		LoadMesh(node->GetChild(i), info, rotateFlag);
 }
 
 CMeshFromFbx::CMeshFromFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices)
@@ -1056,7 +1043,7 @@ CDoorMeshTest::CDoorMeshTest(ID3D12Device* pd3dDevice,
 CDoorMeshTest::~CDoorMeshTest()
 {
 }
-
+ 
 CTerrainSinMesh::CTerrainSinMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index)
 	:CMesh(pd3dDevice, pd3dCommandList)
 {
@@ -1098,11 +1085,11 @@ CTerrainSinMesh::CTerrainSinMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
-
+  
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
-
+  
 	delete[] pVertices;
 }
 
@@ -1151,8 +1138,7 @@ CTerrainCosMesh::CTerrainCosMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
 		}
 	}
-
-
+	 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
@@ -1172,3 +1158,108 @@ float CTerrainCosMesh::OnGetCosHeight(float x, float z)
 {
 	return 0.0f;
 }
+
+CSphereMesh::CSphereMesh(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList,
+	float radius, UINT32 sliceCount, UINT32 stackCount)
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = stackCount * sliceCount + 1;
+	m_nStride = sizeof(CTexturedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	CTexturedVertex topVertex(0.0f, +radius, 0.0f, XMFLOAT2{ 0.0f, 0.0f });
+	CTexturedVertex bottomVertex(0.0f, -radius, 0.0f, XMFLOAT2{ 0.0f, 1.0f });
+
+	const int a = m_nVertices;
+	CTexturedVertex* pVertices = new CTexturedVertex[m_nVertices];
+	pVertices[0] = topVertex;
+
+	float phiStep = XM_PI / stackCount;
+	float thetaStep = 2.0f * XM_PI / sliceCount;
+	// Compute vertices for each stack ring (do not count the poles as rings).
+	int idx = 1;
+	for (UINT32 i = 1; i <= stackCount - 1; ++i)
+	{
+		float phi = i * phiStep;
+
+		// Vertices of ring.
+		for (UINT32 j = 0; j <= sliceCount; ++j)
+		{
+			float theta = j * thetaStep;
+
+			// spherical to cartesian
+			float x = radius * sinf(phi) * cosf(theta);
+			float y = radius * cosf(phi);
+			float z = radius * sinf(phi) * sinf(theta);
+
+			float uvX = theta / XM_2PI;
+			float uvY = phi / XM_PI;
+			pVertices[idx++] = CTexturedVertex(
+				x, y, z,
+				uvX, uvY
+			);
+		}
+	}
+	pVertices[idx++] = bottomVertex;
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+  
+	vector<UINT> pnVecIndices;
+
+	for (UINT32 i = 1; i <= sliceCount; ++i)
+	{
+		pnVecIndices.push_back(0);
+		pnVecIndices.push_back(i + 1);
+		pnVecIndices.push_back(i);
+	}
+
+	UINT32 baseIndex = 1;
+	UINT32 ringVertexCount = sliceCount + 1;
+	for (UINT32 i = 0; i < stackCount - 2; ++i)
+	{
+		for (UINT32 j = 0; j < sliceCount; ++j)
+		{
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j);
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j + 1);
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j);
+			
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j);
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j + 1);
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j + 1);
+		}
+	}
+
+	UINT32 southPoleIndex = (UINT32)m_nVertices - 1;
+
+	// Offset the indices to the index of the first vertex in the last ring.
+	baseIndex = southPoleIndex - ringVertexCount;
+
+	for (UINT32 i = 0; i < sliceCount; ++i)
+	{
+		pnVecIndices.push_back(southPoleIndex);
+		pnVecIndices.push_back(baseIndex + i);
+		pnVecIndices.push_back(baseIndex + i + 1);
+	}
+	m_nIndices = pnVecIndices.size();
+	UINT* pnIndices = new UINT[m_nIndices];
+
+	copy(pnVecIndices.begin(), pnVecIndices.end(), pnIndices);
+
+	m_pd3dIndexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList,
+		pnIndices, sizeof(UINT) * m_nIndices,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
+		&m_pd3dIndexUploadBuffer);
+
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+	delete[] pnIndices;
+}
+
+CSphereMesh::~CSphereMesh()
+{
+} 

@@ -217,20 +217,31 @@ public:
 
 class CSkyBox  
 {
-private:
+protected:
 	int						m_nObjects;
 	CGameObject**			m_ppObjects;
 
+	CSkyBox() {}
 public:
+	
 	CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		CShader* pShader);
+	 
 	virtual ~CSkyBox();
 
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle); 
 };
 
+class CSkyBoxSphere : public CSkyBox
+{ 
+public: 
+	CSkyBoxSphere(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		CShader* pShader, float radius, UINT32 sliceCount, UINT32 stackCount);
+	virtual ~CSkyBoxSphere();
+};
 
-class CTerrain
+class CTerrain 
 {
 public:
 	CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int nBlockWidth, int nBlockLength,CShader* pShader);

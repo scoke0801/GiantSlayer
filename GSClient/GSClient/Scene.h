@@ -16,6 +16,13 @@ protected:
 	
 	unordered_map<string, unique_ptr<CShader*>> m_pShaders;
 	 
+protected:
+	// about FBX
+	FbxManager* m_pfbxManager = nullptr;
+	FbxScene* m_pfbxScene = nullptr;
+	FbxIOSettings* m_pfbxIOs = nullptr;
+	FbxImporter* m_pfbxImporter = nullptr;
+
 public:
 	CScene();
 	virtual ~CScene();
