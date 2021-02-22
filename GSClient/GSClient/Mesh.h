@@ -326,7 +326,7 @@ protected:
 
 public:
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		int nWidth, int nLength, int BlockWidth, int BlockDepth, int WidthBlock_Index, int DepthBlock_Index);
+		int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index);
 	
 	~CTerrainMesh();
 
@@ -334,6 +334,45 @@ public:
 	virtual float OnGetHeight(float x, float z);
 
 };
+
+class CTerrainSinMesh : public CMesh
+{
+protected:
+	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+
+	int m_nWidth;
+	int m_nDepth;
+
+public:
+	CTerrainSinMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index);
+
+	~CTerrainSinMesh();
+
+	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
+	virtual float OnGetSinHeight(float x, float z);
+
+};
+
+class CTerrainCosMesh : public CMesh
+{
+protected:
+	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+
+	int m_nWidth;
+	int m_nDepth;
+
+public:
+	CTerrainCosMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index);
+
+	~CTerrainCosMesh();
+
+	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
+	virtual float OnGetCosHeight(float x, float z);
+
+};
+
 class CTerrainWayMesh : public CMesh
 {
 protected:

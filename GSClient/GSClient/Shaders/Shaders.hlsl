@@ -134,8 +134,9 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 struct VS_TERRAIN_INPUT
 {
     float3 position : POSITION;
-    float4 color : COLOR;
     float2 uv0 : TEXCOORD0;
+    float4 color : COLOR;
+    
 };
 
 struct VS_TERRAIN_OUTPUT
