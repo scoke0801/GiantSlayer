@@ -23,3 +23,5 @@ bool SendFrameData(SOCKET& sock, string& str, int& retval);
 bool RecvFrameData(SOCKET& sock, char* buf, int& retval);
  
 int ConvertoIntFromText(const char* text, const char* token);
+
+XMFLOAT3 GetVectorFromText(const char* text);
