@@ -7,7 +7,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
 		 50.0f, 165.0f, 50.0f );
 
-	SetMesh(pCubeMeshTex);
+	//SetMesh(pCubeMeshTex);
 }
 
 CPlayer::~CPlayer()
@@ -24,10 +24,14 @@ void CPlayer::Update(double fTimeElapsed)
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
 	Move(vel);
-	 
+
+	//Scale(m_xmf3Size.x * 0.01, m_xmf3Size.y * 0.01, m_xmf3Size.z * 0.01, false);
+
 	m_Camera->Update(m_xmf3Position, fTimeElapsed);
 	m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
 	m_Camera->UpdateViewMatrix();
+
+	//Scale(m_xmf3Size.x, m_xmf3Size.y, m_xmf3Size.z, false);
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 

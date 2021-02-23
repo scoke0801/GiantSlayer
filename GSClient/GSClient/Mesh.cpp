@@ -770,9 +770,8 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice,
 				assert(!"그런 지형 높이 함수는 없는데요");
 				break;
 			} 
-			pVertices[i].m_xmf3Position = XMFLOAT3(x/2 , tempheight , z/2);
+			pVertices[i].m_xmf3Position = XMFLOAT3(x/2 , tempheight, z/2);
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
-			//pVertices[i].m_xmf3Normal = XMFLOAT3(1, 0, z/9);
 			pVertices[i].m_xmf4Color = XMFLOAT4(1, 1, 1, 0);
 			 
 			if (tempheight < fMinHeight) tempheight = fMinHeight;
@@ -794,11 +793,6 @@ CTerrainMesh::~CTerrainMesh()
 {
 }
 
-float CTerrainMesh::OnGetHeight(float x, float z)
-{
-	return 50.f * (z * sinf(0.7f * x) + x * cosf(0.7f * z));	
-}
-
 float CTerrainMesh::GetHeightUpRidge(float x, float z, float waveSize)
 {
 	return waveSize * cosf(XMConvertToRadians((x - 4) / 8) * 180);
@@ -808,8 +802,7 @@ float CTerrainMesh::GetHeightDownRidge(float x, float z, float waveSize)
 {
 	return waveSize * cosf(XMConvertToRadians((x - 4 + 8) / 8) * 180);
 }
-
-
+ 
 ///////////////////////////////////////////////////////////////////////////////
 //
 CDoorMesh::CDoorMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,

@@ -45,9 +45,10 @@ private:
 protected:
 	XMFLOAT4X4			m_xmf4x4World;
 
-	XMFLOAT3			m_xmf3Position;
-	XMFLOAT3			m_xmf3Velocity;
-	 
+	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
+	XMFLOAT3			m_xmf3Velocity = XMFLOAT3{ 0,0,0 };
+	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
+
 	CMesh*				m_pMesh = NULL;
 	CShader*			m_pShader = NULL;
  
@@ -95,7 +96,7 @@ public:
 
 	bool CollisionCheck() { return false; };
 
-	void Scale(float x, float y, float z);
+	void Scale(float x, float y, float z, bool setSize = true);
 
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
@@ -106,6 +107,7 @@ public:
 	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
 	virtual void SetPosition(XMFLOAT3 pos);
+	virtual void SetPositionPlus(XMFLOAT3 pos);
 	void SetVelocity(XMFLOAT3 vel); 
 	virtual void SetVelocity(OBJ_DIRECTION direction);
 
@@ -252,12 +254,11 @@ public:
 private:
 	int						m_nWidth;
 	int						m_nLength;
+
 	int						m_nObjects;
-	CGameObject**			m_ppObjects;
-	vector<vector<CGameObject>> m_VectorObjects;
 	vector<CGameObject*>    m_Objects;
+
 	long cxBlocks;
 	long czBlocks;
-
 };
 
