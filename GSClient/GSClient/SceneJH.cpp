@@ -213,12 +213,10 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	
-	//int index = BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 6, pShader);
-	//index = BuildDoorWall(pd3dDevice, pd3dCommandList, index, pShader);
-	// 
-	///
-	/// FBX Model Test
-	///
+	int index = BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 6, pShader);
+	index = BuildDoorWall(pd3dDevice, pd3dCommandList, index, pShader);
+	
+	/// FBX Model
 	CShader* pFBXShader = new CShader();
 	pFBXShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
 	pFBXShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
@@ -254,6 +252,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetShader(pShader);
 	m_Player->SetObjectName(OBJ_NAME::Player);
 	//m_Player->SetPosition({ 500,  250 + 82.5, 1501 });
+	m_Player->SetPosition({ 500,  -250, 1501 });
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
 	//m_Player->SetMesh(fbxMesh);

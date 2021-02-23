@@ -170,8 +170,7 @@ void CGameSceneProto::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 void CGameSceneProto::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 지형 메쉬
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 50, 50,10,10);
-	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 10, 100);
+	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 50, 50,10,10); 
 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -216,13 +215,7 @@ void CGameSceneProto::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_ppObjects[3]->SetMesh(pPlaneMeshTex);
 	m_ppObjects[3]->SetPosition({ 500,  0,  500 });
 	m_ppObjects[3]->SetTextureIndex(0x01);
-	m_ppObjects[3]->SetShader(pShader);
-
-	m_ppObjects[4]->SetMesh(pEdgeMeshTex);
-	m_ppObjects[4]->SetPosition({ 0,  0,  0 });
-	m_ppObjects[4]->Rotate(XMFLOAT3( 0,1,0 ), 90);
-	m_ppObjects[4]->SetTextureIndex(0x01);
-	m_ppObjects[4]->SetShader(pShader);
+	m_ppObjects[3]->SetShader(pShader); 
 #pragma endregion 
 
 	CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
