@@ -157,18 +157,16 @@ void CGameScene::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 }
 
 void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-
-	// 지형 메쉬 
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000,10,10);
-	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
-
+{  
 	m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
-	CMeshFbx* pTowerMeshTex = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Medieval tower_Mid.fbx");
+	//CMeshFbx* pTowerMeshTex = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Medieval tower_Mid.fbx");
+	// 지형 메쉬 
+	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000, 10, 10);
+	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -186,13 +184,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, pSkyBoxShader);
-
-	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
-	pShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
+	 
 	CShader* pTerrainShader = new CTerrainTessellationShader();
 	pTerrainShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTerrainTessellation");
 	pTerrainShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTerrainTessellation");
@@ -204,6 +196,12 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 #pragma region Create Terrain
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, 257, 257, 9, 9, pTerrainShader);
 #pragma endregion 
+
+	CShader* pObjectShader = new CShader();
+	pObjectShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
+	pObjectShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
+	pObjectShader->CreateInputLayout(ShaderTypes::Textured);
+	pObjectShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	/*CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
 	pBox->SetShader(pShader);

@@ -544,38 +544,31 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 		vector<CGameObject> element(m_nObjects);
 		m_VectorObjects.push_back(element);
 	}
+	 
+	CTerrainMesh* pTerrainPlaneMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList, 
+		0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks, MapMeshHeightType::Plane);
+	CTerrainMesh* pTerrainUpRidgeMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks, MapMeshHeightType::UpRidge);
+	CTerrainMesh* pTerrainDownRidgeMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks, MapMeshHeightType::DownRidge);
 
-	CTerrainMesh* pTerrainMesh = NULL;
-
-	pTerrainMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks);
-
-	CTerrainCosMesh* pTerrainCosMesh = NULL;
-
-	pTerrainCosMesh = new CTerrainCosMesh(pd3dDevice, pd3dCommandList, 0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks);
-
-	CTerrainSinMesh* pTerrainSinMesh = NULL;
-
-	pTerrainSinMesh = new CTerrainSinMesh(pd3dDevice, pd3dCommandList, 0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks);
-	
-	
 	// Ã¹ ¼¶ ÁöÇü
 	for (int j = 0; j <18 ; j++)
 	{
 		for (int i = 0; i < 18; i++)
-		{
-			
+		{ 
 			m_VectorObjects[i][j].SetTextureIndex(0x01);
 			
 			m_VectorObjects[i][j].SetShader(pShader);
 			if (j < 3 && i < 3)
 			{
-				m_VectorObjects[i][j].SetMesh(pTerrainMesh);
+				m_VectorObjects[i][j].SetMesh(pTerrainUpRidgeMesh);
 				m_VectorObjects[i][j].Scale(400.0f, 1.0f, 700.0f);
-				m_VectorObjects[i][j].SetPosition(XMFLOAT3(i * 1400.0f, -100.0f, j * 2600.0f));
+				m_VectorObjects[i][j].SetPosition(XMFLOAT3(i * 1600.0f, -100.0f, j * 2800.0f));
 			}
 			if (j < 6 && i < 6 && j>=3 && i>=3)
 			{
-				m_VectorObjects[i][j].SetMesh(pTerrainSinMesh);
+				m_VectorObjects[i][j].SetMesh(pTerrainDownRidgeMesh);
 				m_VectorObjects[i][j].Scale(400.0f, 1.0f, 700.0f);
 				m_VectorObjects[i][j].SetPosition(XMFLOAT3((i-3) * 1600.0f, -500.0f, j * 2800.0f+2500.0f));
 			}
@@ -609,20 +602,14 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 				m_VectorObjects[i][j].SetMesh(pTerrainMesh);
 				m_VectorObjects[i][j].Scale(400.0f, 1.0f, 500.0f);
 				m_VectorObjects[i][j].SetPosition(XMFLOAT3((i - 7.5) * 1600.0f + 1000.0f, -300.0f, (j - 9) * 2000.0f+1000.0f));
-			}*/
-			
-			
+			}*/ 
 		}
-	}
-
-	
+	} 
 	m_VectorObjects[19][19].Scale(5000.0f, 1.0f, 5000.0f);
 	m_VectorObjects[19][19].SetTextureIndex(0x01);
-	m_VectorObjects[19][19].SetMesh(pTerrainMesh);
+	m_VectorObjects[19][19].SetMesh(pTerrainPlaneMesh);
 	m_VectorObjects[19][19].SetShader(pShader);
-	m_VectorObjects[19][19].SetPosition(XMFLOAT3(0.0f, -5000.0f, 0.0f));
-
-
+	m_VectorObjects[19][19].SetPosition(XMFLOAT3(0.0f, -5000.0f, 0.0f)); 
 }
 
 CTerrain::~CTerrain()

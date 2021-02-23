@@ -337,6 +337,14 @@ public:
 	~CMinimapMesh();
 };
 
+//////////////////////////////////////////////////////////////////////////////
+//
+enum class MapMeshHeightType
+{
+	Plane = 0,
+	UpRidge,
+	DownRidge,
+};
 class CTerrainMesh : public CMesh
 {
 protected:
@@ -347,13 +355,17 @@ protected:
 
 public:
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index);
+		int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index,
+		MapMeshHeightType heightType = MapMeshHeightType::Plane);
 	
 	~CTerrainMesh();
 
 	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
 	virtual float OnGetHeight(float x, float z);
 
+	float GetHeightPlane(float x, float z) const { return 0; }
+	float GetHeightUpRidge(float x, float z, float waveSize);
+	float GetHeightDownRidge(float x, float z, float waveSize);
 };
 
 class CTerrainSinMesh : public CMesh
