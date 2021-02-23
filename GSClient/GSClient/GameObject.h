@@ -255,6 +255,7 @@ private:
 	int						m_nObjects;
 	CGameObject**			m_ppObjects;
 	vector<vector<CGameObject>> m_VectorObjects;
+	vector<CGameObject*>    m_Objects;
 	long cxBlocks;
 	long czBlocks;
 
