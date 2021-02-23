@@ -211,6 +211,12 @@ void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
+void CGameObject::Scale(float x, float y, float z)
+{
+	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
+	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World); 
+}
+
 //void CGameObject::Rotate(float x, float y, float z)
 //{
 //	static float pitch, yaw, roll;
@@ -474,19 +480,50 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 CSkyBox::~CSkyBox()
 {
 }
-
+  
 void CSkyBox::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition3f();
 
 	for (int i = 0; i < m_nObjects; ++i)
 		m_ppObjects[i]->SetPosition(xmf3CameraPos);
-
+ 
 	for (int i = 0; i < m_nObjects; ++i)
-		m_ppObjects[i]->Draw(pd3dCommandList, pCamera);
-
+		m_ppObjects[i]->Draw(pd3dCommandList, pCamera); 
 }
 
+void CSkyBox::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
+{
+	//for (int i = 0; i < m_nObjects; ++i)
+		m_ppObjects[4]->Rotate(pxmf3Axis, fAngle);
+}
+
+CSkyBoxSphere::CSkyBoxSphere(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList,
+	CShader* pShader,
+	float radius, UINT32 sliceCount, UINT32 stackCount)
+{
+	m_nObjects = 1;
+	m_ppObjects = new CGameObject * [m_nObjects];
+	for (int i = 0; i < m_nObjects; ++i)
+	{
+		CGameObject* pObject = new CGameObject();
+
+		m_ppObjects[i] = pObject;
+	} 
+
+	// 스카이박스  
+	CSphereMesh* pSphereMesh = new CSphereMesh(pd3dDevice, pd3dCommandList,
+		radius, sliceCount, stackCount);
+	m_ppObjects[0]->SetMesh(pSphereMesh); 
+	m_ppObjects[0]->SetTextureIndex(0x02);
+	m_ppObjects[0]->SetShader(pShader);
+}
+
+CSkyBoxSphere::~CSkyBoxSphere()
+{
+}
+ 
 CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int nBlockWidth, int nBlockLength,CShader* pShader)
 {
 	m_nWidth = nWidth;			// 257
@@ -499,43 +536,80 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	long czBlocks = (m_nLength - 1) / czQuadsPerBlock;	// 32
 
 	m_nObjects = cxBlocks * czBlocks;
+
 	m_ppObjects = new CGameObject * [m_nObjects];
 
-	for (int i = 0; i < m_nObjects; i++) 
+	for (int i = 0; i < m_nObjects; i++)
 	{
-		CGameObject* pObject = new CGameObject();
-
-		m_ppObjects[i] = pObject;
+		vector<CGameObject> element(m_nObjects);
+		m_VectorObjects.push_back(element);
 	}
+	 
+	CTerrainMesh* pTerrainPlaneMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList, 
+		0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks, MapMeshHeightType::Plane);
+	CTerrainMesh* pTerrainUpRidgeMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks, MapMeshHeightType::UpRidge);
+	CTerrainMesh* pTerrainDownRidgeMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks, MapMeshHeightType::DownRidge);
 
-	CTerrainMesh* pTerrainMesh = NULL;
-
-	for (int z = 0, zStart = 0; z < czBlocks; z++)
+	// 첫 섬 지형
+	for (int j = 0; j <18 ; j++)
 	{
-		for (int x = 0, xStart = 0; x < cxBlocks; x++)
-		{
-			pTerrainMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks);
+		for (int i = 0; i < 18; i++)
+		{ 
+			m_VectorObjects[i][j].SetTextureIndex(0x01);
+			
+			m_VectorObjects[i][j].SetShader(pShader);
+			if (j < 3 && i < 3)
+			{
+				m_VectorObjects[i][j].SetMesh(pTerrainDownRidgeMesh);
+				m_VectorObjects[i][j].Scale(400.0f, 1.0f, 700.0f);
+				m_VectorObjects[i][j].SetPosition(XMFLOAT3(i * 1600.0f, -100.0f, j * 2800.0f));
+			}
+			if (j < 6 && i < 6 && j>=3 && i>=3)
+			{
+				m_VectorObjects[i][j].SetMesh(pTerrainUpRidgeMesh);
+				m_VectorObjects[i][j].Scale(400.0f, 1.0f, 700.0f);
+				m_VectorObjects[i][j].SetPosition(XMFLOAT3((i-3) * 1600.0f, -500.0f, j * 2800.0f+2500.0f));
+			}
+
+			/*if (j < 9 && i < 9 && j >= 6 && i >= 6)
+			{
+				m_VectorObjects[i][j].SetMesh(pTerrainMesh);
+				m_VectorObjects[i][j].Scale(400.0f, 1.0f, 700.0f);
+				m_VectorObjects[i][j].SetPosition(XMFLOAT3((i - 3) * 1600.0f+1000.0f, -300.0f, (j-6) * 2800.0f));
+			}
+			if (j < 12 && i < 12 && j >= 9 && i >= 9)
+			{
+				m_VectorObjects[i][j].SetMesh(pTerrainMesh);
+				m_VectorObjects[i][j].Scale(400.0f, 1.0f, 700.0f);
+				m_VectorObjects[i][j].SetPosition(XMFLOAT3((i - 6) * 1600.0f + 1000.0f, -300.0f, (j - 6) * 2800.0f+2500.0f));
+			}
+			if (j < 15 && i < 15 && j >= 12 && i >= 12)
+			{
+				m_VectorObjects[i][j].SetMesh(pTerrainMesh);
+				m_VectorObjects[i][j].Scale(400.0f, 1.0f, 500.0f);
+				m_VectorObjects[i][j].SetPosition(XMFLOAT3((i - 6) * 1600.0f + 1500.0f, -300.0f, (j - 12) * 2000.0f));
+			}
+			if (j < 16 && i < 16 && j >= 15 && i >= 15)
+			{
+				m_VectorObjects[i][j].SetMesh(pTerrainMesh);
+				m_VectorObjects[i][j].Scale(200.0f, 1.0f, 2000.0f);
+				m_VectorObjects[i][j].SetPosition(XMFLOAT3((i - 6) * 1600.0f + 1800.0f, -300.0f, (j - 15) * 2000.0f));
+			}
+			if (j < 19 && i < 19 && j >= 16 && i >= 16)
+			{
+				m_VectorObjects[i][j].SetMesh(pTerrainMesh);
+				m_VectorObjects[i][j].Scale(400.0f, 1.0f, 500.0f);
+				m_VectorObjects[i][j].SetPosition(XMFLOAT3((i - 7.5) * 1600.0f + 1000.0f, -300.0f, (j - 9) * 2000.0f+1000.0f));
+			}*/ 
 		}
-	}
-
-	/*CTerrainMesh** pTerrainMesh = new CTerrainMesh * [cxBlocks * czBlocks];
-
-	for (int z = 0, zStart = 0; z < czBlocks; z++)
-	{
-		for (int x = 0, xStart = 0; x < cxBlocks; x++)
-		{
-			pTerrainMesh[x+(cxBlocks*z)] = new CTerrainMesh(pd3dDevice, pd3dCommandList, x, z, nBlockWidth, nBlockLength,cxBlocks,czBlocks);
-		}
-	}*/
-
-	for (int i = 0; i < 10; i++)
-	{
-		m_ppObjects[i]->SetTextureIndex(0x01);
-		m_ppObjects[i]->SetMesh(pTerrainMesh);
-		m_ppObjects[i]->SetShader(pShader);
-		m_ppObjects[i]->SetPosition(XMFLOAT3(i, 200.0f,i*200.0f));
-
-	}
+	} 
+	m_VectorObjects[19][19].Scale(5000.0f, 1.0f, 5000.0f);
+	m_VectorObjects[19][19].SetTextureIndex(0x01);
+	m_VectorObjects[19][19].SetMesh(pTerrainPlaneMesh);
+	m_VectorObjects[19][19].SetShader(pShader);
+	m_VectorObjects[19][19].SetPosition(XMFLOAT3(0.0f, -5000.0f, 0.0f)); 
 }
 
 CTerrain::~CTerrain()
@@ -544,7 +618,11 @@ CTerrain::~CTerrain()
 
 void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	for (int i = 0; i < m_nObjects; ++i)
-		m_ppObjects[i]->Draw(pd3dCommandList, pCamera);
+	for (int j = 0; j < 32; ++j)
+	{
+		for (int i = 0; i < 32; ++i)
+		{
+			m_VectorObjects[i][j].Draw(pd3dCommandList, pCamera);
+		}
+	}
 }
-

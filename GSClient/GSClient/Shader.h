@@ -56,8 +56,8 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 	
-	D3D12_SHADER_BYTECODE CreateVertexShader(WCHAR* pszFileName, LPCSTR pszShaderName);
-	D3D12_SHADER_BYTECODE CreatePixelShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(WCHAR* pszFileName, LPCSTR pszShaderName);
 
 	virtual D3D12_SHADER_BYTECODE CreateDomainShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE CreateHullShader(ID3DBlob** ppd3dShaderBlob);
@@ -76,6 +76,9 @@ public:
 	virtual void CreateGeneralShader(ID3D12Device* pd3dDevice,
 		ID3D12RootSignature* pd3dGraphicsRootSignature,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	void CreateFBXMeshShader(ID3D12Device* pd3dDevice,
+		ID3D12RootSignature* pd3dGraphicsRootSignature);
+
 	virtual void CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice,
@@ -106,6 +109,7 @@ public:
 	virtual void CreateShader(ID3D12Device* pd3dDevice,
 		ID3D12RootSignature* pd3dGraphicsRootSignature);
 };
+
 class CTexturedShader : public CShader
 {
 private:
@@ -161,21 +165,11 @@ public:
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
 };
 
-
-
 class CTerrainTessellationShader : public CShader
 {
 public:
 	CTerrainTessellationShader();
 	virtual ~CTerrainTessellationShader();
-
-	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
-
-	virtual D3D12_SHADER_BYTECODE CreateDomainShader(ID3DBlob** ppd3dShaderBlob);
-	virtual D3D12_SHADER_BYTECODE CreateHullShader(ID3DBlob** ppd3dShaderBlob);
-
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
-	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

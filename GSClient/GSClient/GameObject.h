@@ -95,6 +95,8 @@ public:
 
 	bool CollisionCheck() { return false; };
 
+	void Scale(float x, float y, float z);
+
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
 	string GetObjectName() const { return ConvertToObjectName(m_Name); }
@@ -215,20 +217,31 @@ public:
 
 class CSkyBox  
 {
-private:
+protected:
 	int						m_nObjects;
 	CGameObject**			m_ppObjects;
 
+	CSkyBox() {}
 public:
+	
 	CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		CShader* pShader);
+	 
 	virtual ~CSkyBox();
 
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle); 
 };
 
+class CSkyBoxSphere : public CSkyBox
+{ 
+public: 
+	CSkyBoxSphere(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		CShader* pShader, float radius, UINT32 sliceCount, UINT32 stackCount);
+	virtual ~CSkyBoxSphere();
+};
 
-class CTerrain
+class CTerrain 
 {
 public:
 	CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int nBlockWidth, int nBlockLength,CShader* pShader);
@@ -241,7 +254,9 @@ private:
 	int						m_nLength;
 	int						m_nObjects;
 	CGameObject**			m_ppObjects;
-
+	vector<vector<CGameObject>> m_VectorObjects;
+	long cxBlocks;
+	long czBlocks;
 
 };
 

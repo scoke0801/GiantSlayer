@@ -36,16 +36,16 @@ public:
 	~CDiffusedVertex() { }
 };
 
-class CTerrainTexturedVertex : public CVertex
+class CTerrainVertex : public CVertex
 {
 public:
-	XMFLOAT2						m_xmf2TexCoord;
-
+	XMFLOAT2				m_xmf2TexCoord;
+	XMFLOAT4				m_xmf4Color;
 public:
-	CTerrainTexturedVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f); }
-	CTerrainTexturedVertex(float x, float y, float z, XMFLOAT2 xmf2TexCoord) { m_xmf3Position = XMFLOAT3(x, y, z); m_xmf2TexCoord = xmf2TexCoord;  }
-	CTerrainTexturedVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2TexCoord = XMFLOAT2(0.0f, 0.0f)) { m_xmf3Position = xmf3Position; m_xmf2TexCoord = xmf2TexCoord;  }
-	~CTerrainTexturedVertex() { }
+	CTerrainVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f); }
+	CTerrainVertex(float x, float y, float z, XMFLOAT2 xmf2TexCoord) { m_xmf3Position = XMFLOAT3(x, y, z); m_xmf2TexCoord = xmf2TexCoord;  }
+	CTerrainVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2TexCoord = XMFLOAT2(0.0f, 0.0f)) { m_xmf3Position = xmf3Position; m_xmf2TexCoord = xmf2TexCoord;  }
+	~CTerrainVertex() { }
 };
 
 class CTexturedVertex : public CVertex
@@ -60,6 +60,11 @@ public:
 		m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); 
 		m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f); 
 		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f); 
+	}
+	CTexturedVertex(float x, float y, float z, float uvX, float uvY)
+	{
+		m_xmf3Position = XMFLOAT3(x, y, z);
+		m_xmf2TexCoord = XMFLOAT2(uvX, uvY);
 	}
 	CTexturedVertex(float x, float y, float z, XMFLOAT2 xmf2TexCoord) 
 	{ 
@@ -184,6 +189,17 @@ public:
 		bool isVertical = true);
 	virtual ~CPlaneMeshTextured();
 };
+//////////////////////////////////////////////////////////////////////////////
+//
+class CSphereMesh : public CMesh
+{
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CSphereMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float radius, UINT32 sliceCount, UINT32 stackCount);
+	virtual ~CSphereMesh();
+};
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -256,14 +272,19 @@ typedef struct Meshinfo
 	int vertics;
 };
 
+//////////////////////////////////////////////////////////////////////////////
+//
 class CMeshFbx : public CMesh
 {
 public:
-	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
+	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName,
+		bool rotateFlag = false);
+
+
 	virtual ~CMeshFbx();
 
 public:
-	void LoadMesh(FbxNode* node, Meshinfo* info);
+	void LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag = false);
 };
 
 class CMeshFromFbx
@@ -316,6 +337,14 @@ public:
 	~CMinimapMesh();
 };
 
+//////////////////////////////////////////////////////////////////////////////
+//
+enum class MapMeshHeightType
+{
+	Plane = 0,
+	UpRidge,
+	DownRidge,
+};
 class CTerrainMesh : public CMesh
 {
 protected:
@@ -326,14 +355,57 @@ protected:
 
 public:
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		int nWidth, int nLength, int BlockWidth, int BlockDepth, int WidthBlock_Index, int DepthBlock_Index);
+		int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index,
+		MapMeshHeightType heightType = MapMeshHeightType::Plane);
 	
 	~CTerrainMesh();
 
 	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
 	virtual float OnGetHeight(float x, float z);
 
+	float GetHeightPlane(float x, float z) const { return 0; }
+	float GetHeightUpRidge(float x, float z, float waveSize);
+	float GetHeightDownRidge(float x, float z, float waveSize);
 };
+
+class CTerrainSinMesh : public CMesh
+{
+protected:
+	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+
+	int m_nWidth;
+	int m_nDepth;
+
+public:
+	CTerrainSinMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index);
+
+	~CTerrainSinMesh();
+
+	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
+	virtual float OnGetSinHeight(float x, float z);
+
+};
+
+class CTerrainCosMesh : public CMesh
+{
+protected:
+	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+
+	int m_nWidth;
+	int m_nDepth;
+
+public:
+	CTerrainCosMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index);
+
+	~CTerrainCosMesh();
+
+	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
+	virtual float OnGetCosHeight(float x, float z);
+
+};
+
 class CTerrainWayMesh : public CMesh
 {
 protected:

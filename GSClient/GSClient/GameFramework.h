@@ -6,6 +6,11 @@ class CCamera;
 
 class CFramework
 {
+public:// 타이틀바 출력 관련 변수입니다.
+	_TCHAR						m_pszFrameRate[50];
+	TCHAR						m_captionTitle[50];
+	int							m_titleLength;
+
 private:
 	HWND						m_hWnd;
 	HINSTANCE					m_hInst;
@@ -15,11 +20,7 @@ private:
 
 	CScene*						m_CurrentScene;
 
-	// 타이틀바 출력 관련 변수입니다.
-	_TCHAR						m_pszFrameRate[50];
-	TCHAR						m_captionTitle[50];
-	int							m_titleLength;
-
+	
 	// 다이렉트X 관련 변수입니다.
 	int							m_nWndClientWidth;
 	int							m_nWndClientHeight;
@@ -66,6 +67,15 @@ private:	// 서버와 통신하기 위한 데이터 입니다.
 	SOCKADDR				m_ServerAddr;
 
 	bool					m_IsServerConnected;
+
+
+
+
+	CRITICAL_SECTION			m_cs;
+
+
+
+
 private:
 	CFramework();
 
@@ -101,7 +111,9 @@ private:
 	void InitializeTextFormats();
 
 public:	// about Update
-	void Update();
+	void SinglePlayUpdate();
+	void MultiplayUpdate();
+	void SceneUpdate();
 	void Animate();
 	void Draw();
 
@@ -116,6 +128,7 @@ public:
 public:	// about server
 	bool ConnectToServer();
 	void Communicate();
+	bool IsOnConntected() const { return m_IsServerConnected; }
 
 public:	// about scene change
 	template <typename SceneName>

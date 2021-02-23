@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Mesh.h"
-
+#pragma region About Basic Meshes
 CMesh::CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
@@ -529,11 +529,14 @@ CPlaneMeshTextured::CPlaneMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 CPlaneMeshTextured::~CPlaneMeshTextured()
 {
 }
-
+#pragma endregion
+#pragma region About FBXMeshes
 //////////////////////////////////////////////////////////////////////////////
 //
-
-CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName) : CMesh(pd3dDevice, pd3dCommandList)
+CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	FbxManager* pfbxSdkManager, char* pstrFbxFileName,
+	bool rotateFlag)
+	: CMesh(pd3dDevice, pd3dCommandList)
 {
 	FbxScene* m_pfbxScene = FbxScene::Create(pfbxSdkManager, "");
 	m_pfbxScene = LoadFbxSceneFromFile(pd3dDevice, pd3dCommandList, pfbxSdkManager, pstrFbxFileName);
@@ -550,7 +553,7 @@ CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 
 	cout << "-메쉬 로드:" << pstrFbxFileName << endl;
 
-	LoadMesh(m_pfbxScene->GetRootNode(), temp);
+	LoadMesh(m_pfbxScene->GetRootNode(), temp, rotateFlag);
 
 	m_nVertices = fbxmesh.vertics;
 	m_nStride = sizeof(CTexturedVertex);
@@ -576,7 +579,7 @@ CMeshFbx::~CMeshFbx()
 
 }
 
-void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
+void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag)
 {
 	FbxNodeAttribute* pfbxNodeAttribute = node->GetNodeAttribute();
 
@@ -606,52 +609,36 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
 				float uv1 = fbxUV[0];
 				float uv2 = 1.0f - fbxUV[1];
 
-				
+				float y = pfbxMesh->GetControlPointAt(pvindex).mData[2];
+				float z = pfbxMesh->GetControlPointAt(pvindex).mData[1];
+				if (rotateFlag)
+				{
+					y = pfbxMesh->GetControlPointAt(pvindex).mData[1];
+					z = pfbxMesh->GetControlPointAt(pvindex).mData[2];
+				} 
+
 				info->vertex.push_back(
 					CTexturedVertex(
 						XMFLOAT3(
 							pfbxMesh->GetControlPointAt(pvindex).mData[0],
-							pfbxMesh->GetControlPointAt(pvindex).mData[2],
-							pfbxMesh->GetControlPointAt(pvindex).mData[1]
+							y,
+							z
 						),
 						XMFLOAT2(
 							uv1,
 							uv2
 						)
 					)
-				);
-				
-				
-
-				/*
-				info->vertex.push_back(
-					CDiffusedVertex(
-						XMFLOAT3(
-							pfbxMesh->GetControlPointAt(pvindex).mData[0],
-							pfbxMesh->GetControlPointAt(pvindex).mData[2],
-							pfbxMesh->GetControlPointAt(pvindex).mData[1]
-						),
-						XMFLOAT4(
-							0.3,
-							0.3,
-							0.3,
-							1.0f
-						)
-					)
-				);
-				*/
-				
-
+				); 
 			}
-		}
-
+		} 
 		info->vertics += nPolygons*3;
 	}
 
 	int nChilds = node->GetChildCount();
 	cout << "연결된 차일드 노드 수: " << nChilds << endl;
 	for (int i = 0; i < nChilds; i++) 
-		LoadMesh(node->GetChild(i), info);
+		LoadMesh(node->GetChild(i), info, rotateFlag);
 }
 
 CMeshFromFbx::CMeshFromFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices)
@@ -697,6 +684,7 @@ void CMeshFromFbx::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->IASetIndexBuffer(&m_d3dIndexBufferView);
 	pd3dCommandList->DrawIndexedInstanced(m_nIndices, 1, 0, 0, 0);
 }
+#pragma endregion
 
 CMinimapMesh::CMinimapMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float radius)
@@ -733,9 +721,15 @@ CMinimapMesh::~CMinimapMesh()
 {
 
 }
-
-CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int x_Index,int z_Index,int WidthBlock_Count,int DepthBlock_Count,int WidthBlock_Index,int DepthBlock_Index)
-
+#pragma region About Terrain Meshes
+///////////////////////////////////////////////////////////////////////////////
+//
+CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList,
+	int x_Index,int z_Index,
+	int WidthBlock_Count,int DepthBlock_Count,
+	int WidthBlock_Index,int DepthBlock_Index,
+	MapMeshHeightType heightType)
 	:CMesh(pd3dDevice, pd3dCommandList)
 {
 	int xStart = x_Index * (WidthBlock_Count - 1);
@@ -747,32 +741,45 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_nDepth = DepthBlock_Count + 1;
 
 	m_nVertices = 25;
-	m_nStride = sizeof(CTerrainTexturedVertex);
+	m_nStride = sizeof(CTerrainVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST;
 
-	CTerrainTexturedVertex* pVertices = new CTerrainTexturedVertex[m_nVertices];
+	CTerrainVertex* pVertices = new CTerrainVertex[m_nVertices];
 
 	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
 	
-	XMFLOAT2 Terrain_Base_Tex_Coord = { (float)x_Index/WidthBlock_Index , (float)z_Index/DepthBlock_Index };
-
 	for (int i = 0, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2)
 	{
 		for (int x = xStart; x < (xStart + m_nWidth - 1); x+=2, i++)
 		{
 			if (i >= 25) break;
 			// 정점의 높이와 색상을 높이 맵으로부터 구한다.
-			float tempheight = OnGetHeight(x, z);
-			pVertices[i].m_xmf3Position = XMFLOAT3(x ,0, z);
-			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x, z*10.0f);
-			
+			float tempheight = 0;
+			switch (heightType)
+			{
+			case MapMeshHeightType::Plane:
+				tempheight = GetHeightPlane(x,z);
+				break;
+			case MapMeshHeightType::UpRidge:
+				tempheight = GetHeightUpRidge(x, z, 500);
+				break;
+			case MapMeshHeightType::DownRidge:
+				tempheight = GetHeightDownRidge(x, z, 500);
+				break;
+			default:
+				assert(!"그런 지형 높이 함수는 없는데요");
+				break;
+			} 
+			pVertices[i].m_xmf3Position = XMFLOAT3(x/2 , tempheight , z/2);
+			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
+			//pVertices[i].m_xmf3Normal = XMFLOAT3(1, 0, z/9);
+			pVertices[i].m_xmf4Color = XMFLOAT4(1, 1, 1, 0);
+			 
 			if (tempheight < fMinHeight) tempheight = fMinHeight;
-			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
-
+			if (tempheight > fMaxHeight)  tempheight = fMaxHeight; 
 		}
 	}
-	
-
+	 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
@@ -781,19 +788,25 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-	delete[] pVertices;
-
+	delete[] pVertices; 
 }
-
 CTerrainMesh::~CTerrainMesh()
 {
 }
 
 float CTerrainMesh::OnGetHeight(float x, float z)
 {
-	
-	return 0.7f * (z * sinf(0.1f * x*10)) ;
-	
+	return 50.f * (z * sinf(0.7f * x) + x * cosf(0.7f * z));	
+}
+
+float CTerrainMesh::GetHeightUpRidge(float x, float z, float waveSize)
+{
+	return waveSize * cosf(XMConvertToRadians((x - 4) / 8) * 180);
+}
+
+float CTerrainMesh::GetHeightDownRidge(float x, float z, float waveSize)
+{
+	return waveSize * cosf(XMConvertToRadians((x - 4 + 8) / 8) * 180);
 }
 
 CTerrainWayMesh::CTerrainWayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int WidthBlock_Count, int DepthBlock_Count)
@@ -822,8 +835,7 @@ CTerrainWayMesh::CTerrainWayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 			pVertices[i].m_xmf3Position = XMFLOAT3(x , 20, z );
 			pVertices[i].m_xmf3Normal = XMFLOAT3(x * 10, 10, z * 10);
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x) / float(100.0f), float(z) / float(100.0f));
-
-
+			  
 			if (tempheight < fMinHeight) tempheight = fMinHeight;
 			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
 		}
@@ -838,8 +850,7 @@ CTerrainWayMesh::CTerrainWayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
 	delete[] pVertices;
-
-
+	 
 	m_nIndices = ((m_nWidth * 2) * (m_nDepth - 1)) + ((m_nDepth - 1) - 1);
 	UINT* pnIndices = new UINT[m_nIndices];
 
@@ -891,6 +902,123 @@ float CTerrainWayMesh::OnGetHeight(float x, float z)
 	return x+z;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//
+CTerrainSinMesh::CTerrainSinMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index)
+	:CMesh(pd3dDevice, pd3dCommandList)
+{
+	int xStart = x_Index * (WidthBlock_Count - 1);
+	int zStart = z_Index * (DepthBlock_Count - 1);
+
+	m_xmf4Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	m_nWidth = WidthBlock_Count + 1;
+	m_nDepth = DepthBlock_Count + 1;
+
+	m_nVertices = 25;
+	m_nStride = sizeof(CTexturedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST;
+
+	CTexturedVertex* pVertices = new CTexturedVertex[m_nVertices];
+
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+	for (int i = 0, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2)
+	{
+		for (int x = xStart; x < (xStart + m_nWidth - 1); x += 2, i++)
+		{
+			if (i >= 25) break;
+			// 정점의 높이와 색상을 높이 맵으로부터 구한다.
+			float tempheight = OnGetSinHeight(x, z);
+
+			pVertices[i].m_xmf3Position = XMFLOAT3(x / 2, tempheight, z / 2);
+			pVertices[i].m_xmf2TexCoord = XMFLOAT2(1, 1);
+			pVertices[i].m_xmf3Normal = XMFLOAT3(1, 0, z / 9);
+
+
+			if (tempheight < fMinHeight) tempheight = fMinHeight;
+			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
+		}
+	}
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	delete[] pVertices;
+}
+
+CTerrainSinMesh::~CTerrainSinMesh()
+{
+}
+
+float CTerrainSinMesh::OnGetSinHeight(float x, float z)
+{
+	return 100.0f * sinf(60 * x) + 100.0f * cosf(60 * x);
+}
+
+CTerrainCosMesh::CTerrainCosMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index)
+	:CMesh(pd3dDevice, pd3dCommandList)
+{
+	int xStart = x_Index * (WidthBlock_Count - 1);
+	int zStart = z_Index * (DepthBlock_Count - 1);
+
+	m_xmf4Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	m_nWidth = WidthBlock_Count + 1;
+	m_nDepth = DepthBlock_Count + 1;
+
+	m_nVertices = 25;
+	m_nStride = sizeof(CTexturedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST;
+
+	CTexturedVertex* pVertices = new CTexturedVertex[m_nVertices];
+
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+	for (int i = 0, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2)
+	{
+		for (int x = xStart; x < (xStart + m_nWidth - 1); x += 2, i++)
+		{
+			if (i >= 25) break;
+			// 정점의 높이와 색상을 높이 맵으로부터 구한다.
+			float tempheight = OnGetCosHeight(x, z);
+			cout << "X : " << x << " Z : " << z << " Y: " << tempheight << "\n";
+			pVertices[i].m_xmf3Position = XMFLOAT3(x / 2, tempheight, z / 2);
+			pVertices[i].m_xmf2TexCoord = XMFLOAT2(1, 1);
+			pVertices[i].m_xmf3Normal = XMFLOAT3(1, 0, z / 9);
+
+			if (tempheight < fMinHeight) tempheight = fMinHeight;
+			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
+		}
+	}
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	delete[] pVertices;
+}
+
+CTerrainCosMesh::~CTerrainCosMesh()
+{
+}
+
+float CTerrainCosMesh::OnGetCosHeight(float x, float z)
+{
+	return 500.0f * cosf(XMConvertToRadians((x-4)/ 8) * 180);
+}
+#pragma endregion
+///////////////////////////////////////////////////////////////////////////////
+//
 CDoorMesh::CDoorMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float fWidth, float fHeight, float fDepth,
 	bool isLeft)
@@ -1055,5 +1183,116 @@ CDoorMeshTest::CDoorMeshTest(ID3D12Device* pd3dDevice,
 }
 
 CDoorMeshTest::~CDoorMeshTest()
+{
+}
+ 
+///////////////////////////////////////////////////////////////////////////////
+//
+CSphereMesh::CSphereMesh(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList,
+	float radius, UINT32 sliceCount, UINT32 stackCount)
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = stackCount * sliceCount + 1;
+	m_nStride = sizeof(CTexturedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	CTexturedVertex topVertex(0.0f, +radius, 0.0f, XMFLOAT2{ 0.0f, 0.0f });
+	CTexturedVertex bottomVertex(0.0f, -radius, 0.0f, XMFLOAT2{ 0.0f, 1.0f });
+
+	const int a = m_nVertices;
+	CTexturedVertex* pVertices = new CTexturedVertex[m_nVertices];
+	pVertices[0] = topVertex;
+
+	float phiStep = XM_PI / stackCount;
+	float thetaStep = 2.0f * XM_PI / sliceCount;
+	// Compute vertices for each stack ring (do not count the poles as rings).
+	int idx = 1;
+	for (UINT32 i = 1; i <= stackCount - 1; ++i)
+	{
+		float phi = i * phiStep;
+
+		// Vertices of ring.
+		for (UINT32 j = 0; j <= sliceCount; ++j)
+		{
+			float theta = j * thetaStep;
+
+			// spherical to cartesian
+			float x = radius * sinf(phi) * cosf(theta);
+			float y = radius * cosf(phi);
+			float z = radius * sinf(phi) * sinf(theta);
+
+			float uvX = theta / XM_2PI;
+			float uvY = phi / XM_PI;
+			pVertices[idx++] = CTexturedVertex(
+				x, y, z,
+				uvX, uvY
+			);
+		}
+	}
+	pVertices[idx++] = bottomVertex;
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	vector<UINT> pnVecIndices;
+
+	for (UINT32 i = 1; i <= sliceCount; ++i)
+	{
+		pnVecIndices.push_back(0);
+		pnVecIndices.push_back(i + 1);
+		pnVecIndices.push_back(i);
+	}
+
+	UINT32 baseIndex = 1;
+	UINT32 ringVertexCount = sliceCount + 1;
+	for (UINT32 i = 0; i < stackCount - 2; ++i)
+	{
+		for (UINT32 j = 0; j < sliceCount; ++j)
+		{
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j);
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j + 1);
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j);
+
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j);
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j + 1);
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j + 1);
+		}
+	}
+
+	UINT32 southPoleIndex = (UINT32)m_nVertices - 1;
+
+	// Offset the indices to the index of the first vertex in the last ring.
+	baseIndex = southPoleIndex - ringVertexCount;
+
+	for (UINT32 i = 0; i < sliceCount; ++i)
+	{
+		pnVecIndices.push_back(southPoleIndex);
+		pnVecIndices.push_back(baseIndex + i);
+		pnVecIndices.push_back(baseIndex + i + 1);
+	}
+	m_nIndices = pnVecIndices.size();
+	UINT* pnIndices = new UINT[m_nIndices];
+
+	copy(pnVecIndices.begin(), pnVecIndices.end(), pnIndices);
+
+	m_pd3dIndexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList,
+		pnIndices, sizeof(UINT) * m_nIndices,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
+		&m_pd3dIndexUploadBuffer);
+
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+	delete[] pnIndices;
+}
+
+CSphereMesh::~CSphereMesh()
 {
 }
