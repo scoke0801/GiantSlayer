@@ -125,9 +125,6 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout(ShaderTypes type)
 	}
 	else if (type == ShaderTypes::Terrain)
 	{
-		//float3 position : POSITION;
-		//float2 uv0 : TEXCOORD0;
-		//float4 color : COLOR;
 		UINT nInputElementDescs = 3;
 		D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
