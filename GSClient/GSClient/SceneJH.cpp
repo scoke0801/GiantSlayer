@@ -249,19 +249,20 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
+
+	m_CurrentCamera->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+	m_CurrentCamera->SetTarget(m_Player);
+
 	m_Player->SetShader(pFBXShader); 
 	m_Player->Scale(20, 20, 20);  
 	m_Player->SetObjectName(OBJ_NAME::Player); 
 	m_Player->SetPosition({ 500,  200, 250 });
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
-	m_Player->SetMesh(fbxMesh);
-	
-	//m_Player->Rotate(XMFLOAT3(0, 1, 0), 180);
-
-	//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), -90);
+	m_Player->SetMesh(fbxMesh); 
+	//m_Player->Rotate(XMFLOAT3(0, 1, 0), 180); 
 	 
-	m_CurrentCamera->SetTarget(m_Player);
+	//m_CurrentCamera->SetTarget(m_Player);
 	m_MinimapCamera->SetTarget(m_Player); 
 	
 	//m_CurrentCamera->LookAt(m_CurrentCamera->GetPosition3f(), m_Player->GetPosition(), m_Player->GetUp());
