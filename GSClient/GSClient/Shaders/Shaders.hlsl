@@ -141,8 +141,8 @@ struct VS_TERRAIN_INPUT
 struct VS_TERRAIN_OUTPUT
 {
     float4 position : SV_POSITION;
+	float2 uv0 : TEXCOORD0;
     float4 color : COLOR;
-    float2 uv0 : TEXCOORD0;
 };
 
 ///////////////////////////////////////////
@@ -152,8 +152,7 @@ struct VS_TERRAIN_TESSELLATION_OUTPUT
 	float3 position : POSITION;
 	float3 positionW : POSITION1;
 	float4 color : COLOR;
-    float2 uv0 : TEXCOORD0;
-
+    float2 uv0 : TEXCOORD0; 
 };
 
 VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
@@ -167,8 +166,7 @@ VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
 	
 	return(output);
 }
-
-
+ 
 struct HS_TERRAIN_TESSELLATION_CONSTANT
 {
 	float fTessEdges[4] : SV_TessFactor;
@@ -215,7 +213,7 @@ float3 CubicBezierSum5x5(OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch, 
 float CalculateTessFactor(float3 f3Position)
 {
 	float fDistToCamera = distance(f3Position, gvCameraPosition);
-	float s = saturate((fDistToCamera - 10.0f) / (500.0f - 10.0f));
+	float s = saturate((fDistToCamera - 10.0f) / (10000.0f - 10.0f));
 
 	return(lerp(64.0f, 1.0f, s));
 }
