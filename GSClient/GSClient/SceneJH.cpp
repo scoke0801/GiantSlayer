@@ -196,31 +196,26 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//m_Skybox = new CSkyBoxSphere(pd3dDevice, pd3dCommandList, pSkyBoxShader, 10, 15, 15);
 
 #pragma region Create Terrain
-	// 지형 메쉬 
-	//CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000,10,10);
-	//CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
-
-	//CShader* pShader = new CShader();
-	//pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTextured");
-	//pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured");
-	//pShader->CreateInputLayout(ShaderTypes::Textured);
-	//pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	//// 지형
-	//m_ppObjects[0]->SetMesh(pPlaneMeshTex);
-	//m_ppObjects[0]->SetPosition({ 0,  0,  0 });
-	//m_ppObjects[0]->SetTextureIndex(0x01);
-	//m_ppObjects[0]->SetShader(pShader);
-	  
+	CShader* pTerrainShader = new CTerrainTessellationShader();
+	pTerrainShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTerrainTessellation");
+	pTerrainShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTerrainTessellation");
+	pTerrainShader->CreateDomainShader(L"Shaders\\Shaders.hlsl", "DSTerrainTessellation");
+	pTerrainShader->CreateHullShader(L"Shaders\\Shaders.hlsl", "HSTerrainTessellation");
+	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
+	pTerrainShader->CreateTerrainShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	 
+	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, 257, 257, 9, 9, pTerrainShader);  
 #pragma endregion   
+
 	CShader*  pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
 	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	
-	int index = BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 6, pShader);
-	index = BuildDoorWall(pd3dDevice, pd3dCommandList, index, pShader);
-	 
+	//int index = BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 6, pShader);
+	//index = BuildDoorWall(pd3dDevice, pd3dCommandList, index, pShader);
+	// 
 	///
 	/// FBX Model Test
 	///
@@ -258,11 +253,11 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player->SetShader(pShader);
 	m_Player->SetObjectName(OBJ_NAME::Player);
-	m_Player->SetPosition({ 500,  250 + 82.5, 1501 });
+	//m_Player->SetPosition({ 500,  250 + 82.5, 1501 });
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
-	m_Player->SetMesh(fbxMesh);
-	m_Player->Rotate(XMFLOAT3(0, 1, 0), 180);
+	//m_Player->SetMesh(fbxMesh);
+	//m_Player->Rotate(XMFLOAT3(0, 1, 0), 180);
 
 	//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), -90);
 	 
@@ -495,6 +490,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)

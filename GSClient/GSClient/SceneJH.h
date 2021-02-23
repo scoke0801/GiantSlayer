@@ -16,7 +16,9 @@ protected:
 
 	CPlayer*					m_Player = nullptr;
 	vector<UI*>					m_UIs;
+
 	CSkyBox*					m_Skybox;
+	CTerrain*					m_Terrain;
 
 	ID3D12RootSignature*		m_pd3dGraphicsRootSignature = NULL;
 

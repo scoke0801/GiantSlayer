@@ -532,14 +532,9 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dRootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[4].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
 	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
-
+	 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 #pragma region sampler
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
@@ -569,8 +564,7 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dSamplerDescs[1].ShaderRegister = 1;
 	pd3dSamplerDescs[1].RegisterSpace = 0;
 	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-#pragma endregion
-
+#pragma endregion 
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);

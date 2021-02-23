@@ -125,9 +125,6 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout(ShaderTypes type)
 	}
 	else if (type == ShaderTypes::Terrain)
 	{
-		//float3 position : POSITION;
-		//float2 uv0 : TEXCOORD0;
-		//float4 color : COLOR;
 		UINT nInputElementDescs = 3;
 		D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
@@ -351,7 +348,7 @@ void CShader::CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 	d3dPipelineStateDesc.DS = m_d3dDSBytecode;
 	if (m_pd3dGeometryShaderBlob)d3dPipelineStateDesc.GS = m_d3dGSBytecode;
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
-	d3dPipelineStateDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	//d3dPipelineStateDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
 	d3dPipelineStateDesc.InputLayout = m_d3dInputLayoutDesc;
