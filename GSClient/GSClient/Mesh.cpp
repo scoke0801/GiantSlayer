@@ -741,10 +741,10 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice,
 	m_nDepth = DepthBlock_Count + 1;
 
 	m_nVertices = 25;
-	m_nStride = sizeof(CTexturedVertex);
+	m_nStride = sizeof(CTerrainVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST;
 
-	CTexturedVertex* pVertices = new CTexturedVertex[m_nVertices];
+	CTerrainVertex* pVertices = new CTerrainVertex[m_nVertices];
 
 	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
 	
@@ -771,9 +771,10 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice,
 				break;
 			} 
 			pVertices[i].m_xmf3Position = XMFLOAT3(x/2 , tempheight , z/2);
-			pVertices[i].m_xmf2TexCoord = XMFLOAT2(1, 1);
-			pVertices[i].m_xmf3Normal = XMFLOAT3(1, 0, z/9);
-		 
+			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
+			//pVertices[i].m_xmf3Normal = XMFLOAT3(1, 0, z/9);
+			pVertices[i].m_xmf4Color = XMFLOAT4(1, 1, 1, 0);
+			 
 			if (tempheight < fMinHeight) tempheight = fMinHeight;
 			if (tempheight > fMaxHeight)  tempheight = fMaxHeight; 
 		}
@@ -787,8 +788,7 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice,
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-	delete[] pVertices;
-
+	delete[] pVertices; 
 }
 CTerrainMesh::~CTerrainMesh()
 {

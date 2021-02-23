@@ -562,13 +562,13 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			m_VectorObjects[i][j].SetShader(pShader);
 			if (j < 3 && i < 3)
 			{
-				m_VectorObjects[i][j].SetMesh(pTerrainUpRidgeMesh);
+				m_VectorObjects[i][j].SetMesh(pTerrainDownRidgeMesh);
 				m_VectorObjects[i][j].Scale(400.0f, 1.0f, 700.0f);
 				m_VectorObjects[i][j].SetPosition(XMFLOAT3(i * 1600.0f, -100.0f, j * 2800.0f));
 			}
 			if (j < 6 && i < 6 && j>=3 && i>=3)
 			{
-				m_VectorObjects[i][j].SetMesh(pTerrainDownRidgeMesh);
+				m_VectorObjects[i][j].SetMesh(pTerrainUpRidgeMesh);
 				m_VectorObjects[i][j].Scale(400.0f, 1.0f, 700.0f);
 				m_VectorObjects[i][j].SetPosition(XMFLOAT3((i-3) * 1600.0f, -500.0f, j * 2800.0f+2500.0f));
 			}
@@ -621,6 +621,8 @@ void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int j = 0; j < 32; ++j)
 	{
 		for (int i = 0; i < 32; ++i)
+		{
 			m_VectorObjects[i][j].Draw(pd3dCommandList, pCamera);
+		}
 	}
 }
