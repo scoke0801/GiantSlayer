@@ -35,12 +35,12 @@ struct MATERIAL
 	float4				m_cEmissive;
 };
 
-cbuffer cbMaterial : register(b2)
+cbuffer cbMaterial : register(b3)
 {
 	MATERIAL			gMaterials[MAX_MATERIALS];
 };
 
-cbuffer cbLights : register(b3)
+cbuffer cbLights : register(b4)
 {
 	LIGHT				gLights[MAX_LIGHTS];
 	float4				gcGlobalAmbientLight;

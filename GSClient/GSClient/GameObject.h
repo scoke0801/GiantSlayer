@@ -60,6 +60,9 @@ protected:
 
 	CCamera*			m_Camera = nullptr;
 
+	UINT				m_HP = 0;
+	UINT				m_SP = 0;
+
 private:
 	ID3D12Resource*		m_pd3dcbGameObject = NULL;
 	GAMEOBJECT_INFO*	m_pcbMappedGameObjInfo = NULL;
@@ -120,6 +123,11 @@ public:
 	void SetCamera(CCamera* camera) { m_Camera = camera; }
 	CCamera* GetCamera() const { return m_Camera; }
 
+	void SetHP(UINT HP) { m_HP = HP; }
+	UINT GetHP() const { return m_HP; }
+
+	void SetSP(UINT SP) { m_SP = SP; }
+	UINT GetSP() const { return m_SP; }
 public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;

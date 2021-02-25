@@ -3,16 +3,23 @@
 #include "Camera.h"
 #include "stdafx.h"
 
-enum class Player_Move_Type
+enum class PlayerMoveType
 {
 	None = 0,
 	Walk,
 	Run
 };
+enum class PlayerWeaponType
+{
+	None = 0x00,
+	Sword = 0x01,
+	Bow = 0x02
+};
 class CPlayer : public CGameObject
 { 
 private:
-	Player_Move_Type m_MovingType = Player_Move_Type::Run;
+	PlayerMoveType m_MovingType = PlayerMoveType::Run;
+	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
 
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -25,4 +32,7 @@ public:
 	virtual void SetVelocity(OBJ_DIRECTION direction) override;
 
 	bool IsMoving() const { return Vector3::Length(m_xmf3Velocity) > 0.01f; }
+
+	void SetWeapon(PlayerWeaponType weaponID) { m_WeaponType = weaponID; }
+	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; }
 };

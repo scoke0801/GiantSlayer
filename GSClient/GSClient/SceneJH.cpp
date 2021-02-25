@@ -11,10 +11,11 @@
 #include "Communicates.h"
 
 #define ROOT_PARAMETER_OBJECT			0
-#define ROOT_PARAMETER_CAMERA			1
-#define ROOT_PARAMETER_MATERIAL			2
-#define ROOT_PARAMETER_LIGHT			3
-#define ROOT_PARAMETER_TEXTURE			4
+#define ROOT_PARAMETER_SCENE_FRAME_DATA 1
+#define ROOT_PARAMETER_CAMERA			2
+#define ROOT_PARAMETER_MATERIAL			3
+#define ROOT_PARAMETER_LIGHT			4
+#define ROOT_PARAMETER_TEXTURE			5
 
 CSceneJH::CSceneJH()
 {
@@ -36,7 +37,8 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 
 	BuildMaterials(pd3dDevice, pd3dCommandList);
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
-	BuildLights(pd3dDevice, pd3dCommandList);
+	BuildLights(pd3dDevice, pd3dCommandList); 
+	BuildSceneFrameData(pd3dDevice, pd3dCommandList);
 	BuildObjects(pd3dDevice, pd3dCommandList);
 	BuildUIs(pd3dDevice, pd3dCommandList);
 }
@@ -169,6 +171,16 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 }
 
+void CSceneJH::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbMaterialBytes = ((sizeof(CB_GAMESCENE_FRAME_DATA) + 255) & ~255); //256의 배수
+	m_pd3dcbSceneInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList,
+		NULL, ncbMaterialBytes, 
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbSceneInfo->Map(0, NULL, (void**)&m_pcbMappedSceneFrameData);
+}
+
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pfbxManager = FbxManager::Create();
@@ -197,10 +209,10 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 #pragma region Create Terrain
 	CShader* pTerrainShader = new CTerrainTessellationShader();
-	pTerrainShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTerrainTessellation");
-	pTerrainShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTerrainTessellation");
-	pTerrainShader->CreateDomainShader(L"Shaders\\Shaders.hlsl", "DSTerrainTessellation");
-	pTerrainShader->CreateHullShader(L"Shaders\\Shaders.hlsl", "HSTerrainTessellation");
+	pTerrainShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTerrainTessellation");
+	pTerrainShader->CreatePixelShader( L"Shaders\\JHTestShader.hlsl", "PSTerrainTessellation");
+	pTerrainShader->CreateDomainShader(L"Shaders\\JHTestShader.hlsl", "DSTerrainTessellation");
+	pTerrainShader->CreateHullShader(  L"Shaders\\JHTestShader.hlsl", "HSTerrainTessellation");
 	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
 	pTerrainShader->CreateTerrainShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	 
@@ -229,7 +241,6 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ppObjects[1]->SetTextureIndex(0x01);
 	m_ppObjects[1]->SetShader(pShader);
 	m_ppObjects[1]->SetTextureIndex(0x80);
-	//m_ppObjects[1]->Rotate(XMFLOAT3(1, 0, 0), -90);
 	m_ppObjects[1]->Scale(5, 5, 5);
 
 	m_ppObjects[2]->SetMesh(fbxMesh);
@@ -237,8 +248,6 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ppObjects[2]->SetTextureIndex(0x01);
 	m_ppObjects[2]->SetShader(pShader);
 	m_ppObjects[2]->SetTextureIndex(0x80);
-	//_ppObjects[1]->Rotate(XMFLOAT3(1, 0, 0), -90);
-	//m_ppObjects[2]->Scale(20, 20, 20)
 
 	CSphereMesh* pSphereMesh = new CSphereMesh(pd3dDevice, pd3dCommandList,
 		30, 20, 20);
@@ -310,12 +319,18 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	auto doorTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, doorTex.get(), "Door", L"resources/OBJ/Door3.dds");
 	
-	auto playerInfoTex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, playerInfoTex.get(), "PlayerInfo", L"resources/UI/[Test]PlayerInfo.dds");
+	auto hpSpGaugeTex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, hpSpGaugeTex.get(), "HP_SP", L"resources/UI/HP_SP.dds");
 	
 	auto minimapTex = make_unique<CTexture>();
 	MakeTexture(pd3dDevice, pd3dCommandList, minimapTex.get(), "Minimap", L"resources/UI/Minimap.dds");
-	  
+
+	auto weaponUITex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, weaponUITex.get(), "WeaponUI", L"resources/UI/Weapon.dds"); 
+
+	auto hpSpPerTex = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, hpSpPerTex.get(), "HP_SP_PER", L"resources/UI/HP_SP_Per.dds");
+
 	m_Textures[terrainTex->m_Name] = std::move(terrainTex);
 	m_Textures[SkyTex_Back->m_Name] = std::move(SkyTex_Back);
 	m_Textures[SkyTex_Front->m_Name] = std::move(SkyTex_Front);
@@ -327,8 +342,10 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Textures[woodTex->m_Name] = std::move(woodTex); 
 	m_Textures[wallTex->m_Name] = std::move(wallTex);
 	m_Textures[doorTex->m_Name] = std::move(doorTex);
-	m_Textures[playerInfoTex->m_Name] = std::move(playerInfoTex);	
+	m_Textures[hpSpGaugeTex->m_Name] = std::move(hpSpGaugeTex);	
 	m_Textures[minimapTex->m_Name] = std::move(minimapTex);	 
+	m_Textures[weaponUITex->m_Name] = std::move(weaponUITex);
+	m_Textures[hpSpPerTex->m_Name] = std::move(hpSpPerTex);
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -358,8 +375,10 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	auto woodTex = m_Textures["Wood"]->m_pd3dResource;
 	auto wallTex = m_Textures["Wall"]->m_pd3dResource;
 	auto doorTex = m_Textures["Door"]->m_pd3dResource;
-	auto playerInfoTex = m_Textures["PlayerInfo"]->m_pd3dResource;
+	auto hpSpGaugeTex = m_Textures["HP_SP"]->m_pd3dResource;
+	auto hpSpPerGaugeTex = m_Textures["HP_SP_PER"]->m_pd3dResource;
 	auto minimapTex = m_Textures["Minimap"]->m_pd3dResource;
+	auto weaponUITex = m_Textures["WeaponUI"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -410,8 +429,12 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pd3dDevice->CreateShaderResourceView(doorTex, &srvDesc, hDescriptor);
 	
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = playerInfoTex->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(playerInfoTex, &srvDesc, hDescriptor);
+	srvDesc.Format = hpSpGaugeTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(hpSpGaugeTex, &srvDesc, hDescriptor);
+
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = hpSpPerGaugeTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(hpSpPerGaugeTex, &srvDesc, hDescriptor);
 
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = minimapTex->GetDesc().Format;
@@ -420,6 +443,10 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = m_pd3dMinimapTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(m_pd3dMinimapTex, &srvDesc, hDescriptor);
+
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = weaponUITex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(weaponUITex, &srvDesc, hDescriptor);
 }
 
 void CSceneJH::ReleaseObjects()
@@ -461,7 +488,6 @@ void CSceneJH::Update(double elapsedTime)
 			m_Player->GetUp());
 		m_MinimapCamera->UpdateViewMatrix(); 
 	}
-	
 }
 
 void CSceneJH::AnimateObjects(float fTimeElapsed)
@@ -474,15 +500,18 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	if (m_CurrentCamera)
 	{
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
+		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
+	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
+	m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
+	m_pcbMappedSceneFrameData->m_PlayerWeapon = m_Player->GetSelectedWeapon();
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
@@ -490,6 +519,9 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
+
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
@@ -509,6 +541,16 @@ void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 	for (UI* pUI : m_UIs)
 	{
 		pUI->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+
+	for (int i = 0; i < m_Player->GetHP() / 5; ++i)
+	{
+		m_HPGauge[i]->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+
+	for (int i = 0; i < m_Player->GetSP() / 5; ++i)
+	{
+		m_SPGauge[i]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 
@@ -531,7 +573,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 
 	if (m_MinimapCamera)
 	{
-		m_MinimapCamera->UpdateShaderVariables(pd3dCommandList, 1);
+		m_MinimapCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
 		m_MinimapCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 
@@ -540,6 +582,11 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 
 	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
+
+	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
+	m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
@@ -550,7 +597,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 
 	m_Skybox->Draw(pd3dCommandList, m_MinimapCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
-	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
+
 	for (int j = 0; j < m_nObjects; j++)
 	{ 
 		if (m_ppObjects[j])
@@ -565,7 +612,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMinimapTex,
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
 
-	// Copy the input (back-buffer in this example) to BlurMap0.
+	// Copy the input (back-buffer) to MimapTexture
 	pd3dCommandList->CopyResource(m_pd3dMinimapTex, pd3dRTV);
 	
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMinimapTex,
@@ -656,11 +703,13 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_1)
 	{
-		m_CurrentCamera = m_Cameras[0];
+		m_Player->SetWeapon(PlayerWeaponType::Sword);
+		//m_CurrentCamera = m_Cameras[0];
 	}
 	if (keyInput.KEY_2)
 	{
-		m_CurrentCamera = m_Cameras[1];
+		m_Player->SetWeapon(PlayerWeaponType::Bow);
+		//m_CurrentCamera = m_Cameras[1];
 	}
 	if (keyInput.KEY_3)
 	{
@@ -749,40 +798,40 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[5];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[6];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[0].Constants.Num32BitValues = 18;
+	pd3dRootParameters[0].Constants.Num32BitValues = 18; // GameData
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[1].Descriptor.ShaderRegister = 1; //Camera
+	pd3dRootParameters[1].Descriptor.ShaderRegister = 1; //SceneFrameData
 	pd3dRootParameters[1].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[2].Descriptor.ShaderRegister = 2; //Material
+	pd3dRootParameters[2].Descriptor.ShaderRegister = 2; //Camera
 	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[3].Descriptor.ShaderRegister = 3; //Light
+	pd3dRootParameters[3].Descriptor.ShaderRegister = 3; //Material
 	pd3dRootParameters[3].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[4].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
-	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[4].Descriptor.ShaderRegister = 4; //Light
+	pd3dRootParameters[4].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-
-	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+	pd3dRootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[5].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
+	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	 
+	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags
+		= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 #pragma region sampler
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
@@ -821,7 +870,7 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	d3dRootSignatureDesc.NumStaticSamplers = _countof(pd3dSamplerDescs);
 	d3dRootSignatureDesc.pStaticSamplers = pd3dSamplerDescs;
 	d3dRootSignatureDesc.Flags
-		= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+		= d3dRootSignatureFlags;
 
 	ID3DBlob* pd3dSignatureBlob = NULL;
 	ID3DBlob* pd3dErrorBlob = NULL;
@@ -876,11 +925,40 @@ int CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VS_UI_Textured");
 	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PS_UI_Textured");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader->CreateUIShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	UI* pUI = new UI(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.0f);
-	pUI->SetPosition({ -0.75, 0.75,  0 });
+	UI* pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.09f, 0.0f, true);
+	pUI->SetPosition({ -0.50, 0.88,  0.92 });		// HP, SP
 	pUI->SetTextureIndex(0x01);
+	pUI->SetShader(pShader);
+	m_UIs.push_back(pUI);
+
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.3f, 0.09f, 0.0f, true);
+	pUI->SetPosition({ -0.50, 0.79,  0.92 });		// HP, SP
+	pUI->SetTextureIndex(0x02);
+	pUI->SetShader(pShader);
+	m_UIs.push_back(pUI);
+
+	for (int i = 0; i < 20; ++i)
+	{
+		pUI = new UI(pd3dDevice, pd3dCommandList, 0.015, 0.053f, 0.0f, true);
+		pUI->SetPosition({float( -0.615 + 0.015 * i), 0.885,  0.91 });
+		pUI->SetTextureIndex(0x04);
+		pUI->SetShader(pShader); 
+		m_HPGauge.push_back(pUI);
+	}
+	for (int i = 0; i < 20; ++i)
+	{
+		pUI = new UI(pd3dDevice, pd3dCommandList, 0.011, 0.053f, 0.0f, true);
+		pUI->SetPosition({ float (-0.575 + 0.011 * i), 0.795,  0.91 });
+		pUI->SetTextureIndex(0x08);
+		pUI->SetShader(pShader);
+		m_SPGauge.push_back(pUI);
+	} 
+
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, true);
+	pUI->SetPosition({ -0.53, 0.65,  0 });		// WeaponUI
+	pUI->SetTextureIndex(0x10);
 	pUI->SetShader(pShader);
 	m_UIs.push_back(pUI);
 
@@ -890,18 +968,18 @@ int CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature); 
 
-	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.3f);
-	pUI->SetPosition({ 0.7f, -0.7f, 0.9 });
+	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.20f);
+	pUI->SetPosition({ -0.78f, 0.78f, 0.9 });	// Minmap Background
 	pUI->SetTextureIndex(0x01);
 	pUI->SetShader(pShader);
 	m_UIs.push_back(pUI);
 
-	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.25f);
-	pUI->SetPosition({ 0.7f, -0.7f,  0.8});
+	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.165f);
+	pUI->SetPosition({ -0.78f, 0.78f,  0.8});	// Minimap
 	pUI->SetTextureIndex(0x02);
 	pUI->SetShader(pShader);
 	m_UIs.push_back(pUI);
-
+	
 	return 0;
 }
 

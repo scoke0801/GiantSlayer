@@ -8,6 +8,13 @@ class CCamera;
 class CPlayer;
 class UI;
 
+struct CB_GAMESCENE_FRAME_DATA
+{
+	UINT m_PlayerHP = 0;
+	UINT m_PlayerSP = 0;
+	UINT m_PlayerWeapon = 0x01;
+}; 
+
 class CSceneJH : public CScene
 {
 protected:
@@ -16,6 +23,8 @@ protected:
 
 	CPlayer*					m_Player = nullptr;
 	vector<UI*>					m_UIs;
+	vector<UI*>					m_HPGauge;
+	vector<UI*>					m_SPGauge;
 
 	CSkyBox*					m_Skybox;
 	CTerrain*					m_Terrain;
@@ -45,6 +54,10 @@ private:	// about Lights
 private:	// about Minimap
 	ID3D12Resource*				m_pd3dMinimapTex = NULL;
 
+private:	// about SceneInfo
+	ID3D12Resource*				m_pd3dcbSceneInfo = NULL;
+	CB_GAMESCENE_FRAME_DATA*	m_pcbMappedSceneFrameData = NULL;
+
 public:
 	CSceneJH();
 	~CSceneJH();
@@ -57,9 +70,9 @@ public:
 	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height);
-
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 	void ReleaseObjects();
 
