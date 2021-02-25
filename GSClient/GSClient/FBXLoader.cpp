@@ -1,213 +1,257 @@
 #include "stdafx.h"
-#include "Shader.h"
+#include "FbxLoader.h"
 #include "Mesh.h"
-#include "FBXLoader.h"
 
-class CFbxRenderInfo
+//==========UtilFunctions==========//////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+
+FbxAMatrix GetGeoOffsetTransform(FbxNode* inNode)
 {
-public:
-	CFbxRenderInfo() { }
-	~CFbxRenderInfo();
-
-public:
-	CShader* m_pShader = NULL;
-	CMeshFromFbx* m_pMesh = NULL;
-};
-
-CFbxRenderInfo::~CFbxRenderInfo()
-{
-	if (m_pShader) m_pShader->Release();
-	if (m_pMesh) m_pMesh->Release();
-}
-
-FbxAMatrix XmFloat4x4MatrixToFbxMatrix(XMFLOAT4X4& xmf4x4Source)
-{
-	FbxAMatrix fbxmtxResult;
-	for (int i = 0; i < 4; i++)
+	if (!inNode)
 	{
-		for (int j = 0; j < 4; j++) fbxmtxResult[i][j] = xmf4x4Source.m[i][j];
+		throw std::exception("Null for mesh geometry");
 	}
-	return(fbxmtxResult);
+
+	const FbxVector4 lT = inNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+	const FbxVector4 lR = inNode->GetGeometricRotation(FbxNode::eSourcePivot);
+	const FbxVector4 lS = inNode->GetGeometricScaling(FbxNode::eSourcePivot);
+
+	return FbxAMatrix(lT, lR, lS);
 }
 
-FbxAMatrix GetGeometricOffsetTransform(FbxNode* pfbxNode)
-{
-	const FbxVector4 T = pfbxNode->GetGeometricTranslation(FbxNode::eSourcePivot);
-	const FbxVector4 R = pfbxNode->GetGeometricRotation(FbxNode::eSourcePivot);
-	const FbxVector4 S = pfbxNode->GetGeometricScaling(FbxNode::eSourcePivot);
+/////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 
-	return(FbxAMatrix(T, R, S));
+FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* pstrFbxFileName)
+{
+	mFbxManager = pfbxSdkManager;
+
+	LoadScene(pstrFbxFileName);
+
+	LoadFbxHierarchy(mFbxScene->GetRootNode());
+
+	cout << "==================================================" << endl;
+	cout << "정점: " << nVertics << "\t폴리곤: " << nPolygons << endl;
+	cout << "본 개수: " << mSkeleton.size() << endl;
 }
 
-FbxScene* LoadFbxScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName)
+FbxLoader::~FbxLoader()
 {
-	FbxScene* pfbxScene = NULL;
 
-	FbxIOSettings* pfbxIOSettings = pfbxSdkManager->GetIOSettings();
-	FbxImporter* pfbxImporter = FbxImporter::Create(pfbxSdkManager, " ");
+}
+
+void FbxLoader::LoadScene(char* pstrFbxFileName)
+{
+	FbxIOSettings* pfbxIOSettings = mFbxManager->GetIOSettings();
+	FbxImporter* pfbxImporter = FbxImporter::Create(mFbxManager, " ");
 	bool bImportStatus = pfbxImporter->Initialize(pstrFbxFileName, -1, pfbxIOSettings);
 
-	pfbxScene = FbxScene::Create(pfbxSdkManager, " ");
-	bool bStatus = pfbxImporter->Import(pfbxScene);
+	mFbxScene = FbxScene::Create(mFbxManager, " ");
+
+	FbxGeometryConverter fbxGeomConverter(mFbxManager);
+	fbxGeomConverter.Triangulate(mFbxScene, true);
+
+	FbxSystemUnit fbxSceneSystemUnit = mFbxScene->GetGlobalSettings().GetSystemUnit();
+	if (fbxSceneSystemUnit.GetScaleFactor() != 1.0) FbxSystemUnit::cm.ConvertScene(mFbxScene);
 
 	pfbxImporter->Destroy();
-
-	return(pfbxScene);
 }
 
-void LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pfbxNode)
+void FbxLoader::LoadFbxHierarchy(FbxNode* pNode)
 {
-	FbxNodeAttribute* pfbxNodeAttribute = pfbxNode->GetNodeAttribute();
+	FbxNodeAttribute* pfbxNodeAttribute = pNode->GetNodeAttribute();
 
-	if (pfbxNodeAttribute && (pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
+	if (pNode == NULL) {
+		cout << "씬 로드 실패" << endl;
+		return;
+	}
+
+	if ((pfbxNodeAttribute != NULL) &&
+		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
 	{
-		FbxMesh* pfbxMesh = pfbxNode->GetMesh();
+		LoadMesh(pNode);
 
-		int nVertices = pfbxMesh->GetControlPointsCount();
+		//if (animation != NULL)
+		LoadAnimations(pNode);
+	}
 
-		int nIndices = 0;
-		int nPolygons = pfbxMesh->GetPolygonCount();
+	for (int i = 0; i < pNode->GetChildCount(); i++)
+		LoadFbxHierarchy(pNode->GetChild(i));
+}
 
-		cout << "-메쉬 로드됨 [폴리곤]: " << nPolygons << "개 [정점]: " << nVertices << "개\n" << endl;
+void FbxLoader::LoadMesh(FbxNode* pNode)
+{
+	FbxMesh* pfbxMesh = pNode->GetMesh();
 
-		FbxGeometryElementNormal* normalEl = pfbxMesh->GetElementNormal();
+	nPolygons = pfbxMesh->GetPolygonCount();
 
-		CDiffusedVertex *pVertices = new CDiffusedVertex[nVertices];
+	for (int pindex = 0; pindex < nPolygons; pindex++) {
+		for (int vindex = 0; vindex < 3; vindex++) {
+			int pvindex = pfbxMesh->GetPolygonVertex(pindex, vindex);
+			int uvindex = pfbxMesh->GetTextureUVIndex(pindex, vindex, FbxLayerElement::eTextureDiffuse);
+			
+			FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
+			FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
 
-		for (int pindex = 0; pindex < nPolygons; pindex++)
-		{
-			const int lVerticeCount = pfbxMesh->GetPolygonSize(pindex);
+			if (fbxLayerUV != NULL) {
+				fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
 
-			for (int lVerticeIndex = 0; lVerticeIndex < lVerticeCount; lVerticeIndex++)
-			{
-				XMFLOAT3 position;
-				float texture[2];
-				XMFLOAT3 normalvector;
+				float uv1 = fbxUV[0];
+				float uv2 = 1.0f - fbxUV[1];
 
-				position.x = pfbxMesh->GetControlPointAt(lVerticeIndex).mData[0];
-				position.y = pfbxMesh->GetControlPointAt(lVerticeIndex).mData[1];
-				position.z = pfbxMesh->GetControlPointAt(lVerticeIndex).mData[2];
 
-				FbxVector4 normal = normalEl->GetDirectArray().GetAt(nIndices);
-				normalvector.x = (float)normal[0];
-				normalvector.y = (float)normal[1];
-				normalvector.z = (float)normal[2];
-
-				FbxVector2 fbxTexCoord;
-				FbxStringList UVSetNameList;
-
-				for (int l = 0; l < pfbxMesh->GetElementUVCount(); ++l)
-				{
-					FbxGeometryElementUV* leUV = pfbxMesh->GetElementUV(l);
-
-					int lTextureUVIndex = pfbxMesh->GetTextureUVIndex(pindex, lVerticeIndex);
-					fbxTexCoord = leUV->GetDirectArray().GetAt(lTextureUVIndex);
-
-					texture[0] = static_cast<float>(fbxTexCoord[0]);
-					texture[1] = static_cast<float>(fbxTexCoord[1]);
-				}
-
-				//verticies.push_back({ position,texture ,normalvector });
+				mMesh.push_back(
+					CTexturedVertex(
+						XMFLOAT3(
+							pfbxMesh->GetControlPointAt(pvindex).mData[0],
+							pfbxMesh->GetControlPointAt(pvindex).mData[2],
+							pfbxMesh->GetControlPointAt(pvindex).mData[1]
+						),
+						XMFLOAT2(
+							uv1,
+							uv2
+						)
+					)
+				);
+			}
+			else {
+				mMesh.push_back(
+					CTexturedVertex(
+						XMFLOAT3(
+							pfbxMesh->GetControlPointAt(pvindex).mData[0],
+							pfbxMesh->GetControlPointAt(pvindex).mData[2],
+							pfbxMesh->GetControlPointAt(pvindex).mData[1]
+						)
+					)
+				);
 			}
 		}
 	}
 
-	int nChilds = pfbxNode->GetChildCount();
-	cout <<"[남은 차일드]: " << nChilds << "개" << endl;
-	for (int i = 0; i < nChilds; i++) LoadFbxMesh(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pfbxNode->GetChild(i));
+	nVertics += nPolygons * 3;
+
 }
 
-void CreateFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pfbxNode)
+void FbxLoader::LoadControlPoints(FbxNode* pNode)
 {
-	FbxNodeAttribute* pfbxNodeAttribute = pfbxNode->GetNodeAttribute();
-	if (pfbxNodeAttribute && (pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
-	{
-		FbxMesh* pfbxMesh = pfbxNode->GetMesh();
 
-		int nVertices = pfbxMesh->GetControlPointsCount();
+}
 
-		int nIndices = 0;
-		int nPolygons = pfbxMesh->GetPolygonCount();
+void FbxLoader::LoadUV(FbxNode* pNode)
+{
 
-		cout << "폴리곤 수: " << nPolygons << endl;
+}
 
-		for (int i = 0; i < nPolygons; i++) 
-			nIndices += pfbxMesh->GetPolygonSize(i);
+void FbxLoader::LoadNormal(FbxNode* pNode)
+{
 
-		int* pnIndices = new int[nIndices];
+}
 
-		for (int i = 0, k = 0; i < nPolygons; i++)
-		{
-			int nPolygonSize = pfbxMesh->GetPolygonSize(i);
-			for (int j = 0; j < nPolygonSize; j++) pnIndices[k++] = pfbxMesh->GetPolygonVertex(i, j);
+//==========================================================================//
+
+void FbxLoader::LoadAnimations(FbxNode* pNode)
+{
+	FbxMesh* pfbxMesh = pNode->GetMesh();
+	int nDefirner = pfbxMesh->GetDeformerCount();
+
+	FbxAMatrix geometryTransform = GetGeoOffsetTransform(pNode);
+
+	for (int dindex = 0; dindex < nDefirner; dindex++) {			// Deformer
+		FbxSkin* pfbxSkin = reinterpret_cast<FbxSkin*>(pfbxMesh->GetDeformer(dindex, FbxDeformer::eSkin));
+
+		if(pfbxSkin == NULL)
+			continue;
+
+		int nCluster = pfbxSkin->GetClusterCount();
+
+		for (int cindex = 0; cindex < nCluster; cindex++) {			// Cluster
+			FbxCluster* pfbxCluster = pfbxSkin->GetCluster(cindex);
+			string jointName = pfbxCluster->GetLink()->GetName();
+			
+			int jindex = 0;
+			for (int i = 0; i < mSkeleton.size(); i++) {
+				if (mSkeleton[i].mName == jointName) {
+					jindex = i;
+					break;
+				}
+			}
+
+			FbxAMatrix transformMatrix;
+			FbxAMatrix transformLinkMatrix;
+			FbxAMatrix globalBindposeInverseMatrix;
+
+			pfbxCluster->GetTransformMatrix(transformMatrix);
+			pfbxCluster->GetTransformLinkMatrix(transformLinkMatrix);
+			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransform;
+
+			mSkeleton[jindex].mGlobalBindposeInverse = globalBindposeInverseMatrix;
+			mSkeleton[jindex].mNode = pfbxCluster->GetLink();
+
+			int nIndices = pfbxCluster->GetControlPointIndicesCount();
+			for (int i = 0; i < nIndices; ++i)
+			{
+				BlendingIndexWeightPair blendingIndexWeightPair;
+				blendingIndexWeightPair.mBlendingIndex = jindex;
+				blendingIndexWeightPair.mBlendingWeight = pfbxCluster->GetControlPointWeights()[i];
+				mControlPoints[pfbxCluster->GetControlPointIndices()[i]]->mBlendingInfo.push_back(blendingIndexWeightPair);
+			}
+
+			FbxAnimStack* animStack = mFbxScene->GetSrcObject<FbxAnimStack>(0);
+			FbxString animStackName = animStack->GetName();
+			mAnimationName = animStackName.Buffer();
+			FbxTakeInfo* takeInfo = mFbxScene->GetTakeInfo(animStackName);
+			FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
+			FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
+			mAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
+			Keyframe** currAnim = &mSkeleton[jindex].mAnimation;
+
+			for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); ++i)
+			{
+				FbxTime currTime;
+				currTime.SetFrame(i, FbxTime::eFrames24);
+				*currAnim = new Keyframe();
+				(*currAnim)->mFrameNum = i;
+				FbxAMatrix currentTransformOffset = pNode->EvaluateGlobalTransform(currTime) * geometryTransform;
+				(*currAnim)->mGlobalTransform = currentTransformOffset.Inverse() * pfbxCluster->GetLink()->EvaluateGlobalTransform(currTime);
+				currAnim = &((*currAnim)->mNext);
+			}
 		}
-
-		CFbxRenderInfo* pFbxRenderInfo = new CFbxRenderInfo();
-		pFbxRenderInfo->m_pMesh = new CMeshFromFbx(pd3dDevice, pd3dCommandList, nVertices, nIndices, pnIndices);
-		
-		int nSkinDeformers = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
-		if (nSkinDeformers > 0)
-			pFbxRenderInfo->m_pShader = new CFbxSkinnedModelShader();
-		else
-			pFbxRenderInfo->m_pShader = new CFbxModelShader();
-		pFbxRenderInfo->m_pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
-		
-		pfbxMesh->SetUserDataPtr(pFbxRenderInfo);
-
-		if (pnIndices) delete[] pnIndices;
 	}
 
-	int nChilds = pfbxNode->GetChildCount();
-	for (int i = 0; i < nChilds; i++) CreateFbxMesh(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pfbxNode->GetChild(i));
-
-}
-
-void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxMesh* pfbxMesh, FbxAMatrix& fbxmtxNodeToRoot, FbxAMatrix& fbxmtxGeometryOffset, FbxAMatrix fbxmtxWorld)
-{
-	int nVertices = pfbxMesh->GetControlPointsCount();
-	if (nVertices > 0)
+	BlendingIndexWeightPair blendingIndexWeightPair;
+	blendingIndexWeightPair.mBlendingIndex = 0;
+	blendingIndexWeightPair.mBlendingWeight = 0;
+	for (auto i = mControlPoints.begin(); i != mControlPoints.end(); ++i)
 	{
-		FbxAMatrix fbxmtxTransform = fbxmtxWorld;
-		int nSkinDeformers = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
-		if (nSkinDeformers == 0) fbxmtxTransform = fbxmtxWorld * fbxmtxNodeToRoot * fbxmtxGeometryOffset;
-
-		//CGameObject::UpdateShaderVariable(pd3dCommandList, &fbxmtxTransform);
-
-		CFbxRenderInfo* pFbxRenderInfo = (CFbxRenderInfo*)pfbxMesh->GetUserDataPtr();
-		if (pFbxRenderInfo->m_pShader) pFbxRenderInfo->m_pShader->Render(pd3dCommandList, NULL);
-		if (pFbxRenderInfo->m_pMesh) pFbxRenderInfo->m_pMesh->Render(pd3dCommandList);
+		for (unsigned int j = i->second->mBlendingInfo.size(); j <= 4; j++)
+		{
+			i->second->mBlendingInfo.push_back(blendingIndexWeightPair);
+		}
 	}
 }
 
-void RenderFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxMesh* pfbxMesh, FbxAMatrix& fbxmtxNodeToRoot, FbxAMatrix& fbxmtxGeometryOffset, FbxAMatrix fbxmtxWorld)
+void FbxLoader::LoadSkeletonHierarchy(FbxNode* pNode)
 {
-	int nVertices = pfbxMesh->GetControlPointsCount();
-	if (nVertices > 0)
+	for (int i = 0; i < pNode->GetChildCount(); i++)
 	{
-		FbxAMatrix fbxmtxTransform = fbxmtxWorld;
-		int nSkinDeformers = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
-		if (nSkinDeformers == 0) fbxmtxTransform = fbxmtxWorld * fbxmtxNodeToRoot * fbxmtxGeometryOffset;
-
-		//CGameObject::UpdateShaderVariable(pd3dCommandList, &fbxmtxTransform);
-
-		CFbxRenderInfo* pFbxRenderInfo = (CFbxRenderInfo*)pfbxMesh->GetUserDataPtr();
-		if (pFbxRenderInfo->m_pShader) pFbxRenderInfo->m_pShader->Render(pd3dCommandList, NULL);
-		if (pFbxRenderInfo->m_pMesh) pFbxRenderInfo->m_pMesh->Render(pd3dCommandList);
+		FbxNode* curNode = pNode->GetChild(i);
+		LoadSkeletonRecursively(curNode, 0, 0, -1);
 	}
 }
 
-void RenderFbxNodeHierarchy(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pfbxNode, FbxTime& fbxCurrentTime, FbxAMatrix& fbxmtxWorld)
+void FbxLoader::LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex, int inParentIndex)
 {
-	FbxNodeAttribute* pfbxNodeAttribute = pfbxNode->GetNodeAttribute();
-	if (pfbxNodeAttribute && (pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
+	if (pNode->GetNodeAttribute() && pNode->GetNodeAttribute()->GetAttributeType() && 
+		pNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
 	{
-		FbxAMatrix fbxmtxNodeToRoot = pfbxNode->EvaluateGlobalTransform(fbxCurrentTime);
-		FbxAMatrix fbxmtxGeometryOffset = GetGeometricOffsetTransform(pfbxNode);
-
-		FbxMesh* pfbxMesh = pfbxNode->GetMesh();
-		RenderFbxMesh(pd3dCommandList, pfbxMesh, fbxmtxNodeToRoot, fbxmtxGeometryOffset, fbxmtxWorld);
+		Joint currJoint;
+		currJoint.mParentIndex = inParentIndex;
+		currJoint.mName = pNode->GetName();
+		mSkeleton.push_back(currJoint);
 	}
 
-	int nChilds = pfbxNode->GetChildCount();
-	for (int i = 0; i < nChilds; i++) RenderFbxNodeHierarchy(pd3dCommandList, pfbxNode->GetChild(i), fbxCurrentTime, fbxmtxWorld);
+	for (int i = 0; i < pNode->GetChildCount(); i++)
+	{
+		LoadSkeletonRecursively(pNode->GetChild(i), inDepth + 1, mSkeleton.size(), myIndex);
+	}
 }

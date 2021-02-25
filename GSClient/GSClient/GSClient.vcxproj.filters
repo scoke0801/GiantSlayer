@@ -102,9 +102,6 @@
     <ClCompile Include="FbxSceneContext.cpp">
       <Filter>FBXLoader</Filter>
     </ClCompile>
-    <ClCompile Include="FBXLoader.cpp">
-      <Filter>FBXLoader</Filter>
-	</ClCompile>
     <ClCompile Include="GameSceneProto.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -113,6 +110,9 @@
     </ClCompile>
     <ClCompile Include="Wall.cpp">
       <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="FbxLoader.cpp">
+      <Filter>FBXLoader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -206,9 +206,6 @@
     <ClInclude Include="FbxSceneContext.h">
       <Filter>FBXLoader</Filter>
     </ClInclude>
-    <ClInclude Include="FBXLoader.h">
-      <Filter>FBXLoader</Filter>
-	</ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Light</Filter>
     </ClInclude>
@@ -220,6 +217,11 @@
     </ClInclude>
     <ClInclude Include="Wall.h">
       <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="FrameResource.h" />
+    <ClInclude Include="FbxLoader.h">
+      <Filter>FBXLoader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 #pragma once
 #include "Mesh.h"
 #include "FbxSceneContext.h"
+#include "FbxLoader.h"
 
 class CShader;
 class CCamera;
@@ -185,13 +186,6 @@ public:
 	void SetPosition(int nAnimationStack, float fPosition);
 };
 
-typedef struct Joint {
-	int mParentIndex;
-	char* pstrFbxFileName;
-	FbxAMatrix mGlobalBindposeInverse;
-	FbxNode mNode;
-};
-
 class CFbxObject : public CGameObject
 {
 public:
@@ -202,6 +196,7 @@ public:
 
 public:
 	FbxScene*				m_pfbxScene = NULL;
+	FbxLoader*				m_pfbxLoader = NULL;
 	CAnimationController*	m_pAnimationController = NULL;
 
 public:

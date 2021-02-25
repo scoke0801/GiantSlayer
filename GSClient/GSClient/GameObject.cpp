@@ -353,6 +353,8 @@ CFbxObject::CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	SetMesh(pFbxtestMesh);
 
 	m_pAnimationController = new CAnimationController(m_pfbxScene);
+
+	FbxLoader(pfbxSdkManager, pstrFbxFileName);
 }
 
 CFbxObject::~CFbxObject()
@@ -364,31 +366,6 @@ CFbxObject::~CFbxObject()
 		m_pShader->Release();
 	}
 	if (m_pAnimationController) delete m_pAnimationController;
-}
-
-void CFbxObject::LoadSkeletonHierarchy(FbxNode* inRootNode)
-{
-	for (int childIndex = 0; childIndex < inRootNode->GetChildCount(); ++childIndex)
-	{
-		FbxNode* currNode = inRootNode->GetChild(childIndex);
-		LoadSkeletonHierarchyRecursively(currNode, 0, 0, -1);
-	}
-}
-
-void CFbxObject::LoadSkeletonHierarchyRecursively(FbxNode* inNode, int inDepth, int myIndex, int inParentIndex)
-{
-	if (inNode->GetNodeAttribute() && inNode->GetNodeAttribute()->GetAttributeType() && inNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton)
-	{
-		int mParentIndex = inParentIndex;
-		string mName = inNode->GetName();
-		//FbxObject mSkeleton
-		//mSkeleton.mJoints.push_back(mSkeleton);
-	}
-
-	for (int i = 0; i < inNode->GetChildCount(); i++)
-	{
-		//LoadSkeletonHierarchyRecursively(inNode->GetChild(i), inDepth + 1, mSkeleton.mJoints.size(), myIndex);
-	}
 }
 
 void CFbxObject::Animate(float fTimeElapsed)

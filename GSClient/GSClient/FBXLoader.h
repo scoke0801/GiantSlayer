@@ -1,17 +1,100 @@
 #pragma once
 
-class FBXLoader
+struct Keyframe
 {
+	FbxLongLong mFrameNum;
+	FbxAMatrix mGlobalTransform;
+	Keyframe* mNext;
 
+	Keyframe() :
+		mNext(nullptr)
+	{}
 };
 
-extern FbxAMatrix XmFloat4x4MatrixToFbxMatrix(XMFLOAT4X4& xmf4x4Source);
+struct Joint
+{
+	std::string mName;
+	int mParentIndex;
+	FbxAMatrix mGlobalBindposeInverse;
+	Keyframe* mAnimation;
+	FbxNode* mNode;
 
-extern FbxScene* LoadFbxScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
-extern void LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pfbxNode);
-extern void CreateFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pfbxNode);
+	Joint() :
+		mNode(nullptr),
+		mAnimation(nullptr)
+	{
+		mGlobalBindposeInverse.SetIdentity();
+		mParentIndex = -1;
+	}
 
-extern void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxMesh* pfbxMesh, FbxAMatrix& fbxmtxNodeToRoot, FbxAMatrix& fbxmtxGeometryOffset, FbxAMatrix fbxmtxWorld);
+	~Joint()
+	{
+		while (mAnimation)
+		{
+			Keyframe* temp = mAnimation->mNext;
+			delete mAnimation;
+			mAnimation = temp;
+		}
+	}
+};
 
-extern void RenderFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxMesh* pfbxMesh, FbxAMatrix& fbxmtxNodeToRoot, FbxAMatrix& fbxmtxGeometryOffset, FbxAMatrix fbxmtxWorld);
-extern void RenderFbxNodeHierarchy(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pfbxNode, FbxTime& fbxCurrentTime, FbxAMatrix& fbxmtxWorld);
+struct BlendingIndexWeightPair
+{
+	unsigned int mBlendingIndex;
+	double mBlendingWeight;
+
+	BlendingIndexWeightPair() :
+		mBlendingIndex(0),
+		mBlendingWeight(0)
+	{}
+};
+
+struct CtrlPoint
+{
+	XMFLOAT3 mPosition;
+	std::vector<BlendingIndexWeightPair> mBlendingInfo;
+
+	CtrlPoint()
+	{
+		mBlendingInfo.reserve(4);
+	}
+};
+
+
+
+class FbxLoader
+{
+private:
+	FbxManager*					mFbxManager = NULL;
+	FbxScene*					mFbxScene = NULL;
+
+	int							nControlPoints = 0;
+	int							nVertics = 0;
+	int							nPolygons = 0;
+	float						mAnimationLength;
+	string						mAnimationName;
+
+	vector<CTexturedVertex>		mMesh;
+
+	vector<Joint>				mSkeleton;
+
+	unordered_map<unsigned int, CtrlPoint*> mControlPoints;
+
+public:
+	FbxLoader(FbxManager* pfbxSdkManager, char* pstrFbxFileName);
+	~FbxLoader();
+
+	void LoadScene(char* pstrFbxFileName);
+
+	void LoadFbxHierarchy(FbxNode* pNode);
+
+	void LoadMesh(FbxNode* pNode);
+	void LoadControlPoints(FbxNode* pNode);
+	void LoadUV(FbxNode* pNode);
+	void LoadNormal(FbxNode* pNode);
+
+	void LoadAnimations(FbxNode* pNode);
+	void LoadSkeletonHierarchy(FbxNode* pNode);
+	void LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex, int inParentIndex);
+
+};
