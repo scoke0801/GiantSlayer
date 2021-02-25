@@ -21,6 +21,34 @@ enum class OBJ_NAME
 	Door = 13
 };
 
+enum class Map_Configuration_Name
+{
+	First_Ground =0,
+	Second_Ground,
+	Third_Ground,
+	Fourth_Ground,
+	Boss_Ground,
+
+	Plane_Pattern_Ground,
+	Plane_Pattern_Ground_Vertical,
+
+	Up_Pattern_Ground,
+	Up_Pattern_Ground_Rotate,
+
+	Down_Pattern_Ground,
+	Down_Pattern_Ground_Rotate,
+
+	Cliff_Pattern_Ground,
+	Cliff_Pattern_Ground_Vertical,
+	Cliff_Pattern_Ground_Rotate,
+};
+
+struct MapData
+{
+	Map_Configuration_Name Name;
+	int Height;
+};
+
 enum class OBJ_DIRECTION
 {
 	Front = 0,

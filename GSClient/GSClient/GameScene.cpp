@@ -202,13 +202,13 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pObjectShader->CreateInputLayout(ShaderTypes::Textured);
 	pObjectShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	/*CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
-	pBox->SetShader(pShader);
+	CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
+	pBox->SetShader(pObjectShader);
 	pBox->SetObjectName(OBJ_NAME::Box);
 
 	m_ppObjects[5] = pBox;
 	m_ppObjects[5]->SetPosition({ 250,  25, 250 });
-	m_ppObjects[5]->SetTextureIndex(0x80);*/
+	m_ppObjects[5]->SetTextureIndex(0x80);
 
 	//CGameObject* ptower = new CGameObject();
 	//ptower->SetShader(pShader);
@@ -383,11 +383,11 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
-	/*for (int j = 0; j < m_nObjects; j++)
+	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
-	}*/
+	}
 }
 
 void CGameScene::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
