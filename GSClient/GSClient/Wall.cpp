@@ -126,3 +126,13 @@ void CDoorWall::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 		pWall->Draw(pd3dCommandList, pCamera);
 	}
 }
+
+void CDoorWall::SetPosition(XMFLOAT3 xmf3Position)
+{
+	m_LeftDoor->SetPositionPlus(xmf3Position);
+	m_RightDoor->SetPositionPlus(xmf3Position);
+	for (CWall* pWall : m_Walls)
+	{
+		pWall->SetPositionPlus(xmf3Position);
+	}
+}

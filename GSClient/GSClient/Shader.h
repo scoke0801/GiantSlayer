@@ -71,13 +71,11 @@ public:
 	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* pszFileName, LPCSTR pszShaderName,
 		LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
 
-	virtual void CreateShader(ID3D12Device* pd3dDevice,
-		ID3D12RootSignature* pd3dGraphicsRootSignature);
-	virtual void CreateGeneralShader(ID3D12Device* pd3dDevice,
-		ID3D12RootSignature* pd3dGraphicsRootSignature,
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual void CreateGeneralShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
-	void CreateFBXMeshShader(ID3D12Device* pd3dDevice,
-		ID3D12RootSignature* pd3dGraphicsRootSignature);
+	void CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	void CreateUIShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	virtual void CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	 

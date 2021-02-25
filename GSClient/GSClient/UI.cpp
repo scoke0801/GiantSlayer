@@ -15,10 +15,14 @@ UI::UI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 	if (pBillboardVertices) delete pBillboardVertices;
 }
 
-UI::UI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width, float height, float depth)
+UI::UI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	float width, float height, float depth, 
+	bool IsHalfSize)
 {
 	CPlaneMeshTextured* pPlaneMeshTex = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList,
-		width, height, depth);
+		width, height, depth,
+		true,
+		IsHalfSize);
 
 	SetMesh(pPlaneMeshTex);
 }

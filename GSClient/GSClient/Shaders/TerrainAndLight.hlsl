@@ -6,8 +6,15 @@ cbuffer cbGameObjectInfo : register(b0)
 	uint	gnMaterialID : packoffset(c4.y);
 };
 
+//게임 씬의 정보를 위한 상수 버퍼를 선언한다. 
+cbuffer cbSceneFrameData : register(b1)
+{
+	uint	gnHP : packoffset(c0.x);
+	uint	gnSP : packoffset(c0.y);
+};
+
 //카메라의 정보를 위한 상수 버퍼를 선언한다. 
-cbuffer cbCameraInfo : register(b1)
+cbuffer cbCameraInfo : register(b2)
 {
 	matrix	gmtxView : packoffset(c0);
 	matrix	gmtxProjection : packoffset(c4);

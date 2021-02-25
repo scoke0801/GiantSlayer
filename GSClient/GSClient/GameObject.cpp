@@ -142,6 +142,16 @@ void CGameObject::SetPosition(XMFLOAT3 pos)
 	m_xmf4x4World._43 = pos.z;
 }
 
+void CGameObject::SetPositionPlus(XMFLOAT3 pos)
+{
+	pos = Vector3::Add(m_xmf3Position, pos);
+	m_xmf3Position = pos;
+
+	m_xmf4x4World._41 = pos.x;
+	m_xmf4x4World._42 = pos.y;
+	m_xmf4x4World._43 = pos.z;
+}
+
 void CGameObject::SetVelocity(XMFLOAT3 vel)
 {
 	m_xmf3Velocity = vel;
@@ -211,8 +221,12 @@ void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
-void CGameObject::Scale(float x, float y, float z)
+void CGameObject::Scale(float x, float y, float z, bool setSize)
 {
+	if (setSize)
+	{
+		m_xmf3Size = { x,y,z };
+	}
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
 	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World); 
 }
@@ -494,8 +508,8 @@ void CSkyBox::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 
 void CSkyBox::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 {
-	//for (int i = 0; i < m_nObjects; ++i)
-		m_ppObjects[4]->Rotate(pxmf3Axis, fAngle);
+	for (int i = 0; i < m_nObjects; ++i)
+		m_ppObjects[i]->Rotate(pxmf3Axis, fAngle);
 }
 
 CSkyBoxSphere::CSkyBoxSphere(ID3D12Device* pd3dDevice,
@@ -536,14 +550,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	long czBlocks = (m_nLength - 1) / czQuadsPerBlock;	// 32
 
 	m_nObjects = cxBlocks * czBlocks;
-
-	m_ppObjects = new CGameObject * [m_nObjects];
-
-	for (int i = 0; i < m_nObjects; i++)
-	{
-		vector<CGameObject> element(m_nObjects);
-		m_VectorObjects.push_back(element);
-	}
+	m_Objects.reserve(m_nObjects);
 	 
 	CTerrainMesh* pTerrainPlaneMesh = new CTerrainMesh(pd3dDevice, pd3dCommandList, 
 		0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks, MapMeshHeightType::Plane);
@@ -818,9 +825,6 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 				pObject->Scale(500.0f, 1.0f, 500.0f);
 				pObject->SetPosition(XMFLOAT3(i * 2000.0f, Map[i][j].Height, j * 2000.0f ));
 			}
-
-			
-
 			m_Objects.push_back(std::move(pObject));
 		}
 	} 
@@ -913,6 +917,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	pObject->SetTextureIndex(0x01);
 	pObject->SetMesh(pTerrainPlaneMesh);
 	pObject->SetShader(pShader);
+
 	pObject->SetPosition(XMFLOAT3(0.0f, -10000.0f, 0.0f));
 	m_Objects.push_back(std::move(pObject));
 }

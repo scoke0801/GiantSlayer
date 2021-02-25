@@ -181,7 +181,8 @@ public:
 	CPlaneMeshTextured(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
 		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f,
-		bool isVertical = true);
+		bool isVertical = true,
+		bool isHalfSize = false); 
 	CPlaneMeshTextured(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
 		XMFLOAT3 startPos,
@@ -361,8 +362,6 @@ public:
 	~CTerrainMesh();
 
 	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
-	virtual float OnGetHeight(float x, float z);
-
 	float GetHeightPlane(float x, float z) const { return 0; }
 	float GetHeightUpRidge(float x, float z, float waveSize);
 	float GetHeightDownRidge(float x, float z, float waveSize);
