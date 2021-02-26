@@ -39,7 +39,13 @@ struct GameInputs
 	bool KEY_ADD = false;
 	bool KEY_SUBTRACT = false;
 };
-
+enum class CommandType
+{
+	None = 0,
+	Move,
+	MoveAttack,
+	Attack
+};
 class CInputHandler
 {
 private :
@@ -72,6 +78,8 @@ public:
 
 	POINT GetMousePoint() const { return m_PrevMousePos; }
 	void ResetMousePos() { m_PrevMousePos = POINT(); }
+
+	int GetCommandType() const;
 };
 #define GAME_INPUT CInputHandler::GetInstance().m_Inputs
 #define GET_MOUSE_POS CInputHandler::GetInstance().m_PrevMousePos

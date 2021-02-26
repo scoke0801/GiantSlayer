@@ -279,174 +279,73 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	auto terrainTex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, terrainTex.get(), "Terrain", L"resources/OBJ/Terrain.dds");
+	const char* keyNames[] = 
+	{ 
+		"Terrain", "Sky_Front","Sky_Front",
+		"Sky_Back", "Sky_Left", "Sky_Right",
+		"Sky_Top","Sky_Bottom", "Box",
+		"Wood", "Wall", "Door",
+		"HP_SP","Minimap","WeaponUI",
+		"HP_SP_PER"
+	};
 
-	auto SkyTex_Front = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Front.get(), "Sky_Front", L"resources/skybox/front.dds");
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Front.get(), "Sky_Front", L"resources/OBJ/SkyBox_Front_0.dds");
-
-	auto SkyTex_Back = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Back.get(), "Sky_Back", L"resources/skybox/back.dds");
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Back.get(), "Sky_Back", L"resources/OBJ/SkyBox_Back_0.dds");
-
-	auto SkyTex_Left = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Left.get(), "Sky_Left", L"resources/skybox/left.dds");
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Left.get(), "Sky_Left", L"resources/OBJ/SkyBox_Left_0.dds");
-
-	auto SkyTex_Right = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Right.get(), "Sky_Right", L"resources/skybox/right.dds");
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Right.get(), "Sky_Right", L"resources/OBJ/SkyBox_Right_0.dds");
-
-	auto SkyTex_Top = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Top.get(), "Sky_Top", L"resources/skybox/top.dds");
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Top.get(), "Sky_Top", L"resources/OBJ/SkyBox_Top_0.dds");
-
-	auto SkyTex_Bottom = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Bottom.get(), "Sky_Bottom", L"resources/skybox/bottom.dds");
-	//MakeTexture(pd3dDevice, pd3dCommandList, SkyTex_Bottom.get(), "Sky_Bottom", L"resources/OBJ/SkyBox_Bottom_0.dds");
-
-	auto boxTex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, boxTex.get(), "Box", L"resources/OBJ/Box.dds");
-
-	auto woodTex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, woodTex.get(), "Wood", L"resources/OBJ/Wood.dds");
-	
-	auto wallTex = make_unique<CTexture>();
-	//MakeTexture(pd3dDevice, pd3dCommandList, wallTex.get(), "Wall", L"resources/OBJ/StoneWall.dds");
-	MakeTexture(pd3dDevice, pd3dCommandList, wallTex.get(), "Wall", L"resources/OBJ/WallTest2.dds"); 
-
-	auto doorTex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, doorTex.get(), "Door", L"resources/OBJ/Door3.dds");
-	
-	auto hpSpGaugeTex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, hpSpGaugeTex.get(), "HP_SP", L"resources/UI/HP_SP.dds");
-	
-	auto minimapTex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, minimapTex.get(), "Minimap", L"resources/UI/Minimap.dds");
-
-	auto weaponUITex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, weaponUITex.get(), "WeaponUI", L"resources/UI/Weapon.dds"); 
-
-	auto hpSpPerTex = make_unique<CTexture>();
-	MakeTexture(pd3dDevice, pd3dCommandList, hpSpPerTex.get(), "HP_SP_PER", L"resources/UI/HP_SP_Per.dds");
-
-	m_Textures[terrainTex->m_Name] = std::move(terrainTex);
-	m_Textures[SkyTex_Back->m_Name] = std::move(SkyTex_Back);
-	m_Textures[SkyTex_Front->m_Name] = std::move(SkyTex_Front);
-	m_Textures[SkyTex_Left->m_Name] = std::move(SkyTex_Left);
-	m_Textures[SkyTex_Right->m_Name] = std::move(SkyTex_Right);
-	m_Textures[SkyTex_Top->m_Name] = std::move(SkyTex_Top);
-	m_Textures[SkyTex_Bottom->m_Name] = std::move(SkyTex_Bottom);
-	m_Textures[boxTex->m_Name] = std::move(boxTex); 
-	m_Textures[woodTex->m_Name] = std::move(woodTex); 
-	m_Textures[wallTex->m_Name] = std::move(wallTex);
-	m_Textures[doorTex->m_Name] = std::move(doorTex);
-	m_Textures[hpSpGaugeTex->m_Name] = std::move(hpSpGaugeTex);	
-	m_Textures[minimapTex->m_Name] = std::move(minimapTex);	 
-	m_Textures[weaponUITex->m_Name] = std::move(weaponUITex);
-	m_Textures[hpSpPerTex->m_Name] = std::move(hpSpPerTex);
+	const wchar_t* address[] = 
+	{ 
+		L"resources/OBJ/Terrain.dds", L"resources/skybox/front.dds", L"resources/skybox/front.dds",
+		L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",
+		L"resources/skybox/top.dds", L"resources/skybox/bottom.dds", L"resources/OBJ/Box.dds",
+		L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
+		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",
+		L"resources/UI/HP_SP_Per.dds"
+	};
+	 
+	for (int i = 0; i < _countof(keyNames); ++i)
+	{
+		unique_ptr<CTexture> tempTex = make_unique<CTexture>();
+		MakeTexture(pd3dDevice, pd3dCommandList, tempTex.get(), keyNames[i], address[i]); 
+		m_Textures[tempTex->m_Name] = std::move(tempTex);
+	}       
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	//
-	// Create the SRV heap.
-	//
+{ 
+	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
 	srvHeapDesc.NumDescriptors = m_Textures.size() + 1;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
-
-	//
-	// Fill out the heap with actual descriptors.
-	//
+	 
+	// Fill out the heap with actual descriptors. 
 	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor = m_pd3dSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-
-	auto terrainTex = m_Textures["Terrain"]->m_pd3dResource;
-	auto SkyTex_Front = m_Textures["Sky_Front"]->m_pd3dResource;
-	auto SkyTex_Back = m_Textures["Sky_Back"]->m_pd3dResource;
-	auto SkyTex_Left = m_Textures["Sky_Left"]->m_pd3dResource;
-	auto SkyTex_Right = m_Textures["Sky_Right"]->m_pd3dResource;
-	auto SkyTex_Top = m_Textures["Sky_Top"]->m_pd3dResource;
-	auto SkyTex_Bottom = m_Textures["Sky_Bottom"]->m_pd3dResource;
-	auto boxTex = m_Textures["Box"]->m_pd3dResource;
-	auto woodTex = m_Textures["Wood"]->m_pd3dResource;
-	auto wallTex = m_Textures["Wall"]->m_pd3dResource;
-	auto doorTex = m_Textures["Door"]->m_pd3dResource;
-	auto hpSpGaugeTex = m_Textures["HP_SP"]->m_pd3dResource;
-	auto hpSpPerGaugeTex = m_Textures["HP_SP_PER"]->m_pd3dResource;
-	auto minimapTex = m_Textures["Minimap"]->m_pd3dResource;
-	auto weaponUITex = m_Textures["WeaponUI"]->m_pd3dResource;
-
+	
+	const char* keyNames[] =
+	{
+		"Terrain",
+		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
+		"Box", "Wood",
+		"Wall", "Door",
+		"HP_SP","HP_SP_PER",
+		"Minimap",
+		"WeaponUI"
+	};  
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format = terrainTex->GetDesc().Format;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; 
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = -1;
-	pd3dDevice->CreateShaderResourceView(terrainTex, &srvDesc, hDescriptor);
+	srvDesc.Texture2D.MipLevels = -1; 
+	for (int i = 0; i < _countof(keyNames); ++i)
+	{
+		if(i != 0)	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+		ID3D12Resource* texResource = m_Textures[keyNames[i]]->m_pd3dResource;
+		srvDesc.Format = texResource->GetDesc().Format;
 
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = SkyTex_Front->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(SkyTex_Front, &srvDesc, hDescriptor);
+		pd3dDevice->CreateShaderResourceView(texResource, &srvDesc, hDescriptor);
+	}  
 
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = SkyTex_Back->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(SkyTex_Back, &srvDesc, hDescriptor);
-
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = SkyTex_Left->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(SkyTex_Left, &srvDesc, hDescriptor);
-
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = SkyTex_Right->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(SkyTex_Right, &srvDesc, hDescriptor);
-
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = SkyTex_Top->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(SkyTex_Top, &srvDesc, hDescriptor);
-
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = SkyTex_Bottom->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(SkyTex_Bottom, &srvDesc, hDescriptor);
-
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = boxTex->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(boxTex, &srvDesc, hDescriptor);
-
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = woodTex->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(woodTex, &srvDesc, hDescriptor);
-
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = wallTex->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(wallTex, &srvDesc, hDescriptor);
-
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = doorTex->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(doorTex, &srvDesc, hDescriptor);
-	
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = hpSpGaugeTex->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(hpSpGaugeTex, &srvDesc, hDescriptor);
-
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = hpSpPerGaugeTex->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(hpSpPerGaugeTex, &srvDesc, hDescriptor);
-
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = minimapTex->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(minimapTex, &srvDesc, hDescriptor);
-	
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = m_pd3dMinimapTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(m_pd3dMinimapTex, &srvDesc, hDescriptor);
-
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = weaponUITex->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(weaponUITex, &srvDesc, hDescriptor);
 }
 
 void CSceneJH::ReleaseObjects()
@@ -648,6 +547,11 @@ void CSceneJH::Communicate(SOCKET& sock)
 	toSendData += to_string(xmf3PlayerLook.y);
 	toSendData += " ";
 	toSendData += to_string(xmf3PlayerLook.z);
+	toSendData += "\n"; 
+
+	auto keyInput = GAME_INPUT;
+	toSendData += "<Command>\n"; 
+	toSendData += to_string(CInputHandler::GetInstance().GetCommandType());
 	toSendData += "\n";
 	SendFrameData(sock, toSendData, retVal);
 

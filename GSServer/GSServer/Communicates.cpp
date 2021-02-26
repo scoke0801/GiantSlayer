@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Communicates.h"
+#include "GameSceneProcessor.h"
 
 void charToWchar(const char* msg, wchar_t* out)
 {
@@ -102,7 +103,7 @@ XMFLOAT3 GetVectorFromText(const char* text)
 	return XMFLOAT3();
 }
 
-DWORD __stdcall ClientThread(LPVOID arg)
+DWORD __stdcall MainServerThread(LPVOID arg)
 {
 	SOCKET client_sock = (SOCKET)arg;
 	SOCKADDR_IN clientAddr;
@@ -117,6 +118,7 @@ DWORD __stdcall ClientThread(LPVOID arg)
 	int receivedSize = 0;
 	int count = 0;
 	int retval = 0;
+
 	while (1) {
 		static std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
 		static std::chrono::duration<double> timeElapsed;
@@ -124,44 +126,8 @@ DWORD __stdcall ClientThread(LPVOID arg)
 		timeElapsed = std::chrono::system_clock::now() - currentTime;
 		currentTime = std::chrono::system_clock::now();
 		//cout << "TimeElapsed: " << timeElapsed.count() << " \n";
-		RecvFrameData(client_sock, buffer, receivedSize);
-		char* token = strtok(buffer, "\n");
-		 
-		while (token != NULL)
-		{
-			if (strstr(token, "<PlayerPosition>:"))
-			{
-				XMFLOAT3 res = GetVectorFromText(token);
-				cout << "<PlayerPosition>: ";
-				DisplayVector3(res);
-			}
-			else if (strstr(token, "<PlayerLook>:"))
-			{
-				XMFLOAT3 res = GetVectorFromText(token);
-				cout << "<PlayerLook>: ";
-				DisplayVector3(res);
-			}
-			token = strtok(NULL, "\n");
-		}
-
-		string toSendData = "\n";
-		XMFLOAT3 xmf3PlayerPos = { 0,0,0 };// m_Player->GetPosition();
-		XMFLOAT3 xmf3PlayerLook = { 0,0,0 }; //m_Player->GetLook();
-		toSendData += "<PlayerPosition>:\n";
-		toSendData += to_string(xmf3PlayerPos.x);
-		toSendData += " ";
-		toSendData += to_string(xmf3PlayerPos.y);
-		toSendData += " ";
-		toSendData += to_string(xmf3PlayerPos.z);
-		toSendData += "\n";
-		toSendData += "<PlayerLook>:\n";
-		toSendData += to_string(xmf3PlayerLook.x);
-		toSendData += " ";
-		toSendData += to_string(xmf3PlayerLook.y);
-		toSendData += " ";
-		toSendData += to_string(xmf3PlayerLook.z);
-		toSendData += "\n";
-		SendFrameData(client_sock, toSendData, retval);
+		
+		GameSceneProcessor::GetInstance()->ProcessGameScene(client_sock); 
 	}
 
 	// closesocket()
