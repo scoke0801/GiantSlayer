@@ -632,7 +632,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 				}
 			}
 
-			// 세번재 지형
+			// 세번째 지형
 			if (i == 4 || i == 5) 
 			{
 				if ( j == 8 || j == 9)
@@ -912,6 +912,137 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 
 	////////////////////////////////////////////////////////////////////////////////////////
 
+	// 위쪽 벽
+	// 두번째 지형 ~ 세번째 지형 가로로 된 벽
+
+	for (int z = 0; z < 10; z++)
+	{
+		if (z < 3)
+		{
+			CGameObject* pObject = new CGameObject();
+			pObject->SetTextureIndex(0x01);
+			pObject->SetShader(pShader);
+			pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
+			pObject->SetMesh(pTerrainPlaneMesh);
+			pObject->Scale(500.0f, 1.0f, 500.0f);
+
+			pObject->SetPosition(XMFLOAT3((0 + (2000.0f * z)), 1000.0f, 20000.0f));
+			m_Objects.push_back(std::move(pObject));
+		}
+		if (z >= 3 && z<7)
+		{
+			CGameObject* pObject = new CGameObject();
+			pObject->SetTextureIndex(0x01);
+			pObject->SetShader(pShader);
+			pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
+			pObject->SetMesh(pTerrainPlaneMesh);
+			pObject->Scale(500.0f, 1.0f, 500.0f);
+
+			pObject->SetPosition(XMFLOAT3((0 + (2000.0f * z)), 0000.0f, 20000.0f));
+			m_Objects.push_back(std::move(pObject));
+		}
+		if (z >= 7)
+		{
+			CGameObject* pObject = new CGameObject();
+			pObject->SetTextureIndex(0x01);
+			pObject->SetShader(pShader);
+			pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
+			pObject->SetMesh(pTerrainPlaneMesh);
+			pObject->Scale(500.0f, 1.0f, 500.0f);
+
+			pObject->SetPosition(XMFLOAT3((0 + (2000.0f * z)), -4000.0f, 20000.0f));
+			m_Objects.push_back(std::move(pObject));
+		}
+	}
+
+
+	// 아래쪽 벽
+	// 세번째 지형 ~ 네번째 지형  가로로 된 벽
+
+	for (int z = 0; z < 10; z++)
+	{
+		if (z < 4)
+		{
+			CGameObject* pObject = new CGameObject();
+			pObject->SetTextureIndex(0x01);
+			pObject->SetShader(pShader);
+			pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
+			pObject->SetMesh(pTerrainPlaneMesh);
+			pObject->Scale(500.0f, 1.0f, 500.0f);
+
+			pObject->SetPosition(XMFLOAT3((0 + (2000.0f * z)), 1000.0f, 0000.0f));
+			m_Objects.push_back(std::move(pObject));
+		}
+		if (z >= 4)
+		{
+			CGameObject* pObject = new CGameObject();
+			pObject->SetTextureIndex(0x01);
+			pObject->SetShader(pShader);
+			pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
+			pObject->SetMesh(pTerrainPlaneMesh);
+			pObject->Scale(500.0f, 1.0f, 500.0f);
+
+			pObject->SetPosition(XMFLOAT3((0 + (2000.0f * z)), -1000.0f, 0000.0f));
+			m_Objects.push_back(std::move(pObject));
+		}
+	}
+
+	// 왼쪽 벽
+	// 첫번째 지형 ~ 두번째 지형 세로로 된 벽
+
+	for (int z = 0; z < 10; z++)
+	{
+		CGameObject* pObject = new CGameObject();
+		pObject->SetTextureIndex(0x01);
+		pObject->SetShader(pShader);
+		pObject->Rotate(XMFLOAT3(0, 0, 1), 90);
+		pObject->SetMesh(pTerrainPlaneMesh);
+		pObject->Scale(500.0f, 1.0f, 500.0f);
+
+		pObject->SetPosition(XMFLOAT3((0 ),-1000.0f, (2000.0f * z)));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	// 오른쪽 벽
+	// 4번째 지형 ~ 보스 지형 세로로 된 벽
+
+	for (int z = 0; z < 10; z++)
+	{
+		CGameObject* pObject = new CGameObject();
+		pObject->SetTextureIndex(0x01);
+		pObject->SetShader(pShader);
+		pObject->Rotate(XMFLOAT3(0, 0, 1), 90);
+		pObject->SetMesh(pTerrainPlaneMesh);
+		pObject->Scale(500.0f, 1.0f, 500.0f);
+		if (z < 2 )
+		{
+			pObject->SetPosition(XMFLOAT3((20000.0f), -3000.0f, (2000.0f * z)));
+		}
+		else if (z == 2)
+		{
+			pObject->SetPosition(XMFLOAT3((20000.0f), -4000.0f, (2000.0f * z)));
+		}
+		else if (z == 3 )
+		{
+			pObject->SetPosition(XMFLOAT3((20000.0f), -5000.0f, (2000.0f * z)));
+		}
+		else if (z <= 4)
+		{
+			pObject->SetPosition(XMFLOAT3((20000.0f), -5000.0f, (2000.0f * z)));
+		}
+		else if (z <= 5)
+		{
+			pObject->SetPosition(XMFLOAT3((20000.0f), -6000.0f, (2000.0f * z)));
+		}
+		else if (z > 5)
+		{
+			pObject->SetPosition(XMFLOAT3((20000.0f), -6000.0f, (2000.0f * z)));
+		}
+		m_Objects.push_back(std::move(pObject));
+
+	}
+
+	// 20000 확인용 평지
 	CGameObject* pObject = new CGameObject();
 	pObject->Scale(5000.0f, 1.0f, 5000.0f);
 	pObject->SetTextureIndex(0x01);
