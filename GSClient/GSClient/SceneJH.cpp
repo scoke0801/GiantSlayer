@@ -547,6 +547,11 @@ void CSceneJH::Communicate(SOCKET& sock)
 	toSendData += to_string(xmf3PlayerLook.y);
 	toSendData += " ";
 	toSendData += to_string(xmf3PlayerLook.z);
+	toSendData += "\n"; 
+
+	auto keyInput = GAME_INPUT;
+	toSendData += "<Command>\n"; 
+	toSendData += to_string(CInputHandler::GetInstance().GetCommandType());
 	toSendData += "\n";
 	SendFrameData(sock, toSendData, retVal);
 

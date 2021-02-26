@@ -2,6 +2,14 @@
 #include "Communicates.h"
 #include "Player.h"
 
+enum class CommandType
+{
+	None = 0,
+	Move,
+	MoveAttack,
+	Attack
+};
+
 #define MAX_CLIENT_NUM 4 
 class GameSceneProcessor
 {

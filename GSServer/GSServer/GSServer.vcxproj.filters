@@ -51,7 +51,4 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
-  </ItemGroup>
 </Project>

@@ -59,3 +59,16 @@ void CInputHandler::MouseUp(WPARAM btnState, int x, int y)
 	TestingMouseClick = false;
 	ReleaseCapture();
 }
+
+int CInputHandler::GetCommandType() const
+{
+	bool moveFlag = false;
+	bool attackFlag = false;
+	if (m_Inputs.KEY_W || m_Inputs.KEY_A || m_Inputs.KEY_S || m_Inputs.KEY_D)
+		moveFlag = true;
+
+	if (moveFlag && attackFlag) return (int)CommandType::MoveAndAttack;
+	if (attackFlag) return (int)CommandType::Attack;
+	if (moveFlag) return (int)CommandType::Move;
+	return (int)CommandType::None;
+}

@@ -66,16 +66,9 @@ private:	// 서버와 통신하기 위한 데이터 입니다.
 	SOCKET					m_Sock;
 	SOCKADDR				m_ServerAddr;
 
-	bool					m_IsServerConnected;
+	bool					m_IsServerConnected; 
 
-
-
-
-	CRITICAL_SECTION			m_cs;
-
-
-
-
+	CRITICAL_SECTION		m_cs; 
 private:
 	CFramework();
 
