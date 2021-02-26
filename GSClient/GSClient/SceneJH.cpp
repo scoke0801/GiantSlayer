@@ -265,7 +265,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetShader(pFBXShader); 
 	m_Player->Scale(20, 20, 20);  
 	m_Player->SetObjectName(OBJ_NAME::Player); 
-	m_Player->SetPosition({ 500,  200, 250 });
+	m_Player->SetPosition({ 500,  0, 550 });
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
 	m_Player->SetMesh(fbxMesh); 
@@ -291,7 +291,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	const wchar_t* address[] = 
 	{ 
-		L"resources/OBJ/Terrain.dds", L"resources/skybox/front.dds", L"resources/skybox/front.dds",
+		L"resources/OBJ/TestTerrain6.dds", L"resources/skybox/front.dds", L"resources/skybox/front.dds",
 		L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",
 		L"resources/skybox/top.dds", L"resources/skybox/bottom.dds", L"resources/OBJ/Box.dds",
 		L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
