@@ -41,8 +41,9 @@ Texture2D gtxtDoor : register(t10);
 Texture2D gtxtHpSpGauge : register(t11);
 Texture2D gtxtHpSpPer : register(t12);
 Texture2D gtxtMinimap : register(t13);
-Texture2D gtxtMap : register(t14); 
-Texture2D gtxtWeapons : register(t15);
+Texture2D gtxtWeapons : register(t14);
+
+Texture2D gtxtMap : register(t15);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
