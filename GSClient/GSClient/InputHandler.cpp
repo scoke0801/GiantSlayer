@@ -67,7 +67,7 @@ int CInputHandler::GetCommandType() const
 	if (m_Inputs.KEY_W || m_Inputs.KEY_A || m_Inputs.KEY_S || m_Inputs.KEY_D)
 		moveFlag = true;
 
-	if (moveFlag && attackFlag) return (int)CommandType::MoveAndAttack;
+	if (moveFlag && attackFlag) return (int)CommandType::MoveAttack;
 	if (attackFlag) return (int)CommandType::Attack;
 	if (moveFlag) return (int)CommandType::Move;
 	return (int)CommandType::None;
