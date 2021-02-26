@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 
 		// 스레드 생성
 		hThread = CreateThread(NULL, 0,
-			ClientThread, (LPVOID)client_sock,
+			MainServerThread, (LPVOID)client_sock,
 			0, NULL);
 
 		if (hThread == NULL) { closesocket(client_sock); }
