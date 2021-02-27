@@ -722,10 +722,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 
 		}
 
-	}
-
-
-
+	} 
 	// Ã¹ ¼¶ ÁöÇü
 	for (int j = 0; j <10 ; j++)
 	{

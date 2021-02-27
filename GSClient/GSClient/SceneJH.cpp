@@ -52,7 +52,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	for (int i = 0; i < nCameras; ++i)
 	{
 		CCamera* pCamera = new CCamera;
-		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 10000.0f);
+		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 60000.0f);
 		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
 		pCamera->SetScissorRect(0, 0, width, height);
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -627,6 +627,8 @@ void CSceneJH::ProcessInput()
 	{
 		m_CurrentCamera = m_Cameras[4];
 	}
+	
+////////////////////////////////////////////////////////// 
 	if (keyInput.KEY_ADD)
 	{
 		m_CurrentCamera->SetSpeed(min(cameraSpeed + 1.0f, 15.0f));
@@ -635,7 +637,47 @@ void CSceneJH::ProcessInput()
 	{
 		m_CurrentCamera->SetSpeed(max(cameraSpeed - 1.0f, 1.0f));
 	}
-
+	if (keyInput.KEY_F1)
+	{
+		m_Player->SetPosition({ 2500,  0, 2500 }); 
+	}
+	if (keyInput.KEY_F2)
+	{
+		m_Player->SetPosition({ 2500,  -1000, 17500 });
+	}
+	if (keyInput.KEY_F3)
+	{
+		m_Player->SetPosition({ 10500,  -2000, 17500 });
+	}
+	if (keyInput.KEY_F4)
+	{
+		m_Player->SetPosition({ 12500,  -3000, 2500 });
+	}
+	if (keyInput.KEY_F5)
+	{
+		m_Player->SetPosition({ 17500,  -6000, 17500 });
+	}
+	if (keyInput.KEY_U)
+	{ 
+	}
+	if (keyInput.KEY_I)
+	{ 
+	}
+	if (keyInput.KEY_O)
+	{ 
+	}
+	if (keyInput.KEY_P)
+	{ 
+	}
+	if (keyInput.KEY_J)
+	{
+	}
+	if (keyInput.KEY_K)
+	{
+	}
+	if (keyInput.KEY_L)
+	{
+	}
 	m_CurrentCamera->UpdateViewMatrix();
 }
 
