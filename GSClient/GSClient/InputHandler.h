@@ -12,6 +12,13 @@
 #define VK_4 0x34
 #define VK_5 0x35 
 
+#define VK_U 0x55
+#define VK_I 0x49
+#define VK_O 0x4F
+#define VK_P 0x50
+#define VK_J 0x4A
+#define VK_K 0x4B
+#define VK_L 0x4C 
 struct GameInputs
 {
 	bool KEY_1 = false;
@@ -24,12 +31,10 @@ struct GameInputs
 	bool KEY_A = false;
 	bool KEY_S = false;
 	bool KEY_D = false;
-
-	bool KEY_B = false;
-	bool KEY_C = false;
 	 
 	bool KEY_SPACE = false;
 
+	// for Debuging Keys
 	bool KEY_F1 = false;
 	bool KEY_F2 = false;	
 	bool KEY_F3 = false;
@@ -38,6 +43,17 @@ struct GameInputs
 
 	bool KEY_ADD = false;
 	bool KEY_SUBTRACT = false;
+
+	bool KEY_B = false;
+	bool KEY_C = false; 
+
+	bool KEY_U = false;
+	bool KEY_I = false;
+	bool KEY_O = false;
+	bool KEY_P = false;
+	bool KEY_J = false;
+	bool KEY_K = false;
+	bool KEY_L = false;
 };
 enum class CommandType
 {
