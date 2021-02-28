@@ -10,7 +10,7 @@ class UI;
 class CSceneYJ : public CScene
 {
 private:
-	bool						m_isPlayerSelected = true;
+	bool						m_isPlayerSelected = false;
 
 protected:
 	CGameObject** m_ppObjects = NULL;

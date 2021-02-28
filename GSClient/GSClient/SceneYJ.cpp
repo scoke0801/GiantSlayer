@@ -65,12 +65,13 @@ void CSceneYJ::BuildCamera(ID3D12Device* pd3dDevice,
 
 	m_Cameras[1]->SetPosition({ 500,  1500, 1500 });
 	m_Cameras[1]->Pitch(XMConvertToRadians(90));
-	m_Cameras[2]->SetPosition({ 2500,  0, 2500 });
+
+	m_Cameras[2]->SetPosition({ 500,  500, 500 }); 
 	m_Cameras[3]->SetPosition({ 10000,  22000, 10000 });
 	m_Cameras[3]->Pitch(XMConvertToRadians(90));
 	m_Cameras[4]->SetPosition({ 0,0,0 });
 
-	m_CurrentCamera = m_Cameras[0];
+	m_CurrentCamera = m_Cameras[2];
 	m_MinimapCamera = m_Cameras[1];
 }
 
@@ -261,15 +262,12 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->Scale(20, 20, 20);
 	m_Player->SetObjectName(OBJ_NAME::Player);
 	m_Player->SetPosition({ 500,  0, 550 });
-	m_Player->SetCamera(m_CurrentCamera);
+	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x80);
-	m_Player->SetMesh(fbxMesh);
-	//m_Player->Rotate(XMFLOAT3(0, 1, 0), 180); 
+	m_Player->SetMesh(fbxMesh); 
 
-	//m_CurrentCamera->SetTarget(m_Player);
 	m_MinimapCamera->SetTarget(m_Player);
 
-	//m_CurrentCamera->LookAt(m_CurrentCamera->GetPosition3f(), m_Player->GetPosition(), m_Player->GetUp());
 }
 
 void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
