@@ -111,9 +111,6 @@
     <ClCompile Include="FBXLoader.cpp">
       <Filter>FBXLoader</Filter>
     </ClCompile>
-    <ClCompile Include="GameSceneProto.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Bridge.cpp">
       <Filter>GameObject\MapObjects</Filter>
     </ClCompile>
@@ -223,9 +220,6 @@
     </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Light</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSceneProto.h">
-      <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Bridge.h">
       <Filter>GameObject\MapObjects</Filter>

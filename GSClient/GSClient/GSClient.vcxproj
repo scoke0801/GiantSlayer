@@ -152,7 +152,6 @@
     <ClInclude Include="Bridge.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Communicates.h" />
-    <ClInclude Include="GameSceneProto.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="EnemyState.h" />
     <ClInclude Include="FBXLoader.h">
@@ -199,7 +198,6 @@
     <ClCompile Include="Bridge.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Communicates.cpp" />
-    <ClCompile Include="GameSceneProto.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="EnemyState.cpp" />
     <ClCompile Include="FBXLoader.cpp">
