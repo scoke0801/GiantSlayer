@@ -17,6 +17,9 @@ struct CB_GAMESCENE_FRAME_DATA
 
 class CSceneJH : public CScene
 {
+private:
+	bool						m_isPlayerSelected = true;
+
 protected:
 	CGameObject**				m_ppObjects = NULL;
 	int							m_nObjects = 0;

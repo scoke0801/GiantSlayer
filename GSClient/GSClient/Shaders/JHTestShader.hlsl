@@ -296,12 +296,12 @@ struct VS_MOUT
 
 VS_MOUT VSMinimap(VS_MIN input)
 {
-	input.position.x += gmtxWorld._41;
-	input.position.y += gmtxWorld._42;
-	input.position.z += gmtxWorld._43;
+	//input.position.x += gmtxWorld._41;
+	//input.position.y += gmtxWorld._42;
+	//input.position.z += gmtxWorld._43;
 
 	VS_MOUT outRes;
-	outRes.position = float4(input.position, 1.0f);
+	outRes.position = mul(float4(input.position, 1.0f), gmtxWorld);
 	outRes.uv = input.uv; 
 	return outRes;
 }

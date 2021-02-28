@@ -1139,7 +1139,7 @@ CHpSpPercentMesh::CHpSpPercentMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	float widthHalf = fWidth * 0.5f;
 	float heightHalf = fHeight * 0.5f;
-	float uvXStart = 0.0f, uvXEnd = 0.245f;
+	float uvXStart = 0.0f, uvXEnd = 0.25f;
 	float uvYStart = 0.0f, uvYEnd = 1.0f;
 	if (isHp) uvYEnd = 0.5f;
 	else

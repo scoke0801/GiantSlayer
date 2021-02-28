@@ -66,7 +66,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	m_Cameras[1]->Pitch(XMConvertToRadians(90)); 
 	//m_Cameras[1]->SetViewport(0, 0, 200, 200, 0.0f, 1.0f);
 	//m_Cameras[1]->SetScissorRect(0, 0, 200, 200);
-	m_Cameras[2]->SetPosition(-1000.0f, 10.0f, -150.0f);
+	m_Cameras[2]->SetPosition({ 2500,  0, 2500 });
 	m_Cameras[3]->SetPosition(0.0f, 1010.0f, -150.0f);
 	m_Cameras[4]->SetPosition(0.0f, -1010.0f, -150.0f);
 
@@ -578,19 +578,31 @@ void CSceneJH::ProcessInput()
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{
-		m_Player->SetVelocity(OBJ_DIRECTION::Front);
+		if(m_isPlayerSelected)
+			m_Player->SetVelocity(OBJ_DIRECTION::Front);
+		else
+			m_CurrentCamera->Walk(cameraSpeed);
 	}
 	if (keyInput.KEY_A)
 	{
-		m_Player->SetVelocity(OBJ_DIRECTION::Left);
+		if (m_isPlayerSelected)
+			m_Player->SetVelocity(OBJ_DIRECTION::Left);
+		else 
+			m_CurrentCamera->Strafe(-cameraSpeed);
 	}
 	if (keyInput.KEY_S)
 	{
-		m_Player->SetVelocity(OBJ_DIRECTION::Back);
+		if (m_isPlayerSelected)
+			m_Player->SetVelocity(OBJ_DIRECTION::Back);
+		else
+			m_CurrentCamera->Walk(-cameraSpeed);
 	}
 	if (keyInput.KEY_D)
 	{
-		m_Player->SetVelocity(OBJ_DIRECTION::Right);
+		if (m_isPlayerSelected)
+			m_Player->SetVelocity(OBJ_DIRECTION::Right);
+		else
+			m_CurrentCamera->Strafe(cameraSpeed);
 	}
 	if (keyInput.KEY_B)
 	{
@@ -608,15 +620,16 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_3)
 	{
-		m_CurrentCamera = m_Cameras[2];
+		m_isPlayerSelected = true;
+		m_CurrentCamera = m_Cameras[0];
 	}
 	if (keyInput.KEY_4)
 	{
-		m_CurrentCamera = m_Cameras[3];
+		m_isPlayerSelected = false;
+		m_CurrentCamera = m_Cameras[2];
 	}
 	if (keyInput.KEY_5)
 	{
-		m_CurrentCamera = m_Cameras[4];
 	}
 	
 ////////////////////////////////////////////////////////// 
@@ -693,15 +706,20 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
 		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
 
-		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
-		m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
-		 
-		m_MinimapCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), dy * 30);
-		//m_MinimapCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
-		if (m_Player->IsMoving())
+		if (m_isPlayerSelected)
 		{
-			m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
-			m_MinimapArrow->Rotate(dx * 150);
+			//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+
+			if (m_Player->IsMoving())
+			{
+				m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
+				m_MinimapArrow->Rotate(-dx * 150);
+			}
+		}
+		else {
+			m_CurrentCamera->Pitch(dy);
+			m_CurrentCamera->RotateY(dx);
 		}
 	}
 
@@ -918,13 +936,14 @@ int CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.20f);
 	pUI->SetPosition({ -0.78f, 0.78f, 0.9 });	// Minmap Background
 	pUI->SetTextureIndex(0x01);
-	pUI->SetShader(pShader);
+	pUI->SetShader(pShader); 
 	m_UIs.push_back(pUI);
 
 	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.165f);
 	pUI->SetPosition({ -0.78f, 0.78f,  0.8});	// Minimap
 	pUI->SetTextureIndex(0x02);
-	pUI->SetShader(pShader);
+	pUI->SetShader(pShader); 
+	pUI->Rotate(180);
 	m_UIs.push_back(pUI);
 	 
 	return 0;
