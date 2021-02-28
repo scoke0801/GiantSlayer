@@ -233,11 +233,13 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 
 VS_TEXTURE_OUT VS_UI_Textured(VS_TEXTURE_IN input)
 {
-	input.position.x += gmtxWorld._41;
-	input.position.y += gmtxWorld._42;
-	input.position.z += gmtxWorld._43;
+	//input.position.x += gmtxWorld._41;
+	//input.position.y += gmtxWorld._42;
+	//input.position.z += gmtxWorld._43;
+	//input.position = mul(float4(input.position, 1.0f), gmtxWorld);
 	VS_TEXTURE_OUT outRes;
-	outRes.position = float4(input.position, 1.0f);
+	//outRes.position = float4(input.position, 1.0f);
+	outRes.position = mul(float4(input.position, 1.0f), gmtxWorld);
 	outRes.uv = input.uv;
 	return outRes;
 }
@@ -261,8 +263,7 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	}
 	if (gnTexturesMask & 0x08)
 	{
-		input.uv.y += 0.5;
-		cColor = gtxtHpSpPer.Sample(gssWrap, input.uv);
+		 
 	}
 	if (gnTexturesMask & 0x10)
 	{

@@ -57,17 +57,12 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 		pCamera->SetScissorRect(0, 0, width, height);
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		m_Cameras[i] = pCamera;
-	}
-	//m_Cameras[0]->SetPosition(0.0f, 300.0f, 0.0f);
-	////m_Cameras[0]->RotateY(XMConvertToRadians(180));
-	//m_Cameras[0]->Pitch(XMConvertToRadians(90));
-	//m_Cameras[0]->SetPosition(125.0f, 250.0f, 500.0f);
-	m_Cameras[0]->SetPosition({ 500,  250 + 150, 1200 });
-	//m_Cameras[0]->RotateY(XMConvertToRadians(45));
+	} 
+	m_Cameras[0]->SetPosition({ 500,  250 + 150, 1200 }); 
 	m_Cameras[0]->Pitch(XMConvertToRadians(15));
 	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 70.0f, -300.0f));
 
-	m_Cameras[1]->SetPosition({ 500,  2000, 1500 }); 
+	m_Cameras[1]->SetPosition({ 500,  1500, 1500 }); 
 	m_Cameras[1]->Pitch(XMConvertToRadians(90)); 
 	//m_Cameras[1]->SetViewport(0, 0, 200, 200, 0.0f, 1.0f);
 	//m_Cameras[1]->SetScissorRect(0, 0, 200, 200);
@@ -296,7 +291,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/skybox/top.dds", L"resources/skybox/bottom.dds", L"resources/OBJ/Box.dds",
 		L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",
-		L"resources/UI/HP_SP_Per.dds"
+		L"resources/UI/SmallICons.dds"
 	};
 	 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -459,11 +454,7 @@ void CSceneJH::DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList)
 }
 
 void CSceneJH::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	if (m_ppObjects[9])
-	{
-		//m_ppObjects[9]->Draw(pd3dCommandList, m_CurrentCamera);
-	}
+{ 
 }
 
 void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
@@ -503,7 +494,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 			m_ppObjects[j]->Draw(pd3dCommandList, m_MinimapCamera);
 	}
 
-	m_Player->Draw(pd3dCommandList, m_MinimapCamera);
+	//m_Player->Draw(pd3dCommandList, m_MinimapCamera);
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
@@ -707,7 +698,11 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		 
 		m_MinimapCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), dy * 30);
 		//m_MinimapCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
-		if(m_Player->IsMoving()) m_Player->Rotate(XMFLOAT3(0, 1, 0), dx*150); 
+		if (m_Player->IsMoving())
+		{
+			m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
+			m_MinimapArrow->Rotate(dx * 150);
+		}
 	}
 
 	if ((btnState & MK_RBUTTON) != 0)
@@ -886,21 +881,27 @@ int CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	m_UIs.push_back(pUI);
 
 	for (int i = 0; i < 20; ++i)
-	{
-		pUI = new UI(pd3dDevice, pd3dCommandList, 0.015, 0.053f, 0.0f, true);
+	{  
+		pUI = new HpSpPercentUI(pd3dDevice, pd3dCommandList, 0.015, 0.053f, 0.0f, true);
 		pUI->SetPosition({float( -0.615 + 0.015 * i), 0.885,  0.91 });
 		pUI->SetTextureIndex(0x04);
 		pUI->SetShader(pShader); 
 		m_HPGauge.push_back(pUI);
 	}
 	for (int i = 0; i < 20; ++i)
-	{
-		pUI = new UI(pd3dDevice, pd3dCommandList, 0.011, 0.053f, 0.0f, true);
+	{ 
+		pUI = new HpSpPercentUI(pd3dDevice, pd3dCommandList, 0.011, 0.053f, 0.0f, false);
 		pUI->SetPosition({ float (-0.575 + 0.011 * i), 0.795,  0.91 });
-		pUI->SetTextureIndex(0x08);
+		pUI->SetTextureIndex(0x04);
 		pUI->SetShader(pShader);
 		m_SPGauge.push_back(pUI);
 	} 
+
+	m_MinimapArrow = new MinimapArrow(pd3dDevice, pd3dCommandList, 0.05, 0.05, 0.0f);
+	m_MinimapArrow->SetPosition({ -0.78f, 0.78f,  0.8 });	// MinimapArrow
+	m_MinimapArrow->SetTextureIndex(0x04);
+	m_MinimapArrow->SetShader(pShader);
+	m_UIs.push_back(m_MinimapArrow);
 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, true);
 	pUI->SetPosition({ -0.53, 0.65,  0 });		// WeaponUI
@@ -925,7 +926,7 @@ int CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	pUI->SetTextureIndex(0x02);
 	pUI->SetShader(pShader);
 	m_UIs.push_back(pUI);
-	
+	 
 	return 0;
 }
 

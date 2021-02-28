@@ -328,8 +328,8 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////
-//
-
+// Ui Meshes
+/////////////////////////////////////////////////////////////////////////////
 class CMinimapMesh : public CMesh
 {
 public:
@@ -337,7 +337,23 @@ public:
 		float radius);
 	~CMinimapMesh();
 };
-
+class CHpSpPercentMesh : public CMesh
+{
+public:
+	CHpSpPercentMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f,
+		bool isHp = true);
+	~CHpSpPercentMesh();
+};
+class CMinimapAroowMesh : public CMesh
+{
+public:
+	CMinimapAroowMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	~CMinimapAroowMesh();
+};
 //////////////////////////////////////////////////////////////////////////////
 //
 enum class MapMeshHeightType

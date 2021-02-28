@@ -38,6 +38,12 @@ UI::~UI()
 {
 }
 
+void UI::Rotate(float angle)
+{
+	CGameObject::Rotate(XMFLOAT3(0, 0, 1), angle);
+	DisplayVector3(m_xmf3Position, true); 
+}
+
 Minimap::Minimap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float radius)
 {
@@ -47,5 +53,31 @@ Minimap::Minimap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 }
 
 Minimap::~Minimap()
+{
+}
+
+MinimapArrow::MinimapArrow(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	float width, float height, float depth)
+{
+	CMinimapAroowMesh* pMinimapArrowMesh = new CMinimapAroowMesh(pd3dDevice, pd3dCommandList,
+		width, height, depth);
+	SetMesh(pMinimapArrowMesh);
+}
+
+MinimapArrow::~MinimapArrow()
+{
+}
+
+HpSpPercentUI::HpSpPercentUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	float width, float height, float depth,
+	bool isHp)
+{
+	CHpSpPercentMesh* pMesh = new CHpSpPercentMesh(pd3dDevice, pd3dCommandList,
+		width, height, depth, 
+		isHp);
+	SetMesh(pMesh);
+}
+
+HpSpPercentUI::~HpSpPercentUI()
 {
 }

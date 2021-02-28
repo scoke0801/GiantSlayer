@@ -53,6 +53,7 @@ private:	// about Lights
 
 private:	// about Minimap
 	ID3D12Resource*				m_pd3dMinimapTex = NULL;
+	UI*							m_MinimapArrow;
 
 private:	// about SceneInfo
 	ID3D12Resource*				m_pd3dcbSceneInfo = NULL;

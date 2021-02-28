@@ -1089,3 +1089,82 @@ CSphereMesh::CSphereMesh(ID3D12Device* pd3dDevice,
 CSphereMesh::~CSphereMesh()
 {
 }
+
+CMinimapAroowMesh::CMinimapAroowMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	float fWidth, float fHeight, float fDepth) 
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = 6;
+	m_nStride = sizeof(CTexturedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	CTexturedVertex pVertices[6];
+
+	float widthHalf = fWidth * 0.5f;
+	float heightHalf = fHeight * 0.5f;
+	float uvXStart = 0.25f, uvXEnd = 1.0f;
+	float uvYStart = 0.0f, uvYEnd = 1.0f;
+	   
+	pVertices[0] = CTexturedVertex(XMFLOAT3(-widthHalf, heightHalf, fDepth), XMFLOAT2(uvXStart, uvYStart));
+	pVertices[1] = CTexturedVertex(XMFLOAT3(widthHalf, heightHalf, fDepth), XMFLOAT2(uvXEnd, uvYStart));
+	pVertices[2] = CTexturedVertex(XMFLOAT3(widthHalf, -heightHalf, fDepth), XMFLOAT2(uvXEnd, uvYEnd));
+	pVertices[3] = CTexturedVertex(XMFLOAT3(-widthHalf, heightHalf, fDepth), XMFLOAT2(uvXStart, uvYStart));
+	pVertices[4] = CTexturedVertex(XMFLOAT3(widthHalf, -heightHalf, fDepth), XMFLOAT2(uvXEnd, uvYEnd));
+	pVertices[5] = CTexturedVertex(XMFLOAT3(-widthHalf, -heightHalf, fDepth), XMFLOAT2(uvXStart, uvYEnd));
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList,
+		pVertices, m_nStride * m_nVertices,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+		&m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+CMinimapAroowMesh::~CMinimapAroowMesh()
+{
+}
+
+CHpSpPercentMesh::CHpSpPercentMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	float fWidth, float fHeight, float fDepth,
+	bool isHp)
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = 6;
+	m_nStride = sizeof(CTexturedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	CTexturedVertex pVertices[6];
+
+	float widthHalf = fWidth * 0.5f;
+	float heightHalf = fHeight * 0.5f;
+	float uvXStart = 0.0f, uvXEnd = 0.245f;
+	float uvYStart = 0.0f, uvYEnd = 1.0f;
+	if (isHp) uvYEnd = 0.5f;
+	else
+	{
+		uvYStart = 0.5f;
+		uvYEnd = 1.0f;
+	}
+
+	pVertices[0] = CTexturedVertex(XMFLOAT3(-widthHalf, heightHalf, fDepth), XMFLOAT2(uvXStart, uvYStart));
+	pVertices[1] = CTexturedVertex(XMFLOAT3(widthHalf, heightHalf, fDepth), XMFLOAT2(uvXEnd, uvYStart));
+	pVertices[2] = CTexturedVertex(XMFLOAT3(widthHalf, -heightHalf, fDepth), XMFLOAT2(uvXEnd, uvYEnd));
+	pVertices[3] = CTexturedVertex(XMFLOAT3(-widthHalf, heightHalf, fDepth), XMFLOAT2(uvXStart, uvYStart));
+	pVertices[4] = CTexturedVertex(XMFLOAT3(widthHalf, -heightHalf, fDepth), XMFLOAT2(uvXEnd, uvYEnd));
+	pVertices[5] = CTexturedVertex(XMFLOAT3(-widthHalf, -heightHalf, fDepth), XMFLOAT2(uvXStart, uvYEnd));
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList,
+		pVertices, m_nStride * m_nVertices,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER,
+		&m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+CHpSpPercentMesh::~CHpSpPercentMesh()
+{
+}
