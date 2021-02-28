@@ -63,12 +63,11 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 70.0f, -300.0f));
 
 	m_Cameras[1]->SetPosition({ 500,  1500, 1500 }); 
-	m_Cameras[1]->Pitch(XMConvertToRadians(90)); 
-	//m_Cameras[1]->SetViewport(0, 0, 200, 200, 0.0f, 1.0f);
-	//m_Cameras[1]->SetScissorRect(0, 0, 200, 200);
+	m_Cameras[1]->Pitch(XMConvertToRadians(90));  
 	m_Cameras[2]->SetPosition({ 2500,  0, 2500 });
-	m_Cameras[3]->SetPosition(0.0f, 1010.0f, -150.0f);
-	m_Cameras[4]->SetPosition(0.0f, -1010.0f, -150.0f);
+	m_Cameras[3]->SetPosition({ 10000,  22000, 10000 }); 
+	m_Cameras[3]->Pitch(XMConvertToRadians(90));
+	m_Cameras[4]->SetPosition({ 0,0,0 });
 
 	m_CurrentCamera = m_Cameras[0];
 	m_MinimapCamera = m_Cameras[1];
@@ -215,8 +214,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 #pragma endregion   
 
 	CShader*  pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
+	pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTexturedLighting");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	
@@ -225,8 +224,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	
 	/// FBX Model
 	CShader* pFBXShader = new CShader();
-	pFBXShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
-	pFBXShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
+	pFBXShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTexturedLighting");
+	pFBXShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTexturedLighting");
 	pFBXShader->CreateInputLayout(ShaderTypes::Textured);
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -630,6 +629,8 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_5)
 	{
+		m_isPlayerSelected = false;
+		m_CurrentCamera = m_Cameras[3];
 	}
 	
 ////////////////////////////////////////////////////////// 

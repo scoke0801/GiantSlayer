@@ -58,7 +58,7 @@ struct VS_COLOR_OUTPUT
 	float4 position : SV_POSITION;
 	float4 color : COLOR;
 };
- 
+
 struct VS_TEXTURE_IN
 {
 	float3 position : POSITION;
@@ -76,7 +76,7 @@ VS_COLOR_OUTPUT VSColor(VS_COLOR_INPUT input)
 {
 	input.position.x += gmtxWorld._41;
 	input.position.y += gmtxWorld._42;
-	input.position.z += gmtxWorld._43; 
+	input.position.z += gmtxWorld._43;
 
 	VS_COLOR_OUTPUT outRes;
 	outRes.position = float4(input.position, 1.0f);
@@ -144,14 +144,14 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 	if (gnTexturesMask & 0x100)
 	{
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
-	}	
+	}
 	if (gnTexturesMask & 0x200)
 	{
 		cColor = gtxtWall.Sample(gssWrap, input.uv);
-	} 
+	}
 	return cColor;
 }
- 
+
 /////////////////////////////////////////////////////////////////
 /////
 
@@ -213,7 +213,7 @@ void GSBillboard(point VS_BILLBOARD_INPUT input[1], inout TriangleStream<GS_BILL
 
 		outStream.Append(output);
 	}
-} 
+}
 
 float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 {
@@ -221,11 +221,11 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
 
 	return(cColor);
-} 
+}
 
 VS_TEXTURE_OUT VS_UI_Textured(VS_TEXTURE_IN input)
-{ 
-	VS_TEXTURE_OUT outRes; 
+{
+	VS_TEXTURE_OUT outRes;
 	outRes.position = mul(float4(input.position, 1.0f), gmtxWorld);
 	outRes.uv = input.uv;
 	return outRes;
@@ -245,12 +245,12 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 		cColor = gtxtHpSpGauge.Sample(gssWrap, input.uv);
 	}
 	if (gnTexturesMask & 0x04)
-	{ 
+	{
 		cColor = gtxtHpSpPer.Sample(gssWrap, input.uv);
 	}
 	if (gnTexturesMask & 0x08)
 	{
-		 
+
 	}
 	if (gnTexturesMask & 0x10)
 	{
@@ -282,10 +282,10 @@ struct VS_MOUT
 };
 
 VS_MOUT VSMinimap(VS_MIN input)
-{ 
+{
 	VS_MOUT outRes;
 	outRes.position = mul(float4(input.position, 1.0f), gmtxWorld);
-	outRes.uv = input.uv; 
+	outRes.uv = input.uv;
 	return outRes;
 }
 
@@ -299,7 +299,7 @@ float4 PSMinimap(VS_MOUT input) : SV_TARGET
 	if (gnTexturesMask & 0x02)
 	{
 		cColor = gtxtMap.Sample(gssWrap, input.uv);
-	} 
+	}
 	return cColor;
 }
 
@@ -460,7 +460,7 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	 
+
 	if (gnTexturesMask & 0x01)
 	{
 		cColor = gtxtTerrain.Sample(gssWrap, input.uv0);

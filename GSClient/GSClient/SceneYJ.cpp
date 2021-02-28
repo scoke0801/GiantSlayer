@@ -1,5 +1,6 @@
 #include "stdafx.h"
-#include "GameSceneProto.h"
+#include "SceneYJ.h"
+
 #include "stdafx.h" 
 #include "GameFramework.h"
 #include "Shader.h"
@@ -17,17 +18,17 @@
 #define ROOT_PARAMETER_LIGHT			4
 #define ROOT_PARAMETER_TEXTURE			5
 
-CGameSceneProto::CGameSceneProto()
+CSceneYJ::CSceneYJ()
 {
-	cout << "Enter CGameSceneProto \n";
+	cout << "Enter CSceneYJ \n";
 	m_pd3dGraphicsRootSignature = NULL;
 }
 
-CGameSceneProto::~CGameSceneProto()
+CSceneYJ::~CSceneYJ()
 {
 }
 
-void CGameSceneProto::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
+void CSceneYJ::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
 {
 	BuildMinimapResource(pd3dDevice);
 	LoadTextures(pd3dDevice, pd3dCommandList);
@@ -43,7 +44,7 @@ void CGameSceneProto::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	BuildUIs(pd3dDevice, pd3dCommandList);
 }
 
-void CGameSceneProto::BuildCamera(ID3D12Device* pd3dDevice,
+void CSceneYJ::BuildCamera(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	int width, int height)
 {
@@ -63,17 +64,17 @@ void CGameSceneProto::BuildCamera(ID3D12Device* pd3dDevice,
 	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 70.0f, -300.0f));
 
 	m_Cameras[1]->SetPosition({ 500,  1500, 1500 });
-	m_Cameras[1]->Pitch(XMConvertToRadians(90)); 
+	m_Cameras[1]->Pitch(XMConvertToRadians(90));
 	m_Cameras[2]->SetPosition({ 2500,  0, 2500 });
 	m_Cameras[3]->SetPosition({ 10000,  22000, 10000 });
 	m_Cameras[3]->Pitch(XMConvertToRadians(90));
-	m_Cameras[4]->SetPosition(0.0f, -1010.0f, -150.0f);
+	m_Cameras[4]->SetPosition({ 0,0,0 });
 
 	m_CurrentCamera = m_Cameras[0];
 	m_MinimapCamera = m_Cameras[1];
 }
 
-void CGameSceneProto::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneYJ::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pMaterials = new MATERIALS;
 	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
@@ -95,7 +96,7 @@ void CGameSceneProto::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
 }
 
-void CGameSceneProto::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneYJ::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pLights = new LIGHTS;
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
@@ -165,7 +166,7 @@ void CGameSceneProto::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 }
 
-void CGameSceneProto::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneYJ::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbMaterialBytes = ((sizeof(CB_GAMESCENE_FRAME_DATA) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbSceneInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList,
@@ -175,7 +176,7 @@ void CGameSceneProto::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12Graphi
 	m_pd3dcbSceneInfo->Map(0, NULL, (void**)&m_pcbMappedSceneFrameData);
 }
 
-void CGameSceneProto::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
@@ -193,8 +194,8 @@ void CGameSceneProto::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	}
 
 	CShader* pSkyBoxShader = new CSkyBoxShader();
-	pSkyBoxShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTextured");
-	pSkyBoxShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured");
+	pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTextured");
+	pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTextured");
 	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	//pSkyBoxShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
@@ -203,10 +204,10 @@ void CGameSceneProto::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 #pragma region Create Terrain
 	CShader* pTerrainShader = new CTerrainTessellationShader();
-	pTerrainShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTerrainTessellation");
-	pTerrainShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTerrainTessellation");
-	pTerrainShader->CreateDomainShader(L"Shaders\\JHTestShader.hlsl", "DSTerrainTessellation");
-	pTerrainShader->CreateHullShader(L"Shaders\\JHTestShader.hlsl", "HSTerrainTessellation");
+	pTerrainShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTerrainTessellation");
+	pTerrainShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTerrainTessellation");
+	pTerrainShader->CreateDomainShader(L"Shaders\\ShaderYJ.hlsl", "DSTerrainTessellation");
+	pTerrainShader->CreateHullShader(L"Shaders\\ShaderYJ.hlsl", "HSTerrainTessellation");
 	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
 	pTerrainShader->CreateTerrainShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -214,8 +215,8 @@ void CGameSceneProto::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 #pragma endregion   
 
 	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
+	pShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -224,8 +225,8 @@ void CGameSceneProto::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 	/// FBX Model
 	CShader* pFBXShader = new CShader();
-	pFBXShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
-	pFBXShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSTexturedLighting");
+	pFBXShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
+	pFBXShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
 	pFBXShader->CreateInputLayout(ShaderTypes::Textured);
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -271,7 +272,7 @@ void CGameSceneProto::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	//m_CurrentCamera->LookAt(m_CurrentCamera->GetPosition3f(), m_Player->GetPosition(), m_Player->GetUp());
 }
 
-void CGameSceneProto::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	const char* keyNames[] =
 	{
@@ -301,7 +302,7 @@ void CGameSceneProto::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	}
 }
 
-void CGameSceneProto::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
@@ -342,7 +343,7 @@ void CGameSceneProto::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12Graph
 	pd3dDevice->CreateShaderResourceView(m_pd3dMinimapTex, &srvDesc, hDescriptor);
 }
 
-void CGameSceneProto::ReleaseObjects()
+void CSceneYJ::ReleaseObjects()
 {
 	m_ppObjects[1];
 
@@ -356,7 +357,7 @@ void CGameSceneProto::ReleaseObjects()
 	}
 }
 
-void CGameSceneProto::Update(double elapsedTime)
+void CSceneYJ::Update(double elapsedTime)
 {
 	ProcessInput();
 
@@ -383,11 +384,11 @@ void CGameSceneProto::Update(double elapsedTime)
 	}
 }
 
-void CGameSceneProto::AnimateObjects(float fTimeElapsed)
+void CSceneYJ::AnimateObjects(float fTimeElapsed)
 {
 }
 
-void CGameSceneProto::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneYJ::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
@@ -429,7 +430,7 @@ void CGameSceneProto::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
-void CGameSceneProto::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneYJ::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	for (UI* pUI : m_UIs)
 	{
@@ -447,16 +448,16 @@ void CGameSceneProto::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
-void CGameSceneProto::DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneYJ::DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_Player) m_Player->Draw(pd3dCommandList, m_CurrentCamera);
 }
 
-void CGameSceneProto::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneYJ::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 
-void CGameSceneProto::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
+void CSceneYJ::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
@@ -517,7 +518,7 @@ void CGameSceneProto::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID
 	}
 }
 
-void CGameSceneProto::Communicate(SOCKET& sock)
+void CSceneYJ::Communicate(SOCKET& sock)
 {
 	int retVal = 0;
 
@@ -567,7 +568,7 @@ void CGameSceneProto::Communicate(SOCKET& sock)
 	}
 }
 
-void CGameSceneProto::ProcessInput()
+void CSceneYJ::ProcessInput()
 {
 	if (m_CurrentCamera == nullptr) return;
 
@@ -686,7 +687,7 @@ void CGameSceneProto::ProcessInput()
 	m_CurrentCamera->UpdateViewMatrix();
 }
 
-void CGameSceneProto::OnMouseDown(WPARAM btnState, int x, int y)
+void CSceneYJ::OnMouseDown(WPARAM btnState, int x, int y)
 {
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
@@ -694,12 +695,12 @@ void CGameSceneProto::OnMouseDown(WPARAM btnState, int x, int y)
 	SetCapture(CFramework::GetInstance().GetHWND());
 }
 
-void CGameSceneProto::OnMouseUp(WPARAM btnState, int x, int y)
+void CSceneYJ::OnMouseUp(WPARAM btnState, int x, int y)
 {
 	ReleaseCapture();
 }
 
-void CGameSceneProto::OnMouseMove(WPARAM btnState, int x, int y)
+void CSceneYJ::OnMouseMove(WPARAM btnState, int x, int y)
 {
 	if ((btnState & MK_LBUTTON) != 0)
 	{
@@ -736,7 +737,7 @@ void CGameSceneProto::OnMouseMove(WPARAM btnState, int x, int y)
 	m_LastMousePos.y = y;
 }
 
-void CGameSceneProto::ReleaseUploadBuffers()
+void CSceneYJ::ReleaseUploadBuffers()
 {
 	if (m_ppObjects)
 	{
@@ -746,7 +747,7 @@ void CGameSceneProto::ReleaseUploadBuffers()
 	}
 }
 
-ID3D12RootSignature* CGameSceneProto::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
+ID3D12RootSignature* CSceneYJ::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
 	// Ground
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
@@ -846,7 +847,7 @@ ID3D12RootSignature* CGameSceneProto::CreateGraphicsRootSignature(ID3D12Device* 
 	return(pd3dGraphicsRootSignature);
 }
 
-int CGameSceneProto::BuildBridges(ID3D12Device* pd3dDevice,
+int CSceneYJ::BuildBridges(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature,
 	int startIndex, CShader* pShader)
@@ -868,7 +869,7 @@ int CGameSceneProto::BuildBridges(ID3D12Device* pd3dDevice,
 	return startIndex;
 }
 
-int CGameSceneProto::BuildDoorWall(ID3D12Device* pd3dDevice,
+int CSceneYJ::BuildDoorWall(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	int startIndex, CShader* pShader)
 {
@@ -879,11 +880,11 @@ int CGameSceneProto::BuildDoorWall(ID3D12Device* pd3dDevice,
 	return startIndex;
 }
 
-int CGameSceneProto::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+int CSceneYJ::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VS_UI_Textured");
-	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PS_UI_Textured");
+	pShader->CreateVertexShader(L"Shaders/ShaderYJ.hlsl", "VS_UI_Textured");
+	pShader->CreatePixelShader(L"Shaders/ShaderYJ.hlsl", "PS_UI_Textured");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateUIShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -929,8 +930,8 @@ int CGameSceneProto::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_UIs.push_back(pUI);
 
 	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VSMinimap");
-	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PSMinimap");
+	pShader->CreateVertexShader(L"Shaders/ShaderYJ.hlsl", "VSMinimap");
+	pShader->CreatePixelShader(L"Shaders/ShaderYJ.hlsl", "PSMinimap");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -950,7 +951,7 @@ int CGameSceneProto::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	return 0;
 }
 
-void CGameSceneProto::BuildMinimapResource(ID3D12Device* pd3dDevice)
+void CSceneYJ::BuildMinimapResource(ID3D12Device* pd3dDevice)
 {
 	D3D12_RESOURCE_DESC texDesc;
 	ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));

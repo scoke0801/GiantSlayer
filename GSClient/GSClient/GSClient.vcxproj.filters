@@ -22,6 +22,9 @@
     <FxCompile Include="Shaders\TitleScene.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\ShaderYJ.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
     <FxCompile Include="Shaders\Shaders.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
@@ -119,6 +122,9 @@
     </ClCompile>
     <ClCompile Include="Communicates.cpp">
       <Filter>Communicate</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneYJ.cpp">
+      <Filter>Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -231,6 +237,9 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="Communicates.h">
       <Filter>Communicate</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneYJ.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

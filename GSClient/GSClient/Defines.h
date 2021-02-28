@@ -91,3 +91,10 @@ inline double GetRadian(int num)
 {
 	return num * (PI / 180);
 }
+
+struct CB_GAMESCENE_FRAME_DATA
+{
+	UINT m_PlayerHP = 0;
+	UINT m_PlayerSP = 0;
+	UINT m_PlayerWeapon = 0x01;
+};

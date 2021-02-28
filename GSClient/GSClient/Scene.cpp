@@ -5,6 +5,7 @@
 #include "GameScene.h"
 #include "SceneJH.h" 
 #include "SceneTH.h"
+#include "SceneYJ.h"
 #include "GameSceneProto.h"
 
 CScene::CScene()
@@ -50,7 +51,8 @@ void CNullScene::ProcessInput()
 	}
 	if (gameInput.KEY_F3)
 	{
-		ChangeScene<CGameScene>();
+		//ChangeScene<CGameScene>();
+		ChangeScene<CSceneYJ>();
 	}
 	if (gameInput.KEY_F4)
 	{

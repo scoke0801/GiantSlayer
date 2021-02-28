@@ -1,20 +1,12 @@
 #pragma once
 #include "Scene.h"
-  
-
+   
 class CShader;
 class CGameObject;
 class CCamera;
 class CPlayer;
 class UI;
-
-struct CB_GAMESCENE_FRAME_DATA
-{
-	UINT m_PlayerHP = 0;
-	UINT m_PlayerSP = 0;
-	UINT m_PlayerWeapon = 0x01;
-}; 
-
+ 
 class CSceneJH : public CScene
 {
 private:

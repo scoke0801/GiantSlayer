@@ -1,14 +1,13 @@
 #pragma once
 #include "Scene.h"
 
-
 class CShader;
 class CGameObject;
 class CCamera;
 class CPlayer;
 class UI;
-  
-class CGameSceneProto : public CScene
+
+class CSceneYJ : public CScene
 {
 private:
 	bool						m_isPlayerSelected = true;
@@ -56,8 +55,8 @@ private:	// about SceneInfo
 	CB_GAMESCENE_FRAME_DATA* m_pcbMappedSceneFrameData = NULL;
 
 public:
-	CGameSceneProto();
-	~CGameSceneProto();
+	CSceneYJ();
+	~CSceneYJ();
 
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override;
 
