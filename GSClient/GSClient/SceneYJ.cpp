@@ -168,15 +168,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
-	m_nObjects = 15;
-
-	m_ppObjects = new CGameObject * [m_nObjects];
-	for (int i = 0; i < m_nObjects; ++i)
-	{
-		CGameObject* pObject = new CGameObject();
-
-		m_ppObjects[i] = pObject;
-	}
+	m_Objects.reserve(30);
 
 	CShader* pSkyBoxShader = new CSkyBoxShader();
 	pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTextured");
@@ -223,8 +215,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	int index = BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 6, pShader);
-	index = BuildDoorWall(pd3dDevice, pd3dCommandList, index, pShader);
+	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	BuildDoorWall(pd3dDevice, pd3dCommandList, pShader);
 
 	/// FBX Model
 	CShader* pFBXShader = new CShader();
@@ -234,25 +226,31 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
-	m_ppObjects[1]->SetMesh(fbxMesh);
-	m_ppObjects[1]->SetPosition({ 500,  250, 1650 });
-	m_ppObjects[1]->SetTextureIndex(0x01);
-	m_ppObjects[1]->SetShader(pShader);
-	m_ppObjects[1]->SetTextureIndex(0x80);
-	m_ppObjects[1]->Scale(5, 5, 5);
+	CGameObject* pObject = new CGameObject();
+	pObject->SetMesh(fbxMesh);
+	pObject->SetPosition({ 500,  250, 1650 });
+	pObject->SetTextureIndex(0x01);
+	pObject->SetShader(pShader);
+	pObject->SetTextureIndex(0x80);
+	pObject->Scale(5, 5, 5);
+	m_Objects.push_back(std::move(pObject));
 
-	m_ppObjects[2]->SetMesh(fbxMesh);
-	m_ppObjects[2]->SetPosition({ 500,  250, 1750 });
-	m_ppObjects[2]->SetTextureIndex(0x01);
-	m_ppObjects[2]->SetShader(pShader);
-	m_ppObjects[2]->SetTextureIndex(0x80);
+	pObject = new CGameObject();
+	pObject->SetMesh(fbxMesh);
+	pObject->SetPosition({ 500,  250, 1750 });
+	pObject->SetTextureIndex(0x01);
+	pObject->SetShader(pShader);
+	pObject->SetTextureIndex(0x80);
+	m_Objects.push_back(std::move(pObject));
 
 	CSphereMesh* pSphereMesh = new CSphereMesh(pd3dDevice, pd3dCommandList,
 		30, 20, 20);
-	m_ppObjects[3]->SetMesh(pSphereMesh);
-	m_ppObjects[3]->SetPosition({ 500,  250 + 82.5, 1401 });
-	m_ppObjects[3]->SetTextureIndex(0x80);
-	m_ppObjects[3]->SetShader(pShader);
+	pObject = new CGameObject();
+	pObject->SetMesh(pSphereMesh);
+	pObject->SetPosition({ 500,  250 + 82.5, 1401 });
+	pObject->SetTextureIndex(0x80);
+	pObject->SetShader(pShader);
+	m_Objects.push_back(std::move(pObject));
 
 	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
@@ -344,16 +342,8 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 void CSceneYJ::ReleaseObjects()
 {
-	m_ppObjects[1];
-
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
-	if (m_ppObjects)
-	{
-		for (int j = 0; j < m_nObjects; j++)
-			if (m_ppObjects[j])
-				delete m_ppObjects[j];
-		delete[] m_ppObjects;
-	}
+	m_Objects.clear();
 }
 
 void CSceneYJ::Update(double elapsedTime)
@@ -362,9 +352,9 @@ void CSceneYJ::Update(double elapsedTime)
 
 	m_Skybox->Rotate(XMFLOAT3(0, 1, 0), 0.3 * elapsedTime);
 
-	for (int i = 0; i < m_nObjects; ++i)
+	for (auto pObject : m_Objects)
 	{
-		m_ppObjects[i]->Update(elapsedTime);
+		pObject->Update(elapsedTime);
 	}
 
 	m_Player->Update(elapsedTime);
@@ -424,10 +414,9 @@ void CSceneYJ::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 
-	for (int j = 0; j < m_nObjects; j++)
-	{ 
-		if (m_ppObjects[j])
-			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
+	for (auto pObject : m_Objects)
+	{
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 
@@ -493,10 +482,9 @@ void CSceneYJ::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	{
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
-	for (int j = 0; j < m_nObjects; j++)
+	for (auto pObject : m_Objects)
 	{
-		if (m_ppObjects[j])
-			m_ppObjects[j]->Draw(pd3dCommandList, m_MinimapCamera);
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 	  
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
@@ -742,11 +730,9 @@ void CSceneYJ::OnMouseMove(WPARAM btnState, int x, int y)
 
 void CSceneYJ::ReleaseUploadBuffers()
 {
-	if (m_ppObjects)
+	for (auto pObject : m_Objects)
 	{
-		for (int j = 0; j < m_nObjects; j++)
-			if (m_ppObjects[j])
-				m_ppObjects[j]->ReleaseUploadBuffers();
+		pObject->ReleaseUploadBuffers();
 	}
 }
 
@@ -850,40 +836,32 @@ ID3D12RootSignature* CSceneYJ::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	return(pd3dGraphicsRootSignature);
 }
 
-int CSceneYJ::BuildBridges(ID3D12Device* pd3dDevice,
+void CSceneYJ::BuildBridges(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
-	ID3D12RootSignature* pd3dGraphicsRootSignature,
-	int startIndex, CShader* pShader)
+	ID3D12RootSignature* pd3dGraphicsRootSignature, CShader* pShader)
 {
 	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
-
-	m_ppObjects[startIndex] = pBridge;
-	m_ppObjects[startIndex++]->SetPosition({ 2500,  01,  1500 });
+	pBridge->SetPosition({ 2500,  01,  1500 });
+	m_Objects.push_back(pBridge);
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
-
-	m_ppObjects[startIndex] = pBridge;
-	m_ppObjects[startIndex++]->SetPosition({ 2500,  01,  2500 });
-
-	return startIndex;
+	pBridge->SetPosition({ 2500,  01,  2500 });
+	m_Objects.push_back(pBridge);
 }
 
-int CSceneYJ::BuildDoorWall(ID3D12Device* pd3dDevice,
-	ID3D12GraphicsCommandList* pd3dCommandList,
-	int startIndex, CShader* pShader)
+void CSceneYJ::BuildDoorWall(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
 	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5000, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 0,0, 5000 });
-	m_ppObjects[startIndex++] = pDoorWall;
-
-	return startIndex;
+	m_Objects.push_back(pDoorWall);
 }
 
-int CSceneYJ::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneYJ::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CShader* pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders/ShaderYJ.hlsl", "VS_UI_Textured");
@@ -949,9 +927,7 @@ int CSceneYJ::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	pUI->SetTextureIndex(0x02);
 	pUI->SetShader(pShader);
 	pUI->Rotate(180);
-	m_UIs.push_back(pUI);
-
-	return 0;
+	m_UIs.push_back(pUI); 
 }
 
 void CSceneYJ::BuildMinimapResource(ID3D12Device* pd3dDevice)

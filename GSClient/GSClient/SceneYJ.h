@@ -13,8 +13,7 @@ private:
 	bool						m_isPlayerSelected = false;
 
 protected:
-	CGameObject**				m_ppObjects = NULL;
-	int							m_nObjects = 0;
+	vector<CGameObject*>		m_Objects;
 
 	CPlayer* m_Player = nullptr;
 	vector<UI*>					m_UIs;
@@ -101,12 +100,11 @@ public:
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
 
-private:
-	// input startIndex, output endIndex 
-	int BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
-		int startIndex, CShader* pShader);
-	int BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int startIndex, CShader* pShader);
-	int BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+private: 
+	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		ID3D12RootSignature* pd3dGraphicsRootSignature, CShader* pShader);
+	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
+	void BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 };
