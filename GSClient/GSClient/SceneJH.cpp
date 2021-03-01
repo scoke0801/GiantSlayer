@@ -211,8 +211,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	
-	int index = BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 6, pShader);
-	index = BuildDoorWall(pd3dDevice, pd3dCommandList, index, pShader);
+	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	BuildDoorWall(pd3dDevice, pd3dCommandList, pShader);
 	
 	/// FBX Model
 	CShader* pFBXShader = new CShader();
@@ -830,10 +830,10 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	return(pd3dGraphicsRootSignature);
 }
 
-int CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
+void CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature,
-	int startIndex, CShader* pShader)
+	CShader* pShader)
 {
 	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pBridge->SetShader(pShader);
@@ -846,22 +846,23 @@ int CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
 	pBridge->SetObjectName(OBJ_NAME::Bridge); 
 	pBridge->SetPosition({ 2500,  01,  2500 });
 	m_Objects.push_back(pBridge);
-
-	return startIndex;
+	 
 }
 
-int CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
+void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
-	int startIndex, CShader* pShader)
+	CShader* pShader)
 {
 	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5000, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 0,0, 5000 });
-	m_Objects.push_back(pDoorWall);
-	 
-	return startIndex;
+	m_Objects.push_back(pDoorWall); 
 }
 
-int CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneJH::BUildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CShader* pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VS_UI_Textured");
@@ -927,9 +928,7 @@ int CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	pUI->SetTextureIndex(0x02);
 	pUI->SetShader(pShader); 
 	pUI->Rotate(180);
-	m_UIs.push_back(pUI);
-	 
-	return 0;
+	m_UIs.push_back(pUI);  
 }
 
 void CSceneJH::BuildMinimapResource(ID3D12Device* pd3dDevice)
