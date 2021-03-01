@@ -9,6 +9,13 @@ class CCamera;
 #define PLAYER_RUN_VELOCITY 250.0f
 #define PLAYER_WALK_VELOCITY 80.0f 
 
+enum class OBJ_TYPE
+{
+	Object = 0,
+	Player,
+	Enemy,
+	Obstacle,
+};
 enum class OBJ_NAME
 {
 	None = 0,
@@ -70,28 +77,32 @@ class CGameObject
 private:
 	int					m_nReferences = 0;
 	 
-protected:
+protected:	// 좌표 관련 변수
 	XMFLOAT4X4			m_xmf4x4World;
 
 	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
 	XMFLOAT3			m_xmf3Velocity = XMFLOAT3{ 0,0,0 };
 	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
 
+protected: // 렌더링 관련 변수
 	CMesh*				m_pMesh = NULL;
 	CShader*			m_pShader = NULL;
  
 	UINT				m_nTextureIndex = 0x00;
 	 
 	MATERIAL*			m_Material;
-	 
-	OBJ_NAME			m_Name;
-
+	  
 	CCamera*			m_Camera = nullptr;
 
+protected:	// 객체 관련 속성 변수
 	UINT				m_HP = 0;
 	UINT				m_SP = 0;
 
-private:
+	OBJ_NAME			m_Name;
+	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
+	bool				m_isCollidable = true;
+
+private:	// GPU 전달 데이터
 	ID3D12Resource*		m_pd3dcbGameObject = NULL;
 	GAMEOBJECT_INFO*	m_pcbMappedGameObjInfo = NULL;
 
@@ -161,22 +172,7 @@ public:
 	DirectX::XMFLOAT3 GetUp()const;
 	DirectX::XMFLOAT3 GetLook()const; 
 };
-
-class CRotatingObject : public CGameObject
-{
-public:
-	CRotatingObject();
-	virtual ~CRotatingObject();
-private:
-	XMFLOAT3 m_xmf3RotationAxis;
-	float m_fRotationSpeed;
-public:
-	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
-	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
-
-	virtual void Animate(float fTimeElapsed);
-};
-
+ 
 class CBox : public CGameObject
 {
 public:

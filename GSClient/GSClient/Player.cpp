@@ -4,10 +4,8 @@
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
-		 50.0f, 165.0f, 50.0f );
+	m_Type = OBJ_TYPE::Player;
 
-	//SetMesh(pCubeMeshTex);
 	m_HP = 50;
 	m_SP = 35;
 }

@@ -266,34 +266,16 @@ void CGameObject::Scale(float x, float y, float z, bool setSize)
 //	m_xmf4x4World._21 = xmf3Up.x;    m_xmf4x4World._22 = xmf3Up.y;	  m_xmf4x4World._23 = xmf3Up.z;
 //	m_xmf4x4World._31 = xmf3Look.x;  m_xmf4x4World._32 = xmf3Look.y;  m_xmf4x4World._33 = xmf3Look.z;
 //}
-
-CRotatingObject::CRotatingObject()
-{
-	m_Name = OBJ_NAME::None;
-	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_fRotationSpeed = 90.0f;
-}
-
-CRotatingObject::~CRotatingObject()
-{
-
-}
-
-void CRotatingObject::Animate(float fTimeElapsed)
-{
-	CGameObject::Rotate(m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
-}
-  
+ 
 CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float width, float height, float depth)
 {
-	
 	m_Name = OBJ_NAME::Box;
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
 		width, height, depth);
-
 	SetMesh(pCubeMeshTex);
 
+	m_Type = OBJ_TYPE::Obstacle;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -539,7 +521,7 @@ CSkyBoxSphere::~CSkyBoxSphere()
 }
  
 CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int nBlockWidth, int nBlockLength,CShader* pShader)
-{
+{ 
 	m_nWidth = nWidth;			// 257
 	m_nLength = nLength;		// 257
 

@@ -8,7 +8,7 @@ CWall::CWall(ID3D12Device* pd3dDevice,
 	m_Name = OBJ_NAME::Wall;
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
 		width, height, depth, true);
-
+	m_Type = OBJ_TYPE::Obstacle;
 	SetMesh(pCubeMeshTex);
 }
 
@@ -24,7 +24,7 @@ CDoor::CDoor(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 	m_Name = OBJ_NAME::Door;
 	CDoorMeshTest* pCubeMeshTex = new CDoorMeshTest(pd3dDevice, pd3dCommandList,
 		width, height, depth, isLeft);
-
+	m_Type = OBJ_TYPE::Obstacle;
 	SetMesh(pCubeMeshTex);
 	if (!m_IsLeft) Rotate(XMFLOAT3(0, 1, 0), 180.0);
 }

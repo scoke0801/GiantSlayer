@@ -3,18 +3,20 @@
 
 CEnemy::CEnemy()
 {
-	sight = 20.f;
-	statemachine = new CStateMachine<CEnemy>(this);
-	statemachine->SetCurrentState(Wandering::Instance());
-	target = nullptr;
+	m_Type = OBJ_TYPE::Enemy;
+	m_Sight = 20.f;
+	m_Statemachine = new CStateMachine<CEnemy>(this);
+	m_Statemachine->SetCurrentState(Wandering::Instance());
+	m_Target = nullptr;
 }
 
 CEnemy::CEnemy(CGameObject* ptarget)
 {
-	sight = 20.f;
-	statemachine = new CStateMachine<CEnemy>(this);
-	statemachine->SetCurrentState(Wandering::Instance());
-	target = ptarget;
+	m_Type = OBJ_TYPE::Enemy;
+	m_Sight = 20.f;
+	m_Statemachine = new CStateMachine<CEnemy>(this);
+	m_Statemachine->SetCurrentState(Wandering::Instance());
+	m_Target = ptarget;
 }
 
 CEnemy::~CEnemy()
@@ -24,15 +26,15 @@ CEnemy::~CEnemy()
 
 void CEnemy::Update(double elapsedTime)
 {
-	statemachine->Update(elapsedTime);
+	m_Statemachine->Update(elapsedTime);
 }
 
 bool CEnemy::IsEnemyInSight() // Chase State
 {
-	XMFLOAT3 tpos = target->GetPosition();
+	XMFLOAT3 tpos = m_Target->GetPosition();
 
-	if (abs(m_xmf4x4World._41 - tpos.x) <= sight && 
-		abs(m_xmf4x4World._43 - tpos.z) <= sight)
+	if (abs(m_xmf4x4World._41 - tpos.x) <= m_Sight && 
+		abs(m_xmf4x4World._43 - tpos.z) <= m_Sight)
 		return TRUE;
 	else
 		return FALSE;
@@ -63,7 +65,7 @@ void CEnemy::MoveRandom() // Moving State
 
 void CEnemy::TrackingTarget()
 {
-	XMFLOAT3 tpos = target->GetPosition();
+	XMFLOAT3 tpos = m_Target->GetPosition();
 		
 	if (m_xmf4x4World._41 > tpos.x) Move({ -0.1, 0, 0 });
 	if (m_xmf4x4World._41 < tpos.x) Move({ +0.1, 0, 0 });
@@ -76,12 +78,12 @@ void CEnemy::TrackingTarget()
 
 CEnemyRangeATK::CEnemyRangeATK()
 {
-
+	m_Type = OBJ_TYPE::Enemy;
 }
 
 CEnemyRangeATK::CEnemyRangeATK(CGameObject* ptarget)
 {
-
+	m_Type = OBJ_TYPE::Enemy;
 }
 
 CEnemyRangeATK::~CEnemyRangeATK()
@@ -91,7 +93,7 @@ CEnemyRangeATK::~CEnemyRangeATK()
 
 void CEnemyRangeATK::Update(double elapsedTime)
 {
-	statemachine->Update(elapsedTime);
+	m_Statemachine->Update(elapsedTime);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -99,12 +101,12 @@ void CEnemyRangeATK::Update(double elapsedTime)
 
 CEnemyCloseATK::CEnemyCloseATK()
 {
-
+	m_Type = OBJ_TYPE::Enemy;
 }
 
 CEnemyCloseATK::CEnemyCloseATK(CGameObject* ptarget)
 {
-
+	m_Type = OBJ_TYPE::Enemy;
 }
 
 CEnemyCloseATK::~CEnemyCloseATK()
@@ -114,5 +116,5 @@ CEnemyCloseATK::~CEnemyCloseATK()
 
 void CEnemyCloseATK::Update(double elapsedTime)
 {
-	statemachine->Update(elapsedTime);
+	m_Statemachine->Update(elapsedTime);
 }

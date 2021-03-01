@@ -9,6 +9,7 @@
 #include "Bridge.h"
 #include "Wall.h"
 #include "Communicates.h"
+#include "Enemy.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
@@ -213,7 +214,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	
 	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	BuildDoorWall(pd3dDevice, pd3dCommandList, pShader);
-	
+	BUildEnemys(pd3dDevice, pd3dCommandList);
+
 	/// FBX Model
 	CShader* pFBXShader = new CShader();
 	pFBXShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTexturedLighting");
@@ -260,13 +262,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetPosition({ 500,  0, 550 });
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
-	m_Player->SetMesh(fbxMesh); 
-	//m_Player->Rotate(XMFLOAT3(0, 1, 0), 180); 
-	 
-	//m_CurrentCamera->SetTarget(m_Player);
-	m_MinimapCamera->SetTarget(m_Player); 
-	
-	//m_CurrentCamera->LookAt(m_CurrentCamera->GetPosition3f(), m_Player->GetPosition(), m_Player->GetUp());
+	m_Player->SetMesh(fbxMesh);  
+
+	m_MinimapCamera->SetTarget(m_Player);  
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -860,6 +858,7 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 
 void CSceneJH::BUildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	CGameObject* pEnemy = new CEnemy();
 }
 
 void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

@@ -6,20 +6,20 @@
 class CEnemy : public CGameObject
 {
 private:
-	CStateMachine<CEnemy>* statemachine;
-	float sight;
+	CStateMachine<CEnemy>* m_Statemachine;
+	float m_Sight;
 
 public:
-	CGameObject* target;
+	CGameObject* m_Target;
 
 public:
 	CEnemy();
 	CEnemy(CGameObject* target);
 	~CEnemy();
 
-	void SetTarget(CGameObject* t) { target = t; }
+	void SetTarget(CGameObject* t) { m_Target = t; }
 
-	CStateMachine<CEnemy>* GetFSM()const { return statemachine; }
+	CStateMachine<CEnemy>* GetFSM()const { return m_Statemachine; }
 
 	virtual void Update(double elapsedTime) override;
 
@@ -31,20 +31,20 @@ public:
 class CEnemyCloseATK : public CGameObject
 {
 private:
-	CStateMachine<CEnemyCloseATK>* statemachine;
-	float sight;
+	CStateMachine<CEnemyCloseATK>* m_Statemachine;
+	float m_Sight;
 
 public:
-	CGameObject* target;
+	CGameObject* m_Target;
 
 public:
 	CEnemyCloseATK();
 	CEnemyCloseATK(CGameObject* target);
 	~CEnemyCloseATK();
 
-	void SetTarget(CGameObject* t) { target = t; }
+	void SetTarget(CGameObject* t) { m_Target = t; }
 
-	CStateMachine<CEnemyCloseATK>* GetFSM()const { return statemachine; }
+	CStateMachine<CEnemyCloseATK>* GetFSM()const { return m_Statemachine; }
 
 	virtual void Update(double elapsedTime) override;
 
@@ -53,7 +53,7 @@ public:
 class CEnemyRangeATK : public CGameObject
 {
 private:
-	CStateMachine<CEnemyRangeATK>* statemachine;
+	CStateMachine<CEnemyRangeATK>* m_Statemachine;
 	float sight;
 
 public:
@@ -66,7 +66,7 @@ public:
 
 	void SetTarget(CGameObject* t) { target = t; }
 
-	CStateMachine<CEnemyRangeATK>* GetFSM()const { return statemachine; }
+	CStateMachine<CEnemyRangeATK>* GetFSM()const { return m_Statemachine; }
 
 	virtual void Update(double elapsedTime);
 
