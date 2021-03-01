@@ -22,6 +22,7 @@ CSceneYJ::CSceneYJ()
 {
 	cout << "Enter CSceneYJ \n";
 	m_pd3dGraphicsRootSignature = NULL;
+	m_isPlayerSelected = false;
 }
 
 CSceneYJ::~CSceneYJ()
@@ -255,8 +256,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 
-	m_CurrentCamera->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
-	m_CurrentCamera->SetTarget(m_Player);
+	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+	m_Cameras[0]->SetTarget(m_Player);
 
 	m_Player->SetShader(pFBXShader);
 	m_Player->Scale(20, 20, 20);
@@ -266,8 +267,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetTextureIndex(0x80);
 	m_Player->SetMesh(fbxMesh); 
 
-	m_MinimapCamera->SetTarget(m_Player);
-
+	m_MinimapCamera->SetTarget(m_Player); 
 }
 
 void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -571,7 +571,7 @@ void CSceneYJ::ProcessInput()
 	if (m_CurrentCamera == nullptr) return;
 
 	float cameraSpeed = m_CurrentCamera->GetSpeed();
-	XMFLOAT3 velocity = m_Player->GetVelocity();
+	XMFLOAT3 velocity = m_Player->GetVelocity(); 
 
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)

@@ -217,6 +217,8 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	d3dPipelineStateDesc.PS.BytecodeLength = pd3dPixelShaderBlob->GetBufferSize();
 	d3dPipelineStateDesc.RasterizerState = CreateDefaultRasterizerDesc();
 	d3dPipelineStateDesc.BlendState = CreateDefaultBlendDesc();
+	d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = TRUE;
+	d3dPipelineStateDesc.BlendState.RenderTarget[0].BlendEnable = TRUE;
 	d3dPipelineStateDesc.DepthStencilState = CreateDefaultDepthStencilDesc();
 	d3dPipelineStateDesc.InputLayout.NumElements = 0;
 	d3dPipelineStateDesc.InputLayout.pInputElementDescs = NULL;
