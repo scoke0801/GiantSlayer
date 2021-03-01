@@ -40,8 +40,7 @@ UI::~UI()
 
 void UI::Rotate(float angle)
 {
-	CGameObject::Rotate(XMFLOAT3(0, 0, 1), angle);
-	DisplayVector3(m_xmf3Position, true); 
+	CGameObject::Rotate(XMFLOAT3(0, 0, 1), angle); 
 }
 
 Minimap::Minimap(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,

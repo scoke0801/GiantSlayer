@@ -13,8 +13,7 @@ private:
 	bool						m_isPlayerSelected = true;
 
 protected:
-	CGameObject**				m_ppObjects = NULL;
-	int							m_nObjects = 0;
+	vector<CGameObject*>		m_Objects; 
 
 	CPlayer*					m_Player = nullptr;
 	vector<UI*>					m_UIs;

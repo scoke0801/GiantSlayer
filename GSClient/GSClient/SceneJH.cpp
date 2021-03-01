@@ -181,17 +181,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
-
-	m_nObjects = 15;
-
-	m_ppObjects = new CGameObject * [m_nObjects];
-	for (int i = 0; i < m_nObjects; ++i)
-	{
-		CGameObject* pObject = new CGameObject();
-
-		m_ppObjects[i] = pObject;
-	}
-
+	  
+	m_Objects.reserve(30);
+	   
 	CShader* pSkyBoxShader = new CSkyBoxShader();
 	pSkyBoxShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTextured");
 	pSkyBoxShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured");
@@ -230,25 +222,31 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
-	m_ppObjects[1]->SetMesh(fbxMesh);
-	m_ppObjects[1]->SetPosition({ 500,  250, 1650 });
-	m_ppObjects[1]->SetTextureIndex(0x01);
-	m_ppObjects[1]->SetShader(pShader);
-	m_ppObjects[1]->SetTextureIndex(0x80);
-	m_ppObjects[1]->Scale(5, 5, 5);
+	CGameObject* pObject = new CGameObject();
+	pObject->SetMesh(fbxMesh);
+	pObject->SetPosition({ 500,  250, 1650 });
+	pObject->SetTextureIndex(0x01);
+	pObject->SetShader(pShader);
+	pObject->SetTextureIndex(0x80);
+	pObject->Scale(5, 5, 5);
+	m_Objects.push_back(std::move(pObject));
 
-	m_ppObjects[2]->SetMesh(fbxMesh);
-	m_ppObjects[2]->SetPosition({ 500,  250, 1750 });
-	m_ppObjects[2]->SetTextureIndex(0x01);
-	m_ppObjects[2]->SetShader(pShader);
-	m_ppObjects[2]->SetTextureIndex(0x80);
+	pObject = new CGameObject();
+	pObject->SetMesh(fbxMesh);
+	pObject->SetPosition({ 500,  250, 1750 });
+	pObject->SetTextureIndex(0x01);
+	pObject->SetShader(pShader);
+	pObject->SetTextureIndex(0x80); 
+	m_Objects.push_back(std::move(pObject));
 
 	CSphereMesh* pSphereMesh = new CSphereMesh(pd3dDevice, pd3dCommandList,
 		30, 20, 20);
-	m_ppObjects[3]->SetMesh(pSphereMesh);
-	m_ppObjects[3]->SetPosition({ 500,  250 + 82.5, 1401 });
-	m_ppObjects[3]->SetTextureIndex(0x80);
-	m_ppObjects[3]->SetShader(pShader);
+	pObject = new CGameObject();
+	pObject->SetMesh(pSphereMesh);
+	pObject->SetPosition({ 500,  250 + 82.5, 1401 });
+	pObject->SetTextureIndex(0x80);
+	pObject->SetShader(pShader);
+	m_Objects.push_back(std::move(pObject));
 
 	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
@@ -343,17 +341,10 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 }
 
 void CSceneJH::ReleaseObjects()
-{
-	m_ppObjects[1];
-
+{  
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
-	if (m_ppObjects)
-	{
-		for (int j = 0; j < m_nObjects; j++)
-			if (m_ppObjects[j])
-				delete m_ppObjects[j];
-		delete[] m_ppObjects;
-	}
+ 
+	m_Objects.clear();
 }
 
 void CSceneJH::Update(double elapsedTime)
@@ -362,11 +353,10 @@ void CSceneJH::Update(double elapsedTime)
 	
 	m_Skybox->Rotate(XMFLOAT3(0, 1, 0), 0.3 * elapsedTime);
 
-	for (int i = 0; i < m_nObjects; ++i)
+	for (auto pObject : m_Objects)
 	{
-		m_ppObjects[i]->Update(elapsedTime);
-	}
-
+		pObject->Update(elapsedTime);
+	} 
 	m_Player->Update(elapsedTime);
 	
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
@@ -418,15 +408,12 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
-
+	 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
-	for (int j = 0; j < m_nObjects; j++)
+	for (auto pObject : m_Objects)
 	{
-		if (j == 9)
-			int stop = 3;
-		if (m_ppObjects[j])
-			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
-	}
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	} 
 }
 
 void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -487,10 +474,9 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	m_Skybox->Draw(pd3dCommandList, m_MinimapCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
-	for (int j = 0; j < m_nObjects; j++)
-	{ 
-		if (m_ppObjects[j])
-			m_ppObjects[j]->Draw(pd3dCommandList, m_MinimapCamera);
+	for (auto pObject : m_Objects)
+	{
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 
 	//m_Player->Draw(pd3dCommandList, m_MinimapCamera);
@@ -738,11 +724,9 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 
 void CSceneJH::ReleaseUploadBuffers()
 {
-	if (m_ppObjects)
+	for (auto pObject : m_Objects)
 	{
-		for (int j = 0; j < m_nObjects; j++)
-			if (m_ppObjects[j])
-				m_ppObjects[j]->ReleaseUploadBuffers();
+		pObject->ReleaseUploadBuffers();
 	}
 }
 
@@ -854,16 +838,14 @@ int CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
 	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
-
-	m_ppObjects[startIndex] = pBridge;
-	m_ppObjects[startIndex++]->SetPosition({ 2500,  01,  1500 });
-
+	pBridge->SetPosition({ 2500,  01,  1500 });
+	m_Objects.push_back(pBridge);
+	 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge); 
-
-	m_ppObjects[startIndex] = pBridge;
-	m_ppObjects[startIndex++]->SetPosition({ 2500,  01,  2500 });
+	pBridge->SetPosition({ 2500,  01,  2500 });
+	m_Objects.push_back(pBridge);
 
 	return startIndex;
 }
@@ -874,7 +856,7 @@ int CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 {
 	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5000, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 0,0, 5000 });
-	m_ppObjects[startIndex++] = pDoorWall;
+	m_Objects.push_back(pDoorWall);
 	 
 	return startIndex;
 }
