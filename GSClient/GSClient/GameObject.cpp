@@ -543,7 +543,6 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 
 	MapData Map[10][10];
 
-	
 	for (int j = 0; j < 10; j++)
 	{
 		for (int i = 0; i < 10; i++)
@@ -1039,6 +1038,30 @@ CTerrain::~CTerrain()
 void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	for (auto pObj : m_Objects)
+	{
+		pObj->Draw(pd3dCommandList, pCamera);
+	}
+}
+
+CBillboard::CBillboard(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_nBillboardObjects = 300;
+
+	m_BillboardObjects.reserve(m_nBillboardObjects);
+	
+	CBillboardVertex* pGeometryBillboardVertices = new CBillboardVertex[m_nBillboardObjects];
+
+	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, pGeometryBillboardVertices, m_nBillboardObjects);
+	
+}
+
+CBillboard::~CBillboard()
+{
+}
+
+void CBillboard::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	for (auto pObj : m_BillboardObjects)
 	{
 		pObj->Draw(pd3dCommandList, pCamera);
 	}

@@ -370,7 +370,27 @@ CTexturedRectMesh::~CTexturedRectMesh()
 
 }
 
-CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, 
+CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) 
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = 1;
+	m_nStride = sizeof(CBillboardVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+
+	CBillboardVertex* pVertice = new CBillboardVertex;
+	pVertice->m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	pVertice->m_xmf2Size = XMFLOAT2(160.0f, 160.0f);
+	pVertice->m_nTexture = 1;
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertice, 
+		m_nStride * m_nVertices,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList, 
 	CBillboardVertex* pGeometryBillboardVertices,
 	UINT nGeometryBillboardVertices)
@@ -379,7 +399,8 @@ CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice,
 	m_nVertices = nGeometryBillboardVertices;
 	m_nStride = sizeof(CBillboardVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pGeometryBillboardVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pGeometryBillboardVertices, m_nStride * m_nVertices, 
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;

@@ -105,23 +105,6 @@ void CSceneYJ::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 
-	//m_pLights->m_pLights[0].m_bEnable = true;
-	//m_pLights->m_pLights[0].m_nType = SPOT_LIGHT;
-	//m_pLights->m_pLights[0].m_fRange = 1500.0f;
-	//m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	//m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	//m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	//if (m_CurrentCamera)
-	//{
-	//	m_pLights->m_pLights[0].m_xmf3Position = m_CurrentCamera->GetPosition3f();
-	//	m_pLights->m_pLights[0].m_xmf3Direction = m_CurrentCamera->GetLook3f();
-	//	m_CurrentCamera->SetLight(&m_pLights->m_pLights[0]);
-	//} 
-	//m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	//m_pLights->m_pLights[0].m_fFalloff = 14.0f;
-	//m_pLights->m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-	//m_pLights->m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
-
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = POINT_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 1000.0f;
@@ -215,6 +198,24 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, 257, 257, 9, 9, pTerrainShader);
 #pragma endregion   
+
+#pragma region Create Billboard
+	CShader* pBillboardShader = new CBillboardShader();
+	pBillboardShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSBillboard");
+	pBillboardShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSBillboard");
+	pBillboardShader->CreateGeometryShader(L"Shaders\\ShaderYJ.hlsl", "GSBillboard");
+	pBillboardShader->CreateInputLayout(ShaderTypes::Billboard);
+	pBillboardShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);
+	 
+	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+	CGameObject* pBillboardObject = new CGameObject();
+	pBillboardObject->SetMesh(pBillboardMesh);
+	pBillboardObject->SetPosition({ 500,  250, 500 });
+	pBillboardObject->SetTextureIndex(0x01);
+	pBillboardObject->SetShader(pBillboardShader); 
+	m_BillboardObjects.push_back(std::move(pBillboardObject));
+
+#pragma endBillboard
 
 	CShader* pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
@@ -416,13 +417,15 @@ void CSceneYJ::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
-	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera); 
 
-	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
-	for (int j = 0; j < m_nObjects; j++)
+	for (auto pObject : m_BillboardObjects)
 	{
-		if (j == 9)
-			int stop = 3;
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+
+	for (int j = 0; j < m_nObjects; j++)
+	{ 
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
@@ -486,14 +489,16 @@ void CSceneYJ::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	m_Skybox->Draw(pd3dCommandList, m_MinimapCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
+	for (auto pObject : m_BillboardObjects)
+	{
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_MinimapCamera);
 	}
-
-	//m_Player->Draw(pd3dCommandList, m_MinimapCamera);
-
+	  
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
 

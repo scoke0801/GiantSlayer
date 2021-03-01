@@ -164,17 +164,12 @@ struct VS_BILLBOARD_INPUT
 
 VS_BILLBOARD_INPUT VSBillboard(VS_BILLBOARD_INPUT input)
 {
-	return(input);
-}
-
-VS_BILLBOARD_INPUT VSExBillboard(VS_BILLBOARD_INPUT input)
-{
 	input.center.x = gmtxWorld._41;
 	input.center.y = gmtxWorld._42;
 	input.center.z = gmtxWorld._43;
 	return(input);
 }
-
+ 
 struct GS_BILLBOARD_GEOMETRY_OUTPUT
 {
 	float4 position : SV_POSITION;
@@ -217,7 +212,13 @@ void GSBillboard(point VS_BILLBOARD_INPUT input[1], inout TriangleStream<GS_BILL
 
 float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 {
-	float4 cColor = gtxtHpSpGauge.Sample(gssClamp, input.uv);
+	// gtxtBillboardTextures[input.index].Sample(gssClamp, input.uv); 
+	// 위 형식은 빌보드 이미지를 배열형식으로 불러오는 경우에 사용가능
+	float4 cColor = gtxtBox.Sample(gssClamp, input.uv);
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtBox.Sample(gssClamp, input.uv);
+	}
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
 
 	return(cColor);
