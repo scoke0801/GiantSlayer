@@ -24,6 +24,10 @@ protected:
 	CSkyBox* m_Skybox;
 	CTerrain* m_Terrain;
 
+	CGameObject** m_ppBillBoardObjects = NULL;
+	int	m_nBillBoardObjects = 0;
+	
+
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 
 	CCamera** m_Cameras;

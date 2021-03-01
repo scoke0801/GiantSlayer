@@ -298,3 +298,15 @@ private:
 	long czBlocks;
 };
 
+class CBillboard
+{
+public:
+	CBillboard(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual ~CBillboard();
+
+	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+private:
+	int						m_nBillboardObjects;
+	vector<CGameObject*>    m_BillboardObjects;
+
+};
