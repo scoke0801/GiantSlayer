@@ -204,11 +204,15 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pBillboardShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSBillboard");
 	pBillboardShader->CreateGeometryShader(L"Shaders\\ShaderYJ.hlsl", "GSBillboard");
 	pBillboardShader->CreateInputLayout(ShaderTypes::Billboard);
-	pBillboardShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
-	m_ppBillBoardObjects = new CGameObject * [m_nObjects];
-
-
+	pBillboardShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);
+	 
+	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+	CGameObject* pBillboardObject = new CGameObject();
+	pBillboardObject->SetMesh(pBillboardMesh);
+	pBillboardObject->SetPosition({ 500,  250, 500 });
+	pBillboardObject->SetTextureIndex(0x01);
+	pBillboardObject->SetShader(pBillboardShader); 
+	m_BillboardObjects.push_back(std::move(pBillboardObject));
 
 #pragma endBillboard
 
@@ -263,8 +267,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetTextureIndex(0x80);
 	m_Player->SetMesh(fbxMesh); 
 
-	m_MinimapCamera->SetTarget(m_Player);
-
+	m_MinimapCamera->SetTarget(m_Player); 
 }
 
 void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -413,13 +416,15 @@ void CSceneYJ::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
-	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera); 
 
-	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
-	for (int j = 0; j < m_nObjects; j++)
+	for (auto pObject : m_BillboardObjects)
 	{
-		if (j == 9)
-			int stop = 3;
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+
+	for (int j = 0; j < m_nObjects; j++)
+	{ 
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
@@ -483,14 +488,16 @@ void CSceneYJ::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	m_Skybox->Draw(pd3dCommandList, m_MinimapCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
+	for (auto pObject : m_BillboardObjects)
+	{
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
 			m_ppObjects[j]->Draw(pd3dCommandList, m_MinimapCamera);
 	}
-
-	//m_Player->Draw(pd3dCommandList, m_MinimapCamera);
-
+	  
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
 
