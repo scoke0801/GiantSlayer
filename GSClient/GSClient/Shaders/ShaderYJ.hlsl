@@ -28,31 +28,41 @@ SamplerState gssClamp : register(s1);
 
 Texture2D gtxtForest : register(t0);
 Texture2D gtxtDryForest : register(t1);
-Texture2D gtxtDryDesert : register(t2);
+Texture2D gtxtDesert : register(t2);
+Texture2D gtxtDryDesert : register(t3);
+Texture2D gtxtRocky_Terrain : register(t4);
 
-Texture2D gSkyBox_Front : register(t3);
-Texture2D gSkyBox_Back : register(t4);
-Texture2D gSkyBox_Right : register(t5);
-Texture2D gSkyBox_Left : register(t6);
-Texture2D gSkyBox_Top : register(t7);
-Texture2D gSkyBox_Bottom : register(t8);
-Texture2D gtxtBox : register(t9);
-Texture2D gtxtWood : register(t10);
-Texture2D gtxtWall : register(t11);
-Texture2D gtxtDoor : register(t12);
+Texture2D gSkyBox_Front : register(t5);
+Texture2D gSkyBox_Back : register(t6);
+Texture2D gSkyBox_Right : register(t7);
+Texture2D gSkyBox_Left : register(t8);
+Texture2D gSkyBox_Top : register(t9);
+Texture2D gSkyBox_Bottom : register(t10);
+Texture2D gtxtBox : register(t11);
+Texture2D gtxtWood : register(t12);
+Texture2D gtxtWall : register(t13);
+Texture2D gtxtDoor : register(t14);
 
-Texture2D gtxtHpSpGauge : register(t13);
-Texture2D gtxtHpSpPer : register(t14);
-Texture2D gtxtMinimap : register(t15);
-Texture2D gtxtWeapons : register(t16);
+Texture2D gtxtHpSpGauge : register(t15);
+Texture2D gtxtHpSpPer : register(t16);
+Texture2D gtxtMinimap : register(t17);
+Texture2D gtxtWeapons : register(t18);
 
-Texture2D gtxtFlower_Red : register(t17);
-Texture2D gtxtFlower_White : register(t18);
-Texture2D gtxtGrass_Width : register(t19);
-Texture2D gtxtGrass_Depth : register(t20);
-Texture2D gtxtTree : register(t21);
+Texture2D gtxtFlower_Red : register(t19);
+Texture2D gtxtFlower_White : register(t20);
+Texture2D gtxtGrass_Width : register(t21);
+Texture2D gtxtGrass_Depth : register(t22);
+Texture2D gtxtTree : register(t23);
 
-Texture2D gtxtMap : register(t22);
+Texture2D gtxtMap : register(t24);
+
+//"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
+//		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
+//		"Box", "Wood", "Wall", "Door",
+//		"HP_SP","HP_SP_PER",
+//		"Minimap",
+//		"WeaponUI",
+//		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree"
 
 
 
@@ -483,7 +493,15 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
     }
     if (gnTexturesMask & 0x04)
     {
+        cColor = gtxtDesert.Sample(gssWrap, input.uv0);
+    }
+    if (gnTexturesMask & 0x08)
+    {
         cColor = gtxtDryDesert.Sample(gssWrap, input.uv0);
+    }
+    if (gnTexturesMask & 0x10)
+    {
+        cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0);
     }
 	
 	//else

@@ -724,9 +724,17 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			{
 				pObject->SetTextureIndex(0x02);
 			}
-			if (Map[i][j].Height == -3000 || Map[i][j].Height == -4000)
+			if (Map[i][j].Height == -2000)
 			{
 				pObject->SetTextureIndex(0x04);
+			}
+			if (Map[i][j].Height == -3000 || Map[i][j].Height == -4000)
+			{
+				pObject->SetTextureIndex(0x08);
+			}
+			if (Map[i][j].Height == -5000 || Map[i][j].Height == -6000)
+			{
+				pObject->SetTextureIndex(0x010);
 			}
 
 			if (Map[i][j].Name == Map_Configuration_Name::Second_Ground)
@@ -835,7 +843,9 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	for (int z = 0; z < 8; z++)
 	{
 		CGameObject* pObject = new CGameObject();
-		pObject->SetTextureIndex(0x01);
+		pObject->SetTextureIndex(0x04);
+		if(z<2)
+			pObject->SetTextureIndex(0x08);
 		pObject->SetShader(pShader);
 		pObject->Rotate(XMFLOAT3(0, 0, 1), 90);
 		pObject->SetMesh(pTerrainPlaneMesh);
@@ -848,7 +858,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	for (int z = 2; z < 10; z++)
 	{
 		CGameObject* pObject = new CGameObject();
-		pObject->SetTextureIndex(0x01);
+		pObject->SetTextureIndex(0x04);
 		pObject->SetShader(pShader);
 		pObject->Rotate(XMFLOAT3(0, 0, 1), 90);
 		pObject->SetMesh(pTerrainPlaneMesh);
@@ -860,8 +870,12 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 
 	for (int z = 2; z < 10; z++)
 	{
+		
 		CGameObject* pObject = new CGameObject();
-		pObject->SetTextureIndex(0x01);
+		pObject->SetTextureIndex(0x08);
+		if (z > 4)
+			pObject->SetTextureIndex(0x010);
+
 		pObject->SetShader(pShader);
 		pObject->Rotate(XMFLOAT3(0, 0, 1), 90);
 		pObject->SetMesh(pTerrainPlaneMesh);
@@ -872,11 +886,11 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	}
 
 	// 가로 벽 
-
+	// 첫번째~두번째 사이 지형 위쪽 작은가로벽 
 	for (int z = 1; z < 3; z++)
 	{
 		CGameObject* pObject = new CGameObject();
-		pObject->SetTextureIndex(0x01);
+		pObject->SetTextureIndex(0x02);
 		pObject->SetShader(pShader);
 		pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
 		pObject->SetMesh(pTerrainPlaneMesh);
@@ -886,10 +900,12 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 		m_Objects.push_back(std::move(pObject));
 	}
 
+	// 가로벽
+	// 3번째 ~ 4번째(메마른지형) 사이 지형 작은가로 벽
 	for (int z = 5; z < 6; z++)
 	{
 		CGameObject* pObject = new CGameObject();
-		pObject->SetTextureIndex(0x01);
+		pObject->SetTextureIndex(0x08);
 		pObject->SetShader(pShader);
 		pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
 		pObject->SetMesh(pTerrainPlaneMesh);
@@ -909,7 +925,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 		if (z < 3)
 		{
 			CGameObject* pObject = new CGameObject();
-			pObject->SetTextureIndex(0x01);
+			pObject->SetTextureIndex(0x02);
 			pObject->SetShader(pShader);
 			pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
 			pObject->SetMesh(pTerrainPlaneMesh);
@@ -918,10 +934,13 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			pObject->SetPosition(XMFLOAT3((0 + (2000.0f * z)), 1000.0f, 20000.0f));
 			m_Objects.push_back(std::move(pObject));
 		}
+		
 		if (z >= 3 && z<7)
 		{
 			CGameObject* pObject = new CGameObject();
-			pObject->SetTextureIndex(0x01);
+			pObject->SetTextureIndex(0x04);
+			if(z==3)
+				pObject->SetTextureIndex(0x02);
 			pObject->SetShader(pShader);
 			pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
 			pObject->SetMesh(pTerrainPlaneMesh);
@@ -933,7 +952,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 		if (z >= 7)
 		{
 			CGameObject* pObject = new CGameObject();
-			pObject->SetTextureIndex(0x01);
+			pObject->SetTextureIndex(0x010);
 			pObject->SetShader(pShader);
 			pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
 			pObject->SetMesh(pTerrainPlaneMesh);
@@ -965,7 +984,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 		if (z >= 4)
 		{
 			CGameObject* pObject = new CGameObject();
-			pObject->SetTextureIndex(0x01);
+			pObject->SetTextureIndex(0x08);
 			pObject->SetShader(pShader);
 			pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
 			pObject->SetMesh(pTerrainPlaneMesh);
@@ -983,6 +1002,8 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	{
 		CGameObject* pObject = new CGameObject();
 		pObject->SetTextureIndex(0x01);
+		if (z>7)
+			pObject->SetTextureIndex(0x02);
 		pObject->SetShader(pShader);
 		pObject->Rotate(XMFLOAT3(0, 0, 1), 90);
 		pObject->SetMesh(pTerrainPlaneMesh);
@@ -998,25 +1019,29 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	for (int z = 0; z < 10; z++)
 	{
 		CGameObject* pObject = new CGameObject();
-		pObject->SetTextureIndex(0x01);
+		pObject->SetTextureIndex(0x010);
 		pObject->SetShader(pShader);
 		pObject->Rotate(XMFLOAT3(0, 0, 1), 90);
 		pObject->SetMesh(pTerrainPlaneMesh);
 		pObject->Scale(500.0f, 1.0f, 500.0f);
 		if (z < 2 )
 		{
+			pObject->SetTextureIndex(0x08);
 			pObject->SetPosition(XMFLOAT3((20000.0f), -3000.0f, (2000.0f * z)));
 		}
 		else if (z == 2)
 		{
+			pObject->SetTextureIndex(0x08);
 			pObject->SetPosition(XMFLOAT3((20000.0f), -4000.0f, (2000.0f * z)));
 		}
 		else if (z == 3 )
 		{
+			pObject->SetTextureIndex(0x08);
 			pObject->SetPosition(XMFLOAT3((20000.0f), -5000.0f, (2000.0f * z)));
 		}
 		else if (z <= 4)
 		{
+			pObject->SetTextureIndex(0x08);
 			pObject->SetPosition(XMFLOAT3((20000.0f), -5000.0f, (2000.0f * z)));
 		}
 		else if (z <= 5)

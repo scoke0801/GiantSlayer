@@ -276,25 +276,20 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 {
 	const char* keyNames[] =
 	{
-		"Forest","Dry_Forest","Dry_Desert", "Sky_Front",
-		"Sky_Back", "Sky_Left", "Sky_Right",
-		"Sky_Top","Sky_Bottom", "Box",
-		"Wood", "Wall", "Door",
+		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
+		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom", 
+		"Box","Wood", "Wall", "Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red","Flower_White","Grass_1","Grass_2",
-		"Tree"
-		
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree"
 	};
 
 	const wchar_t* address[] =
 	{
-		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Dry_Desert.dds", L"resources/skybox/front.dds",
-		L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",
-		L"resources/skybox/top.dds", L"resources/skybox/bottom.dds", L"resources/OBJ/Box.dds",
-		L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
-		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",
-		L"resources/UI/SmallICons.dds",
+		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",
+		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds", 
+		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
+		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
 		L"resources/Billboard/Tree02.dds"
 	};
@@ -321,15 +316,13 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	const char* keyNames[] =
 	{
-		"Forest","Dry_Forest","Dry_Desert",
+		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
 		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
-		"Box", "Wood",
-		"Wall", "Door",
+		"Box", "Wood", "Wall", "Door",
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2",
-		"Tree"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};

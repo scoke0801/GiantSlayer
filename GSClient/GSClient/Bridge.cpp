@@ -7,8 +7,8 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_Name = OBJ_NAME::Bridge; 
 
 	CShader* pShader = new CShader();	
-	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSBridgeLight"); 
+	pShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSBridgeLight"); 
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, pd3dRootSignature);
 	 
