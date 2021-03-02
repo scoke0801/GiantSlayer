@@ -719,9 +719,20 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 				pObject->Scale(500.0f, 1.0f, 500.0f);
 				pObject->SetPosition(XMFLOAT3(i * 2000.0f, Map[i][j].Height, j * 2000.0f));
 			}
+
+			if (Map[i][j].Height == -1000)
+			{
+				pObject->SetTextureIndex(0x02);
+			}
+			if (Map[i][j].Height == -3000 || Map[i][j].Height == -4000)
+			{
+				pObject->SetTextureIndex(0x04);
+			}
+
 			if (Map[i][j].Name == Map_Configuration_Name::Second_Ground)
 			{
 				pObject->SetMesh(pTerrainPlaneMesh);
+				
 				pObject->Scale(500.0f, 1.0f, 500.0f);
 				pObject->SetPosition(XMFLOAT3(i * 2000.0f, Map[i][j].Height, j * 2000.0f));
 			}

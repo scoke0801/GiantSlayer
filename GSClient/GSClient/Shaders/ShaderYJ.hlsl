@@ -26,24 +26,35 @@ cbuffer cbCameraInfo : register(b2)
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
 
-Texture2D gtxtTerrain : register(t0);
-Texture2D gSkyBox_Front : register(t1);
-Texture2D gSkyBox_Back : register(t2);
-Texture2D gSkyBox_Right : register(t3);
-Texture2D gSkyBox_Left : register(t4);
-Texture2D gSkyBox_Top : register(t5);
-Texture2D gSkyBox_Bottom : register(t6);
-Texture2D gtxtBox : register(t7);
-Texture2D gtxtWood : register(t8);
-Texture2D gtxtWall : register(t9);
-Texture2D gtxtDoor : register(t10);
+Texture2D gtxtForest : register(t0);
+Texture2D gtxtDryForest : register(t1);
+Texture2D gtxtDryDesert : register(t2);
 
-Texture2D gtxtHpSpGauge : register(t11);
-Texture2D gtxtHpSpPer : register(t12);
-Texture2D gtxtMinimap : register(t13);
-Texture2D gtxtWeapons : register(t14);
+Texture2D gSkyBox_Front : register(t3);
+Texture2D gSkyBox_Back : register(t4);
+Texture2D gSkyBox_Right : register(t5);
+Texture2D gSkyBox_Left : register(t6);
+Texture2D gSkyBox_Top : register(t7);
+Texture2D gSkyBox_Bottom : register(t8);
+Texture2D gtxtBox : register(t9);
+Texture2D gtxtWood : register(t10);
+Texture2D gtxtWall : register(t11);
+Texture2D gtxtDoor : register(t12);
 
-Texture2D gtxtMap : register(t15);
+Texture2D gtxtHpSpGauge : register(t13);
+Texture2D gtxtHpSpPer : register(t14);
+Texture2D gtxtMinimap : register(t15);
+Texture2D gtxtWeapons : register(t16);
+
+Texture2D gtxtFlower_Red : register(t17);
+Texture2D gtxtFlower_White : register(t18);
+Texture2D gtxtGrass_Width : register(t19);
+Texture2D gtxtGrass_Depth : register(t20);
+Texture2D gtxtTree : register(t21);
+
+Texture2D gtxtMap : register(t22);
+
+
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -106,7 +117,7 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtTerrain.Sample(gssClamp, input.uv);
+		cColor = gtxtForest.Sample(gssClamp, input.uv);
 	}
 
 	if (gnTexturesMask & 0x02)
@@ -217,8 +228,8 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 	float4 cColor = gtxtBox.Sample(gssClamp, input.uv);
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtBox.Sample(gssClamp, input.uv);
-	}
+        cColor = gtxtFlower_Red.Sample(gssClamp, input.uv);
+    }
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
 
 	return(cColor);
@@ -464,12 +475,21 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtTerrain.Sample(gssWrap, input.uv0);
+		cColor = gtxtForest.Sample(gssWrap, input.uv0);
 	}
-	else
-	{
-		cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	}
+    if (gnTexturesMask & 0x02)
+    {
+        cColor = gtxtDryForest.Sample(gssWrap, input.uv0);
+    }
+    if (gnTexturesMask & 0x04)
+    {
+        cColor = gtxtDryDesert.Sample(gssWrap, input.uv0);
+    }
+	
+	//else
+	//{
+	//	cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	//}
 
 	return (cColor);
 }
@@ -518,7 +538,7 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtTerrain.Sample(gssClamp, input.uv);
+		cColor = gtxtForest.Sample(gssClamp, input.uv);
 	}
 
 	if (gnTexturesMask & 0x02)

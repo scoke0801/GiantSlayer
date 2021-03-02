@@ -199,13 +199,16 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pBillboardShader->CreateInputLayout(ShaderTypes::Billboard);
 	pBillboardShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);
 	 
-	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
-	CGameObject* pBillboardObject = new CGameObject();
-	pBillboardObject->SetMesh(pBillboardMesh);
-	pBillboardObject->SetPosition({ 500,  250, 500 });
-	pBillboardObject->SetTextureIndex(0x01);
-	pBillboardObject->SetShader(pBillboardShader); 
-	m_BillboardObjects.push_back(std::move(pBillboardObject));
+	for (int i = 0; i < 1000; i++)
+	{
+		CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+		CGameObject* pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->SetPosition({ 4000+float((i*500)), 100, 500 });
+		pBillboardObject->SetTextureIndex(0x01);
+		pBillboardObject->SetShader(pBillboardShader);
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
 
 #pragma endBillboard
 
@@ -273,22 +276,27 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 {
 	const char* keyNames[] =
 	{
-		"Terrain", "Sky_Front","Sky_Front",
+		"Forest","Dry_Forest","Dry_Desert", "Sky_Front",
 		"Sky_Back", "Sky_Left", "Sky_Right",
 		"Sky_Top","Sky_Bottom", "Box",
 		"Wood", "Wall", "Door",
 		"HP_SP","Minimap","WeaponUI",
-		"HP_SP_PER"
+		"HP_SP_PER",
+		"Flower_Red","Flower_White","Grass_1","Grass_2",
+		"Tree"
+		
 	};
 
 	const wchar_t* address[] =
 	{
-		L"resources/OBJ/TestTerrain6.dds", L"resources/skybox/front.dds", L"resources/skybox/front.dds",
+		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Dry_Desert.dds", L"resources/skybox/front.dds",
 		L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",
 		L"resources/skybox/top.dds", L"resources/skybox/bottom.dds", L"resources/OBJ/Box.dds",
 		L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",
-		L"resources/UI/SmallICons.dds"
+		L"resources/UI/SmallICons.dds",
+		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
+		L"resources/Billboard/Tree02.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -313,14 +321,17 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	const char* keyNames[] =
 	{
-		"Terrain",
+		"Forest","Dry_Forest","Dry_Desert",
 		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
 		"Box", "Wood",
 		"Wall", "Door",
 		"HP_SP","HP_SP_PER",
 		"Minimap",
-		"WeaponUI"
+		"WeaponUI",
+		"Flower_Red","Flower_White","Grass_1","Grass_2",
+		"Tree"
 	};
+
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
