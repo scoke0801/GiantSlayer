@@ -11,7 +11,8 @@ private:
 
 public:
 	CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		ID3D12RootSignature* pd3dRootSignature);
+		ID3D12RootSignature* pd3dRootSignature,
+		CShader* pShader);
 
 	virtual ~CBridge(); 
 

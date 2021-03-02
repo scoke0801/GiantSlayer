@@ -100,8 +100,8 @@ public:
 
 private: 
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
-		ID3D12RootSignature* pd3dGraphicsRootSignature, CShader* pShader);
-	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
+		ID3D12RootSignature* pd3dGraphicsRootSignature, CShader* pShader = nullptr);
+	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader = nullptr);
 
 	void BUildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 

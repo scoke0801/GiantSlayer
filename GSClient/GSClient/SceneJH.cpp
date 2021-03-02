@@ -206,13 +206,19 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, 257, 257, 9, 9, pTerrainShader);  
 #pragma endregion   
 
-	CShader*  pShader = new CShader();
+	CShader* pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSBridgeLight");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature); 
+	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+
+	pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTexturedLighting");
 	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTexturedLighting");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	
-	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+
 	BuildDoorWall(pd3dDevice, pd3dCommandList, pShader);
 	BUildEnemys(pd3dDevice, pd3dCommandList);
 
@@ -833,13 +839,13 @@ void CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
 	ID3D12RootSignature* pd3dGraphicsRootSignature,
 	CShader* pShader)
 {
-	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->SetPosition({ 2500,  01,  1500 });
 	m_Objects.push_back(pBridge);
 	 
-	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge); 
 	pBridge->SetPosition({ 2500,  01,  2500 });
