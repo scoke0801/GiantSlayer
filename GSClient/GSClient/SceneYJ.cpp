@@ -208,14 +208,18 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_BillboardObjects.push_back(std::move(pBillboardObject));
 
 #pragma endBillboard
-
 	CShader* pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSBridgeLight");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+
+	pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 	pShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
-	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	BuildDoorWall(pd3dDevice, pd3dCommandList, pShader);
 
 	/// FBX Model
@@ -840,14 +844,12 @@ void CSceneYJ::BuildBridges(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature, CShader* pShader)
 {
-	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pBridge->SetShader(pShader);
+	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader); 
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->SetPosition({ 2500,  01,  1500 });
 	m_Objects.push_back(pBridge);
 
-	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pBridge->SetShader(pShader);
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->SetPosition({ 2500,  01,  2500 });
 	m_Objects.push_back(pBridge);

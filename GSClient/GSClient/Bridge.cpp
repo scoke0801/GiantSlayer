@@ -2,16 +2,10 @@
 #include "Bridge.h"
 #include "Shader.h" 
 CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	ID3D12RootSignature* pd3dRootSignature)
+	ID3D12RootSignature* pd3dRootSignature, CShader* pShader)
 {
-	m_Name = OBJ_NAME::Bridge; 
+	m_Name = OBJ_NAME::Bridge;  
 
-	CShader* pShader = new CShader();	
-	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSBridgeLight"); 
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, pd3dRootSignature);
-	 
 // ¹Ù´Ú »ý¼º
 	for (int i = 0; i < 10; i += 5)
 	{
