@@ -26,24 +26,35 @@ cbuffer cbCameraInfo : register(b2)
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
 
-Texture2D gtxtTerrain : register(t0);
-Texture2D gSkyBox_Front : register(t1);
-Texture2D gSkyBox_Back : register(t2);
-Texture2D gSkyBox_Right : register(t3);
-Texture2D gSkyBox_Left : register(t4);
-Texture2D gSkyBox_Top : register(t5);
-Texture2D gSkyBox_Bottom : register(t6);
-Texture2D gtxtBox : register(t7);
-Texture2D gtxtWood : register(t8);
-Texture2D gtxtWall : register(t9);
-Texture2D gtxtDoor : register(t10);
+Texture2D gtxtForest : register(t0);
+Texture2D gtxtDryForest : register(t1);
+Texture2D gtxtDesert : register(t2);
+Texture2D gtxtDryDesert : register(t3);
+Texture2D gtxtRocky_Terrain : register(t4);
 
-Texture2D gtxtHpSpGauge : register(t11);
-Texture2D gtxtHpSpPer : register(t12);
-Texture2D gtxtMinimap : register(t13);
-Texture2D gtxtWeapons : register(t14);
+Texture2D gSkyBox_Front : register(t5);
+Texture2D gSkyBox_Back : register(t6);
+Texture2D gSkyBox_Right : register(t7);
+Texture2D gSkyBox_Left : register(t8);
+Texture2D gSkyBox_Top : register(t9);
+Texture2D gSkyBox_Bottom : register(t10);
+Texture2D gtxtBox : register(t11);
+Texture2D gtxtWood : register(t12);
+Texture2D gtxtWall : register(t13);
+Texture2D gtxtDoor : register(t14);
 
-Texture2D gtxtMap : register(t15);
+Texture2D gtxtHpSpGauge : register(t15);
+Texture2D gtxtHpSpPer : register(t16);
+Texture2D gtxtMinimap : register(t17);
+Texture2D gtxtWeapons : register(t18);
+
+Texture2D gtxtFlower_Red : register(t19);
+Texture2D gtxtFlower_White : register(t20);
+Texture2D gtxtGrass_Width : register(t21);
+Texture2D gtxtGrass_Depth : register(t22);
+Texture2D gtxtTree : register(t23);
+
+Texture2D gtxtMap : register(t24);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -58,7 +69,7 @@ struct VS_COLOR_OUTPUT
 	float4 position : SV_POSITION;
 	float4 color : COLOR;
 };
- 
+
 struct VS_TEXTURE_IN
 {
 	float3 position : POSITION;
@@ -76,7 +87,7 @@ VS_COLOR_OUTPUT VSColor(VS_COLOR_INPUT input)
 {
 	input.position.x += gmtxWorld._41;
 	input.position.y += gmtxWorld._42;
-	input.position.z += gmtxWorld._43; 
+	input.position.z += gmtxWorld._43;
 
 	VS_COLOR_OUTPUT outRes;
 	outRes.position = float4(input.position, 1.0f);
@@ -106,7 +117,7 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtTerrain.Sample(gssClamp, input.uv);
+		cColor = gtxtForest.Sample(gssClamp, input.uv);
 	}
 
 	if (gnTexturesMask & 0x02)
@@ -144,14 +155,14 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 	if (gnTexturesMask & 0x100)
 	{
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
-	}	
+	}
 	if (gnTexturesMask & 0x200)
 	{
 		cColor = gtxtWall.Sample(gssWrap, input.uv);
-	} 
+	}
 	return cColor;
 }
- 
+
 /////////////////////////////////////////////////////////////////
 /////
 
@@ -163,11 +174,6 @@ struct VS_BILLBOARD_INPUT
 };
 
 VS_BILLBOARD_INPUT VSBillboard(VS_BILLBOARD_INPUT input)
-{
-	return(input);
-}
-
-VS_BILLBOARD_INPUT VSExBillboard(VS_BILLBOARD_INPUT input)
 {
 	input.center.x = gmtxWorld._41;
 	input.center.y = gmtxWorld._42;
@@ -213,19 +219,25 @@ void GSBillboard(point VS_BILLBOARD_INPUT input[1], inout TriangleStream<GS_BILL
 
 		outStream.Append(output);
 	}
-} 
+}
 
 float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 {
-	float4 cColor = gtxtHpSpGauge.Sample(gssClamp, input.uv);
+	// gtxtBillboardTextures[input.index].Sample(gssClamp, input.uv); 
+	// 위 형식은 빌보드 이미지를 배열형식으로 불러오는 경우에 사용가능
+	float4 cColor;
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtFlower_Red.Sample(gssClamp, input.uv);
+	}
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
 
 	return(cColor);
-} 
+}
 
 VS_TEXTURE_OUT VS_UI_Textured(VS_TEXTURE_IN input)
-{ 
-	VS_TEXTURE_OUT outRes; 
+{
+	VS_TEXTURE_OUT outRes;
 	outRes.position = mul(float4(input.position, 1.0f), gmtxWorld);
 	outRes.uv = input.uv;
 	return outRes;
@@ -245,12 +257,12 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 		cColor = gtxtHpSpGauge.Sample(gssWrap, input.uv);
 	}
 	if (gnTexturesMask & 0x04)
-	{ 
+	{
 		cColor = gtxtHpSpPer.Sample(gssWrap, input.uv);
 	}
 	if (gnTexturesMask & 0x08)
 	{
-		 
+
 	}
 	if (gnTexturesMask & 0x10)
 	{
@@ -282,10 +294,10 @@ struct VS_MOUT
 };
 
 VS_MOUT VSMinimap(VS_MIN input)
-{ 
+{
 	VS_MOUT outRes;
 	outRes.position = mul(float4(input.position, 1.0f), gmtxWorld);
-	outRes.uv = input.uv; 
+	outRes.uv = input.uv;
 	return outRes;
 }
 
@@ -299,7 +311,7 @@ float4 PSMinimap(VS_MOUT input) : SV_TARGET
 	if (gnTexturesMask & 0x02)
 	{
 		cColor = gtxtMap.Sample(gssWrap, input.uv);
-	} 
+	}
 	return cColor;
 }
 
@@ -460,15 +472,32 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	 
+
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtTerrain.Sample(gssWrap, input.uv0);
+		cColor = gtxtForest.Sample(gssWrap, input.uv0);
 	}
-	else
+	if (gnTexturesMask & 0x02)
 	{
-		cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
+		cColor = gtxtDryForest.Sample(gssWrap, input.uv0);
 	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gtxtDesert.Sample(gssWrap, input.uv0);
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtDryDesert.Sample(gssWrap, input.uv0);
+	}
+	if (gnTexturesMask & 0x10)
+	{
+		cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0);
+	}
+
+	//else
+	//{
+	//	cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	//}
 
 	return (cColor);
 }
@@ -517,7 +546,7 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtTerrain.Sample(gssClamp, input.uv);
+		cColor = gtxtForest.Sample(gssClamp, input.uv);
 	}
 
 	if (gnTexturesMask & 0x02)

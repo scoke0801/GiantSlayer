@@ -20,7 +20,7 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		AddObject(pCubeMeshTex, pShader, 0x01);
 	}
 // 난간 생성
-	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
+	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,	
 		XMFLOAT3(-250.0f, 250.0f+12.5f, 0.0f),
 		50, 25, 1000);
 	//m_Meshes.push_back(pCubeMeshTex); 

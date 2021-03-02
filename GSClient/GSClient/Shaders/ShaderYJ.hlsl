@@ -55,17 +55,7 @@ Texture2D gtxtGrass_Depth : register(t22);
 Texture2D gtxtTree : register(t23);
 
 Texture2D gtxtMap : register(t24);
-
-//"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
-//		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
-//		"Box", "Wood", "Wall", "Door",
-//		"HP_SP","HP_SP_PER",
-//		"Minimap",
-//		"WeaponUI",
-//		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree"
-
-
-
+ 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
 {
@@ -235,7 +225,7 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 {
 	// gtxtBillboardTextures[input.index].Sample(gssClamp, input.uv); 
 	// 위 형식은 빌보드 이미지를 배열형식으로 불러오는 경우에 사용가능
-	float4 cColor = gtxtBox.Sample(gssClamp, input.uv);
+	float4 cColor;
 	if (gnTexturesMask & 0x01)
 	{
         cColor = gtxtFlower_Red.Sample(gssClamp, input.uv);

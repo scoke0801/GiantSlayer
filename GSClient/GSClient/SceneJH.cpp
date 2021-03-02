@@ -186,8 +186,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Objects.reserve(30);
 	   
 	CShader* pSkyBoxShader = new CSkyBoxShader();
-	pSkyBoxShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTextured");
-	pSkyBoxShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTextured");
+	pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTextured");
+	pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTextured");
 	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	//pSkyBoxShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
@@ -196,10 +196,10 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 #pragma region Create Terrain
 	CShader* pTerrainShader = new CTerrainTessellationShader();
-	pTerrainShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTerrainTessellation");
-	pTerrainShader->CreatePixelShader( L"Shaders\\JHTestShader.hlsl", "PSTerrainTessellation");
-	pTerrainShader->CreateDomainShader(L"Shaders\\JHTestShader.hlsl", "DSTerrainTessellation");
-	pTerrainShader->CreateHullShader(  L"Shaders\\JHTestShader.hlsl", "HSTerrainTessellation");
+	pTerrainShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTerrainTessellation");
+	pTerrainShader->CreatePixelShader( L"Shaders\\ShaderJH.hlsl", "PSTerrainTessellation");
+	pTerrainShader->CreateDomainShader(L"Shaders\\ShaderJH.hlsl", "DSTerrainTessellation");
+	pTerrainShader->CreateHullShader(  L"Shaders\\ShaderJH.hlsl", "HSTerrainTessellation");
 	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
 	pTerrainShader->CreateTerrainShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	 
@@ -207,15 +207,15 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 #pragma endregion   
 
 	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSBridgeLight");
+	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSBridgeLight");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature); 
 	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 
 	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTexturedLighting");
+	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -224,8 +224,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	/// FBX Model
 	CShader* pFBXShader = new CShader();
-	pFBXShader->CreateVertexShader(L"Shaders\\JHTestShader.hlsl", "VSTexturedLighting");
-	pFBXShader->CreatePixelShader(L"Shaders\\JHTestShader.hlsl", "PSTexturedLighting");
+	pFBXShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
+	pFBXShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
 	pFBXShader->CreateInputLayout(ShaderTypes::Textured);
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -275,24 +275,24 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	const char* keyNames[] = 
-	{ 
-		"Terrain", "Sky_Front","Sky_Front",
-		"Sky_Back", "Sky_Left", "Sky_Right",
-		"Sky_Top","Sky_Bottom", "Box",
-		"Wood", "Wall", "Door",
+	const char* keyNames[] =
+	{
+		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
+		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
+		"Box","Wood", "Wall", "Door",
 		"HP_SP","Minimap","WeaponUI",
-		"HP_SP_PER"
+		"HP_SP_PER",
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree"
 	};
 
-	const wchar_t* address[] = 
-	{ 
-		L"resources/OBJ/TestTerrain6.dds", L"resources/skybox/front.dds", L"resources/skybox/front.dds",
-		L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",
-		L"resources/skybox/top.dds", L"resources/skybox/bottom.dds", L"resources/OBJ/Box.dds",
-		L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
-		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",
-		L"resources/UI/SmallICons.dds"
+	const wchar_t* address[] =
+	{
+		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",
+		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds",
+		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
+		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
+		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
+		L"resources/Billboard/Tree02.dds"
 	};
 	 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -317,14 +317,14 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	
 	const char* keyNames[] =
 	{
-		"Terrain",
+		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
 		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
-		"Box", "Wood",
-		"Wall", "Door",
+		"Box", "Wood", "Wall", "Door",
 		"HP_SP","HP_SP_PER",
 		"Minimap",
-		"WeaponUI"
-	};  
+		"WeaponUI",
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree"
+	};
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; 
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -870,8 +870,8 @@ void CSceneJH::BUildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VS_UI_Textured");
-	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PS_UI_Textured");
+	pShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VS_UI_Textured");
+	pShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PS_UI_Textured");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateUIShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
@@ -917,8 +917,8 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	m_UIs.push_back(pUI);
 
 	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/JHTestShader.hlsl", "VSMinimap");  
-	pShader->CreatePixelShader(L"Shaders/JHTestShader.hlsl", "PSMinimap");
+	pShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSMinimap");  
+	pShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSMinimap");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature); 
 
