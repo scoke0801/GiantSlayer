@@ -53,8 +53,9 @@ Texture2D gtxtFlower_White : register(t20);
 Texture2D gtxtGrass_Width : register(t21);
 Texture2D gtxtGrass_Depth : register(t22);
 Texture2D gtxtTree : register(t23);
+Texture2D gtxtCactus : register(t24);
 
-Texture2D gtxtMap : register(t24);
+Texture2D gtxtMap : register(t25);
  
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -203,16 +204,19 @@ void GSBillboard(point VS_BILLBOARD_INPUT input[1], inout TriangleStream<GS_BILL
 	float fHalfHeight = input[0].size.y * 0.5f;
 
 	float4 pf4Vertices[4];
-	pf4Vertices[0] = float4(input[0].center.xyz + (fHalfWidth * f3Right) - (fHalfHeight * f3Up), 1.0f);
-	pf4Vertices[1] = float4(input[0].center.xyz + (fHalfWidth * f3Right) + (fHalfHeight * f3Up), 1.0f);
-	pf4Vertices[2] = float4(input[0].center.xyz - (fHalfWidth * f3Right) - (fHalfHeight * f3Up), 1.0f);
-	pf4Vertices[3] = float4(input[0].center.xyz - (fHalfWidth * f3Right) + (fHalfHeight * f3Up), 1.0f);
+	pf4Vertices[0] = float4(input[0].center.xyz + (fHalfWidth * f3Right)*gmtxWorld._11 - (fHalfHeight * f3Up)*gmtxWorld._22, 1.0f);
+	pf4Vertices[1] = float4(input[0].center.xyz + (fHalfWidth * f3Right)*gmtxWorld._11 + (fHalfHeight * f3Up)*gmtxWorld._22, 1.0f);
+	pf4Vertices[2] = float4(input[0].center.xyz - (fHalfWidth * f3Right)*gmtxWorld._11 - (fHalfHeight * f3Up)*gmtxWorld._22, 1.0f);
+	pf4Vertices[3] = float4(input[0].center.xyz - (fHalfWidth * f3Right)*gmtxWorld._11 + (fHalfHeight * f3Up)*gmtxWorld._22, 1.0f);
 
 	GS_BILLBOARD_GEOMETRY_OUTPUT output;
 	for (int i = 0; i < 4; i++)
 	{
 		output.positionW = pf4Vertices[i].xyz;
-		output.position = mul(mul(pf4Vertices[i], gmtxView), gmtxProjection);
+		
+        //outRes.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+        output.position = mul(mul(pf4Vertices[i], gmtxView), gmtxProjection);
+        //output.position = mul(mul(mul(pf4Vertices[i], gmtxWorld), gmtxView), gmtxProjection);
 		output.normal = f3Look;
 		output.uv = pf2UVs[i];
 		output.index = input[0].index;
@@ -226,10 +230,32 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 	// gtxtBillboardTextures[input.index].Sample(gssClamp, input.uv); 
 	// 위 형식은 빌보드 이미지를 배열형식으로 불러오는 경우에 사용가능
 	float4 cColor;
+	
 	if (gnTexturesMask & 0x01)
 	{
         cColor = gtxtFlower_Red.Sample(gssClamp, input.uv);
     }
+    if (gnTexturesMask & 0x02)
+    {
+        cColor = gtxtFlower_White.Sample(gssClamp, input.uv);
+    }
+    if (gnTexturesMask & 0x04)
+    {
+        cColor = gtxtGrass_Width.Sample(gssClamp, input.uv);
+    }
+    if (gnTexturesMask & 0x08)
+    {
+        cColor = gtxtGrass_Depth.Sample(gssClamp, input.uv);
+    }
+    if (gnTexturesMask & 0x10)
+    {
+        cColor = gtxtTree.Sample(gssClamp, input.uv);
+    }
+    if (gnTexturesMask & 0x20)
+    {
+        cColor = gtxtCactus.Sample(gssClamp, input.uv);
+    }
+	
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
 
 	return(cColor);

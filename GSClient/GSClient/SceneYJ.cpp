@@ -198,19 +198,94 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pBillboardShader->CreateGeometryShader(L"Shaders\\ShaderYJ.hlsl", "GSBillboard");
 	pBillboardShader->CreateInputLayout(ShaderTypes::Billboard);
 	pBillboardShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);
-	 
-	for (int i = 0; i < 1000; i++)
+#pragma region Create Tree
+	// 지나가지 못하는 첫번째 지형쪽의 나무 빌보드
+	for (int j = 0; j < 4; j++)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+			CGameObject* pBillboardObject = new CGameObject();
+
+			pBillboardObject->SetMesh(pBillboardMesh);
+			pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+			
+			if (j == 0)
+			{
+				pBillboardObject->SetPosition({ 4300 + float((j * 500)), 1400, 1000 + float((i * 950)) });
+			}
+			if (j == 1)
+			{
+				pBillboardObject->SetPosition({ 4300 + float((j * 500)), 1400, 500 + float((i * 950)) });
+			}
+			if (j == 2)
+			{
+				pBillboardObject->SetPosition({ 6300 + float((j * 500)), 1400, 1000 + float((i * 950)) });
+			}
+			if (j == 3)
+			{
+				pBillboardObject->SetPosition({ 6300 + float((j * 500)), 1400, 500 + float((i * 950)) });
+			}
+			
+			pBillboardObject->SetTextureIndex(0x010);
+			pBillboardObject->SetShader(pBillboardShader);
+			m_BillboardObjects.push_back(std::move(pBillboardObject));
+		}
+	}
+	for (int i = 0; i < 8; i++)
 	{
 		CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
 		CGameObject* pBillboardObject = new CGameObject();
+
 		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->SetPosition({ 4000+float((i*500)), 100, 500 });
-		pBillboardObject->SetTextureIndex(0x01);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+		pBillboardObject->SetPosition({ 4300 + float(((500*i))), 1400, 1000 + float((14750)) });
+
+		pBillboardObject->SetTextureIndex(0x010);
 		pBillboardObject->SetShader(pBillboardShader);
 		m_BillboardObjects.push_back(std::move(pBillboardObject));
 	}
+#pragma endregion 
+#pragma region Create Cactus
+	for (int j = 0; j < 2; j++)
+	{
+		for (int i = 4; i < 20; i+=2)
+		{
+			CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+			CGameObject* pBillboardObject = new CGameObject();
 
-#pragma endBillboard
+			pBillboardObject->SetMesh(pBillboardMesh);
+			pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+			if (j == 0)
+			{
+				pBillboardObject->SetPosition({ 13750 + float((j * 500)), -600, 1000 + float((i * 950)) });
+			}
+			if (j == 1)
+			{
+				pBillboardObject->SetPosition({ 11750 + float((j * 500)), -600, 500 + float((i * 950)) });
+			}
+			
+
+			pBillboardObject->SetTextureIndex(0x020);
+			pBillboardObject->SetShader(pBillboardShader);
+			m_BillboardObjects.push_back(std::move(pBillboardObject));
+		}
+	}
+	
+		CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+		CGameObject* pBillboardObject = new CGameObject();
+
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+		pBillboardObject->SetPosition({ 13000 , -600, 4250 });
+
+		pBillboardObject->SetTextureIndex(0x020);
+		pBillboardObject->SetShader(pBillboardShader);
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	
+#pragma endregion
+#pragma endregion
 	CShader* pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 	pShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSBridgeLight");
@@ -285,7 +360,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Box","Wood", "Wall", "Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus"
 	};
 
 	const wchar_t* address[] =
@@ -295,7 +370,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
-		L"resources/Billboard/Tree02.dds"
+		L"resources/Billboard/Tree02.dds",L"resources/Billboard/Cactus.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -326,7 +401,7 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
