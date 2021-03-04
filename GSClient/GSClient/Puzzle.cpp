@@ -44,7 +44,7 @@ CPuzzle::CPuzzle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 			pObject->SetShader(pShader);
 			pObject->SetPosition(XMFLOAT3(-100.0f + 500.0f * i + 300.0f, 250.0f, 0.0f + 450.0f * j));
 			pObject->Rotate(XMFLOAT3(0, 1, 0), 90);
-			m_Objects.push_back(std::move(pObject));
+			m_Objects.push_back(std::move(pObject)); 
 		}
 	}
 	
