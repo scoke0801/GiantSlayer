@@ -14,41 +14,40 @@ CPuzzle::CPuzzle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	}
 	if (pMesh != nullptr) SetMesh(pMesh);
 
-	pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 150, 50, 50);
+	CMesh* pXMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 150, 50, 50);
+	CMesh* pYMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 250, 50, 50);
+	for (int i = 1; i <= 3; ++i)
+	{
+		for (int j = 1; j <= 3; ++j)
+		{
+			CGameObject* pObject = new CGameObject();
+			pObject->SetMesh(pXMesh);
+			pObject->SetShader(pShader);
+			pObject->SetPosition(XMFLOAT3(500.0f * i + 300.0f, 250.0f, 100.0f + 450.0f * j));
+			m_Objects.push_back(std::move(pObject));
 
-	CGameObject* pObject = new CGameObject();
-	pObject->SetMesh(pMesh);
-	pObject->SetShader(pShader);
-	pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, 100.0f));
-	m_Objects.push_back(std::move(pObject));
+			pObject = new CGameObject();
+			pObject->SetMesh(pXMesh);
+			pObject->SetShader(pShader);
+			pObject->SetPosition(XMFLOAT3(500.0f * i + 300.0f, 250.0f, -100.0f + 450.0f * j));
+			m_Objects.push_back(std::move(pObject));
+			 
+			pObject = new CGameObject();
+			pObject->SetMesh(pYMesh);
+			pObject->SetShader(pShader);
+			pObject->SetPosition(XMFLOAT3(100.0f + 500.0f * i + 300.0f, 250.0f, 0.0f + 450.0f * j));
+			pObject->Rotate(XMFLOAT3(0, 1, 0), 90);
+			m_Objects.push_back(std::move(pObject));
 
-	pObject = new CGameObject();
-	pObject->SetMesh(pMesh);
-	pObject->SetShader(pShader);	
-	pObject->SetPosition(XMFLOAT3(0.0f, 0.0f, -100.0f));
-	m_Objects.push_back(std::move(pObject));
-
-	pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 250, 50, 50);
-	pObject = new CGameObject();
-	pObject->SetMesh(pMesh);
-	pObject->SetShader(pShader); 
-	pObject->SetPosition(XMFLOAT3(100.0f, 0.0f, 0.0f));
-	pObject->Rotate(XMFLOAT3(0, 1, 0), 90);
-	m_Objects.push_back(std::move(pObject));
-
-	pObject = new CGameObject();
-	pObject->SetMesh(pMesh);
-	pObject->SetShader(pShader);
-	pObject->SetPosition(XMFLOAT3(-100.0f, 0.0f, 0.0f));
-	pObject->Rotate(XMFLOAT3(0, 1, 0), 90);
-	m_Objects.push_back(std::move(pObject));
-
-	pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 150, 100, 150);
-	pObject = new CGameObject();
-	pObject->SetMesh(pMesh);
-	pObject->SetShader(pShader); 
-	pObject->SetTextureIndex(0x02);
-	m_Objects.push_back(std::move(pObject));
+			pObject = new CGameObject();
+			pObject->SetMesh(pYMesh);
+			pObject->SetShader(pShader);
+			pObject->SetPosition(XMFLOAT3(-100.0f + 500.0f * i + 300.0f, 250.0f, 0.0f + 450.0f * j));
+			pObject->Rotate(XMFLOAT3(0, 1, 0), 90);
+			m_Objects.push_back(std::move(pObject));
+		}
+	}
+	
 }
 
 CPuzzle::~CPuzzle()
@@ -71,3 +70,72 @@ void CPuzzle::SetPosition(XMFLOAT3 pos)
 	}
 }
 
+CPlate::CPlate(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
+{
+	CMesh* pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 2500, 240, 1800);
+	CGameObject* pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetShader(pShader);
+	pObject->SetPosition({ 1250.0f, 120.f, 900.0f });
+	//pObject->SetTextureIndex(0x02);
+	m_Objects.push_back(std::move(pObject));
+
+	pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 700, 80, 300);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetShader(pShader);
+	pObject->SetPosition(XMFLOAT3(1250.0f, 40.0f, -150.0f));
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetShader(pShader);
+	pObject->SetPosition(XMFLOAT3(1250.0f, 40.0f, 150.0f +1800.0f));
+	m_Objects.push_back(std::move(pObject));
+
+	pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 700, 80, 200);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetShader(pShader);
+	pObject->SetPosition(XMFLOAT3(1250.0f, 120.0f, -100.0f));
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetShader(pShader);
+	pObject->SetPosition(XMFLOAT3(1250.0f, 120.0f, 100.0f + 1800.0f));
+	m_Objects.push_back(std::move(pObject));
+
+	pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 700, 80, 100);
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetShader(pShader);
+	pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f, -50.0f));
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetShader(pShader);
+	pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f, 50.0f + 1800.0f));
+	m_Objects.push_back(std::move(pObject));
+}
+
+CPlate::~CPlate()
+{
+}
+
+void CPlate::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	for (auto pObj : m_Objects)
+	{
+		pObj->Draw(pd3dCommandList, pCamera);
+	}
+}
+
+void CPlate::SetPosition(XMFLOAT3 pos)
+{
+	for (auto pObj : m_Objects)
+	{
+		pObj->SetPositionPlus(pos);
+	}
+}

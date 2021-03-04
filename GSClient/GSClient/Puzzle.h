@@ -8,6 +8,22 @@ enum class PuzzleType
     Mirror, 
 };
 
+// Puzzle Plate
+class CPlate :public CGameObject 
+{
+private:
+    vector<CGameObject*> m_Objects;
+public:
+    CPlate(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
+    ~CPlate();
+
+public:
+    void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+
+public:
+    void SetPosition(XMFLOAT3 pos) override;
+};
+
 class CPuzzle : public CGameObject
 {
 private:
