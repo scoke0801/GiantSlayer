@@ -106,16 +106,19 @@
       <Filter>FBXLoader</Filter>
     </ClCompile>
     <ClCompile Include="Bridge.cpp">
-      <Filter>GameObject\MapObjects</Filter>
-    </ClCompile>
-    <ClCompile Include="Wall.cpp">
-      <Filter>GameObject</Filter>
+      <Filter>GameObject\Bridge</Filter>
     </ClCompile>
     <ClCompile Include="Communicates.cpp">
       <Filter>Communicate</Filter>
     </ClCompile>
     <ClCompile Include="SceneYJ.cpp">
       <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Puzzle.cpp">
+      <Filter>GameObject\Puzzle</Filter>
+    </ClCompile>
+    <ClCompile Include="Wall.cpp">
+      <Filter>GameObject\Wall</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -216,10 +219,7 @@
       <Filter>Light</Filter>
     </ClInclude>
     <ClInclude Include="Bridge.h">
-      <Filter>GameObject\MapObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="Wall.h">
-      <Filter>GameObject</Filter>
+      <Filter>GameObject\Bridge</Filter>
     </ClInclude>
     <ClInclude Include="Font.h" />
     <ClInclude Include="FrameResource.h" />
@@ -228,6 +228,12 @@
     </ClInclude>
     <ClInclude Include="SceneYJ.h">
       <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Puzzle.h">
+      <Filter>GameObject\Puzzle</Filter>
+    </ClInclude>
+    <ClInclude Include="Wall.h">
+      <Filter>GameObject\Wall</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -308,11 +314,17 @@
     <Filter Include="Light">
       <UniqueIdentifier>{76bf6ead-7ce3-40d6-9316-71c6d9f7879e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameObject\MapObjects">
-      <UniqueIdentifier>{38ed0ea0-17b1-400c-8353-3f568979694b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Communicate">
       <UniqueIdentifier>{14b67835-0384-4268-979f-06d1d744c3b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Bridge">
+      <UniqueIdentifier>{38ed0ea0-17b1-400c-8353-3f568979694b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Puzzle">
+      <UniqueIdentifier>{de94e817-e872-4596-bc31-ad96d0f8396f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Wall">
+      <UniqueIdentifier>{c3b83253-b8e3-41aa-9bca-9c9d5c2daf35}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
