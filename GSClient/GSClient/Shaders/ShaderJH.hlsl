@@ -53,8 +53,9 @@ Texture2D gtxtFlower_White : register(t20);
 Texture2D gtxtGrass_Width : register(t21);
 Texture2D gtxtGrass_Depth : register(t22);
 Texture2D gtxtTree : register(t23);
+Texture2D gtxtCactus : register(t24);
 
-Texture2D gtxtMap : register(t24);
+Texture2D gtxtMap : register(t25);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -229,6 +230,26 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & 0x01)
 	{
 		cColor = gtxtFlower_Red.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtFlower_White.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gtxtGrass_Width.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtGrass_Depth.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x10)
+	{
+		cColor = gtxtTree.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x20)
+	{
+		cColor = gtxtCactus.Sample(gssClamp, input.uv);
 	}
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
 

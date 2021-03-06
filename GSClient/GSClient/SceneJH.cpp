@@ -42,6 +42,7 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	BuildLights(pd3dDevice, pd3dCommandList); 
 	BuildSceneFrameData(pd3dDevice, pd3dCommandList);
 	BuildObjects(pd3dDevice, pd3dCommandList);
+	BuildBilboardObjects(pd3dDevice, pd3dCommandList);
 	BuildUIs(pd3dDevice, pd3dCommandList);
 }
 
@@ -235,20 +236,12 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	CGameObject* pObject = new CGameObject();
 	pObject->SetMesh(fbxMesh);
-	pObject->SetPosition({ 500,  250, 3350 });
+	pObject->SetPosition({ 2000,  650, 12550 });
 	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(pShader);
 	pObject->SetTextureIndex(0x80);
-	pObject->Scale(5, 5, 5);
-	m_Objects.push_back(std::move(pObject));
-
-	pObject = new CGameObject();
-	pObject->SetMesh(fbxMesh);
-	pObject->SetPosition({ 500,  250, 3450 });
-	pObject->SetTextureIndex(0x01);
-	pObject->SetShader(pShader);
-	pObject->SetTextureIndex(0x80); 
-	m_Objects.push_back(std::move(pObject));
+	pObject->Scale(15, 15, 15);
+	m_Objects.push_back(std::move(pObject)); 
 
 	CSphereMesh* pSphereMesh = new CSphereMesh(pd3dDevice, pd3dCommandList,
 		30, 20, 20);
@@ -286,7 +279,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Box","Wood", "Wall", "Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus"
 	};
 
 	const wchar_t* address[] =
@@ -296,7 +289,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
-		L"resources/Billboard/Tree02.dds"
+		L"resources/Billboard/Tree02.dds", L"resources/Billboard/Cactus.dds"
 	};
 	 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -327,7 +320,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus"
 	};
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; 
@@ -416,8 +409,12 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
-	 
-	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
+
+	for (auto pBillboardObject : m_BillboardObjects)
+	{
+		pBillboardObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+
 	for (auto pObject : m_Objects)
 	{
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
@@ -482,6 +479,10 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	m_Skybox->Draw(pd3dCommandList, m_MinimapCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
+	for (auto pBillboardObject : m_BillboardObjects)
+	{
+		pBillboardObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
 	for (auto pObject : m_Objects)
 	{
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
@@ -974,6 +975,101 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	pUI->SetShader(pShader); 
 	pUI->Rotate(180);
 	m_UIs.push_back(pUI);  
+}
+
+void CSceneJH::BuildBilboardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{ 
+	CShader* pBillboardShader = new CBillboardShader();
+	pBillboardShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSBillboard");
+	pBillboardShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSBillboard");
+	pBillboardShader->CreateGeometryShader(L"Shaders\\ShaderYJ.hlsl", "GSBillboard");
+	pBillboardShader->CreateInputLayout(ShaderTypes::Billboard);
+	pBillboardShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);
+#pragma region Create Tree
+	// 지나가지 못하는 첫번째 지형쪽의 나무 빌보드
+	for (int j = 0; j < 4; j++)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+			CGameObject* pBillboardObject = new CGameObject();
+
+			pBillboardObject->SetMesh(pBillboardMesh);
+			pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+			if (j == 0)
+			{
+				pBillboardObject->SetPosition({ 4300 + float((j * 500)), 1400, 1000 + float((i * 950)) });
+			}
+			if (j == 1)
+			{
+				pBillboardObject->SetPosition({ 4300 + float((j * 500)), 1400, 500 + float((i * 950)) });
+			}
+			if (j == 2)
+			{
+				pBillboardObject->SetPosition({ 6300 + float((j * 500)), 1400, 1000 + float((i * 950)) });
+			}
+			if (j == 3)
+			{
+				pBillboardObject->SetPosition({ 6300 + float((j * 500)), 1400, 500 + float((i * 950)) });
+			}
+
+			pBillboardObject->SetTextureIndex(0x010);
+			pBillboardObject->SetShader(pBillboardShader);
+			m_BillboardObjects.push_back(std::move(pBillboardObject));
+		}
+	}
+	for (int i = 0; i < 8; i++)
+	{
+		CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+		CGameObject* pBillboardObject = new CGameObject();
+
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+		pBillboardObject->SetPosition({ 4300 + float(((500 * i))), 1400, 1000 + float((14750)) });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(pBillboardShader);
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+#pragma endregion 
+#pragma region Create Cactus
+	for (int j = 0; j < 2; j++)
+	{
+		for (int i = 4; i < 20; i += 2)
+		{
+			CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+			CGameObject* pBillboardObject = new CGameObject();
+
+			pBillboardObject->SetMesh(pBillboardMesh);
+			pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+			if (j == 0)
+			{
+				pBillboardObject->SetPosition({ 13750 + float((j * 500)), -600, 1000 + float((i * 950)) });
+			}
+			if (j == 1)
+			{
+				pBillboardObject->SetPosition({ 11750 + float((j * 500)), -600, 500 + float((i * 950)) });
+			}
+			 
+			pBillboardObject->SetTextureIndex(0x020);
+			pBillboardObject->SetShader(pBillboardShader);
+			m_BillboardObjects.push_back(std::move(pBillboardObject));
+		}
+	}
+
+	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+	CGameObject* pBillboardObject = new CGameObject();
+
+	pBillboardObject->SetMesh(pBillboardMesh);
+	pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+	pBillboardObject->SetPosition({ 13000 , -600, 4250 });
+
+	pBillboardObject->SetTextureIndex(0x020);
+	pBillboardObject->SetShader(pBillboardShader);
+	m_BillboardObjects.push_back(std::move(pBillboardObject)); 
+#pragma endregion
 }
 
 void CSceneJH::BuildMinimapResource(ID3D12Device* pd3dDevice)

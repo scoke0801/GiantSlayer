@@ -14,6 +14,7 @@ private:
 
 protected:
 	vector<CGameObject*>		m_Objects; 
+	vector<CGameObject*>		m_BillboardObjects;
 
 	CPlayer*					m_Player = nullptr;
 	vector<UI*>					m_UIs;
@@ -106,6 +107,7 @@ private:
 	void BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildBilboardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 };
