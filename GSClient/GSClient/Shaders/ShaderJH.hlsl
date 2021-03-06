@@ -164,8 +164,7 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 }
 
 /////////////////////////////////////////////////////////////////
-/////
-
+///// 
 struct VS_BILLBOARD_INPUT
 {
 	float3 center : POSITION;
@@ -202,7 +201,8 @@ void GSBillboard(point VS_BILLBOARD_INPUT input[1], inout TriangleStream<GS_BILL
 	float fHalfWidth = input[0].size.x * 0.5f;
 	float fHalfHeight = input[0].size.y * 0.5f;
 
-	float4 pf4Vertices[4];
+	float4 pf4Vertices[4]; 
+	
 	pf4Vertices[0] = float4(input[0].center.xyz + (fHalfWidth * f3Right) - (fHalfHeight * f3Up), 1.0f);
 	pf4Vertices[1] = float4(input[0].center.xyz + (fHalfWidth * f3Right) + (fHalfHeight * f3Up), 1.0f);
 	pf4Vertices[2] = float4(input[0].center.xyz - (fHalfWidth * f3Right) - (fHalfHeight * f3Up), 1.0f);
@@ -606,44 +606,44 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtWood.Sample(gssClamp, input.uv);
+		cColor = gtxtWood.Sample(gssClamp, uvw);
 	}
 
 	if (gnTexturesMask & 0x02)
 	{
-		cColor = gtxtBox.Sample(gssClamp, input.uv);
+		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
 	if (gnTexturesMask & 0x04)
 	{
-		cColor = gtxtBox.Sample(gssClamp, input.uv);
+		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
 
 	if (gnTexturesMask & 0x08)
 	{
-		cColor = gtxtBox.Sample(gssClamp, input.uv);
+		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
 
 	if (gnTexturesMask & 0x10)
 	{
-		cColor = gSkyBox_Left.Sample(gssClamp, input.uv);
+		cColor = gSkyBox_Left.Sample(gssClamp, uvw);
 	}
 
 	if (gnTexturesMask & 0x20)
 	{
-		cColor = gSkyBox_Top.Sample(gssClamp, input.uv);
+		cColor = gSkyBox_Top.Sample(gssClamp, uvw);
 	}
 
 	if (gnTexturesMask & 0x40)
 	{
-		cColor = gSkyBox_Bottom.Sample(gssClamp, input.uv);
+		cColor = gSkyBox_Bottom.Sample(gssClamp, uvw);
 	}
 	if (gnTexturesMask & 0x80)
 	{
-		cColor = gtxtBox.Sample(gssWrap, input.uv);
+		cColor = gtxtBox.Sample(gssWrap, uvw);
 	}
 	if (gnTexturesMask & 0x100)
 	{
-		cColor = gtxtWood.Sample(gssWrap, input.uv);
+		cColor = gtxtWood.Sample(gssWrap, uvw);
 	}
 
 	input.normalW = normalize(input.normalW);
@@ -652,3 +652,21 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	return(cColor * cIllumination);
 }
 
+float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor = gtxtWood.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtWood.Sample(gssClamp, uvw);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtBox.Sample(gssClamp, uvw);
+	}
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return(cColor * cIllumination);
+}

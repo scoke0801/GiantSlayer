@@ -10,6 +10,7 @@
 #include "Wall.h"
 #include "Communicates.h"
 #include "Enemy.h"
+#include "Puzzle.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
@@ -220,8 +221,10 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	BuildDoorWall(pd3dDevice, pd3dCommandList, pShader);
-	BUildEnemys(pd3dDevice, pd3dCommandList);
+	BuildEnemys(pd3dDevice, pd3dCommandList);
+	BuildPuzzles(pd3dDevice, pd3dCommandList);
 
+// Objects Test Setings
 	/// FBX Model
 	CShader* pFBXShader = new CShader();
 	pFBXShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
@@ -232,7 +235,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	CGameObject* pObject = new CGameObject();
 	pObject->SetMesh(fbxMesh);
-	pObject->SetPosition({ 500,  250, 1650 });
+	pObject->SetPosition({ 500,  250, 3350 });
 	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(pShader);
 	pObject->SetTextureIndex(0x80);
@@ -241,7 +244,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	pObject = new CGameObject();
 	pObject->SetMesh(fbxMesh);
-	pObject->SetPosition({ 500,  250, 1750 });
+	pObject->SetPosition({ 500,  250, 3450 });
 	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(pShader);
 	pObject->SetTextureIndex(0x80); 
@@ -251,21 +254,22 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		30, 20, 20);
 	pObject = new CGameObject();
 	pObject->SetMesh(pSphereMesh);
-	pObject->SetPosition({ 500,  250 + 82.5, 1401 });
+	pObject->SetPosition({ 500,  250 + 82.5, 3300 });
 	pObject->SetTextureIndex(0x80);
 	pObject->SetShader(pShader);
 	m_Objects.push_back(std::move(pObject));
 
+///////////////////////////////////////////////////////////////////////////////	 
 	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 
-	m_CurrentCamera->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+	m_CurrentCamera->SetOffset(XMFLOAT3(0.0f, 450.0f, -750.0f));
 	m_CurrentCamera->SetTarget(m_Player);
 
 	m_Player->SetShader(pFBXShader); 
 	m_Player->Scale(20, 20, 20);  
 	m_Player->SetObjectName(OBJ_NAME::Player); 
-	m_Player->SetPosition({ 500,  0, 550 });
+	m_Player->SetPosition({ 750,  0, 1850 });
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
 	m_Player->SetMesh(fbxMesh);  
@@ -842,29 +846,65 @@ void CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
 	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
-	pBridge->SetPosition({ 2500,  01,  1500 });
+	pBridge->SetPosition({ 2000,  01,  5500 });
 	m_Objects.push_back(pBridge);
 	 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge); 
-	pBridge->SetPosition({ 2500,  01,  2500 });
-	m_Objects.push_back(pBridge);
-	 
+	pBridge->SetPosition({ 2000,  01,  6500 });
+	m_Objects.push_back(pBridge); 
 }
 
 void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	CShader* pShader)
 {
-	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5000, 1000, 500, pShader);
-	pDoorWall->SetPosition({ 0,0, 5000 });
+	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 1000, 500, pShader);
+	pDoorWall->SetPosition({ 0,0, 7500 });
 	m_Objects.push_back(pDoorWall); 
 }
 
-void CSceneJH::BUildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObject* pEnemy = new CEnemy();
+}
+
+void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CShader* pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSPuzzle");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+
+	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, pShader);
+	pPuzzlePlate->SetPosition({ 600.0f,  0.0f, 1500.0f });
+	pPuzzlePlate->SetShader(pShader);
+	m_Objects.push_back(std::move(pPuzzlePlate));
+
+	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, pShader);
+	pObject->SetPosition({ 500.0f,  0.0f, 1500.0f });
+	pObject->SetShader(pShader);
+	m_Objects.push_back(std::move(pObject)); 
+
+	pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+
+	for (int i = 0; i < 2; ++i)
+	{
+		for (int j = 0; j < 5; ++j)
+		{
+			pObject = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
+			pObject->SetPosition({ 900.0f + i * 1800.0f,  300 , 1800.0f + j * 300.0f });
+			pObject->SetTextureIndex(0x80);
+			pObject->SetShader(pShader);
+			m_Objects.push_back(std::move(pObject));
+		}
+	} 
 }
 
 void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
