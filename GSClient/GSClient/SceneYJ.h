@@ -34,6 +34,9 @@ private:
 	POINT						m_LastMousePos;
 
 	ID3D12DescriptorHeap* m_pd3dSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap* m_pd3dDsvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap* m_pd3dRtvDescriptorHeap = nullptr;
+
 
 private:	// about Meterail
 	MATERIALS* m_pMaterials = NULL;

@@ -11,6 +11,7 @@ enum class ShaderTypes
 	Textured,
 	Billboard,
 	Terrain,
+	DynamicCube,
 	Count
 };
 
@@ -200,4 +201,14 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+class CDynamicCubeMappingShader : public CShader
+{
+public:
+	CDynamicCubeMappingShader();
+	virtual ~CDynamicCubeMappingShader();
 };

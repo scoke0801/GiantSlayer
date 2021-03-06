@@ -56,6 +56,8 @@ Texture2D gtxtTree : register(t23);
 Texture2D gtxtCactus : register(t24);
 
 Texture2D gtxtMap : register(t25);
+
+TextureCube gtxtCubeMap : register(t26);
  
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -634,7 +636,6 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	{
 		cColor = gtxtWood.Sample(gssClamp, input.uv);
 	}
-
 	if (gnTexturesMask & 0x02)
 	{
 		cColor = gtxtBox.Sample(gssClamp, input.uv);
@@ -643,22 +644,18 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	{
 		cColor = gtxtBox.Sample(gssClamp, input.uv);
 	}
-
 	if (gnTexturesMask & 0x08)
 	{
 		cColor = gtxtBox.Sample(gssClamp, input.uv);
 	}
-
 	if (gnTexturesMask & 0x10)
 	{
 		cColor = gSkyBox_Left.Sample(gssClamp, input.uv);
 	}
-
 	if (gnTexturesMask & 0x20)
 	{
 		cColor = gSkyBox_Top.Sample(gssClamp, input.uv);
 	}
-
 	if (gnTexturesMask & 0x40)
 	{
 		cColor = gSkyBox_Bottom.Sample(gssClamp, input.uv);
@@ -678,3 +675,43 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	return(cColor * cIllumination);
 }
 
+/// DynamicCube
+struct VS_LIGHTING_INPUT
+{
+    float3 position : POSITION;
+    float3 normal : NORMAL;
+};
+
+struct VS_LIGHTING_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float3 positionW : POSITION;
+    float3 normalW : NORMAL;
+};
+
+VS_LIGHTING_OUTPUT VSCubeMapping(VS_LIGHTING_INPUT input)
+{
+    VS_LIGHTING_OUTPUT output;
+
+    output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
+    output.normalW = mul(float4(input.normal, 0.0f), gmtxWorld).xyz;
+    output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+
+    return (output);
+}
+
+
+float4 PSCubeMapping(VS_LIGHTING_OUTPUT input) : SV_Target
+{
+    input.normalW = normalize(input.normalW);
+
+    float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+    float3 f3FromCamera = normalize(input.positionW - gvCameraPosition.xyz);
+    float3 f3Reflected = normalize(reflect(f3FromCamera, input.normalW));
+    float4 cCubeTextureColor = gtxtCubeMap.Sample(gssWrap, f3Reflected);
+
+//	return(float4(vReflected * 0.5f + 0.5f, 1.0f));
+    return (cCubeTextureColor);
+//	return(cIllumination * cCubeTextureColor);
+}

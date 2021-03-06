@@ -147,6 +147,17 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout(ShaderTypes type)
 		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 		m_d3dInputLayoutDesc.NumElements = nInputElementDescs;
 	}
+	else if (type == ShaderTypes::DynamicCube)
+	{
+		UINT nInputElementDescs = 2;
+		D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+		pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+		m_d3dInputLayoutDesc.NumElements = nInputElementDescs;
+	}
 	return m_d3dInputLayoutDesc;
 }
 
@@ -746,3 +757,10 @@ D3D12_SHADER_BYTECODE CFbxSkinnedModelShader::CreatePixelShader()
 	return(CShader::CompileShaderFromFile(L"SceneTH.hlsl", "PSFbxSkinnedModel", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
+CDynamicCubeMappingShader::CDynamicCubeMappingShader()
+{
+}
+
+CDynamicCubeMappingShader::~CDynamicCubeMappingShader()
+{
+}
