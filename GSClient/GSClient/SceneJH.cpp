@@ -262,7 +262,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetShader(pFBXShader); 
 	m_Player->Scale(20, 20, 20);  
 	m_Player->SetObjectName(OBJ_NAME::Player); 
-	m_Player->SetPosition({ 750,  0, 1850 });
+	m_Player->SetPosition({ 750,  230, 1850 });
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
 	m_Player->SetMesh(fbxMesh);  
@@ -279,7 +279,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Box","Wood", "Wall", "Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus",
+		"PuzzleBoard"
 	};
 
 	const wchar_t* address[] =
@@ -289,7 +290,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
-		L"resources/Billboard/Tree02.dds", L"resources/Billboard/Cactus.dds"
+		L"resources/Billboard/Tree02.dds", L"resources/Billboard/Cactus.dds",
+		L"resources/OBJ/Board_Test.dds"
 	};
 	 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -307,10 +309,10 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	srvHeapDesc.NumDescriptors = m_Textures.size() + 1;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
+	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dBasicSrvDescriptorHeap));
 	 
 	// Fill out the heap with actual descriptors. 
-	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor = m_pd3dSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor = m_pd3dBasicSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	
 	const char* keyNames[] =
 	{
@@ -320,7 +322,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus", "PuzzleBoard"
 	};
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; 
@@ -339,6 +341,36 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = m_pd3dMinimapTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(m_pd3dMinimapTex, &srvDesc, hDescriptor);
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	//
+	//srvHeapDesc = {};
+	//srvHeapDesc.NumDescriptors = 1;
+	//srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	//srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	//pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dMonsterDescriptorHeap));
+
+	//// Fill out the heap with actual descriptors. 
+	//hDescriptor = m_pd3dMonsterDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+
+	//srvDesc = {};
+	//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	//srvDesc.Texture2D.MostDetailedMip = 0;
+	//srvDesc.Texture2D.MipLevels = -1;
+
+	//const char* keyNames2[] =
+	//{
+	//	"PuzzleBoard"
+	//};
+	//for (int i = 0; i < _countof(keyNames2); ++i)
+	//{
+	//	if (i != 0)	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	//	ID3D12Resource* texResource = m_Textures[keyNames2[i]]->m_pd3dResource;
+	//	srvDesc.Format = texResource->GetDesc().Format;
+
+	//	pd3dDevice->CreateShaderResourceView(texResource, &srvDesc, hDescriptor);
+	//}
 }
 
 void CSceneJH::ReleaseObjects()
@@ -388,9 +420,9 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
+	  
 	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
 	m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
 	m_pcbMappedSceneFrameData->m_PlayerWeapon = m_Player->GetSelectedWeapon();
@@ -404,9 +436,9 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
 
-	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dBasicSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
-
+	 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
@@ -457,11 +489,11 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 		m_MinimapCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
 		m_MinimapCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
-
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
+	 
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dBasicSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
 
 	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
@@ -744,10 +776,10 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	// Ground
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size() + 1;
+	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size()+ 1;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
-	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; 
 
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
@@ -782,7 +814,7 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	pd3dRootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[5].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
 	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	 
+
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags
 		= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
@@ -877,7 +909,7 @@ void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
 	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSPuzzle");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, true);
 
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, pShader);
 	pPuzzlePlate->SetPosition({ 600.0f,  0.0f, 1500.0f });
@@ -900,7 +932,7 @@ void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		for (int j = 0; j < 5; ++j)
 		{
 			pObject = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
-			pObject->SetPosition({ 900.0f + i * 1800.0f,  300 , 1800.0f + j * 300.0f });
+			pObject->SetPosition({ 900.0f + i * 1800.0f,  300, 1800.0f + j * 300.0f });
 			pObject->SetTextureIndex(0x80);
 			pObject->SetShader(pShader);
 			m_Objects.push_back(std::move(pObject));

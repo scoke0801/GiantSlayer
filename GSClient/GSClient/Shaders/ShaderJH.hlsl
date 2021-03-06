@@ -55,7 +55,9 @@ Texture2D gtxtGrass_Depth : register(t22);
 Texture2D gtxtTree : register(t23);
 Texture2D gtxtCactus : register(t24);
 
-Texture2D gtxtMap : register(t25);
+Texture2D gtxtPuzzleBoard : register(t25);
+
+Texture2D gtxtMap : register(t26);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -685,6 +687,13 @@ float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	if (gnTexturesMask & 0x02)
 	{
 		cColor = gtxtBox.Sample(gssClamp, uvw);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtPuzzleBoard.Sample(gssClamp, uvw);
 	}
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);

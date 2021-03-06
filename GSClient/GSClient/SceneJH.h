@@ -32,7 +32,8 @@ protected:
 private:
 	POINT						m_LastMousePos;
 
-	ID3D12DescriptorHeap*		m_pd3dSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap*		m_pd3dBasicSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap*		m_pd3dMonsterDescriptorHeap = nullptr;
 
 private:	// about Meterail
 	MATERIALS*					m_pMaterials = NULL;
