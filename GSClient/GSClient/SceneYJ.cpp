@@ -31,6 +31,7 @@ CSceneYJ::~CSceneYJ()
 
 void CSceneYJ::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
 {
+	BuildMirrorResource(pd3dDevice);
 	BuildMinimapResource(pd3dDevice);
 	LoadTextures(pd3dDevice, pd3dCommandList);
 	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
@@ -68,10 +69,11 @@ void CSceneYJ::BuildCamera(ID3D12Device* pd3dDevice,
 	m_Cameras[1]->Pitch(XMConvertToRadians(90));
 
 	m_Cameras[2]->SetPosition({ 500,  500, 500 }); 
-	m_Cameras[3]->SetPosition({ 10000,  22000, 10000 });
-	m_Cameras[3]->Pitch(XMConvertToRadians(90));
+	m_Cameras[3]->SetPosition({ 2000, 1000, 8000 });
+	//m_Cameras[3]->Pitch(XMConvertToRadians(90));
 	m_Cameras[4]->SetPosition({ 0,0,0 });
 
+	m_MirrorCamera = m_Cameras[3];
 	m_CurrentCamera = m_Cameras[2];
 	m_MinimapCamera = m_Cameras[1];
 }
@@ -298,6 +300,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	
 	BuildDoorWall(pd3dDevice, pd3dCommandList, pShader);
 
 	/// FBX Model
@@ -341,14 +344,30 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Cameras[0]->SetTarget(m_Player);
 
 	m_Player->SetShader(pFBXShader);
-	m_Player->Scale(20, 20, 20);
+	m_Player->Scale(50, 50, 50);
 	m_Player->SetObjectName(OBJ_NAME::Player);
-	m_Player->SetPosition({ 500,  0, 550 });
+	m_Player->SetPosition({ 500,  0, 12550 });
 	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x80);
 	m_Player->SetMesh(fbxMesh); 
 
 	m_MinimapCamera->SetTarget(m_Player); 
+
+	m_Mirror = new CGameObject();
+
+	CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 4000.0f, 1000.0f, 1.0f);
+
+	pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
+	pShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature,D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,TRUE);
+
+	m_Mirror->SetMesh(pMirrorMesh);
+	m_Mirror->SetShader(pShader);
+	m_Mirror->SetPosition({ 2000,500,10000 });
+	m_Mirror->SetTextureIndex(0x800);
+
 }
 
 void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -385,7 +404,7 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = m_Textures.size() + 1;
+	srvHeapDesc.NumDescriptors = m_Textures.size() + 2;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
@@ -421,6 +440,10 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = m_pd3dMinimapTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(m_pd3dMinimapTex, &srvDesc, hDescriptor);
+
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = m_pd3dMirrorTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(m_pd3dMirrorTex, &srvDesc, hDescriptor);
 }
 
 void CSceneYJ::ReleaseObjects()
@@ -443,6 +466,11 @@ void CSceneYJ::Update(double elapsedTime)
 	m_Player->Update(elapsedTime);
 
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
+
+	if (m_MirrorCamera)
+	{
+		m_MirrorCamera->UpdateViewMatrix();
+	}
 	if (m_MinimapCamera)
 	{
 		XMFLOAT3 pos = m_Player->GetPosition();
@@ -491,6 +519,7 @@ void CSceneYJ::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera); 
+	m_Mirror->Draw(pd3dCommandList, m_CurrentCamera);
 
 	for (auto pObject : m_BillboardObjects)
 	{
@@ -580,6 +609,69 @@ void CSceneYJ::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	pd3dCommandList->CopyResource(m_pd3dMinimapTex, pd3dRTV);
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMinimapTex,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON));
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
+		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
+	if (m_CurrentCamera)
+	{
+		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
+		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	}
+}
+
+void CSceneYJ::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
+{
+	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	if (m_MirrorCamera)
+	{
+		m_MirrorCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
+		m_MirrorCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	}
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
+	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
+
+	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
+	m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
+
+	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
+
+	m_Skybox->Draw(pd3dCommandList, m_MirrorCamera);
+	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
+
+	for (auto pObject : m_BillboardObjects)
+	{
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+	for (auto pObject : m_Objects)
+	{
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMirrorTex,
+		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
+
+	// Copy the input (back-buffer) to MimapTexture
+	pd3dCommandList->CopyResource(m_pd3dMirrorTex, pd3dRTV);
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMirrorTex,
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON));
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
@@ -705,7 +797,7 @@ void CSceneYJ::ProcessInput()
 	if (keyInput.KEY_5)
 	{
 		m_isPlayerSelected = false;
-		m_CurrentCamera = m_Cameras[3];
+		//m_CurrentCamera = m_Cameras[3];
 	}
 
 	////////////////////////////////////////////////////////// 
@@ -758,6 +850,8 @@ void CSceneYJ::ProcessInput()
 	if (keyInput.KEY_L)
 	{
 	}
+	DisplayVector3(m_CurrentCamera->GetPosition3f());
+	
 	m_CurrentCamera->UpdateViewMatrix();
 }
 
@@ -824,7 +918,7 @@ ID3D12RootSignature* CSceneYJ::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	// Ground
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size() + 1;
+	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size() + 2;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -937,8 +1031,8 @@ void CSceneYJ::BuildBridges(ID3D12Device* pd3dDevice,
 void CSceneYJ::BuildDoorWall(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
-	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5000, 1000, 500, pShader);
-	pDoorWall->SetPosition({ 0,0, 5000 });
+	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 1000, 500, pShader);
+	pDoorWall->SetPosition({ 0,0, 7500 });
 	m_Objects.push_back(pDoorWall);
 }
 
@@ -1034,4 +1128,29 @@ void CSceneYJ::BuildMinimapResource(ID3D12Device* pd3dDevice)
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
 		IID_PPV_ARGS(&m_pd3dMinimapTex));
+}
+
+void CSceneYJ::BuildMirrorResource(ID3D12Device* pd3dDevice)
+{
+	D3D12_RESOURCE_DESC texDesc;
+	ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
+	texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	texDesc.Alignment = 0;
+	texDesc.Width = FRAME_BUFFER_WIDTH;
+	texDesc.Height = FRAME_BUFFER_HEIGHT;
+	texDesc.DepthOrArraySize = 1;
+	texDesc.MipLevels = 1;
+	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+
+	pd3dDevice->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&texDesc,
+		D3D12_RESOURCE_STATE_COMMON,
+		nullptr,
+		IID_PPV_ARGS(&m_pd3dMirrorTex));
 }
