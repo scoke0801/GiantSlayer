@@ -344,9 +344,9 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Cameras[0]->SetTarget(m_Player);
 
 	m_Player->SetShader(pFBXShader);
-	m_Player->Scale(50, 50, 50);
+	m_Player->Scale(20, 20, 20);
 	m_Player->SetObjectName(OBJ_NAME::Player);
-	m_Player->SetPosition({ 500,  0, 12550 });
+	m_Player->SetPosition({ 2000,  0, 11550 });
 	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x80);
 	m_Player->SetMesh(fbxMesh); 
