@@ -53,8 +53,13 @@ Texture2D gtxtFlower_White : register(t20);
 Texture2D gtxtGrass_Width : register(t21);
 Texture2D gtxtGrass_Depth : register(t22);
 Texture2D gtxtTree : register(t23);
+Texture2D gtxtCactus : register(t24);
 
-Texture2D gtxtMap : register(t24);
+Texture2D gtxtPuzzleBoard : register(t25);
+
+Texture2D gtxtHelpText : register(t26);
+
+Texture2D gtxtMap : register(t27);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -230,6 +235,26 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 	{
 		cColor = gtxtFlower_Red.Sample(gssClamp, input.uv);
 	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtFlower_White.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gtxtGrass_Width.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtGrass_Depth.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x10)
+	{
+		cColor = gtxtTree.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x20)
+	{
+		cColor = gtxtCactus.Sample(gssClamp, input.uv);
+	}
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
 
 	return(cColor);
@@ -274,11 +299,41 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	}
 	if (gnTexturesMask & 0x20)
 	{
-		cColor = gtxtMinimap.Sample(gssWrap, input.uv);
+		cColor = gtxtHelpText.Sample(gssWrap, input.uv);
 	}
 	return cColor;
 }
+float4 PS_UI_HelpText(VS_TEXTURE_OUT input) : SV_TARGET
+{
+	float4 cColor;
 
+	if (gnTexturesMask & 0x01)
+	{
+		input.uv.y += 0.1;
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		input.uv.y += 0.2; 
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		input.uv.y += 0.3;
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		input.uv.y += 0.4;
+	}
+	if (gnTexturesMask & 0x10)
+	{
+		input.uv.y += 0.5;
+	}
+	if (gnTexturesMask & 0x20)
+	{
+		input.uv.y += 0.6;
+	}
+	cColor = gtxtHelpText.Sample(gssWrap, input.uv);
+	return cColor;
+}
 /////////////////////////////////////////////////////
 // Minimap
 
@@ -664,6 +719,13 @@ float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	if (gnTexturesMask & 0x02)
 	{
 		cColor = gtxtBox.Sample(gssClamp, uvw);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtPuzzleBoard.Sample(gssClamp, uvw);
 	}
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);

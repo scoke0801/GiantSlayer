@@ -264,8 +264,8 @@ void CShader::CreateShader(ID3D12Device* pd3dDevice,
 
 void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice, 
 	ID3D12RootSignature* pd3dGraphicsRootSignature, 
-	D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology,
-	bool isCullModeOn)
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, 
+	bool isCullModeOn, bool isBlendOn) 
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
@@ -277,7 +277,17 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	d3dPipelineStateDesc.PS = m_d3dPSBytecode;
 	if (m_pd3dGeometryShaderBlob)d3dPipelineStateDesc.GS = m_d3dGSBytecode;
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
+	if (isCullModeOn)
+	{
+		d3dPipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	}
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
+	if (isBlendOn)
+	{
+		d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = TRUE;
+		d3dPipelineStateDesc.BlendState.RenderTarget[0].BlendEnable = TRUE;
+	}	
+
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
 	d3dPipelineStateDesc.InputLayout = m_d3dInputLayoutDesc;
 	d3dPipelineStateDesc.SampleMask = UINT_MAX;
@@ -287,12 +297,7 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	d3dPipelineStateDesc.SampleDesc.Count = 1;
 	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-
-	if (isCullModeOn)
-	{
-		d3dPipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
-	}
-
+	 
 	HRESULT hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
 		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[0]);
 

@@ -6,7 +6,8 @@ class CGameObject;
 class CCamera;
 class CPlayer;
 class UI;
- 
+class HelpTextUI;
+
 class CSceneJH : public CScene
 {
 private:
@@ -14,11 +15,14 @@ private:
 
 protected:
 	vector<CGameObject*>		m_Objects; 
+	vector<CGameObject*>		m_BillboardObjects;
 
 	CPlayer*					m_Player = nullptr;
+
 	vector<UI*>					m_UIs;
-	vector<UI*>					m_HPGauge;
-	vector<UI*>					m_SPGauge;
+	vector<UI*>					m_HPGauges;
+	vector<UI*>					m_SPGauges;
+	HelpTextUI*					m_HelpTextUI;
 
 	CSkyBox*					m_Skybox;
 	CTerrain*					m_Terrain;
@@ -31,7 +35,8 @@ protected:
 private:
 	POINT						m_LastMousePos;
 
-	ID3D12DescriptorHeap*		m_pd3dSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap*		m_pd3dBasicSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap*		m_pd3dMonsterDescriptorHeap = nullptr;
 
 private:	// about Meterail
 	MATERIALS*					m_pMaterials = NULL;
@@ -106,6 +111,7 @@ private:
 	void BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildBilboardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 };

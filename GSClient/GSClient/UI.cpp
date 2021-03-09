@@ -80,3 +80,34 @@ HpSpPercentUI::HpSpPercentUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 HpSpPercentUI::~HpSpPercentUI()
 {
 }
+
+HelpTextUI::HelpTextUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	float width, float height, float depth, 
+	HELP_TEXT_INFO helpTextInfo)
+{ 
+	CPlaneMeshTextured* pMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList,
+		0.0f, ((int)helpTextInfo * 0.1),
+		1.0f, ((int)helpTextInfo * 0.1) + 0.1,
+		width, height, depth);
+	SetMesh(pMesh);
+}
+
+HelpTextUI::~HelpTextUI()
+{
+}
+
+void HelpTextUI::Update(double fTimeElapsed)
+{
+	if (m_RenderingTime > 0.0f)
+	{
+		m_RenderingTime -= fTimeElapsed; 
+	}
+}
+
+void HelpTextUI::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_RenderingTime > 0.0f)
+	{
+		UI::Draw(pd3dCommandList, pCamera);
+	}
+}
