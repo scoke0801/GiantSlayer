@@ -57,7 +57,9 @@ Texture2D gtxtCactus : register(t24);
 
 Texture2D gtxtPuzzleBoard : register(t25);
 
-Texture2D gtxtMap : register(t26);
+Texture2D gtxtHelpText : register(t26);
+
+Texture2D gtxtMap : register(t27);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -297,7 +299,7 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	}
 	if (gnTexturesMask & 0x20)
 	{
-		cColor = gtxtMinimap.Sample(gssWrap, input.uv);
+		cColor = gtxtHelpText.Sample(gssWrap, input.uv);
 	}
 	return cColor;
 }

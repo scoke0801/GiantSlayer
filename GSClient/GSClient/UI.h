@@ -42,3 +42,21 @@ public:
 		bool isHp = true);
 	~HpSpPercentUI();
 };
+
+enum class HELP_TEXT_INFO
+{
+	QuestAccept = 0,
+	MonsterKill,
+	PuzzleDevice,
+	PuzzleMedusa,
+	BossKill,
+};
+class HelpTextUI : public UI
+{
+public:
+	HelpTextUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		float width, float height, float depth,
+		HELP_TEXT_INFO helpTextInfo);
+
+	~HelpTextUI();
+};

@@ -280,7 +280,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
 		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus",
-		"PuzzleBoard"
+		"PuzzleBoard",
+		"HelpText"
 	};
 
 	const wchar_t* address[] =
@@ -291,7 +292,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
 		L"resources/Billboard/Tree02.dds", L"resources/Billboard/Cactus.dds",
-		L"resources/OBJ/Board_Test.dds"
+		L"resources/OBJ/Board_Test.dds",
+		L"resources/UI/HelpText.dds" 
 	};
 	 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -322,7 +324,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus", "PuzzleBoard"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus", "PuzzleBoard",
+		"HelpText"
 	};
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; 
@@ -986,6 +989,12 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, true);
 	pUI->SetPosition({ -0.53, 0.65,  0 });		// WeaponUI
 	pUI->SetTextureIndex(0x10);
+	pUI->SetShader(pShader);
+	m_UIs.push_back(pUI); 
+
+	pUI = new HelpTextUI(pd3dDevice, pd3dCommandList, 1.0, 0.25f, 0.8f, HELP_TEXT_INFO::PuzzleDevice);
+	pUI->SetPosition({ 0.0f, -0.8,  0 });		 
+	pUI->SetTextureIndex(0x20);
 	pUI->SetShader(pShader);
 	m_UIs.push_back(pUI);
 

@@ -80,3 +80,18 @@ HpSpPercentUI::HpSpPercentUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 HpSpPercentUI::~HpSpPercentUI()
 {
 }
+
+HelpTextUI::HelpTextUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	float width, float height, float depth, 
+	HELP_TEXT_INFO helpTextInfo)
+{ 
+	CPlaneMeshTextured* pMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList,
+		0.0f, ((int)helpTextInfo * 0.1),
+		1.0f, ((int)helpTextInfo * 0.1) + 0.1,
+		width, height, depth);
+	SetMesh(pMesh);
+}
+
+HelpTextUI::~HelpTextUI()
+{
+}
