@@ -264,7 +264,8 @@ void CShader::CreateShader(ID3D12Device* pd3dDevice,
 
 void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice, 
 	ID3D12RootSignature* pd3dGraphicsRootSignature, 
-	D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology)
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology,
+	bool isCullModeOn)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
@@ -286,6 +287,11 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	d3dPipelineStateDesc.SampleDesc.Count = 1;
 	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+
+	if (isCullModeOn)
+	{
+		d3dPipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	}
 
 	HRESULT hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
 		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[0]);

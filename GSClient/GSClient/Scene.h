@@ -34,6 +34,7 @@ public:
 	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) {} 
+	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) {}
 
 public:
 	// about Keyboard process
