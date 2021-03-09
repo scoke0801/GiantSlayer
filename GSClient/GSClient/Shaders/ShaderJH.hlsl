@@ -303,7 +303,37 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	}
 	return cColor;
 }
+float4 PS_UI_HelpText(VS_TEXTURE_OUT input) : SV_TARGET
+{
+	float4 cColor;
 
+	if (gnTexturesMask & 0x01)
+	{
+		input.uv.y += 0.1;
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		input.uv.y += 0.2; 
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		input.uv.y += 0.3;
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		input.uv.y += 0.4;
+	}
+	if (gnTexturesMask & 0x10)
+	{
+		input.uv.y += 0.5;
+	}
+	if (gnTexturesMask & 0x20)
+	{
+		input.uv.y += 0.6;
+	}
+	cColor = gtxtHelpText.Sample(gssWrap, input.uv);
+	return cColor;
+}
 /////////////////////////////////////////////////////
 // Minimap
 

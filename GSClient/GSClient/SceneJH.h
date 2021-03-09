@@ -6,7 +6,8 @@ class CGameObject;
 class CCamera;
 class CPlayer;
 class UI;
- 
+class HelpTextUI;
+
 class CSceneJH : public CScene
 {
 private:
@@ -17,9 +18,11 @@ protected:
 	vector<CGameObject*>		m_BillboardObjects;
 
 	CPlayer*					m_Player = nullptr;
+
 	vector<UI*>					m_UIs;
-	vector<UI*>					m_HPGauge;
-	vector<UI*>					m_SPGauge;
+	vector<UI*>					m_HPGauges;
+	vector<UI*>					m_SPGauges;
+	HelpTextUI*					m_HelpTextUI;
 
 	CSkyBox*					m_Skybox;
 	CTerrain*					m_Terrain;

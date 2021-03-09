@@ -393,6 +393,7 @@ void CSceneJH::Update(double elapsedTime)
 	{
 		pObject->Update(elapsedTime);
 	} 
+	m_HelpTextUI->Update(elapsedTime);
 	m_Player->Update(elapsedTime);
 	
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
@@ -465,12 +466,12 @@ void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	for (int i = 0; i < m_Player->GetHP() / 5; ++i)
 	{
-		m_HPGauge[i]->Draw(pd3dCommandList, m_CurrentCamera);
+		m_HPGauges[i]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 
 	for (int i = 0; i < m_Player->GetSP() / 5; ++i)
 	{
-		m_SPGauge[i]->Draw(pd3dCommandList, m_CurrentCamera);
+		m_SPGauges[i]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 
@@ -969,7 +970,7 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 		pUI->SetPosition({float( -0.615 + 0.015 * i), 0.885,  0.91 });
 		pUI->SetTextureIndex(0x04);
 		pUI->SetShader(pShader); 
-		m_HPGauge.push_back(pUI);
+		m_HPGauges.push_back(pUI);
 	}
 	for (int i = 0; i < 20; ++i)
 	{ 
@@ -977,7 +978,7 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 		pUI->SetPosition({ float (-0.575 + 0.011 * i), 0.795,  0.91 });
 		pUI->SetTextureIndex(0x04);
 		pUI->SetShader(pShader);
-		m_SPGauge.push_back(pUI);
+		m_SPGauges.push_back(pUI);
 	} 
 
 	m_MinimapArrow = new MinimapArrow(pd3dDevice, pd3dCommandList, 0.05, 0.05, 0.0f);
@@ -991,13 +992,19 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	pUI->SetTextureIndex(0x10);
 	pUI->SetShader(pShader);
 	m_UIs.push_back(pUI); 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	pShader = new CShader();
+	pShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VS_UI_Textured");
+	pShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PS_UI_HelpText");
+	pShader->CreateInputLayout(ShaderTypes::Textured);
+	pShader->CreateUIShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	pUI = new HelpTextUI(pd3dDevice, pd3dCommandList, 1.0, 0.25f, 0.8f, HELP_TEXT_INFO::PuzzleDevice);
-	pUI->SetPosition({ 0.0f, -0.8,  0 });		 
-	pUI->SetTextureIndex(0x20);
-	pUI->SetShader(pShader);
-	m_UIs.push_back(pUI);
-
+	m_HelpTextUI = new HelpTextUI(pd3dDevice, pd3dCommandList, 1.5, 0.25f, 0.8f, HELP_TEXT_INFO::QuestAccept);
+	m_HelpTextUI->SetPosition({ 0.0f, -0.8,  0 });		 
+	m_HelpTextUI->SetTextureIndex(0x01);
+	m_HelpTextUI->SetShader(pShader);
+	m_UIs.push_back(m_HelpTextUI);
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	pShader = new CShader();
 	pShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSMinimap");  
 	pShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSMinimap");
