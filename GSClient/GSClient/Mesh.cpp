@@ -850,6 +850,56 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice,
 
 	delete[] pVertices; 
 }
+CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	int x_Index, int z_Index, 
+	int WidthBlock_Count, int DepthBlock_Count,
+	int WidthBlock_Index, int DepthBlock_Index, 
+	const int heights[25])
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	int xStart = x_Index * (WidthBlock_Count - 1);
+	int zStart = z_Index * (DepthBlock_Count - 1);
+
+	m_xmf4Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	m_nWidth = WidthBlock_Count + 1;
+	m_nDepth = DepthBlock_Count + 1;
+
+	m_nVertices = 25;
+	m_nStride = sizeof(CTerrainVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST;
+
+	CTerrainVertex* pVertices = new CTerrainVertex[m_nVertices];
+
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+	for (int i = 0, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2)
+	{
+		for (int x = xStart; x < (xStart + m_nWidth - 1); x += 2, i++)
+		{
+			if (i >= 25) break;
+			// 정점의 높이와 색상을 높이 맵으로부터 구한다.
+			float tempheight = 0;
+		 
+			pVertices[i].m_xmf3Position = XMFLOAT3(x / 2, heights[i], z / 2);
+			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
+			pVertices[i].m_xmf4Color = XMFLOAT4(1, 1, 1, 0);
+
+			if (tempheight < fMinHeight) tempheight = fMinHeight;
+			if (tempheight > fMaxHeight)  tempheight = fMaxHeight;
+		}
+	}
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	delete[] pVertices;
+}
 CTerrainMesh::~CTerrainMesh()
 {
 }

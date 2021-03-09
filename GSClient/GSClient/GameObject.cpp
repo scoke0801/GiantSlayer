@@ -519,7 +519,9 @@ CSkyBoxSphere::~CSkyBoxSphere()
 {
 }
  
-CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int nBlockWidth, int nBlockLength,CShader* pShader)
+CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	int nWidth, int nLength, 
+	int nBlockWidth, int nBlockLength,CShader* pShader)
 { 
 	m_nWidth = nWidth;			// 257
 	m_nLength = nLength;		// 257
@@ -1123,6 +1125,28 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	pObject->SetShader(pShader);
 
 	pObject->SetPosition(XMFLOAT3(0.0f, -10000.0f, 0.0f));
+	m_Objects.push_back(std::move(pObject));
+}
+
+CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	CShader* pShader)
+{
+	CGameObject* pObject = new CGameObject();
+	pObject->SetTextureIndex(0x01);
+	pObject->SetShader(pShader);
+
+	int heights[25] = { 100, 200,300,400,500,
+		5,5,5,5,5,
+		-100, -200,-300,-100, -200,
+		5,5,5,5,5,
+		500,400,300,200,100
+	};
+	//0, 0, nBlockWidth, nBlockLength, cxBlocks, czBlocks
+	pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		0, 0, 9, 9, 257, 257,
+		heights));
+	pObject->Scale(500.0f, 1.0f, 500.0f);
+	pObject->SetPosition({ 0,0,0 });
 	m_Objects.push_back(std::move(pObject));
 }
 
