@@ -8,6 +8,7 @@
 class CShader;
 class CGameObject;
 class CCamera;
+class CTerrain;
 
 class CGameScene : public CScene
 {

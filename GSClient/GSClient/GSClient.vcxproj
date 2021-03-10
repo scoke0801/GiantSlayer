@@ -189,6 +189,7 @@
     <ClInclude Include="StateMachine.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="UI.h" />
@@ -199,6 +200,7 @@
     <ClCompile Include="Bridge.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Communicates.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="EnemyState.cpp" />
     <ClCompile Include="FBXLoader.cpp">

@@ -120,6 +120,9 @@
     <ClCompile Include="Wall.cpp">
       <Filter>GameObject\Wall</Filter>
     </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>GameObject\Terrain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -235,6 +238,9 @@
     <ClInclude Include="Wall.h">
       <Filter>GameObject\Wall</Filter>
     </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>GameObject\Terrain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -325,6 +331,9 @@
     </Filter>
     <Filter Include="GameObject\Wall">
       <UniqueIdentifier>{c3b83253-b8e3-41aa-9bca-9c9d5c2daf35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Terrain">
+      <UniqueIdentifier>{cb851dde-6738-433c-b8e3-cfba40b0713f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

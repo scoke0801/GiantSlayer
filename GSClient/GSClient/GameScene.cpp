@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "GameObject.h"
 #include "Camera.h"
+#include "Terrain.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_CAMERA			1

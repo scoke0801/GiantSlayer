@@ -7,6 +7,7 @@ class CCamera;
 class CPlayer;
 class UI;
 class HelpTextUI;
+class CTerrain;
 
 class CSceneJH : public CScene
 {

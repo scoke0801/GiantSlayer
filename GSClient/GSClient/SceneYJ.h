@@ -6,6 +6,7 @@ class CGameObject;
 class CCamera;
 class CPlayer;
 class UI;
+class CTerrain;
 
 class CSceneYJ : public CScene
 {

@@ -10,7 +10,7 @@
 #include "Bridge.h"
 #include "Wall.h"
 #include "Communicates.h"
-
+#include "Terrain.h"
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
 #define ROOT_PARAMETER_CAMERA			2

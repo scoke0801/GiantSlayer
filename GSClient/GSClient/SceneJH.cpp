@@ -11,6 +11,7 @@
 #include "Communicates.h"
 #include "Enemy.h"
 #include "Puzzle.h"
+#include "Terrain.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
