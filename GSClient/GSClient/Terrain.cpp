@@ -614,19 +614,28 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	CShader* pShader)
 {
+	InitHeightDatas();
+
 	CGameObject* pObject = new CGameObject();
 	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(pShader);
-
+	 
+	// 테스트용 생성 방식
 	int heights[25] = { 100, 200,300,400,500,
 		5,5,5,5,5,
 		-100, -200,-300,-100, -200,
 		5,5,5,5,5,
 		500,400,300,200,100
-	};
+	}; 
 	pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 		0, 0, 9, 9, 257, 257,
 		heights));
+
+	// 해야할 생성 방식
+	//pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+	//	0, 0, 9, 9, 257, 257,
+	//	m_Heights));
+
 	pObject->Scale(500.0f, 1.0f, 500.0f);
 	pObject->SetPosition({ 0,0,0 });
 	m_Objects.push_back(std::move(pObject));
@@ -641,5 +650,16 @@ void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (auto pObj : m_Objects)
 	{
 		pObj->Draw(pd3dCommandList, pCamera);
+	}
+}
+
+void CTerrain::InitHeightDatas()
+{
+	for (int i = 0; i < TERRAIN_HEIGHT_MAP_HEIGHT; ++i)
+	{
+		for (int j = 0; j < TERRAIN_HEIGHT_MAP_WIDTH; ++j)
+		{
+			m_Heights[i][j] = rand() % 5000 - 2500;
+		}
 	}
 }

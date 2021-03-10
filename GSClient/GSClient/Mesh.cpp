@@ -850,11 +850,12 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice,
 
 	delete[] pVertices; 
 }
-CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+ 
+CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
 	int x_Index, int z_Index, 
-	int WidthBlock_Count, int DepthBlock_Count,
-	int WidthBlock_Index, int DepthBlock_Index, 
-	const int heights[25])
+	int WidthBlock_Count, int DepthBlock_Count, 
+	int WidthBlock_Index, int DepthBlock_Index,
+	int* heights)
 	: CMesh(pd3dDevice, pd3dCommandList)
 {
 	int xStart = x_Index * (WidthBlock_Count - 1);
@@ -880,8 +881,10 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			if (i >= 25) break;
 			// 정점의 높이와 색상을 높이 맵으로부터 구한다.
 			float tempheight = 0;
-		 
+
+			// 수정이 필요한 영역
 			pVertices[i].m_xmf3Position = XMFLOAT3(x / 2, heights[i], z / 2);
+
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
 			pVertices[i].m_xmf4Color = XMFLOAT4(1, 1, 1, 0);
 
