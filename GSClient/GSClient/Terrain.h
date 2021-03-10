@@ -1,11 +1,9 @@
 #pragma once 
  
-#define TERRAIN_HEIGHT_MAP_WIDTH 100
-#define TERRAIN_HEIGHT_MAP_HEIGHT 100
 class CTerrain
 {
 private:
-	int m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT][TERRAIN_HEIGHT_MAP_WIDTH];
+	int m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 
 private:
 	int						m_nWidth;

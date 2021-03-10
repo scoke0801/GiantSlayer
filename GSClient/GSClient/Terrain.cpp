@@ -619,26 +619,23 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	CGameObject* pObject = new CGameObject();
 	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(pShader);
-	 
-	// 테스트용 생성 방식
-	int heights[25] = { 100, 200,300,400,500,
-		5,5,5,5,5,
-		-100, -200,-300,-100, -200,
-		5,5,5,5,5,
-		500,400,300,200,100
-	}; 
-	pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-		0, 0, 9, 9, 257, 257,
-		heights));
-
-	// 해야할 생성 방식
-	//pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-	//	0, 0, 9, 9, 257, 257,
-	//	m_Heights));
-
-	pObject->Scale(500.0f, 1.0f, 500.0f);
-	pObject->SetPosition({ 0,0,0 });
-	m_Objects.push_back(std::move(pObject));
+	   
+	for (int i = 0; i < 25; ++i)
+	{
+		for (int j = 0; j < 25; ++j)
+		{
+			pObject = new CGameObject();
+			pObject->SetTextureIndex(0x01);
+			pObject->SetShader(pShader);
+			pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+				4 * j, 4 * i,
+				m_Heights));
+	
+			pObject->Scale(200.0f, 1.0f, 200.0f);
+			pObject->SetPosition({ 800.0f * j, 0, 800.0f * i });
+			m_Objects.push_back(std::move(pObject));
+		} 
+	} 
 }
 
 CTerrain::~CTerrain()
@@ -655,11 +652,11 @@ void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 void CTerrain::InitHeightDatas()
 {
-	for (int i = 0; i < TERRAIN_HEIGHT_MAP_HEIGHT; ++i)
+	for (int i = 0; i <= TERRAIN_HEIGHT_MAP_HEIGHT; ++i)
 	{
-		for (int j = 0; j < TERRAIN_HEIGHT_MAP_WIDTH; ++j)
+		for (int j = 0; j <= TERRAIN_HEIGHT_MAP_WIDTH; ++j)
 		{
-			m_Heights[i][j] = rand() % 5000 - 2500;
+			m_Heights[i][j] = rand() % 300 - 150;
 		}
 	}
 }
