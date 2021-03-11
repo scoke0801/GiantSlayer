@@ -743,12 +743,12 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		if (m_isPlayerSelected)
 		{
 			//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 15);
 
 			if (m_Player->IsMoving())
 			{
-				m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
-				m_MinimapArrow->Rotate(-dx * 150);
+				m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 15);
+				m_MinimapArrow->Rotate(-dx * 15);
 			}
 		}
 		else {

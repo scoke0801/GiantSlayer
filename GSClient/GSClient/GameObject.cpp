@@ -220,6 +220,42 @@ void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
 
+void CGameObject::LookAt(const DirectX::FXMVECTOR& pos, const DirectX::FXMVECTOR& target, const DirectX::FXMVECTOR& worldUp)
+{
+	XMVECTOR L = XMVector3Normalize(XMVectorSubtract(target, pos));
+	XMVECTOR R = XMVector3Normalize(XMVector3Cross(worldUp, L));
+	XMVECTOR U = XMVector3Cross(L, R);
+
+	XMStoreFloat3(&m_xmf3Position, pos);
+	 
+	m_xmf4x4World(0, 0) = m_xmf3Right.x;
+	m_xmf4x4World(1, 0) = m_xmf3Right.y;
+	m_xmf4x4World(2, 0) = m_xmf3Right.z;
+	m_xmf4x4World(3, 0) = x; 
+
+	m_xmf4x4World(0, 1) = m_xmf3Up.x;
+	m_xmf4x4World(1, 1) = m_xmf3Up.y;
+	m_xmf4x4World(2, 1) = m_xmf3Up.z;
+	m_xmf4x4World(3, 1) = y;
+	m_xmf4x4World
+	m_xmf4x4World(0, 2) = m_xmf3Look.x;
+	m_xmf4x4World(1, 2) = m_xmf3Look.y;
+	m_xmf4x4World(2, 2) = m_xmf3Look.z;
+	m_xmf4x4World(3, 2) = z;
+
+	XMStoreFloat3(&m_xmf3Look, L);
+	XMStoreFloat3(&m_xmf3Right, R);
+	XMStoreFloat3(&m_xmf3Up, U); 
+}
+
+void CGameObject::LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up)
+{  
+	XMFLOAT3 L = Vector3::Normalize(Vector3::Subtract(target, pos));
+	XMFLOAT3 R = Vector3::Normalize(Vector3::CrossProduct(up, L));
+	XMFLOAT3 U = Vector3::CrossProduct(L, R);
+	 /// 여기서부터 작업 해야 합니다.
+}
+
 void CGameObject::Scale(float x, float y, float z, bool setSize)
 {
 	if (setSize)
