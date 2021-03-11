@@ -15,8 +15,11 @@ enum class PlayerWeaponType
 	Sword = 0x01,
 	Bow = 0x02
 };
+
+class CTerrain;
+
 class CPlayer : public CGameObject
-{ 
+{   
 private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
 	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
@@ -28,6 +31,8 @@ public:
 public:
 	virtual void Update(double fTimeElapsed);
 
+	void FixPositionByTerrain(CTerrain* pTerrain);
+
 public:
 	virtual void SetVelocity(OBJ_DIRECTION direction) override;
 
@@ -35,4 +40,5 @@ public:
 
 	void SetWeapon(PlayerWeaponType weaponID) { m_WeaponType = weaponID; }
 	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; }
+	 
 };

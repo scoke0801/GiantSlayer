@@ -650,6 +650,14 @@ void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	}
 }
 
+float CTerrain::GetHeight(int xPosition, int zPosition)
+{
+	int x = xPosition / 200.0f;
+	int z = zPosition / 200.0f;
+
+	return m_Heights[z][x];
+}
+
 void CTerrain::InitHeightDatas()
 {
 	for (int i = 0; i <= TERRAIN_HEIGHT_MAP_HEIGHT; ++i)

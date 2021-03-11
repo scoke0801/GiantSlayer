@@ -396,8 +396,10 @@ void CSceneJH::Update(double elapsedTime)
 		pObject->Update(elapsedTime);
 	} 
 	m_HelpTextUI->Update(elapsedTime);
-	m_Player->Update(elapsedTime);
 	
+	m_Player->Update(elapsedTime);
+	m_Player->FixPositionByTerrain(m_Terrain);
+
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 	if (m_MinimapCamera) 
 	{

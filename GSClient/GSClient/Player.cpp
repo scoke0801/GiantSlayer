@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Player.h"
 #include "Shader.h"
+#include "Terrain.h"
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -60,6 +61,11 @@ void CPlayer::Update(double fTimeElapsed)
 #pragma endregion
 }
 
+void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
+{
+	m_xmf3Position.y = pTerrain->GetHeight(m_xmf3Position.x, m_xmf3Position.z);
+}
+
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 { 	
 	//XMFLOAT3 look = GetLook();//m_Camera->GetLook3f();
@@ -93,8 +99,7 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook());
 	float angle = Vector3::GetAngle(xmf3Dir, playerLookAt);
 	cout << "°¢µµ : " << angle << "\n"; 
-	Rotate(XMFLOAT3(0, 1, 0), (angle));
-	Rotate()
+	Rotate(XMFLOAT3(0, 1, 0), (angle)); 
 	//bool isMoving = IsMoving();
 	//if (!isMoving)
 	//{
@@ -118,3 +123,4 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
 }
+ 
