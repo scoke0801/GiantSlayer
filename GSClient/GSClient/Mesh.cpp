@@ -438,6 +438,7 @@ CPlaneMeshDiffused::CPlaneMeshDiffused(ID3D12Device* pd3dDevice,
 
 CPlaneMeshDiffused::~CPlaneMeshDiffused()
 {
+
 }
 
 CPlaneMeshTextured::CPlaneMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
@@ -450,7 +451,7 @@ CPlaneMeshTextured::CPlaneMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	CTexturedVertex pVertices[6];
-	 
+	
 	float widthHalf = fWidth * 0.5f;
 	float heightHalf = fHeight * 0.5f;
 
@@ -606,7 +607,6 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info)
 
 					float uv1 = fbxUV[0];
 					float uv2 = 1.0f - fbxUV[1];
-
 
 					info->vertex.push_back(
 						CTexturedVertex(
@@ -773,7 +773,7 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			pVertices[i].m_xmf3Normal= XMFLOAT3(x * 10, tempheight, z * 10);
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(float(x)/float(WidthBlock_Count), float(z)/float(DepthBlock_Count));
 			 
-			if (tempheight < fMinHeight) tempheight = fMinHeight ;
+			if (tempheight < fMinHeight) tempheight = fMinHeight ; 
 			if (tempheight > fMaxHeight)  tempheight = fMaxHeight; 
 		}
 	}

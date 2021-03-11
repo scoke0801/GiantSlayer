@@ -259,6 +259,210 @@ CBox::~CBox()
 
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//CAnimationCurve::CAnimationCurve(int nKeys)
+//{
+//	m_nKeys = nKeys;
+//	m_pfKeyTimes = new float[nKeys];
+//	m_pfKeyValues = new float[nKeys];
+//}
+//
+//CAnimationCurve::~CAnimationCurve()
+//{
+//	if (m_pfKeyTimes) delete[] m_pfKeyTimes;
+//	if (m_pfKeyValues) delete[] m_pfKeyValues;
+//}
+//
+//float CAnimationCurve::GetValueByLinearInterpolation(float fPosition)
+//{
+//	for (int k = 0; k < (m_nKeys - 1); k++)
+//	{
+//		if ((m_pfKeyTimes[k] <= fPosition) && (fPosition < m_pfKeyTimes[k + 1]))
+//		{
+//			float t = (fPosition - m_pfKeyTimes[k]) / (m_pfKeyTimes[k + 1] - m_pfKeyTimes[k]);
+//			return(m_pfKeyValues[k] * (1.0f - t) + m_pfKeyValues[k + 1] * t);
+//		}
+//	}
+//	return(m_pfKeyValues[m_nKeys - 1]);
+//}
+//
+//CAnimationLayer::CAnimationLayer()
+//{
+//}
+//
+//CAnimationLayer::~CAnimationLayer()
+//{
+//	for (int i = 0; i < m_nAnimatedBoneFrames; i++)
+//	{
+//		for (int j = 0; j < 9; j++)
+//		{
+//			if (m_ppAnimationCurves[i][j]) delete m_ppAnimationCurves[i][j];
+//		}
+//	}
+//	if (m_ppAnimationCurves) delete[] m_ppAnimationCurves;
+//
+//	if (m_ppAnimatedBoneFrameCaches) delete[] m_ppAnimatedBoneFrameCaches;
+//}
+//
+//void CAnimationLayer::LoadAnimationKeyValues(int nBoneFrame, int nCurve, FILE* pInFile)
+//{
+//	int nAnimationKeys = ::ReadIntegerFromFile(pInFile);
+//
+//	m_ppAnimationCurves[nBoneFrame][nCurve] = new CAnimationCurve(nAnimationKeys);
+//
+//	::fread(m_ppAnimationCurves[nBoneFrame][nCurve]->m_pfKeyTimes, sizeof(float), nAnimationKeys, pInFile);
+//	::fread(m_ppAnimationCurves[nBoneFrame][nCurve]->m_pfKeyValues, sizeof(float), nAnimationKeys, pInFile);
+//}
+//
+//XMFLOAT4X4 CAnimationLayer::GetSRT(int nBoneFrame, float fPosition, float fTrackWeight)
+//{
+//	CGameObject* pBoneFrame = m_ppAnimatedBoneFrameCaches[nBoneFrame];
+//	XMFLOAT3 xmf3S = pBoneFrame->m_xmf3Scale;
+//	XMFLOAT3 xmf3R = pBoneFrame->m_xmf3Rotation;
+//	XMFLOAT3 xmf3T = pBoneFrame->m_xmf3Translation;
+//
+//	if (m_ppAnimationCurves[nBoneFrame][0]) xmf3T.x = m_ppAnimationCurves[nBoneFrame][0]->GetValueByLinearInterpolation(fPosition);
+//	if (m_ppAnimationCurves[nBoneFrame][1]) xmf3T.y = m_ppAnimationCurves[nBoneFrame][1]->GetValueByLinearInterpolation(fPosition);
+//	if (m_ppAnimationCurves[nBoneFrame][2]) xmf3T.z = m_ppAnimationCurves[nBoneFrame][2]->GetValueByLinearInterpolation(fPosition);
+//	if (m_ppAnimationCurves[nBoneFrame][3]) xmf3R.x = m_ppAnimationCurves[nBoneFrame][3]->GetValueByLinearInterpolation(fPosition);
+//	if (m_ppAnimationCurves[nBoneFrame][4]) xmf3R.y = m_ppAnimationCurves[nBoneFrame][4]->GetValueByLinearInterpolation(fPosition);
+//	if (m_ppAnimationCurves[nBoneFrame][5]) xmf3R.z = m_ppAnimationCurves[nBoneFrame][5]->GetValueByLinearInterpolation(fPosition);
+//	if (m_ppAnimationCurves[nBoneFrame][6]) xmf3S.x = m_ppAnimationCurves[nBoneFrame][6]->GetValueByLinearInterpolation(fPosition);
+//	if (m_ppAnimationCurves[nBoneFrame][7]) xmf3S.y = m_ppAnimationCurves[nBoneFrame][7]->GetValueByLinearInterpolation(fPosition);
+//	if (m_ppAnimationCurves[nBoneFrame][8]) xmf3S.z = m_ppAnimationCurves[nBoneFrame][8]->GetValueByLinearInterpolation(fPosition);
+//
+//	float fWeight = m_fWeight * fTrackWeight;
+//	XMMATRIX S = XMMatrixScaling(xmf3S.x * fWeight, xmf3S.y * fWeight, xmf3S.z * fWeight);
+//	//	XMMATRIX R = XMMatrixRotationRollPitchYaw(xmf3R.x * fWeight, xmf3R.y * fWeight, xmf3R.z * fWeight);
+//	XMMATRIX R = XMMatrixMultiply(XMMatrixMultiply(XMMatrixRotationX(xmf3R.x * fWeight), XMMatrixRotationY(xmf3R.y * fWeight)), XMMatrixRotationZ(xmf3R.z * fWeight));
+//	XMMATRIX T = XMMatrixTranslation(xmf3T.x * fWeight, xmf3T.y * fWeight, xmf3T.z * fWeight);
+//
+//	XMFLOAT4X4 xmf4x4Transform;
+//	XMStoreFloat4x4(&xmf4x4Transform, XMMatrixMultiply(XMMatrixMultiply(S, R), T));
+//
+//	return(xmf4x4Transform);
+//}
+//
+//CAnimationSet::CAnimationSet(float fStartTime, float fEndTime, char* pstrName)
+//{
+//	m_fStartTime = fStartTime;
+//	m_fEndTime = fEndTime;
+//	m_fLength = fEndTime - fStartTime;
+//
+//	strcpy_s(m_pstrAnimationSetName, 64, pstrName);
+//}
+//
+//CAnimationSet::~CAnimationSet()
+//{
+//	if (m_pAnimationLayers) delete[] m_pAnimationLayers;
+//
+//	if (m_pCallbackKeys) delete[] m_pCallbackKeys;
+//	if (m_pAnimationCallbackHandler) delete m_pAnimationCallbackHandler;
+//}
+//
+//void* CAnimationSet::GetCallbackData()
+//{
+//	for (int i = 0; i < m_nCallbackKeys; i++)
+//	{
+//		if (::IsEqual(m_pCallbackKeys[i].m_fTime, m_fPosition, ANIMATION_CALLBACK_EPSILON)) return(m_pCallbackKeys[i].m_pCallbackData);
+//	}
+//	return(NULL);
+//}
+//
+//void CAnimationSet::SetPosition(float fTrackPosition)
+//{
+//	m_fPosition = fTrackPosition;
+//	switch (m_nType)
+//	{
+//	case ANIMATION_TYPE_LOOP:
+//	{
+//		m_fPosition = m_fStartTime + ::fmod(fTrackPosition, m_fLength);
+//		break;
+//	}
+//	case ANIMATION_TYPE_ONCE:
+//		break;
+//	case ANIMATION_TYPE_PINGPONG:
+//		break;
+//	}
+//
+//	if (m_pAnimationCallbackHandler)
+//	{
+//		void* pCallbackData = GetCallbackData();
+//		if (pCallbackData) m_pAnimationCallbackHandler->HandleCallback(pCallbackData);
+//	}
+//}
+//
+//void CAnimationSet::Animate(float fTrackPosition, float fTrackWeight)
+//{
+//	SetPosition(fTrackPosition);
+//
+//	//for (int i = 0; i < m_nAnimationLayers; i++)
+//	//{
+//	//	for (int j = 0; j < m_pAnimationLayers[i].m_nAnimatedBoneFrames; j++)
+//	//	{
+//	//		m_pAnimationLayers[i].m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4ToParent = Matrix4x4::Zero();
+//	//	}
+//	//}
+//
+//	for (int i = 0; i < m_nAnimationLayers; i++)
+//	{
+//		for (int j = 0; j < m_pAnimationLayers[i].m_nAnimatedBoneFrames; j++)
+//		{
+//			m_pAnimationLayers[i].m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4ToParent = m_pAnimationLayers[i].GetSRT(j, m_fPosition, fTrackWeight);
+//			//			m_pAnimationLayers[i].m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4ToParent = Matrix4x4::Add(xmf4x4Transform, m_pAnimationLayers[i].m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4ToParent);
+//		}
+//	}
+//}
+//
+//void CAnimationSet::SetCallbackKeys(int nCallbackKeys)
+//{
+//	m_nCallbackKeys = nCallbackKeys;
+//	m_pCallbackKeys = new CALLBACKKEY[nCallbackKeys];
+//}
+//
+//void CAnimationSet::SetCallbackKey(int nKeyIndex, float fKeyTime, void* pData)
+//{
+//	m_pCallbackKeys[nKeyIndex].m_fTime = fKeyTime;
+//	m_pCallbackKeys[nKeyIndex].m_pCallbackData = pData;
+//}
+//
+//void CAnimationSet::SetAnimationCallbackHandler(CAnimationCallbackHandler* pCallbackHandler)
+//{
+//	m_pAnimationCallbackHandler = pCallbackHandler;
+//}
+//
+//CAnimationSets::CAnimationSets(int nAnimationSets)
+//{
+//	m_nAnimationSets = nAnimationSets;
+//	m_ppAnimationSets = new CAnimationSet * [nAnimationSets];
+//	for (int i = 0; i < m_nAnimationSets; i++) m_ppAnimationSets[i] = NULL;
+//}
+//
+//CAnimationSets::~CAnimationSets()
+//{
+//	for (int i = 0; i < m_nAnimationSets; i++) if (m_ppAnimationSets[i]) delete m_ppAnimationSets[i];
+//	if (m_ppAnimationSets) delete[] m_ppAnimationSets;
+//}
+//
+//void CAnimationSets::SetCallbackKeys(int nAnimationSet, int nCallbackKeys)
+//{
+//	m_ppAnimationSets[nAnimationSet]->m_nCallbackKeys = nCallbackKeys;
+//	m_ppAnimationSets[nAnimationSet]->m_pCallbackKeys = new CALLBACKKEY[nCallbackKeys];
+//}
+//
+//void CAnimationSets::SetCallbackKey(int nAnimationSet, int nKeyIndex, float fKeyTime, void* pData)
+//{
+//	m_ppAnimationSets[nAnimationSet]->m_pCallbackKeys[nKeyIndex].m_fTime = fKeyTime;
+//	m_ppAnimationSets[nAnimationSet]->m_pCallbackKeys[nKeyIndex].m_pCallbackData = pData;
+//}
+//
+//void CAnimationSets::SetAnimationCallbackHandler(int nAnimationSet, CAnimationCallbackHandler* pCallbackHandler)
+//{
+//	m_ppAnimationSets[nAnimationSet]->SetAnimationCallbackHandler(pCallbackHandler);
+//}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -376,6 +580,11 @@ void CFbxObject::Animate(float fTimeElapsed)
 		FbxTime fbxCurrentTime = m_pAnimationController->GetCurrentTime();
 		//::AnimateFbxNodeHierarchy(m_pfbxScene->GetRootNode(), fbxCurrentTime);
 	}
+}
+
+void CFbxObject::TestAnimate(float fTimeElapsed)
+{
+	
 }
 
 void CFbxObject::Update(float fTimeElapsed)

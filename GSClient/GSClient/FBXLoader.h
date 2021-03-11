@@ -52,6 +52,7 @@ struct BlendingIndexWeightPair
 struct CtrlPoint
 {
 	XMFLOAT3 mPosition;
+	XMFLOAT2 mUv;
 	std::vector<BlendingIndexWeightPair> mBlendingInfo;
 
 	CtrlPoint()
@@ -75,9 +76,8 @@ private:
 	string						mAnimationName;
 
 	vector<CTexturedVertex>		mMesh;
-
 	vector<Joint>				mSkeleton;
-
+	
 	unordered_map<unsigned int, CtrlPoint*> mControlPoints;
 
 public:
@@ -89,12 +89,10 @@ public:
 	void LoadFbxHierarchy(FbxNode* pNode);
 
 	void LoadMesh(FbxNode* pNode);
-	void LoadControlPoints(FbxNode* pNode);
-	void LoadUV(FbxNode* pNode);
-	void LoadNormal(FbxNode* pNode);
 
 	void LoadAnimations(FbxNode* pNode);
 	void LoadSkeletonHierarchy(FbxNode* pNode);
 	void LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex, int inParentIndex);
 
+	void SaveAsFile();
 };
