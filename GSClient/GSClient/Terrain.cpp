@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Terrain.h"
+#include <fstream>
+
 CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	int nWidth, int nLength,
 	int nBlockWidth, int nBlockLength, CShader* pShader)
@@ -654,40 +656,83 @@ void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 void CTerrain::InitHeightDatas()
 {
-	int count = 0;
-	for (int Sero = 0; Sero <= TERRAIN_HEIGHT_MAP_HEIGHT; ++Sero)
+	//int count = 0;
+	//for (int Sero = 0; Sero <= TERRAIN_HEIGHT_MAP_HEIGHT; ++Sero)
+	//{
+	//	for (int j = 0; j <= TERRAIN_HEIGHT_MAP_WIDTH; ++j)
+	//	{
+	//		m_Heights[Sero][j] = rand() % 300 - 150;
+	//		
+	//		if (j <= 50 && Sero <= 50)
+	//		{
+	//			m_Heights[Sero][j] = rand() % 300 - 350;
+	//		}
+	//		if (Sero > 80 && j < 50)
+	//		{
+	//			m_Heights[Sero][j] = rand() % 300 - 1150;
+	//		}
+	//		if (Sero > 20 && (j > 50 && j < 70))
+	//		{
+	//			m_Heights[Sero][j] = rand() % 300 - 2150;
+	//		}
+	//		if (Sero <= 20 && (j > 50 && j < 70))
+	//		{
+	//			m_Heights[Sero][j] = rand() % 300 - 3150;
+	//		}
+	//		if (Sero <= 20 && j >= 70)
+	//		{
+	//			m_Heights[Sero][j] = rand() % 300 - 3150;
+	//		}
+	//		if (Sero > 20 && j >= 70)
+	//		{
+	//			m_Heights[Sero][j] = rand() % 300 - 4150;
+	//		} 
+	//	}
+	//}
+
+
+
+	
+}
+
+void CTerrain::FileSave()
+{	
+	ofstream fileOut("Heights.txt");
+	for (int i = 0; i <= TERRAIN_HEIGHT_MAP_HEIGHT; ++i)
 	{
 		for (int j = 0; j <= TERRAIN_HEIGHT_MAP_WIDTH; ++j)
 		{
-			m_Heights[Sero][j] = rand() % 300 - 150;
-			
-			if (j <= 50 && Sero <= 50)
-			{
-				m_Heights[Sero][j] = rand() % 300 - 350;
-			}
-			if (Sero > 80 && j < 50)
-			{
-				m_Heights[Sero][j] = rand() % 300 - 1150;
-			}
-			if (Sero > 20 && (j > 50 && j < 70))
-			{
-				m_Heights[Sero][j] = rand() % 300 - 2150;
-			}
-			if (Sero <= 20 && (j > 50 && j < 70))
-			{
-				m_Heights[Sero][j] = rand() % 300 - 3150;
-			}
-			if (Sero <= 20 && j >= 70)
-			{
-				m_Heights[Sero][j] = rand() % 300 - 3150;
-			}
-			if (Sero > 20 && j >= 70)
-			{
-				m_Heights[Sero][j] = rand() % 300 - 4150;
-			}
-
-			
-
+			fileOut << m_Heights[i][j] << "\t";
+			if (((j+1) % 5 == 0 &&(j != 0 && j != 100)))
+				fileOut << "//\t";
 		}
+		fileOut << endl;
+		if (((i + 1) % 5 == 0 && (i != 0 && i != 100)))
+		{ 
+			 fileOut << "\n\n";
+		}
+	
+		fileOut << endl;
+	}
+}
+
+void CTerrain::FileRead()
+{
+	ifstream fileIn("Heights.txt");
+	for (int i = 0; i <= TERRAIN_HEIGHT_MAP_HEIGHT; ++i)
+	{
+		for (int j = 0; j <= TERRAIN_HEIGHT_MAP_WIDTH; ++j)
+		{
+			string text;
+			fileIn >> text;
+			if (text.compare("//") == 0)
+			{
+				j--;
+				continue;
+			}
+			cout << stoi(text) << " ";
+			m_Heights[i][j] = stoi(text);
+		}
+		cout << "\n";
 	}
 }
