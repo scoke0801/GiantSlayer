@@ -4,10 +4,11 @@ class CTerrain
 {
 private:
 	int m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
-
+	
 private:
 	int						m_nWidth;
 	int						m_nLength;
+	int						F_L;
 
 	int						m_nObjects;
 	vector<CGameObject*>    m_Objects;

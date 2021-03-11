@@ -609,6 +609,8 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	pObject->SetPosition(XMFLOAT3(0.0f, -10000.0f, 0.0f));
 	m_Objects.push_back(std::move(pObject));
 #pragma endregion
+
+
 }
 
 CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -652,11 +654,40 @@ void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 void CTerrain::InitHeightDatas()
 {
-	for (int i = 0; i <= TERRAIN_HEIGHT_MAP_HEIGHT; ++i)
+	int count = 0;
+	for (int Sero = 0; Sero <= TERRAIN_HEIGHT_MAP_HEIGHT; ++Sero)
 	{
 		for (int j = 0; j <= TERRAIN_HEIGHT_MAP_WIDTH; ++j)
 		{
-			m_Heights[i][j] = rand() % 300 - 150;
+			m_Heights[Sero][j] = rand() % 300 - 150;
+			
+			if (j <= 50 && Sero <= 50)
+			{
+				m_Heights[Sero][j] = rand() % 300 - 350;
+			}
+			if (Sero > 80 && j < 50)
+			{
+				m_Heights[Sero][j] = rand() % 300 - 1150;
+			}
+			if (Sero > 20 && (j > 50 && j < 70))
+			{
+				m_Heights[Sero][j] = rand() % 300 - 2150;
+			}
+			if (Sero <= 20 && (j > 50 && j < 70))
+			{
+				m_Heights[Sero][j] = rand() % 300 - 3150;
+			}
+			if (Sero <= 20 && j >= 70)
+			{
+				m_Heights[Sero][j] = rand() % 300 - 3150;
+			}
+			if (Sero > 20 && j >= 70)
+			{
+				m_Heights[Sero][j] = rand() % 300 - 4150;
+			}
+
+			
+
 		}
 	}
 }
