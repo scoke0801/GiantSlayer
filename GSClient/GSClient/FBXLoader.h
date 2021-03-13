@@ -89,6 +89,8 @@ public:
 	void LoadFbxHierarchy(FbxNode* pNode);
 
 	void LoadMesh(FbxNode* pNode);
+	void LoadControlPoints(FbxNode* pNode);
+	int FindJointIndexUsingName(const string& inJointName);
 
 	void LoadAnimations(FbxNode* pNode);
 	void LoadSkeletonHierarchy(FbxNode* pNode);

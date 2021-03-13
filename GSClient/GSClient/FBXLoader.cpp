@@ -19,6 +19,34 @@ FbxAMatrix GetGeoOffsetTransform(FbxNode* inNode)
 	return FbxAMatrix(lT, lR, lS);
 }
 
+XMFLOAT4X4 FbxAMatrixToXMFLOAT4X4(FbxAMatrix* pfbxmtxSource)
+{
+	FbxVector4 S = pfbxmtxSource->GetS();
+	FbxVector4 R = pfbxmtxSource->GetR();
+	FbxVector4 T = pfbxmtxSource->GetT();
+
+	FbxAMatrix fbxmtxTransform = FbxAMatrix(T, R, S);
+
+	XMFLOAT4X4 xmf4x4Result;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++) xmf4x4Result.m[i][j] = (float)(*pfbxmtxSource)[i][j];
+	}
+
+	XMFLOAT3 xmf3S = XMFLOAT3((float)S.mData[0], (float)S.mData[1], (float)S.mData[2]);
+	XMFLOAT3 xmf3R = XMFLOAT3((float)R.mData[0], (float)R.mData[1], (float)R.mData[2]);
+	XMFLOAT3 xmf3T = XMFLOAT3((float)T.mData[0], (float)T.mData[1], (float)T.mData[2]);
+
+	XMMATRIX Rx = XMMatrixRotationX(XMConvertToRadians(xmf3R.x));
+	XMMATRIX Ry = XMMatrixRotationY(XMConvertToRadians(xmf3R.y));
+	XMMATRIX Rz = XMMatrixRotationZ(XMConvertToRadians(xmf3R.z));
+	XMMATRIX xmR = XMMatrixMultiply(XMMatrixMultiply(Rx, Ry), Rz);
+	XMFLOAT4X4 xmf4x4Multiply;
+	XMStoreFloat4x4(&xmf4x4Multiply, XMMatrixMultiply(XMMatrixMultiply(XMMatrixScaling(xmf3S.x, xmf3S.y, xmf3S.z), xmR), XMMatrixTranslation(xmf3T.x, xmf3T.y, xmf3T.z)));
+
+	return(xmf4x4Result);
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -82,7 +110,8 @@ void FbxLoader::LoadFbxHierarchy(FbxNode* pNode)
 	if ((pfbxNodeAttribute != NULL) &&
 		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
 	{
-		LoadMesh(pNode);
+		//LoadMesh(pNode);
+		LoadControlPoints(pNode);
 
 		//if (animation != NULL)
 		LoadAnimations(pNode);
@@ -90,6 +119,30 @@ void FbxLoader::LoadFbxHierarchy(FbxNode* pNode)
 
 	for (int i = 0; i < pNode->GetChildCount(); i++)
 		LoadFbxHierarchy(pNode->GetChild(i));
+}
+
+void FbxLoader::LoadControlPoints(FbxNode* pNode)
+{
+	FbxMesh* pfbxMesh = pNode->GetMesh();
+	int cpNum = pfbxMesh->GetControlPointsCount();
+
+	for (unsigned int i = 0; i < cpNum; ++i)
+	{
+		CtrlPoint* cptemp = new CtrlPoint();
+		XMFLOAT3 postemp;
+
+		/*
+		float uv1 = fbxUV[0];
+		float uv2 = 1.0f - fbxUV[1];
+		*/
+
+		postemp.x = pfbxMesh->GetControlPointAt(i).mData[0];
+		postemp.y = pfbxMesh->GetControlPointAt(i).mData[1];
+		postemp.z = pfbxMesh->GetControlPointAt(i).mData[2];
+
+		cptemp->mPosition = postemp;
+		mControlPoints[i] = cptemp;
+	}
 }
 
 void FbxLoader::LoadMesh(FbxNode* pNode)
@@ -343,6 +396,9 @@ void FbxLoader::SaveAsFile()
 	FbxLongLong mFrameNum;
 	FbxAMatrix mGlobalTransform;
 	Keyframe* mNext;
+
+	GetT R S Q .
+	FbxVector4(double pX, double pY, double pZ, double pW=1.0);
 	*/
 
 	file << "[Joint]" << endl;
@@ -351,6 +407,21 @@ void FbxLoader::SaveAsFile()
 		file << "[JointName]" << point->mName << " [ParentIndex] " << point->mParentIndex << endl;
 
 	}
+
+	for (auto point = mSkeleton.begin(); point != mSkeleton.end(); point++) {
+		file << "[AnimFrameNum] " << point->mAnimation->mFrameNum;
+
+		XMFLOAT4X4 temp = FbxAMatrixToXMFLOAT4X4(&point->mAnimation->mGlobalTransform);
+
+		file << " [T] " << temp._11 << " " << temp._12 << " " << temp._13 << " " << temp._14;
+		file << " [R] " << temp._21 << " " << temp._22 << " " << temp._23 << " " << temp._24;
+		file << " [S] " << temp._31 << " " << temp._32 << " " << temp._33 << " " << temp._34;
+		file << " [Q] " << temp._41 << " " << temp._42 << " " << temp._43 << " " << temp._44;
+
+		file << endl;
+	}
+
+
 
 	cout << "파일 추출 끝" << endl;
 
