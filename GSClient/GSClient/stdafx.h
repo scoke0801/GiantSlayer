@@ -76,6 +76,7 @@ extern UINT gnDsvDescriptorIncrementSize;
 
 extern bool gbTerrainTessellationWireframe;
 extern bool gbBlurOn;
+extern bool gbBoundaryOn;
 
 extern const int gNumFrameResources;
 

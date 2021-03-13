@@ -267,7 +267,7 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, 
 	bool isCullModeOn, bool isBlendOn) 
 {
-	m_nPipelineStates = 1;
+	m_nPipelineStates = 2;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
@@ -301,6 +301,10 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	HRESULT hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
 		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[0]);
 
+	d3dPipelineStateDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[1]);
+
 	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
 	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
 	if (m_pd3dGeometryShaderBlob) m_pd3dGeometryShaderBlob->Release();
@@ -309,9 +313,34 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 		delete[] d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
 
+void CShader::CreateBoundaryShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
+	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	d3dPipelineStateDesc.pRootSignature = pd3dGraphicsRootSignature;
+	d3dPipelineStateDesc.VS = CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSBasic");
+	d3dPipelineStateDesc.PS = CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSBasic");
+	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState(); 
+	d3dPipelineStateDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	d3dPipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE; 
+	d3dPipelineStateDesc.BlendState = CreateBlendState();  
+	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
+	d3dPipelineStateDesc.InputLayout = CreateInputLayout(ShaderTypes::Diffused );
+	d3dPipelineStateDesc.SampleMask = UINT_MAX;
+	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	d3dPipelineStateDesc.NumRenderTargets = 1;
+	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dPipelineStateDesc.SampleDesc.Count = 1;
+	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+
+	HRESULT hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void**)&m_pd3dBoundartPipelineState);
+}
+
 void CShader::CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
-	m_nPipelineStates = 1;
+	m_nPipelineStates = 2;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
@@ -335,6 +364,10 @@ void CShader::CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 
 	HRESULT hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
 		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[0]);
+
+	d3dPipelineStateDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+	hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[1]);
 
 	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
 	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
@@ -424,12 +457,20 @@ void CShader::CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	//파이프라인에 그래픽스 상태 객체를 설정한다.
-	pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]);
+	pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]); 
 }
 
 void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	OnPrepareRender(pd3dCommandList);
+}
+
+void CShader::RenderBoundary(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_pd3dBoundartPipelineState != NULL)
+	{
+		pd3dCommandList->SetPipelineState(m_pd3dBoundartPipelineState);
+	} 
 }
 
 void CShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList

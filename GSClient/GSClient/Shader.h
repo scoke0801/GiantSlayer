@@ -38,6 +38,8 @@ protected:
 	ID3D12PipelineState**			m_ppd3dPipelineStates = NULL;
 	int								m_nPipelineStates = 0;
 
+	ID3D12PipelineState*			m_pd3dBoundartPipelineState = NULL;
+
 public:
 	CShader();
 	virtual ~CShader();
@@ -75,6 +77,7 @@ public:
 	virtual void CreateGeneralShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
 		bool isCullModeOn=false, bool isBlendOn = false);
+	void CreateBoundaryShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	void CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	void CreateUIShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
@@ -91,6 +94,7 @@ public:
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void RenderBoundary(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 }; 
 
 ///////////////////////////////////////////////////////////////////////////////////////

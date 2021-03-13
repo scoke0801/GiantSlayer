@@ -51,7 +51,12 @@ void CGameObject::SetMesh(CMesh* pMesh)
 	m_pMesh = pMesh;
 
 	if (m_pMesh) m_pMesh->AddRef();
-} 
+}  
+void CGameObject::BuildBoundigMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth)
+{
+	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, false, fWidth, fHeight, fDepth);
+	m_BoundingObjectMeshes.push_back(std::move(pMesh));
+}
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
@@ -126,10 +131,18 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 	{
 		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
 		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
-		m_pShader->Render(pd3dCommandList, pCamera);
+		m_pShader->Render(pd3dCommandList, pCamera); 
 	}
-	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
-
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList); 
+	
+	if (gbBoundaryOn)
+	{ 
+		m_pShader->RenderBoundary(pd3dCommandList, pCamera);
+		for (auto pBoundingMesh : m_BoundingObjectMeshes)
+		{
+			pBoundingMesh->Render(pd3dCommandList);
+		}
+	}
 }
 
 void CGameObject::SetPosition(XMFLOAT3 pos)

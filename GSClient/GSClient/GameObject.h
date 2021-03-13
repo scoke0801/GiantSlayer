@@ -86,6 +86,8 @@ protected:	// 좌표 관련 변수
 
 protected: // 렌더링 관련 변수
 	CMesh*				m_pMesh = NULL;
+	vector<CMesh*>		m_BoundingObjectMeshes;
+
 	CShader*			m_pShader = NULL;
  
 	UINT				m_nTextureIndex = 0x00;
@@ -116,11 +118,14 @@ public:
 
 	virtual void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 
+	virtual void BuildBoundigMeshes(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float fWidth, float fHeight, float fDepth);
+
 	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseShaderVariables();
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseUploadBuffers(); 
-
 public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(double fTimeElapsed);

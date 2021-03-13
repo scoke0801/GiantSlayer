@@ -11,6 +11,7 @@
 
 bool gbTerrainTessellationWireframe = false;
 bool gbBlurOn = false;
+bool gbBoundaryOn = false;
 
 UINT gnRtvDescriptorIncrementSize = 0;
 UINT gnDsvDescriptorIncrementSize = 0;
