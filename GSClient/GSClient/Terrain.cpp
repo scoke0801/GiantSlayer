@@ -609,8 +609,6 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	pObject->SetPosition(XMFLOAT3(0.0f, -10000.0f, 0.0f));
 	m_Objects.push_back(std::move(pObject));
 #pragma endregion
-
-
 }
 
 CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -627,7 +625,33 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 		for (int j = 0; j < 25; ++j)
 		{
 			pObject = new CGameObject();
-			pObject->SetTextureIndex(0x01);
+		
+			if (i < 19 && j<12)
+			{
+				pObject->SetTextureIndex(0x01);
+			}
+			else if (i >= 19 && j < 12)
+			{
+				pObject->SetTextureIndex(0x02);
+			}
+			else if (i >= 5  && j >= 12 && j<17)
+			{
+				pObject->SetTextureIndex(0x04);
+			}
+			else if (i < 5 && j >= 12 && j < 25)
+			{
+				pObject->SetTextureIndex(0x08);
+			}
+			else if (i > 0 && i <= 10 && j>=17 && j < 25)
+			{
+				pObject->SetTextureIndex(0x08);
+			}
+			else
+			{
+				pObject->SetTextureIndex(0x10);
+			}
+			
+
 			pObject->SetShader(pShader);
 			pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 				4 * j, 4 * i,
@@ -638,6 +662,8 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			m_Objects.push_back(std::move(pObject));
 		} 
 	} 
+
+
 }
 
 CTerrain::~CTerrain()
@@ -738,7 +764,14 @@ void CTerrain::InitHeightDatas()
 		}
 	}
 
+	for (int i = 80; i < 100; i++)
+	{
+		for (int Garo = 0; Garo < 50; Garo++)
+		{
+			
+		}
 
+	}
 	// 두번째 지형및 구조물
 	for (int i = 80; i < 100; i++)
 	{
@@ -754,7 +787,7 @@ void CTerrain::InitHeightDatas()
 			m_Heights[i][Garo] = rand() % 300 - 1750;
 		}
 	}
-	
+
 	for (int i = 0; i < 80; i++)
 	{
 		for (int Garo = 50; Garo < 70; Garo++)
@@ -802,6 +835,8 @@ void CTerrain::InitHeightDatas()
 			m_Heights[i][Garo] = rand() % 300 - 1650;
 		}
 	}
+
+	
 	// 세번째 지형및 구조물
 	for (int i = 80; i < 100; i++)
 	{
@@ -838,14 +873,22 @@ void CTerrain::InitHeightDatas()
 	{
 		for (int Garo = 70; Garo < 100; Garo++)
 		{
-			m_Heights[i][Garo] = rand() % 300 - 4650;
+			m_Heights[i][Garo] = rand() % 300 - 2550;
+			if (Garo > 79 && Garo < 89)
+			{
+				m_Heights[i][Garo] = rand() % 300 - 4650;
+				for(int i= 45; i<70; i++)
+				{
+					m_Heights[i][Garo] = -(100*i);
+				}
+			}
 		}
 	}
 	for (int i = 70; i < 100; i++)
 	{
 		for (int Garo = 70; Garo < 100; Garo++)
 		{
-			m_Heights[i][Garo] = rand() % 300 - 5150;
+			m_Heights[i][Garo] = rand() % 300 - 7150;
 		}
 	}
 	

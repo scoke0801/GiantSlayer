@@ -1034,6 +1034,12 @@ void CSceneYJ::BuildDoorWall(ID3D12Device* pd3dDevice,
 {
 	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 0,0, 7500 });
+
+	m_Objects.push_back(pDoorWall);
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
+	pDoorWall->SetPosition({ 14000,-4500, 8000 });
+
 	m_Objects.push_back(pDoorWall);
 }
 
