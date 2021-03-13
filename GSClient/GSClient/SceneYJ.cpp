@@ -203,51 +203,36 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pBillboardShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);
 #pragma region Create Tree
 	// 지나가지 못하는 첫번째 지형쪽의 나무 빌보드
-	for (int j = 0; j < 4; j++)
+	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+	/*for (int j = 0; j < 10; j++)
 	{
-		for (int i = 0; i < 16; i++)
+		for (int i = 1; i < 10; i++)
 		{
-			CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
 			CGameObject* pBillboardObject = new CGameObject();
 
 			pBillboardObject->SetMesh(pBillboardMesh);
-			pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-			
-			if (j == 0)
-			{
-				pBillboardObject->SetPosition({ 4300 + float((j * 500)), 1400, 1000 + float((i * 950)) });
-			}
-			if (j == 1)
-			{
-				pBillboardObject->SetPosition({ 4300 + float((j * 500)), 1400, 500 + float((i * 950)) });
-			}
-			if (j == 2)
-			{
-				pBillboardObject->SetPosition({ 6300 + float((j * 500)), 1400, 1000 + float((i * 950)) });
-			}
-			if (j == 3)
-			{
-				pBillboardObject->SetPosition({ 6300 + float((j * 500)), 1400, 500 + float((i * 950)) });
-			}
-			
-			pBillboardObject->SetTextureIndex(0x010);
+			pBillboardObject->Scale(1.0f, 1.0f, 1.0f);
+			float x_Location = 100.0f + rand() % 9500;
+			float z_Location = 100.0f + rand() % 15000;
+			pBillboardObject->SetPosition(XMFLOAT3(x_Location, m_Terrain->GetHeight(x_Location , z_Location) , z_Location));
+
+			pBillboardObject->SetTextureIndex(0x004);
 			pBillboardObject->SetShader(pBillboardShader);
 			m_BillboardObjects.push_back(std::move(pBillboardObject));
 		}
-	}
-	for (int i = 0; i < 8; i++)
-	{
-		CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
-		CGameObject* pBillboardObject = new CGameObject();
+	}*/
 
-		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-		pBillboardObject->SetPosition({ 4300 + float(((500*i))), 1400, 1000 + float((14750)) });
+	CGameObject* pBillboardObject = new CGameObject();
 
-		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(pBillboardShader);
-		m_BillboardObjects.push_back(std::move(pBillboardObject));
-	}
+	pBillboardObject->SetMesh(pBillboardMesh);
+	pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+	pBillboardObject->SetPosition({ 3000 , 400, 4500 });
+
+	pBillboardObject->SetTextureIndex(0x010);
+	pBillboardObject->SetShader(pBillboardShader);
+	m_BillboardObjects.push_back(std::move(pBillboardObject));
+	
+	
 #pragma endregion 
 #pragma region Create Cactus
 	for (int j = 0; j < 2; j++)
@@ -276,16 +261,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		}
 	}
 	
-		CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
-		CGameObject* pBillboardObject = new CGameObject();
-
-		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-		pBillboardObject->SetPosition({ 13000 , -600, 4250 });
-
-		pBillboardObject->SetTextureIndex(0x020);
-		pBillboardObject->SetShader(pBillboardShader);
-		m_BillboardObjects.push_back(std::move(pBillboardObject));
+		
 	
 #pragma endregion
 #pragma endregion
@@ -855,7 +831,7 @@ void CSceneYJ::ProcessInput()
 	if (keyInput.KEY_L)
 	{
 	}
-	DisplayVector3(m_CurrentCamera->GetPosition3f());
+	//DisplayVector3(m_CurrentCamera->GetPosition3f());
 	
 	m_CurrentCamera->UpdateViewMatrix();
 }
