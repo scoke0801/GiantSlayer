@@ -203,7 +203,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pBillboardShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);
 #pragma region Create Tree
 	// 지나가지 못하는 첫번째 지형쪽의 나무 빌보드
-	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
+	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, 160.0f, 160.0f);
 
 	CGameObject* pBillboardObject = new CGameObject();
 
@@ -212,24 +212,24 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pBillboardObject = new CGameObject();
 
 		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+		pBillboardObject->Scale(5.0f, 5.0f, 1.0f);
 		
 		float x_Tree = 4000 + 100.0f * i;
 		float z_Tree = 4500 + 700.0f * i;
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)+400.0f, z_Tree });
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 80.0f * 5.0f, z_Tree });
 		if (i == 5)
 		{
 			float x_Tree = 200 + 500.0f;
 			float z_Tree = 3500 + 500.0f;
-			pBillboardObject->SetPosition({ 200 + 500.0f , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , 3500 + 500.0f });
+			pBillboardObject->SetPosition({ 200 + 500.0f , m_Terrain->GetHeight(x_Tree,z_Tree) + 80.0f * 5.0f, 3500 + 500.0f });
 		}
 		if (i == 6)
 		{
-			pBillboardObject->SetPosition({ 3000 ,m_Terrain->GetHeight(3000,4500) + 400.0f, 4500 });
+			pBillboardObject->SetPosition({ 3000 ,m_Terrain->GetHeight(3000,4500) + 80.0f * 5.0f, 4500 });
 		}
 		if (i == 7)
 		{
-			pBillboardObject->SetPosition({ 3500 ,m_Terrain->GetHeight(3500,4500) + 400.0f, 4500 });
+			pBillboardObject->SetPosition({ 3500 ,m_Terrain->GetHeight(3500,4500) + 80.0f * 5.0f , 4500 });
 		}
 
 		pBillboardObject->SetTextureIndex(0x010);
@@ -319,8 +319,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Mirror->SetMesh(pMirrorMesh);
 	m_Mirror->SetShader(pShader);
 	m_Mirror->SetPosition({ 2000,500,10000 });
-	m_Mirror->SetTextureIndex(0x800);
-
+	m_Mirror->SetTextureIndex(0x800); 
 }
 
 void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -972,14 +971,25 @@ void CSceneYJ::BuildBridges(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature, CShader* pShader)
 {
-	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader); 
+	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
-	pBridge->SetPosition({ 2500,  01,  1500 });
+	pBridge->RotateAll({ 0,1,0 }, 90);
+	pBridge->SetPosition({ 8200,  -1301,  17800 });
 	m_Objects.push_back(pBridge);
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
-	pBridge->SetPosition({ 2500,  01,  2500 });
+	pBridge->RotateAll({ 0,1,0 }, 90);
+	pBridge->SetPosition({ 10200,  -1301,  17800 });
+	m_Objects.push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90);
+	pBridge->SetPosition({ 9200,  -1301,  17800 });
 	m_Objects.push_back(pBridge);
 }
 

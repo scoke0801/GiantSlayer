@@ -18,6 +18,7 @@ protected:
 	vector<CGameObject*>		m_Objects; 
 	vector<CGameObject*>		m_BillboardObjects;
 
+	CGameObject*				m_Mirror = nullptr;
 	CPlayer*					m_Player = nullptr;
 
 	vector<UI*>					m_UIs;
@@ -33,6 +34,7 @@ protected:
 	CCamera**					m_Cameras;
 	CCamera*					m_CurrentCamera = nullptr;
 	CCamera*					m_MinimapCamera = nullptr;
+	CCamera*					m_MirrorCamera = nullptr;
 private:
 	POINT						m_LastMousePos;
 
@@ -54,6 +56,9 @@ private:	// about Lights
 private:	// about Minimap
 	ID3D12Resource*				m_pd3dMinimapTex = NULL;
 	UI*							m_MinimapArrow;
+
+private:
+	ID3D12Resource*				m_pd3dMirrorTex = NULL;
 
 private:	// about SceneInfo
 	ID3D12Resource*				m_pd3dcbSceneInfo = NULL;
@@ -86,6 +91,7 @@ public:
 	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
+	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 
 public:
 	virtual void Communicate(SOCKET& sock) override;
@@ -115,4 +121,5 @@ private:
 	void BuildBilboardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
+	void BuildMirrorResource(ID3D12Device* pd3dDevice);
 };

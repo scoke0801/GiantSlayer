@@ -264,7 +264,8 @@ public:
 class CBillboardMesh : public CMesh
 {
 public:
-	CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		float sizeX, float sizeY);
 	CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		CBillboardVertex* pGeometryBillboardVertices, UINT nGeometryBillboardVertices);
 	virtual ~CBillboardMesh();
