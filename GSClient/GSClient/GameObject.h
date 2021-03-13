@@ -172,6 +172,9 @@ public:
 
 	void SetSP(UINT SP) { m_SP = SP; }
 	UINT GetSP() const { return m_SP; }
+
+	void SetSize(const XMFLOAT3& size) { m_xmf3Size = size; }
+	XMFLOAT3 GetSize()const { return m_xmf3Size; }
 public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;
