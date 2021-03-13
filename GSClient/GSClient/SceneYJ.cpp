@@ -309,6 +309,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pFBXShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
 	pFBXShader->CreateInputLayout(ShaderTypes::Textured);
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pFBXShader->CreateBoundaryShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	CGameObject* pObject = new CGameObject();
@@ -350,6 +351,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x80);
 	m_Player->SetMesh(fbxMesh); 
+	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
 
 	m_MinimapCamera->SetTarget(m_Player); 
 
@@ -837,9 +839,11 @@ void CSceneYJ::ProcessInput()
 	}
 	if (keyInput.KEY_O)
 	{
+		gbBoundaryOn = true;
 	}
 	if (keyInput.KEY_P)
 	{
+		gbBoundaryOn = false;
 	}
 	if (keyInput.KEY_J)
 	{
