@@ -134,7 +134,6 @@ public:
 
 	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
 
-	void LookAt(const DirectX::FXMVECTOR& pos, const DirectX::FXMVECTOR& target, const DirectX::FXMVECTOR& worldUp);
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 
 	bool CollisionCheck() { return false; };

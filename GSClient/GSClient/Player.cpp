@@ -76,30 +76,36 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	look.y = right.y = 0.0f;
 	look = Vector3::Normalize(look);
 	right = Vector3::Normalize(right);
-	 
+
+	XMFLOAT3 xmf3Dir = Vector3::Normalize(m_xmf3Velocity);
 	switch (direction)
 	{
 	case OBJ_DIRECTION::Front:
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(look, PLAYER_RUN_VELOCITY));
+		xmf3Dir.z += 500;
 		break;
 	case OBJ_DIRECTION::Back:
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(Vector3::Multifly(look, -1), PLAYER_RUN_VELOCITY));
+		xmf3Dir.z -= 500;
 		break;
 	case OBJ_DIRECTION::Left:
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(Vector3::Multifly(right, -1), PLAYER_RUN_VELOCITY));
+		xmf3Dir.x -= 500;
 		break;
 	case OBJ_DIRECTION::Right:
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(right, PLAYER_RUN_VELOCITY));
+		xmf3Dir.x += 500;
 		break;
 	default:
 		assert("잘못된 방향으로 이동할 수 없어요~");
 		break;
 	}	
-	XMFLOAT3 xmf3Dir = Vector3::Normalize(m_xmf3Velocity);
 	XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook());
 	float angle = Vector3::GetAngle(xmf3Dir, playerLookAt);
 	cout << "각도 : " << angle << "\n"; 
-	Rotate(XMFLOAT3(0, 1, 0), (angle)); 
+	
+	LookAt(m_xmf3Position, xmf3Dir, { 0,1,0 });
+	//Rotate(XMFLOAT3(0, 1, 0), (angle)); 
 	//bool isMoving = IsMoving();
 	//if (!isMoving)
 	//{
