@@ -19,7 +19,6 @@ void CCamera::Update(float elapsedTime)
 	{
 		m_TimerForShake.UpdateElapsedTime();
 		auto res = m_TimerForShake.GetElapsedTime();
-		cout << res << "\n";
 	 
 		if (res >= m_ShakeTime)
 		{
@@ -63,6 +62,7 @@ void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
 	float fLength = Vector3::Length(xmf3Direction);
 	xmf3Direction = Vector3::Normalize(xmf3Direction);
+
 	//float fTimeLagScale = (m_fTimeLag) ? fTimeElapsed * (1.0f / m_fTimeLag) : 1.0f;
 	float fTimeLagScale = 1.0f;
 	float fDistance = fLength * fTimeLagScale;

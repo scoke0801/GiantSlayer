@@ -51,7 +51,12 @@ void CGameObject::SetMesh(CMesh* pMesh)
 	m_pMesh = pMesh;
 
 	if (m_pMesh) m_pMesh->AddRef();
-} 
+}  
+void CGameObject::BuildBoundigMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth)
+{
+	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, false, fWidth, fHeight, fDepth);
+	m_BoundingObjectMeshes.push_back(std::move(pMesh));
+}
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
@@ -126,10 +131,18 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 	{
 		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
 		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
-		m_pShader->Render(pd3dCommandList, pCamera);
+		m_pShader->Render(pd3dCommandList, pCamera); 
 	}
-	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
-
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList); 
+	
+	if (gbBoundaryOn)
+	{ 
+		m_pShader->RenderBoundary(pd3dCommandList, pCamera);
+		for (auto pBoundingMesh : m_BoundingObjectMeshes)
+		{
+			pBoundingMesh->Render(pd3dCommandList);
+		}
+	}
 }
 
 void CGameObject::SetPosition(XMFLOAT3 pos)
@@ -218,6 +231,29 @@ void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
 		XMConvertToRadians(fAngle));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+}
+void CGameObject::LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up)
+{  
+	XMFLOAT3 L = Vector3::Normalize(Vector3::Subtract(target, pos));
+	XMFLOAT3 R = Vector3::Normalize(Vector3::CrossProduct(up, L));
+	XMFLOAT3 U = Vector3::CrossProduct(L, R);
+
+	float x = -(Vector3::DotProduct(pos, R));
+	float y = -(Vector3::DotProduct(pos, U));
+	float z = -(Vector3::DotProduct(pos, L));
+
+	m_xmf4x4World(0, 0) = R.x;
+	m_xmf4x4World(0, 1) = R.y;
+	m_xmf4x4World(0, 2) = R.z;  
+
+	m_xmf4x4World(1, 0) = U.x;
+	m_xmf4x4World(1, 1) = U.y;
+	m_xmf4x4World(1, 2) = U.z; 
+
+	m_xmf4x4World(2, 0) = L.x;
+	m_xmf4x4World(2, 1) = L.y;
+	m_xmf4x4World(2, 2) = L.z;
+	Scale(m_xmf3Size.x, m_xmf3Size.y, m_xmf3Size.z, false); 
 }
 
 void CGameObject::Scale(float x, float y, float z, bool setSize)

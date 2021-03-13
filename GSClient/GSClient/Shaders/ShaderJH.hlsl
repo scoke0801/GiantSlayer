@@ -106,6 +106,17 @@ float4 PSColor(VS_COLOR_OUTPUT input) : SV_TARGET
 	return cColor;
 }
 
+VS_COLOR_OUTPUT VSBasic(VS_COLOR_INPUT input)
+{
+	VS_COLOR_OUTPUT outRes;
+	outRes.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	return outRes;
+}
+float4 PSBasic(VS_COLOR_OUTPUT input) : SV_TARGET
+{
+	float4 cColor = float4(1.0f, 0.0f, 0.0f, 0.0f);
+	return cColor;
+}
 //////////////////////////////////////////////////////////////////////
 //
 VS_TEXTURE_OUT VSTextured(VS_TEXTURE_IN input)

@@ -234,6 +234,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pFBXShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
 	pFBXShader->CreateInputLayout(ShaderTypes::Textured);
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pFBXShader->CreateBoundaryShader(pd3dDevice, m_pd3dGraphicsRootSignature );
 
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	CGameObject* pObject = new CGameObject();
@@ -268,6 +269,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetCamera(m_CurrentCamera);
 	m_Player->SetTextureIndex(0x80);
 	m_Player->SetMesh(fbxMesh);  
+	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
 
 	m_MinimapCamera->SetTarget(m_Player);  
 }
@@ -396,8 +398,10 @@ void CSceneJH::Update(double elapsedTime)
 		pObject->Update(elapsedTime);
 	} 
 	m_HelpTextUI->Update(elapsedTime);
-	m_Player->Update(elapsedTime);
 	
+	m_Player->Update(elapsedTime);
+	m_Player->FixPositionByTerrain(m_Terrain);
+
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 	if (m_MinimapCamera) 
 	{
@@ -702,10 +706,12 @@ void CSceneJH::ProcessInput()
 	{ 
 	}
 	if (keyInput.KEY_O)
-	{ 
+	{  
+		gbBoundaryOn = true;
 	}
 	if (keyInput.KEY_P)
-	{ 
+	{
+		gbBoundaryOn = false;
 	}
 	if (keyInput.KEY_J)
 	{
@@ -743,12 +749,12 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		if (m_isPlayerSelected)
 		{
 			//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 15);
 
 			if (m_Player->IsMoving())
 			{
-				m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
-				m_MinimapArrow->Rotate(-dx * 150);
+				m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 15);
+				m_MinimapArrow->Rotate(-dx * 15);
 			}
 		}
 		else {
