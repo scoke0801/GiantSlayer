@@ -35,5 +35,7 @@ public:
 
 private:
 	void InitHeightDatas();
+	void FileSave();
+	void FileRead();
 };
 
