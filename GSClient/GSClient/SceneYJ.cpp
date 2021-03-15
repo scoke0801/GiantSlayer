@@ -207,35 +207,164 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	CGameObject* pBillboardObject = new CGameObject();
 
-	for (int i = 0; i < 8; i++)
+	float x_Tree,z_Tree;
+
+
+	for (int i = 0; i < 2; i++)
 	{
 		pBillboardObject = new CGameObject();
-
 		pBillboardObject->SetMesh(pBillboardMesh);
 		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-		
-		float x_Tree = 4000 + 100.0f * i;
-		float z_Tree = 4500 + 700.0f * i;
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)+400.0f, z_Tree });
-		if (i == 5)
-		{
-			float x_Tree = 200 + 500.0f;
-			float z_Tree = 3500 + 500.0f;
-			pBillboardObject->SetPosition({ 200 + 500.0f , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , 3500 + 500.0f });
-		}
-		if (i == 6)
-		{
-			pBillboardObject->SetPosition({ 3000 ,m_Terrain->GetHeight(3000,4500) + 400.0f, 4500 });
-		}
-		if (i == 7)
-		{
-			pBillboardObject->SetPosition({ 3500 ,m_Terrain->GetHeight(3500,4500) + 400.0f, 4500 });
-		}
+
+		x_Tree = 3000.0f + 500.0f * i;
+		z_Tree = 4500.0f;
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
 		pBillboardObject->SetShader(pBillboardShader);
 		m_BillboardObjects.push_back(std::move(pBillboardObject));
 	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		pBillboardObject = new CGameObject();
+
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000 + 100.0f * i;
+		z_Tree = 4500 + 700.0f * i;
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f, z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(pBillboardShader);
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 700.0f+(600*i);
+		z_Tree = 4000.0f+(600*i);
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(pBillboardShader);
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+	
+	for (int i = 0; i < 2; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000.0f + (600 * i);
+		z_Tree = 3200.0f;
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(pBillboardShader);
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+	
+	for (int i = 0; i < 3; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 5500;
+		z_Tree = 4200.0f+ (1000 * i);
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)+300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(pBillboardShader);
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000.0f;
+		z_Tree = 10500.0f + (500 * i);
+		if (i == 2)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 10500.0f;
+		}
+		if (i == 3)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 11000.0f;
+		}
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(pBillboardShader);
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000;
+		z_Tree = 12600.0f +2100.0f*i ;
+
+		if (i == 2)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 12600.0f;
+		}
+		if (i == 3)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 14700.0f;
+		}
+
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(pBillboardShader);
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 7; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 8200;
+		z_Tree = 300.0f+1650.0f * i;
+
+		if (i == 5)
+		{
+			x_Tree = 6500.0f;
+			z_Tree = 8500.0f;
+		}
+		if (i == 6)
+		{
+			x_Tree = 6500.0f;
+			z_Tree = 9500.0f;
+		}
+
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(pBillboardShader);
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
 	
 #pragma endregion 
 
@@ -262,15 +391,16 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pFBXShader->CreateBoundaryShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
+	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
 	CGameObject* pObject = new CGameObject();
 	pObject->SetMesh(fbxMesh);
 	pObject->SetPosition({ 500,  250, 1650 });
 	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(pShader);
 	pObject->SetTextureIndex(0x80);
-	pObject->Scale(5, 5, 5);
+	pObject->Scale(50, 50, 50);
 	m_Objects.push_back(std::move(pObject));
+
 
 	pObject = new CGameObject();
 	pObject->SetMesh(fbxMesh);
@@ -296,7 +426,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Cameras[0]->SetTarget(m_Player);
 
 	m_Player->SetShader(pFBXShader);
-	m_Player->Scale(20, 20, 20);
+	m_Player->Scale(50, 50, 50);
 	m_Player->SetObjectName(OBJ_NAME::Player);
 	m_Player->SetPosition({ 2000,  0, 11550 });
 	m_Player->SetCamera(m_Cameras[0]);
@@ -339,7 +469,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	{
 		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds", 
-		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
+		L"resources/OBJ/box.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/Cactus.dds"

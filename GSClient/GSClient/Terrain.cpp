@@ -688,216 +688,248 @@ float CTerrain::GetHeight(int xPosition, int zPosition)
 
 void CTerrain::InitHeightDatas()
 {
-	//for (int Sero = 0; Sero <= TERRAIN_HEIGHT_MAP_HEIGHT; ++Sero)
-	//{
-	//	for (int j = 0; j <= TERRAIN_HEIGHT_MAP_WIDTH; ++j)
-	//	{
-	//		m_Heights[Sero][j] = rand() % 300 - 150;
-	//	}
-	//}
+	for (int Sero = 0; Sero <= TERRAIN_HEIGHT_MAP_HEIGHT; ++Sero)
+	{
+		for (int j = 0; j <= TERRAIN_HEIGHT_MAP_WIDTH; ++j)
+		{
+			m_Heights[Sero][j] = rand() % 300 - 150;
+		}
+	}
 
-	//// 첫번째 지형및 구조물
-	//for (int i = 0; i < 15; i++)
-	//{
-	//	for (int Garo = 0; Garo < 15; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = 100;
-	//	}
-	//}
+	// 첫번째 지형및 구조물
+	for (int i = 0; i < 15; i++)
+	{
+		for (int Garo = 0; Garo < 15; Garo++)
+		{
+			m_Heights[i][Garo] = 100;
+		}
+	}
 
-	//for (int i = 7; i < 15; i++)
-	//{
-	//	for (int Garo = 5; Garo < 15; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 500 + (Garo * Garo *2);
-	//	}
-	//}
+	for (int i = 7; i < 15; i++)
+	{
+		for (int Garo = 5; Garo < 15; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 500 + (Garo * Garo *2);
+		}
+	}
 
-	//for (int i = 0; i < 5; i++)
-	//{
-	//	for (int Garo = 15; Garo < 25; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 500 + (Garo * Garo * 2);
-	//	}
-	//}
+	for (int i = 0; i < 5; i++)
+	{
+		for (int Garo = 15; Garo < 25; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 500 + (Garo * Garo * 2);
+		}
+	}
 
-	//for (int i = 5; i < 15; i++)
-	//{
-	//	for (int Garo = 20; Garo < 25; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 500 + (Garo * Garo * 2);
-	//	}
-	//}
+	for (int i = 5; i < 15; i++)
+	{
+		for (int Garo = 20; Garo < 25; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 500 + (Garo * Garo * 2);
+		}
+	}
 
 
-	//for (int i = 15; i < 25; i++)
-	//{
-	//	for (int Garo = 0; Garo < 5; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 500 - (i * i );
-	//	}
-	//}
-	// 
-	//for (int i = 25; i < 35; i++)
-	//{
-	//	for (int Garo = 15; Garo < 20; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i*20);
-	//	}
-	//}
+	for (int i = 15; i < 25; i++)
+	{
+		for (int Garo = 0; Garo < 5; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 500 - (i * i );
+		}
+	}
+	 
+	for (int i = 25; i < 35; i++)
+	{
+		for (int Garo = 15; Garo < 20; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 + (i*20);
+		}
+	}
 
-	//for (int i = 25; i < 35; i++)
-	//{
-	//	for (int Garo = 0; Garo < 7; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i * 20);
-	//	}
-	//}
+	for (int i = 25; i < 35; i++)
+	{
+		for (int Garo = 0; Garo < 7; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 + (i * 20);
+		}
+	}
 
-	//for (int i = 0; i < 35; i++)
-	//{
-	//	for (int Garo = 30; Garo < 40; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i * 30);
-	//	}
-	//}
+	for (int i = 0; i < 35; i++)
+	{
+		for (int Garo = 30; Garo < 40; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 + (i * 30);
+		}
+	}
 
-	//for (int i = 40; i < 50; i++)
-	//{
-	//	for (int Garo = 20; Garo < 30; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i * 30);
-	//	}
-	//}
+	for (int i = 40; i < 50; i++)
+	{
+		for (int Garo = 20; Garo < 30; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 + (i * 30);
+		}
+	}
 
-	//for (int i = 80; i < 100; i++)
-	//{
-	//	for (int Garo = 0; Garo < 50; Garo++)
-	//	{
-	//		
-	//	}
+	for (int i = 57; i < 62; i++)
+	{
+		for (int Garo = 20; Garo < 27; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 + (i * 30)-1300.0f;
+		}
+	}
 
-	//}
-	//// 두번째 지형및 구조물
-	//for (int i = 80; i < 100; i++)
-	//{
-	//	for (int Garo = 0; Garo < 50; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1150;
-	//	}
-	//}
-	//for (int i = 80; i < 100; i++)
-	//{
-	//	for (int Garo = 40; Garo < 50; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1750;
-	//	}
-	//}
+	for (int i = 65; i < 72; i++)
+	{
+		for (int Garo = 20; Garo < 27; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 + (i * 30) -1300.0f;
+		}
+	}
 
-	//for (int i = 0; i < 80; i++)
-	//{
-	//	for (int Garo = 50; Garo < 70; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 2150;
-	//	}
-	//}
-	//for (int i = 0; i < 80; i++)
-	//{
-	//	for (int Garo = 50; Garo < 70; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 2150;
-	//	}
-	//}
+	for (int i = 55; i < 65; i++)
+	{
+		for (int Garo = 40; Garo < 50; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 + (i * 30)-1700.0f;
+		}
+	}
 
-	//// 구덩이
-	//for (int i = 95; i < 100; i++)
-	//{
-	//	for (int Garo = 10; Garo < 15; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1650;
-	//	}
-	//}
+	for (int i = 62; i < 65; i++)
+	{
+		for (int Garo = 0; Garo < 10; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 + (i * 30) - 2000.0f;
+		}
+	}
 
-	//for (int i = 85; i < 90; i++)
-	//{
-	//	for (int Garo = 7; Garo < 12; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1650;
-	//	}
-	//}
+	for (int i = 10; i < 15; i++)
+	{
+		for (int Garo = 45; Garo < 50; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - (i * 30)-1000.0f;
+		}
+	}
+	
+	// 두번째 지형및 구조물
+	for (int i = 80; i < 100; i++)
+	{
+		for (int Garo = 0; Garo < 50; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 1150;
+		}
+	}
+	for (int i = 80; i < 100; i++)
+	{
+		for (int Garo = 40; Garo < 50; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 1750;
+		}
+	}
 
-	//for (int i = 80; i < 85; i++)
-	//{
-	//	for (int Garo = 22; Garo < 27; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1650;
-	//	}
-	//}
+	for (int i = 0; i < 80; i++)
+	{
+		for (int Garo = 50; Garo < 70; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 2150;
+		}
+	}
+	for (int i = 0; i < 80; i++)
+	{
+		for (int Garo = 50; Garo < 70; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 2150;
+		}
+	}
 
-	//for (int i = 95; i < 100; i++)
-	//{
-	//	for (int Garo = 27; Garo < 32; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1650;
-	//	}
-	//}
+	// 구덩이
+	for (int i = 95; i < 100; i++)
+	{
+		for (int Garo = 10; Garo < 15; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 1650;
+		}
+	}
 
-	//
-	//// 세번째 지형및 구조물
-	//for (int i = 80; i < 100; i++)
-	//{
-	//	for (int Garo = 50; Garo < 70; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1150;
-	//	}
-	//}
-	//for (int i = 0; i < 20; i++)
-	//{
-	//	for (int Garo = 50; Garo < 70; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 3150;
-	//	}
-	//}
-	// 
-	//// 4번째~보스
-	//for (int i = 0; i < 20; i++)
-	//{
-	//	for (int Garo = 70; Garo < 100; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 3650;
-	//	}
-	//}
-	//for (int i = 20; i < 40; i++)
-	//{
-	//	for (int Garo = 70; Garo < 100; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 4150;
-	//	}
-	//}
-	//for (int i = 40; i < 70; i++)
-	//{
-	//	for (int Garo = 70; Garo < 100; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 2550;
-	//		if (Garo > 79 && Garo < 89)
-	//		{
-	//			m_Heights[i][Garo] = rand() % 300 - 4650;
-	//			for(int i= 45; i<70; i++)
-	//			{
-	//				m_Heights[i][Garo] = -(100*i);
-	//			}
-	//		}
-	//	}
-	//}
-	//for (int i = 70; i < 100; i++)
-	//{
-	//	for (int Garo = 70; Garo < 100; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 7150;
-	//	}
-	//} 
-	//FileSave();
-	FileRead();
+	for (int i = 85; i < 90; i++)
+	{
+		for (int Garo = 7; Garo < 12; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 1650;
+		}
+	}
+
+	for (int i = 80; i < 85; i++)
+	{
+		for (int Garo = 22; Garo < 27; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 1650;
+		}
+	}
+
+	for (int i = 95; i < 100; i++)
+	{
+		for (int Garo = 27; Garo < 32; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 1650;
+		}
+	}
+
+	
+	// 세번째 지형및 구조물
+	for (int i = 80; i < 100; i++)
+	{
+		for (int Garo = 50; Garo < 70; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 1150;
+		}
+	}
+	for (int i = 0; i < 20; i++)
+	{
+		for (int Garo = 50; Garo < 70; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 3150;
+		}
+	}
+	 
+	// 4번째~보스
+	for (int i = 0; i < 20; i++)
+	{
+		for (int Garo = 70; Garo < 100; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 3650;
+		}
+	}
+	for (int i = 20; i < 40; i++)
+	{
+		for (int Garo = 70; Garo < 100; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 4150;
+		}
+	}
+	for (int i = 40; i < 70; i++)
+	{
+		for (int Garo = 70; Garo < 100; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 2550;
+			if (Garo > 79 && Garo < 89)
+			{
+				m_Heights[i][Garo] = rand() % 300 - 4650;
+				for(int i= 45; i<70; i++)
+				{
+					m_Heights[i][Garo] = -(100*i);
+				}
+			}
+		}
+	}
+	for (int i = 70; i < 100; i++)
+	{
+		for (int Garo = 70; Garo < 100; Garo++)
+		{
+			m_Heights[i][Garo] = rand() % 300 - 7150;
+		}
+	} 
+	FileSave();
+	//FileRead();
 }
 void CTerrain::FileSave()
 {
