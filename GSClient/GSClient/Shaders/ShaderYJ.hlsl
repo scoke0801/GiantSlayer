@@ -634,6 +634,8 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     {
         cColor = gtxtMirror.Sample(gssWrap, input.uv);
     }
+    
+	
 	
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
