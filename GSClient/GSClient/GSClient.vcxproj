@@ -164,6 +164,7 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="Handler.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
@@ -201,6 +202,7 @@
     <ClCompile Include="Bridge.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Communicates.cpp" />
+    <ClCompile Include="Handler.cpp" />
     <ClCompile Include="Sign.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Enemy.cpp" />

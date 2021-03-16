@@ -126,6 +126,9 @@
     <ClCompile Include="Sign.cpp">
       <Filter>GameObject\Sign</Filter>
     </ClCompile>
+    <ClCompile Include="Handler.cpp">
+      <Filter>Handler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -246,6 +249,9 @@
     </ClInclude>
     <ClInclude Include="Sign.h">
       <Filter>GameObject\Sign</Filter>
+    </ClInclude>
+    <ClInclude Include="Handler.h">
+      <Filter>Handler</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
