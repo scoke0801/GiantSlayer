@@ -22,7 +22,7 @@ CSign::CSign(ID3D12Device* pd3dDevice,
 	m_WallPaper = new CGameObject();
 	m_WallPaper->SetMesh(pMesh);
 	m_WallPaper->SetShader(pShader);
-	m_WallPaper->SetTextureIndex(0x80);
+	m_WallPaper->SetTextureIndex(0x100);
 	if (isFrontSide)
 	{
 		m_WallPaper->SetPosition({ 0, 250, -40 });
