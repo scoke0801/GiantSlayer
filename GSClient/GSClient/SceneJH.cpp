@@ -353,7 +353,9 @@ void CSceneJH::BuildShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTextured");
 	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	CHandler<CShader*>::GetInstance().AddData("SkyBox", pSkyBoxShader);
+	//CHandler<CShader*>::GetInstance().AddData("SkyBox", pSkyBoxShader);
+
+	CShaderHandler::GetInstance().AddData("SkyBox", pSkyBoxShader);
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
