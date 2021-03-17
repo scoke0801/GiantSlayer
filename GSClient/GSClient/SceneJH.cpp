@@ -12,6 +12,7 @@
 #include "Enemy.h"
 #include "Puzzle.h"
 #include "Terrain.h"
+#include "Sign.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
@@ -39,6 +40,7 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
+	BuildShaders(pd3dDevice, pd3dCommandList);
 	BuildMaterials(pd3dDevice, pd3dCommandList);
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
 	BuildLights(pd3dDevice, pd3dCommandList); 
@@ -289,6 +291,23 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Mirror->SetShader(pShader);
 	m_Mirror->SetPosition({ 2000,500,10000 });
 	m_Mirror->SetTextureIndex(0x800);
+
+	// 첫번째 지형 표지판
+	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, true, pShader);
+	pSign->SetPosition({ 2700, 200,7000 });
+	m_Objects.push_back(pSign);
+	
+
+	// 퍼즐 벽 표지판
+	pSign = new CSign(pd3dDevice, pd3dCommandList, false, pShader);
+	pSign->SetPosition({ 11200.0f, 0.0f - 1800.0f, 3200.0f + 5000.0f });
+	m_Objects.push_back(pSign);
+
+	//퍼즐 앞 표지판 
+	//pSign = new CSign(pd3dDevice, pd3dCommandList, false, pShader);
+	//pSign->SetPosition({ 11200.0f, 0.0f - 1800.0f, 1500.0f + 10500.0f });
+	//m_Objects.push_back(pSign);
+	//{ 10600.0f, 0.0f - 2000.0f, 1500.0f + 8000.0f }
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -307,9 +326,11 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	const wchar_t* address[] =
 	{
+		//Wood->WoodBoard2
+		//WallTest2->StoneWallTexture3
 		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds",
-		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
+		L"resources/OBJ/Box.dds",L"resources/OBJ/WoodBoard2.dds",  L"resources/OBJ/StoneWallTexture3.dds", L"resources/OBJ/Door3.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
 		L"resources/Billboard/Tree02.dds", L"resources/Billboard/Cactus.dds",
@@ -323,6 +344,18 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		MakeTexture(pd3dDevice, pd3dCommandList, tempTex.get(), keyNames[i], address[i]); 
 		m_Textures[tempTex->m_Name] = std::move(tempTex);
 	}       
+}
+
+void CSceneJH::BuildShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{ 
+	CShader* pSkyBoxShader = new CSkyBoxShader();
+	pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTextured");
+	pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTextured");
+	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
+	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	//CHandler<CShader*>::GetInstance().AddData("SkyBox", pSkyBoxShader);
+
+	CShaderHandler::GetInstance().AddData("SkyBox", pSkyBoxShader);
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -976,6 +1009,10 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 0,0, 7500 });
 	m_Objects.push_back(pDoorWall); 
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 3300, 1000, 500, pShader);
+	pDoorWall->SetPosition({ 10300, -2000, 7500 });
+	m_Objects.push_back(pDoorWall);
 }
 
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -992,12 +1029,13 @@ void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
 
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, pShader);
-	pPuzzlePlate->SetPosition({ 600.0f,  0.0f, 1500.0f });
+	pPuzzlePlate->SetPosition({ 10600.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f });
 	pPuzzlePlate->SetShader(pShader);
+	//pPuzzlePlate->RotateAll ({ 0,1,0 }, 180);
 	m_Objects.push_back(std::move(pPuzzlePlate));
 
 	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, pShader);
-	pObject->SetPosition({ 500.0f,  0.0f, 1500.0f });
+	pObject->SetPosition({ 10500.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f });
 	pObject->SetShader(pShader);
 	m_Objects.push_back(std::move(pObject)); 
 
@@ -1012,7 +1050,7 @@ void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		for (int j = 0; j < 5; ++j)
 		{
 			pObject = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
-			pObject->SetPosition({ 900.0f + i * 1800.0f,  300, 1800.0f + j * 300.0f });
+			pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
 			pObject->SetTextureIndex(0x80);
 			pObject->SetShader(pShader);
 			m_Objects.push_back(std::move(pObject));
