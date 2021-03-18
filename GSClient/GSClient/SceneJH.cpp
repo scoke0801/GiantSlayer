@@ -267,32 +267,31 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
 		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
 		"Box","Wood", "WoodSignBoard",
-		"GrassWall", "SandWall", "RockyWall",
+		"GrassWall", "SandWall","RockyWall",
 		"Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus",
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
 		"PuzzleBoard",
-		"HelpText"
+		"HelpText",
+		"Dry_Tree","Stump","Dead_Tree" 
 	};
 
 	const wchar_t* address[] =
 	{
-		//Wood->WoodBoard2
-		//GrassWallTexture->StoneWallTexture3
 		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds",
 		L"resources/OBJ/Box.dds",
 		L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
-		L"resources/OBJ/Door3.dds",
+		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
-		L"resources/Billboard/Tree02.dds", L"resources/Billboard/Cactus.dds",
+		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board_Test.dds",
-		L"resources/UI/HelpText.dds" 
+		L"resources/UI/HelpText.dds",
+		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds"
 	};
-	 
 	for (int i = 0; i < _countof(keyNames); ++i)
 	{
 		unique_ptr<CTexture> tempTex = make_unique<CTexture>();
@@ -323,8 +322,10 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus", "PuzzleBoard",
-		"HelpText"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
+		"PuzzleBoard",
+		"HelpText",
+		"Dry_Tree","Stump","Dead_Tree"
 	};
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; 

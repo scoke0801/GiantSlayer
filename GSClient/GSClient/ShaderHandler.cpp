@@ -29,19 +29,43 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 
 void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
-	CShader* pFBXShader = new CShader();
+	CShader* pFBXShader = new CShader(); 
+	CShader* pFBXFeatureShaderLeft = new CShader();	
+	CShader* pFBXFeatureShaderRight = new CShader();
 	if (m_UserID == ShaderHandlerUser::JH) {
 		pFBXShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
 		pFBXShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting"); 
+
+		pFBXFeatureShaderLeft->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
+		pFBXFeatureShaderLeft->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSFBXFeatureShader");
+
+		pFBXFeatureShaderRight->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
+		pFBXFeatureShaderRight->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSFBXFeatureShader");
 	}
 	else {
 		pFBXShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 		pFBXShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting"); 
+
+		pFBXFeatureShaderLeft->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
+		pFBXFeatureShaderLeft->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSFBXFeatureShader");
+		
+		pFBXFeatureShaderRight->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
+		pFBXFeatureShaderRight->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSFBXFeatureShader");
 	}
 	pFBXShader->CreateInputLayout(ShaderTypes::Textured);
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pFBXShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("FBX", pFBXShader);
+
+	pFBXFeatureShaderLeft->CreateInputLayout(ShaderTypes::Textured);
+	pFBXFeatureShaderLeft->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pFBXFeatureShaderLeft->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("FBXFeatureLeft", pFBXFeatureShaderLeft);
+
+	pFBXFeatureShaderRight->CreateInputLayout(ShaderTypes::Textured);
+	pFBXFeatureShaderRight->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
+	pFBXFeatureShaderRight->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("FBXFeatureRight", pFBXFeatureShaderRight);
 }
 
 void CShaderHandler::CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -247,11 +271,11 @@ void CShaderHandler::CreateTreeShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CShader* pTreeShader = new CShader();
 	if (m_UserID == ShaderHandlerUser::JH) {
 		pTreeShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-		pTreeShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
+		pTreeShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSFBXFeatureShader");
 	}
 	else {
 		pTreeShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
-		pTreeShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
+		pTreeShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSFBXFeatureShader");
 	}
 	pTreeShader->CreateInputLayout(ShaderTypes::Textured);
 	pTreeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);

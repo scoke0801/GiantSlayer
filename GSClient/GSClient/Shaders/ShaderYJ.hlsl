@@ -43,32 +43,32 @@ Texture2D gtxtBox          : register(t11);
 Texture2D gtxtWood         : register(t12);
 Texture2D gtxtWoodSignBoard: register(t13);
 Texture2D gtxtGrassWall    : register(t14);
-Texture2D gtxtSandWall     : register(t15);
-Texture2D gtxtDoor         : register(t16); 
+Texture2D gtxtSandWall     : register(t15); 
+Texture2D gtxtRockyWall    : register(t16);
+Texture2D gtxtDoor         : register(t17);
 
+Texture2D gtxtHpSpGauge    : register(t18);
+Texture2D gtxtHpSpPer      : register(t19);
+Texture2D gtxtMinimap      : register(t20);
+Texture2D gtxtWeapons      : register(t21);
 
-Texture2D gtxtHpSpGauge    : register(t17);
-Texture2D gtxtHpSpPer      : register(t18);
-Texture2D gtxtMinimap      : register(t19);
-Texture2D gtxtWeapons      : register(t20);
+Texture2D gtxtFlower_Red   : register(t22);
+Texture2D gtxtFlower_White : register(t23);
+Texture2D gtxtGrass_Width  : register(t24);
+Texture2D gtxtGrass_Depth  : register(t25);
+Texture2D gtxtTree         : register(t26);
+Texture2D gtxtNoLeafTrees  : register(t27);
+Texture2D gtxtLeaves       : register(t28);
+Texture2D gtxtMoss_Rock    : register(t29);
 
-Texture2D gtxtFlower_Red   : register(t21);
-Texture2D gtxtFlower_White : register(t22);
-Texture2D gtxtGrass_Width  : register(t23);
-Texture2D gtxtGrass_Depth  : register(t24);
-Texture2D gtxtTree         : register(t25);
-Texture2D gtxtNoLeafTrees  : register(t26);
-Texture2D gtxtLeaves       : register(t27);
-Texture2D gtxtMoss_Rock    : register(t28);
+Texture2D gtxtPuzzleBoard  : register(t30);
+Texture2D gtxtHelpText     : register(t31);
+Texture2D gtxtDry_Tree	   : register(t32);
+Texture2D gtxtStump		   : register(t33);
+Texture2D gtxtDead_Tree	   : register(t34);
 
-Texture2D gtxtPuzzleBoard  : register(t29);
-Texture2D gtxtHelpText     : register(t30);
-Texture2D gtxtDry_Tree	   : register(t31);
-Texture2D gtxtStump		   : register(t32);
-Texture2D gtxtDead_Tree	   : register(t33);
-
-Texture2D gtxtMap          : register(t34);
-Texture2D gtxtMirror       : register(t35);
+Texture2D gtxtMap          : register(t35);
+Texture2D gtxtMirror       : register(t36);
  
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -665,38 +665,6 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	{
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x200)
-	{
-		cColor = gtxtGrassWall.Sample(gssWrap, input.uv);
-	}
-	if (gnTexturesMask & 0x400)
-	{
-		cColor = gtxtDoor.Sample(gssWrap, input.uv);
-	}
-    if (gnTexturesMask & 0x800)
-    {
-        cColor = gtxtMirror.Sample(gssWrap, input.uv);
-    }
-    if (gnTexturesMask & 0x1000)
-    {
-        cColor = gtxtLeaves.Sample(gssWrap, input.uv);
-    }
-    if (gnTexturesMask & 0x2000)
-    {
-        cColor = gtxtMoss_Rock.Sample(gssWrap, input.uv);
-    } 
-    if (gnTexturesMask & 0x4000)
-    {
-        cColor = gtxtDry_Tree.Sample(gssWrap, input.uv);
-    }
-    if (gnTexturesMask & 0x8000)
-    {
-        cColor = gtxtStump.Sample(gssWrap, input.uv);
-    }
-    if (gnTexturesMask & 0x10000)
-    {
-        cColor = gtxtDead_Tree.Sample(gssWrap, input.uv);
-    }
    
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
@@ -720,10 +688,14 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	}
 	if (gnTexturesMask & 0x04)
 	{
-		cColor = gtxtWoodSignBoard.Sample(gssWrap, input.uv);
+		cColor = gtxtDryDesert.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtRockyWall.Sample(gssWrap, input.uv);
 	}
 
-	if (gnTexturesMask & 0x08)
+	if (gnTexturesMask & 0x10)
 	{
 		cColor = gtxtDoor.Sample(gssWrap, input.uv);
 	}
@@ -806,8 +778,7 @@ float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primitiv
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
 	return(cColor * cIllumination);
-}
-
+} 
 
 float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
@@ -817,6 +788,37 @@ float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	if (gnTexturesMask & 0x01)
 	{
 		cColor = cColor = gtxtMirror.Sample(gssWrap, input.uv);
+	}
+
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return(cColor * cIllumination);
+}
+float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor;// = gtxtBox.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtLeaves.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtMoss_Rock.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gtxtDry_Tree.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtStump.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x10)
+	{
+		cColor = gtxtDead_Tree.Sample(gssWrap, input.uv);
 	}
 
 	input.normalW = normalize(input.normalW);

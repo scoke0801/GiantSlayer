@@ -43,7 +43,7 @@ Texture2D gtxtBox          : register(t11);
 Texture2D gtxtWood         : register(t12);
 Texture2D gtxtWoodSignBoard: register(t13);
 Texture2D gtxtGrassWall    : register(t14);
-Texture2D gtxtSandWall     : register(t15); 
+Texture2D gtxtSandWall     : register(t15);
 Texture2D gtxtRockyWall    : register(t16);
 Texture2D gtxtDoor         : register(t17);
 
@@ -57,14 +57,19 @@ Texture2D gtxtFlower_White : register(t23);
 Texture2D gtxtGrass_Width  : register(t24);
 Texture2D gtxtGrass_Depth  : register(t25);
 Texture2D gtxtTree         : register(t26);
-Texture2D gtxtCactus       : register(t27);
+Texture2D gtxtNoLeafTrees  : register(t27);
+Texture2D gtxtLeaves       : register(t28);
+Texture2D gtxtMoss_Rock    : register(t29);
 
-Texture2D gtxtPuzzleBoard  : register(t28);
+Texture2D gtxtPuzzleBoard  : register(t30);
+Texture2D gtxtHelpText     : register(t31);
+Texture2D gtxtDry_Tree	   : register(t32);
+Texture2D gtxtStump		   : register(t33);
+Texture2D gtxtDead_Tree	   : register(t34);
 
-Texture2D gtxtHelpText     : register(t29);
+Texture2D gtxtMap          : register(t35);
+Texture2D gtxtMirror       : register(t36);
 
-Texture2D gtxtMap          : register(t30);
-Texture2D gtxtMirror       : register(t31);
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
 {
@@ -109,7 +114,6 @@ float4 PSColor(VS_COLOR_OUTPUT input) : SV_TARGET
 	float4 cColor = input.color;
 	return cColor;
 }
-
 VS_COLOR_OUTPUT VSBasic(VS_COLOR_INPUT input)
 {
 	VS_COLOR_OUTPUT outRes;
@@ -184,7 +188,8 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 }
 
 /////////////////////////////////////////////////////////////////
-///// 
+/////
+
 struct VS_BILLBOARD_INPUT
 {
 	float3 center : POSITION;
@@ -248,6 +253,7 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 	// gtxtBillboardTextures[input.index].Sample(gssClamp, input.uv); 
 	// 위 형식은 빌보드 이미지를 배열형식으로 불러오는 경우에 사용가능
 	float4 cColor;
+
 	if (gnTexturesMask & 0x01)
 	{
 		cColor = gtxtFlower_Red.Sample(gssClamp, input.uv);
@@ -270,8 +276,9 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
 	}
 	if (gnTexturesMask & 0x20)
 	{
-		cColor = gtxtCactus.Sample(gssClamp, input.uv);
+		cColor = gtxtNoLeafTrees.Sample(gssClamp, input.uv);
 	}
+
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
 
 	return(cColor);
@@ -316,10 +323,11 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	}
 	if (gnTexturesMask & 0x20)
 	{
-		cColor = gtxtHelpText.Sample(gssWrap, input.uv);
+		cColor = gtxtMinimap.Sample(gssWrap, input.uv);
 	}
 	return cColor;
 }
+
 float4 PS_UI_HelpText(VS_TEXTURE_OUT input) : SV_TARGET
 {
 	float4 cColor;
@@ -330,7 +338,7 @@ float4 PS_UI_HelpText(VS_TEXTURE_OUT input) : SV_TARGET
 	}
 	if (gnTexturesMask & 0x02)
 	{
-		input.uv.y += 0.2; 
+		input.uv.y += 0.2;
 	}
 	if (gnTexturesMask & 0x04)
 	{
@@ -657,10 +665,7 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	{
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x1000)
-	{
-		cColor = gtxtMirror.Sample(gssWrap, input.uv);
-	}	 
+
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
@@ -689,16 +694,17 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	{
 		cColor = gtxtRockyWall.Sample(gssWrap, input.uv);
 	}
-	
+
 	if (gnTexturesMask & 0x10)
 	{
 		cColor = gtxtDoor.Sample(gssWrap, input.uv);
-	} 
+	}
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
 	return(cColor * cIllumination);
 }
+
 float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
 	float3 uvw = float3(input.uv, nPrimitiveID / 2);
@@ -722,12 +728,13 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	{
 		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
-	 
+
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
 	return(cColor * cIllumination);
 }
+
 
 float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
@@ -766,13 +773,12 @@ float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primitiv
 	if (gnTexturesMask & 0x02)
 	{
 		cColor = gtxtWoodSignBoard.Sample(gssClamp, uvw);
-	} 
+	}
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
 	return(cColor * cIllumination);
 }
-
 
 float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
@@ -783,7 +789,38 @@ float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	{
 		cColor = cColor = gtxtMirror.Sample(gssWrap, input.uv);
 	}
-	 
+
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return(cColor * cIllumination);
+}
+float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor;// = gtxtBox.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtLeaves.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtMoss_Rock.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gtxtDry_Tree.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtStump.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x10)
+	{
+		cColor = gtxtDead_Tree.Sample(gssWrap, input.uv);
+	}
+
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 

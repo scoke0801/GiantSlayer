@@ -371,8 +371,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->Rotate({ 1,0,0 }, 90);
 		pObject->SetMesh(fbx_bush_Mesh);
 		pObject->SetPosition({ 1000.0f+i*1000.0f, 100, 850 });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-		pObject->SetTextureIndex(0x1000);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
 		pObject->Scale(50, 50, 50);
 		m_Objects.push_back(std::move(pObject));
 	}
@@ -383,8 +383,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->Rotate({ 1,0,0 }, 90);
 		pObject->SetMesh(fbx_bush_Mesh);
 		pObject->SetPosition({ 1200.0f + i * 1000.0f, 0, 3150 });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-		pObject->SetTextureIndex(0x1000);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
 		pObject->Scale(50, 50, 50);
 		m_Objects.push_back(std::move(pObject));
 	}
@@ -395,8 +395,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->SetMesh(fbx_bush_Mesh);
 		pObject->Rotate({ 0,0,1 }, 90);
 		pObject->SetPosition({ 500.0f + i * 2700.0f, 0, 2150 });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-		pObject->SetTextureIndex(0x1000);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
 		
 		pObject->Scale(50, 50, 50);
 		m_Objects.push_back(std::move(pObject));
@@ -408,8 +408,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->SetMesh(fbx_bush_Mesh);
 		pObject->Rotate({ 0,0,1 }, 90);
 		pObject->SetPosition({ 2600.0f, 0, 4650+500.0f*i });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-		pObject->SetTextureIndex(0x1000);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
 
 		pObject->Scale(50, 50, 50);
 		m_Objects.push_back(std::move(pObject));
@@ -421,8 +421,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->SetMesh(fbx_bush_Mesh);
 		pObject->Rotate({ 0,0,1 }, 90);
 		pObject->SetPosition({ 2600.0f, -200.0f, 4650 + 500.0f * i });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-		pObject->SetTextureIndex(0x1000);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
 
 		pObject->Scale(50, 50, 50);
 		m_Objects.push_back(std::move(pObject));
@@ -463,8 +463,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->Rotate({ 0,0,1 }, 90);
 
 		pObject->SetPosition({ x_bush+300*i, 0, z_bush + 700.0f * i });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-		pObject->SetTextureIndex(0x1000);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
 
 		pObject->Scale(50, 50, 50);
 		m_Objects.push_back(std::move(pObject));
@@ -473,8 +473,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pObject = new CGameObject();
 	pObject->SetMesh(fbx_bush_Mesh);
 	pObject->SetPosition({ 2500.0f, 100, 250 });
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->SetTextureIndex(0x1000);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x01);
 	pObject->Scale(50, 50, 50);
 	m_Objects.push_back(std::move(pObject));
 
@@ -488,8 +488,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		
 		pObject->SetMesh(fbx_Rock_Mesh);
 		pObject->SetPosition({ 500.0f + i * 1000.0f, -1000, 19500 - 500.0f * i });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		pObject->SetTextureIndex(0x2000);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+		pObject->SetTextureIndex(0x02);
 		pObject->Scale(50, 50, 50);
 		m_Objects.push_back(std::move(pObject));
 	}
@@ -509,7 +509,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		
 		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) , z_Tree });
 		
-		pObject->SetTextureIndex(0x4000);
+		pObject->SetTextureIndex(0x04);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
 		m_Objects.push_back(std::move(pObject));
 	}
@@ -524,12 +524,11 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		z_Tree = 17000;
 		pObject->Scale(0.5f, 0.5f, 0.5f);
 		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)   , z_Tree });
-		pObject->SetTextureIndex(0x4000);
+		pObject->SetTextureIndex(0x04);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
 		m_Objects.push_back(std::move(pObject));
 	}
-
-
+	 
 	pObject = new CGameObject();
 	pObject->SetMesh(fbx_Stump_Mesh);
 	
@@ -538,11 +537,9 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	
 	pObject->Scale(20.0f, 20.0f, 20.0f);
 	pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree), z_Tree });
-	pObject->SetTextureIndex(0x8000);
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pObject->SetTextureIndex(0x08);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
 	m_BillboardObjects.push_back(std::move(pObject));
-
-
 
 	pObject = new CGameObject();
 	pObject->SetMesh(fbx_Dead_Tree_Mesh);
@@ -552,8 +549,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pObject->Scale(150.0f, 150.0f, 150.0f);
 	
 	pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)+1000.0f,z_Tree });
-	pObject->SetTextureIndex(0x10000);
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pObject->SetTextureIndex(0x10);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
 	m_BillboardObjects.push_back(std::move(pObject));
 
 	for (int i = 0; i < 2; i++)
@@ -567,8 +564,8 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		
 		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)+1000.0f, z_Tree });
 
-		pObject->SetTextureIndex(0x10000);
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		pObject->SetTextureIndex(0x10);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
 		m_BillboardObjects.push_back(std::move(pObject));
 	}
 
@@ -627,7 +624,8 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
 		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom", 
 		"Box","Wood", "WoodSignBoard",
-		"GrassWall", "SandWall","Door",
+		"GrassWall", "SandWall","RockyWall",
+		"Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
 		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
@@ -643,8 +641,8 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds", 
 		L"resources/OBJ/Box.dds",
 		L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
-		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",
-		L"resources/OBJ/Door3.dds",
+		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
+		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
@@ -678,7 +676,8 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
 		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
 		"Box","Wood", "WoodSignBoard",
-		"GrassWall", "SandWall","Door",
+		"GrassWall", "SandWall","RockyWall",
+		"Door",
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
@@ -1319,16 +1318,16 @@ void CSceneYJ::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pDoorWall->SetTextureIndexes(0x02);
 	m_Objects.push_back(pDoorWall);
 
-	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
-	pDoorWall->SetPosition({ 14000,-4500, 8000 });
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 2500, 500, true, pShader);
 	pDoorWall->SetTextureIndexes(0x04);
+	//pDoorWall->RotateAll({ 0,1,0 }, 90);
+	pDoorWall->SetPosition({ 13500, -3500, 00 });
 	m_Objects.push_back(pDoorWall);
 
 	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
-	pDoorWall->SetTextureIndexes(0x04);
-	pDoorWall->RotateAll({ 0,1,0 }, 90);
-	pDoorWall->SetPosition({ 12000, -3000, 00 });
-	//m_Objects.push_back(pDoorWall);
+	pDoorWall->SetPosition({ 14000,-4500, 8000 });
+	pDoorWall->SetTextureIndexes(0x08);
+	m_Objects.push_back(pDoorWall);
 }
 
 void CSceneYJ::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1381,12 +1380,7 @@ void CSceneYJ::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	m_HelpTextUI->SetShader(CShaderHandler::GetInstance().GetData("UiHelpText"));
 	m_UIs.push_back(m_HelpTextUI);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSMinimap");
-	pShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSMinimap");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
+	
 	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.20f);
 	pUI->SetPosition({ -0.78f, 0.78f, 0.9 });	// Minmap Background
 	pUI->SetTextureIndex(0x01);
