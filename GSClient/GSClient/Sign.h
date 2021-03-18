@@ -5,7 +5,7 @@ class CSign : public CGameObject
 {
 private: 
     CGameObject* m_Pillar;          // 기둥
-    CGameObject* m_WallPaper;       // 벽지
+    CGameObject* m_Board;           // 표지판
 
 public:
     CSign(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,

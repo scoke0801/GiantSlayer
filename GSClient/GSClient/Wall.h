@@ -43,4 +43,8 @@ public:
     virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
 
     void SetPosition(XMFLOAT3 xmf3Position);
+
+    void SetTextureIndexes(int idx);
+
+    void RotateAll(XMFLOAT3 xmf3Axis, float angle);
 };

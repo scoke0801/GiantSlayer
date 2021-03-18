@@ -182,11 +182,11 @@ void CShaderHandler::CreateDoorWallShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 	CShader* pDoorWallShader = new CShader();
 	if (m_UserID == ShaderHandlerUser::JH) {
 		pDoorWallShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-		pDoorWallShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
+		pDoorWallShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSDoorWall");
 	}
 	else {
 		pDoorWallShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
-		pDoorWallShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
+		pDoorWallShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSDoorWall");
 	}
 	pDoorWallShader->CreateInputLayout(ShaderTypes::Textured);
 	pDoorWallShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -230,11 +230,11 @@ void CShaderHandler::CreateSignShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CShader* pSignShader = new CShader();
 	if (m_UserID == ShaderHandlerUser::JH) {
 		pSignShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-		pSignShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
+		pSignShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSSign");
 	}
 	else {
 		pSignShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
-		pSignShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
+		pSignShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSSign");
 	}
 	pSignShader->CreateInputLayout(ShaderTypes::Textured);
 	pSignShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
@@ -246,11 +246,11 @@ void CShaderHandler::CreateMirroShader(ID3D12Device* pd3dDevice, ID3D12RootSigna
 	CShader* pMirrorShader = new CShader();
 	if (m_UserID == ShaderHandlerUser::JH) {
 		pMirrorShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-		pMirrorShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
+		pMirrorShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSMirror");
 	}
 	else {
 		pMirrorShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
-		pMirrorShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
+		pMirrorShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSMirror");
 	}
 	pMirrorShader->CreateInputLayout(ShaderTypes::Textured);
 	pMirrorShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);

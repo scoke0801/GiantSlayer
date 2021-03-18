@@ -247,7 +247,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Mirror->SetMesh(pMirrorMesh);
 	m_Mirror->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
 	m_Mirror->SetPosition({ 2000,500,10000 });
-	m_Mirror->SetTextureIndex(0x800);
+	m_Mirror->SetTextureIndex(0x01);
 
 	// 첫번째 지형 표지판
 	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, true, CShaderHandler::GetInstance().GetData("Sign"));
@@ -266,7 +266,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	{
 		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
 		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
-		"Box","Wood", "Wall", "Door",
+		"Box","Wood", "WoodSignBoard",
+		"GrassWall", "SandWall","Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
 		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus",
@@ -277,10 +278,13 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	const wchar_t* address[] =
 	{
 		//Wood->WoodBoard2
-		//WallTest2->StoneWallTexture3
+		//GrassWallTexture->StoneWallTexture3
 		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds",
-		L"resources/OBJ/Box.dds",L"resources/OBJ/WoodBoard2.dds",  L"resources/OBJ/StoneWallTexture3.dds", L"resources/OBJ/Door3.dds",
+		L"resources/OBJ/Box.dds",
+		L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
+		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",
+		L"resources/OBJ/Door3.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
 		L"resources/Billboard/Tree02.dds", L"resources/Billboard/Cactus.dds",
@@ -312,7 +316,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	{
 		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
 		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
-		"Box", "Wood", "Wall", "Door",
+		"Box","Wood", "WoodSignBoard",
+		"GrassWall", "SandWall","Door",
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
@@ -950,6 +955,18 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 
 	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 3300, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 10300, -2000, 7500 });
+	pDoorWall->SetTextureIndexes(0x02);
+	m_Objects.push_back(pDoorWall);
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
+	pDoorWall->SetPosition({ 14000,-4500, 8000 });
+	pDoorWall->SetTextureIndexes(0x04); 
+	m_Objects.push_back(pDoorWall);
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
+	pDoorWall->SetTextureIndexes(0x04);
+	pDoorWall->RotateAll({ 0,1,0 }, 90);
+	pDoorWall->SetPosition({ 12000, -3000, 00 });
 	m_Objects.push_back(pDoorWall);
 }
 
