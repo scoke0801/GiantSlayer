@@ -383,5 +383,5 @@ static T Clamp(const T& x, const T& low, const T& high)
 #include "Material.h"
 #include "GameFramework.h"
 #include "Light.h"
-#include "Handler.h"
+#include "ShaderHandler.h"
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.

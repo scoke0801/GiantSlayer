@@ -126,7 +126,7 @@
     <ClCompile Include="Sign.cpp">
       <Filter>GameObject\Sign</Filter>
     </ClCompile>
-    <ClCompile Include="Handler.cpp">
+    <ClCompile Include="ShaderHandler.cpp">
       <Filter>Handler</Filter>
     </ClCompile>
   </ItemGroup>
@@ -250,7 +250,7 @@
     <ClInclude Include="Sign.h">
       <Filter>GameObject\Sign</Filter>
     </ClInclude>
-    <ClInclude Include="Handler.h">
+    <ClInclude Include="ShaderHandler.h">
       <Filter>Handler</Filter>
     </ClInclude>
   </ItemGroup>

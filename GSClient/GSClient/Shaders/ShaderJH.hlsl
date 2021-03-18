@@ -217,18 +217,20 @@ void GSBillboard(point VS_BILLBOARD_INPUT input[1], inout TriangleStream<GS_BILL
 	float fHalfWidth = input[0].size.x * 0.5f;
 	float fHalfHeight = input[0].size.y * 0.5f;
 
-	float4 pf4Vertices[4]; 
-	
-	pf4Vertices[0] = float4(input[0].center.xyz + (fHalfWidth * f3Right) - (fHalfHeight * f3Up), 1.0f);
-	pf4Vertices[1] = float4(input[0].center.xyz + (fHalfWidth * f3Right) + (fHalfHeight * f3Up), 1.0f);
-	pf4Vertices[2] = float4(input[0].center.xyz - (fHalfWidth * f3Right) - (fHalfHeight * f3Up), 1.0f);
-	pf4Vertices[3] = float4(input[0].center.xyz - (fHalfWidth * f3Right) + (fHalfHeight * f3Up), 1.0f);
+	float4 pf4Vertices[4];
+	pf4Vertices[0] = float4(input[0].center.xyz + (fHalfWidth * f3Right) * gmtxWorld._11 - (fHalfHeight * f3Up) * gmtxWorld._22, 1.0f);
+	pf4Vertices[1] = float4(input[0].center.xyz + (fHalfWidth * f3Right) * gmtxWorld._11 + (fHalfHeight * f3Up) * gmtxWorld._22, 1.0f);
+	pf4Vertices[2] = float4(input[0].center.xyz - (fHalfWidth * f3Right) * gmtxWorld._11 - (fHalfHeight * f3Up) * gmtxWorld._22, 1.0f);
+	pf4Vertices[3] = float4(input[0].center.xyz - (fHalfWidth * f3Right) * gmtxWorld._11 + (fHalfHeight * f3Up) * gmtxWorld._22, 1.0f);
 
 	GS_BILLBOARD_GEOMETRY_OUTPUT output;
 	for (int i = 0; i < 4; i++)
 	{
 		output.positionW = pf4Vertices[i].xyz;
+
+		//outRes.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
 		output.position = mul(mul(pf4Vertices[i], gmtxView), gmtxProjection);
+		//output.position = mul(mul(mul(pf4Vertices[i], gmtxWorld), gmtxView), gmtxProjection);
 		output.normal = f3Look;
 		output.uv = pf2UVs[i];
 		output.index = input[0].index;
