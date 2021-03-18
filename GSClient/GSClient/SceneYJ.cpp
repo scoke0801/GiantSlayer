@@ -392,24 +392,147 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pFBXShader->CreateBoundaryShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
+	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	CGameObject* pObject = new CGameObject();
 	pObject->SetMesh(fbxMesh);
 	pObject->SetPosition({ 500,  250, 1650 });
-	pObject->SetTextureIndex(0x01);
-	pObject->SetShader(pFBXShader);
+	pObject->SetShader(pShader);
 	pObject->SetTextureIndex(0x80);
+	pObject->Scale(5, 5, 5);
+	m_Objects.push_back(std::move(pObject));
+
+	CMeshFbx* fbx_bush_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->Rotate({ 1,0,0 }, 90);
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetPosition({ 1000.0f+i*1000.0f, 100, 850 });
+		pObject->SetShader(pFBXShader);
+		pObject->SetTextureIndex(0x1000);
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->Rotate({ 1,0,0 }, 90);
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetPosition({ 1200.0f + i * 1000.0f, 0, 3150 });
+		pObject->SetShader(pFBXShader);
+		pObject->SetTextureIndex(0x1000);
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+		pObject->SetPosition({ 500.0f + i * 2700.0f, 0, 2150 });
+		pObject->SetShader(pFBXShader);
+		pObject->SetTextureIndex(0x1000);
+		
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+		pObject->SetPosition({ 2600.0f, 0, 4650+500.0f*i });
+		pObject->SetShader(pFBXShader);
+		pObject->SetTextureIndex(0x1000);
+
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+		pObject->SetPosition({ 2600.0f, -200.0f, 4650 + 500.0f * i });
+		pObject->SetShader(pFBXShader);
+		pObject->SetTextureIndex(0x1000);
+
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 9; i++)
+	{
+		float x_bush = 1000.0f;
+		float z_bush = 8050.0f;
+
+
+		if (i == 0)
+		{
+			x_bush += 2000.0f;
+		}
+
+		if (i ==2)
+		{
+			x_bush -= 1000.0f;
+		}
+
+		if (i == 4)
+		{
+			x_bush -= 1500.0f;
+		}
+
+		if (i == 6)
+		{
+			x_bush -= 2000.0f;
+		}
+
+		if (i == 8)
+		{
+			x_bush -= 2000.0f;
+		}
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+
+		pObject->SetPosition({ x_bush+300*i, 0, z_bush + 700.0f * i });
+		pObject->SetShader(pFBXShader);
+		pObject->SetTextureIndex(0x1000);
+
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+
+	pObject = new CGameObject();
+	pObject->SetMesh(fbx_bush_Mesh);
+	pObject->SetPosition({ 2500.0f, 100, 250 });
+	pObject->SetShader(pFBXShader);
+	pObject->SetTextureIndex(0x1000);
 	pObject->Scale(50, 50, 50);
 	m_Objects.push_back(std::move(pObject));
 
 
-	pObject = new CGameObject();
-	pObject->SetMesh(fbxMesh);
-	pObject->SetPosition({ 500,  250, 1750 });
-	pObject->SetTextureIndex(0x01);
-	pObject->SetShader(pShader);
-	pObject->SetTextureIndex(0x80);
-	m_Objects.push_back(std::move(pObject));
+	// 2단계 지형 돌
+	CMeshFbx* fbx_Rock_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/rock.fbx", true);
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->Rotate({ 1,0,0 }, 90);
+		pObject->SetMesh(fbx_Rock_Mesh);
+		pObject->SetPosition({ 1000.0f + i * 1000.0f, -1000, 18500 });
+		pObject->SetShader(pShader);
+		pObject->SetTextureIndex(0x2000);
+		pObject->Scale(200, 200, 200);
+		m_Objects.push_back(std::move(pObject));
+	}
+
 
 	CSphereMesh* pSphereMesh = new CSphereMesh(pd3dDevice, pd3dCommandList,
 		30, 20, 20);
@@ -462,17 +585,17 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Box","Wood", "Wall", "Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus","Leaves","Moss_Rock"
 	};
 
 	const wchar_t* address[] =
 	{
 		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds", 
-		L"resources/OBJ/Leaves.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
+		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
-		L"resources/Billboard/Tree02.dds",L"resources/Billboard/Cactus.dds"
+		L"resources/Billboard/Tree02.dds",L"resources/Billboard/Cactus.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -503,7 +626,7 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus","Leaves","Moss_Rock"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};

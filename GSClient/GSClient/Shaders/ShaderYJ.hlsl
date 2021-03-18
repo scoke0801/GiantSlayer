@@ -54,9 +54,11 @@ Texture2D gtxtGrass_Width : register(t21);
 Texture2D gtxtGrass_Depth : register(t22);
 Texture2D gtxtTree : register(t23);
 Texture2D gtxtCactus : register(t24);
+Texture2D gtxtLeaves : register(t25);
+Texture2D gtxtMoss_Rock : register(t26);
 
-Texture2D gtxtMap : register(t25);
-Texture2D gtxtMirror : register(t26);
+Texture2D gtxtMap : register(t27);
+Texture2D gtxtMirror : register(t28);
  
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -634,8 +636,14 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     {
         cColor = gtxtMirror.Sample(gssWrap, input.uv);
     }
-    
-	
+    if (gnTexturesMask & 0x1000)
+    {
+        cColor = gtxtLeaves.Sample(gssWrap, input.uv);
+    }
+    if (gnTexturesMask & 0x2000)
+    {
+        cColor = gtxtMoss_Rock.Sample(gssWrap, input.uv);
+    }
 	
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
