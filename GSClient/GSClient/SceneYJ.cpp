@@ -510,7 +510,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) , z_Tree });
 		
 		pObject->SetTextureIndex(0x4000);
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
 		m_Objects.push_back(std::move(pObject));
 	}
 
@@ -525,7 +525,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->Scale(0.5f, 0.5f, 0.5f);
 		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)   , z_Tree });
 		pObject->SetTextureIndex(0x4000);
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
 		m_Objects.push_back(std::move(pObject));
 	}
 
