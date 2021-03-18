@@ -36,6 +36,10 @@ public:
     CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
         float width, float height, float depth,
         CShader* pShader);
+    CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+        float width, float height, float depth,
+        bool isRotated,
+        CShader* pShader);
     ~CDoorWall();
 
 public:

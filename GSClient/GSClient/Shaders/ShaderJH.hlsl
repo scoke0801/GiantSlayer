@@ -43,27 +43,28 @@ Texture2D gtxtBox          : register(t11);
 Texture2D gtxtWood         : register(t12);
 Texture2D gtxtWoodSignBoard: register(t13);
 Texture2D gtxtGrassWall    : register(t14);
-Texture2D gtxtSandWall     : register(t15);
-Texture2D gtxtDoor         : register(t16);
+Texture2D gtxtSandWall     : register(t15); 
+Texture2D gtxtRockyWall    : register(t16);
+Texture2D gtxtDoor         : register(t17);
 
-Texture2D gtxtHpSpGauge    : register(t17);
-Texture2D gtxtHpSpPer      : register(t18);
-Texture2D gtxtMinimap      : register(t19);
-Texture2D gtxtWeapons      : register(t20);
+Texture2D gtxtHpSpGauge    : register(t18);
+Texture2D gtxtHpSpPer      : register(t19);
+Texture2D gtxtMinimap      : register(t20);
+Texture2D gtxtWeapons      : register(t21);
 
-Texture2D gtxtFlower_Red   : register(t21);
-Texture2D gtxtFlower_White : register(t22);
-Texture2D gtxtGrass_Width  : register(t23);
-Texture2D gtxtGrass_Depth  : register(t24);
-Texture2D gtxtTree         : register(t25);
-Texture2D gtxtCactus       : register(t26);
+Texture2D gtxtFlower_Red   : register(t22);
+Texture2D gtxtFlower_White : register(t23);
+Texture2D gtxtGrass_Width  : register(t24);
+Texture2D gtxtGrass_Depth  : register(t25);
+Texture2D gtxtTree         : register(t26);
+Texture2D gtxtCactus       : register(t27);
 
-Texture2D gtxtPuzzleBoard  : register(t27);
+Texture2D gtxtPuzzleBoard  : register(t28);
 
-Texture2D gtxtHelpText     : register(t28);
+Texture2D gtxtHelpText     : register(t29);
 
-Texture2D gtxtMap          : register(t29);
-Texture2D gtxtMirror       : register(t30);
+Texture2D gtxtMap          : register(t30);
+Texture2D gtxtMirror       : register(t31);
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
 {
@@ -682,10 +683,14 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	}
 	if (gnTexturesMask & 0x04)
 	{
-		cColor = gtxtWoodSignBoard.Sample(gssWrap, input.uv);
+		cColor = gtxtDryDesert.Sample(gssWrap, input.uv);
 	}
-
 	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtRockyWall.Sample(gssWrap, input.uv);
+	}
+	
+	if (gnTexturesMask & 0x10)
 	{
 		cColor = gtxtDoor.Sample(gssWrap, input.uv);
 	} 

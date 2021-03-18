@@ -93,14 +93,53 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice,
 	m_LeftDoor = new CDoor(pd3dDevice, pd3dCommandList, fWidthRatio, height, depth * 0.2f, true);
 	m_LeftDoor->SetShader(pShader);
 	m_LeftDoor->SetObjectName(OBJ_NAME::Wall);
-	m_LeftDoor->SetTextureIndex(0x08);
+	m_LeftDoor->SetTextureIndex(0x10);
 	m_LeftDoor->SetPosition({ fWidthRatio * 4,  height * 0.5f, depth * 0.5f });
 
 	m_RightDoor = new CDoor(pd3dDevice, pd3dCommandList, fWidthRatio, height, depth * 0.2f, false);
 	m_RightDoor->SetShader(pShader);
 	m_RightDoor->SetObjectName(OBJ_NAME::Wall);
-	m_RightDoor->SetTextureIndex(0x08); 
+	m_RightDoor->SetTextureIndex(0x10); 
 	m_RightDoor->SetPosition({ fWidthRatio * 6,  height * 0.5f, depth * 0.5f });
+}
+
+CDoorWall::CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	float width, float height, float depth,
+	bool isRotated, CShader* pShader)
+{
+	float fWidthRatio = width * 0.1f;
+
+	CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth);
+	pWall->SetShader(pShader);
+	pWall->SetObjectName(OBJ_NAME::Wall);
+	pWall->SetTextureIndex(0x01);
+	pWall->Rotate({ 0,1,0 }, 90);
+	pWall->SetPosition({ depth * 0.5f,  height * 0.5f, fWidthRatio * 2 });
+	m_Walls.push_back(pWall);
+
+	pWall = new CWall(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth);
+	pWall->SetShader(pShader);
+	pWall->SetObjectName(OBJ_NAME::Wall);
+	pWall->SetTextureIndex(0x01);
+	pWall->Rotate({ 0,1,0 }, 90);
+	pWall->SetPosition({ depth * 0.5f,  height * 0.5f, fWidthRatio * 6 + fWidthRatio * 2 });
+	m_Walls.push_back(pWall);
+
+	m_LeftDoor = new CDoor(pd3dDevice, pd3dCommandList, fWidthRatio, height, depth * 0.2f, true);
+	m_LeftDoor->SetShader(pShader);
+	m_LeftDoor->SetObjectName(OBJ_NAME::Wall);
+	m_LeftDoor->SetTextureIndex(0x10);
+	m_LeftDoor->Rotate({ 0,1,0 }, 90);
+	m_LeftDoor->Rotate({ 0,1,0 }, 180);
+	m_LeftDoor->SetPosition({ depth * 0.5f,  height * 0.5f,  fWidthRatio * 4 });
+
+	m_RightDoor = new CDoor(pd3dDevice, pd3dCommandList, fWidthRatio, height, depth * 0.2f, false);
+	m_RightDoor->SetShader(pShader);
+	m_RightDoor->SetObjectName(OBJ_NAME::Wall);
+	m_RightDoor->SetTextureIndex(0x10);
+	m_RightDoor->Rotate({ 0,1,0 }, 90); 
+	m_RightDoor->Rotate({ 0,1,0 }, 180);
+	m_RightDoor->SetPosition({ depth * 0.5f,  height * 0.5f, fWidthRatio * 6 });
 }
 
 CDoorWall::~CDoorWall()
