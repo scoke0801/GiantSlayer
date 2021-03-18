@@ -12,6 +12,7 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateBridgeShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreatePuzzleShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateSignShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateTreeShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateMirroShader(pd3dDevice, pd3dGraphicsRootSignature);
 
@@ -239,6 +240,22 @@ void CShaderHandler::CreateSignShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	pSignShader->CreateInputLayout(ShaderTypes::Textured);
 	pSignShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
 	m_Data.emplace("Sign", pSignShader);
+}
+
+void CShaderHandler::CreateTreeShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CShader* pTreeShader = new CShader();
+	if (m_UserID == ShaderHandlerUser::JH) {
+		pTreeShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
+		pTreeShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
+	}
+	else {
+		pTreeShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
+		pTreeShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
+	}
+	pTreeShader->CreateInputLayout(ShaderTypes::Textured);
+	pTreeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
+	m_Data.emplace("Tree", pTreeShader);
 }
 
 void CShaderHandler::CreateMirroShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
