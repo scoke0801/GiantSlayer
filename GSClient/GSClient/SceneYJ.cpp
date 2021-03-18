@@ -366,7 +366,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_BillboardObjects.push_back(std::move(pBillboardObject));
 	}
 
-	
+
 #pragma endregion 
 
 	CShader* pShader = new CShader();
@@ -524,15 +524,91 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	for (int i = 0; i < 2; i++)
 	{
 		pObject = new CGameObject();
-		pObject->Rotate({ 1,0,0 }, 90);
+		
 		pObject->SetMesh(fbx_Rock_Mesh);
-		pObject->SetPosition({ 1000.0f + i * 1000.0f, -1000, 18500 });
+		pObject->SetPosition({ 500.0f + i * 1000.0f, -1000, 19500 - 500.0f * i });
 		pObject->SetShader(pShader);
 		pObject->SetTextureIndex(0x2000);
-		pObject->Scale(200, 200, 200);
+		pObject->Scale(50, 50, 50);
 		m_Objects.push_back(std::move(pObject));
 	}
 
+
+
+	CMeshFbx* fbx_NoLeaf_Tree_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/DeadTree11.fbx", true);
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_NoLeaf_Tree_Mesh);
+		
+		x_Tree = 200+700 * i;
+		z_Tree = 19500-700*i;
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+		
+		pObject->SetTextureIndex(0x020);
+		pObject->SetShader(pFBXShader);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	/*for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_NoLeaf_Tree_Mesh);
+		
+		x_Tree = 200 + 3000*i;
+		z_Tree = 16500;
+
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+		pObject->Rotate({ 1,0,0 }, 90);
+		pObject->SetTextureIndex(0x020);
+		pObject->SetShader(pFBXShader);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+
+	pObject = new CGameObject();
+	pObject->SetMesh(fbx_NoLeaf_Tree_Mesh);
+	
+	x_Tree = 200;
+	z_Tree = 18000;
+
+	pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+	pObject->Rotate({ 1,0,0 }, 90);
+	pObject->SetTextureIndex(0x020);
+	pObject->SetShader(pFBXShader);
+	m_BillboardObjects.push_back(std::move(pObject));
+
+
+
+	pObject = new CGameObject();
+	pObject->SetMesh(fbx_NoLeaf_Tree_Mesh);
+	
+	x_Tree = 3700;
+	z_Tree = 19000;
+
+	pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+	pObject->Rotate({ 1,0,0 }, 90);
+	pObject->SetTextureIndex(0x020);
+	pObject->SetShader(pFBXShader);
+	m_BillboardObjects.push_back(std::move(pObject));
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_NoLeaf_Tree_Mesh);
+		
+		x_Tree = 1700+5000*i;
+		z_Tree = 16500;
+
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pObject->SetTextureIndex(0x020);
+		pObject->SetShader(pFBXShader);
+		m_BillboardObjects.push_back(std::move(pObject));
+	}*/
+
+	/////////////////////////////////////////////////////////////////////////////
 
 	CSphereMesh* pSphereMesh = new CSphereMesh(pd3dDevice, pd3dCommandList,
 		30, 20, 20);
@@ -585,7 +661,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Box","Wood", "Wall", "Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus","Leaves","Moss_Rock"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock"
 	};
 
 	const wchar_t* address[] =
@@ -595,7 +671,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
-		L"resources/Billboard/Tree02.dds",L"resources/Billboard/Cactus.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds"
+		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -626,7 +702,7 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus","Leaves","Moss_Rock"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};

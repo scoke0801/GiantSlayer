@@ -53,7 +53,7 @@ Texture2D gtxtFlower_White : register(t20);
 Texture2D gtxtGrass_Width : register(t21);
 Texture2D gtxtGrass_Depth : register(t22);
 Texture2D gtxtTree : register(t23);
-Texture2D gtxtCactus : register(t24);
+Texture2D gtxtNoLeafTrees : register(t24);
 Texture2D gtxtLeaves : register(t25);
 Texture2D gtxtMoss_Rock : register(t26);
 
@@ -266,7 +266,7 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
     }
     if (gnTexturesMask & 0x20)
     {
-        cColor = gtxtCactus.Sample(gssClamp, input.uv);
+        cColor = gtxtNoLeafTrees.Sample(gssClamp, input.uv);
     }
 	
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
@@ -644,6 +644,11 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     {
         cColor = gtxtMoss_Rock.Sample(gssWrap, input.uv);
     }
+    if (gnTexturesMask & 0x2000)
+    {
+        cColor = gtxtMoss_Rock.Sample(gssWrap, input.uv);
+    }
+  
 	
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);

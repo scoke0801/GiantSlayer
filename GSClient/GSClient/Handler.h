@@ -31,7 +31,7 @@ public:
 		auto targetData = m_Data.find(id);
 		if (targetData != m_Data.end())
 			return targetData->second;
-		return T();
+		
 	}
 };
 
@@ -90,7 +90,7 @@ public:
 		}
 		string resultText = "지정되지 않은 셰이더 호출!";
 		resultText += (" " + id);
-		assert(!resultText);
+		assert(!resultText.c_str());
 	}
 public:
 	void CreateFBXShader()    { return;}
