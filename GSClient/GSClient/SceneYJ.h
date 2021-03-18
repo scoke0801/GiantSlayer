@@ -6,6 +6,7 @@ class CGameObject;
 class CCamera;
 class CPlayer;
 class UI;
+class HelpTextUI;
 class CTerrain;
 
 class CSceneYJ : public CScene
@@ -19,8 +20,10 @@ protected:
 
 	CPlayer* m_Player = nullptr;
 	vector<UI*>					m_UIs;
-	vector<UI*>					m_HPGauge;
-	vector<UI*>					m_SPGauge;
+	vector<UI*>					m_HPGauges;
+	vector<UI*>					m_SPGauges;
+	HelpTextUI*					m_HelpTextUI;
+
 
 	CSkyBox* m_Skybox;
 	CTerrain* m_Terrain;
@@ -112,6 +115,7 @@ private:
 		ID3D12RootSignature* pd3dGraphicsRootSignature, CShader* pShader);
 	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	void BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);
