@@ -124,6 +124,14 @@ void CBridge::SetPosition(XMFLOAT3 pos)
 	CGameObject::SetPosition(pos);
 }
 
+void CBridge::RotateAll(const XMFLOAT3& axis, float angle)
+{
+	for (CGameObject* pObject : m_Objects)
+	{
+		pObject->Rotate(axis, angle);
+	}
+}
+
 void CBridge::AddObject(CMesh* pMesh, CShader* pShader, UINT textureIndex)
 {
 	CGameObject* pGameObject = new CGameObject();

@@ -140,6 +140,14 @@ void CPlate::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 	}
 }
 
+void CPlate::RotateAll(const XMFLOAT3& axis, float angle)
+{
+	for (auto pObj : m_Objects)
+	{
+		pObj->Rotate(axis, angle);
+	}
+}
+
 void CPlate::SetPosition(XMFLOAT3 pos)
 {
 	for (auto pObj : m_Objects)

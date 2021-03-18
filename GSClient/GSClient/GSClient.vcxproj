@@ -164,6 +164,7 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="ShaderHandler.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
@@ -184,6 +185,7 @@
     <ClInclude Include="SceneYJ.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SceneJH.h" />
+    <ClInclude Include="Sign.h" />
     <ClInclude Include="Sound.h" />
     <ClInclude Include="State.h" />
     <ClInclude Include="StateMachine.h" />
@@ -200,6 +202,8 @@
     <ClCompile Include="Bridge.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Communicates.cpp" />
+    <ClCompile Include="ShaderHandler.cpp" />
+    <ClCompile Include="Sign.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="EnemyState.cpp" />

@@ -620,13 +620,14 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(pShader);
 	   
+	int k = 0;
 	for (int i = 0; i < 25; ++i)
 	{
 		for (int j = 0; j < 25; ++j)
 		{
 			pObject = new CGameObject();
-		
-			if (i < 19 && j<12)
+
+			if (i < 19 && j < 12)
 			{
 				pObject->SetTextureIndex(0x01);
 			}
@@ -634,7 +635,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			{
 				pObject->SetTextureIndex(0x02);
 			}
-			else if (i >= 5  && j >= 12 && j<17)
+			else if (i >= 5 && j >= 12 && j < 17)
 			{
 				pObject->SetTextureIndex(0x04);
 			}
@@ -642,7 +643,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			{
 				pObject->SetTextureIndex(0x08);
 			}
-			else if (i > 0 && i <= 10 && j>=17 && j < 25)
+			else if (i > 0 && i <= 10 && j >= 17 && j < 25)
 			{
 				pObject->SetTextureIndex(0x08);
 			}
@@ -650,20 +651,34 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			{
 				pObject->SetTextureIndex(0x10);
 			}
-			
+
+			if (i == 24 &&
+				(j >= 17 && j <= 24))
+			{
+				continue;
+			}
+			if (j == 17 &&
+				(i >= 17 && i <= 24))
+			{
+				continue;
+			}
+			if (j == 24 &&
+				(i >= 17 && i <= 24))
+			{
+				continue;
+			}
+
 
 			pObject->SetShader(pShader);
 			pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 				4 * j, 4 * i,
 				m_Heights));
-	
+
 			pObject->Scale(200.0f, 1.0f, 200.0f);
 			pObject->SetPosition({ 800.0f * j, 0, 800.0f * i });
 			m_Objects.push_back(std::move(pObject));
-		} 
-	} 
-
-
+		}
+	}  
 }
 
 CTerrain::~CTerrain()
@@ -770,14 +785,46 @@ void CTerrain::InitHeightDatas()
 	//	}
 	//}
 
-	//for (int i = 80; i < 100; i++)
+	//for (int i = 57; i < 62; i++)
 	//{
-	//	for (int Garo = 0; Garo < 50; Garo++)
+	//	for (int Garo = 20; Garo < 27; Garo++)
 	//	{
-	//		
+	//		m_Heights[i][Garo] = rand() % 300 + (i * 30)-1300.0f;
 	//	}
-
 	//}
+
+	//for (int i = 65; i < 72; i++)
+	//{
+	//	for (int Garo = 20; Garo < 27; Garo++)
+	//	{
+	//		m_Heights[i][Garo] = rand() % 300 + (i * 30) -1300.0f;
+	//	}
+	//}
+
+	//for (int i = 55; i < 65; i++)
+	//{
+	//	for (int Garo = 40; Garo < 50; Garo++)
+	//	{
+	//		m_Heights[i][Garo] = rand() % 300 + (i * 30)-1700.0f;
+	//	}
+	//}
+
+	//for (int i = 62; i < 65; i++)
+	//{
+	//	for (int Garo = 0; Garo < 10; Garo++)
+	//	{
+	//		m_Heights[i][Garo] = rand() % 300 + (i * 30) - 2000.0f;
+	//	}
+	//}
+
+	//for (int i = 10; i < 15; i++)
+	//{
+	//	for (int Garo = 45; Garo < 50; Garo++)
+	//	{
+	//		m_Heights[i][Garo] = rand() % 300 - (i * 30)-1000.0f;
+	//	}
+	//}
+	//
 	//// 두번째 지형및 구조물
 	//for (int i = 80; i < 100; i++)
 	//{

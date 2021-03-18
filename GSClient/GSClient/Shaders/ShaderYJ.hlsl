@@ -32,31 +32,43 @@ Texture2D gtxtDesert : register(t2);
 Texture2D gtxtDryDesert : register(t3);
 Texture2D gtxtRocky_Terrain : register(t4);
 
-Texture2D gSkyBox_Front : register(t5);
-Texture2D gSkyBox_Back : register(t6);
-Texture2D gSkyBox_Right : register(t7);
-Texture2D gSkyBox_Left : register(t8);
-Texture2D gSkyBox_Top : register(t9);
-Texture2D gSkyBox_Bottom : register(t10);
-Texture2D gtxtBox : register(t11);
-Texture2D gtxtWood : register(t12);
-Texture2D gtxtWall : register(t13);
-Texture2D gtxtDoor : register(t14);
+Texture2D gSkyBox_Front    : register(t5);
+Texture2D gSkyBox_Back     : register(t6);
+Texture2D gSkyBox_Right    : register(t7);
+Texture2D gSkyBox_Left     : register(t8);
+Texture2D gSkyBox_Top      : register(t9);
+Texture2D gSkyBox_Bottom   : register(t10);
 
-Texture2D gtxtHpSpGauge : register(t15);
-Texture2D gtxtHpSpPer : register(t16);
-Texture2D gtxtMinimap : register(t17);
-Texture2D gtxtWeapons : register(t18);
+Texture2D gtxtBox          : register(t11);
+Texture2D gtxtWood         : register(t12);
+Texture2D gtxtWoodSignBoard: register(t13);
+Texture2D gtxtGrassWall    : register(t14);
+Texture2D gtxtSandWall     : register(t15); 
+Texture2D gtxtRockyWall    : register(t16);
+Texture2D gtxtDoor         : register(t17);
 
-Texture2D gtxtFlower_Red : register(t19);
-Texture2D gtxtFlower_White : register(t20);
-Texture2D gtxtGrass_Width : register(t21);
-Texture2D gtxtGrass_Depth : register(t22);
-Texture2D gtxtTree : register(t23);
-Texture2D gtxtCactus : register(t24);
+Texture2D gtxtHpSpGauge    : register(t18);
+Texture2D gtxtHpSpPer      : register(t19);
+Texture2D gtxtMinimap      : register(t20);
+Texture2D gtxtWeapons      : register(t21);
 
-Texture2D gtxtMap : register(t25);
-Texture2D gtxtMirror : register(t26);
+Texture2D gtxtFlower_Red   : register(t22);
+Texture2D gtxtFlower_White : register(t23);
+Texture2D gtxtGrass_Width  : register(t24);
+Texture2D gtxtGrass_Depth  : register(t25);
+Texture2D gtxtTree         : register(t26);
+Texture2D gtxtNoLeafTrees  : register(t27);
+Texture2D gtxtLeaves       : register(t28);
+Texture2D gtxtMoss_Rock    : register(t29);
+
+Texture2D gtxtPuzzleBoard  : register(t30);
+Texture2D gtxtHelpText     : register(t31);
+Texture2D gtxtDry_Tree	   : register(t32);
+Texture2D gtxtStump		   : register(t33);
+Texture2D gtxtDead_Tree	   : register(t34);
+
+Texture2D gtxtMap          : register(t35);
+Texture2D gtxtMirror       : register(t36);
  
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -170,7 +182,7 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 	}
 	if (gnTexturesMask & 0x200)
 	{
-		cColor = gtxtWall.Sample(gssWrap, input.uv);
+		cColor = gtxtGrassWall.Sample(gssWrap, input.uv);
 	}
 	return cColor;
 }
@@ -264,7 +276,7 @@ float4 PSBillboard(GS_BILLBOARD_GEOMETRY_OUTPUT input) : SV_TARGET
     }
     if (gnTexturesMask & 0x20)
     {
-        cColor = gtxtCactus.Sample(gssClamp, input.uv);
+        cColor = gtxtNoLeafTrees.Sample(gssClamp, input.uv);
     }
 	
 	if (cColor.a <= 0.3f) discard; //clip(cColor.a - 0.3f);
@@ -316,6 +328,37 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	return cColor;
 }
 
+float4 PS_UI_HelpText(VS_TEXTURE_OUT input) : SV_TARGET
+{
+	float4 cColor;
+
+	if (gnTexturesMask & 0x01)
+	{
+		input.uv.y += 0.1;
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		input.uv.y += 0.2;
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		input.uv.y += 0.3;
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		input.uv.y += 0.4;
+	}
+	if (gnTexturesMask & 0x10)
+	{
+		input.uv.y += 0.5;
+	}
+	if (gnTexturesMask & 0x20)
+	{
+		input.uv.y += 0.6;
+	}
+	cColor = gtxtHelpText.Sample(gssWrap, input.uv);
+	return cColor;
+}
 /////////////////////////////////////////////////////
 // Minimap
 
@@ -622,19 +665,40 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	{
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x200)
+   
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return(cColor * cIllumination);
+}
+
+float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor;// = gtxtBox.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtWall.Sample(gssWrap, input.uv);
+		cColor = gtxtGrassWall.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x400)
+
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtSandWall.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gtxtDryDesert.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtRockyWall.Sample(gssWrap, input.uv);
+	}
+
+	if (gnTexturesMask & 0x10)
 	{
 		cColor = gtxtDoor.Sample(gssWrap, input.uv);
 	}
-    if (gnTexturesMask & 0x800)
-    {
-        cColor = gtxtMirror.Sample(gssWrap, input.uv);
-    }
-	
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
@@ -648,44 +712,21 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtWood.Sample(gssClamp, input.uv);
+		cColor = gtxtWood.Sample(gssClamp, uvw);
 	}
 
 	if (gnTexturesMask & 0x02)
 	{
-		cColor = gtxtBox.Sample(gssClamp, input.uv);
+		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
 	if (gnTexturesMask & 0x04)
 	{
-		cColor = gtxtBox.Sample(gssClamp, input.uv);
+		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
 
 	if (gnTexturesMask & 0x08)
 	{
-		cColor = gtxtBox.Sample(gssClamp, input.uv);
-	}
-
-	if (gnTexturesMask & 0x10)
-	{
-		cColor = gSkyBox_Left.Sample(gssClamp, input.uv);
-	}
-
-	if (gnTexturesMask & 0x20)
-	{
-		cColor = gSkyBox_Top.Sample(gssClamp, input.uv);
-	}
-
-	if (gnTexturesMask & 0x40)
-	{
-		cColor = gSkyBox_Bottom.Sample(gssClamp, input.uv);
-	}
-	if (gnTexturesMask & 0x80)
-	{
-		cColor = gtxtBox.Sample(gssWrap, input.uv);
-	}
-	if (gnTexturesMask & 0x100)
-	{
-		cColor = gtxtWood.Sample(gssWrap, input.uv);
+		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
 
 	input.normalW = normalize(input.normalW);
@@ -694,3 +735,94 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	return(cColor * cIllumination);
 }
 
+
+float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor = gtxtWood.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtWood.Sample(gssClamp, uvw);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtBox.Sample(gssClamp, uvw);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtPuzzleBoard.Sample(gssClamp, uvw);
+	}
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return(cColor * cIllumination);
+}
+float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor = gtxtWood.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtBox.Sample(gssClamp, uvw);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtWoodSignBoard.Sample(gssClamp, uvw);
+	}
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return(cColor * cIllumination);
+} 
+
+float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor;// = gtxtBox.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = cColor = gtxtMirror.Sample(gssWrap, input.uv);
+	}
+
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return(cColor * cIllumination);
+}
+float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor;// = gtxtBox.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtLeaves.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtMoss_Rock.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gtxtDry_Tree.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtStump.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x10)
+	{
+		cColor = gtxtDead_Tree.Sample(gssWrap, input.uv);
+	}
+
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return(cColor * cIllumination);
+}

@@ -12,6 +12,8 @@
 #include "Enemy.h"
 #include "Puzzle.h"
 #include "Terrain.h"
+#include "Sign.h"
+
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
@@ -32,18 +34,21 @@ CSceneJH::~CSceneJH()
 
 void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
 {
+	BuildMirrorResource(pd3dDevice);
 	BuildMinimapResource(pd3dDevice);
 	LoadTextures(pd3dDevice, pd3dCommandList);
 	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
+	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::JH);
+	CShaderHandler::GetInstance().CreateAllShaders(pd3dDevice, m_pd3dGraphicsRootSignature);
+	 
 	BuildMaterials(pd3dDevice, pd3dCommandList);
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
 	BuildLights(pd3dDevice, pd3dCommandList); 
 	BuildSceneFrameData(pd3dDevice, pd3dCommandList);
-	BuildObjects(pd3dDevice, pd3dCommandList);
-	BuildBilboardObjects(pd3dDevice, pd3dCommandList);
+	BuildObjects(pd3dDevice, pd3dCommandList); 
 	BuildUIs(pd3dDevice, pd3dCommandList);
 }
 
@@ -69,12 +74,13 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	m_Cameras[1]->SetPosition({ 500,  1500, 1500 }); 
 	m_Cameras[1]->Pitch(XMConvertToRadians(90));  
 	m_Cameras[2]->SetPosition({ 2500,  0, 2500 });
-	m_Cameras[3]->SetPosition({ 10000,  22000, 10000 }); 
-	m_Cameras[3]->Pitch(XMConvertToRadians(90));
-	m_Cameras[4]->SetPosition({ 0,0,0 });
+	m_Cameras[3]->SetPosition({ 2000, 1000, 8000 });
+	m_Cameras[4]->SetPosition({ 10000,  22000, 10000 });
+	m_Cameras[4]->Pitch(XMConvertToRadians(90));
 
 	m_CurrentCamera = m_Cameras[0];
 	m_MinimapCamera = m_Cameras[1];
+	m_MirrorCamera = m_Cameras[3];
 }
 
 void CSceneJH::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -188,60 +194,27 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	  
 	m_Objects.reserve(30);
 	   
-	CShader* pSkyBoxShader = new CSkyBoxShader();
-	pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTextured");
-	pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTextured");
-	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
-	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	//pSkyBoxShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, pSkyBoxShader);
-	//m_Skybox = new CSkyBoxSphere(pd3dDevice, pd3dCommandList, pSkyBoxShader, 10, 15, 15);
-
-#pragma region Create Terrain
-	CShader* pTerrainShader = new CTerrainTessellationShader();
-	pTerrainShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTerrainTessellation");
-	pTerrainShader->CreatePixelShader( L"Shaders\\ShaderJH.hlsl", "PSTerrainTessellation");
-	pTerrainShader->CreateDomainShader(L"Shaders\\ShaderJH.hlsl", "DSTerrainTessellation");
-	pTerrainShader->CreateHullShader(  L"Shaders\\ShaderJH.hlsl", "HSTerrainTessellation");
-	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
-	pTerrainShader->CreateTerrainShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox")); 
+	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain")); 
 	 
-	//m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, 257, 257, 9, 9, pTerrainShader);  
-	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, pTerrainShader);
-#pragma endregion   
+	BuildMapSector1(pd3dDevice, pd3dCommandList);
+	BuildMapSector2(pd3dDevice, pd3dCommandList);
+	BuildMapSector3(pd3dDevice, pd3dCommandList);
+	BuildMapSector4(pd3dDevice, pd3dCommandList);
+	BuildMapSector5(pd3dDevice, pd3dCommandList);
 
-	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSBridgeLight");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature); 
-	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 
-	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
-	BuildDoorWall(pd3dDevice, pd3dCommandList, pShader);
-	BuildEnemys(pd3dDevice, pd3dCommandList);
+	BuildDoorWall(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("DoorWall"));
 	BuildPuzzles(pd3dDevice, pd3dCommandList);
-
-// Objects Test Setings
-	/// FBX Model
-	CShader* pFBXShader = new CShader();
-	pFBXShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-	pFBXShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
-	pFBXShader->CreateInputLayout(ShaderTypes::Textured);
-	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pFBXShader->CreateBoundaryShader(pd3dDevice, m_pd3dGraphicsRootSignature );
+	BuildSigns(pd3dDevice, pd3dCommandList);
 
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	CGameObject* pObject = new CGameObject();
 	pObject->SetMesh(fbxMesh);
 	pObject->SetPosition({ 2000,  650, 12550 });
 	pObject->SetTextureIndex(0x01);
-	pObject->SetShader(pShader);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	pObject->SetTextureIndex(0x80);
 	pObject->Scale(15, 15, 15);
 	m_Objects.push_back(std::move(pObject)); 
@@ -252,7 +225,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pObject->SetMesh(pSphereMesh);
 	pObject->SetPosition({ 500,  250 + 82.5, 3300 });
 	pObject->SetTextureIndex(0x80);
-	pObject->SetShader(pShader);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	m_Objects.push_back(std::move(pObject));
 
 ///////////////////////////////////////////////////////////////////////////////	 
@@ -262,7 +235,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_CurrentCamera->SetOffset(XMFLOAT3(0.0f, 450.0f, -750.0f));
 	m_CurrentCamera->SetTarget(m_Player);
 
-	m_Player->SetShader(pFBXShader); 
+	m_Player->SetShader(CShaderHandler::GetInstance().GetData("Player"));
 	m_Player->Scale(20, 20, 20);  
 	m_Player->SetObjectName(OBJ_NAME::Player); 
 	m_Player->SetPosition({ 750,  230, 1850 });
@@ -272,6 +245,25 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
 
 	m_MinimapCamera->SetTarget(m_Player);  
+
+	m_Mirror = new CGameObject();
+
+	CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 4000.0f, 1000.0f, 1.0f);
+	 
+	m_Mirror->SetMesh(pMirrorMesh);
+	m_Mirror->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
+	m_Mirror->SetPosition({ 2000,500,10000 });
+	m_Mirror->SetTextureIndex(0x01);
+
+	// 첫번째 지형 표지판
+	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, true, CShaderHandler::GetInstance().GetData("Sign"));
+	pSign->SetPosition({ 2700, 200,7000 });
+	m_Objects.push_back(pSign);
+	 
+	// 퍼즐 벽 표지판
+	pSign = new CSign(pd3dDevice, pd3dCommandList, false, CShaderHandler::GetInstance().GetData("Sign"));
+	pSign->SetPosition({ 11200.0f, 0.0f - 1800.0f, 3200.0f + 5000.0f });
+	m_Objects.push_back(pSign); 
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -280,26 +272,32 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	{
 		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
 		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
-		"Box","Wood", "Wall", "Door",
+		"Box","Wood", "WoodSignBoard",
+		"GrassWall", "SandWall","RockyWall",
+		"Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus",
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
 		"PuzzleBoard",
-		"HelpText"
+		"HelpText",
+		"Dry_Tree","Stump","Dead_Tree" 
 	};
 
 	const wchar_t* address[] =
 	{
 		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds",
-		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds",  L"resources/OBJ/WallTest2.dds", L"resources/OBJ/Door3.dds",
+		L"resources/OBJ/Box.dds",
+		L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
+		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
+		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
-		L"resources/Billboard/Tree02.dds", L"resources/Billboard/Cactus.dds",
+		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board_Test.dds",
-		L"resources/UI/HelpText.dds" 
+		L"resources/UI/HelpText.dds",
+		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds"
 	};
-	 
 	for (int i = 0; i < _countof(keyNames); ++i)
 	{
 		unique_ptr<CTexture> tempTex = make_unique<CTexture>();
@@ -312,7 +310,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 { 
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = m_Textures.size() + 1;
+	srvHeapDesc.NumDescriptors = m_Textures.size() + 2;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dBasicSrvDescriptorHeap));
@@ -324,12 +322,16 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	{
 		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
 		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
-		"Box", "Wood", "Wall", "Door",
+		"Box","Wood", "WoodSignBoard",
+		"GrassWall", "SandWall","RockyWall",
+		"Door",
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus", "PuzzleBoard",
-		"HelpText"
+		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
+		"PuzzleBoard",
+		"HelpText",
+		"Dry_Tree","Stump","Dead_Tree"
 	};
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; 
@@ -349,35 +351,9 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	srvDesc.Format = m_pd3dMinimapTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(m_pd3dMinimapTex, &srvDesc, hDescriptor);
 
-	/////////////////////////////////////////////////////////////////////////////////////
-	//
-	//srvHeapDesc = {};
-	//srvHeapDesc.NumDescriptors = 1;
-	//srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	//srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	//pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dMonsterDescriptorHeap));
-
-	//// Fill out the heap with actual descriptors. 
-	//hDescriptor = m_pd3dMonsterDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-
-	//srvDesc = {};
-	//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	//srvDesc.Texture2D.MostDetailedMip = 0;
-	//srvDesc.Texture2D.MipLevels = -1;
-
-	//const char* keyNames2[] =
-	//{
-	//	"PuzzleBoard"
-	//};
-	//for (int i = 0; i < _countof(keyNames2); ++i)
-	//{
-	//	if (i != 0)	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	//	ID3D12Resource* texResource = m_Textures[keyNames2[i]]->m_pd3dResource;
-	//	srvDesc.Format = texResource->GetDesc().Format;
-
-	//	pd3dDevice->CreateShaderResourceView(texResource, &srvDesc, hDescriptor);
-	//}
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = m_pd3dMirrorTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(m_pd3dMirrorTex, &srvDesc, hDescriptor);
 }
 
 void CSceneJH::ReleaseObjects()
@@ -403,6 +379,10 @@ void CSceneJH::Update(double elapsedTime)
 	m_Player->FixPositionByTerrain(m_Terrain);
 
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
+	if (m_MirrorCamera)
+	{
+		m_MirrorCamera->UpdateViewMatrix();
+	}
 	if (m_MinimapCamera) 
 	{
 		XMFLOAT3 pos = m_Player->GetPosition();
@@ -451,6 +431,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Mirror->Draw(pd3dCommandList, m_CurrentCamera);
 
 	for (auto pBillboardObject : m_BillboardObjects)
 	{
@@ -547,6 +528,69 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET));
 	
+	if (m_CurrentCamera)
+	{
+		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
+		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	}
+}
+
+void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
+{
+	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	if (m_MirrorCamera)
+	{
+		m_MirrorCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
+		m_MirrorCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	}
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
+	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dBasicSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
+
+	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
+	m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
+
+	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
+
+	m_Skybox->Draw(pd3dCommandList, m_MirrorCamera);
+	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
+
+	for (auto pObject : m_BillboardObjects)
+	{
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+	for (auto pObject : m_Objects)
+	{
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMirrorTex,
+		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
+
+	// Copy the input (back-buffer) to MimapTexture
+	pd3dCommandList->CopyResource(m_pd3dMirrorTex, pd3dRTV);
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMirrorTex,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON));
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
+		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
 	if (m_CurrentCamera)
 	{
 		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
@@ -788,7 +832,7 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	// Ground
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size()+ 1;
+	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size()+ 2;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; 
@@ -885,19 +929,27 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 
 void CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
-	ID3D12RootSignature* pd3dGraphicsRootSignature,
 	CShader* pShader)
 {
 	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
-	pBridge->SetPosition({ 2000,  01,  5500 });
+	pBridge->RotateAll({ 0,1,0 }, 90);
+	pBridge->SetPosition({ 8200,  -1301,  17800 });
 	m_Objects.push_back(pBridge);
 	 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
-	pBridge->SetObjectName(OBJ_NAME::Bridge); 
-	pBridge->SetPosition({ 2000,  01,  6500 });
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90);
+	pBridge->SetPosition({ 10200,  -1301,  17800 });
+	m_Objects.push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90);
+	pBridge->SetPosition({ 9200,  -1301,  17800 });
 	m_Objects.push_back(pBridge); 
 }
 
@@ -908,6 +960,22 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 0,0, 7500 });
 	m_Objects.push_back(pDoorWall); 
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 3300, 1000, 500, pShader);
+	pDoorWall->SetPosition({ 10300, -2000, 7500 });
+	pDoorWall->SetTextureIndexes(0x02);
+	m_Objects.push_back(pDoorWall);
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 2500, 500, true, pShader);
+	pDoorWall->SetTextureIndexes(0x04);
+	//pDoorWall->RotateAll({ 0,1,0 }, 90);
+	pDoorWall->SetPosition({ 13500, -3500, 00 });
+	m_Objects.push_back(pDoorWall);
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
+	pDoorWall->SetPosition({ 14000,-4500, 8000 });
+	pDoorWall->SetTextureIndexes(0x08); 
+	m_Objects.push_back(pDoorWall);
 }
 
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -916,60 +984,55 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 
 void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSPuzzle");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
-
-	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, pShader);
-	pPuzzlePlate->SetPosition({ 600.0f,  0.0f, 1500.0f });
-	pPuzzlePlate->SetShader(pShader);
+{ 
+	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
+	pPuzzlePlate->SetPosition({ 10600.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f });
+	//pPuzzlePlate->RotateAll ({ 0,1,0 }, 180);
 	m_Objects.push_back(std::move(pPuzzlePlate));
 
-	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, pShader);
-	pObject->SetPosition({ 500.0f,  0.0f, 1500.0f });
-	pObject->SetShader(pShader);
+	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
+	pObject->SetPosition({ 10500.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f }); 
 	m_Objects.push_back(std::move(pObject)); 
-
-	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
+	 
 	for (int i = 0; i < 2; ++i)
 	{
 		for (int j = 0; j < 5; ++j)
 		{
 			pObject = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
-			pObject->SetPosition({ 900.0f + i * 1800.0f,  300, 1800.0f + j * 300.0f });
+			pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
 			pObject->SetTextureIndex(0x80);
-			pObject->SetShader(pShader);
+			pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 			m_Objects.push_back(std::move(pObject));
 		}
 	} 
 }
 
+void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// 첫번째 지형 표지판
+	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, true, CShaderHandler::GetInstance().GetData("Sign"));
+	pSign->SetPosition({ 2700, 200,7000 });
+	m_Objects.push_back(pSign);
+
+	// 퍼즐 벽 표지판
+	pSign = new CSign(pd3dDevice, pd3dCommandList, false, CShaderHandler::GetInstance().GetData("Sign"));
+	pSign->SetPosition({ 11200.0f, 0.0f - 1800.0f, 3200.0f + 5000.0f });
+	m_Objects.push_back(pSign);
+}
+
 void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VS_UI_Textured");
-	pShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PS_UI_Textured");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateUIShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
+	CShader* pShader = new CShader(); 
 	UI* pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.09f, 0.0f, true);
 	pUI->SetPosition({ -0.50, 0.88,  0.92 });		// HP, SP
 	pUI->SetTextureIndex(0x01);
-	pUI->SetShader(pShader);
+	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(pUI);
 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.3f, 0.09f, 0.0f, true);
 	pUI->SetPosition({ -0.50, 0.79,  0.92 });		// HP, SP
 	pUI->SetTextureIndex(0x02);
-	pUI->SetShader(pShader);
+	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(pUI);
 
 	for (int i = 0; i < 20; ++i)
@@ -977,7 +1040,7 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 		pUI = new HpSpPercentUI(pd3dDevice, pd3dCommandList, 0.015, 0.053f, 0.0f, true);
 		pUI->SetPosition({float( -0.615 + 0.015 * i), 0.885,  0.91 });
 		pUI->SetTextureIndex(0x04);
-		pUI->SetShader(pShader); 
+		pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 		m_HPGauges.push_back(pUI);
 	}
 	for (int i = 0; i < 20; ++i)
@@ -985,32 +1048,26 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 		pUI = new HpSpPercentUI(pd3dDevice, pd3dCommandList, 0.011, 0.053f, 0.0f, false);
 		pUI->SetPosition({ float (-0.575 + 0.011 * i), 0.795,  0.91 });
 		pUI->SetTextureIndex(0x04);
-		pUI->SetShader(pShader);
+		pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 		m_SPGauges.push_back(pUI);
 	} 
 
 	m_MinimapArrow = new MinimapArrow(pd3dDevice, pd3dCommandList, 0.05, 0.05, 0.0f);
 	m_MinimapArrow->SetPosition({ -0.78f, 0.78f,  0.8 });	// MinimapArrow
 	m_MinimapArrow->SetTextureIndex(0x04);
-	m_MinimapArrow->SetShader(pShader);
+	m_MinimapArrow->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(m_MinimapArrow);
 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, true);
 	pUI->SetPosition({ -0.53, 0.65,  0 });		// WeaponUI
 	pUI->SetTextureIndex(0x10);
-	pUI->SetShader(pShader);
+	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(pUI); 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VS_UI_Textured");
-	pShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PS_UI_HelpText");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateUIShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
 	m_HelpTextUI = new HelpTextUI(pd3dDevice, pd3dCommandList, 1.5, 0.25f, 0.8f, HELP_TEXT_INFO::QuestAccept);
 	m_HelpTextUI->SetPosition({ 0.0f, -0.8,  0 });		 
 	m_HelpTextUI->SetTextureIndex(0x01);
-	m_HelpTextUI->SetShader(pShader);
+	m_HelpTextUI->SetShader(CShaderHandler::GetInstance().GetData("UiHelpText"));
 	m_UIs.push_back(m_HelpTextUI);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	pShader = new CShader();
@@ -1022,110 +1079,15 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.20f);
 	pUI->SetPosition({ -0.78f, 0.78f, 0.9 });	// Minmap Background
 	pUI->SetTextureIndex(0x01);
-	pUI->SetShader(pShader); 
+	pUI->SetShader(CShaderHandler::GetInstance().GetData("Minimap"));
 	m_UIs.push_back(pUI);
 
 	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.165f);
 	pUI->SetPosition({ -0.78f, 0.78f,  0.8});	// Minimap
 	pUI->SetTextureIndex(0x02);
-	pUI->SetShader(pShader); 
+	pUI->SetShader(CShaderHandler::GetInstance().GetData("Minimap"));
 	pUI->Rotate(180);
 	m_UIs.push_back(pUI);  
-}
-
-void CSceneJH::BuildBilboardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
-	CShader* pBillboardShader = new CBillboardShader();
-	pBillboardShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSBillboard");
-	pBillboardShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSBillboard");
-	pBillboardShader->CreateGeometryShader(L"Shaders\\ShaderYJ.hlsl", "GSBillboard");
-	pBillboardShader->CreateInputLayout(ShaderTypes::Billboard);
-	pBillboardShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);
-#pragma region Create Tree
-	// 지나가지 못하는 첫번째 지형쪽의 나무 빌보드
-	for (int j = 0; j < 4; j++)
-	{
-		for (int i = 0; i < 16; i++)
-		{
-			CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
-			CGameObject* pBillboardObject = new CGameObject();
-
-			pBillboardObject->SetMesh(pBillboardMesh);
-			pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-
-			if (j == 0)
-			{
-				pBillboardObject->SetPosition({ 4300 + float((j * 500)), 1400, 1000 + float((i * 950)) });
-			}
-			if (j == 1)
-			{
-				pBillboardObject->SetPosition({ 4300 + float((j * 500)), 1400, 500 + float((i * 950)) });
-			}
-			if (j == 2)
-			{
-				pBillboardObject->SetPosition({ 6300 + float((j * 500)), 1400, 1000 + float((i * 950)) });
-			}
-			if (j == 3)
-			{
-				pBillboardObject->SetPosition({ 6300 + float((j * 500)), 1400, 500 + float((i * 950)) });
-			}
-
-			pBillboardObject->SetTextureIndex(0x010);
-			pBillboardObject->SetShader(pBillboardShader);
-			m_BillboardObjects.push_back(std::move(pBillboardObject));
-		}
-	}
-	for (int i = 0; i < 8; i++)
-	{
-		CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
-		CGameObject* pBillboardObject = new CGameObject();
-
-		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-		pBillboardObject->SetPosition({ 4300 + float(((500 * i))), 1400, 1000 + float((14750)) });
-
-		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(pBillboardShader);
-		m_BillboardObjects.push_back(std::move(pBillboardObject));
-	}
-#pragma endregion 
-#pragma region Create Cactus
-	for (int j = 0; j < 2; j++)
-	{
-		for (int i = 4; i < 20; i += 2)
-		{
-			CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
-			CGameObject* pBillboardObject = new CGameObject();
-
-			pBillboardObject->SetMesh(pBillboardMesh);
-			pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-
-			if (j == 0)
-			{
-				pBillboardObject->SetPosition({ 13750 + float((j * 500)), -600, 1000 + float((i * 950)) });
-			}
-			if (j == 1)
-			{
-				pBillboardObject->SetPosition({ 11750 + float((j * 500)), -600, 500 + float((i * 950)) });
-			}
-			 
-			pBillboardObject->SetTextureIndex(0x020);
-			pBillboardObject->SetShader(pBillboardShader);
-			m_BillboardObjects.push_back(std::move(pBillboardObject));
-		}
-	}
-
-	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList);
-	CGameObject* pBillboardObject = new CGameObject();
-
-	pBillboardObject->SetMesh(pBillboardMesh);
-	pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-	pBillboardObject->SetPosition({ 13000 , -600, 4250 });
-
-	pBillboardObject->SetTextureIndex(0x020);
-	pBillboardObject->SetShader(pBillboardShader);
-	m_BillboardObjects.push_back(std::move(pBillboardObject)); 
-#pragma endregion
 }
 
 void CSceneJH::BuildMinimapResource(ID3D12Device* pd3dDevice)
@@ -1151,4 +1113,415 @@ void CSceneJH::BuildMinimapResource(ID3D12Device* pd3dDevice)
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
 		IID_PPV_ARGS(&m_pd3dMinimapTex));
+}
+
+void CSceneJH::BuildMirrorResource(ID3D12Device* pd3dDevice)
+{
+	D3D12_RESOURCE_DESC texDesc;
+	ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
+	texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	texDesc.Alignment = 0;
+	texDesc.Width = FRAME_BUFFER_WIDTH;
+	texDesc.Height = FRAME_BUFFER_HEIGHT;
+	texDesc.DepthOrArraySize = 1;
+	texDesc.MipLevels = 1;
+	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	texDesc.SampleDesc.Count = 1;
+	texDesc.SampleDesc.Quality = 0;
+	texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+
+	pd3dDevice->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&texDesc,
+		D3D12_RESOURCE_STATE_COMMON,
+		nullptr,
+		IID_PPV_ARGS(&m_pd3dMirrorTex));
+}
+
+
+void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+#pragma region Create Tree
+	// 지나가지 못하는 첫번째 지형쪽의 나무 빌보드
+	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, 160.0f, 160.0f);
+
+	CGameObject* pBillboardObject = new CGameObject();
+
+	float x_Tree, z_Tree;
+
+	for (int i = 0; i < 2; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 3000.0f + 500.0f * i;
+		z_Tree = 4500.0f;
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		pBillboardObject = new CGameObject();
+
+		pBillboardObject->SetMesh(pBillboardMesh);
+
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000 + 100.0f * i;
+		z_Tree = 4500 + 700.0f * i;
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f, z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 700.0f + (600 * i);
+		z_Tree = 4000.0f + (600 * i);
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000.0f + (600 * i);
+		z_Tree = 3200.0f;
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 5500;
+		z_Tree = 4200.0f + (1000 * i);
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000.0f;
+		z_Tree = 10500.0f + (500 * i);
+		if (i == 2)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 10500.0f;
+		}
+		if (i == 3)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 11000.0f;
+		}
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000;
+		z_Tree = 12600.0f + 2100.0f * i;
+
+		if (i == 2)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 12600.0f;
+		}
+		if (i == 3)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 14700.0f;
+		}
+
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 7; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 8200;
+		z_Tree = 300.0f + 1650.0f * i;
+
+		if (i == 5)
+		{
+			x_Tree = 6500.0f;
+			z_Tree = 8500.0f;
+		}
+		if (i == 6)
+		{
+			x_Tree = 6500.0f;
+			z_Tree = 9500.0f;
+		}
+
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+#pragma endregion 
+
+	CMeshFbx* fbx_bush_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
+
+	CGameObject* pObject;
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->Rotate({ 1,0,0 }, 90);
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetPosition({ 1000.0f + i * 1000.0f, 100, 850 });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->Rotate({ 1,0,0 }, 90);
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetPosition({ 1200.0f + i * 1000.0f, 0, 3150 });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+		pObject->SetPosition({ 500.0f + i * 2700.0f, 0, 2150 });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+		pObject->SetPosition({ 2600.0f, 0, 4650 + 500.0f * i });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+		pObject->SetPosition({ 2600.0f, -200.0f, 4650 + 500.0f * i });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 9; i++)
+	{
+		float x_bush = 1000.0f;
+		float z_bush = 8050.0f;
+
+		if (i == 0) {
+			x_bush += 2000.0f;
+		}
+
+		if (i == 2) {
+			x_bush -= 1000.0f;
+		}
+
+		if (i == 4) {
+			x_bush -= 1500.0f;
+		}
+
+		if (i == 6) {
+			x_bush -= 2000.0f;
+		}
+
+		if (i == 8) {
+			x_bush -= 2000.0f;
+		}
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+
+		pObject->SetPosition({ x_bush + 300 * i, 0, z_bush + 700.0f * i });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	pObject = new CGameObject();
+	pObject->SetMesh(fbx_bush_Mesh);
+	pObject->SetPosition({ 2500.0f, 100, 250 });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x01);
+	pObject->Scale(50, 50, 50);
+	m_Objects.push_back(std::move(pObject));
+}
+
+void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CMeshFbx* fbx_Rock_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/rock.fbx", true);
+	CGameObject* pObject;
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+
+		pObject->SetMesh(fbx_Rock_Mesh);
+		pObject->SetPosition({ 500.0f + i * 1000.0f, -1000, 19500 - 500.0f * i });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+		pObject->SetTextureIndex(0x02);
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	CMeshFbx* fbx_Dry_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
+	CMeshFbx* fbx_Stump_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
+	CMeshFbx* fbx_Dead_Tree_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
+
+	float x_Tree, z_Tree;
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_Dry_Mesh);
+
+		x_Tree = 200 + 700 * i;
+		z_Tree = 19500 - 700 * i;
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) , z_Tree });
+
+		pObject->SetTextureIndex(0x04);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_Dry_Mesh);
+
+		x_Tree = 200 + 3000 * i;
+		z_Tree = 17000;
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)   , z_Tree });
+		pObject->SetTextureIndex(0x04);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	pObject = new CGameObject();
+	pObject->SetMesh(fbx_Stump_Mesh);
+
+	x_Tree = 200;
+	z_Tree = 18000;
+
+	pObject->Scale(20.0f, 20.0f, 20.0f);
+	pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree), z_Tree });
+	pObject->SetTextureIndex(0x08);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+	m_BillboardObjects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetMesh(fbx_Dead_Tree_Mesh);
+
+	x_Tree = 3700;
+	z_Tree = 19000;
+	pObject->Scale(150.0f, 150.0f, 150.0f);
+
+	pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 1000.0f,z_Tree });
+	pObject->SetTextureIndex(0x10);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+	m_BillboardObjects.push_back(std::move(pObject));
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_Dead_Tree_Mesh);
+
+		x_Tree = 1700 + 5000 * i;
+		z_Tree = 16500;
+		pObject->Scale(150.0f, 150.0f, 150.0f);
+
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 1000.0f, z_Tree });
+
+		pObject->SetTextureIndex(0x10);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+		m_BillboardObjects.push_back(std::move(pObject));
+	}
+}
+
+void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CSceneJH::BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CSceneJH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
 }

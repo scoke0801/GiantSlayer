@@ -318,8 +318,8 @@ void CShader::CreateBoundaryShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
 	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	d3dPipelineStateDesc.pRootSignature = pd3dGraphicsRootSignature;
-	d3dPipelineStateDesc.VS = CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSBasic");
-	d3dPipelineStateDesc.PS = CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSBasic");
+	d3dPipelineStateDesc.VS = CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSBasic");
+	d3dPipelineStateDesc.PS = CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSBasic");
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState(); 
 	d3dPipelineStateDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	d3dPipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE; 
@@ -338,7 +338,7 @@ void CShader::CreateBoundaryShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
 		__uuidof(ID3D12PipelineState), (void**)&m_pd3dBoundartPipelineState);
 }
 
-void CShader::CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+void CShader::CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, bool isLeftSide)
 {
 	m_nPipelineStates = 2;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
@@ -350,8 +350,12 @@ void CShader::CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 	d3dPipelineStateDesc.PS = m_d3dPSBytecode;
 	if (m_pd3dGeometryShaderBlob)d3dPipelineStateDesc.GS = m_d3dGSBytecode;
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
-	d3dPipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
+	if (isLeftSide) {
+		d3dPipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
+	}
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
+	d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = TRUE;
+	d3dPipelineStateDesc.BlendState.RenderTarget[0].BlendEnable = TRUE;
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
 	d3dPipelineStateDesc.InputLayout = m_d3dInputLayoutDesc;
 	d3dPipelineStateDesc.SampleMask = UINT_MAX;

@@ -376,7 +376,8 @@ CTexturedRectMesh::~CTexturedRectMesh()
 
 }
 
-CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) 
+CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	float sizeX, float sizeY)
 	: CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = 1;
@@ -385,7 +386,7 @@ CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	CBillboardVertex* pVertice = new CBillboardVertex;
 	pVertice->m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	pVertice->m_xmf2Size = XMFLOAT2(160.0f, 160.0f);
+	pVertice->m_xmf2Size = XMFLOAT2(sizeX, sizeY);
 	pVertice->m_nTexture = 1;
 	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertice, 
 		m_nStride * m_nVertices,

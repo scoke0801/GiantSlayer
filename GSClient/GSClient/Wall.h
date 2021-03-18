@@ -36,6 +36,10 @@ public:
     CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
         float width, float height, float depth,
         CShader* pShader);
+    CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+        float width, float height, float depth,
+        bool isRotated,
+        CShader* pShader);
     ~CDoorWall();
 
 public:
@@ -43,4 +47,8 @@ public:
     virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
 
     void SetPosition(XMFLOAT3 xmf3Position);
+
+    void SetTextureIndexes(int idx);
+
+    void RotateAll(XMFLOAT3 xmf3Axis, float angle);
 };
