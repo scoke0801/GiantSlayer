@@ -181,178 +181,17 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 
-#pragma region Create Tree
-	// 지나가지 못하는 첫번째 지형쪽의 나무 빌보드
-	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, 160.0f, 160.0f);
-
-	CGameObject* pBillboardObject = new CGameObject();
-
-	float x_Tree,z_Tree;
-
-
-	for (int i = 0; i < 2; i++)
-	{
-		pBillboardObject = new CGameObject();
-		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-
-		x_Tree = 3000.0f + 500.0f * i;
-		z_Tree = 4500.0f;
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
-
-		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
-		m_BillboardObjects.push_back(std::move(pBillboardObject));
-	}
-
-	for (int i = 0; i < 5; i++)
-	{
-		pBillboardObject = new CGameObject();
-
-		pBillboardObject->SetMesh(pBillboardMesh);
-
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-
-		x_Tree = 4000 + 100.0f * i;
-		z_Tree = 4500 + 700.0f * i;
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f, z_Tree });
-
-		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
-		m_BillboardObjects.push_back(std::move(pBillboardObject));
-	}
-
-	for (int i = 0; i < 2; i++)
-	{
-		pBillboardObject = new CGameObject();
-		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-
-		x_Tree = 700.0f+(600*i);
-		z_Tree = 4000.0f+(600*i);
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
-
-		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
-		m_BillboardObjects.push_back(std::move(pBillboardObject));
-	}
+	BuildMapSector1(pd3dDevice, pd3dCommandList);
+	BuildMapSector2(pd3dDevice, pd3dCommandList);
+	BuildMapSector3(pd3dDevice, pd3dCommandList);
+	BuildMapSector4(pd3dDevice, pd3dCommandList);
+	BuildMapSector5(pd3dDevice, pd3dCommandList);
 	
-	for (int i = 0; i < 2; i++)
-	{
-		pBillboardObject = new CGameObject();
-		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-
-		x_Tree = 4000.0f + (600 * i);
-		z_Tree = 3200.0f;
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
-
-		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
-		m_BillboardObjects.push_back(std::move(pBillboardObject));
-	}
-	
-	for (int i = 0; i < 3; i++)
-	{
-		pBillboardObject = new CGameObject();
-		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-
-		x_Tree = 5500;
-		z_Tree = 4200.0f+ (1000 * i);
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)+300.0f  , z_Tree });
-
-		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
-		m_BillboardObjects.push_back(std::move(pBillboardObject));
-	}
-
-	for (int i = 0; i < 4; i++)
-	{
-		pBillboardObject = new CGameObject();
-		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-
-		x_Tree = 4000.0f;
-		z_Tree = 10500.0f + (500 * i);
-		if (i == 2)
-		{
-			x_Tree = 5500.0f;
-			z_Tree = 10500.0f;
-		}
-		if (i == 3)
-		{
-			x_Tree = 5500.0f;
-			z_Tree = 11000.0f;
-		}
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
-
-		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
-		m_BillboardObjects.push_back(std::move(pBillboardObject));
-	}
-
-	for (int i = 0; i < 4; i++)
-	{
-		pBillboardObject = new CGameObject();
-		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-
-		x_Tree = 4000;
-		z_Tree = 12600.0f +2100.0f*i ;
-
-		if (i == 2)
-		{
-			x_Tree = 5500.0f;
-			z_Tree = 12600.0f;
-		}
-		if (i == 3)
-		{
-			x_Tree = 5500.0f;
-			z_Tree = 14700.0f;
-		}
-
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
-
-		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
-		m_BillboardObjects.push_back(std::move(pBillboardObject));
-	}
-
-	for (int i = 0; i < 7; i++)
-	{
-		pBillboardObject = new CGameObject();
-		pBillboardObject->SetMesh(pBillboardMesh);
-		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
-
-		x_Tree = 8200;
-		z_Tree = 300.0f+1650.0f * i;
-
-		if (i == 5)
-		{
-			x_Tree = 6500.0f;
-			z_Tree = 8500.0f;
-		}
-		if (i == 6)
-		{
-			x_Tree = 6500.0f;
-			z_Tree = 9500.0f;
-		}
-
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
-
-		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
-		m_BillboardObjects.push_back(std::move(pBillboardObject));
-	}
-
-
-#pragma endregion 
-	 
-	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, CShaderHandler::GetInstance().GetData("Bridge"));
+	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 	 
 	BuildDoorWall(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("DoorWall"));
 	BuildPuzzles(pd3dDevice, pd3dCommandList);
+	BuildSigns(pd3dDevice, pd3dCommandList);
 
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	CGameObject* pObject = new CGameObject();
@@ -362,215 +201,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pObject->SetTextureIndex(0x80);
 	pObject->Scale(5, 5, 5);
 	m_Objects.push_back(std::move(pObject));
-
-	CMeshFbx* fbx_bush_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
-
-	for (int i = 0; i < 2; i++)
-	{
-		pObject = new CGameObject();
-		pObject->Rotate({ 1,0,0 }, 90);
-		pObject->SetMesh(fbx_bush_Mesh);
-		pObject->SetPosition({ 1000.0f+i*1000.0f, 100, 850 });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		pObject->SetTextureIndex(0x01);
-		pObject->Scale(50, 50, 50);
-		m_Objects.push_back(std::move(pObject));
-	}
-
-	for (int i = 0; i < 2; i++)
-	{
-		pObject = new CGameObject();
-		pObject->Rotate({ 1,0,0 }, 90);
-		pObject->SetMesh(fbx_bush_Mesh);
-		pObject->SetPosition({ 1200.0f + i * 1000.0f, 0, 3150 });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		pObject->SetTextureIndex(0x01);
-		pObject->Scale(50, 50, 50);
-		m_Objects.push_back(std::move(pObject));
-	}
-
-	for (int i = 0; i < 2; i++)
-	{
-		pObject = new CGameObject();
-		pObject->SetMesh(fbx_bush_Mesh);
-		pObject->Rotate({ 0,0,1 }, 90);
-		pObject->SetPosition({ 500.0f + i * 2700.0f, 0, 2150 });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		pObject->SetTextureIndex(0x01);
-		
-		pObject->Scale(50, 50, 50);
-		m_Objects.push_back(std::move(pObject));
-	}
-
-	for (int i = 0; i < 5; i++)
-	{
-		pObject = new CGameObject();
-		pObject->SetMesh(fbx_bush_Mesh);
-		pObject->Rotate({ 0,0,1 }, 90);
-		pObject->SetPosition({ 2600.0f, 0, 4650+500.0f*i });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		pObject->SetTextureIndex(0x01);
-
-		pObject->Scale(50, 50, 50);
-		m_Objects.push_back(std::move(pObject));
-	}
-
-	for (int i = 0; i < 5; i++)
-	{
-		pObject = new CGameObject();
-		pObject->SetMesh(fbx_bush_Mesh);
-		pObject->Rotate({ 0,0,1 }, 90);
-		pObject->SetPosition({ 2600.0f, -200.0f, 4650 + 500.0f * i });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		pObject->SetTextureIndex(0x01);
-
-		pObject->Scale(50, 50, 50);
-		m_Objects.push_back(std::move(pObject));
-	}
-
-	for (int i = 0; i < 9; i++)
-	{
-		float x_bush = 1000.0f;
-		float z_bush = 8050.0f;
-
-
-		if (i == 0)
-		{
-			x_bush += 2000.0f;
-		}
-
-		if (i ==2)
-		{
-			x_bush -= 1000.0f;
-		}
-
-		if (i == 4)
-		{
-			x_bush -= 1500.0f;
-		}
-
-		if (i == 6)
-		{
-			x_bush -= 2000.0f;
-		}
-
-		if (i == 8)
-		{
-			x_bush -= 2000.0f;
-		}
-		pObject = new CGameObject();
-		pObject->SetMesh(fbx_bush_Mesh);
-		pObject->Rotate({ 0,0,1 }, 90);
-
-		pObject->SetPosition({ x_bush+300*i, 0, z_bush + 700.0f * i });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		pObject->SetTextureIndex(0x01);
-
-		pObject->Scale(50, 50, 50);
-		m_Objects.push_back(std::move(pObject));
-	}
-	 
-	pObject = new CGameObject();
-	pObject->SetMesh(fbx_bush_Mesh);
-	pObject->SetPosition({ 2500.0f, 100, 250 });
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-	pObject->SetTextureIndex(0x01);
-	pObject->Scale(50, 50, 50);
-	m_Objects.push_back(std::move(pObject));
-
-
-	// 2단계 지형 돌
-	CMeshFbx* fbx_Rock_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/rock.fbx", true);
-
-	for (int i = 0; i < 2; i++)
-	{
-		pObject = new CGameObject();
-		
-		pObject->SetMesh(fbx_Rock_Mesh);
-		pObject->SetPosition({ 500.0f + i * 1000.0f, -1000, 19500 - 500.0f * i });
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-		pObject->SetTextureIndex(0x02);
-		pObject->Scale(50, 50, 50);
-		m_Objects.push_back(std::move(pObject));
-	}
-	
-	CMeshFbx* fbx_Dry_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
-	CMeshFbx* fbx_Stump_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
-	CMeshFbx* fbx_Dead_Tree_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
-
-	for (int i = 0; i < 2; i++)
-	{
-		pObject = new CGameObject();
-		pObject->SetMesh(fbx_Dry_Mesh);
-		
-		x_Tree = 200+700 * i;
-		z_Tree = 19500-700*i;
-		pObject->Scale(0.5f, 0.5f, 0.5f);
-		
-		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) , z_Tree });
-		
-		pObject->SetTextureIndex(0x04);
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
-		m_Objects.push_back(std::move(pObject));
-	}
-
-
-	for (int i = 0; i < 2; i++)
-	{
-		pObject = new CGameObject();
-		pObject->SetMesh(fbx_Dry_Mesh);
-		
-		x_Tree = 200 + 3000*i;
-		z_Tree = 17000;
-		pObject->Scale(0.5f, 0.5f, 0.5f);
-		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)   , z_Tree });
-		pObject->SetTextureIndex(0x04);
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
-		m_Objects.push_back(std::move(pObject));
-	}
-	 
-	pObject = new CGameObject();
-	pObject->SetMesh(fbx_Stump_Mesh);
-	
-	x_Tree = 200;
-	z_Tree = 18000;
-	
-	pObject->Scale(20.0f, 20.0f, 20.0f);
-	pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree), z_Tree });
-	pObject->SetTextureIndex(0x08);
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-	m_BillboardObjects.push_back(std::move(pObject));
-
-	pObject = new CGameObject();
-	pObject->SetMesh(fbx_Dead_Tree_Mesh);
-	
-	x_Tree = 3700;
-	z_Tree = 19000;
-	pObject->Scale(150.0f, 150.0f, 150.0f);
-	
-	pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)+1000.0f,z_Tree });
-	pObject->SetTextureIndex(0x10);
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-	m_BillboardObjects.push_back(std::move(pObject));
-
-	for (int i = 0; i < 2; i++)
-	{
-		pObject = new CGameObject();
-		pObject->SetMesh(fbx_Dead_Tree_Mesh);
-		
-		x_Tree = 1700+5000*i;
-		z_Tree = 16500;
-		pObject->Scale(150.0f, 150.0f, 150.0f);
-		
-		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)+1000.0f, z_Tree });
-
-		pObject->SetTextureIndex(0x10);
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-		m_BillboardObjects.push_back(std::move(pObject));
-	}
-
-	/////////////////////////////////////////////////////////////////////////////
-
+	   
 	CSphereMesh* pSphereMesh = new CSphereMesh(pd3dDevice, pd3dCommandList,
 		30, 20, 20);
 	pObject = new CGameObject();
@@ -595,26 +226,15 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetMesh(fbxMesh); 
 	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
 
-	m_MinimapCamera->SetTarget(m_Player); 
-
-	m_Mirror = new CGameObject();
+	m_MinimapCamera->SetTarget(m_Player);  
 
 	CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 4000.0f, 1000.0f, 1.0f);
-	 
+
+	m_Mirror = new CGameObject();
 	m_Mirror->SetMesh(pMirrorMesh);
 	m_Mirror->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
 	m_Mirror->SetPosition({ 2000,500,10000 });
-	m_Mirror->SetTextureIndex(0x01);
-
-	// 첫번째 지형 표지판
-	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, true, CShaderHandler::GetInstance().GetData("Sign"));
-	pSign->SetPosition({ 2700, 200,7000 });
-	m_Objects.push_back(pSign);
-
-	// 퍼즐 벽 표지판
-	pSign = new CSign(pd3dDevice, pd3dCommandList, false, CShaderHandler::GetInstance().GetData("Sign"));
-	pSign->SetPosition({ 11200.0f, 0.0f - 1800.0f, 3200.0f + 5000.0f });
-	m_Objects.push_back(pSign);
+	m_Mirror->SetTextureIndex(0x01); 
 }
 
 void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1281,8 +901,7 @@ ID3D12RootSignature* CSceneYJ::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 }
 
 void CSceneYJ::BuildBridges(ID3D12Device* pd3dDevice,
-	ID3D12GraphicsCommandList* pd3dCommandList,
-	ID3D12RootSignature* pd3dGraphicsRootSignature, CShader* pShader)
+	ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
 	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
@@ -1419,6 +1038,19 @@ void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	}
 }
 
+void CSceneYJ::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// 첫번째 지형 표지판
+	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, true, CShaderHandler::GetInstance().GetData("Sign"));
+	pSign->SetPosition({ 2700, 200,7000 });
+	m_Objects.push_back(pSign);
+
+	// 퍼즐 벽 표지판
+	pSign = new CSign(pd3dDevice, pd3dCommandList, false, CShaderHandler::GetInstance().GetData("Sign"));
+	pSign->SetPosition({ 11200.0f, 0.0f - 1800.0f, 3200.0f + 5000.0f });
+	m_Objects.push_back(pSign);
+}
+
 void CSceneYJ::BuildMinimapResource(ID3D12Device* pd3dDevice)
 {
 	D3D12_RESOURCE_DESC texDesc;
@@ -1467,4 +1099,389 @@ void CSceneYJ::BuildMirrorResource(ID3D12Device* pd3dDevice)
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
 		IID_PPV_ARGS(&m_pd3dMirrorTex));
+}
+
+void CSceneYJ::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+#pragma region Create Tree
+	// 지나가지 못하는 첫번째 지형쪽의 나무 빌보드
+	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, 160.0f, 160.0f);
+
+	CGameObject* pBillboardObject = new CGameObject();
+
+	float x_Tree, z_Tree;
+	 
+	for (int i = 0; i < 2; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 3000.0f + 500.0f * i;
+		z_Tree = 4500.0f;
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		pBillboardObject = new CGameObject();
+
+		pBillboardObject->SetMesh(pBillboardMesh);
+
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000 + 100.0f * i;
+		z_Tree = 4500 + 700.0f * i;
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f, z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 700.0f + (600 * i);
+		z_Tree = 4000.0f + (600 * i);
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000.0f + (600 * i);
+		z_Tree = 3200.0f;
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 400.0f , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 5500;
+		z_Tree = 4200.0f + (1000 * i);
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000.0f;
+		z_Tree = 10500.0f + (500 * i);
+		if (i == 2)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 10500.0f;
+		}
+		if (i == 3)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 11000.0f;
+		}
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 4000;
+		z_Tree = 12600.0f + 2100.0f * i;
+
+		if (i == 2)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 12600.0f;
+		}
+		if (i == 3)
+		{
+			x_Tree = 5500.0f;
+			z_Tree = 14700.0f;
+		}
+
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	}
+
+	for (int i = 0; i < 7; i++)
+	{
+		pBillboardObject = new CGameObject();
+		pBillboardObject->SetMesh(pBillboardMesh);
+		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
+
+		x_Tree = 8200;
+		z_Tree = 300.0f + 1650.0f * i;
+
+		if (i == 5)
+		{
+			x_Tree = 6500.0f;
+			z_Tree = 8500.0f;
+		}
+		if (i == 6)
+		{
+			x_Tree = 6500.0f;
+			z_Tree = 9500.0f;
+		}
+
+		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 300.0f  , z_Tree });
+
+		pBillboardObject->SetTextureIndex(0x010);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
+		m_BillboardObjects.push_back(std::move(pBillboardObject));
+	} 
+#pragma endregion 
+
+	CMeshFbx* fbx_bush_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
+
+	CGameObject* pObject;
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->Rotate({ 1,0,0 }, 90);
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetPosition({ 1000.0f + i * 1000.0f, 100, 850 });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->Rotate({ 1,0,0 }, 90);
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetPosition({ 1200.0f + i * 1000.0f, 0, 3150 });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+		pObject->SetPosition({ 500.0f + i * 2700.0f, 0, 2150 });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+		pObject->SetPosition({ 2600.0f, 0, 4650 + 500.0f * i });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+		pObject->SetPosition({ 2600.0f, -200.0f, 4650 + 500.0f * i });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 9; i++)
+	{
+		float x_bush = 1000.0f;
+		float z_bush = 8050.0f;
+
+		if (i == 0) {
+			x_bush += 2000.0f;
+		}
+
+		if (i == 2) {
+			x_bush -= 1000.0f;
+		}
+
+		if (i == 4) {
+			x_bush -= 1500.0f;
+		}
+
+		if (i == 6) {
+			x_bush -= 2000.0f;
+		}
+
+		if (i == 8) {
+			x_bush -= 2000.0f;
+		}
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->Rotate({ 0,0,1 }, 90);
+
+		pObject->SetPosition({ x_bush + 300 * i, 0, z_bush + 700.0f * i });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x01);
+
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	pObject = new CGameObject();
+	pObject->SetMesh(fbx_bush_Mesh);
+	pObject->SetPosition({ 2500.0f, 100, 250 });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x01);
+	pObject->Scale(50, 50, 50);
+	m_Objects.push_back(std::move(pObject));
+}
+
+void CSceneYJ::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CMeshFbx* fbx_Rock_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/rock.fbx", true);
+	CGameObject* pObject;
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+
+		pObject->SetMesh(fbx_Rock_Mesh);
+		pObject->SetPosition({ 500.0f + i * 1000.0f, -1000, 19500 - 500.0f * i });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+		pObject->SetTextureIndex(0x02);
+		pObject->Scale(50, 50, 50);
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	CMeshFbx* fbx_Dry_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
+	CMeshFbx* fbx_Stump_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
+	CMeshFbx* fbx_Dead_Tree_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
+
+	float x_Tree, z_Tree;
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_Dry_Mesh);
+
+		x_Tree = 200 + 700 * i;
+		z_Tree = 19500 - 700 * i;
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) , z_Tree });
+
+		pObject->SetTextureIndex(0x04);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_Dry_Mesh);
+
+		x_Tree = 200 + 3000 * i;
+		z_Tree = 17000;
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)   , z_Tree });
+		pObject->SetTextureIndex(0x04);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	pObject = new CGameObject();
+	pObject->SetMesh(fbx_Stump_Mesh);
+
+	x_Tree = 200;
+	z_Tree = 18000;
+
+	pObject->Scale(20.0f, 20.0f, 20.0f);
+	pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree), z_Tree });
+	pObject->SetTextureIndex(0x08);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+	m_BillboardObjects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetMesh(fbx_Dead_Tree_Mesh);
+
+	x_Tree = 3700;
+	z_Tree = 19000;
+	pObject->Scale(150.0f, 150.0f, 150.0f);
+
+	pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 1000.0f,z_Tree });
+	pObject->SetTextureIndex(0x10);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+	m_BillboardObjects.push_back(std::move(pObject));
+
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(fbx_Dead_Tree_Mesh);
+
+		x_Tree = 1700 + 5000 * i;
+		z_Tree = 16500;
+		pObject->Scale(150.0f, 150.0f, 150.0f);
+
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 1000.0f, z_Tree });
+
+		pObject->SetTextureIndex(0x10);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+		m_BillboardObjects.push_back(std::move(pObject));
+	}
+}
+
+void CSceneYJ::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CSceneYJ::BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CSceneYJ::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
 }
