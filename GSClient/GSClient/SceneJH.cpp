@@ -14,6 +14,7 @@
 #include "Terrain.h"
 #include "Sign.h"
 
+
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
 #define ROOT_PARAMETER_CAMERA			2
@@ -40,7 +41,9 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	BuildShaders(pd3dDevice, pd3dCommandList);
+	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::JH);
+	CShaderHandler::GetInstance().CreateAllShaders(pd3dDevice, m_pd3dGraphicsRootSignature);
+	 
 	BuildMaterials(pd3dDevice, pd3dCommandList);
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
 	BuildLights(pd3dDevice, pd3dCommandList); 
@@ -192,60 +195,20 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	  
 	m_Objects.reserve(30);
 	   
-	CShader* pSkyBoxShader = new CSkyBoxShader();
-	pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTextured");
-	pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTextured");
-	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
-	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	//pSkyBoxShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, pSkyBoxShader);
-	//m_Skybox = new CSkyBoxSphere(pd3dDevice, pd3dCommandList, pSkyBoxShader, 10, 15, 15);
-
-#pragma region Create Terrain
-	CShader* pTerrainShader = new CTerrainTessellationShader();
-	pTerrainShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTerrainTessellation");
-	pTerrainShader->CreatePixelShader( L"Shaders\\ShaderJH.hlsl", "PSTerrainTessellation");
-	pTerrainShader->CreateDomainShader(L"Shaders\\ShaderJH.hlsl", "DSTerrainTessellation");
-	pTerrainShader->CreateHullShader(  L"Shaders\\ShaderJH.hlsl", "HSTerrainTessellation");
-	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
-	pTerrainShader->CreateTerrainShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox")); 
+	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain")); 
 	 
-	//m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, 257, 257, 9, 9, pTerrainShader);  
-	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, pTerrainShader);
-#pragma endregion   
-
-	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSBridgeLight");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature); 
-	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
-
-	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
-	BuildDoorWall(pd3dDevice, pd3dCommandList, pShader);
+	BuildBridges(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, CShaderHandler::GetInstance().GetData("Bridge")); 
+	BuildDoorWall(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("DoorWall"));
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildPuzzles(pd3dDevice, pd3dCommandList);
-
-// Objects Test Setings
-	/// FBX Model
-	CShader* pFBXShader = new CShader();
-	pFBXShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-	pFBXShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
-	pFBXShader->CreateInputLayout(ShaderTypes::Textured);
-	pFBXShader->CreateFBXMeshShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pFBXShader->CreateBoundaryShader(pd3dDevice, m_pd3dGraphicsRootSignature );
 
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	CGameObject* pObject = new CGameObject();
 	pObject->SetMesh(fbxMesh);
 	pObject->SetPosition({ 2000,  650, 12550 });
 	pObject->SetTextureIndex(0x01);
-	pObject->SetShader(pShader);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	pObject->SetTextureIndex(0x80);
 	pObject->Scale(15, 15, 15);
 	m_Objects.push_back(std::move(pObject)); 
@@ -256,7 +219,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pObject->SetMesh(pSphereMesh);
 	pObject->SetPosition({ 500,  250 + 82.5, 3300 });
 	pObject->SetTextureIndex(0x80);
-	pObject->SetShader(pShader);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	m_Objects.push_back(std::move(pObject));
 
 ///////////////////////////////////////////////////////////////////////////////	 
@@ -266,7 +229,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_CurrentCamera->SetOffset(XMFLOAT3(0.0f, 450.0f, -750.0f));
 	m_CurrentCamera->SetTarget(m_Player);
 
-	m_Player->SetShader(pFBXShader); 
+	m_Player->SetShader(CShaderHandler::GetInstance().GetData("Player"));
 	m_Player->Scale(20, 20, 20);  
 	m_Player->SetObjectName(OBJ_NAME::Player); 
 	m_Player->SetPosition({ 750,  230, 1850 });
@@ -280,34 +243,21 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Mirror = new CGameObject();
 
 	CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 4000.0f, 1000.0f, 1.0f);
-
-	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
-
+	 
 	m_Mirror->SetMesh(pMirrorMesh);
-	m_Mirror->SetShader(pShader);
+	m_Mirror->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
 	m_Mirror->SetPosition({ 2000,500,10000 });
-	m_Mirror->SetTextureIndex(0x800);
+	m_Mirror->SetTextureIndex(0x01);
 
 	// 첫번째 지형 표지판
-	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, true, pShader);
+	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, true, CShaderHandler::GetInstance().GetData("Sign"));
 	pSign->SetPosition({ 2700, 200,7000 });
 	m_Objects.push_back(pSign);
-	
-
+	 
 	// 퍼즐 벽 표지판
-	pSign = new CSign(pd3dDevice, pd3dCommandList, false, pShader);
+	pSign = new CSign(pd3dDevice, pd3dCommandList, false, CShaderHandler::GetInstance().GetData("Sign"));
 	pSign->SetPosition({ 11200.0f, 0.0f - 1800.0f, 3200.0f + 5000.0f });
-	m_Objects.push_back(pSign);
-
-	//퍼즐 앞 표지판 
-	//pSign = new CSign(pd3dDevice, pd3dCommandList, false, pShader);
-	//pSign->SetPosition({ 11200.0f, 0.0f - 1800.0f, 1500.0f + 10500.0f });
-	//m_Objects.push_back(pSign);
-	//{ 10600.0f, 0.0f - 2000.0f, 1500.0f + 8000.0f }
+	m_Objects.push_back(pSign); 
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -316,7 +266,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	{
 		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
 		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
-		"Box","Wood", "Wall", "Door",
+		"Box","Wood", "WoodSignBoard",
+		"GrassWall", "SandWall","Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
 		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","Cactus",
@@ -327,10 +278,13 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	const wchar_t* address[] =
 	{
 		//Wood->WoodBoard2
-		//WallTest2->StoneWallTexture3
+		//GrassWallTexture->StoneWallTexture3
 		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds",
-		L"resources/OBJ/Box.dds",L"resources/OBJ/WoodBoard2.dds",  L"resources/OBJ/StoneWallTexture3.dds", L"resources/OBJ/Door3.dds",
+		L"resources/OBJ/Box.dds",
+		L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
+		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",
+		L"resources/OBJ/Door3.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
 		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
 		L"resources/Billboard/Tree02.dds", L"resources/Billboard/Cactus.dds",
@@ -344,18 +298,6 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		MakeTexture(pd3dDevice, pd3dCommandList, tempTex.get(), keyNames[i], address[i]); 
 		m_Textures[tempTex->m_Name] = std::move(tempTex);
 	}       
-}
-
-void CSceneJH::BuildShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
-	CShader* pSkyBoxShader = new CSkyBoxShader();
-	pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTextured");
-	pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTextured");
-	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
-	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	//CHandler<CShader*>::GetInstance().AddData("SkyBox", pSkyBoxShader);
-
-	CShaderHandler::GetInstance().AddData("SkyBox", pSkyBoxShader);
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -374,7 +316,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	{
 		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
 		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
-		"Box", "Wood", "Wall", "Door",
+		"Box","Wood", "WoodSignBoard",
+		"GrassWall", "SandWall","Door",
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
@@ -1012,6 +955,18 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 
 	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 3300, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 10300, -2000, 7500 });
+	pDoorWall->SetTextureIndexes(0x02);
+	m_Objects.push_back(pDoorWall);
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
+	pDoorWall->SetPosition({ 14000,-4500, 8000 });
+	pDoorWall->SetTextureIndexes(0x04); 
+	m_Objects.push_back(pDoorWall);
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
+	pDoorWall->SetTextureIndexes(0x04);
+	pDoorWall->RotateAll({ 0,1,0 }, 90);
+	pDoorWall->SetPosition({ 12000, -3000, 00 });
 	m_Objects.push_back(pDoorWall);
 }
 
@@ -1021,30 +976,16 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 
 void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSPuzzle");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
-
-	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, pShader);
+{ 
+	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
 	pPuzzlePlate->SetPosition({ 10600.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f });
-	pPuzzlePlate->SetShader(pShader);
 	//pPuzzlePlate->RotateAll ({ 0,1,0 }, 180);
 	m_Objects.push_back(std::move(pPuzzlePlate));
 
-	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, pShader);
-	pObject->SetPosition({ 10500.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f });
-	pObject->SetShader(pShader);
+	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
+	pObject->SetPosition({ 10500.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f }); 
 	m_Objects.push_back(std::move(pObject)); 
-
-	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
+	 
 	for (int i = 0; i < 2; ++i)
 	{
 		for (int j = 0; j < 5; ++j)
@@ -1052,7 +993,7 @@ void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 			pObject = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
 			pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
 			pObject->SetTextureIndex(0x80);
-			pObject->SetShader(pShader);
+			pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 			m_Objects.push_back(std::move(pObject));
 		}
 	} 
@@ -1060,22 +1001,17 @@ void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VS_UI_Textured");
-	pShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PS_UI_Textured");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateUIShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
+	CShader* pShader = new CShader(); 
 	UI* pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.09f, 0.0f, true);
 	pUI->SetPosition({ -0.50, 0.88,  0.92 });		// HP, SP
 	pUI->SetTextureIndex(0x01);
-	pUI->SetShader(pShader);
+	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(pUI);
 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.3f, 0.09f, 0.0f, true);
 	pUI->SetPosition({ -0.50, 0.79,  0.92 });		// HP, SP
 	pUI->SetTextureIndex(0x02);
-	pUI->SetShader(pShader);
+	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(pUI);
 
 	for (int i = 0; i < 20; ++i)
@@ -1083,7 +1019,7 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 		pUI = new HpSpPercentUI(pd3dDevice, pd3dCommandList, 0.015, 0.053f, 0.0f, true);
 		pUI->SetPosition({float( -0.615 + 0.015 * i), 0.885,  0.91 });
 		pUI->SetTextureIndex(0x04);
-		pUI->SetShader(pShader); 
+		pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 		m_HPGauges.push_back(pUI);
 	}
 	for (int i = 0; i < 20; ++i)
@@ -1091,32 +1027,26 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 		pUI = new HpSpPercentUI(pd3dDevice, pd3dCommandList, 0.011, 0.053f, 0.0f, false);
 		pUI->SetPosition({ float (-0.575 + 0.011 * i), 0.795,  0.91 });
 		pUI->SetTextureIndex(0x04);
-		pUI->SetShader(pShader);
+		pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 		m_SPGauges.push_back(pUI);
 	} 
 
 	m_MinimapArrow = new MinimapArrow(pd3dDevice, pd3dCommandList, 0.05, 0.05, 0.0f);
 	m_MinimapArrow->SetPosition({ -0.78f, 0.78f,  0.8 });	// MinimapArrow
 	m_MinimapArrow->SetTextureIndex(0x04);
-	m_MinimapArrow->SetShader(pShader);
+	m_MinimapArrow->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(m_MinimapArrow);
 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, true);
 	pUI->SetPosition({ -0.53, 0.65,  0 });		// WeaponUI
 	pUI->SetTextureIndex(0x10);
-	pUI->SetShader(pShader);
+	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(pUI); 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VS_UI_Textured");
-	pShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PS_UI_HelpText");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateUIShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
 	m_HelpTextUI = new HelpTextUI(pd3dDevice, pd3dCommandList, 1.5, 0.25f, 0.8f, HELP_TEXT_INFO::QuestAccept);
 	m_HelpTextUI->SetPosition({ 0.0f, -0.8,  0 });		 
 	m_HelpTextUI->SetTextureIndex(0x01);
-	m_HelpTextUI->SetShader(pShader);
+	m_HelpTextUI->SetShader(CShaderHandler::GetInstance().GetData("UiHelpText"));
 	m_UIs.push_back(m_HelpTextUI);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	pShader = new CShader();
@@ -1128,25 +1058,19 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.20f);
 	pUI->SetPosition({ -0.78f, 0.78f, 0.9 });	// Minmap Background
 	pUI->SetTextureIndex(0x01);
-	pUI->SetShader(pShader); 
+	pUI->SetShader(CShaderHandler::GetInstance().GetData("Minimap"));
 	m_UIs.push_back(pUI);
 
 	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.165f);
 	pUI->SetPosition({ -0.78f, 0.78f,  0.8});	// Minimap
 	pUI->SetTextureIndex(0x02);
-	pUI->SetShader(pShader); 
+	pUI->SetShader(CShaderHandler::GetInstance().GetData("Minimap"));
 	pUI->Rotate(180);
 	m_UIs.push_back(pUI);  
 }
 
 void CSceneJH::BuildBilboardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
-	CShader* pBillboardShader = new CBillboardShader();
-	pBillboardShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSBillboard");
-	pBillboardShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSBillboard");
-	pBillboardShader->CreateGeometryShader(L"Shaders\\ShaderYJ.hlsl", "GSBillboard");
-	pBillboardShader->CreateInputLayout(ShaderTypes::Billboard);
-	pBillboardShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);
+{  
 #pragma region Create Tree
 	// 지나가지 못하는 첫번째 지형쪽의 나무 빌보드
 	CBillboardMesh* pBillboardMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, 160.0f, 160.0f);
@@ -1179,7 +1103,7 @@ void CSceneJH::BuildBilboardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		}
 
 		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(pBillboardShader);
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
 		m_BillboardObjects.push_back(std::move(pBillboardObject));
 	}
 #pragma endregion 

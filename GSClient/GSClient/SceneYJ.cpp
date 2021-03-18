@@ -38,6 +38,9 @@ void CSceneYJ::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
+	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::JH);
+	CShaderHandler::GetInstance().CreateAllShaders(pd3dDevice, m_pd3dGraphicsRootSignature);
+
 	BuildMaterials(pd3dDevice, pd3dCommandList);
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
 	BuildLights(pd3dDevice, pd3dCommandList);
