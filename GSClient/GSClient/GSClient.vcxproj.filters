@@ -123,6 +123,12 @@
     <ClCompile Include="Terrain.cpp">
       <Filter>GameObject\Terrain</Filter>
     </ClCompile>
+    <ClCompile Include="Sign.cpp">
+      <Filter>GameObject\Sign</Filter>
+    </ClCompile>
+    <ClCompile Include="Handler.cpp">
+      <Filter>Handler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -241,6 +247,12 @@
     <ClInclude Include="Terrain.h">
       <Filter>GameObject\Terrain</Filter>
     </ClInclude>
+    <ClInclude Include="Sign.h">
+      <Filter>GameObject\Sign</Filter>
+    </ClInclude>
+    <ClInclude Include="Handler.h">
+      <Filter>Handler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -334,6 +346,9 @@
     </Filter>
     <Filter Include="GameObject\Terrain">
       <UniqueIdentifier>{cb851dde-6738-433c-b8e3-cfba40b0713f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Sign">
+      <UniqueIdentifier>{639e0d57-1a7b-492e-aac3-2c5c5fc89552}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
