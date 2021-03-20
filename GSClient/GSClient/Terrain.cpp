@@ -817,11 +817,11 @@ void CTerrain::InitHeightDatas()
 	//	}
 	//}
 
-	//for (int i = 10; i < 15; i++)
+	//for (int i = 25; i < 30; i++)
 	//{
 	//	for (int Garo = 45; Garo < 50; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - (i * 30)-1000.0f;
+	//		m_Heights[i][Garo] = rand() % 300 - (i * 30)-500.0f;
 	//	}
 	//}
 	//
@@ -902,7 +902,7 @@ void CTerrain::InitHeightDatas()
 	//{
 	//	for (int Garo = 50; Garo < 70; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 3150;
+	//		m_Heights[i][Garo] = rand() % 300 - 3650;
 	//	}
 	//}
 	// 
@@ -918,7 +918,7 @@ void CTerrain::InitHeightDatas()
 	//{
 	//	for (int Garo = 70; Garo < 100; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 4150;
+	//		m_Heights[i][Garo] = rand() % 300 - 3650;
 	//	}
 	//}
 	//for (int i = 40; i < 70; i++)
