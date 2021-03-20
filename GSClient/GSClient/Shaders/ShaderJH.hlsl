@@ -771,9 +771,9 @@ float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primitiv
 		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
 	if (gnTexturesMask & 0x02)
-	{
+	{ 
 		cColor = gtxtWoodSignBoard.Sample(gssClamp, uvw);
-	}
+	} 
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 

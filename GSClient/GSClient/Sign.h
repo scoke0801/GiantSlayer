@@ -1,6 +1,13 @@
 #pragma once
 #include "GameObject.h"
 
+enum class SignBoardInfos 
+{
+    None = 0x02,
+    Scroll = 0x04,
+    NumPuzzle = 0x08,
+    Medusa = 0x10
+};
 class CSign : public CGameObject
 {
 private: 
@@ -9,7 +16,8 @@ private:
 
 public:
     CSign(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-        bool isFrontSide,
+        SignBoardInfos boardInfo,
+        bool isRotated, bool isFrontSide,
         CShader* pShader);
     ~CSign();
      
