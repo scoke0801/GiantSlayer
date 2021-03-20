@@ -23,6 +23,13 @@ cbuffer cbCameraInfo : register(b2)
 	float3	gvCameraPosition : packoffset(c8);
 };
 
+cbuffer cbFogInfo : register(b5)
+{
+    float4 gFogColor : packoffset(c0);
+    float gFogStart : packoffset(c4);
+    float gFogRange : packoffset(c8);
+}
+
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
 
@@ -572,9 +579,24 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
     }
     if (gnTexturesMask & 0x10)
     {
+		
+		
         cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0);
+        float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+        float FogStart = 200.0f;
+        float FogRange = 3000.0f;
+	
+        float3 toEyeW = gvCameraPosition + input.position.xyz;
+        float distToEye = length(toEyeW);
+        toEyeW /= distToEye; // normalize
+	
+        float fogAmount = saturate((distToEye - FogStart) / FogRange);
+        cColor = lerp(cColor, FogColor, fogAmount);
     }
 	
+	
+   
+
 	//else
 	//{
 	//	cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
@@ -667,6 +689,20 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
 	}
    
+    //input.NormalW = normalize(input.NormalW);
+
+    //float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+    //float FogStart = 5.0f;
+    //float FogRange = 15000.0f;
+	
+    //float3 toEyeW = gvCameraPosition - input.positionW;
+    //float distToEye = length(toEyeW);
+    //toEyeW /= distToEye; // normalize
+	
+    //float fogAmount = saturate((distToEye - FogStart) / FogRange);
+    //cColor = lerp(cColor, FogColor, fogAmount);
+
+	
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
@@ -825,9 +861,11 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     {
         cColor = gtxtDesert_Rock.Sample(gssWrap, input.uv);
     }
-
+   
+	
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
 	return(cColor * cIllumination);
 }
+

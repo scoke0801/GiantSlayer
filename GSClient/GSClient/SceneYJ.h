@@ -64,6 +64,8 @@ private:	// about SceneInfo
 	ID3D12Resource* m_pd3dcbSceneInfo = NULL;
 	CB_GAMESCENE_FRAME_DATA* m_pcbMappedSceneFrameData = NULL;
 
+
+
 public:
 	CSceneYJ();
 	~CSceneYJ();

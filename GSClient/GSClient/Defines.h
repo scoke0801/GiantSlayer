@@ -100,4 +100,9 @@ struct CB_GAMESCENE_FRAME_DATA
 	UINT m_PlayerHP = 0;
 	UINT m_PlayerSP = 0;
 	UINT m_PlayerWeapon = 0x01;
+
+	//XMFLOAT4 m_FogColor = { 0.7f,0.7f,0.7f,1.0f };
+	//float m_FogStart = 5.0f;
+	//float m_FogRange = 150.0f;
 };
+
