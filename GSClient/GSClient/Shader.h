@@ -38,7 +38,7 @@ protected:
 	ID3D12PipelineState**			m_ppd3dPipelineStates = NULL;
 	int								m_nPipelineStates = 0;
 
-	ID3D12PipelineState*			m_pd3dBoundartPipelineState = NULL;
+	ID3D12PipelineState*			m_pd3dBoundaryPipelineState = NULL;
 
 public:
 	CShader();

@@ -859,7 +859,7 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice,
 }
  
 CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
-	int xIndex, int zIndex,  
+	bool xZero, bool zZero,
 	int* heights)
 	: CMesh(pd3dDevice, pd3dCommandList)
 {
@@ -886,7 +886,13 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		{
 			if (i >= 25) break; 
 			 
-			pVertices[i].m_xmf3Position = XMFLOAT3(x / 2, heights[i], z / 2); 
+			if(xZero){
+				pVertices[i].m_xmf3Position = XMFLOAT3(xStart, heights[i], z / 2);
+			}
+			else if (zZero) {
+				pVertices[i].m_xmf3Position = XMFLOAT3(x / 2, heights[i], zStart);
+			}
+			
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
 			pVertices[i].m_xmf4Color = XMFLOAT4(1, 1, 1, 0); 
 		}
