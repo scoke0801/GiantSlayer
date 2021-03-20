@@ -66,9 +66,10 @@ Texture2D gtxtHelpText     : register(t31);
 Texture2D gtxtDry_Tree	   : register(t32);
 Texture2D gtxtStump		   : register(t33);
 Texture2D gtxtDead_Tree	   : register(t34);
+Texture2D gtxtDesert_Rock  : register(t35);
 
-Texture2D gtxtMap          : register(t35);
-Texture2D gtxtMirror       : register(t36);
+Texture2D gtxtMap          : register(t36);
+Texture2D gtxtMirror       : register(t37);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -820,7 +821,10 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	{
 		cColor = gtxtDead_Tree.Sample(gssWrap, input.uv);
 	}
-
+	if (gnTexturesMask & 0x20)
+	{
+		cColor = gtxtDesert_Rock.Sample(gssWrap, input.uv);
+	}
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
