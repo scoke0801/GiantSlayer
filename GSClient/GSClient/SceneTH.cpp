@@ -218,7 +218,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ppObjects[5]->SetPosition({ 400,  25, 400 });
 	m_ppObjects[5]->SetTextureIndex(0x80);
 
-	CFbxObject* pFbxtest = new CFbxObject(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/angrybot.fbx");
+	CFbxObject* pFbxtest = new CFbxObject(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Angrybot.fbx");
 	pFbxtest->SetShader(pShader);
 	m_ppObjects[6] = pFbxtest;
 	m_ppObjects[6]->SetPosition({ 250,  100, 250 });

@@ -1,72 +1,34 @@
 #include "stdafx.h"
 #include "FbxLoader.h"
-#include "Mesh.h"
 
-//==========UtilFunctions==========//////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
-FbxAMatrix GetGeoOffsetTransform(FbxNode* inNode)
+FbxMatrix GetGeometryTransform(FbxNode* pNode)
 {
-	if (!inNode)
-	{
-		throw std::exception("Null for mesh geometry");
-	}
-
-	const FbxVector4 lT = inNode->GetGeometricTranslation(FbxNode::eSourcePivot);
-	const FbxVector4 lR = inNode->GetGeometricRotation(FbxNode::eSourcePivot);
-	const FbxVector4 lS = inNode->GetGeometricScaling(FbxNode::eSourcePivot);
+	const FbxVector4 lT = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+	const FbxVector4 lR = pNode->GetGeometricRotation(FbxNode::eSourcePivot);
+	const FbxVector4 lS = pNode->GetGeometricScaling(FbxNode::eSourcePivot);
 
 	return FbxAMatrix(lT, lR, lS);
 }
 
-XMFLOAT4X4 FbxAMatrixToXMFLOAT4X4(FbxAMatrix* pfbxmtxSource)
+//////////////////////////////////////////////////////////////////////////////////
+
+FbxLoader::FbxLoader()
 {
-	FbxVector4 S = pfbxmtxSource->GetS();
-	FbxVector4 R = pfbxmtxSource->GetR();
-	FbxVector4 T = pfbxmtxSource->GetT();
 
-	FbxAMatrix fbxmtxTransform = FbxAMatrix(T, R, S);
-
-	XMFLOAT4X4 xmf4x4Result;
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++) xmf4x4Result.m[i][j] = (float)(*pfbxmtxSource)[i][j];
-	}
-
-	XMFLOAT3 xmf3S = XMFLOAT3((float)S.mData[0], (float)S.mData[1], (float)S.mData[2]);
-	XMFLOAT3 xmf3R = XMFLOAT3((float)R.mData[0], (float)R.mData[1], (float)R.mData[2]);
-	XMFLOAT3 xmf3T = XMFLOAT3((float)T.mData[0], (float)T.mData[1], (float)T.mData[2]);
-
-	XMMATRIX Rx = XMMatrixRotationX(XMConvertToRadians(xmf3R.x));
-	XMMATRIX Ry = XMMatrixRotationY(XMConvertToRadians(xmf3R.y));
-	XMMATRIX Rz = XMMatrixRotationZ(XMConvertToRadians(xmf3R.z));
-	XMMATRIX xmR = XMMatrixMultiply(XMMatrixMultiply(Rx, Ry), Rz);
-	XMFLOAT4X4 xmf4x4Multiply;
-	XMStoreFloat4x4(&xmf4x4Multiply, XMMatrixMultiply(XMMatrixMultiply(XMMatrixScaling(xmf3S.x, xmf3S.y, xmf3S.z), xmR), XMMatrixTranslation(xmf3T.x, xmf3T.y, xmf3T.z)));
-
-	return(xmf4x4Result);
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
-
-FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* pstrFbxFileName)
+FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName)
 {
 	mFbxManager = pfbxSdkManager;
 
-	LoadScene(pstrFbxFileName);
+	LoadScene(FileName);
 
-	cout << "==================================================" << endl;
 	LoadSkeletonHierarchy(mFbxScene->GetRootNode());
+	if (!mSkeleton.empty()) Animation = true;
 
-	cout << "==================================================" << endl;
-	LoadFbxHierarchy(mFbxScene->GetRootNode());
+	ExploreFbxHierarchy(mFbxScene->GetRootNode());
 
-	cout << "==================================================" << endl;
-	cout << "정점: " << nVertics << "\t폴리곤: " << nPolygons << "\t제어점: " << size(mControlPoints) << endl;
-	cout << "본 개수: " << mSkeleton.size() << endl;
-
-	SaveAsFile();
+	ExportFbxFile();
 }
 
 FbxLoader::~FbxLoader()
@@ -98,199 +60,6 @@ void FbxLoader::LoadScene(char* pstrFbxFileName)
 	pfbxImporter->Destroy();
 }
 
-void FbxLoader::LoadFbxHierarchy(FbxNode* pNode)
-{
-	FbxNodeAttribute* pfbxNodeAttribute = pNode->GetNodeAttribute();
-
-	if (pNode == NULL) {
-		cout << "씬 로드 실패" << endl;
-		return;
-	}
-
-	if ((pfbxNodeAttribute != NULL) &&
-		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
-	{
-		//LoadMesh(pNode);
-		LoadControlPoints(pNode);
-
-		//if (animation != NULL)
-		LoadAnimations(pNode);
-	}
-
-	for (int i = 0; i < pNode->GetChildCount(); i++)
-		LoadFbxHierarchy(pNode->GetChild(i));
-}
-
-void FbxLoader::LoadControlPoints(FbxNode* pNode)
-{
-	FbxMesh* pfbxMesh = pNode->GetMesh();
-	int cpNum = pfbxMesh->GetControlPointsCount();
-
-	for (unsigned int i = 0; i < cpNum; ++i)
-	{
-		CtrlPoint* cptemp = new CtrlPoint();
-		XMFLOAT3 postemp;
-
-		/*
-		float uv1 = fbxUV[0];
-		float uv2 = 1.0f - fbxUV[1];
-		*/
-
-		postemp.x = pfbxMesh->GetControlPointAt(i).mData[0];
-		postemp.y = pfbxMesh->GetControlPointAt(i).mData[1];
-		postemp.z = pfbxMesh->GetControlPointAt(i).mData[2];
-
-		cptemp->mPosition = postemp;
-		mControlPoints[i] = cptemp;
-	}
-}
-
-void FbxLoader::LoadMesh(FbxNode* pNode)
-{
-	FbxMesh* pfbxMesh = pNode->GetMesh();
-
-	nPolygons = pfbxMesh->GetPolygonCount();
-
-	for (int pindex = 0; pindex < nPolygons; pindex++) {
-		for (int vindex = 0; vindex < 3; vindex++) {
-			int pvindex = pfbxMesh->GetPolygonVertex(pindex, vindex);
-			int uvindex = pfbxMesh->GetTextureUVIndex(pindex, vindex, FbxLayerElement::eTextureDiffuse);
-			
-			FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
-			FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
-
-			CtrlPoint* tempCtrPoint = new CtrlPoint();
-
-			if (fbxLayerUV != NULL) {
-				fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
-
-				float uv1 = fbxUV[0];
-				float uv2 = 1.0f - fbxUV[1];
-
-				tempCtrPoint->mPosition = XMFLOAT3(
-					pfbxMesh->GetControlPointAt(pvindex).mData[0],
-					pfbxMesh->GetControlPointAt(pvindex).mData[2],
-					pfbxMesh->GetControlPointAt(pvindex).mData[1]
-				);
-
-				tempCtrPoint->mUv = XMFLOAT2(
-					uv1,
-					uv2
-				);
-
-			}
-			else {
-				tempCtrPoint->mPosition = XMFLOAT3(
-					pfbxMesh->GetControlPointAt(pvindex).mData[0],
-					pfbxMesh->GetControlPointAt(pvindex).mData[2],
-					pfbxMesh->GetControlPointAt(pvindex).mData[1]
-				);
-			}
-
-			mControlPoints[vindex+(pindex*3)] = tempCtrPoint;
-		}
-	}
-
-	nVertics += nPolygons * 3;
-}
-
-//==========================================================================//
-
-void FbxLoader::LoadAnimations(FbxNode* pNode)
-{
-	FbxMesh* pfbxMesh = pNode->GetMesh();
-	int nDefirner = pfbxMesh->GetDeformerCount();
-	FbxAMatrix geometryTransform = GetGeoOffsetTransform(pNode);
-	
-	for (int dindex = 0; dindex < nDefirner; dindex++) {			// Deformer
-		FbxSkin* pfbxSkin = reinterpret_cast<FbxSkin*>(pfbxMesh->GetDeformer(dindex, FbxDeformer::eSkin));
-
-		if(pfbxSkin == NULL)
-			continue;
-
-		int nCluster = pfbxSkin->GetClusterCount();
-		cout << "[ClusterNum]: " << nCluster << endl;
-
-		for (int cindex = 0; cindex < nCluster; cindex++) {			// Cluster
-			FbxCluster* pfbxCluster = pfbxSkin->GetCluster(cindex);
-			string jointName = pfbxCluster->GetLink()->GetName();
-			
-			int jindex = 0;
-
-			for (int i = 0; i < mSkeleton.size(); i++) {
-				if (mSkeleton[i].mName == jointName) {
-					jindex = i;
-					break;
-				}
-			}
-
-			FbxAMatrix transformMatrix;
-			FbxAMatrix transformLinkMatrix;
-			FbxAMatrix globalBindposeInverseMatrix;
-
-			pfbxCluster->GetTransformMatrix(transformMatrix);
-			pfbxCluster->GetTransformLinkMatrix(transformLinkMatrix);
-			globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransform;
-
-			mSkeleton[jindex].mGlobalBindposeInverse = globalBindposeInverseMatrix;
-			mSkeleton[jindex].mNode = pfbxCluster->GetLink();
-
-			int nIndices = pfbxCluster->GetControlPointIndicesCount();
-			
-			cout << "GetControlPointIndicesCount: " << nIndices << endl;
-
-			for (int i = 0; i < nIndices; i++)
-			{
-				BlendingIndexWeightPair blendingIndexWeightPair;
-				blendingIndexWeightPair.mBlendingIndex = jindex;
-				blendingIndexWeightPair.mBlendingWeight = pfbxCluster->GetControlPointWeights()[i];
-				mControlPoints[pfbxCluster->GetControlPointIndices()[i]]->mBlendingInfo.push_back(blendingIndexWeightPair);
-			}
-
-			FbxAnimStack* animStack = mFbxScene->GetSrcObject<FbxAnimStack>(0);
-			FbxString animStackName = animStack->GetName();
-
-			mAnimationName = animStackName.Buffer();
-			cout << "AnimationName: " << mAnimationName << endl;
-
-
-
-			FbxTakeInfo* takeInfo = mFbxScene->GetTakeInfo(animStackName);
-
-			FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
-			FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
-			mAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
-			cout << "AnimationLength: " << mAnimationLength << endl;
-
-			Keyframe** currAnim = &mSkeleton[jindex].mAnimation;
-
-			for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); ++i)
-			{
-				FbxTime currTime;
-				currTime.SetFrame(i, FbxTime::eFrames24);
-				*currAnim = new Keyframe();
-				(*currAnim)->mFrameNum = i;
-
-				FbxAMatrix currentTransformOffset = pNode->EvaluateGlobalTransform(currTime) * geometryTransform;
-				(*currAnim)->mGlobalTransform = currentTransformOffset.Inverse() * pfbxCluster->GetLink()->EvaluateGlobalTransform(currTime);
-				currAnim = &((*currAnim)->mNext);
-			}
-		}
-	}
-
-	BlendingIndexWeightPair blendingIndexWeightPair;
-	blendingIndexWeightPair.mBlendingIndex = 0;
-	blendingIndexWeightPair.mBlendingWeight = 0;
-
-	for (auto i = mControlPoints.begin(); i != mControlPoints.end(); ++i)
-	{
-		for (unsigned int j = i->second->mBlendingInfo.size(); j <= 4; j++)
-		{
-			i->second->mBlendingInfo.push_back(blendingIndexWeightPair);
-		}
-	}
-}
-
 void FbxLoader::LoadSkeletonHierarchy(FbxNode* pNode)
 {
 	for (int i = 0; i < pNode->GetChildCount(); i++)
@@ -320,110 +89,287 @@ void FbxLoader::LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex
 	}
 }
 
-void FbxLoader::SaveAsFile()
+void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
+{
+	FbxNodeAttribute* pfbxNodeAttribute = pNode->GetNodeAttribute();
+
+	if ((pfbxNodeAttribute != NULL) &&
+		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
+	{
+		FbxMesh* pfbxMesh = pNode->GetMesh();
+
+		//===========================================================
+		int numCP = pfbxMesh->GetControlPointsCount();
+		cout << "ControlPoint Count: " << numCP << endl;
+
+		for (int i = 0; i < numCP; i++) {
+			ControlPoint* tempCP = new ControlPoint();
+			XMFLOAT3 tempPos;
+			tempPos.x = pfbxMesh->GetControlPointAt(i).mData[0];
+			tempPos.y = pfbxMesh->GetControlPointAt(i).mData[2];
+			tempPos.z = pfbxMesh->GetControlPointAt(i).mData[1];
+			tempCP->pos = tempPos;
+			mControlPoint.push_back(tempCP);
+
+			//cout << mControlPoint[i]->pos.x << " " << mControlPoint[i]->pos.y << " " << mControlPoint[i]->pos.z << endl;
+		}
+		//===========================================================
+
+		//===========================================================
+		if (Animation == true) {
+			int numDF = pfbxMesh->GetDeformerCount();
+
+			FbxMatrix geometryTransform = GetGeometryTransform(pNode);
+
+			for (int i = 0; i < numDF; i++) {
+				FbxSkin* tempSkin = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
+			
+				if (!tempSkin) 
+					continue;
+
+				int numCS = tempSkin->GetClusterCount();
+
+				for (int i = 0; i < numCS; i++) {
+					FbxCluster* tempCS = tempSkin->GetCluster(i);
+					string jointName = tempCS->GetLink()->GetName();
+					
+					int jointIndex = 0;
+
+					for (int i = 0; i < mSkeleton.size(); i++) {
+						if (mSkeleton[i].mName == jointName) {
+							jointIndex = i;
+							break;
+						}
+					}
+
+					FbxAMatrix transformMatrix;
+					FbxAMatrix transformLinkMatrix;
+					FbxAMatrix globalBindposeInverseMatrix;
+
+					tempCS->GetTransformMatrix(transformMatrix);
+					tempCS->GetTransformLinkMatrix(transformLinkMatrix);
+					globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix * 
+						FbxAMatrix(pNode->GetGeometricTranslation(FbxNode::eSourcePivot),
+									pNode->GetGeometricRotation(FbxNode::eSourcePivot),
+									pNode->GetGeometricScaling(FbxNode::eSourcePivot));
+
+					mSkeleton[jointIndex].mGlobalBindposeInverse = globalBindposeInverseMatrix;
+					mSkeleton[jointIndex].mNode = tempCS->GetLink();
+
+					int numCPID = tempCS->GetControlPointIndicesCount();
+
+					for (int i = 0; i < numCPID; i++)
+					{
+						BlendingIndexWeightPair currBlendingIndexWeightPair;
+						currBlendingIndexWeightPair.mBlendingIndex = jointIndex;
+						currBlendingIndexWeightPair.mBlendingWeight = tempCS->GetControlPointWeights()[i];
+						mControlPoint[tempCS->GetControlPointIndices()[i]]->mBlendingInfo.push_back(currBlendingIndexWeightPair);
+					}
+
+					FbxAnimStack* currAnimStack = mFbxScene->GetSrcObject<FbxAnimStack>(0);
+					FbxString animStackName = currAnimStack->GetName();
+					mAnimationName = animStackName.Buffer();
+					FbxTakeInfo* takeInfo = mFbxScene->GetTakeInfo(animStackName);
+					FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
+					FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
+					mAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
+					Keyframe** currAnim = &mSkeleton[jointIndex].mAnimation;
+
+					for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); ++i)
+					{
+						FbxTime currTime;
+						currTime.SetFrame(i, FbxTime::eFrames24);
+						*currAnim = new Keyframe();
+						(*currAnim)->mFrameNum = i;
+						FbxAMatrix currentTransformOffset = pNode->EvaluateGlobalTransform(currTime) *
+							FbxAMatrix(pNode->GetGeometricTranslation(FbxNode::eSourcePivot),
+								pNode->GetGeometricRotation(FbxNode::eSourcePivot),
+								pNode->GetGeometricScaling(FbxNode::eSourcePivot));
+						(*currAnim)->mGlobalTransform = currentTransformOffset.Inverse() * tempCS->GetLink()->EvaluateGlobalTransform(currTime);
+						currAnim = &((*currAnim)->mNext);
+					}
+				}
+			}
+
+			BlendingIndexWeightPair currBlendingIndexWeightPair;
+			currBlendingIndexWeightPair.mBlendingIndex = 0;
+			currBlendingIndexWeightPair.mBlendingWeight = 0;
+			for (int i = 0; i < mControlPoint.size(); i++){
+				for (int j = mControlPoint[i]->mBlendingInfo.size(); j <= 4; j++){
+					mControlPoint[i]->mBlendingInfo.push_back(currBlendingIndexWeightPair);
+				}
+			}
+		}
+		//===========================================================
+
+		//===========================================================
+		int PGcount = pfbxMesh->GetPolygonCount();
+
+		cout << "Polgon Count: " << PGcount << endl;
+
+		int vertexnum = 0;
+		mPolygon.reserve(PGcount);
+
+		for (int i = 0; i < PGcount; i++) {
+			TriPolygon temppl;
+			mPolygon.push_back(temppl);
+
+			for (int j = 0; j < 3; j++) {
+				int CPindex = pfbxMesh->GetPolygonVertex(i, j);
+				int UVindex = pfbxMesh->GetTextureUVIndex(i, j, FbxLayerElement::eTextureDiffuse);
+				
+				ControlPoint* cptemp = mControlPoint[CPindex];
+
+				FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
+				FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
+
+				fbxUV = fbxLayerUV->GetDirectArray().GetAt(UVindex);
+
+				float uvX = fbxUV[0];
+				float uvY = 1.0f - fbxUV[1];
+
+				MeshVertex temp;
+				temp.pos = cptemp->pos;
+				temp.uv.x = uvX;
+				temp.uv.y = uvY;
+
+				//cout << "BlendingInfo Count,, BinfoSize: " << cptemp->mBlendingInfo.size() << endl;
+				for (int b = 0; b < cptemp->mBlendingInfo.size(); b++)
+				{
+					//cout << b << endl;
+					VertexBlendingInfo tempBlendInfo;
+					tempBlendInfo.mBlendingIndex = cptemp->mBlendingInfo[b].mBlendingIndex;
+					tempBlendInfo.mBlendingWeight = cptemp->mBlendingInfo[b].mBlendingWeight;
+					temp.mVertexBlendingInfos.push_back(tempBlendInfo);
+					//cout << "BInfoSize: " << temp.mVertexBlendingInfos.size() << endl;
+				}
+
+				temp.SortBlendingInfoByWeight();
+
+				mVertex.push_back(temp);
+				mPolygon.back().mIndices.push_back(vertexnum);
+
+				//cout << temp->uv.x << " " << temp->uv.y << endl;
+				vertexnum++;
+			}
+		}
+		cout << "vertexnum: " << vertexnum << endl;
+		//===========================================================
+
+
+
+	}
+
+	for (int i = 0; i < pNode->GetChildCount(); ++i)
+		ExploreFbxHierarchy(pNode->GetChild(i));
+}
+
+void FbxLoader::ExportFbxFile()
 {
 	ofstream file;
 	file.open("FbxExportedFile.bin", ios::out | ios::binary);
 
 	/*
-	XMFLOAT2	m_xmf2TexCoord;
-	XMFLOAT3	m_xmf3Normal;
+	int num = 0;
 
-	fout.write((const char*)data, data_len); fout.close();
-
-	FbxManager*					mFbxManager = NULL;
-	FbxScene*					mFbxScene = NULL;
-
-	int							nControlPoints = 0;
-	int							nVertics = 0;
-	int							nPolygons = 0;
-	float						mAnimationLength;
-	string						mAnimationName;
-
-	vector<CTexturedVertex>		mMesh;
-	vector<Joint>				mSkeleton;
-
-	unordered_map<unsigned int, CtrlPoint*> mControlPoints;
-
-	unsigned int mBlendingIndex;
-	double mBlendingWeight;
-	*/
-
-	file << "[ControlPoints] " << nControlPoints << endl;
-	file << "[Polygons] " << nPolygons << endl;
-
-	file << "[Mesh]" << endl;
-
-	for (auto point = mControlPoints.begin(); point != mControlPoints.end(); point++) {
-		// 제어점 번호: Px Py Pz | UVx UVy
-		string line;
-
-		file << point->first << ": ";
-
-		file << point->second->mPosition.x << " " << point->second->mPosition.y << " " << point->second->mPosition.z << " | "
-			 << point->second->mUv.x << " " << point->second->mUv.y << endl;
+	for (int i = 0; i < 10; i++) {
+		num = i;
+		file.write((char*)&num, sizeof(num));
 	}
 
-	file << endl;
+	string mtext = "asdewxfsdfesfwererwrwesf23423sfser3";
+	string mtext2 = "dhtfydrrsetttttre!grrger";
 
-	file << "[AnimName] " << mAnimationName << endl;
-	file << "[AnimLength] " << mAnimationLength << endl << endl;
+	file.write((char*)&mtext, sizeof(mtext));
+	file.write((char*)&mtext2, sizeof(mtext2));
+	
+	string writetemp;
+	writetemp.clear();
 
+	writetemp = "[VertexCount]: ";
+	writetemp += mVertex.size();
+	writetemp += "\n";
 
-	file << "[BlendingInfo]" << endl;
+	file << writetemp;
 
-	for (auto point = mControlPoints.begin(); point != mControlPoints.end(); point++) {
-		file << point->first << ": ";
+	file.write((char*)&writetemp, sizeof(writetemp));
+	*/
 
-		for (auto bpoint = point->second->mBlendingInfo.begin();
-			bpoint != point->second->mBlendingInfo.end(); bpoint++) {
-			file << bpoint->mBlendingIndex << "-" << bpoint->mBlendingWeight << " ";
+	file << "[Vertex]" << endl;
+	file << mVertex.size() << endl;
+
+	for (int i = 0; i < mVertex.size(); i++) {
+		file << mVertex[i].pos.x << " " << mVertex[i].pos.y << " " << mVertex[i].pos.z << " " <<
+			mVertex[i].uv.x << " " << mVertex[i].uv.y << endl;
+	}
+
+	file << "[VertexEnd]" << endl;
+	/*
+	file << "\n";
+
+	Animation = false;
+
+	if (Animation == true) {
+		file << "[JointCount]: " << mSkeleton.size() << "\n";
+		for (int i = 0; i < mSkeleton.size(); i++) {
+			file << "[" << i << "]: " <<
+				"Name " << mSkeleton[i].mName << "ParentIndex " << mSkeleton[i].mParentIndex <<
+				" BindPose " << mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 0) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 1) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 2) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 3) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 0) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 1) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 2) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 3) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 0) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 1) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 2) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 3) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 0) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 1) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 2) << "," <<
+				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 3) << "\n";
 		}
 
-		file << endl;
+		file << "\n";
+
+		file << "[Animation]" << "\n";
+		for (int i = 0; i < mSkeleton.size(); i++) {
+			Keyframe* temp = mSkeleton[i].mAnimation;
+
+			file << "[" << i << "]: " << "Name " << mSkeleton[i].mName << "\n";
+
+			while(temp) {
+				FbxVector4 translation = temp->mGlobalTransform.GetT();
+				FbxVector4 rotation = temp->mGlobalTransform.GetR();
+				translation.Set(translation.mData[0], translation.mData[1], -translation.mData[2]);
+				rotation.Set(-rotation.mData[0], -rotation.mData[1], rotation.mData[2]);
+				temp->mGlobalTransform.SetT(translation);
+				temp->mGlobalTransform.SetR(rotation);
+		
+				file << "[FrameNum]: " << temp->mFrameNum - 1 << " " <<
+					temp->mGlobalTransform.Transpose().Get(0, 0) << "," <<
+					temp->mGlobalTransform.Transpose().Get(0, 1) << "," <<
+					temp->mGlobalTransform.Transpose().Get(0, 2) << "," <<
+					temp->mGlobalTransform.Transpose().Get(0, 3) << "," <<
+					temp->mGlobalTransform.Transpose().Get(1, 0) << "," <<
+					temp->mGlobalTransform.Transpose().Get(1, 1) << "," <<
+					temp->mGlobalTransform.Transpose().Get(1, 2) << "," <<
+					temp->mGlobalTransform.Transpose().Get(1, 3) << "," <<
+					temp->mGlobalTransform.Transpose().Get(2, 0) << "," <<
+					temp->mGlobalTransform.Transpose().Get(2, 1) << "," <<
+					temp->mGlobalTransform.Transpose().Get(2, 2) << "," <<
+					temp->mGlobalTransform.Transpose().Get(2, 3) << "," <<
+					temp->mGlobalTransform.Transpose().Get(3, 0) << "," <<
+					temp->mGlobalTransform.Transpose().Get(3, 1) << "," <<
+					temp->mGlobalTransform.Transpose().Get(3, 2) << "," <<
+					temp->mGlobalTransform.Transpose().Get(3, 3) << "\n";
+
+				temp = temp->mNext;
+			}
+		}
 	}
-
-	file << endl;
-
-	/*
-	std::string mName;
-	int mParentIndex;
-	FbxAMatrix mGlobalBindposeInverse;
-	Keyframe* mAnimation;
-	FbxNode* mNode;
-
-	keyf
-	FbxLongLong mFrameNum;
-	FbxAMatrix mGlobalTransform;
-	Keyframe* mNext;
-
-	GetT R S Q .
-	FbxVector4(double pX, double pY, double pZ, double pW=1.0);
 	*/
-
-	file << "[Joint]" << endl;
-
-	for (auto point = mSkeleton.begin(); point != mSkeleton.end(); point++) {
-		file << "[JointName]" << point->mName << " [ParentIndex] " << point->mParentIndex << endl;
-
-	}
-
-	for (auto point = mSkeleton.begin(); point != mSkeleton.end(); point++) {
-		file << "[AnimFrameNum] " << point->mAnimation->mFrameNum;
-
-		XMFLOAT4X4 temp = FbxAMatrixToXMFLOAT4X4(&point->mAnimation->mGlobalTransform);
-
-		file << " [T] " << temp._11 << " " << temp._12 << " " << temp._13 << " " << temp._14;
-		file << " [R] " << temp._21 << " " << temp._22 << " " << temp._23 << " " << temp._24;
-		file << " [S] " << temp._31 << " " << temp._32 << " " << temp._33 << " " << temp._34;
-		file << " [Q] " << temp._41 << " " << temp._42 << " " << temp._43 << " " << temp._44;
-
-		file << endl;
-	}
-
-
-
-	cout << "파일 추출 끝" << endl;
-
 	file.close();
 }

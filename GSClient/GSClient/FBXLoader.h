@@ -1,5 +1,32 @@
 #pragma once
 
+struct BlendingIndexWeightPair
+{
+	unsigned int mBlendingIndex;
+	double mBlendingWeight;
+
+	BlendingIndexWeightPair() :
+		mBlendingIndex(0),
+		mBlendingWeight(0)
+	{}
+};
+
+struct VertexBlendingInfo
+{
+	int mBlendingIndex;
+	double mBlendingWeight;
+
+	VertexBlendingInfo() :
+		mBlendingIndex(0),
+		mBlendingWeight(0.0)
+	{}
+
+	bool operator < (const VertexBlendingInfo& rhs)
+	{
+		return (mBlendingWeight > rhs.mBlendingWeight);
+	}
+};
+
 struct Keyframe
 {
 	FbxLongLong mFrameNum;
@@ -9,6 +36,44 @@ struct Keyframe
 	Keyframe() :
 		mNext(nullptr)
 	{}
+};
+
+/////////////////////////////////////////////////////////////////////////
+
+struct ControlPoint
+{
+	XMFLOAT3 pos;
+	XMFLOAT2 uv;
+	vector<BlendingIndexWeightPair> mBlendingInfo;
+
+	ControlPoint()
+	{
+		mBlendingInfo.reserve(4);
+	}
+};
+
+struct MeshVertex
+{
+	XMFLOAT3 pos;
+	XMFLOAT2 uv;
+	vector<VertexBlendingInfo> mVertexBlendingInfos;
+
+	void SortBlendingInfoByWeight()
+	{
+		std::sort(mVertexBlendingInfos.begin(), mVertexBlendingInfos.end());
+	}
+};
+
+struct TriPolygon
+{
+	vector<int> mIndices;
+	string mMaterialName;
+	int mMaterialIndex;
+
+	bool operator<(const TriPolygon& rhs)
+	{
+		return mMaterialIndex < rhs.mMaterialIndex;
+	}
 };
 
 struct Joint
@@ -38,63 +103,32 @@ struct Joint
 	}
 };
 
-struct BlendingIndexWeightPair
-{
-	unsigned int mBlendingIndex;
-	double mBlendingWeight;
-
-	BlendingIndexWeightPair() :
-		mBlendingIndex(0),
-		mBlendingWeight(0)
-	{}
-};
-
-struct CtrlPoint
-{
-	XMFLOAT3 mPosition;
-	XMFLOAT2 mUv;
-	std::vector<BlendingIndexWeightPair> mBlendingInfo;
-
-	CtrlPoint()
-	{
-		mBlendingInfo.reserve(4);
-	}
-};
-
-
-
 class FbxLoader
 {
 private:
-	FbxManager*					mFbxManager = NULL;
-	FbxScene*					mFbxScene = NULL;
+	FbxManager* mFbxManager;
+	FbxScene* mFbxScene;
 
-	int							nControlPoints = 0;
-	int							nVertics = 0;
-	int							nPolygons = 0;
-	float						mAnimationLength;
-	string						mAnimationName;
+	FbxLongLong mAnimationLength;
+	string mAnimationName;
+	bool Animation = 0;
 
-	vector<CTexturedVertex>		mMesh;
-	vector<Joint>				mSkeleton;
-	
-	unordered_map<unsigned int, CtrlPoint*> mControlPoints;
+	vector<ControlPoint*> mControlPoint;
+	vector<MeshVertex> mVertex;
+	vector<TriPolygon> mPolygon;
+	vector<Joint> mSkeleton;
 
 public:
-	FbxLoader(FbxManager* pfbxSdkManager, char* pstrFbxFileName);
+	FbxLoader();
+	FbxLoader(FbxManager* pfbxSdkManager, char* FileName);
 	~FbxLoader();
 
 	void LoadScene(char* pstrFbxFileName);
 
-	void LoadFbxHierarchy(FbxNode* pNode);
-
-	void LoadMesh(FbxNode* pNode);
-	void LoadControlPoints(FbxNode* pNode);
-	int FindJointIndexUsingName(const string& inJointName);
-
-	void LoadAnimations(FbxNode* pNode);
 	void LoadSkeletonHierarchy(FbxNode* pNode);
 	void LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex, int inParentIndex);
 
-	void SaveAsFile();
+	void ExploreFbxHierarchy(FbxNode* pNode);
+	void ExportFbxFile();
+
 };

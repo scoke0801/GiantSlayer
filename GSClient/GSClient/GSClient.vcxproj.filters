@@ -114,9 +114,6 @@
     <ClCompile Include="FbxLoader.cpp">
       <Filter>FBXLoader</Filter>
     </ClCompile>
-    <ClCompile Include="FbxObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -225,9 +222,6 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="FbxLoader.h">
       <Filter>FBXLoader</Filter>
-    </ClInclude>
-    <ClInclude Include="FbxObject.h">
-      <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
