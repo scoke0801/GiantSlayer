@@ -384,6 +384,8 @@ public:
 		MapMeshHeightType heightType = MapMeshHeightType::Plane);
 
 	// º® »ý¼º
+	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+		int* heights);
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		bool xZero, bool zZero,
 		int* heights);

@@ -681,11 +681,10 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	for (int i = 0; i < 1; ++i) {
 		int heightsTemp[25] = {
 			m_Heights[0][0], m_Heights[1][0], m_Heights[2][0], m_Heights[3][0], m_Heights[4][0],
-			500.0f, 500.0f, 500.0f, 500.0f, 500.0f,
-			500.0f, 500.0f, 500.0f, 500.0f, 500.0f,
-			500.0f, 500.0f, 500.0f, 500.0f, 500.0f,
-			500.0f, 500.0f, 500.0f, 500.0f, 500.0f };
-		 
+			m_Heights[0][0] + 700.0f, m_Heights[1][0] + 700.0f, m_Heights[2][0] + 700.0f, m_Heights[3][0] + 700.0f, m_Heights[4][0] + 700.0f,
+			m_Heights[0][0] + 700.0f, m_Heights[1][0] + 700.0f, m_Heights[2][0] + 700.0f, m_Heights[3][0] + 700.0f, m_Heights[4][0] + 700.0f,
+			m_Heights[0][0] + 500.0f, m_Heights[1][0] + 500.0f, m_Heights[2][0] + 500.0f, m_Heights[3][0] + 500.0f, m_Heights[4][0] + 500.0f,
+			m_Heights[0][0] + 200.0f, m_Heights[1][0] + 200.0f, m_Heights[2][0] + 200.0f, m_Heights[3][0] + 200.0f, m_Heights[4][0] + 200.0f}; 
 		
 		for (int j = 0; j < 45; j += 4) {
 			pObject = new CGameObject();
@@ -697,12 +696,11 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			heightsTemp[2] = m_Heights[0][j + 2];
 			heightsTemp[3] = m_Heights[0][j + 3];
 			heightsTemp[4] = m_Heights[0][j + 4];
-			pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-				false, true,
+			pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList, 
 				heightsTemp));
 
 			pObject->Scale(200.0f, 1.0f, 200.0f);
-			pObject->SetPosition({ 200.0f * j , 200.0f * i, 0.0f });
+			pObject->SetPosition({ 200.0f * j , 200.0f * i, -800.0f });
 			m_Objects.push_back(std::move(pObject));
 		}
 
@@ -732,18 +730,12 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 		pObject->SetShader(pShader);
 
 		int heightsTemp[25] = {
-				m_Heights[0][0], 500.0f, 500.0f, 500.0f, 500.0f,
-				m_Heights[1][0], 500.0f, 500.0f, 500.0f, 500.0f,
-				m_Heights[2][0], 500.0f, 500.0f, 500.0f, 500.0f,
-				m_Heights[3][0], 500.0f, 500.0f, 500.0f, 500.0f,
-				m_Heights[4][0], 500.0f, 500.0f, 500.0f, 500.0f };
-
-		heightsTemp[0]  = m_Heights[j + 4  ][0];
-		heightsTemp[5]  = m_Heights[j + 3][0];
-		heightsTemp[10] = m_Heights[j + 2][0];
-		heightsTemp[15] = m_Heights[j + 1][0];
-		heightsTemp[20] = m_Heights[j + 0][0]; 
-
+				m_Heights[j + 4][0], 500.0f, 500.0f, 500.0f, 500.0f,
+				m_Heights[j + 3][0], 500.0f, 500.0f, 500.0f, 500.0f,
+				m_Heights[j + 2][0], 500.0f, 500.0f, 500.0f, 500.0f,
+				m_Heights[j + 1][0], 500.0f, 500.0f, 500.0f, 500.0f,
+				m_Heights[j + 0][0], 500.0f, 500.0f, 500.0f, 500.0f };
+		 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 			true, false,
 			heightsTemp));
