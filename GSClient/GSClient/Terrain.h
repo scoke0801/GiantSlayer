@@ -33,6 +33,12 @@ public:
 	float GetHeight(int xPosition, int zPosition);
 	float GetHeight(const XMFLOAT3& xmf3Position) { return 0.0f; }
 
+private: // 경계선 지형을 추가적으로 생성해주기 위한 함수.
+	void BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
+	void BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
+	void BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
+	void BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
+
 private:
 	void InitHeightDatas();
 	void FileSave();
