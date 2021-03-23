@@ -617,8 +617,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	InitHeightDatas();
 
 	CGameObject* pObject;
-
-	int k = 0;
+	 
 	for (int i = 0; i < 25; ++i)
 	{
 		for (int j = 0; j < 25; ++j)
@@ -650,30 +649,73 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 				pObject->SetTextureIndex(0x10);
 			}
 
-			//if (i == 24 &&
-			//	(j >= 17 && j <= 24))
-			//{
-			//	continue;
-			//}
-			/*
-			if (j == 24 &&
-				(i >= 17 && i <= 24))
+			pObject->SetShader(pShader);
+
+			if (j == 17 &&
+				(i > 17 && i <= 24))
 			{
+				int heightsGap[5] = {
+					m_Heights[i * 4 + 4][(j + 1) * 4] - m_Heights[i * 4 + 4][j * 4] - 30,
+					m_Heights[i * 4 + 3][(j + 1) * 4] - m_Heights[i * 4 + 3][j * 4] - 30,
+					m_Heights[i * 4 + 2][(j + 1) * 4] - m_Heights[i * 4 + 2][j * 4] - 30,
+					m_Heights[i * 4 + 1][(j + 1) * 4] - m_Heights[i * 4 + 1][j * 4] - 30,
+					m_Heights[i * 4	   ][(j + 1) * 4] - m_Heights[i * 4	   ][j * 4] - 30
+				};
+				for (int k = 0; k < 5; ++k)
+				{ 
+					pObject = new CGameObject();
+					pObject->SetTextureIndex(0x10);
+					pObject->SetShader(pShader);
+
+					int heightsTemp[25] = 
+					{
+						m_Heights[i * 4 + 4][j * 4] + (heightsGap[0] / 20) * (k*4),
+						m_Heights[i * 4 + 4][j * 4] + (heightsGap[0] / 20) * (k*4 + 1),
+						m_Heights[i * 4 + 4][j * 4] + (heightsGap[0] / 20) * (k*4 + 2),
+						m_Heights[i * 4 + 4][j * 4] + (heightsGap[0] / 20) * (k*4 + 3),
+						m_Heights[i * 4 + 4][j * 4] + (heightsGap[0] / 20) * (k*4 + 4),
+
+						m_Heights[i * 4 + 3][j * 4] + (heightsGap[1] / 20) * (k*4),
+						m_Heights[i * 4 + 3][j * 4] + (heightsGap[1] / 20) * (k*4 + 1),
+						m_Heights[i * 4 + 3][j * 4] + (heightsGap[1] / 20) * (k*4 + 2),
+						m_Heights[i * 4 + 3][j * 4] + (heightsGap[1] / 20) * (k*4 + 3),
+						m_Heights[i * 4 + 3][j * 4] + (heightsGap[1] / 20) * (k*4 + 4),
+
+						m_Heights[i * 4 + 2][j * 4] + (heightsGap[2] / 20) * (k*4),
+						m_Heights[i * 4 + 2][j * 4] + (heightsGap[2] / 20) * (k*4 + 1),
+						m_Heights[i * 4 + 2][j * 4] + (heightsGap[2] / 20) * (k*4 + 2),
+						m_Heights[i * 4 + 2][j * 4] + (heightsGap[2] / 20) * (k*4 + 3),
+						m_Heights[i * 4 + 2][j * 4] + (heightsGap[2] / 20) * (k*4 + 4),
+
+						m_Heights[i * 4 + 1][j * 4] + (heightsGap[3] / 20) * (k*4),
+						m_Heights[i * 4 + 1][j * 4] + (heightsGap[3] / 20) * (k*4 + 1),
+						m_Heights[i * 4 + 1][j * 4] + (heightsGap[3] / 20) * (k*4 + 2),
+						m_Heights[i * 4 + 1][j * 4] + (heightsGap[3] / 20) * (k*4 + 3),
+						m_Heights[i * 4 + 1][j * 4] + (heightsGap[3] / 20) * (k*4 + 4),
+						 
+						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k*4),
+						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k*4 + 1),
+						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k*4 + 2),
+						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k*4 + 3),
+						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k*4 + 4),
+					};
+					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+						heightsTemp)); 
+
+					pObject->Scale(40.0f, 1.0f, 200.0f);
+					pObject->SetPosition({ 800.0f * j + 160.0f * k, 0, 800.0f * i });
+					m_Objects.push_back(std::move(pObject));
+				} 
 				continue;
 			}
-			if (j == 17 &&
-				(i >= 17 && i <= 24))
-			{
-				continue;
-			}*/
-			 
-			pObject->SetShader(pShader);
-			pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-				4 * j, 4 * i,
-				m_Heights));
-
-			pObject->Scale(200.0f, 1.0f, 200.0f);
-			pObject->SetPosition({ 800.0f * j, 0, 800.0f * i });
+			else {
+				pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+					4 * j, 4 * i,
+					m_Heights)); 
+				pObject->Scale(200.0f, 1.0f, 200.0f);
+				pObject->SetPosition({ 800.0f * j, 0, 800.0f * i });
+			}
+			
 			m_Objects.push_back(std::move(pObject));
 		}
 	} 

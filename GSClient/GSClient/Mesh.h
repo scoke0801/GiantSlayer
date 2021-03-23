@@ -383,9 +383,12 @@ public:
 		int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index,
 		MapMeshHeightType heightType = MapMeshHeightType::Plane);
 
-	// 寒 积己
+	// 寒 积己	 
+	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		bool flag,
+		int heights[5]);
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
-		int* heights);
+		int heights[25]);
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		bool xZero, bool zZero,
 		int* heights);
