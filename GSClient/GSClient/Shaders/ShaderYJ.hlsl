@@ -579,24 +579,21 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
     }
     if (gnTexturesMask & 0x10)
     {
-		
-		
         cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0);
         float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-        float FogStart = 200.0f;
-        float FogRange = 3000.0f;
+        float FogStart = 10000.0f;
+        float FogRange = 20000.0f;
 	
-        float3 toEyeW = gvCameraPosition + input.position.xyz;
+        float3 toEyeW =  gvCameraPosition + input.position.xyz;
         float distToEye = length(toEyeW);
         toEyeW /= distToEye; // normalize
-	
-        float fogAmount = saturate((distToEye - FogStart) / FogRange);
-        cColor = lerp(cColor, FogColor, fogAmount);
+		
+        float fogAmount = saturate((distToEye - FogStart+5000.0f) / FogRange);
+        
+        
+        cColor = lerp(cColor, FogColor, 1 - fogAmount);
     }
 	
-	
-   
-
 	//else
 	//{
 	//	cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
@@ -683,26 +680,24 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	if (gnTexturesMask & 0x80)
 	{
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
-	}
+		
+        float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+        float FogStart = 10000.0f;
+        float FogRange = 20000.0f;
+	
+        float3 toEyeW = gvCameraPosition + input.position.xyz;
+        float distToEye = length(toEyeW);
+        toEyeW /= distToEye; // normalize
+	
+        float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+		
+        cColor = lerp(cColor, FogColor, 1 - fogAmount);
+    }
 	if (gnTexturesMask & 0x100)
 	{
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
-	}
+    }
    
-    //input.NormalW = normalize(input.NormalW);
-
-    //float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-    //float FogStart = 5.0f;
-    //float FogRange = 15000.0f;
-	
-    //float3 toEyeW = gvCameraPosition - input.positionW;
-    //float distToEye = length(toEyeW);
-    //toEyeW /= distToEye; // normalize
-	
-    //float fogAmount = saturate((distToEye - FogStart) / FogRange);
-    //cColor = lerp(cColor, FogColor, fogAmount);
-
-	
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
