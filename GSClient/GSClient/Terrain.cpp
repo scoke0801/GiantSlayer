@@ -832,26 +832,7 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->SetPosition({ 200.0f * j , 0, -800.0f });
 		m_Objects.push_back(std::move(pObject));
 	}
-	{
-		int j = 48;
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x01);
-		pObject->SetShader(pShader);
-
-		int heightsTemp[25] = {
-				m_Heights[j + 4][0], m_Heights[j + 4][0] , m_Heights[j + 4][0], m_Heights[j + 4][0], m_Heights[j + 4][0],
-				m_Heights[j + 4][0], m_Heights[j + 4][0] , m_Heights[j + 4][0], m_Heights[j + 4][0], m_Heights[j + 4][0],
-				m_Heights[j + 4][0], m_Heights[j + 4][0] , m_Heights[j + 4][0], m_Heights[j + 4][0], m_Heights[j + 4][0],
-				m_Heights[j + 4][0] + 500.0f, m_Heights[j + 4][0] + 500.0f , m_Heights[j + 4][0] + 500.0f, m_Heights[j + 4][0] + 500.0f, m_Heights[j + 4][0] + 500.0f,
-				m_Heights[j + 4][0] + 700.0f, m_Heights[j + 4][0] + 700.0f , m_Heights[j + 4][0] + 700.0f, m_Heights[j + 4][0] + 700.0f, m_Heights[j + 4][0] + 700.0f };
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			true, false,
-			heightsTemp));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ 200.0f * j  +1.0f , 0, -800.0f });
-		m_Objects.push_back(std::move(pObject));
-	}
+	
 	for (int j = 52; j < 100; j += 4) {
 		pObject = new CGameObject();
 		pObject->SetTextureIndex(0x08);
