@@ -197,9 +197,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox")); 
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain")); 
 	 
-	BuildMapSector1(pd3dDevice, pd3dCommandList);
+	//BuildMapSector1(pd3dDevice, pd3dCommandList);
 	//BuildMapSector2(pd3dDevice, pd3dCommandList);
-	BuildMapSector3(pd3dDevice, pd3dCommandList);
+	//BuildMapSector3(pd3dDevice, pd3dCommandList);
 	BuildMapSector4(pd3dDevice, pd3dCommandList);
 	BuildMapSector5(pd3dDevice, pd3dCommandList);
 
@@ -246,7 +246,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
-		"Dry_Tree","Stump","Dead_Tree" 
+		"Dry_Tree","Stump","Dead_Tree",
+		"Desert_Rock"
 	};
 
 	const wchar_t* address[] =
@@ -262,7 +263,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board.dds",
 		L"resources/UI/HelpText.dds",
-		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds"
+		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds",
+		L"resources/OBJ/Desert_Rock.dds"
 	};
 	for (int i = 0; i < _countof(keyNames); ++i)
 	{
@@ -297,7 +299,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
-		"Dry_Tree","Stump","Dead_Tree"
+		"Dry_Tree","Stump","Dead_Tree",
+		"Desert_Rock"
 	};
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; 
@@ -949,11 +952,12 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	CGameObject* pObject = new CGameObject();
 	pObject->SetMesh(fbxMesh);
-	pObject->SetPosition({ 16800,  -6070, 16500 });
+	pObject->SetPosition({ 16800,  -6500, 16500 });
 	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	pObject->SetTextureIndex(0x80);
-	pObject->Scale(35, 35, 35);
+	pObject->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 50, 50, 125);
+	pObject->Scale(15, 15, 15);
 	m_Objects.push_back(std::move(pObject));
 }
 
@@ -1012,7 +1016,7 @@ void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	// 메두사 벽 표지판
 	pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::Medusa,
 		true, true, CShaderHandler::GetInstance().GetData("Sign"));
-	pSign->SetPosition({ 13000.0f, -2750.0f, 1300.0f });
+	pSign->SetPosition({ 13000.0f, -3250.0f, 1300.0f });
 	pSign->RotateAll({ 0,1,0 }, 90.0f);
 	m_Objects.push_back(pSign);
 }
@@ -1444,10 +1448,10 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject = new CGameObject();
 		pObject->SetMesh(fbx_Dry_Mesh);
 
-		x_Tree = 200 + 700 * i;
-		z_Tree = 19500 - 700 * i;
-		pObject->Scale(0.5f, 0.5f, 0.5f);
-
+		x_Tree = 900 + 6200 * i;
+		z_Tree = 18800;
+		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
+		pObject->Rotate({ 0,1,0 }, 60 + 30 * i);
 		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) , z_Tree });
 
 		pObject->SetTextureIndex(0x04);
@@ -1463,7 +1467,8 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 		x_Tree = 200 + 3000 * i;
 		z_Tree = 17000;
-		pObject->Scale(0.5f, 0.5f, 0.5f);
+		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
+		pObject->Rotate({ 0,1,0 }, 0 + 15 * i);
 		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree)   , z_Tree });
 		pObject->SetTextureIndex(0x04);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
@@ -1499,11 +1504,11 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject = new CGameObject();
 		pObject->SetMesh(fbx_Dead_Tree_Mesh);
 
-		x_Tree = 1700 + 5000 * i;
-		z_Tree = 16500;
-		pObject->Scale(150.0f, 150.0f, 150.0f);
-
-		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 1000.0f, z_Tree });
+		x_Tree = 1500 + 5000 * i;
+		z_Tree = 17500;
+		pObject->Scale(150.0f + 50 * i, 150.0f + 50 * i, 150.0f + 50 * i);
+		pObject->Rotate({ 0,1,0 }, 30 + 30 * i);
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) + 1500.0f, z_Tree });
 
 		pObject->SetTextureIndex(0x10);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
@@ -1513,6 +1518,127 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	CMeshFbx* fbx_Desert_Rock_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true);
+	CGameObject* pObject;
+
+	float x_Tree, z_Tree;
+
+	for (int i = 0; i < 5; i++)
+	{
+		pObject = new CGameObject();
+
+		pObject->SetMesh(fbx_Desert_Rock_Mesh);
+
+		x_Tree = 11000.0f + 300.0f * i;
+		z_Tree = 18500.0f;
+
+		if (i == 0)
+		{
+			z_Tree = 19500;
+			pObject->Scale(4.0f, 4.0f, 4.0f);
+		}
+		else if (i == 1)
+		{
+			z_Tree = 18700;
+			pObject->Rotate({ 0,1,0 }, 90);
+			pObject->Scale(2.0f, 2.0f, 2.0f);
+		}
+		else if (i == 4)
+		{
+			pObject->Scale(1.0f, 1.0f, 1.0f);
+			x_Tree = 10700.0f;
+			z_Tree = 20000.0f - 300.0f * i;
+		}
+		else
+		{
+			x_Tree = 10700.0f - 100.0f * i;
+			z_Tree = 20000.0f - 300.0f * i;
+		}
+
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree), z_Tree });
+		pObject->SetTextureIndex(0x020);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 6; i++)
+	{
+		pObject = new CGameObject();
+
+		pObject->SetMesh(fbx_Desert_Rock_Mesh);
+
+		x_Tree = 11000.0f;
+		z_Tree = 19000 - 2000.0f * i;
+		if (i == 0)
+		{
+			pObject->Scale(3.0f, 3.0f, 3.0f);
+		}
+
+		else if (i == 3)
+		{
+			z_Tree += 500.0f;
+			pObject->Rotate({ 0,1,0 }, 270);
+			pObject->Scale(3.0f, 3.0f, 3.0f);
+			x_Tree += 700.0f;
+		}
+		else if (i == 1)
+		{
+			x_Tree = 11000 + 500 * i;
+			z_Tree = 13900;
+			pObject->Rotate({ 0,1,0 }, 90);
+			pObject->Scale(1.5f, 1.5f, 1.5f);
+		}
+		else if (i == 5)
+		{
+			x_Tree = 12300;
+			z_Tree = 13300;
+			pObject->Rotate({ 0,1,0 }, 135);
+			pObject->Scale(1.5f, 1.5f, 1.5f);
+		}
+		else if (i == 4)
+		{
+			x_Tree = 13000;
+			z_Tree = 15300;
+		}
+		else
+		{
+			x_Tree = 11000 + 500 * i;
+			z_Tree = 13900;
+		}
+
+
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) , z_Tree });
+		pObject->SetTextureIndex(0x020);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		pObject = new CGameObject();
+
+		pObject->SetMesh(fbx_Desert_Rock_Mesh);
+
+		x_Tree = 11000.0f + 100 * i;
+		z_Tree = 19000 - 2000.0f * i;
+
+		if (i % 2 == 0)
+		{
+			x_Tree += 2000;
+		}
+
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) , z_Tree });
+		pObject->SetTextureIndex(0x020);
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+
+		m_Objects.push_back(std::move(pObject));
+	}
 }
 
 void CSceneJH::BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

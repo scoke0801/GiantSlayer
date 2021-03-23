@@ -1041,7 +1041,7 @@ void CSceneYJ::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	// 메두사 벽 표지판
 	pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::Medusa,
 		true, true, CShaderHandler::GetInstance().GetData("Sign"));
-	pSign->SetPosition({ 13000.0f, -2750.0f, 1300.0f });
+	pSign->SetPosition({ 13000.0f, -3250.0f, 1300.0f });
 	pSign->RotateAll({ 0,1,0 }, 90.0f);
 	m_Objects.push_back(pSign);
 }

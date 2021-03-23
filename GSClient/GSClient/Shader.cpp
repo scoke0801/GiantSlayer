@@ -335,7 +335,7 @@ void CShader::CreateBoundaryShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
 	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
 	HRESULT hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
-		__uuidof(ID3D12PipelineState), (void**)&m_pd3dBoundartPipelineState);
+		__uuidof(ID3D12PipelineState), (void**)&m_pd3dBoundaryPipelineState);
 }
 
 void CShader::CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, bool isLeftSide)
@@ -471,9 +471,9 @@ void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 void CShader::RenderBoundary(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	if (m_pd3dBoundartPipelineState != NULL)
+	if (m_pd3dBoundaryPipelineState != NULL)
 	{
-		pd3dCommandList->SetPipelineState(m_pd3dBoundartPipelineState);
+		pd3dCommandList->SetPipelineState(m_pd3dBoundaryPipelineState);
 	} 
 }
 
