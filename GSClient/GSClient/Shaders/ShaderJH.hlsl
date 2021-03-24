@@ -570,14 +570,10 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	{
 		cColor = gtxtDryDesert.Sample(gssWrap, input.uv0);
 	}
-	if (gnTexturesMask & 0x20)
+	if (gnTexturesMask & 0x10)
 	{
 		cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0); 
-	}
-	if (gnTexturesMask & 0x20)
-	{
-		cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0); 
-	}
+	} 
 	//else
 	//{
 	//	cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
