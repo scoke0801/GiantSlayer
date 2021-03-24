@@ -649,22 +649,41 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 				pObject->SetTextureIndex(0x10);
 			}
 
-			pObject->SetShader(pShader);
-
+			pObject->SetShader(pShader); 
+			 
+			// 고저 차에 의헤 늘어진 텍스처 보완 코드.
 			if (j == 17 &&
-				(i > 17 && i <= 24))
-			{
+				(i >= 17 && i <= 24) ||
+				(j == 19) && (i >= 10 && i <= 17) ||
+				(j == 22) && (i >= 10 && i <= 17) ||
+				(j == 18 && i == 17))
+			{ 
+				int tolerance = 30; 
+				
+				if ((j == 22) && (i >= 10 && i <= 17)){
+					tolerance = -15; 
+				}
+
 				int heightsGap[5] = {
-					m_Heights[i * 4 + 4][(j + 1) * 4] - m_Heights[i * 4 + 4][j * 4] - 30,
-					m_Heights[i * 4 + 3][(j + 1) * 4] - m_Heights[i * 4 + 3][j * 4] - 30,
-					m_Heights[i * 4 + 2][(j + 1) * 4] - m_Heights[i * 4 + 2][j * 4] - 30,
-					m_Heights[i * 4 + 1][(j + 1) * 4] - m_Heights[i * 4 + 1][j * 4] - 30,
-					m_Heights[i * 4	   ][(j + 1) * 4] - m_Heights[i * 4	   ][j * 4] - 30
+					m_Heights[i * 4 + 4][(j + 1) * 4] - m_Heights[i * 4 + 4][j * 4] - tolerance,
+					m_Heights[i * 4 + 3][(j + 1) * 4] - m_Heights[i * 4 + 3][j * 4] - tolerance,
+					m_Heights[i * 4 + 2][(j + 1) * 4] - m_Heights[i * 4 + 2][j * 4] - tolerance,
+					m_Heights[i * 4 + 1][(j + 1) * 4] - m_Heights[i * 4 + 1][j * 4] - tolerance,
+					m_Heights[i * 4][(j + 1) * 4] - m_Heights[i * 4][j * 4] - tolerance
 				};
+				if (j == 17 && i == 17)
+				{
+					heightsGap[0] = m_Heights[i * 4 + 4][j * 4] - 4000;
+					heightsGap[1] = m_Heights[i * 4 + 3][j * 4] - 4000;
+					heightsGap[2] = m_Heights[i * 4 + 2][j * 4] - 4000;
+					heightsGap[3] = m_Heights[i * 4 + 1][j * 4] - 4000;
+					heightsGap[4] = m_Heights[i * 4][j * 4] - 4000;
+				}
 				for (int k = 0; k < 5; ++k)
 				{ 
 					pObject = new CGameObject();
 					pObject->SetTextureIndex(0x10);
+					if (i == 10)pObject->SetTextureIndex(0x08);
 					pObject->SetShader(pShader);
 
 					int heightsTemp[25] = 
@@ -707,6 +726,64 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 					m_Objects.push_back(std::move(pObject));
 				} 
 				continue;
+			}
+			else if ((j == 24 || j == 23 || j == 18) && i == 17) {
+				for (int k = 0; k < 1; ++k)
+				{
+					pObject = new CGameObject();
+					pObject->SetTextureIndex(0x20);
+					if (i == 10)pObject->SetTextureIndex(0x08);
+					pObject->SetShader(pShader);
+					 
+					int tolerance = 0;
+					int heightsGap[5] = {
+					m_Heights[i * 4 + 4][(j + 1) * 4] - m_Heights[i * 4 + 4][j * 4] - tolerance,
+					m_Heights[i * 4 + 3][(j + 1) * 4] - m_Heights[i * 4 + 3][j * 4] - tolerance,
+					m_Heights[i * 4 + 2][(j + 1) * 4] - m_Heights[i * 4 + 2][j * 4] - tolerance,
+					m_Heights[i * 4 + 1][(j + 1) * 4] - m_Heights[i * 4 + 1][j * 4] - tolerance,
+					m_Heights[i * 4    ][(j + 1) * 4] - m_Heights[i * 4    ][j * 4] - tolerance 
+					};
+
+					int heightsTemp[25] =
+					{
+						m_Heights[i * 4 + 4][j * 4] + (heightsGap[0] / 20) * (k * 4),
+						m_Heights[i * 4 + 4][j * 4] + (heightsGap[0] / 20) * (k * 4 + 1),
+						m_Heights[i * 4 + 4][j * 4] + (heightsGap[0] / 20) * (k * 4 + 2),
+						m_Heights[i * 4 + 4][j * 4] + (heightsGap[0] / 20) * (k * 4 + 3),
+						m_Heights[i * 4 + 4][j * 4] + (heightsGap[0] / 20) * (k * 4 + 4),
+
+						m_Heights[i * 4 + 3][j * 4] + (heightsGap[1] / 20) * (k * 4),
+						m_Heights[i * 4 + 3][j * 4] + (heightsGap[1] / 20) * (k * 4 + 1),
+						m_Heights[i * 4 + 3][j * 4] + (heightsGap[1] / 20) * (k * 4 + 2),
+						m_Heights[i * 4 + 3][j * 4] + (heightsGap[1] / 20) * (k * 4 + 3),
+						m_Heights[i * 4 + 3][j * 4] + (heightsGap[1] / 20) * (k * 4 + 4),
+
+						m_Heights[i * 4 + 2][j * 4] + (heightsGap[2] / 20) * (k * 4),
+						m_Heights[i * 4 + 2][j * 4] + (heightsGap[2] / 20) * (k * 4 + 1),
+						m_Heights[i * 4 + 2][j * 4] + (heightsGap[2] / 20) * (k * 4 + 2),
+						m_Heights[i * 4 + 2][j * 4] + (heightsGap[2] / 20) * (k * 4 + 3),
+						m_Heights[i * 4 + 2][j * 4] + (heightsGap[2] / 20) * (k * 4 + 4),
+
+						m_Heights[i * 4 + 1][j * 4] + (heightsGap[3] / 20) * (k * 4),
+						m_Heights[i * 4 + 1][j * 4] + (heightsGap[3] / 20) * (k * 4 + 1),
+						m_Heights[i * 4 + 1][j * 4] + (heightsGap[3] / 20) * (k * 4 + 2),
+						m_Heights[i * 4 + 1][j * 4] + (heightsGap[3] / 20) * (k * 4 + 3),
+						m_Heights[i * 4 + 1][j * 4] + (heightsGap[3] / 20) * (k * 4 + 4),
+
+						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k * 4),
+						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k * 4 + 1),
+						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k * 4 + 2),
+						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k * 4 + 3),
+						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k * 4 + 4),
+					};
+					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+						heightsTemp));
+
+					pObject->Scale(200.0f, 1.0f, 40.0f);
+					pObject->SetPosition({ 800.0f * j , 0, 800.0f * i + 160.0f * k });
+					m_Objects.push_back(std::move(pObject));
+					continue;
+				}
 			}
 			else {
 				pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
@@ -1022,7 +1099,7 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->SetPosition({ 20000.0f, 0, 200.0f * j });
 		m_Objects.push_back(std::move(pObject));
 	}
-	for (int j = 68; j < 100; j += 4)
+	for (int j = 72; j < 100; j += 4)
 	{
 		pObject = new CGameObject();
 		pObject->SetTextureIndex(0x10);
@@ -1034,8 +1111,7 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[j + 2][heightWallIndex], m_Heights[j + 2][heightWallIndex] + 700.0f, m_Heights[j + 2][heightWallIndex] + 1500.0f, m_Heights[j + 2][heightWallIndex] + 500.0f, m_Heights[j + 2][heightWallIndex] + 200.0f,
 				m_Heights[j + 1][heightWallIndex], m_Heights[j + 1][heightWallIndex] + 700.0f, m_Heights[j + 1][heightWallIndex] + 1500.0f, m_Heights[j + 1][heightWallIndex] + 500.0f, m_Heights[j + 1][heightWallIndex] + 200.0f,
 				m_Heights[j + 0][heightWallIndex], m_Heights[j + 0][heightWallIndex] + 700.0f, m_Heights[j + 0][heightWallIndex] + 1500.0f, m_Heights[j + 0][heightWallIndex] + 500.0f, m_Heights[j + 0][heightWallIndex] + 200.0f };
-
-
+		 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 			heightsTemp));
 
@@ -1043,7 +1119,26 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->SetPosition({ 20000.0f, 0, 200.0f * j });
 		m_Objects.push_back(std::move(pObject));
 	}
+	{
+		int j = 72;
+		pObject = new CGameObject();
+		pObject->SetTextureIndex(0x10);
+		pObject->SetShader(pShader);
 
+		int heightsTemp[25] = {
+				m_Heights[j + 0][heightWallIndex], m_Heights[j + 0][heightWallIndex] + 700.0f, m_Heights[j + 0][heightWallIndex] + 1500.0f, m_Heights[j + 0][heightWallIndex] + 500.0f, m_Heights[j + 0][heightWallIndex] + 200.0f,
+				m_Heights[j + 1][heightWallIndex], m_Heights[j + 1][heightWallIndex] + 700.0f, m_Heights[j + 1][heightWallIndex] + 1500.0f, m_Heights[j + 1][heightWallIndex] + 500.0f, m_Heights[j + 1][heightWallIndex] + 200.0f,
+				m_Heights[j + 2][heightWallIndex], m_Heights[j + 2][heightWallIndex] + 700.0f, m_Heights[j + 2][heightWallIndex] + 1500.0f, m_Heights[j + 2][heightWallIndex] + 500.0f, m_Heights[j + 2][heightWallIndex] + 200.0f,
+				m_Heights[j + 3][heightWallIndex], m_Heights[j + 3][heightWallIndex] + 700.0f, m_Heights[j + 3][heightWallIndex] + 1500.0f, m_Heights[j + 3][heightWallIndex] + 500.0f, m_Heights[j + 3][heightWallIndex] + 200.0f,
+				m_Heights[j + 4][heightWallIndex], m_Heights[j + 4][heightWallIndex] + 700.0f, m_Heights[j + 4][heightWallIndex] + 1500.0f, m_Heights[j + 4][heightWallIndex] + 500.0f, m_Heights[j + 4][heightWallIndex] + 200.0f };
+
+		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+			heightsTemp));
+
+		pObject->Scale(200.0f, 1.0f, 200.0f);
+		pObject->SetPosition({ 20000.0f, 0, 200.0f * j - 800.0f});
+		m_Objects.push_back(std::move(pObject));
+	}
 }
 
 void CTerrain::InitHeightDatas()
@@ -1268,7 +1363,7 @@ void CTerrain::InitHeightDatas()
 	//}
 	//for (int i = 40; i < 70; i++)
 	//{
-	//	for (int Garo = 70; Garo < 100; Garo++)
+	//	for (int Garo = 64; Garo < 100; Garo++)
 	//	{
 	//		m_Heights[i][Garo] = rand() % 300 - 2550;
 	//		if (Garo > 79 && Garo < 89)
