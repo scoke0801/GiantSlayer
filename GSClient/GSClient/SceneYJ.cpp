@@ -219,7 +219,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 {
 	const char* keyNames[] =
 	{
-		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
+		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain","Rocky_Terrain_Normal",
 		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom", 
 		"Box","Wood", "WoodSignBoard",
 		"GrassWall", "SandWall","RockyWall",
@@ -236,7 +236,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	const wchar_t* address[] =
 	{
-		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",
+		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",L"resources/OBJ/Rocky_Terrain_Normal.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds", 
 		L"resources/OBJ/Box.dds",
 		L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
@@ -273,7 +273,7 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	const char* keyNames[] =
 	{
-		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain",
+		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain","Rocky_Terrain_Normal",
 		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
 		"Box","Wood", "WoodSignBoard",
 		"GrassWall", "SandWall","RockyWall",
