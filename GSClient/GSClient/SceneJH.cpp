@@ -945,6 +945,33 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pDoorWall->SetPosition({ 14000,-4500, 8000 });
 	pDoorWall->SetTextureIndexes(0x08); 
 	m_Objects.push_back(pDoorWall);
+	  
+	CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, 2000, 2000, 500);
+	pWall->SetShader(pShader);
+	pWall->SetObjectName(OBJ_NAME::Wall);
+	pWall->SetTextureIndex(0x08);
+	pWall->Rotate({ 0,1,0 }, 90);
+	pWall->Rotate({ 0,0,1 }, -155);
+	pWall->SetPosition({ 15800, -4500, 10500 });
+	m_Objects.push_back(pWall);
+
+	pWall = new CWall(pd3dDevice, pd3dCommandList, 2000, 2000, 500);
+	pWall->SetShader(pShader);
+	pWall->SetObjectName(OBJ_NAME::Wall);
+	pWall->SetTextureIndex(0x08);
+	pWall->Rotate({ 0,1,0 }, 90);
+	pWall->Rotate({ 0,0,1 }, -155);
+	pWall->SetPosition({ 17700, -4500, 11000 });
+	m_Objects.push_back(pWall);
+
+	pWall = new CWall(pd3dDevice, pd3dCommandList, 2000, 2000, 500);
+	pWall->SetShader(pShader);
+	pWall->SetObjectName(OBJ_NAME::Wall);
+	pWall->SetTextureIndex(0x08);
+	pWall->Rotate({ 0,1,0 }, 90);
+	pWall->Rotate({ 0,0,1 }, -155);
+	pWall->SetPosition({ 17700, -4500, 13100 });
+	m_Objects.push_back(pWall);
 }
 
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

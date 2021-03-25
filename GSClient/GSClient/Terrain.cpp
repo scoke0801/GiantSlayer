@@ -414,14 +414,13 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 	for (int i = 0; i < 25; ++i)
 	{
 		for (int j = 0; j < 25; ++j)
-		{ 
+		{  
 			// 고저 차에 의헤 늘어진 텍스처 보완 코드.
-			if (j == 17 && (i >= 17 && i <= 24) ||
+			if (j == 17 && (i >= 17 && i <= 24)||
 				(j == 19) && (i >= 10 && i < 17) ||
 				(j == 22) && (i >= 10 && i < 17))
 			{
-				tolerance = 30;
-
+				tolerance = 30; 
 				if ((j == 22) && (i >= 10 && i <= 17)) {
 					tolerance = -15;
 				}
@@ -479,7 +478,7 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 					pObject->SetTextureIndex(0x20);
 					if (i == 10)pObject->SetTextureIndex(0x08);
 					pObject->SetShader(pShader);
-					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList, 
 						heightsTemp));
 
 					pObject->Scale(40.0f, 1.0f, 200.0f);
