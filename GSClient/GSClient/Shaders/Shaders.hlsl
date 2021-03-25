@@ -138,13 +138,6 @@ struct VS_TERRAIN_INPUT
     float4 color : COLOR; 
 };
 
-struct VS_TERRAIN_OUTPUT
-{
-    float4 position : SV_POSITION;
-	float2 uv0 : TEXCOORD0;
-    float4 color : COLOR;
-};
-
 ///////////////////////////////////////////
 // VS
 struct VS_TERRAIN_TESSELLATION_OUTPUT

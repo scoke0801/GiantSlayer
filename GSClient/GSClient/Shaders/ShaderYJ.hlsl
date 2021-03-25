@@ -407,6 +407,8 @@ float4 PSMinimap(VS_MOUT input) : SV_TARGET
 //////////////////////////////////////////////////////
 //
 
+
+
 struct VS_TERRAIN_INPUT
 {
 	float3 position : POSITION;
@@ -426,7 +428,6 @@ struct VS_TERRAIN_TESSELLATION_OUTPUT
     float3 normalW : NORMAL;
     //float3 tangentW : TANGENT;
     //float3 bitangentW : BITANGENT;
-   
 };
 
 VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
@@ -452,13 +453,20 @@ struct HS_TERRAIN_TESSELLATION_CONSTANT
 struct HS_TERRAIN_TESSELLATION_OUTPUT
 {
 	float3 position : POSITION;
+    float3 positionW : POSITION1;
 	float2 uv0 : TEXCOORD0;
+    float3 normalW : NORMAL;
 };
 
 struct DS_TERRAIN_TESSELLATION_OUTPUT
 {
 	float4 position : SV_POSITION;
+    float3 positionW : POSITION;
+	
 	float2 uv0 : TEXCOORD0;
+
+    float3 normalW : NORMAL;
+	
 	float4 tessellation : TEXCOORD2;
 };
 
@@ -504,7 +512,8 @@ HS_TERRAIN_TESSELLATION_OUTPUT HSTerrainTessellation(InputPatch<VS_TERRAIN_TESSE
 	HS_TERRAIN_TESSELLATION_OUTPUT output;
 
 	output.position = input[i].position;
-	
+    output.normalW = mul(input[i].normalW, (float3x3) gmtxWorld);
+    output.positionW = (float3) mul(float4(input[i].position, 1.0f), gmtxWorld);
 	output.uv0 = input[i].uv0;
 
 	return(output);
@@ -543,12 +552,19 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 	BernsteinCoeffcient5x5(uv.x, uB);
 	BernsteinCoeffcient5x5(uv.y, vB);
 
-	
+  
 	output.uv0 = lerp(lerp(patch[0].uv0, patch[4].uv0, uv.x), lerp(patch[20].uv0, patch[24].uv0, uv.x), uv.y);
 
+	
+	
 	float3 position = CubicBezierSum5x5(patch, uB, vB);
 	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
 	output.position = mul(float4(position, 1.0f), mtxWorldViewProjection);
+    for (int i = 0; i < 25; i++)
+    {
+        output.normalW = mul(patch[i].normalW, (float3x3) gmtxWorld);
+        output.positionW = (float3) mul(float4(patch[i].position, 1.0f), gmtxWorld);
+    }
 
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
 
@@ -556,14 +572,28 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 }
 
 // PS
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+#include "Light.hlsl"
+
+struct VS_LIGHT_OUT
+{
+    float4 PosH : SV_POSITION;
+    float3 PosW : POSITION;
+    float2 uv : TEXCOORD;
+    float3 Normal : NORMAL;
+};
+
 float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 {
-	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	if (gnTexturesMask & 0x01)
-	{
-		cColor = gtxtForest.Sample(gssWrap, input.uv0);
-	}
+    if (gnTexturesMask & 0x01)
+    {
+        cColor = gtxtForest.Sample(gssWrap, input.uv0);
+    }
     if (gnTexturesMask & 0x02)
     {
         cColor = gtxtDryForest.Sample(gssWrap, input.uv0);
@@ -583,34 +613,28 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
         float FogStart = 10000.0f;
         float FogRange = 20000.0f;
 	
-        float3 toEyeW =  gvCameraPosition + input.position.xyz;
+        float3 toEyeW = gvCameraPosition + input.position.xyz;
         float distToEye = length(toEyeW);
         toEyeW /= distToEye; // normalize
 		
-        float fogAmount = saturate((distToEye - FogStart+5000.0f) / FogRange);
+        float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
         
         
         cColor = lerp(cColor, FogColor, 1 - fogAmount);
     }
 	
+    input.normalW = normalize(input.normalW);
+    float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
 	//else
 	//{
 	//	cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
 	//}
 
-	return (cColor);
+    return (cColor * cIllumination);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-#include "Light.hlsl"
 
-struct VS_LIGHT_OUT
-{
-	float4 PosH    : SV_POSITION;
-	float3 PosW    : POSITION;
-	float2 uv	   : TEXCOORD;
-	float3 Normal  : NORMAL;
-};
+
 struct VS_TEXTURED_LIGHTING_INPUT
 {
 	float3 position : POSITION;
