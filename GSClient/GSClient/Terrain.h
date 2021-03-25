@@ -17,9 +17,6 @@ private:
 	long czBlocks;
 
 public:
-	// 이전에 사용하여 지형을 생성한 방식
-	CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nLength, int nBlockWidth, int nBlockLength, CShader* pShader);
-
 	// 앞으로 수정하여 사용할 방식
 	CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	virtual ~CTerrain();
@@ -39,6 +36,8 @@ private: // 경계선 지형을 추가적으로 생성해주기 위한 함수.
 	void BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	void BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 
+	void ReviseLoosedTextureWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+		CShader* pShader);
 private:
 	void InitHeightDatas();
 	void FileSave();
