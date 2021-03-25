@@ -21,6 +21,9 @@ CDoor::CDoor(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 	, bool isLeft)
 	:m_IsLeft(isLeft)
 {
+	const float MAX_HEIGHT = 2500.0f;
+	if (height >= MAX_HEIGHT) height = MAX_HEIGHT;
+	m_Height = height;
 	m_Name = OBJ_NAME::Door;
 	CDoorMeshTest* pCubeMeshTex = new CDoorMeshTest(pd3dDevice, pd3dCommandList,
 		width, height, depth, isLeft);
@@ -90,17 +93,27 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice,
 	pWall->SetPosition({ fWidthRatio * 6 + fWidthRatio * 2,  height * 0.5f, depth * 0.5f });
 	m_Walls.push_back(pWall);  
 
+	float createdHeight;
 	m_LeftDoor = new CDoor(pd3dDevice, pd3dCommandList, fWidthRatio, height, depth * 0.2f, true);
 	m_LeftDoor->SetShader(pShader);
 	m_LeftDoor->SetObjectName(OBJ_NAME::Wall);
 	m_LeftDoor->SetTextureIndex(0x10);
-	m_LeftDoor->SetPosition({ fWidthRatio * 4,  height * 0.5f, depth * 0.5f });
+	createdHeight = m_LeftDoor->GetHeight();
+	if (height != createdHeight)
+		m_LeftDoor->SetPosition({ fWidthRatio * 4,  height * 0.5f - createdHeight * 0.5f, depth * 0.5f });
+	else
+		m_LeftDoor->SetPosition({ fWidthRatio * 4,  height * 0.5f, depth * 0.5f });
 
+	//3000, 1500
 	m_RightDoor = new CDoor(pd3dDevice, pd3dCommandList, fWidthRatio, height, depth * 0.2f, false);
 	m_RightDoor->SetShader(pShader);
 	m_RightDoor->SetObjectName(OBJ_NAME::Wall);
-	m_RightDoor->SetTextureIndex(0x10); 
-	m_RightDoor->SetPosition({ fWidthRatio * 6,  height * 0.5f, depth * 0.5f });
+	m_RightDoor->SetTextureIndex(0x10);  
+	m_RightDoor->GetHeight();
+	if (height != createdHeight)
+		m_RightDoor->SetPosition({ fWidthRatio * 6,  height * 0.5f - createdHeight * 0.5f, depth * 0.5f });
+	else
+		m_RightDoor->SetPosition({ fWidthRatio * 6,  height * 0.5f, depth * 0.5f });
 }
 
 CDoorWall::CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
