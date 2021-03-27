@@ -26,12 +26,12 @@ cbuffer cbCameraInfo : register(b2)
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
 
-Texture2D gtxtForest : register(t0);
-Texture2D gtxtDryForest : register(t1);
-Texture2D gtxtDesert : register(t2);
-Texture2D gtxtDryDesert : register(t3);
-Texture2D gtxtRocky_Terrain : register(t4);
-Texture2D gtxtRocky_Terrain_Normal : register(t5); // ¼öÁ¤¿ä¸Á
+Texture2D gtxtForest	   : register(t0);
+Texture2D gtxtDryForest	   : register(t1);
+Texture2D gtxtDesert	   : register(t2);
+Texture2D gtxtDryDesert	   : register(t3);
+Texture2D gtxtRocky_Terrain: register(t4);
+Texture2D gtxtBossWall	   : register(t5); // ¼öÁ¤¿ä¸Á
 
 Texture2D gSkyBox_Front    : register(t6);
 Texture2D gSkyBox_Back     : register(t7);
@@ -615,7 +615,23 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
+	if (gnTexturesMask & 0x20)
+	{
+		cColor = gtxtBossWall.Sample(gssWrap, input.uv0);
 
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
+	}
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
@@ -717,7 +733,8 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);
+	return cColor;
 }
 
 float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
@@ -754,7 +771,8 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);
+	return cColor;
 }
 
 float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
@@ -784,7 +802,8 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);	
+	return cColor;
 }
 
 
@@ -811,7 +830,8 @@ float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);	
+	return cColor;
 }
 float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
@@ -829,7 +849,8 @@ float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primitiv
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);
+	return cColor;
 }
 
 float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
