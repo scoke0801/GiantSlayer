@@ -39,8 +39,9 @@ public:
 class CTerrainVertex : public CVertex
 {
 public:
-	XMFLOAT2				m_xmf2TexCoord;
-	XMFLOAT4				m_xmf4Color;
+	XMFLOAT2				m_xmf2TexCoord; 
+	XMFLOAT3				m_xmf3Normal;
+
 public:
 	CTerrainVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f); }
 	CTerrainVertex(float x, float y, float z, XMFLOAT2 xmf2TexCoord) { m_xmf3Position = XMFLOAT3(x, y, z); m_xmf2TexCoord = xmf2TexCoord;  }
@@ -378,27 +379,22 @@ protected:
 	int m_nWidth;
 	int m_nDepth;
 
-public:
-	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		int x_Index, int z_Index, int WidthBlock_Count, int DepthBlock_Count, int WidthBlock_Index, int DepthBlock_Index,
-		MapMeshHeightType heightType = MapMeshHeightType::Plane);
-
+public: 
 	// 벽 생성	 
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
-		int heights[25]);
+		int heights[25],
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		int xNomalPos, int zNormalPos);
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		bool xZero, bool zZero,
-		int* heights);
+		int* heights,
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		int xNomalPos, int zNormalPos);
 
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		int x_Index, int z_Index,  
-		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
+		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 
 	~CTerrainMesh();
-
-public:
-	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
-	float GetHeightPlane(float x, float z) const { return 0; }
-	float GetHeightUpRidge(float x, float z, float waveSize);
-	float GetHeightDownRidge(float x, float z, float waveSize); 
 };
