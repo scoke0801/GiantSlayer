@@ -4,7 +4,7 @@
 CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	CShader* pShader)
 {
-	m_nWidth = 200, m_nLength = 200;
+	m_nWidth = 100, m_nLength = 100;
 	InitHeightDatas();
 	InitNormals();
 
@@ -603,7 +603,7 @@ void CTerrain::InitNormals()
 
 XMFLOAT3 CTerrain::GetHeightMapNormal(int x, int z)
 {
-	XMFLOAT3 xmf3Scale = { 100.0f, 1.0f, 100.0f };
+	XMFLOAT3 xmf3Scale = { 200.0f, 1.0f, 200.0f };
 	if ((x < 0.0f) || (z < 0.0f) || (x >= m_nWidth) || (z >= m_nLength))
 		return(XMFLOAT3(0.0f, 1.0f, 0.0f));
 

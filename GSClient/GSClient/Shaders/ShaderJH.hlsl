@@ -427,9 +427,7 @@ VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
 
 	output.position = input.position;
 	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
-	output.normalW = mul(input.normal, (float3x3) gmtxWorld);
-	//output.tangentW = (float3) mul(float4(input.tangent, 1.0f), gmtxWorld);
-	//output.bitangentW = (float3) mul(float4(input.bitangent, 1.0f), gmtxWorld);
+	output.normalW = mul(input.normal, (float3x3) gmtxWorld); 
 	output.uv0 = input.uv0;
 
 	return (output);
@@ -537,7 +535,10 @@ HS_TERRAIN_TESSELLATION_CONSTANT HSTerrainTessellationConstant(InputPatch<VS_TER
 
 // DS
 [domain("quad")]
-DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CONSTANT patchConstant, float2 uv : SV_DomainLocation, OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch)
+DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
+	HS_TERRAIN_TESSELLATION_CONSTANT patchConstant,
+	float2 uv : SV_DomainLocation, 
+	OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch)
 {
 	DS_TERRAIN_TESSELLATION_OUTPUT output = (DS_TERRAIN_TESSELLATION_OUTPUT)0;
 
@@ -550,10 +551,15 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 	float3 position = CubicBezierSum5x5(patch, uB, vB);
 	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
 	output.position = mul(float4(position, 1.0f), mtxWorldViewProjection);
-
+	float3 normal = patch[0].normalW;
+	for (int i = 1; i < 25; i++)
+	{
+		normal += patch[i].normalW;
+	}
+	normal /= 25;
 	for (int i = 0; i < 25; i++)
 	{
-		output.normalW = mul(patch[i].normalW, (float3x3) gmtxWorld);
+		output.normalW = mul(normal, (float3x3) gmtxWorld);
 		output.positionW = (float3) mul(float4(position, 1.0f), gmtxWorld);
 	}
 
