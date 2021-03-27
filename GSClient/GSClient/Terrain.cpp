@@ -110,7 +110,7 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 			heightsTemp,
 			m_Normals,
-			j, 100));
+			j, 96));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 200.0f * j, 0, 20000.0f });
@@ -155,7 +155,7 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 			heightsTemp,
 			m_Normals,
-			j, 100));
+			j, 96));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ -800.0f, 0, 20000.0f });
@@ -177,7 +177,7 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 			heightsTemp,
 			m_Normals,
-			j, 100));
+			j, 96));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 20000.0f, 0, 20000.0f });
@@ -199,7 +199,7 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 			heightsTemp,
 			m_Normals,
-			j, 100));
+			j, 96));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 200.0f * j - 800.0f, 0, 20000.0f });
