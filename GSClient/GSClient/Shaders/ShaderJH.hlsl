@@ -399,9 +399,7 @@ float4 PSMinimap(VS_MOUT input) : SV_TARGET
 
 //////////////////////////////////////////////////////
 //
-
-
-
+ 
 struct VS_TERRAIN_INPUT
 {
 	float3 position : POSITION;
@@ -634,12 +632,7 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	}
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
-
-	//else
-	//{
-	//	cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	//}
-
+	  
 	return (cColor * cIllumination);
 }
 
@@ -866,7 +859,8 @@ float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);
+	return cColor;
 }
 float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
