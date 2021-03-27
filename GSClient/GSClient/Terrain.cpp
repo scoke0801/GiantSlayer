@@ -15,7 +15,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			// 늘어진 텍스쳐 발생 부분 제외 후 생성
 			if (j == 17 && (i >= 17 && i <= 24) ||
 				(j == 19) && (i >= 10 && i < 17) ||
-				(j == 22) && (i >= 10 && i <= 17))
+				(j == 22) && (i >= 10 && i < 17))
 				continue;
 			if ((j == 24 || j == 23 || j == 18 || j == 17) && i == 17)
 				continue;
@@ -405,23 +405,22 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	}
 }
 
-void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice, 
-	ID3D12GraphicsCommandList* pd3dCommandList, 
+void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList,
 	CShader* pShader)
 {
-	CGameObject* pObject;	
+	CGameObject* pObject;
 	int tolerance = 30;
 	for (int i = 0; i < 25; ++i)
 	{
 		for (int j = 0; j < 25; ++j)
-		{ 
+		{
 			// 고저 차에 의헤 늘어진 텍스처 보완 코드.
 			if (j == 17 && (i >= 17 && i <= 24) ||
 				(j == 19) && (i >= 10 && i < 17) ||
 				(j == 22) && (i >= 10 && i < 17))
 			{
 				tolerance = 30;
-
 				if ((j == 22) && (i >= 10 && i <= 17)) {
 					tolerance = -15;
 				}
@@ -478,17 +477,17 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 					pObject = new CGameObject();
 					pObject->SetTextureIndex(0x20);
 					if (i == 10)pObject->SetTextureIndex(0x08);
-					pObject->SetShader(pShader);
-					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-						heightsTemp));
+					pObject->SetShader(pShader); 
+					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList, 
+						heightsTemp)); 
 
-					pObject->Scale(40.0f, 1.0f, 200.0f);
+					pObject->Scale(40.0f, 1.0f, 200.0f); 
 					pObject->SetPosition({ 800.0f * j + 160.0f * k, 0, 800.0f * i });
 					m_Objects.push_back(std::move(pObject));
 				}
 				if (j != 17 || i != 17) continue;
 			}
-			if ((j == 24 || j == 23 || j == 18 || j == 17) && i == 17) {
+			if ((j == 24 || j == 23 || j == 18 || j == 17) && i == 17 ) {
 				tolerance = 10;
 				int heightsGap[5] = {
 					m_Heights[(i + 1) * 4][j * 4] - m_Heights[i * 4][j * 4] - tolerance,
@@ -496,7 +495,7 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 					m_Heights[(i + 1) * 4][j * 4 + 2] - m_Heights[i * 4][j * 4 + 2] - tolerance,
 					m_Heights[(i + 1) * 4][j * 4 + 3] - m_Heights[i * 4][j * 4 + 3] - tolerance,
 					m_Heights[(i + 1) * 4][j * 4 + 4] - m_Heights[i * 4][j * 4 + 4] - tolerance
-				}; 
+				};
 				if (j == 17)
 				{
 					heightsGap[0] = m_Heights[i * 4][j * 4] - 4000;
@@ -506,7 +505,7 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 					heightsGap[4] = m_Heights[i * 4][j * 4 + 4] - 4000;
 				}
 				for (int k = 0; k < 5; ++k)
-				{  
+				{
 					int heightsTemp[25] =
 					{
 						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 4),
@@ -514,31 +513,31 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 4),
 						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 4),
 						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 4),
-
+						
 						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 3),
 						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 3),
 						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 3),
 						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 3),
 						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 3),
-
+						
 						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 2),
 						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 2),
 						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 2),
 						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 2),
 						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 2),
-
+						
 						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 1),
 						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 1),
 						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 1),
 						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 1),
 						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 1),
-
+						
 						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4),
 						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4),
 						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4),
 						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4),
 						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4),
-					};					
+					};
 					pObject = new CGameObject();
 					pObject->SetTextureIndex(0x20);
 					if (i == 10)pObject->SetTextureIndex(0x08);
@@ -549,12 +548,12 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 					pObject->Scale(200.0f, 1.0f, 40.0f);
 					pObject->SetPosition({ 800.0f * j , 0, 800.0f * i + 160.0f * k });
 
-					m_Objects.push_back(std::move(pObject)); 
+					m_Objects.push_back(std::move(pObject));
 				}
 			}
 			if (j == 19 && i == 17) {
 				continue;
-				int heightsGap[5] = { 
+				int heightsGap[5] = {
 					m_Heights[i * 4][j * 4] - 4000,
 					m_Heights[i * 4][j * 4 + 1] - 4000,
 					m_Heights[i * 4][j * 4 + 2] - 4000,
@@ -594,9 +593,9 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4),
 						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4),
 						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4),
-					};					
+					};
 					pObject = new CGameObject();
-					pObject->SetTextureIndex(0x20); 
+					pObject->SetTextureIndex(0x20);
 					pObject->SetShader(pShader);
 					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 						heightsTemp));
@@ -605,7 +604,7 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 					pObject->SetPosition({ 800.0f * j , 0, 800.0f * i + 160.0f * k });
 
 					m_Objects.push_back(std::move(pObject));
-				}  
+				}
 			}
 			if (j == 22 && i == 17) {
 				continue;

@@ -243,7 +243,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Door",
 		"HP_SP","Minimap","WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
+		"BossWall","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
 		"Dry_Tree","Stump","Dead_Tree",
@@ -296,7 +296,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
+		"BossWall","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
 		"Dry_Tree","Stump","Dead_Tree",
@@ -945,6 +945,11 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pDoorWall->SetPosition({ 14000,-4500, 8000 });
 	pDoorWall->SetTextureIndexes(0x08); 
 	m_Objects.push_back(pDoorWall);
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5700, 4500, 800, pShader);
+	pDoorWall->SetPosition({ 14000, -7050, 13650 });
+	pDoorWall->SetTextureIndexes(0x08);
+	m_Objects.push_back(pDoorWall); 
 }
 
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
