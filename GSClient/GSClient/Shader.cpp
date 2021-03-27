@@ -130,7 +130,9 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout(ShaderTypes type)
 
 		pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-		pd3dInputElementDescs[2] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		pd3dInputElementDescs[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		//pd3dInputElementDescs[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		//pd3dInputElementDescs[4] = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		
 		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 		m_d3dInputLayoutDesc.NumElements = nInputElementDescs; 
@@ -335,7 +337,7 @@ void CShader::CreateBoundaryShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
 	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
 	HRESULT hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
-		__uuidof(ID3D12PipelineState), (void**)&m_pd3dBoundartPipelineState);
+		__uuidof(ID3D12PipelineState), (void**)&m_pd3dBoundaryPipelineState);
 }
 
 void CShader::CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, bool isLeftSide)
@@ -471,9 +473,9 @@ void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 void CShader::RenderBoundary(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	if (m_pd3dBoundartPipelineState != NULL)
+	if (m_pd3dBoundaryPipelineState != NULL)
 	{
-		pd3dCommandList->SetPipelineState(m_pd3dBoundartPipelineState);
+		pd3dCommandList->SetPipelineState(m_pd3dBoundaryPipelineState);
 	} 
 }
 

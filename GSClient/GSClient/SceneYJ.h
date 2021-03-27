@@ -64,6 +64,8 @@ private:	// about SceneInfo
 	ID3D12Resource* m_pd3dcbSceneInfo = NULL;
 	CB_GAMESCENE_FRAME_DATA* m_pcbMappedSceneFrameData = NULL;
 
+
+
 public:
 	CSceneYJ();
 	~CSceneYJ();
@@ -116,6 +118,8 @@ private:
 	void BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);

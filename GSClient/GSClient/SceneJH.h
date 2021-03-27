@@ -80,8 +80,7 @@ public:
 	virtual void BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
 
-	void ReleaseObjects();
-
+	void ReleaseObjects(); 
 public:
 	virtual void Update(double elapsedTime) override;
 	void AnimateObjects(float fTimeElapsed);
@@ -117,6 +116,7 @@ private:
 	void BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice); 

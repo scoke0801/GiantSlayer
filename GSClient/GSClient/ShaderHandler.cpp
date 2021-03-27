@@ -7,7 +7,6 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateFBXShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateBasicObjectShader(pd3dDevice,pd3dGraphicsRootSignature);
 
-	CreateBoxShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateDoorWallShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateBridgeShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreatePuzzleShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -56,7 +55,7 @@ void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignatu
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pFBXShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("FBX", pFBXShader);
-
+	 
 	pFBXFeatureShaderLeft->CreateInputLayout(ShaderTypes::Textured);
 	pFBXFeatureShaderLeft->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pFBXFeatureShaderLeft->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -93,10 +92,6 @@ void CShaderHandler::CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignatur
 	pUiHelpTextShader->CreateInputLayout(ShaderTypes::Textured);
 	pUiHelpTextShader->CreateUIShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("UiHelpText", pUiHelpTextShader);
-}
-
-void CShaderHandler::CreateBoxShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
-{
 }
 
 void CShaderHandler::CreatePlayerShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -181,6 +176,7 @@ void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12Roo
 	}
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Object", pShader);
 }
 
