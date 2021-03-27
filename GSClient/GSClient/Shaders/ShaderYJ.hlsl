@@ -536,6 +536,8 @@ HS_TERRAIN_TESSELLATION_CONSTANT HSTerrainTessellationConstant(InputPatch<VS_TER
 	float3 f3Sum = float3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < 25; i++)
 		f3Sum += input[i].positionW;
+	
+
 	float3 f3Center = f3Sum / 25.0f;
 	output.fTessInsides[0] = output.fTessInsides[1] = CalculateTessFactor(f3Center);
 
@@ -552,18 +554,16 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 	BernsteinCoeffcient5x5(uv.x, uB);
 	BernsteinCoeffcient5x5(uv.y, vB);
 
-  
 	output.uv0 = lerp(lerp(patch[0].uv0, patch[4].uv0, uv.x), lerp(patch[20].uv0, patch[24].uv0, uv.x), uv.y);
 
-	
-	
 	float3 position = CubicBezierSum5x5(patch, uB, vB);
 	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
 	output.position = mul(float4(position, 1.0f), mtxWorldViewProjection);
+	
     for (int i = 0; i < 25; i++)
     {
         output.normalW = mul(patch[i].normalW, (float3x3) gmtxWorld);
-        output.positionW = (float3) mul(float4(patch[i].position, 1.0f), gmtxWorld);
+        output.positionW = (float3) mul(float4(position, 1.0f), gmtxWorld);
     }
 
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
