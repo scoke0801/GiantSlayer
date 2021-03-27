@@ -52,6 +52,8 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 				pObject->SetTextureIndex(0x10);
 			}
 			
+			if (i == 24)
+				int stop = 3;
 			pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 				4 * j, 4 * i,
 				m_Heights,
@@ -133,7 +135,7 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 			heightsTemp,
 			m_Normals,
-			j, 100));
+			j, 96));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 200.0f * j, 0, 20000.0f });
@@ -594,8 +596,8 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 
 void CTerrain::InitNormals()
 {
-	for (int i = 0; i < TERRAIN_HEIGHT_MAP_HEIGHT; ++i) {
-		for (int j = 0; j < TERRAIN_HEIGHT_MAP_WIDTH; ++j) {
+	for (int i = 0; i <= TERRAIN_HEIGHT_MAP_HEIGHT; ++i) {
+		for (int j = 0; j <= TERRAIN_HEIGHT_MAP_WIDTH; ++j) {
 			m_Normals[i][j] = GetHeightMapNormal(j, i);
 		}
 	} 
@@ -604,11 +606,11 @@ void CTerrain::InitNormals()
 XMFLOAT3 CTerrain::GetHeightMapNormal(int x, int z)
 {
 	XMFLOAT3 xmf3Scale = { 200.0f, 1.0f, 200.0f };
-	if ((x < 0.0f) || (z < 0.0f) || (x >= TERRAIN_HEIGHT_MAP_WIDTH) || (z >= TERRAIN_HEIGHT_MAP_HEIGHT))
+	if ((x < 0.0f) || (z < 0.0f) || (x > TERRAIN_HEIGHT_MAP_WIDTH) || (z > TERRAIN_HEIGHT_MAP_HEIGHT))
 		return(XMFLOAT3(0.0f, 1.0f, 0.0f));
 
-	int xHeightMapAdd = (x < (TERRAIN_HEIGHT_MAP_WIDTH - 1)) ? 1 : -1;
-	int zHeightMapAdd = (z < (TERRAIN_HEIGHT_MAP_HEIGHT - 1)) ? 1 : -1;
+	int xHeightMapAdd = (x <= (TERRAIN_HEIGHT_MAP_WIDTH)) ? 1 : -1;
+	int zHeightMapAdd = (z <= (TERRAIN_HEIGHT_MAP_HEIGHT)) ? 1 : -1;
 
 	float y1 = (float)m_Heights[z][x] * xmf3Scale.y;
 	float y2 = (float)m_Heights[z][x + xHeightMapAdd] * xmf3Scale.y;

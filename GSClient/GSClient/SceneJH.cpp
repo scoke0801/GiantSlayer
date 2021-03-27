@@ -111,8 +111,8 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pLights = new LIGHTS;
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 
-	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(2.7f, 2.7f, 2.7f, 1.0f);
-
+	//m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(2.7f, 2.7f, 2.7f, 1.0f);
+	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.1f, 0.1f,0.1f, 1.0f);
 	//m_pLights->m_pLights[0].m_bEnable = true;
 	//m_pLights->m_pLights[0].m_nType = SPOT_LIGHT;
 	//m_pLights->m_pLights[0].m_fRange = 30000.0f;
@@ -225,7 +225,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetObjectName(OBJ_NAME::Player);
 	m_Player->SetPosition({ 750,  230, 1850 });
 	m_Player->SetCamera(m_Cameras[0]);
-	m_Player->SetTextureIndex(0x80);
+	m_Player->SetTextureIndex(0x200);
 	m_Player->SetMesh(fbxMesh);
 	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
 
@@ -1039,7 +1039,7 @@ void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		{
 			pObject = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
 			pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
-			pObject->SetTextureIndex(0x80);
+			pObject->SetTextureIndex(0x200);
 			pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 			m_Objects.push_back(std::move(pObject));
 		}
