@@ -4,7 +4,8 @@ class CTerrain
 {
 private:
 	int m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
-	
+	XMFLOAT3 m_Normals[TERRAIN_HEIGHT_MAP_HEIGHT][TERRAIN_HEIGHT_MAP_WIDTH];
+
 private:
 	int						m_nWidth;
 	int						m_nLength;
@@ -13,8 +14,8 @@ private:
 	int						m_nObjects;
 	vector<CGameObject*>    m_Objects;
 	
-	long cxBlocks;
-	long czBlocks;
+	long					cxBlocks;
+	long					czBlocks;
 
 public:
 	// 앞으로 수정하여 사용할 방식
@@ -42,5 +43,8 @@ private:
 	void InitHeightDatas();
 	void FileSave();
 	void FileRead();
+
+	void InitNormals();	
+	XMFLOAT3 GetHeightMapNormal(int x, int z);
 };
 

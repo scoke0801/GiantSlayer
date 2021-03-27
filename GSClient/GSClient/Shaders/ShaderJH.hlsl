@@ -26,12 +26,12 @@ cbuffer cbCameraInfo : register(b2)
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
 
-Texture2D gtxtForest : register(t0);
-Texture2D gtxtDryForest : register(t1);
-Texture2D gtxtDesert : register(t2);
-Texture2D gtxtDryDesert : register(t3);
-Texture2D gtxtRocky_Terrain : register(t4);
-Texture2D gtxtRocky_Terrain_Normal : register(t5); // ¼öÁ¤¿ä¸Á
+Texture2D gtxtForest	   : register(t0);
+Texture2D gtxtDryForest	   : register(t1);
+Texture2D gtxtDesert	   : register(t2);
+Texture2D gtxtDryDesert	   : register(t3);
+Texture2D gtxtRocky_Terrain: register(t4);
+Texture2D gtxtBossWall	   : register(t5); // ¼öÁ¤¿ä¸Á
 
 Texture2D gSkyBox_Front    : register(t6);
 Texture2D gSkyBox_Back     : register(t7);
@@ -399,9 +399,7 @@ float4 PSMinimap(VS_MOUT input) : SV_TARGET
 
 //////////////////////////////////////////////////////
 //
-
-
-
+ 
 struct VS_TERRAIN_INPUT
 {
 	float3 position : POSITION;
@@ -429,9 +427,7 @@ VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
 
 	output.position = input.position;
 	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
-	output.normalW = mul(input.normal, (float3x3) gmtxWorld);
-	//output.tangentW = (float3) mul(float4(input.tangent, 1.0f), gmtxWorld);
-	//output.bitangentW = (float3) mul(float4(input.bitangent, 1.0f), gmtxWorld);
+	output.normalW = mul(input.normal, (float3x3) gmtxWorld); 
 	output.uv0 = input.uv0;
 
 	return (output);
@@ -481,6 +477,17 @@ float3 CubicBezierSum5x5(OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch, 
 	f3Sum += vB[2] * (uB[0] * patch[10].position + uB[1] * patch[11].position + uB[2] * patch[12].position + uB[3] * patch[13].position + uB[4] * patch[14].position);
 	f3Sum += vB[3] * (uB[0] * patch[15].position + uB[1] * patch[16].position + uB[2] * patch[17].position + uB[3] * patch[18].position + uB[4] * patch[19].position);
 	f3Sum += vB[4] * (uB[0] * patch[20].position + uB[1] * patch[21].position + uB[2] * patch[22].position + uB[3] * patch[23].position + uB[4] * patch[24].position);
+
+	return(f3Sum);
+}
+float3 CubicBezierNormalSum5x5(OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch, float uB[5], float vB[5])
+{
+	float3 f3Sum = float3(0.0f, 0.0f, 0.0f);
+	f3Sum = vB[0] * (uB[0] * patch[0].normalW + uB[1] * patch[1].normalW + uB[2] * patch[2].normalW + uB[3] * patch[3].normalW + uB[4] * patch[4].normalW);
+	f3Sum += vB[1] * (uB[0] * patch[5].normalW + uB[1] * patch[6].normalW + uB[2] * patch[7].normalW + uB[3] * patch[8].normalW + uB[4] * patch[9].normalW);
+	f3Sum += vB[2] * (uB[0] * patch[10].normalW + uB[1] * patch[11].normalW + uB[2] * patch[12].normalW + uB[3] * patch[13].normalW + uB[4] * patch[14].normalW);
+	f3Sum += vB[3] * (uB[0] * patch[15].normalW + uB[1] * patch[16].normalW + uB[2] * patch[17].normalW + uB[3] * patch[18].normalW + uB[4] * patch[19].normalW);
+	f3Sum += vB[4] * (uB[0] * patch[20].normalW + uB[1] * patch[21].normalW + uB[2] * patch[22].normalW + uB[3] * patch[23].normalW + uB[4] * patch[24].normalW);
 
 	return(f3Sum);
 }
@@ -539,7 +546,10 @@ HS_TERRAIN_TESSELLATION_CONSTANT HSTerrainTessellationConstant(InputPatch<VS_TER
 
 // DS
 [domain("quad")]
-DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CONSTANT patchConstant, float2 uv : SV_DomainLocation, OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch)
+DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
+	HS_TERRAIN_TESSELLATION_CONSTANT patchConstant,
+	float2 uv : SV_DomainLocation, 
+	OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch)
 {
 	DS_TERRAIN_TESSELLATION_OUTPUT output = (DS_TERRAIN_TESSELLATION_OUTPUT)0;
 
@@ -550,13 +560,14 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 	output.uv0 = lerp(lerp(patch[0].uv0, patch[4].uv0, uv.x), lerp(patch[20].uv0, patch[24].uv0, uv.x), uv.y);
 
 	float3 position = CubicBezierSum5x5(patch, uB, vB);
+	float3 normal = CubicBezierNormalSum5x5(patch, uB, vB);
 	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
 	output.position = mul(float4(position, 1.0f), mtxWorldViewProjection);
-
+	  
 	for (int i = 0; i < 25; i++)
 	{
-		output.normalW = mul(patch[i].normalW, (float3x3) gmtxWorld);
-		output.positionW = (float3) mul(float4(position, 1.0f), gmtxWorld);
+		output.normalW = (float3)(mul(float4(normal, 1.0f),gmtxWorld));
+		output.positionW = (float3)mul(float4(position, 1.0f), gmtxWorld);
 	}
 
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
@@ -564,8 +575,7 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 	return(output);
 }
 
-// PS
-
+// PS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
@@ -615,15 +625,26 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
+	if (gnTexturesMask & 0x20)
+	{
+		cColor = gtxtBossWall.Sample(gssWrap, input.uv0);
 
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
+	}
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
-
-	//else
-	//{
-	//	cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	//}
-
+	  
 	return (cColor * cIllumination);
 }
 
@@ -717,7 +738,8 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);
+	return cColor;
 }
 
 float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
@@ -754,7 +776,8 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);
+	return cColor;
 }
 
 float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
@@ -784,7 +807,8 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);	
+	return cColor;
 }
 
 
@@ -811,7 +835,8 @@ float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);	
+	return cColor;
 }
 float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
@@ -829,7 +854,8 @@ float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primitiv
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);
+	return cColor;
 }
 
 float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
@@ -845,7 +871,8 @@ float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
-	return(cColor * cIllumination);
+	//return(cColor * cIllumination);
+	return cColor;
 }
 float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {

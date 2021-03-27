@@ -4,7 +4,9 @@
 CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	CShader* pShader)
 {
+	m_nWidth = 100, m_nLength = 100;
 	InitHeightDatas();
+	InitNormals();
 
 	CGameObject* pObject;
 	 
@@ -52,7 +54,8 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			
 			pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
 				4 * j, 4 * i,
-				m_Heights));
+				m_Heights,
+				m_Normals));
 			pObject->Scale(200.0f, 1.0f, 200.0f);
 			pObject->SetPosition({ 800.0f * j, 0, 800.0f * i });
 			m_Objects.push_back(std::move(pObject));
@@ -105,7 +108,9 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			m_Heights[heightWallIndex][j],          m_Heights[heightWallIndex][j + 1],			m_Heights[heightWallIndex][j + 2],		    m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 4] };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			j, 96));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 200.0f * j, 0, 20000.0f });
@@ -126,7 +131,9 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			m_Heights[heightWallIndex][j],           m_Heights[heightWallIndex][j + 1],			  m_Heights[heightWallIndex][j + 2],		   m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 4] };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			j, 100));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 200.0f * j, 0, 20000.0f });
@@ -146,7 +153,9 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		m_Heights[heightWallIndex][j + 4],          m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 2],		    m_Heights[heightWallIndex][j + 1],			m_Heights[heightWallIndex][j] };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			j, 96));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ -800.0f, 0, 20000.0f });
@@ -166,7 +175,9 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[heightWallIndex][j + 4],          m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 2],		    m_Heights[heightWallIndex][j + 1],			m_Heights[heightWallIndex][j] };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			j, 96));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 20000.0f, 0, 20000.0f });
@@ -186,7 +197,9 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[heightWallIndex][j + 4],          m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 2],		    m_Heights[heightWallIndex][j + 1],			m_Heights[heightWallIndex][j] };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			j, 96));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 200.0f * j - 800.0f, 0, 20000.0f });
@@ -209,7 +222,9 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[0][j] + 500.0f, m_Heights[0][j + 1] + 500.0f, m_Heights[0][j + 2] + 500.0f, m_Heights[0][j + 3] + 500.0f, m_Heights[0][j + 4] + 500.0f,
 				m_Heights[0][j] + 200.0f, m_Heights[0][j + 1] + 200.0f, m_Heights[0][j + 2] + 200.0f, m_Heights[0][j + 3] + 200.0f, m_Heights[0][j + 4] + 200.0f };
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			j, 0));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 200.0f * j , 0, -800.0f });
@@ -228,7 +243,9 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_Heights[0][j] + 200.0f, m_Heights[0][j + 1] + 200.0f, m_Heights[0][j + 2] + 200.0f, m_Heights[0][j + 3] + 200.0f, m_Heights[0][j + 4] + 200.0f };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			j, 0));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 200.0f * j , 0.0f, -800.0f });
@@ -247,7 +264,9 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[0][0] + 500.0f, m_Heights[0][1] + 500.0f, m_Heights[0][2] + 500.0f, m_Heights[0][3] + 500.0f, m_Heights[0][4] + 500.0f,
 				m_Heights[0][0] + 200.0f, m_Heights[0][1] + 200.0f, m_Heights[0][2] + 200.0f, m_Heights[0][3] + 200.0f, m_Heights[0][4] + 200.0f };
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			0, 0));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ -800.0f , 0, -800.0f });
@@ -267,7 +286,9 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_Heights[0][j + 4] + 200.0f, m_Heights[0][j + 3] + 200.0f, m_Heights[0][j + 2] + 200.0f, m_Heights[0][j + 1] + 200.0f, m_Heights[0][j] + 200.0f };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			j, 0));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 200.0f * j - 800.0f, 0.0f, -800.0f });
@@ -292,7 +313,9 @@ void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[j + 0][0] + 200.0f, m_Heights[j + 0][0] + 500.0f, m_Heights[j + 0][0] + 700.0f, m_Heights[j + 0][0] + 700.0f, m_Heights[j + 0][0] };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			0, j));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ -800.0f, 0, 200.0f * j });
@@ -311,7 +334,9 @@ void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[0][0] + 200.0f, m_Heights[0][0] + 500.0f, m_Heights[0][0] + 700.0f, m_Heights[0][0] + 700.0f, m_Heights[0][0] };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			0, 0));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ -800.0f, 0, -800.0f });
@@ -331,7 +356,9 @@ void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[100][0] + 200.0f,  m_Heights[100][0] + 500.0f, m_Heights[100][0] + 700.0f, m_Heights[100][0] + 700.0f, m_Heights[100][0] };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			0, 96));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ -800.0f, 0, 20000.0f });
@@ -357,7 +384,9 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[j + 0][heightWallIndex], m_Heights[j + 0][heightWallIndex] + 700.0f, m_Heights[j + 0][heightWallIndex] + 700.0f, m_Heights[j + 0][heightWallIndex] + 500.0f, m_Heights[j + 0][heightWallIndex] + 200.0f };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			100, j));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 20000.0f, 0, 200.0f * j });
@@ -377,7 +406,9 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[j + 0][heightWallIndex], m_Heights[j + 0][heightWallIndex] + 700.0f, m_Heights[j + 0][heightWallIndex] + 1500.0f, m_Heights[j + 0][heightWallIndex] + 500.0f, m_Heights[j + 0][heightWallIndex] + 200.0f };
 		 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			100, j));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 20000.0f, 0, 200.0f * j });
@@ -397,7 +428,9 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[j + 4][heightWallIndex], m_Heights[j + 4][heightWallIndex] + 700.0f, m_Heights[j + 4][heightWallIndex] + 1500.0f, m_Heights[j + 4][heightWallIndex] + 500.0f, m_Heights[j + 4][heightWallIndex] + 200.0f };
 
 		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-			heightsTemp));
+			heightsTemp,
+			m_Normals,
+			100, j));
 
 		pObject->Scale(200.0f, 1.0f, 200.0f);
 		pObject->SetPosition({ 20000.0f, 0, 200.0f * j - 800.0f});
@@ -479,7 +512,9 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 					if (i == 10)pObject->SetTextureIndex(0x08);
 					pObject->SetShader(pShader); 
 					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList, 
-						heightsTemp)); 
+						heightsTemp,
+						m_Normals,
+						j, i));
 
 					pObject->Scale(40.0f, 1.0f, 200.0f); 
 					pObject->SetPosition({ 800.0f * j + 160.0f * k, 0, 800.0f * i });
@@ -543,74 +578,47 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 					if (i == 10)pObject->SetTextureIndex(0x08);
 					pObject->SetShader(pShader);
 					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-						heightsTemp));
+						heightsTemp,
+						m_Normals,
+						j, i));
 
 					pObject->Scale(200.0f, 1.0f, 40.0f);
 					pObject->SetPosition({ 800.0f * j , 0, 800.0f * i + 160.0f * k });
 
 					m_Objects.push_back(std::move(pObject));
 				}
-			}
-			if (j == 19 && i == 17) {
-				continue;
-				int heightsGap[5] = {
-					m_Heights[i * 4][j * 4] - 4000,
-					m_Heights[i * 4][j * 4 + 1] - 4000,
-					m_Heights[i * 4][j * 4 + 2] - 4000,
-					m_Heights[i * 4][j * 4 + 3] - 4000,
-					m_Heights[i * 4][j * 4 + 4] - 4000 };
-
-				for (int k = 0; k < 5; ++k)
-				{
-					int heightsTemp[25] =
-					{
-						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 4),
-						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 4),
-						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 4),
-						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 4),
-						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 4),
-
-						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 3),
-						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 3),
-						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 3),
-						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 3),
-						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 3),
-
-						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 2),
-						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 2),
-						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 2),
-						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 2),
-						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 2),
-
-						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 1),
-						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 1),
-						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 1),
-						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 1),
-						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 1),
-
-						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4),
-						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4),
-						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4),
-						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4),
-						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4),
-					};
-					pObject = new CGameObject();
-					pObject->SetTextureIndex(0x20);
-					pObject->SetShader(pShader);
-					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-						heightsTemp));
-
-					pObject->Scale(200.0f, 1.0f, 40.0f);
-					pObject->SetPosition({ 800.0f * j , 0, 800.0f * i + 160.0f * k });
-
-					m_Objects.push_back(std::move(pObject));
-				}
-			}
-			if (j == 22 && i == 17) {
-				continue;
-			}
+			} 
 		}
 	}
+}
+
+void CTerrain::InitNormals()
+{
+	for (int i = 0; i < TERRAIN_HEIGHT_MAP_HEIGHT; ++i) {
+		for (int j = 0; j < TERRAIN_HEIGHT_MAP_WIDTH; ++j) {
+			m_Normals[i][j] = GetHeightMapNormal(j, i);
+		}
+	} 
+}
+
+XMFLOAT3 CTerrain::GetHeightMapNormal(int x, int z)
+{
+	XMFLOAT3 xmf3Scale = { 200.0f, 1.0f, 200.0f };
+	if ((x < 0.0f) || (z < 0.0f) || (x >= TERRAIN_HEIGHT_MAP_WIDTH) || (z >= TERRAIN_HEIGHT_MAP_HEIGHT))
+		return(XMFLOAT3(0.0f, 1.0f, 0.0f));
+
+	int xHeightMapAdd = (x < (TERRAIN_HEIGHT_MAP_WIDTH - 1)) ? 1 : -1;
+	int zHeightMapAdd = (z < (TERRAIN_HEIGHT_MAP_HEIGHT - 1)) ? 1 : -1;
+
+	float y1 = (float)m_Heights[z][x] * xmf3Scale.y;
+	float y2 = (float)m_Heights[z][x + xHeightMapAdd] * xmf3Scale.y;
+	float y3 = (float)m_Heights[z + zHeightMapAdd][x] * xmf3Scale.y;
+
+	XMFLOAT3 xmf3Edge1 = XMFLOAT3(0.0f, y3 - y1, xmf3Scale.z);
+	XMFLOAT3 xmf3Edge2 = XMFLOAT3(xmf3Scale.x, y2 - y1, 0.0f);
+	XMFLOAT3 xmf3Normal = Vector3::CrossProduct(xmf3Edge1, xmf3Edge2, true);
+
+	return(xmf3Normal);  
 }
 
 void CTerrain::InitHeightDatas()

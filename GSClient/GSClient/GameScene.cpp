@@ -166,7 +166,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	//CMeshFbx* pTowerMeshTex = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Medieval tower_Mid.fbx");
 	// 지형 메쉬 
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000, 10, 10); 
+	//CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000, 10, 10); 
 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];

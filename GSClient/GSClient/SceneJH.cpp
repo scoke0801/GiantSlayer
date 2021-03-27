@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "SceneJH.h"
+
 #include "stdafx.h" 
 #include "GameFramework.h"
 #include "Shader.h"
@@ -9,11 +10,9 @@
 #include "Bridge.h"
 #include "Wall.h"
 #include "Communicates.h"
-#include "Enemy.h"
-#include "Puzzle.h"
 #include "Terrain.h"
 #include "Sign.h"
-
+#include "Puzzle.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
@@ -26,6 +25,7 @@ CSceneJH::CSceneJH()
 {
 	cout << "Enter CSceneJH \n";
 	m_pd3dGraphicsRootSignature = NULL;
+	m_isPlayerSelected = false;
 }
 
 CSceneJH::~CSceneJH()
@@ -43,12 +43,12 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 
 	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::JH);
 	CShaderHandler::GetInstance().CreateAllShaders(pd3dDevice, m_pd3dGraphicsRootSignature);
-	 
+
 	BuildMaterials(pd3dDevice, pd3dCommandList);
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
-	BuildLights(pd3dDevice, pd3dCommandList); 
+	BuildLights(pd3dDevice, pd3dCommandList);
 	BuildSceneFrameData(pd3dDevice, pd3dCommandList);
-	BuildObjects(pd3dDevice, pd3dCommandList); 
+	BuildObjects(pd3dDevice, pd3dCommandList);
 	BuildUIs(pd3dDevice, pd3dCommandList);
 }
 
@@ -66,21 +66,22 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 		pCamera->SetScissorRect(0, 0, width, height);
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		m_Cameras[i] = pCamera;
-	} 
-	m_Cameras[0]->SetPosition({ 500,  250 + 150, 1200 }); 
+	}
+	m_Cameras[0]->SetPosition({ 500,  250 + 150, 1200 });
 	m_Cameras[0]->Pitch(XMConvertToRadians(15));
 	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 70.0f, -300.0f));
 
-	m_Cameras[1]->SetPosition({ 500,  1500, 1500 }); 
-	m_Cameras[1]->Pitch(XMConvertToRadians(90));  
-	m_Cameras[2]->SetPosition({ 2500,  0, 2500 });
-	m_Cameras[3]->SetPosition({ 2000, 1000, 8000 });
-	m_Cameras[4]->SetPosition({ 10000,  22000, 10000 });
-	m_Cameras[4]->Pitch(XMConvertToRadians(90));
+	m_Cameras[1]->SetPosition({ 500,  1500, 1500 });
+	m_Cameras[1]->Pitch(XMConvertToRadians(90));
 
-	m_CurrentCamera = m_Cameras[0];
-	m_MinimapCamera = m_Cameras[1];
+	m_Cameras[2]->SetPosition({ 500,  500, 500 });
+	m_Cameras[3]->SetPosition({ 2000, 1000, 8000 });
+	//m_Cameras[3]->Pitch(XMConvertToRadians(90));
+	m_Cameras[4]->SetPosition({ 0,0,0 });
+
 	m_MirrorCamera = m_Cameras[3];
+	m_CurrentCamera = m_Cameras[2];
+	m_MinimapCamera = m_Cameras[1];
 }
 
 void CSceneJH::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -110,50 +111,48 @@ void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pLights = new LIGHTS;
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 
-	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(2.7f, 2.7f, 2.7f, 1.0f);
 
-	m_pLights->m_pLights[0].m_bEnable = true;
-	m_pLights->m_pLights[0].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 30000.0f;
-	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	if (m_CurrentCamera)
-	{
-		m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(12000.0f, 10000.0f, 10000.0f);
-		m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-
-
-		//m_CurrentCamera->SetLight(&m_pLights->m_pLights[0]);
-	}
-	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[0].m_fFalloff = 30.0f;
-	m_pLights->m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-	m_pLights->m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	//m_pLights->m_pLights[0].m_bEnable = true;
+	//m_pLights->m_pLights[0].m_nType = SPOT_LIGHT;
+	//m_pLights->m_pLights[0].m_fRange = 30000.0f;
+	//m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	//m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	//m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	//if (m_CurrentCamera)
+	//{
+	//	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(12000.0f, 10000.0f, 10000.0f);
+	//	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f); 
+	//	//m_CurrentCamera->SetLight(&m_pLights->m_pLights[0]);
+	//}
+	//m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	//m_pLights->m_pLights[0].m_fFalloff = 30.0f;
+	//m_pLights->m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	//m_pLights->m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = POINT_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 100000.0f;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.0f);
 	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(0.0f, 300.0f, -150.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(10000.0f, 1000.0f, 10000.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 
-	//m_pLights->m_pLights[2].m_bEnable = true;
-	//m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
-	//m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	//m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	//m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
-	//m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	m_pLights->m_pLights[2].m_bEnable = true;
+	m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
+	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
+	m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
 
-	m_pLights->m_pLights[3].m_bEnable = true;
-	m_pLights->m_pLights[3].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
-	m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(-1.0f, 0.0f, 0.0f);
+	//m_pLights->m_pLights[3].m_bEnable = true;
+	//m_pLights->m_pLights[3].m_nType = DIRECTIONAL_LIGHT;
+	//m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	//m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	//m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
+	//m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(-1.0f, 0.0f, 0.0f); 
 
 	/*m_pLights->m_pLights[4].m_bEnable = true;
 	m_pLights->m_pLights[4].m_nType = SPOT_LIGHT;
@@ -181,7 +180,7 @@ void CSceneJH::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 {
 	UINT ncbMaterialBytes = ((sizeof(CB_GAMESCENE_FRAME_DATA) + 255) & ~255); //256의 배수
 	m_pd3dcbSceneInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList,
-		NULL, ncbMaterialBytes, 
+		NULL, ncbMaterialBytes,
 		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbSceneInfo->Map(0, NULL, (void**)&m_pcbMappedSceneFrameData);
@@ -193,15 +192,15 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
-	  
+
 	m_Objects.reserve(30);
-	   
-	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox")); 
-	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain")); 
-	 
-	//BuildMapSector1(pd3dDevice, pd3dCommandList);
+
+	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
+	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
+
+	BuildMapSector1(pd3dDevice, pd3dCommandList);
 	//BuildMapSector2(pd3dDevice, pd3dCommandList);
-	//BuildMapSector3(pd3dDevice, pd3dCommandList);
+	BuildMapSector3(pd3dDevice, pd3dCommandList);
 	BuildMapSector4(pd3dDevice, pd3dCommandList);
 	BuildMapSector5(pd3dDevice, pd3dCommandList);
 
@@ -215,30 +214,29 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	CMeshFbx* fbxMesh;
 
-///////////////////////////////////////////////////////////////////////////////	 
 	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 
-	m_CurrentCamera->SetOffset(XMFLOAT3(0.0f, 450.0f, -750.0f));
-	m_CurrentCamera->SetTarget(m_Player);
+	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+	m_Cameras[0]->SetTarget(m_Player);
 
-	m_Player->SetShader(CShaderHandler::GetInstance().GetData("Player"));
-	m_Player->Scale(20, 20, 20);  
-	m_Player->SetObjectName(OBJ_NAME::Player); 
+	m_Player->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	m_Player->Scale(50, 50, 50);
+	m_Player->SetObjectName(OBJ_NAME::Player);
 	m_Player->SetPosition({ 750,  230, 1850 });
-	m_Player->SetCamera(m_CurrentCamera);
+	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x80);
-	m_Player->SetMesh(fbxMesh);  
+	m_Player->SetMesh(fbxMesh);
 	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
 
-	m_MinimapCamera->SetTarget(m_Player);   
+	m_MinimapCamera->SetTarget(m_Player);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	const char* keyNames[] =
 	{
-		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain","Rocky_Terrain_Normal",
+		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain","BossWall",
 		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
 		"Box","Wood", "WoodSignBoard",
 		"GrassWall", "SandWall","RockyWall",
@@ -254,7 +252,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	const wchar_t* address[] =
 	{
-		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",L"resources/OBJ/Rocky_Terrain_Normal.dds",
+		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",
+		L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",L"resources/OBJ/bossWall.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds",
 		L"resources/OBJ/Box.dds",
 		L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
@@ -268,54 +267,57 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds",
 		L"resources/OBJ/Desert_Rock.dds"
 	};
+
 	for (int i = 0; i < _countof(keyNames); ++i)
 	{
 		unique_ptr<CTexture> tempTex = make_unique<CTexture>();
-		MakeTexture(pd3dDevice, pd3dCommandList, tempTex.get(), keyNames[i], address[i]); 
+		MakeTexture(pd3dDevice, pd3dCommandList, tempTex.get(), keyNames[i], address[i]);
 		m_Textures[tempTex->m_Name] = std::move(tempTex);
-	}       
+	}
 }
 
 void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
+{
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
 	srvHeapDesc.NumDescriptors = m_Textures.size() + 2;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dBasicSrvDescriptorHeap));
-	 
+
 	// Fill out the heap with actual descriptors. 
 	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor = m_pd3dBasicSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	
+
 	const char* keyNames[] =
 	{
-		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain","Rocky_Terrain_Normal",
-		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
+		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain","BossWall",
+		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
 		"Box","Wood", "WoodSignBoard",
 		"GrassWall", "SandWall","RockyWall",
 		"Door",
-		"HP_SP","Minimap","WeaponUI",
-		"HP_SP_PER",
+		"HP_SP","HP_SP_PER",
+		"Minimap",
+		"WeaponUI",
 		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
 		"Dry_Tree","Stump","Dead_Tree",
 		"Desert_Rock"
 	};
+
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; 
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = -1; 
+	srvDesc.Texture2D.MipLevels = -1;
 	for (int i = 0; i < _countof(keyNames); ++i)
 	{
-		if(i != 0)	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+		if (i != 0)	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 		ID3D12Resource* texResource = m_Textures[keyNames[i]]->m_pd3dResource;
 		srvDesc.Format = texResource->GetDesc().Format;
 
 		pd3dDevice->CreateShaderResourceView(texResource, &srvDesc, hDescriptor);
-	}  
+	}
 
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = m_pd3dMinimapTex->GetDesc().Format;
@@ -327,42 +329,41 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 }
 
 void CSceneJH::ReleaseObjects()
-{  
+{
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
- 
 	m_Objects.clear();
 }
 
 void CSceneJH::Update(double elapsedTime)
 {
 	ProcessInput();
-	
+
 	m_Skybox->Rotate(XMFLOAT3(0, 1, 0), 0.3 * elapsedTime);
 
 	for (auto pObject : m_Objects)
 	{
 		pObject->Update(elapsedTime);
-	} 
+	}
 	m_HelpTextUI->Update(elapsedTime);
-	
+
 	m_Player->Update(elapsedTime);
-	m_Player->FixPositionByTerrain(m_Terrain);
 
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
+
 	if (m_MirrorCamera)
 	{
 		m_MirrorCamera->UpdateViewMatrix();
 	}
-	if (m_MinimapCamera) 
+	if (m_MinimapCamera)
 	{
 		XMFLOAT3 pos = m_Player->GetPosition();
 		pos.y = m_MinimapCamera->GetPosition3f().y;
 		pos.z += 1;
 
 		m_MinimapCamera->LookAt(pos,
-			m_Player->GetPosition(), 
+			m_Player->GetPosition(),
 			m_Player->GetUp());
-		m_MinimapCamera->UpdateViewMatrix(); 
+		m_MinimapCamera->UpdateViewMatrix();
 	}
 }
 
@@ -382,7 +383,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	  
+
 	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
 	m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
 	m_pcbMappedSceneFrameData->m_PlayerWeapon = m_Player->GetSelectedWeapon();
@@ -398,20 +399,20 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dBasicSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
-	 
+
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Mirror->Draw(pd3dCommandList, m_CurrentCamera);
 
-	for (auto pBillboardObject : m_BillboardObjects)
+	for (auto pObject : m_BillboardObjects)
 	{
-		pBillboardObject->Draw(pd3dCommandList, m_CurrentCamera);
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 
 	for (auto pObject : m_Objects)
 	{
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
-	} 
+	}
 }
 
 void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -438,7 +439,7 @@ void CSceneJH::DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList)
 }
 
 void CSceneJH::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
+{
 }
 
 void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
@@ -450,7 +451,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 		m_MinimapCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
 		m_MinimapCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
-	 
+
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
@@ -472,16 +473,14 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	m_Skybox->Draw(pd3dCommandList, m_MinimapCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
-	for (auto pBillboardObject : m_BillboardObjects)
+	for (auto pObject : m_BillboardObjects)
 	{
-		pBillboardObject->Draw(pd3dCommandList, m_CurrentCamera);
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 	for (auto pObject : m_Objects)
 	{
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
-
-	//m_Player->Draw(pd3dCommandList, m_MinimapCamera);
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
@@ -491,13 +490,13 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 
 	// Copy the input (back-buffer) to MimapTexture
 	pd3dCommandList->CopyResource(m_pd3dMinimapTex, pd3dRTV);
-	
+
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMinimapTex,
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON));
-	
+
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET));
-	
+
 	if (m_CurrentCamera)
 	{
 		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
@@ -572,7 +571,7 @@ void CSceneJH::Communicate(SOCKET& sock)
 {
 	int retVal = 0;
 
-	string toSendData ="\n";
+	string toSendData = "\n";
 	XMFLOAT3 xmf3PlayerPos = m_Player->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = m_Player->GetLook();
 	toSendData += "<PlayerPosition>:\n";
@@ -588,16 +587,16 @@ void CSceneJH::Communicate(SOCKET& sock)
 	toSendData += to_string(xmf3PlayerLook.y);
 	toSendData += " ";
 	toSendData += to_string(xmf3PlayerLook.z);
-	toSendData += "\n"; 
+	toSendData += "\n";
 
 	auto keyInput = GAME_INPUT;
-	toSendData += "<Command>\n"; 
+	toSendData += "<Command>\n";
 	toSendData += to_string(CInputHandler::GetInstance().GetCommandType());
 	toSendData += "\n";
 	SendFrameData(sock, toSendData, retVal);
 
 	char buffer[BUFSIZE + 1];
-	 
+
 	RecvFrameData(sock, buffer, retVal);
 	char* token = strtok(buffer, "\n");
 	while (token != NULL)
@@ -628,7 +627,7 @@ void CSceneJH::ProcessInput()
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{
-		if(m_isPlayerSelected)
+		if (m_isPlayerSelected)
 			m_Player->SetVelocity(OBJ_DIRECTION::Front);
 		else
 			m_CurrentCamera->Walk(cameraSpeed);
@@ -637,7 +636,7 @@ void CSceneJH::ProcessInput()
 	{
 		if (m_isPlayerSelected)
 			m_Player->SetVelocity(OBJ_DIRECTION::Left);
-		else 
+		else
 			m_CurrentCamera->Strafe(-cameraSpeed);
 	}
 	if (keyInput.KEY_S)
@@ -681,10 +680,10 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_5)
 	{
 		m_isPlayerSelected = false;
-		m_CurrentCamera = m_Cameras[3];
+		//m_CurrentCamera = m_Cameras[3];
 	}
-	
-////////////////////////////////////////////////////////// 
+
+	////////////////////////////////////////////////////////// 
 	if (keyInput.KEY_ADD)
 	{
 		m_CurrentCamera->SetSpeed(min(cameraSpeed + 1.0f, 15.0f));
@@ -695,7 +694,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_F1)
 	{
-		m_Player->SetPosition({ 2500,  0, 2500 }); 
+		m_Player->SetPosition({ 2500,  0, 2500 });
 	}
 	if (keyInput.KEY_F2)
 	{
@@ -714,13 +713,13 @@ void CSceneJH::ProcessInput()
 		m_Player->SetPosition({ 17500,  -6000, 17500 });
 	}
 	if (keyInput.KEY_U)
-	{ 
+	{
 	}
 	if (keyInput.KEY_I)
-	{ 
+	{
 	}
 	if (keyInput.KEY_O)
-	{  
+	{
 		gbBoundaryOn = true;
 	}
 	if (keyInput.KEY_P)
@@ -736,6 +735,8 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_L)
 	{
 	}
+	//DisplayVector3(m_CurrentCamera->GetPosition3f());
+
 	m_CurrentCamera->UpdateViewMatrix();
 }
 
@@ -753,7 +754,7 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 }
 
 void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
-{ 
+{
 	if ((btnState & MK_LBUTTON) != 0)
 	{
 		// Make each pixel correspond to a quarter of a degree.
@@ -763,12 +764,12 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		if (m_isPlayerSelected)
 		{
 			//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 15);
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
 
 			if (m_Player->IsMoving())
 			{
-				m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 15);
-				m_MinimapArrow->Rotate(-dx * 15);
+				m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
+				m_MinimapArrow->Rotate(-dx * 150);
 			}
 		}
 		else {
@@ -802,14 +803,14 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	// Ground
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size()+ 2;
+	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size() + 2;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
-	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; 
+	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[6];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[7];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 18; // GameData
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
@@ -840,6 +841,11 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	pd3dRootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[5].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
 	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dRootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[6].Descriptor.ShaderRegister = 5; //Fog
+	pd3dRootParameters[6].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags
 		= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -898,8 +904,7 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 }
 
 void CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
-	ID3D12GraphicsCommandList* pd3dCommandList,
-	CShader* pShader)
+	ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
 	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
@@ -907,7 +912,7 @@ void CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
 	pBridge->RotateAll({ 0,1,0 }, 90);
 	pBridge->SetPosition({ 8200,  -1301,  17800 });
 	m_Objects.push_back(pBridge);
-	 
+
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
@@ -920,16 +925,15 @@ void CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90);
 	pBridge->SetPosition({ 9200,  -1301,  17800 });
-	m_Objects.push_back(pBridge); 
+	m_Objects.push_back(pBridge);
 }
 
 void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
-	ID3D12GraphicsCommandList* pd3dCommandList,
-	CShader* pShader)
+	ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
 	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 0,0, 7500 });
-	m_Objects.push_back(pDoorWall); 
+	m_Objects.push_back(pDoorWall);
 
 	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 3300, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 10300, -2000, 7500 });
@@ -944,92 +948,18 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 
 	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
 	pDoorWall->SetPosition({ 14000,-4500, 8000 });
-	pDoorWall->SetTextureIndexes(0x08); 
+	pDoorWall->SetTextureIndexes(0x08);
 	m_Objects.push_back(pDoorWall);
 
 	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5700, 4500, 800, pShader);
 	pDoorWall->SetPosition({ 14000, -7050, 13650 });
 	pDoorWall->SetTextureIndexes(0x08);
-	m_Objects.push_back(pDoorWall); 
-}
-
-void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
-	CGameObject* pObject = new CGameObject();
-	pObject->SetMesh(fbxMesh);
-	pObject->SetPosition({ 16800,  -6500, 16500 });
-	pObject->SetTextureIndex(0x01);
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pObject->SetTextureIndex(0x80);
-	pObject->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 50, 50, 125);
-	pObject->Scale(15, 15, 15);
-	m_Objects.push_back(std::move(pObject));
-}
-
-void CSceneJH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	m_Mirror = new CGameObject();
-
-	CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
-
-	m_MirrorCamera->SetPosition({ 17000, -3000, 210 });
-	
-	m_Mirror->SetMesh(pMirrorMesh);
-	m_Mirror->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
-	m_Mirror->SetPosition({ 17000, -2300, 200 });
-	m_Mirror->SetTextureIndex(0x01);
-}
-
-void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
-	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
-	pPuzzlePlate->SetPosition({ 10600.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f });
-	//pPuzzlePlate->RotateAll ({ 0,1,0 }, 180);
-	m_Objects.push_back(std::move(pPuzzlePlate));
-
-	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
-	pObject->SetPosition({ 10500.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f }); 
-	m_Objects.push_back(std::move(pObject)); 
-	 
-	for (int i = 0; i < 2; ++i)
-	{
-		for (int j = 0; j < 5; ++j)
-		{
-			pObject = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
-			pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
-			pObject->SetTextureIndex(0x80);
-			pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-			m_Objects.push_back(std::move(pObject));
-		}
-	} 
-}
-
-void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	// 첫번째 지형 표지판
-	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::Scroll,
-		false, true, CShaderHandler::GetInstance().GetData("Sign"));
-	pSign->SetPosition({ 2700, 200,7000 });
-	m_Objects.push_back(pSign);
-
-	// 퍼즐 벽 표지판
-	pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::NumPuzzle, 
-		false, false, CShaderHandler::GetInstance().GetData("Sign"));
-	pSign->SetPosition({ 11200.0f, -1800.0f, 8200.0f });
-	m_Objects.push_back(pSign);
-
-	// 메두사 벽 표지판
-	pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::Medusa,
-		true, true, CShaderHandler::GetInstance().GetData("Sign"));
-	pSign->SetPosition({ 13000.0f, -3250.0f, 1300.0f });
-	pSign->RotateAll({ 0,1,0 }, 90.0f);
-	m_Objects.push_back(pSign);
+	m_Objects.push_back(pDoorWall);
 }
 
 void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CShader* pShader = new CShader(); 
+	CShader* pShader = new CShader();
 	UI* pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.09f, 0.0f, true);
 	pUI->SetPosition({ -0.50, 0.88,  0.92 });		// HP, SP
 	pUI->SetTextureIndex(0x01);
@@ -1043,21 +973,21 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	m_UIs.push_back(pUI);
 
 	for (int i = 0; i < 20; ++i)
-	{  
+	{
 		pUI = new HpSpPercentUI(pd3dDevice, pd3dCommandList, 0.015, 0.053f, 0.0f, true);
-		pUI->SetPosition({float( -0.615 + 0.015 * i), 0.885,  0.91 });
+		pUI->SetPosition({ float(-0.615 + 0.015 * i), 0.885,  0.91 });
 		pUI->SetTextureIndex(0x04);
 		pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 		m_HPGauges.push_back(pUI);
 	}
 	for (int i = 0; i < 20; ++i)
-	{ 
+	{
 		pUI = new HpSpPercentUI(pd3dDevice, pd3dCommandList, 0.011, 0.053f, 0.0f, false);
-		pUI->SetPosition({ float (-0.575 + 0.011 * i), 0.795,  0.91 });
+		pUI->SetPosition({ float(-0.575 + 0.011 * i), 0.795,  0.91 });
 		pUI->SetTextureIndex(0x04);
 		pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 		m_SPGauges.push_back(pUI);
-	} 
+	}
 
 	m_MinimapArrow = new MinimapArrow(pd3dDevice, pd3dCommandList, 0.05, 0.05, 0.0f);
 	m_MinimapArrow->SetPosition({ -0.78f, 0.78f,  0.8 });	// MinimapArrow
@@ -1069,19 +999,14 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	pUI->SetPosition({ -0.53, 0.65,  0 });		// WeaponUI
 	pUI->SetTextureIndex(0x10);
 	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
-	m_UIs.push_back(pUI); 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
+	m_UIs.push_back(pUI);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
 	m_HelpTextUI = new HelpTextUI(pd3dDevice, pd3dCommandList, 1.5, 0.25f, 0.8f, HELP_TEXT_INFO::QuestAccept);
-	m_HelpTextUI->SetPosition({ 0.0f, -0.8,  0 });		 
+	m_HelpTextUI->SetPosition({ 0.0f, -0.8,  0 });
 	m_HelpTextUI->SetTextureIndex(0x01);
 	m_HelpTextUI->SetShader(CShaderHandler::GetInstance().GetData("UiHelpText"));
 	m_UIs.push_back(m_HelpTextUI);
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSMinimap");  
-	pShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSMinimap");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature); 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.20f);
 	pUI->SetPosition({ -0.78f, 0.78f, 0.9 });	// Minmap Background
@@ -1090,11 +1015,84 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	m_UIs.push_back(pUI);
 
 	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.165f);
-	pUI->SetPosition({ -0.78f, 0.78f,  0.8});	// Minimap
+	pUI->SetPosition({ -0.78f, 0.78f,  0.8 });	// Minimap
 	pUI->SetTextureIndex(0x02);
 	pUI->SetShader(CShaderHandler::GetInstance().GetData("Minimap"));
 	pUI->Rotate(180);
-	m_UIs.push_back(pUI);  
+	m_UIs.push_back(pUI);
+}
+
+void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
+	pPuzzlePlate->SetPosition({ 10600.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f });
+	//pPuzzlePlate->RotateAll ({ 0,1,0 }, 180);
+	m_Objects.push_back(std::move(pPuzzlePlate));
+
+	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
+	pObject->SetPosition({ 10500.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f });
+	m_Objects.push_back(std::move(pObject));
+
+	for (int i = 0; i < 2; ++i)
+	{
+		for (int j = 0; j < 5; ++j)
+		{
+			pObject = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
+			pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
+			pObject->SetTextureIndex(0x80);
+			pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+			m_Objects.push_back(std::move(pObject));
+		}
+	}
+}
+
+void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// 첫번째 지형 표지판
+	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::Scroll,
+		false, true, CShaderHandler::GetInstance().GetData("Sign"));
+	pSign->SetPosition({ 2700, 200,7000 });
+	m_Objects.push_back(pSign);
+
+	// 퍼즐 벽 표지판
+	pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::NumPuzzle,
+		false, false, CShaderHandler::GetInstance().GetData("Sign"));
+	pSign->SetPosition({ 11200.0f, -1800.0f, 8200.0f });
+	m_Objects.push_back(pSign);
+
+	// 메두사 벽 표지판
+	pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::Medusa,
+		true, true, CShaderHandler::GetInstance().GetData("Sign"));
+	pSign->SetPosition({ 13000.0f, -3250.0f, 1300.0f });
+	pSign->RotateAll({ 0,1,0 }, 90.0f);
+	m_Objects.push_back(pSign);
+}
+
+void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
+	CGameObject* pObject = new CGameObject();
+	pObject->SetMesh(fbxMesh);
+	pObject->SetPosition({ 16800,  -6070, 16500 });
+	pObject->SetTextureIndex(0x01);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pObject->SetTextureIndex(0x80);
+	pObject->Scale(35, 35, 35);
+	m_Objects.push_back(std::move(pObject));
+}
+
+void CSceneJH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_Mirror = new CGameObject();
+
+	CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
+
+	m_MirrorCamera->SetPosition({ 17000, -3000, 210 });
+
+	m_Mirror->SetMesh(pMirrorMesh);
+	m_Mirror->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
+	m_Mirror->SetPosition({ 17000, -2300, 200 });
+	m_Mirror->SetTextureIndex(0x01);
 }
 
 void CSceneJH::BuildMinimapResource(ID3D12Device* pd3dDevice)
@@ -1146,7 +1144,6 @@ void CSceneJH::BuildMirrorResource(ID3D12Device* pd3dDevice)
 		nullptr,
 		IID_PPV_ARGS(&m_pd3dMirrorTex));
 }
-
 
 void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
