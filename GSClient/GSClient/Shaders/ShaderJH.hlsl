@@ -480,6 +480,17 @@ float3 CubicBezierSum5x5(OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch, 
 
 	return(f3Sum);
 }
+float3 CubicBezierNormalSum5x5(OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch, float uB[5], float vB[5])
+{
+	float3 f3Sum = float3(0.0f, 0.0f, 0.0f);
+	f3Sum = vB[0] * (uB[0] * patch[0].normalW + uB[1] * patch[1].normalW + uB[2] * patch[2].normalW + uB[3] * patch[3].normalW + uB[4] * patch[4].normalW);
+	f3Sum += vB[1] * (uB[0] * patch[5].normalW + uB[1] * patch[6].normalW + uB[2] * patch[7].normalW + uB[3] * patch[8].normalW + uB[4] * patch[9].normalW);
+	f3Sum += vB[2] * (uB[0] * patch[10].normalW + uB[1] * patch[11].normalW + uB[2] * patch[12].normalW + uB[3] * patch[13].normalW + uB[4] * patch[14].normalW);
+	f3Sum += vB[3] * (uB[0] * patch[15].normalW + uB[1] * patch[16].normalW + uB[2] * patch[17].normalW + uB[3] * patch[18].normalW + uB[4] * patch[19].normalW);
+	f3Sum += vB[4] * (uB[0] * patch[20].normalW + uB[1] * patch[21].normalW + uB[2] * patch[22].normalW + uB[3] * patch[23].normalW + uB[4] * patch[24].normalW);
+
+	return(f3Sum);
+}
 
 float CalculateTessFactor(float3 f3Position)
 {
@@ -549,18 +560,14 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	output.uv0 = lerp(lerp(patch[0].uv0, patch[4].uv0, uv.x), lerp(patch[20].uv0, patch[24].uv0, uv.x), uv.y);
 
 	float3 position = CubicBezierSum5x5(patch, uB, vB);
+	float3 normal = CubicBezierNormalSum5x5(patch, uB, vB);
 	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
 	output.position = mul(float4(position, 1.0f), mtxWorldViewProjection);
-	float3 normal = patch[0].normalW;
-	for (int i = 1; i < 25; i++)
-	{
-		normal += patch[i].normalW;
-	}
-	normal /= 25;
+	  
 	for (int i = 0; i < 25; i++)
 	{
-		output.normalW = mul(normal, (float3x3) gmtxWorld);
-		output.positionW = (float3) mul(float4(position, 1.0f), gmtxWorld);
+		output.normalW = (float3)(mul(float4(normal, 1.0f),gmtxWorld));
+		output.positionW = (float3)mul(float4(position, 1.0f), gmtxWorld);
 	}
 
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
@@ -568,8 +575,7 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	return(output);
 }
 
-// PS
-
+// PS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
