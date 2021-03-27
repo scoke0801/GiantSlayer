@@ -311,6 +311,7 @@ void CSceneJH::Update(double elapsedTime)
 	m_HelpTextUI->Update(elapsedTime);
 
 	m_Player->Update(elapsedTime);
+	m_Player->FixPositionByTerrain(m_Terrain);
 
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
@@ -367,7 +368,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Mirror->Draw(pd3dCommandList, m_CurrentCamera);
-
+	 
 	for (auto pObject : m_BillboardObjects)
 	{
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
@@ -692,12 +693,15 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_J)
 	{
+		
 	}
 	if (keyInput.KEY_K)
 	{
+		gbWireframeOn = true;
 	}
 	if (keyInput.KEY_L)
 	{
+		gbWireframeOn = false;
 	}
 	//DisplayVector3(m_CurrentCamera->GetPosition3f());
 

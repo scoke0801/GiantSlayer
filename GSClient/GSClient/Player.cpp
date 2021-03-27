@@ -63,6 +63,10 @@ void CPlayer::Update(double fTimeElapsed)
 
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
+	cout << "x : [" << int(m_xmf3Position.x / 200.0f) << "] z : ["
+		<< int(m_xmf3Position.z / 200.0f)<< "]";
+	cout << " xPlus : [" << int((m_xmf3Position.x +m_xmf3Size.x)/ 200.0f) << "] zPlus : ["
+		<< int((m_xmf3Position.z + m_xmf3Size.z)/ 200.0f) << "]\n";
 	m_xmf3Position.y = pTerrain->GetHeight(m_xmf3Position.x, m_xmf3Position.z);
 }
 
@@ -102,7 +106,7 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	}	
 	XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook());
 	float angle = Vector3::GetAngle(xmf3Dir, playerLookAt);
-	cout << "각도 : " << angle << "\n"; 
+	//cout << "각도 : " << angle << "\n"; 
 	
 	LookAt(m_xmf3Position, xmf3Dir, { 0,1,0 });
 	//Rotate(XMFLOAT3(0, 1, 0), (angle)); 
