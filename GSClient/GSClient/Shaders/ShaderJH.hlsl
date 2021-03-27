@@ -31,45 +31,46 @@ Texture2D gtxtDryForest : register(t1);
 Texture2D gtxtDesert : register(t2);
 Texture2D gtxtDryDesert : register(t3);
 Texture2D gtxtRocky_Terrain : register(t4);
+Texture2D gtxtRocky_Terrain_Normal : register(t5); // 수정요망
 
-Texture2D gSkyBox_Front    : register(t5);
-Texture2D gSkyBox_Back     : register(t6);
-Texture2D gSkyBox_Right    : register(t7);
-Texture2D gSkyBox_Left     : register(t8);
-Texture2D gSkyBox_Top      : register(t9);
-Texture2D gSkyBox_Bottom   : register(t10);
+Texture2D gSkyBox_Front    : register(t6);
+Texture2D gSkyBox_Back     : register(t7);
+Texture2D gSkyBox_Right    : register(t8);
+Texture2D gSkyBox_Left     : register(t9);
+Texture2D gSkyBox_Top      : register(t10);
+Texture2D gSkyBox_Bottom   : register(t11);
 
-Texture2D gtxtBox          : register(t11);
-Texture2D gtxtWood         : register(t12);
-Texture2D gtxtWoodSignBoard: register(t13);
-Texture2D gtxtGrassWall    : register(t14);
-Texture2D gtxtSandWall     : register(t15);
-Texture2D gtxtRockyWall    : register(t16);
-Texture2D gtxtDoor         : register(t17);
+Texture2D gtxtBox          : register(t12);
+Texture2D gtxtWood         : register(t13);
+Texture2D gtxtWoodSignBoard: register(t14);
+Texture2D gtxtGrassWall    : register(t15);
+Texture2D gtxtSandWall     : register(t16);
+Texture2D gtxtRockyWall    : register(t17);
+Texture2D gtxtDoor         : register(t18);
 
-Texture2D gtxtHpSpGauge    : register(t18);
-Texture2D gtxtHpSpPer      : register(t19);
-Texture2D gtxtMinimap      : register(t20);
-Texture2D gtxtWeapons      : register(t21);
+Texture2D gtxtHpSpGauge    : register(t19);
+Texture2D gtxtHpSpPer      : register(t20);
+Texture2D gtxtMinimap      : register(t21);
+Texture2D gtxtWeapons      : register(t22);
 
-Texture2D gtxtFlower_Red   : register(t22);
-Texture2D gtxtFlower_White : register(t23);
-Texture2D gtxtGrass_Width  : register(t24);
-Texture2D gtxtGrass_Depth  : register(t25);
-Texture2D gtxtTree         : register(t26);
-Texture2D gtxtNoLeafTrees  : register(t27);
-Texture2D gtxtLeaves       : register(t28);
-Texture2D gtxtMoss_Rock    : register(t29);
+Texture2D gtxtFlower_Red   : register(t23); // 여분
+Texture2D gtxtFlower_White : register(t24); // 여분
+Texture2D gtxtGrass_Width  : register(t25); // 여분
+Texture2D gtxtGrass_Depth  : register(t26); // 여분
+Texture2D gtxtTree         : register(t27);
+Texture2D gtxtNoLeafTrees  : register(t28);
+Texture2D gtxtLeaves       : register(t29);
+Texture2D gtxtMoss_Rock    : register(t30);
 
-Texture2D gtxtPuzzleBoard  : register(t30);
-Texture2D gtxtHelpText     : register(t31);
-Texture2D gtxtDry_Tree	   : register(t32);
-Texture2D gtxtStump		   : register(t33);
-Texture2D gtxtDead_Tree	   : register(t34);
-Texture2D gtxtDesert_Rock  : register(t35);
+Texture2D gtxtPuzzleBoard  : register(t31);
+Texture2D gtxtHelpText     : register(t32);
+Texture2D gtxtDry_Tree	   : register(t33);
+Texture2D gtxtStump		   : register(t34);
+Texture2D gtxtDead_Tree	   : register(t35);
+Texture2D gtxtDesert_Rock  : register(t36);
 
-Texture2D gtxtMap          : register(t36);
-Texture2D gtxtMirror       : register(t37);
+Texture2D gtxtMap          : register(t37);
+Texture2D gtxtMirror       : register(t38);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -399,18 +400,15 @@ float4 PSMinimap(VS_MOUT input) : SV_TARGET
 //////////////////////////////////////////////////////
 //
 
+
+
 struct VS_TERRAIN_INPUT
 {
 	float3 position : POSITION;
 	float2 uv0 : TEXCOORD0;
-	float4 color : COLOR;
-};
-
-struct VS_TERRAIN_OUTPUT
-{
-	float4 position : SV_POSITION;
-	float2 uv0 : TEXCOORD0;
-	float4 color : COLOR;
+	float3 normal : NORMAL;
+	//float3 tangent : TANGENT;
+	//float3 bitangent : BITANGENT;
 };
 
 ///////////////////////////////////////////
@@ -419,8 +417,10 @@ struct VS_TERRAIN_TESSELLATION_OUTPUT
 {
 	float3 position : POSITION;
 	float3 positionW : POSITION1;
-	float4 color : COLOR;
 	float2 uv0 : TEXCOORD0;
+	float3 normalW : NORMAL;
+	//float3 tangentW : TANGENT;
+	//float3 bitangentW : BITANGENT;
 };
 
 VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
@@ -429,10 +429,12 @@ VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
 
 	output.position = input.position;
 	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
-	output.color = input.color;
+	output.normalW = mul(input.normal, (float3x3) gmtxWorld);
+	//output.tangentW = (float3) mul(float4(input.tangent, 1.0f), gmtxWorld);
+	//output.bitangentW = (float3) mul(float4(input.bitangent, 1.0f), gmtxWorld);
 	output.uv0 = input.uv0;
 
-	return(output);
+	return (output);
 }
 
 struct HS_TERRAIN_TESSELLATION_CONSTANT
@@ -444,15 +446,20 @@ struct HS_TERRAIN_TESSELLATION_CONSTANT
 struct HS_TERRAIN_TESSELLATION_OUTPUT
 {
 	float3 position : POSITION;
-	float4 color : COLOR;
+	float3 positionW : POSITION1;
 	float2 uv0 : TEXCOORD0;
+	float3 normalW : NORMAL;
 };
 
 struct DS_TERRAIN_TESSELLATION_OUTPUT
 {
 	float4 position : SV_POSITION;
-	float4 color : COLOR;
+	float3 positionW : POSITION;
+
 	float2 uv0 : TEXCOORD0;
+
+	float3 normalW : NORMAL;
+
 	float4 tessellation : TEXCOORD2;
 };
 
@@ -498,7 +505,8 @@ HS_TERRAIN_TESSELLATION_OUTPUT HSTerrainTessellation(InputPatch<VS_TERRAIN_TESSE
 	HS_TERRAIN_TESSELLATION_OUTPUT output;
 
 	output.position = input[i].position;
-	output.color = input[i].color;
+	output.normalW = mul(input[i].normalW, (float3x3) gmtxWorld);
+	output.positionW = (float3) mul(float4(input[i].position, 1.0f), gmtxWorld);
 	output.uv0 = input[i].uv0;
 
 	return(output);
@@ -521,6 +529,8 @@ HS_TERRAIN_TESSELLATION_CONSTANT HSTerrainTessellationConstant(InputPatch<VS_TER
 	float3 f3Sum = float3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < 25; i++)
 		f3Sum += input[i].positionW;
+
+
 	float3 f3Center = f3Sum / 25.0f;
 	output.fTessInsides[0] = output.fTessInsides[1] = CalculateTessFactor(f3Center);
 
@@ -537,12 +547,17 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 	BernsteinCoeffcient5x5(uv.x, uB);
 	BernsteinCoeffcient5x5(uv.y, vB);
 
-	output.color = lerp(lerp(patch[0].color, patch[4].color, uv.x), lerp(patch[20].color, patch[24].color, uv.x), uv.y);
 	output.uv0 = lerp(lerp(patch[0].uv0, patch[4].uv0, uv.x), lerp(patch[20].uv0, patch[24].uv0, uv.x), uv.y);
 
 	float3 position = CubicBezierSum5x5(patch, uB, vB);
 	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
 	output.position = mul(float4(position, 1.0f), mtxWorldViewProjection);
+
+	for (int i = 0; i < 25; i++)
+	{
+		output.normalW = mul(patch[i].normalW, (float3x3) gmtxWorld);
+		output.positionW = (float3) mul(float4(position, 1.0f), gmtxWorld);
+	}
 
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
 
@@ -550,9 +565,23 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 }
 
 // PS
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+#include "Light.hlsl"
+
+struct VS_LIGHT_OUT
+{
+	float4 PosH : SV_POSITION;
+	float3 PosW : POSITION;
+	float2 uv : TEXCOORD;
+	float3 Normal : NORMAL;
+};
+
 float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 {
-	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	if (gnTexturesMask & 0x01)
 	{
@@ -572,30 +601,33 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	}
 	if (gnTexturesMask & 0x10)
 	{
-		cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0); 
-	} 
-	if(gnTexturesMask & 0x20)
-	{
-		cColor = gtxtFlower_Red.Sample(gssWrap, input.uv0); 
+		cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0);
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
+
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
 	//else
 	//{
 	//	cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
 	//}
 
-	return (cColor);
+	return (cColor * cIllumination);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-#include "Light.hlsl"
 
-struct VS_LIGHT_OUT
-{
-	float4 PosH    : SV_POSITION;
-	float3 PosW    : POSITION;
-	float2 uv	   : TEXCOORD;
-	float3 Normal  : NORMAL;
-};
+
 struct VS_TEXTURED_LIGHTING_INPUT
 {
 	float3 position : POSITION;
@@ -664,6 +696,18 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	if (gnTexturesMask & 0x80)
 	{
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
+
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
 	if (gnTexturesMask & 0x100)
 	{
@@ -700,6 +744,10 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	}
 
 	if (gnTexturesMask & 0x10)
+	{
+		cColor = gtxtDoor.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x20)
 	{
 		cColor = gtxtDoor.Sample(gssWrap, input.uv);
 	}
@@ -775,9 +823,9 @@ float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primitiv
 		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
 	if (gnTexturesMask & 0x02)
-	{ 
+	{
 		cColor = gtxtWoodSignBoard.Sample(gssClamp, uvw);
-	} 
+	}
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
@@ -828,8 +876,11 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	{
 		cColor = gtxtDesert_Rock.Sample(gssWrap, input.uv);
 	}
+
+
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
 	return(cColor * cIllumination);
 }
+

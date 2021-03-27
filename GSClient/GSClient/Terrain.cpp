@@ -857,7 +857,7 @@ void CTerrain::InitHeightDatas()
 	//} 
 
 	//FileSave();
-	//FileRead();
+	FileRead();
 }
 void CTerrain::FileSave()
 {

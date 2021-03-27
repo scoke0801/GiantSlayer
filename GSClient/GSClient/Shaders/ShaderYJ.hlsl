@@ -23,13 +23,6 @@ cbuffer cbCameraInfo : register(b2)
 	float3	gvCameraPosition : packoffset(c8);
 };
 
-cbuffer cbFogInfo : register(b5)
-{
-    float4 gFogColor : packoffset(c0);
-    float gFogStart : packoffset(c4);
-    float gFogRange : packoffset(c8);
-}
-
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
 
@@ -38,7 +31,7 @@ Texture2D gtxtDryForest : register(t1);
 Texture2D gtxtDesert : register(t2);
 Texture2D gtxtDryDesert : register(t3);
 Texture2D gtxtRocky_Terrain : register(t4);
-Texture2D gtxtRocky_Terrain_Normal : register(t5);
+Texture2D gtxtBossWall : register(t5); // 수정요망
 
 Texture2D gSkyBox_Front    : register(t6);
 Texture2D gSkyBox_Back     : register(t7);
@@ -60,10 +53,10 @@ Texture2D gtxtHpSpPer      : register(t20);
 Texture2D gtxtMinimap      : register(t21);
 Texture2D gtxtWeapons      : register(t22);
 
-Texture2D gtxtFlower_Red   : register(t23);
-Texture2D gtxtFlower_White : register(t24);
-Texture2D gtxtGrass_Width  : register(t25);
-Texture2D gtxtGrass_Depth  : register(t26);
+Texture2D gtxtFlower_Red   : register(t23); // 여분
+Texture2D gtxtFlower_White : register(t24); // 여분
+Texture2D gtxtGrass_Width  : register(t25); // 여분
+Texture2D gtxtGrass_Depth  : register(t26); // 여분
 Texture2D gtxtTree         : register(t27);
 Texture2D gtxtNoLeafTrees  : register(t28);
 Texture2D gtxtLeaves       : register(t29);
@@ -621,8 +614,25 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
         
         
         cColor = lerp(cColor, FogColor, 1 - fogAmount);
-    }
-	
+    } 
+	if (gnTexturesMask & 0x20)
+	{
+		cColor = gtxtBossWall.Sample(gssWrap, input.uv0);
+
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
+	}
+
     input.normalW = normalize(input.normalW);
     float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
@@ -720,7 +730,6 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	{
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
     }
-   
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
@@ -754,6 +763,8 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	{
 		cColor = gtxtDoor.Sample(gssWrap, input.uv);
 	}
+
+	
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
