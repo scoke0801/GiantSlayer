@@ -647,11 +647,12 @@ CMeshFbx::~CMeshFbx()
 
 }
 
+
 void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag)
 {
 	FbxNodeAttribute* pfbxNodeAttribute = node->GetNodeAttribute();
 
-	if ((pfbxNodeAttribute != NULL) && 
+	if ((pfbxNodeAttribute != NULL) &&
 		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
 	{
 		FbxMesh* pfbxMesh = node->GetMesh();
@@ -683,7 +684,9 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag)
 				{
 					y = pfbxMesh->GetControlPointAt(pvindex).mData[1];
 					z = pfbxMesh->GetControlPointAt(pvindex).mData[2];
-				} 
+				}
+
+				FbxGeometryElementNormal* pnormal = pfbxMesh->GetElementNormal(0);
 
 				info->vertex.push_back(
 					CTexturedVertex(
@@ -695,17 +698,22 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag)
 						XMFLOAT2(
 							uv1,
 							uv2
-						)
+						),
+						XMFLOAT3(
+							pnormal->GetDirectArray().GetAt(pvindex).mData[0],
+							pnormal->GetDirectArray().GetAt(pvindex).mData[1],
+							pnormal->GetDirectArray().GetAt(pvindex).mData[2]
+							)
 					)
-				); 
+				);
 			}
-		} 
-		info->vertics += nPolygons*3;
+		}
+		info->vertics += nPolygons * 3;
 	}
 
 	int nChilds = node->GetChildCount();
 	cout << "연결된 차일드 노드 수: " << nChilds << endl;
-	for (int i = 0; i < nChilds; i++) 
+	for (int i = 0; i < nChilds; i++)
 		LoadMesh(node->GetChild(i), info, rotateFlag);
 }
 
@@ -984,7 +992,7 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			// 수정이 필요한 영역
 			// 
 			pVertices[i].m_xmf3Position = XMFLOAT3(x / 2, heights[zIndex + j][xIndex + i % 5], z / 2);
-
+		
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
 			pVertices[i].m_xmf4Color = XMFLOAT4(1, 1, 1, 0); 
 		}

@@ -856,8 +856,9 @@ void CTerrain::InitHeightDatas()
 	//		m_Heights[i][Garo] = rand() % 300 - 7150;
 	//	}
 	//} 
+
 	//FileSave();
-	FileRead();
+	//FileRead();
 }
 void CTerrain::FileSave()
 {
