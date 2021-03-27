@@ -383,18 +383,18 @@ public:
 	// º® »ý¼º	 
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
 		int heights[25],
-		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT][TERRAIN_HEIGHT_MAP_WIDTH],
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
 		int xNomalPos, int zNormalPos);
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		bool xZero, bool zZero,
 		int* heights,
-		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT][TERRAIN_HEIGHT_MAP_WIDTH],
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
 		int xNomalPos, int zNormalPos);
 
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		int x_Index, int z_Index,  
 		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
-		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT][TERRAIN_HEIGHT_MAP_WIDTH]);
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 
 	~CTerrainMesh();
 };
