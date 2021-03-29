@@ -63,10 +63,10 @@ void CPlayer::Update(double fTimeElapsed)
 
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
-	cout << "x : [" << int(m_xmf3Position.x / 200.0f) << "] z : ["
+	/*cout << "x : [" << int(m_xmf3Position.x / 200.0f) << "] z : ["
 		<< int(m_xmf3Position.z / 200.0f)<< "]";
 	cout << " xPlus : [" << int((m_xmf3Position.x +m_xmf3Size.x)/ 200.0f) << "] zPlus : ["
-		<< int((m_xmf3Position.z + m_xmf3Size.z)/ 200.0f) << "]\n";
+		<< int((m_xmf3Position.z + m_xmf3Size.z)/ 200.0f) << "]\n";*/
 	m_xmf3Position.y = pTerrain->GetHeight(m_xmf3Position.x, m_xmf3Position.z);
 }
 
@@ -134,9 +134,12 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
 }
 
-void CPlayer::SetVelocity(const XMFLOAT3& dir)
+void CPlayer::SetVelocity(XMFLOAT3 dir)
 {
+	dir.y = 0;
 	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);
+
+	DisplayVector3(dir);
 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY)); 
 	XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook());
@@ -154,14 +157,7 @@ void CPlayer::SetVelocity(const XMFLOAT3& dir)
 	//float det = playerLookAt.x * dir.y - playerLookAt.y * dir.x;
 	//float angle = atan2(det, dot);
 	cout << "°¢µµ : " << XMConvertToDegrees( angle) << "\n";
-	//dot = x1 * x2 + y1 * y2  // dot product
-	//det = x1 * y2 - y1 * x2  // determinant
-	//angle = atan2(det, dot)  // atan2(y, x) or atan2(sin, cos)
-	// 
-	// 
-	// 
-	// 
-	//LookAt(m_xmf3Position, normalizedDir, { 0,1,0 });
+	
 	Rotate(XMFLOAT3(0, 1, 0), (angle)); 
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
