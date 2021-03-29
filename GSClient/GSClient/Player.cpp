@@ -137,7 +137,32 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 void CPlayer::SetVelocity(const XMFLOAT3& dir)
 {
 	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);
+
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY)); 
+	XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook());
+	//float angle = Vector3::GetAngle(normalizedDir, playerLookAt);
+	  
+	XMFLOAT3 cross = Vector3::CrossProduct(playerLookAt, dir);
+	float dot = Vector3::DotProduct(playerLookAt, dir);
+
+	float angle = atan2(Vector3::Length(cross), dot);
+
+	float test = Vector3::DotProduct({0,1,0}, cross);
+	if (test < 0.0) angle = -angle; 
+	  
+	//float dot = Vector3::DotProduct(playerLookAt, dir);
+	//float det = playerLookAt.x * dir.y - playerLookAt.y * dir.x;
+	//float angle = atan2(det, dot);
+	cout << "°¢µµ : " << XMConvertToDegrees( angle) << "\n";
+	//dot = x1 * x2 + y1 * y2  // dot product
+	//det = x1 * y2 - y1 * x2  // determinant
+	//angle = atan2(det, dot)  // atan2(y, x) or atan2(sin, cos)
+	// 
+	// 
+	// 
+	// 
+	//LookAt(m_xmf3Position, normalizedDir, { 0,1,0 });
+	Rotate(XMFLOAT3(0, 1, 0), (angle)); 
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;

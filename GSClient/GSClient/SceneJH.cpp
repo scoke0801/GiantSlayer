@@ -596,28 +596,28 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_W)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(m_CurrentCamera->GetLook3f());//m_Player->SetVelocity(OBJ_DIRECTION::Front);
+			m_Player->SetVelocity(m_CurrentCamera->GetLook3f());
 		else
 			m_CurrentCamera->Walk(cameraSpeed);
 	}
 	if (keyInput.KEY_A)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(Vector3::Multifly(m_CurrentCamera->GetRight3f(), -1.0f));//m_Player->SetVelocity(OBJ_DIRECTION::Left);
+			m_Player->SetVelocity(Vector3::Multifly(m_CurrentCamera->GetRight3f(), -1.0f));
 		else
 			m_CurrentCamera->Strafe(-cameraSpeed);
 	}
 	if (keyInput.KEY_S)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(Vector3::Multifly(m_CurrentCamera->GetLook3f(), -1.0f));//m_Player->SetVelocity(OBJ_DIRECTION::Back);
+			m_Player->SetVelocity(Vector3::Multifly(m_CurrentCamera->GetLook3f(), -1.0f));
 		else
 			m_CurrentCamera->Walk(-cameraSpeed);
 	}
 	if (keyInput.KEY_D)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(m_CurrentCamera->GetRight3f());// m_Player->SetVelocity(OBJ_DIRECTION::Right);
+			m_Player->SetVelocity(m_CurrentCamera->GetRight3f());
 		else
 			m_CurrentCamera->Strafe(cameraSpeed);
 	}
