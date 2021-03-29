@@ -133,4 +133,17 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
 }
+
+void CPlayer::SetVelocity(const XMFLOAT3& dir)
+{
+	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY)); 
+	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
+	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
+	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;
+	if (m_xmf3Velocity.z > speed) m_xmf3Velocity.z = speed;
+	if (m_xmf3Velocity.x < -speed) m_xmf3Velocity.x = -speed;
+	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
+	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
+}
  

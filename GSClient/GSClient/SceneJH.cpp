@@ -244,6 +244,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+
 	srvHeapDesc.NumDescriptors = m_Textures.size() + 2;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
@@ -588,33 +589,35 @@ void CSceneJH::ProcessInput()
 
 	float cameraSpeed = m_CurrentCamera->GetSpeed();
 	XMFLOAT3 velocity = m_Player->GetVelocity();
+	XMFLOAT3 temp = m_CurrentCamera->GetRight3f();
 
+	temp = Vector3::Multifly(temp, -1.0f);
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(OBJ_DIRECTION::Front);
+			m_Player->SetVelocity(m_CurrentCamera->GetLook3f());//m_Player->SetVelocity(OBJ_DIRECTION::Front);
 		else
 			m_CurrentCamera->Walk(cameraSpeed);
 	}
 	if (keyInput.KEY_A)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(OBJ_DIRECTION::Left);
+			m_Player->SetVelocity(Vector3::Multifly(m_CurrentCamera->GetRight3f(), -1.0f));//m_Player->SetVelocity(OBJ_DIRECTION::Left);
 		else
 			m_CurrentCamera->Strafe(-cameraSpeed);
 	}
 	if (keyInput.KEY_S)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(OBJ_DIRECTION::Back);
+			m_Player->SetVelocity(Vector3::Multifly(m_CurrentCamera->GetLook3f(), -1.0f));//m_Player->SetVelocity(OBJ_DIRECTION::Back);
 		else
 			m_CurrentCamera->Walk(-cameraSpeed);
 	}
 	if (keyInput.KEY_D)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(OBJ_DIRECTION::Right);
+			m_Player->SetVelocity(m_CurrentCamera->GetRight3f());// m_Player->SetVelocity(OBJ_DIRECTION::Right);
 		else
 			m_CurrentCamera->Strafe(cameraSpeed);
 	}

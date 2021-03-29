@@ -35,6 +35,7 @@ public:
 
 public:
 	virtual void SetVelocity(OBJ_DIRECTION direction) override;
+	virtual void SetVelocity(const XMFLOAT3& dir) override;
 
 	bool IsMoving() const { return Vector3::Length(m_xmf3Velocity) > 0.01f; }
 
