@@ -164,6 +164,7 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="protocol.h" />
     <ClInclude Include="ShaderHandler.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Light.h" />

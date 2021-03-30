@@ -1,5 +1,5 @@
 #pragma once
-
+#include "protocol.h"
 void charToWchar(const char* msg, wchar_t* out);
 
 // 소켓 함수 오류 출력 후 종료
@@ -12,6 +12,9 @@ void err_display(const char* msg);
 int recvn(SOCKET s, char* buf, int len, int flags);
 
 bool RecvFrameData(SOCKET& client_sock, char* buf, int& retval);
+
+bool SendFrameData(SOCKET& sock, test_packet packet, int& retval);
+bool SendFrameData(SOCKET& sock, char* buf, int& retval);
 bool SendFrameData(SOCKET& sock, string& str, int& retval);
 XMFLOAT3 GetVectorFromText(const char* text);
 

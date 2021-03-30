@@ -53,6 +53,30 @@ int recvn(SOCKET s, char* buf, int len, int flags)
     return (len - left);
 }
 
+bool SendFrameData(SOCKET& sock, test_packet packet, int& retval)
+{ 
+    int data_len = sizeof(packet); 
+    int packet_len = sizeof(test_packet);
+    if (data_len != packet_len) {
+        int stop = 3;
+    }
+    // 데이터 보내기(고정 길이)
+    retval = send(sock, (char*)&data_len, sizeof(int), 0);
+    if (retval == SOCKET_ERROR)
+    {
+        error_display("send()");
+        return false;
+    }
+    // 데이터 보내기(가변 길이)
+    retval = send(sock, reinterpret_cast<char*>(&packet), packet_len, 0);
+    if (retval == SOCKET_ERROR)
+    {
+        error_display("send()");
+        return false;
+    }
+    return true;
+}
+
 bool SendFrameData(SOCKET& sock, string& str, int& retval)
 {
     int len = str.length();

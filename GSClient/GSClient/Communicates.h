@@ -4,7 +4,8 @@
 
 #pragma comment(lib, "ws2_32")
 #include <WinSock2.h> 
-  
+
+#include "protocol.h"
 //#define SERVERIP   "127.0.0.1"		 // 루프백
 //#define SERVERIP   "192.168.35.118" + 
 //#define SERVERIP   "172.30.1.39"
@@ -19,6 +20,7 @@ void error_display(const char* msg);
 
 int recvn(SOCKET s, char* buf, int len, int flag);
 
+bool SendFrameData(SOCKET& sock, test_packet packet, int& retval);
 bool SendFrameData(SOCKET& sock, string& str, int& retval);
 bool RecvFrameData(SOCKET& sock, char* buf, int& retval);
  

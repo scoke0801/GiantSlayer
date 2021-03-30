@@ -253,6 +253,7 @@
     <ClInclude Include="ShaderHandler.h">
       <Filter>Handler</Filter>
     </ClInclude>
+    <ClInclude Include="protocol.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
