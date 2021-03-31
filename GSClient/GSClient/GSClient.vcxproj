@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\GSServer\GSServer\protocol.h" />
     <ClInclude Include="Bridge.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Communicates.h" />
@@ -164,7 +165,6 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameScene.h" />
-    <ClInclude Include="protocol.h" />
     <ClInclude Include="ShaderHandler.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Light.h" />

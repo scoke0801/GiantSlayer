@@ -12,8 +12,7 @@
 #include "Communicates.h"
 #include "Terrain.h"
 #include "Sign.h"
-#include "Puzzle.h"
-#include "protocol.h"
+#include "Puzzle.h" 
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
@@ -164,7 +163,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 
 	BuildMapSector1(pd3dDevice, pd3dCommandList);
-	//BuildMapSector2(pd3dDevice, pd3dCommandList);
+	BuildMapSector2(pd3dDevice, pd3dCommandList);
 	BuildMapSector3(pd3dDevice, pd3dCommandList);
 	BuildMapSector4(pd3dDevice, pd3dCommandList);
 	BuildMapSector5(pd3dDevice, pd3dCommandList);
