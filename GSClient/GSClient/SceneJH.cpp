@@ -107,7 +107,7 @@ void CSceneJH::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 }
 
 void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
+{  
 	m_pLights = new LIGHTS;
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 
@@ -162,9 +162,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 
-	BuildMapSector1(pd3dDevice, pd3dCommandList);
-	BuildMapSector2(pd3dDevice, pd3dCommandList);
-	BuildMapSector3(pd3dDevice, pd3dCommandList);
+	//BuildMapSector1(pd3dDevice, pd3dCommandList);
+	//BuildMapSector2(pd3dDevice, pd3dCommandList);
+	//BuildMapSector3(pd3dDevice, pd3dCommandList);
 	BuildMapSector4(pd3dDevice, pd3dCommandList);
 	BuildMapSector5(pd3dDevice, pd3dCommandList);
 

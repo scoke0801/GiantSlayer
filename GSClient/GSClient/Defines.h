@@ -7,9 +7,8 @@
 //#define SERVERIP   "211.207.24.227"// 종현 
 //#define SERVERIP	 "192.168.35.229"// 태훈?
 //#define SERVERIP   "192.168.0.15"  // 영진 
-#define SERVERPORT 9000
+ 
 #define MAX_FILE_NAME_LAN 256
-#define BUFSIZE 4096
 
 #define UV_TEX 100.0F
 
