@@ -15,7 +15,9 @@ enum class ShaderTypes
 	Diffused,
 	Textured,
 	Billboard,
-	Count
+	Count,
+	FbxGeneral,
+	FbxSkinned
 };
 
 class CShader

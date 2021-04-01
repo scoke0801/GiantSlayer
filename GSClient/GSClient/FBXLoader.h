@@ -45,24 +45,30 @@ struct ControlPoint
 	XMFLOAT3 pos;
 	XMFLOAT2 uv;
 	vector<BlendingIndexWeightPair> mBlendingInfo;
+	vector<VertexBlendingInfo> mVertexBlendingInfos;
 
 	ControlPoint()
 	{
 		mBlendingInfo.reserve(4);
 	}
-};
-
-struct MeshVertex
-{
-	XMFLOAT3 pos;
-	XMFLOAT2 uv;
-	vector<VertexBlendingInfo> mVertexBlendingInfos;
 
 	void SortBlendingInfoByWeight()
 	{
 		std::sort(mVertexBlendingInfos.begin(), mVertexBlendingInfos.end());
 	}
 };
+
+//struct MeshVertex
+//{
+//	XMFLOAT3 pos;
+//	XMFLOAT2 uv;
+//	vector<VertexBlendingInfo> mVertexBlendingInfos;
+//
+//	void SortBlendingInfoByWeight()
+//	{
+//		std::sort(mVertexBlendingInfos.begin(), mVertexBlendingInfos.end());
+//	}
+//};
 
 struct TriPolygon
 {
@@ -111,12 +117,16 @@ private:
 
 	FbxLongLong mAnimationLength;
 	string mAnimationName;
+
 	bool Animation = 0;
+	int modelcount = 0;
 
 	vector<ControlPoint*> mControlPoint;
-	vector<MeshVertex> mVertex;
+	//vector<MeshVertex> mVertex;
 	vector<TriPolygon> mPolygon;
 	vector<Joint> mSkeleton;
+
+
 
 public:
 	FbxLoader();

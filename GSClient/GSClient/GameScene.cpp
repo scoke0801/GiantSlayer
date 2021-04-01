@@ -177,7 +177,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
-	CMeshFbx* pTowerMeshTex = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Medieval tower_Mid.fbx");
+	//CMeshFbx* pTowerMeshTex = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Medieval tower_Mid.fbx");
 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -265,13 +265,13 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_ppObjects[5]->SetPosition({ 250,  25, 250 });
 	m_ppObjects[5]->SetTextureIndex(0x80);
 
-	CGameObject* ptower = new CGameObject();
+	/*CGameObject* ptower = new CGameObject();
 	ptower->SetShader(pShader);
 
 	m_ppObjects[6] = ptower;
 	m_ppObjects[6]->SetMesh(pTowerMeshTex);
 	m_ppObjects[6]->SetPosition({ 250,  125, 250 });
-	m_ppObjects[6]->SetTextureIndex(0x100);
+	m_ppObjects[6]->SetTextureIndex(0x100);*/
 }
 
 void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

@@ -28,6 +28,8 @@ FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName)
 
 	ExploreFbxHierarchy(mFbxScene->GetRootNode());
 
+	cout << "±¸¼º ¸ðµ¨ ¼ö: " << modelcount << endl;
+
 	ExportFbxFile();
 }
 
@@ -98,21 +100,67 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 	{
 		FbxMesh* pfbxMesh = pNode->GetMesh();
 
+		modelcount++;
+
 		//===========================================================
 		int numCP = pfbxMesh->GetControlPointsCount();
+		int numPG = pfbxMesh->GetPolygonCount();
 		cout << "ControlPoint Count: " << numCP << endl;
 
-		for (int i = 0; i < numCP; i++) {
-			ControlPoint* tempCP = new ControlPoint();
-			XMFLOAT3 tempPos;
-			tempPos.x = pfbxMesh->GetControlPointAt(i).mData[0];
-			tempPos.y = pfbxMesh->GetControlPointAt(i).mData[2];
-			tempPos.z = pfbxMesh->GetControlPointAt(i).mData[1];
-			tempCP->pos = tempPos;
-			mControlPoint.push_back(tempCP);
+		for (int pindex = 0; pindex < numPG; pindex++) {
+			for (int vindex = 0; vindex < 3; vindex++) {
+				int pvindex = pfbxMesh->GetPolygonVertex(pindex, vindex);
+				int uvindex = pfbxMesh->GetTextureUVIndex(pindex, vindex, FbxLayerElement::eTextureDiffuse);
 
-			//cout << mControlPoint[i]->pos.x << " " << mControlPoint[i]->pos.y << " " << mControlPoint[i]->pos.z << endl;
+				FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
+				FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
+
+				ControlPoint* tempCP = new ControlPoint();
+				XMFLOAT3 tempPos;
+				tempPos.x = pfbxMesh->GetControlPointAt(pvindex).mData[0];
+				tempPos.y = pfbxMesh->GetControlPointAt(pvindex).mData[2];
+				tempPos.z = pfbxMesh->GetControlPointAt(pvindex).mData[1];
+				XMFLOAT2 tempUv;
+
+				if (fbxLayerUV != NULL) {
+					fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
+
+					tempUv.x = fbxUV[0];
+					tempUv.y = 1.0f - fbxUV[1];
+				}
+				else {
+					tempUv.x = 0;
+					tempUv.y = 0;
+				}
+
+				tempCP->pos = tempPos;
+				tempCP->uv = tempUv;
+				mControlPoint.push_back(tempCP);
+
+				for (int b = 0; b < tempCP->mBlendingInfo.size(); b++)
+				{
+					//cout << b << endl;
+					VertexBlendingInfo tempblendinfo;
+					tempblendinfo.mBlendingIndex = tempCP->mBlendingInfo[b].mBlendingIndex;
+					tempblendinfo.mBlendingIndex = tempCP->mBlendingInfo[b].mBlendingWeight;
+					tempCP->mVertexBlendingInfos.push_back(tempblendinfo);
+					//cout << "binfosize: " << temp.mvertexblendinginfos.size() << endl;
+				}
+
+				tempCP->SortBlendingInfoByWeight();
+			}
 		}
+
+		/*ofstream file;
+		file.open("MeshVertexFromExportedControlPoint.txt");
+
+		for (int i = 0; i < mControlPoint.size(); i++) {
+			file << mControlPoint[i]->pos.x << " " << mControlPoint[i]->pos.y << " " << mControlPoint[i]->pos.z << " " <<
+				mControlPoint[i]->uv.x << " " << mControlPoint[i]->uv.y << endl;
+		}
+
+		file.close();*/
+
 		//===========================================================
 
 		//===========================================================
@@ -200,64 +248,6 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 				}
 			}
 		}
-		//===========================================================
-
-		//===========================================================
-		int PGcount = pfbxMesh->GetPolygonCount();
-
-		cout << "Polgon Count: " << PGcount << endl;
-
-		int vertexnum = 0;
-		mPolygon.reserve(PGcount);
-
-		for (int i = 0; i < PGcount; i++) {
-			TriPolygon temppl;
-			mPolygon.push_back(temppl);
-
-			for (int j = 0; j < 3; j++) {
-				int CPindex = pfbxMesh->GetPolygonVertex(i, j);
-				int UVindex = pfbxMesh->GetTextureUVIndex(i, j, FbxLayerElement::eTextureDiffuse);
-				
-				ControlPoint* cptemp = mControlPoint[CPindex];
-
-				FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
-				FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
-
-				fbxUV = fbxLayerUV->GetDirectArray().GetAt(UVindex);
-
-				float uvX = fbxUV[0];
-				float uvY = 1.0f - fbxUV[1];
-
-				MeshVertex temp;
-				temp.pos = cptemp->pos;
-				temp.uv.x = uvX;
-				temp.uv.y = uvY;
-
-				//cout << "BlendingInfo Count,, BinfoSize: " << cptemp->mBlendingInfo.size() << endl;
-				for (int b = 0; b < cptemp->mBlendingInfo.size(); b++)
-				{
-					//cout << b << endl;
-					VertexBlendingInfo tempBlendInfo;
-					tempBlendInfo.mBlendingIndex = cptemp->mBlendingInfo[b].mBlendingIndex;
-					tempBlendInfo.mBlendingWeight = cptemp->mBlendingInfo[b].mBlendingWeight;
-					temp.mVertexBlendingInfos.push_back(tempBlendInfo);
-					//cout << "BInfoSize: " << temp.mVertexBlendingInfos.size() << endl;
-				}
-
-				temp.SortBlendingInfoByWeight();
-
-				mVertex.push_back(temp);
-				mPolygon.back().mIndices.push_back(vertexnum);
-
-				//cout << temp->uv.x << " " << temp->uv.y << endl;
-				vertexnum++;
-			}
-		}
-		cout << "vertexnum: " << vertexnum << endl;
-		//===========================================================
-
-
-
 	}
 
 	for (int i = 0; i < pNode->GetChildCount(); ++i)
@@ -296,18 +286,18 @@ void FbxLoader::ExportFbxFile()
 	*/
 
 	file << "[Vertex]" << endl;
-	file << mVertex.size() << endl;
+	file << mControlPoint.size() << endl;
 
-	for (int i = 0; i < mVertex.size(); i++) {
-		file << mVertex[i].pos.x << " " << mVertex[i].pos.y << " " << mVertex[i].pos.z << " " <<
-			mVertex[i].uv.x << " " << mVertex[i].uv.y << endl;
+	for (int i = 0; i < mControlPoint.size(); i++) {
+		file << mControlPoint[i]->pos.x << " " << mControlPoint[i]->pos.y << " " << mControlPoint[i]->pos.z << " " <<
+			mControlPoint[i]->uv.x << " " << mControlPoint[i]->uv.y << endl;
 	}
 
 	file << "[VertexEnd]" << endl;
-	/*
+	
 	file << "\n";
 
-	Animation = false;
+	//Animation = false;
 
 	if (Animation == true) {
 		file << "[JointCount]: " << mSkeleton.size() << "\n";
@@ -370,6 +360,6 @@ void FbxLoader::ExportFbxFile()
 			}
 		}
 	}
-	*/
+	
 	file.close();
 }

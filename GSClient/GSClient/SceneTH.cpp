@@ -2,6 +2,7 @@
 #include "SceneTH.h"
 #include "Shader.h"
 #include "GameObject.h"
+#include "FbxObject.h"
 #include "Camera.h"
 
 #define ROOT_PARAMETER_OBJECT			0
@@ -218,10 +219,13 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ppObjects[5]->SetPosition({ 400,  25, 400 });
 	m_ppObjects[5]->SetTextureIndex(0x80);
 
-	CFbxObject* pFbxtest = new CFbxObject(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Angrybot.fbx");
-	pFbxtest->SetShader(pShader);
+	// x z y
+
+	CFbxObject* pFbxtest = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/angrybot.fbx");
 	m_ppObjects[6] = pFbxtest;
-	m_ppObjects[6]->SetPosition({ 250,  100, 250 });
+	m_ppObjects[6]->SetAnimationStack(0);
+	m_ppObjects[6]->m_pAnimationController->SetPosition(0, 0.0f);
+	m_ppObjects[6]->SetPosition({ 600, 100, 600 });
 	m_ppObjects[6]->SetTextureIndex(0x100);
 }
 
@@ -514,7 +518,7 @@ ID3D12RootSignature* CSceneTH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[5];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[0].Constants.Num32BitValues = 18;
+	pd3dRootParameters[0].Constants.Num32BitValues = 18; //GameObject
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;

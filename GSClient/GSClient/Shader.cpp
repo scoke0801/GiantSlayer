@@ -135,6 +135,26 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout(ShaderTypes type)
 		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 		m_d3dInputLayoutDesc.NumElements = nInputElementDescs;
 	}
+	if (type == ShaderTypes::FbxGeneral)
+	{
+		UINT nInputElementDescs = 1;
+		D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+		pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+		m_d3dInputLayoutDesc.NumElements = nInputElementDescs;
+	}
+	if (type == ShaderTypes::FbxSkinned)
+	{
+		UINT nInputElementDescs = 1;
+		D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+		pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+		m_d3dInputLayoutDesc.NumElements = nInputElementDescs;
+	}
 	return m_d3dInputLayoutDesc;
 }
 
@@ -528,12 +548,12 @@ D3D12_RASTERIZER_DESC CFbxModelShader::CreateRasterizerState()
 
 D3D12_SHADER_BYTECODE CFbxModelShader::CreateVertexShader()
 {
-	return(CShader::CompileShaderFromFile(L"SceneTH.hlsl", "VSFbxModel", "vs_5_1", &m_pd3dVertexShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders\\Shaders.hlsl", "VSFbxModel", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CFbxModelShader::CreatePixelShader()
 {
-	return(CShader::CompileShaderFromFile(L"SceneTH.hlsl", "PSFbxModel", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders\\Shaders.hlsl", "PSFbxModel", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -582,10 +602,10 @@ D3D12_RASTERIZER_DESC CFbxSkinnedModelShader::CreateRasterizerState()
 
 D3D12_SHADER_BYTECODE CFbxSkinnedModelShader::CreateVertexShader()
 {
-	return(CShader::CompileShaderFromFile(L"SceneTH.hlsl", "VSFbxSkinnedModel", "vs_5_1", &m_pd3dVertexShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders\\Shaders.hlsl", "VSFbxSkinnedModel", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CFbxSkinnedModelShader::CreatePixelShader()
 {
-	return(CShader::CompileShaderFromFile(L"SceneTH.hlsl", "PSFbxSkinnedModel", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders\\Shaders.hlsl", "PSFbxSkinnedModel", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
