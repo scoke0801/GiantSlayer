@@ -175,26 +175,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildSigns(pd3dDevice, pd3dCommandList);
 	BuildMirror(pd3dDevice, pd3dCommandList);
-
-	CMeshFbx* fbxMesh;
-
-	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
-	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
-
-	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
-	m_Cameras[0]->SetTarget(m_Player);
-
-	m_Player->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	m_Player->Scale(50, 50, 50);
-	m_Player->SetObjectName(OBJ_NAME::Player);
-	m_Player->SetPosition({ 750,  230, 1850 });
-	
-	m_Player->SetCamera(m_Cameras[0]);
-	m_Player->SetTextureIndex(0x200);
-	m_Player->SetMesh(fbxMesh);
-	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
-
-	m_MinimapCamera->SetTarget(m_Player);
+	 
+	BuildPlayers(pd3dDevice, pd3dCommandList);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -540,22 +522,42 @@ void CSceneJH::Communicate(SOCKET& sock)
 	P_C2S_UPDATE_SYNC_REQUEST p_syncUpdateRequest;
 	p_syncUpdateRequest.size = sizeof(P_C2S_UPDATE_SYNC_REQUEST);
 	p_syncUpdateRequest.type = PACKET_PROTOCOL::C2S_INGAME_UPDATE_SYNC;
+	p_syncUpdateRequest.playerNum = m_CurrentPlayerNum;
 
 	int retVal;
+	bool haveToRecv = false;
 	SendPacket(CFramework::GetInstance().GetSocket(), reinterpret_cast<char*>(&p_syncUpdateRequest), p_syncUpdateRequest.size, retVal);
 
 	char buffer[BUFSIZE + 1] = {};
 	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-
+	PACKET_PROTOCOL type = (PACKET_PROTOCOL)buffer[1];
+	if (type == PACKET_PROTOCOL::S2C_NEW_PLAYER) {
+		P_S2C_ADD_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_ADD_PLAYER*>(&buffer);
+		AddPlayer(p_addPlayer.id);
+		haveToRecv = true;
+	}
+	if (type == PACKET_PROTOCOL::S2C_DELETE_PLAYER) { 
+		P_S2C_DELETE_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_DELETE_PLAYER*>(&buffer);
+		DeletePlayer(p_addPlayer.id);
+		haveToRecv = true;
+	}
+	if (type == PACKET_PROTOCOL::S2C_INGAME_DOOR_EVENT) {
+		haveToRecv = true;
+	}
+	if (type == PACKET_PROTOCOL::S2C_INGAME_END) { 
+		return;
+	}
+	if (haveToRecv) {
+		ZeroMemory(buffer, sizeof(buffer));
+		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+	}
 	P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&buffer);
 
-	//return;
 	for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
 		XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 
-		//m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
+		m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
 	}
-	cout << "Sync Update Processed \n";
 }
 
 void CSceneJH::LoginToServer()
@@ -579,7 +581,17 @@ void CSceneJH::LoginToServer()
 		
 		CFramework::GetInstance().SetPlayerId(p_processLogin.id);
 
-		m_Player->SetPosition(pos);
+		cout << "Login id = " << p_processLogin.id << "\n";
+
+		//m_Player->SetPosition(pos); 
+		
+		m_Players[p_processLogin.id]->SetPosition(pos);
+		m_Player = m_Players[p_processLogin.id]; 
+		m_Player->SetDrawable(true);
+
+		m_MinimapCamera->SetTarget(m_Player);
+
+		m_CurrentPlayerNum++;
 	}  
 }
 
@@ -589,6 +601,51 @@ void CSceneJH::LogoutToServer()
 
 void CSceneJH::ProcessInput()
 {
+	if (CFramework::GetInstance().IsOnConntected())
+	{
+		auto keyInput = GAME_INPUT; 
+		bool processKey = false;
+		P_C2S_KEYBOARD_INPUT p_keyboard;
+		p_keyboard.size = sizeof(P_C2S_KEYBOARD_INPUT);
+		p_keyboard.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
+		p_keyboard.id = CFramework::GetInstance().GetPlayerId();
+
+		if (keyInput.KEY_W){ 
+			p_keyboard.keyInput = VK_W;
+			processKey = true;
+		}
+		if (keyInput.KEY_A){ 
+			p_keyboard.keyInput = VK_A;
+			processKey = true;
+		}
+		if (keyInput.KEY_S){ 
+			p_keyboard.keyInput = VK_S;
+			processKey = true;
+		}
+		if (keyInput.KEY_D){ 
+			p_keyboard.keyInput = VK_D; 
+			processKey = true;
+		}
+		if (processKey == false) return;
+		int retVal = 0;
+		SendPacket(CFramework::GetInstance().GetSocket(),
+			reinterpret_cast<char*>(&p_keyboard), p_keyboard.size, retVal);
+
+		char buffer[BUFSIZE + 1] = {};
+		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+		 
+		P_S2C_PROCESS_KEYBOARD p_keyboardProcess = *reinterpret_cast<P_S2C_PROCESS_KEYBOARD*>(&buffer);
+		
+		XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_keyboardProcess.posX),
+			IntToFloat(p_keyboardProcess.posY), 
+			IntToFloat(p_keyboardProcess.posZ) };
+
+		m_Players[p_keyboard.id]->SetPosition(pos);
+		m_Players[p_keyboard.id]->FixPositionByTerrain(m_Terrain);
+
+		DisplayVector3(pos, true);
+		return;
+	}
 	if (m_CurrentCamera == nullptr) return;
 
 	float cameraSpeed = m_CurrentCamera->GetSpeed();
@@ -1625,4 +1682,42 @@ void CSceneJH::BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CSceneJH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+}
+
+void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CMeshFbx* fbxMesh;
+
+	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
+	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
+
+	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+	m_Cameras[0]->SetTarget(m_Players[0]);
+
+	m_Players[0]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	m_Players[0]->Scale(50, 50, 50);
+	m_Players[0]->SetObjectName(OBJ_NAME::Player);
+	m_Players[0]->SetPosition({ 750,  230, 1850 });
+
+	m_Players[0]->SetCamera(m_Cameras[0]);
+	m_Players[0]->SetTextureIndex(0x200);
+	m_Players[0]->SetMesh(fbxMesh);
+	m_Players[0]->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+	m_Players[0]->SetDrawable(true); 
+
+	m_MinimapCamera->SetTarget(m_Players[0]);
+
+	for (int i = 1; i < MAX_USER; ++i) {
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
+		m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		m_Players[i]->Scale(50, 50, 50);
+		m_Players[i]->SetObjectName(OBJ_NAME::Player);
+
+		m_Players[i]->SetCamera(m_Cameras[0]);
+		m_Players[i]->SetTextureIndex(0x200);
+		m_Players[i]->SetMesh(fbxMesh);
+		m_Players[i]->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+		m_Players[i]->SetDrawable(false); 
+	}
+	m_Player;
 }

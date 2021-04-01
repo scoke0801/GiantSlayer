@@ -52,11 +52,47 @@ bool GameSceneProcessor::ProcessGameScene(SOCKET& socket)
 	return true;
 	case PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT:
 	{
+		P_C2S_KEYBOARD_INPUT p_keyboard =
+			*reinterpret_cast<P_C2S_KEYBOARD_INPUT*>(buffer);
+		
+		XMFLOAT3 pos = m_Players[p_keyboard.id]->GetPosition();
+		switch (p_keyboard.keyInput)
+		{
+		case VK_W:
+			break;
+		case VK_S:
+			break;
+		case VK_A:
+			break;
+		case VK_D:
+			break;
+		}
+
+		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
+		p_keyboardProcess.size = sizeof(p_keyboardProcess);
+		p_keyboardProcess.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
+
+		p_keyboardProcess.posX = FloatToInt(pos.x);
+		p_keyboardProcess.posY = FloatToInt(pos.y);
+		p_keyboardProcess.posZ = FloatToInt(pos.z);
+
+		SendPacket(socket, reinterpret_cast<char*>(&p_keyboardProcess), p_keyboardProcess.size, retval);
 	}
 	return true;
 	case PACKET_PROTOCOL::C2S_INGAME_UPDATE_SYNC:
 	{
+		P_C2S_UPDATE_SYNC_REQUEST p_updateSyncRequest =
+			*reinterpret_cast<P_C2S_UPDATE_SYNC_REQUEST*>(buffer);
+
+		// 
+		// 플레이어 수에 따라서,
+		// 도어 변경 조건에 따라서
+		// 게임 엔딩 조건에 따라서 
+		// 추가적인 내용을 더 보내도록 코드 수정 필요
+		//
 		P_S2C_UPDATE_SYNC p_syncUpdate;
+		p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
+		p_syncUpdate.size = sizeof(p_syncUpdate);
 
 		p_syncUpdate.playerNum = m_CurrentPlayerNum;
 

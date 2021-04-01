@@ -88,6 +88,7 @@ struct P_C2S_KEYBOARD_INPUT {
 	BYTE size;
 	PACKET_PROTOCOL type;
 	short keyInput;
+	short id;
 };
 
 struct P_C2S_MOUSE_INPUT {
@@ -100,6 +101,7 @@ struct P_C2S_MOUSE_INPUT {
 struct P_C2S_UPDATE_SYNC_REQUEST {
 	BYTE size;
 	PACKET_PROTOCOL type;
+	char playerNum;
 };
 
 /////////////////////////////////////////////////////////////////
