@@ -13,7 +13,7 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateSignShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateTreeShader(pd3dDevice, pd3dGraphicsRootSignature);
 
-	CreateMirroShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateMirrorShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreatePlayerShader(pd3dDevice, pd3dGraphicsRootSignature);
 
@@ -278,7 +278,7 @@ void CShaderHandler::CreateTreeShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	m_Data.emplace("Tree", pTreeShader);
 }
 
-void CShaderHandler::CreateMirroShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+void CShaderHandler::CreateMirrorShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	CShader* pMirrorShader = new CShader();
 	if (m_UserID == ShaderHandlerUser::JH) {

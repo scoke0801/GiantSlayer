@@ -36,6 +36,7 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 {
 	BuildMirrorResource(pd3dDevice);
 	BuildMinimapResource(pd3dDevice);
+	
 	LoadTextures(pd3dDevice, pd3dCommandList);
 	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
 

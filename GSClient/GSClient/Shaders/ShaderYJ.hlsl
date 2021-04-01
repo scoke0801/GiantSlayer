@@ -21,10 +21,15 @@ cbuffer cbCameraInfo : register(b2)
 	matrix	gmtxView : packoffset(c0);
 	matrix	gmtxProjection : packoffset(c4);
 	float3	gvCameraPosition : packoffset(c8);
+    matrix  gmtxViewProjection : packoffset(c12);
+    matrix  gmtxShadowTransform : packoffset(c16);
 };
 
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
+
+// 그림자
+SamplerComparisonState gscsShadow : register(s2);
 
 Texture2D gtxtForest : register(t0);
 Texture2D gtxtDryForest : register(t1);
@@ -69,8 +74,10 @@ Texture2D gtxtStump		   : register(t34);
 Texture2D gtxtDead_Tree	   : register(t35);
 Texture2D gtxtDesert_Rock  : register(t36);
 
+
 Texture2D gtxtMap          : register(t37);
 Texture2D gtxtMirror       : register(t38);
+Texture2D gtxtShadowMap		: register(t39);
  
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -129,6 +136,9 @@ float4 PSBasic(VS_COLOR_OUTPUT input) : SV_TARGET
 }
 //////////////////////////////////////////////////////////////////////
 //
+
+
+
 VS_TEXTURE_OUT VSTextured(VS_TEXTURE_IN input)
 {
 	VS_TEXTURE_OUT outRes;
@@ -670,6 +680,7 @@ struct VS_TEXTURED_LIGHTING_OUTPUT
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
 	float2 uv : TEXCOORD;
+    float4 shadowPosH : SHADOWPOS;
 };
 
 VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
@@ -680,6 +691,8 @@ VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
 	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxWorld);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
+    output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+
 
 	return(output);
 }
@@ -866,13 +879,48 @@ float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	if (gnTexturesMask & 0x01)
 	{
 		cColor = cColor = gtxtMirror.Sample(gssWrap, input.uv);
-	}
-
+        //cColor = cColor = gtxtShadowMap.Sample(gssWrap, input.uv);
+    }
+    return cColor;
+	
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
 	return(cColor * cIllumination);
 }
+
+
+float CalcShadowFactor(float4 f4ShadowPos)
+{
+    f4ShadowPos.xyz /= f4ShadowPos.w;
+
+    float fDepth = f4ShadowPos.z;
+
+    uint nWidth, nHeight, nMips;
+    gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
+
+    float dx = 1.0f / (float) nWidth;
+
+    float percentLit = 0.0f;
+
+    const float2 offsets[9] =
+    {
+        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
+		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
+    };
+
+	[unroll]
+    for (int i = 0; i < 9; i++)
+    {
+        percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
+    }
+
+    float fFactor = max(percentLit / 9.0f, 0.5f);
+
+    return fFactor;
+}
+
 float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
 	float3 uvw = float3(input.uv, nPrimitiveID / 2);
@@ -902,11 +950,15 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     {
         cColor = gtxtDesert_Rock.Sample(gssWrap, input.uv);
     }
+    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+    shadowFactor = CalcShadowFactor(input.shadowPosH);
    
-	
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+    //float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID,shadowFactor);
 
 	return(cColor * cIllumination);
 }
+
+// 그림자 계산
 
