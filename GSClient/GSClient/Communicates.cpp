@@ -53,23 +53,18 @@ int recvn(SOCKET s, char* buf, int len, int flags)
     return (len - left);
 }
 
-bool SendFrameData(SOCKET& sock, test_packet packet, int& retval)
-{ 
-    int data_len = sizeof(packet); 
-    int packet_len = sizeof(test_packet);
-    if (data_len != packet_len) {
-        int stop = 3;
-    }
+bool SendPacket(SOCKET& sock, char* packet, int packetSize, int& retVal)
+{  
     // 데이터 보내기(고정 길이)
-    retval = send(sock, (char*)&data_len, sizeof(int), 0);
-    if (retval == SOCKET_ERROR)
+    retVal = send(sock, (char*)&packetSize, sizeof(int), 0);
+    if (retVal == SOCKET_ERROR)
     {
         error_display("send()");
         return false;
     }
     // 데이터 보내기(가변 길이)
-    retval = send(sock, reinterpret_cast<char*>(&packet), packet_len, 0);
-    if (retval == SOCKET_ERROR)
+    retVal = send(sock, packet, packetSize, 0);
+    if (retVal == SOCKET_ERROR)
     {
         error_display("send()");
         return false;
@@ -77,52 +72,58 @@ bool SendFrameData(SOCKET& sock, test_packet packet, int& retval)
     return true;
 }
 
-bool SendFrameData(SOCKET& sock, string& str, int& retval)
-{
-    int len = str.length();
-
-    // 데이터 보내기(고정 길이)
-    retval = send(sock, (char*)&len, sizeof(int), 0);
-    if (retval == SOCKET_ERROR)
-    {
-        error_display("send()");
-        return false;
-    }
-
-    // 데이터 보내기(가변 길이)
-    retval = send(sock, str.c_str(), len, 0);
-    if (retval == SOCKET_ERROR)
-    {
-        error_display("send()");
-        return false;
-    }
-    return true;
-}
-
-bool RecvFrameData(SOCKET& sock, char* buf, int& retval)
+bool RecvPacket(SOCKET& sock, char* buf, int& retVal)
 {
     // 데이터 받기(고정 길이)
     int len;
-    retval = recvn(sock, (char*)&len, sizeof(int), 0);
+    retVal = recvn(sock, (char*)&len, sizeof(int), 0);
 
-    if (retval == SOCKET_ERROR)
+    if (retVal == SOCKET_ERROR)
     {
         error_display("recv()");
         return false;
     }
-    else if (retval == 0) return false;
+    else if (retVal == 0) return false;
 
     // 데이터 받기(가변 길이)
-    retval = recvn(sock, buf, len, 0);
+    retVal = recvn(sock, buf, len, 0);
 
-    if (retval == SOCKET_ERROR)
+    if (retVal == SOCKET_ERROR)
     {
         error_display("recv()");
         return false;
     }
 
-    buf[retval] = '\0';
+    buf[retVal] = '\0';
     return true;
+}
+
+void ProcessPacket(SOCKET& sock, char* packet, int packetSize, PACKET_PROTOCOL packetType)
+{
+    int retVal = -1;
+   // 
+     
+    switch (packetType)
+    {
+    // client
+    ///////////////////////////////////////////////////////////////////////////////
+    case PACKET_PROTOCOL::C2S_LOGIN:
+    
+    break;
+    case PACKET_PROTOCOL::C2S_LOGOUT:
+    break;
+    case PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT:
+        break;
+    case PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT:
+        break;
+
+   // server
+   ///////////////////////////////////////////////////////////////////////////////
+    case PACKET_PROTOCOL::S2C_LOGIN_HANDLE:
+        break;
+    default:
+        break;
+    }
 }
  
 int ConvertoIntFromText(const char* text, const char* token)

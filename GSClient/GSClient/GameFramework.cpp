@@ -297,89 +297,7 @@ void CFramework::BuildScene()
 
 	m_CurrentScene->ReleaseUploadBuffers();
 }
-
-void CFramework::CreateAboutD2D()
-{
-	// create the DirectWrite factory
-	if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &m_pd2dWriteFactory)))
-		assert(!"Critical error: Unable to create the DirectWrite factory!");
-
-	// create the Direct2D factory
-	D2D1_FACTORY_OPTIONS options;
-#ifndef NDEBUG
-	options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
-#else
-	options.debugLevel = D2D1_DEBUG_LEVEL_NONE;
-#endif 
-	if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED, __uuidof(ID2D1Factory2), &options, &m_pd2dFactory)))
-		assert(!"Critical error: Unable to create Direct2D Factory!");
-
-	// get the dxgi device
-	//m_pd3dDevice->As;
-
-	//m_pd3dDevice->As(&m_pdxgiDevice);
-
-	if (FAILED(m_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice), &m_pdxgiDevice)))
-		return assert(!"Critical error: Unable to get the DXGI device!");
-
-	if (FAILED(m_pd2dFactory->CreateDevice(m_pdxgiDevice.Get(), &m_pd2Device)))
-		return assert(!"Critical error: Unable to create the Direct2D device!");
-
-	// create the device context
-	if (FAILED(m_pd2Device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS, &m_pd2devCon)))
-		return assert(!"Critical error: Unable to create the Direct2D device context!");
-
-	CreateBitmapRenderTarget();
-}
-
-void CFramework::CreateBitmapRenderTarget()
-{
-	// specify the desired bitmap properties
-	D2D1_BITMAP_PROPERTIES1 bp;
-	bp.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	bp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE;
-	bp.dpiX = 96.0f;
-	bp.dpiY = 96.0f;
-	bp.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
-	bp.colorContext = nullptr;
-
-	// Direct2D needs the DXGI version of the back buffer
-	Microsoft::WRL::ComPtr<IDXGISurface> dxgiBuffer;
-
-	if (FAILED(m_pdxgiSwapChain->GetBuffer(0, __uuidof(IDXGISurface), &dxgiBuffer)))
-		return assert(!"Critical error: Unable to retrieve the back buffer!");
-
-	//// create the bitmap
-	Microsoft::WRL::ComPtr<ID2D1Bitmap1> targetBitmap;
-	if (FAILED(m_pd2devCon->CreateBitmapFromDxgiSurface(dxgiBuffer.Get(), &bp, &targetBitmap)))
-		return assert(!"Critical error: Unable to create the Direct2D bitmap from the DXGI surface!");
-
-	// set the newly created bitmap as render target
-	m_pd2devCon->SetTarget(targetBitmap.Get());
-}
-
-void CFramework::InitializeTextFormats()
-{
-	ID2D1SolidColorBrush* yellowBrush, * blackBrush, * whiteBrush;
-	// create standard brushes
-	if (FAILED(m_pd2devCon->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Yellow), &yellowBrush)))
-		return assert(!"Critical error: Unable to create the yellow brush!");
-	if (FAILED(m_pd2devCon->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &blackBrush)))
-		return assert(!"Critical error: Unable to create the black brush!");
-	if (FAILED(m_pd2devCon->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &whiteBrush)))
-		return assert(!"Critical error: Unable to create the white brush!");
-
-	// set up text formats
-
-	// FPS text
-	//if (FAILED(writeFactory.Get()->CreateTextFormat(L"Lucida Console", nullptr, DWRITE_FONT_WEIGHT_LIGHT, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.0f, L"en-GB", &textFormatFPS)))
-	//	return assert(!"Critical error: Unable to create text format for FPS information!");
-	//if (FAILED(textFormatFPS->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)))
-	//	return assert(!"Critical error: Unable to set text alignment!");
-	//if (FAILED(textFormatFPS->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR)))
-	//	return assert(!"Critical error: Unable to set paragraph alignment!"); 
-}
-
+   
 void CFramework::SinglePlayUpdate()
 {
 	if (IsOnConntected())
@@ -561,6 +479,24 @@ bool CFramework::ConnectToServer()
 	return true;	
 }
 
+void CFramework::LoginToServer()
+{
+	
+}
+
+void CFramework::LogoutToServer()
+{
+	P_C2S_LOGOUT p_logout;
+
+	p_logout.size = sizeof(p_logout);
+	p_logout.type = PACKET_PROTOCOL::C2S_LOGOUT;
+	p_logout.id = CFramework::GetInstance().GetPlayerId();
+	strcpy_s(p_logout.name, CFramework::GetInstance().GetPlayerName().c_str());	
+	
+	int retVal;
+	SendPacket(m_Sock, reinterpret_cast<char*>(&p_logout), p_logout.size, retVal); 
+}
+
 void CFramework::Communicate()
 {
 	if (m_CurrentScene) m_CurrentScene->Communicate(m_Sock);
@@ -578,7 +514,7 @@ DWORD __stdcall ClientMain(LPVOID arg)
 	double lag = 0.0f;
 	double fps = 0.0f;
 	double elapsedTime = m_GameTimer.GetElapsedTime();
-	
+	 
 	while (1)
 	{
 		m_GameTimer.UpdateElapsedTime();

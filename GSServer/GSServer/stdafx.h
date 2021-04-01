@@ -17,9 +17,6 @@
 #pragma warning(disable  : 4996)    // mbstowcs unsafe###
 using namespace std;
 
-#define SERVERPORT 9000
-#define BUFSIZE 4096
-
 #define width 480 
 #define height 960
 

@@ -4,6 +4,8 @@
 #include "UploadBuffer.h"
 #include "Mesh.h" 
 
+#include "Communicates.h"
+
 #define GET_PSO(key) *m_PSOs[key].get() 
 
 class CScene
@@ -22,6 +24,9 @@ protected:
 	FbxScene* m_pfbxScene = nullptr;
 	FbxIOSettings* m_pfbxIOs = nullptr;
 	FbxImporter* m_pfbxImporter = nullptr;
+
+//protected:
+//	GAME_STATE	m_GameState;
 
 public:
 	CScene();
@@ -47,6 +52,9 @@ public:
 
 public:
 	virtual void Communicate(SOCKET& sock) {}
+	
+	virtual void LoginToServer() {}
+	virtual void LogoutToServer() {}
 
 public: 
 	virtual void SendDataToNextScene(void* context) {}	

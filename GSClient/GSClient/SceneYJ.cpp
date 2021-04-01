@@ -532,52 +532,7 @@ void CSceneYJ::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 
 void CSceneYJ::Communicate(SOCKET& sock)
 {
-	int retVal = 0;
-
-	string toSendData = "\n";
-	XMFLOAT3 xmf3PlayerPos = m_Player->GetPosition();
-	XMFLOAT3 xmf3PlayerLook = m_Player->GetLook();
-	toSendData += "<PlayerPosition>:\n";
-	toSendData += to_string(xmf3PlayerPos.x);
-	toSendData += " ";
-	toSendData += to_string(xmf3PlayerPos.y);
-	toSendData += " ";
-	toSendData += to_string(xmf3PlayerPos.z);
-	toSendData += "\n";
-	toSendData += "<PlayerLook>:\n";
-	toSendData += to_string(xmf3PlayerLook.x);
-	toSendData += " ";
-	toSendData += to_string(xmf3PlayerLook.y);
-	toSendData += " ";
-	toSendData += to_string(xmf3PlayerLook.z);
-	toSendData += "\n";
-
-	auto keyInput = GAME_INPUT;
-	toSendData += "<Command>\n";
-	toSendData += to_string(CInputHandler::GetInstance().GetCommandType());
-	toSendData += "\n";
-	SendFrameData(sock, toSendData, retVal);
-
-	char buffer[BUFSIZE + 1];
-
-	RecvFrameData(sock, buffer, retVal);
-	char* token = strtok(buffer, "\n");
-	while (token != NULL)
-	{
-		if (strstr(token, "<PlayerPosition>:"))
-		{
-			XMFLOAT3 res = GetVectorFromText(token);
-			cout << "<PlayerPosition>: ";
-			DisplayVector3(res);
-		}
-		else if (strstr(token, "<PlayerLook>:"))
-		{
-			XMFLOAT3 res = GetVectorFromText(token);
-			cout << "<PlayerLook>: ";
-			DisplayVector3(res);
-		}
-		token = strtok(NULL, "\n");
-	}
+	
 }
 
 void CSceneYJ::ProcessInput()

@@ -9,7 +9,6 @@
 #include "Player.h"
 #include "Bridge.h"
 #include "Wall.h"
-#include "Communicates.h"
 #include "Terrain.h"
 #include "Sign.h"
 #include "Puzzle.h" 
@@ -33,7 +32,7 @@ CSceneJH::~CSceneJH()
 }
 
 void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
-{
+{  
 	BuildMirrorResource(pd3dDevice);
 	BuildMinimapResource(pd3dDevice);
 	LoadTextures(pd3dDevice, pd3dCommandList);
@@ -188,6 +187,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->Scale(50, 50, 50);
 	m_Player->SetObjectName(OBJ_NAME::Player);
 	m_Player->SetPosition({ 750,  230, 1850 });
+	
 	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x200);
 	m_Player->SetMesh(fbxMesh);
@@ -536,25 +536,54 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 
 void CSceneJH::Communicate(SOCKET& sock)
 {
-	test_packet tp;
-	tp.dirX = 1.0f;
-	tp.dirY = 2.0f;
-	tp.dirZ = 3.0f;
-	tp.posX = 10.0f;
-	tp.posY = 20.0f;
-	tp.posZ = 30.0f; 
+	P_C2S_UPDATE_SYNC_REQUEST p_syncUpdateRequest;
+	p_syncUpdateRequest.size = sizeof(P_C2S_UPDATE_SYNC_REQUEST);
+	p_syncUpdateRequest.type = PACKET_PROTOCOL::C2S_INGAME_UPDATE_SYNC;
 
-	int retVal = 0; 
-	SendFrameData(sock, tp, retVal);
+	int retVal;
+	SendPacket(CFramework::GetInstance().GetSocket(), reinterpret_cast<char*>(&p_syncUpdateRequest), p_syncUpdateRequest.size, retVal);
 
-	test_packet after;
-	char buffer__[BUFSIZE + 1] = {};
-	int receivedSize = 0;
-	int count = 0;
-	int retval = 0;
-	RecvFrameData(sock, buffer__, receivedSize);
-	after = *reinterpret_cast<test_packet*>(buffer__);
-	return; 
+	char buffer[BUFSIZE + 1] = {};
+	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+
+	P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&buffer);
+
+	//return;
+	for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
+		XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
+
+		//m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
+	}
+	cout << "Sync Update Processed \n";
+}
+
+void CSceneJH::LoginToServer()
+{
+	P_C2S_LOGIN p_login;
+	p_login.size = sizeof(p_login);
+	p_login.type = PACKET_PROTOCOL::C2S_LOGIN; 
+	strcpy_s(p_login.name, CFramework::GetInstance().GetPlayerName().c_str());
+
+	int retVal;
+	SendPacket(CFramework::GetInstance().GetSocket(), reinterpret_cast<char*>(&p_login), p_login.size, retVal);
+
+	char buffer[BUFSIZE + 1] = {}; 
+	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+
+	P_S2C_PROCESS_LOGIN p_processLogin = *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&buffer);
+	if (p_processLogin.isSuccess)
+	{
+		XMFLOAT3 pos = XMFLOAT3{IntToFloat(p_processLogin.x), 
+			IntToFloat(p_processLogin.y), IntToFloat(p_processLogin.z) };
+		
+		CFramework::GetInstance().SetPlayerId(p_processLogin.id);
+
+		m_Player->SetPosition(pos);
+	}  
+}
+
+void CSceneJH::LogoutToServer()
+{
 }
 
 void CSceneJH::ProcessInput()

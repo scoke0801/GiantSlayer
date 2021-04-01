@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr int MAX_USER = 10;
+constexpr int MAX_USER = 5;
 
 constexpr int MAX_PLAYER_NAME = 200;
 constexpr int SERVERPORT = 9000;
@@ -8,6 +8,8 @@ constexpr int BUFSIZE = 4096;
 constexpr int F_TO_I = 10000;
 constexpr int I_TO_F = F_TO_I;
 
+// x,y,z 크기를 short로 보내면 맵 크기 20000에서 
+// int, float 형 변환 계산하기에 크기가 작아서 int형으로 사용
 inline int FloatToInt(float num)
 { 
 	return (int)(num * F_TO_I);
@@ -41,7 +43,9 @@ enum class PACKET_PROTOCOL : short
 	C2S_INGAME_KEYBOARD_INPUT, 
 	C2S_INGAME_MOUSE_INPUT,
 
-	C2S_INGAME_LOGOUT,
+	C2S_INGAME_UPDATE_SYNC,
+
+	C2S_LOGOUT,
 
 	//SERVER 
 	S2C_LOGIN_HANDLE, 
@@ -64,18 +68,23 @@ enum class PACKET_PROTOCOL : short
 };
 
 #pragma pack (push, 1)
-struct test_packet {
-	float posX, posY, posZ;
-	float dirX, dirY, dirZ;
-	XMFLOAT3 xmf3Dir; 
-}; 
 
+/////////////////////////////////////////////////////////////////
+// client protocol packet  
 struct P_C2S_LOGIN {
 	BYTE size;
 	PACKET_PROTOCOL type;
 	char name[MAX_PLAYER_NAME];
 };
-struct P_C2S_KEYBOARD_INPUT_PACKET {
+
+struct P_C2S_LOGOUT {
+	BYTE size;
+	PACKET_PROTOCOL type;
+	short id;
+	char name[MAX_PLAYER_NAME];
+};
+
+struct P_C2S_KEYBOARD_INPUT {
 	BYTE size;
 	PACKET_PROTOCOL type;
 	short keyInput;
@@ -88,20 +97,28 @@ struct P_C2S_MOUSE_INPUT {
 	short yInput;
 }; 
 
+struct P_C2S_UPDATE_SYNC_REQUEST {
+	BYTE size;
+	PACKET_PROTOCOL type;
+};
+
+/////////////////////////////////////////////////////////////////
+// server protocol packet
+
 struct P_S2C_PROCESS_LOGIN {
 	BYTE size; 
 	PACKET_PROTOCOL type;
+	short id;
 	bool isSuccess;
-	short x, y, z;
+	int x, y, z;
 };
-
 struct P_S2C_ADD_PLAYER {
 	BYTE size;
 	PACKET_PROTOCOL type;
 
 	char id;
 	
-	short x, y, z;
+	int x, y, z;
 	short angle;
 };
 
@@ -116,7 +133,7 @@ struct P_S2C_PROCESS_KEYBOARD {
 	BYTE size;
 	PACKET_PROTOCOL type;
 
-	short posX, posY, posZ;
+	int posX, posY, posZ;
 	short rotateAngle;
 
 	WEAPON_TYPE weaponType;
@@ -126,22 +143,22 @@ struct P_S2C_PROCESS_MOUSE {
 	BYTE size;
 	PACKET_PROTOCOL type;
 
-	short posX, posY, posZ;
+	int posX, posY, posZ;
 
 	ROTATION_AXIS axis;
 	short angle;
 };
 
-struct P_S2C_UPDATE_PLAYERS_STATE {
+struct P_S2C_UPDATE_SYNC {
 	BYTE size;
 	PACKET_PROTOCOL type;
 	char playerNum;
 	 
 	char id[MAX_USER];
 
-	short posX[MAX_USER];
-	short posY[MAX_USER];
-	short posZ[MAX_USER];
+	int posX[MAX_USER];
+	int posY[MAX_USER];
+	int posZ[MAX_USER];
 
 	short angle[MAX_USER];
 

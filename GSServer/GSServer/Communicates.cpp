@@ -6,7 +6,7 @@ void charToWchar(const char* msg, wchar_t* out)
 {
 	mbstowcs(out, msg, strlen(msg) + 1);//Plus null
 }
-void err_quit(const char* msg)
+void error_quit(const char* msg)
 {
 	wchar_t wMsg[20];
 	LPVOID lpMsgBuf;
@@ -22,7 +22,7 @@ void err_quit(const char* msg)
 	exit(1);
 
 }
-void err_display(const char* msg)
+void error_display(const char* msg)
 {
 	LPVOID lpMsgBuf;
 	FormatMessage(
@@ -52,92 +52,49 @@ int recvn(SOCKET s, char* buf, int len, int flags)
 
 	return (len - left);
 }
-bool RecvFrameData(SOCKET& client_sock, char* buf, int& retval)
+
+bool SendPacket(SOCKET& sock, char* packet, int packetSize, int& retVal)
+{
+	// 데이터 보내기(고정 길이)
+	retVal = send(sock, (char*)&packetSize, sizeof(int), 0);
+	if (retVal == SOCKET_ERROR)
+	{
+		error_display("send()");
+		return false;
+	}
+	// 데이터 보내기(가변 길이)
+	retVal = send(sock, packet, packetSize, 0);
+	if (retVal == SOCKET_ERROR)
+	{
+		error_display("send()");
+		return false;
+	}
+	return true;
+}
+
+bool RecvPacket(SOCKET& sock, char* buf, int& retVal)
 {
 	// 데이터 받기(고정 길이)
 	int len;
-	retval = recvn(client_sock, (char*)&len, sizeof(int), 0);
+	retVal = recvn(sock, (char*)&len, sizeof(int), 0);
 
-	if (retval == SOCKET_ERROR)
+	if (retVal == SOCKET_ERROR)
 	{
-		err_display("recv()");
+		error_display("recv()");
 		return false;
 	}
-	else if (retval == 0) return false;
+	else if (retVal == 0) return false;
 
 	// 데이터 받기(가변 길이)
-	retval = recvn(client_sock, buf, len, 0);
-	if (retval == SOCKET_ERROR)
+	retVal = recvn(sock, buf, len, 0);
+
+	if (retVal == SOCKET_ERROR)
 	{
-		err_display("recv()");
+		error_display("recv()");
 		return false;
 	}
 
-	buf[retval] = '\0';
-	return true;
-}
-bool SendFrameData(SOCKET& sock, test_packet packet, int& retval)
-{
-	int data_len = sizeof(packet);
-	int packet_len = sizeof(test_packet);
-	if (data_len != packet_len) {
-		int stop = 3;
-	}
-	// 데이터 보내기(고정 길이)
-	retval = send(sock, (char*)&data_len, sizeof(int), 0);
-	if (retval == SOCKET_ERROR)
-	{
-		err_display("send()");
-		return false;
-	}
-	// 데이터 보내기(가변 길이)
-	retval = send(sock, reinterpret_cast<char*>(&packet), packet_len, 0);
-	if (retval == SOCKET_ERROR)
-	{
-		err_display("send()");
-		return false;
-	}
-	return true;
-}
-bool SendFrameData(SOCKET& sock, char* buf, int& retval)
-{
-	int len = sizeof(buf);
-
-	// 데이터 보내기(고정 길이)
-	retval = send(sock, (char*)&len, sizeof(int), 0);
-	if (retval == SOCKET_ERROR)
-	{
-		err_display("send()");
-		return false;
-	}
-	// 데이터 보내기(가변 길이)
-	retval = send(sock, buf, len, 0);
-	if (retval == SOCKET_ERROR)
-	{
-		err_display("send()");
-		return false;
-	}
-	return true;
-}
-bool SendFrameData(SOCKET& sock, string& str, int& retval)
-{
-	int len = str.length();
-
-	// 데이터 보내기(고정 길이)
-	retval = send(sock, (char*)&len, sizeof(int), 0);
-	if (retval == SOCKET_ERROR)
-	{
-		err_display("send()");
-		return false;
-	}
-
-	// 데이터 보내기(가변 길이)
-	retval = send(sock, str.c_str(), len, 0);
-	if (retval == SOCKET_ERROR)
-	{
-		err_display("send()");
-		return false;
-	}
+	buf[retVal] = '\0';
 	return true;
 }
 

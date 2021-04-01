@@ -21,10 +21,11 @@ void error_display(const char* msg);
 
 int recvn(SOCKET s, char* buf, int len, int flag);
 
-bool SendFrameData(SOCKET& sock, test_packet packet, int& retval);
-bool SendFrameData(SOCKET& sock, string& str, int& retval);
-bool RecvFrameData(SOCKET& sock, char* buf, int& retval);
- 
+bool SendPacket(SOCKET& sock, char* packet, int packetSize, int& retVal);
+bool RecvPacket(SOCKET& sock, char* buf, int& retVal);
+
+void ProcessPacket(SOCKET& sock, char* packet, int packetSize, PACKET_PROTOCOL packetType);
+
 int ConvertoIntFromText(const char* text, const char* token);
 
 XMFLOAT3 GetVectorFromText(const char* text);

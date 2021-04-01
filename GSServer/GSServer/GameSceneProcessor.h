@@ -10,13 +10,15 @@ enum class CommandType
 	Attack
 };
 
-#define MAX_CLIENT_NUM 4 
 class GameSceneProcessor
 {
 private:
 	CRITICAL_SECTION			m_cs;
-	CPlayer*					m_Players[MAX_CLIENT_NUM];
+	CPlayer*					m_Players[MAX_USER];
 
+	bool						m_isInitialized = false;
+
+	int							m_CurrentPlayerNum = 0;
 private:
 	GameSceneProcessor()
 	{
@@ -32,9 +34,19 @@ public:
 	static GameSceneProcessor* GetInstance()
 	{
 		static GameSceneProcessor self;
+		if(self.m_isInitialized == false)
+		{
+			self.InitAll();
+			 self.m_isInitialized = true;
+		}
 		return &self;
 	}
 
 	bool ProcessGameScene(SOCKET& socket);
+
+private:
+	void InitAll();
+	void InitPlayers();
+	void InitMonsters();
 };
 
