@@ -743,7 +743,7 @@ void CTerrain::InitHeightDatas()
 	//{
 	//	for (int Garo = 45; Garo < 50; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - (i * 30)-500.0f;
+	//		//m_Heights[i][Garo] = rand() % 300 - (i * 30)-500.0f;
 	//	}
 	//}
 	//

@@ -21,6 +21,8 @@ protected:
 	CGameObject*				m_Mirror = nullptr;
 	CPlayer*					m_Player = nullptr;
 
+	CPlayer*					m_Players[MAX_USER];
+
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
 	vector<UI*>					m_SPGauges;
@@ -94,7 +96,8 @@ public:
 
 public:
 	virtual void Communicate(SOCKET& sock) override;
-
+	virtual void LoginToServer()  override;
+	virtual void LogoutToServer() override;
 public:
 	virtual void ProcessInput();
 

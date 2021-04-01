@@ -71,10 +71,14 @@ void CTitleScene::ProcessInput()
 		if (!m_IsSingleplay)
 		{
 			isFirst = false;
-			CFramework::GetInstance().ConnectToServer(); 
-		}
-		cout << "ChangeScene to CSceneJH\n";
-		ChangeScene<CSceneJH>((void*)m_IsSingleplay); 
+			if (CFramework::GetInstance().ConnectToServer()) { 
+
+				cout << "ChangeScene to CSceneJH\n";
+				ChangeScene<CSceneJH>((void*)m_IsSingleplay);
+
+				CFramework::GetInstance().GetCurrentScene()->LoginToServer();;
+			}
+		} 
 	}
 }
 

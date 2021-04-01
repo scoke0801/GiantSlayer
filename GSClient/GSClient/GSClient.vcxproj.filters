@@ -253,6 +253,9 @@
     <ClInclude Include="ShaderHandler.h">
       <Filter>Handler</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\GSServer\GSServer\protocol.h">
+      <Filter>Communicate</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">

@@ -17,9 +17,6 @@
 #pragma warning(disable  : 4996)    // mbstowcs unsafe###
 using namespace std;
 
-#define SERVERPORT 9000
-#define BUFSIZE 4096
-
 #define width 480 
 #define height 960
 
@@ -40,8 +37,7 @@ using namespace DirectX::PackedVector;
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
-
-
+ 
 #define EPSILON					1.0e-10f
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }

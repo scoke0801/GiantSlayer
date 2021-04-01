@@ -43,9 +43,9 @@ void CInputHandler::ProcessInput()
 	if (GetAsyncKeyState(VK_I) & 0x8000)		m_Inputs.KEY_I = true;
 	if (GetAsyncKeyState(VK_O) & 0x8000)		m_Inputs.KEY_O = true;
 	if (GetAsyncKeyState(VK_P) & 0x8000)		m_Inputs.KEY_P = true;
-	if (GetAsyncKeyState(VK_J) & 0x8000)		m_Inputs.KEY_I = true;
-	if (GetAsyncKeyState(VK_K) & 0x8000)		m_Inputs.KEY_O = true;
-	if (GetAsyncKeyState(VK_L) & 0x8000)		m_Inputs.KEY_P = true;
+	if (GetAsyncKeyState(VK_J) & 0x8000)		m_Inputs.KEY_J = true;
+	if (GetAsyncKeyState(VK_K) & 0x8000)		m_Inputs.KEY_K = true;
+	if (GetAsyncKeyState(VK_L) & 0x8000)		m_Inputs.KEY_L = true;
 #pragma endregion
 }
 
