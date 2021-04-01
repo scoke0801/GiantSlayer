@@ -470,7 +470,7 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 		MeshInfo* pMeshinfo = new MeshInfo();
 		//pMeshinfo->pMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, numCP, numPG * 3, pnIndices);
-		pMeshinfo->pMesh = new CMeshFbxTextured(pd3dDevice, pd3dCommandList, pfbxMesh);
+		pMeshinfo->pMesh = new CMeshFbxTextured(pd3dDevice, pd3dCommandList, numCP, numPG * 3, pnIndices, pfbxMesh);
 
 		CShader* tempShader = new CShader();
 
@@ -529,14 +529,17 @@ void CFbxObject::AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime)
 
 			if ((nSkinningType == FbxSkin::eLinear) || (nSkinningType == FbxSkin::eRigid))
 			{
+				//cout << "SkinningType: eLinear or eRigid" << endl;
 				ComputeLinearDeformation(pfbxMesh, fbxCurrentTime, pfbxv4Vertices, numCP);
 			}
 			else if (nSkinningType == FbxSkin::eDualQuaternion)
 			{
+				//cout << "SkinningType: eDualQuaternion" << endl;
 				ComputeDualQuaternionDeformation(pfbxMesh, fbxCurrentTime, pfbxv4Vertices, numCP);
 			}
 			else if (nSkinningType == FbxSkin::eBlend)
 			{
+				//cout << "SkinningType: eBlend" << endl;
 				FbxVector4* pfbxv4LinearVertices = new FbxVector4[numCP];
 				memcpy(pfbxv4LinearVertices, pfbxMesh->GetControlPoints(), numCP * sizeof(FbxVector4));
 				ComputeLinearDeformation(pfbxMesh, fbxCurrentTime, pfbxv4LinearVertices, numCP);
@@ -559,10 +562,11 @@ void CFbxObject::AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime)
 
 		MeshInfo* pMeshinfo = (MeshInfo*)pfbxMesh->GetUserDataPtr();
 
-		for (int i = 0; i < numCP; i++) 
-			pMeshinfo->pMesh->m_pxmf4MappedPositions[i] = XMFLOAT4(	(float)pfbxv4Vertices[i][0], 
-																	(float)pfbxv4Vertices[i][1], 
-																	(float)pfbxv4Vertices[i][2], 1.0f);
+		for (int i = 0; i < numCP; i++) {
+			pMeshinfo->pMesh->m_pxmf4MappedPositions[i] = XMFLOAT4(	(float)pfbxv4Vertices[i][0],
+																	(float)pfbxv4Vertices[i][2],
+																	(float)pfbxv4Vertices[i][1], 1.0f);
+		}
 
 		delete[] pfbxv4Vertices;
 	}
@@ -621,7 +625,7 @@ void CFbxObject::DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode
 
 void CFbxObject::Animate(float fTimeElapsed)
 {
-	if (m_pAnimationController->m_nAnimationStack != 0)
+	if (m_pAnimationController)
 	{
 		m_pAnimationController->AdvanceTime(fTimeElapsed);
 		FbxTime fbxCurrentTime = m_pAnimationController->GetCurrentTime();
@@ -629,12 +633,7 @@ void CFbxObject::Animate(float fTimeElapsed)
 	}
 }
 
-void CFbxObject::TestAnimate(float fTimeElapsed)
-{
-
-}
-
-void CFbxObject::Update(float fTimeElapsed)
+void CFbxObject::Update(double fTimeElapsed)
 {
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
@@ -658,8 +657,11 @@ void CFbxObject::Update(float fTimeElapsed)
 	float fDeceleration = (Friction * fTimeElapsed);
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+}
 
-	Animate(fTimeElapsed);
+void CFbxObject::SetAnimationStack(int nAnimationStack)
+{
+	m_pAnimationController->SetAnimationStack(m_pfbxScene, nAnimationStack);
 }
 
 void CFbxObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

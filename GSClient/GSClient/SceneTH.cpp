@@ -221,9 +221,9 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	// x z y
 
-	CFbxObject* pFbxtest = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/angrybot.fbx");
+	CFbxObject* pFbxtest = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
 	m_ppObjects[6] = pFbxtest;
-	m_ppObjects[6]->SetAnimationStack(0);
+	m_ppObjects[6]->SetAnimationStack(nAnim);
 	m_ppObjects[6]->m_pAnimationController->SetPosition(0, 0.0f);
 	m_ppObjects[6]->SetPosition({ 600, 100, 600 });
 	m_ppObjects[6]->SetTextureIndex(0x100);
@@ -395,6 +395,7 @@ void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
+			m_ppObjects[j]->Animate(0.1);
 			m_ppObjects[j]->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
@@ -452,6 +453,18 @@ void CSceneTH::ProcessInput()
 	if (keyInput.KEY_5)
 	{
 		m_CurrentCamera = m_Cameras[4];
+	}
+	if (keyInput.KEY_9)
+	{
+		m_ppObjects[6]->SetAnimationStack(0);
+	}
+	if (keyInput.KEY_8)
+	{
+		m_ppObjects[6]->SetAnimationStack(1);
+	}
+	if (keyInput.KEY_7)
+	{
+		m_ppObjects[6]->SetAnimationStack(2);
 	}
 	if (keyInput.KEY_ADD)
 	{

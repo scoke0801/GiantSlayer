@@ -14,6 +14,7 @@ class CSceneTH : public CScene
 protected:
 	CGameObject**				m_ppObjects = NULL;
 	int							m_nObjects = 0;
+	int							nAnim = 0;
 
 	CSkyBox*					m_Skybox;
 

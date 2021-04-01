@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Mesh.h"
 //#include "FbxSceneContext.h"
 #include "FbxLoader.h"
@@ -181,4 +182,3 @@ public:
 
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 };
-

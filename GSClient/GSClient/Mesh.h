@@ -262,7 +262,7 @@ public:
 class CMeshFbxTextured : public CMesh
 {
 public:
-	CMeshFbxTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxMesh* pfbxMesh);
+	CMeshFbxTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices, FbxMesh* pfbxMesh);
 	virtual ~CMeshFbxTextured();
 };
 

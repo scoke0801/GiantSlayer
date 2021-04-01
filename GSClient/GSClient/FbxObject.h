@@ -52,16 +52,15 @@ public:
 	void AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime);
 	void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, FbxTime& fbxCurrentTime, FbxAMatrix& fbxmtxWorld);
 	
-	virtual void Animate(float fTimeElapsed);
-	virtual void TestAnimate(float fTimeElapsed);
-	virtual void Update(float fTimeElapsed);
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void Animate(float fTimeElapsed) override;
+	void Update(double fTimeElapsed) override;
+	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
 
 	static void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
 	static void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, FbxAMatrix* pfbxf4x4World);
 
 	virtual void ReleaseUploadBuffers();
 
-	void SetAnimationStack(int nAnimationStack) { m_pAnimationController->SetAnimationStack(m_pfbxScene, nAnimationStack); }
+	void SetAnimationStack(int nAnimationStack) override;
 	void LoadFbxModelFromFile(char* pstrFbxFileName);
 };

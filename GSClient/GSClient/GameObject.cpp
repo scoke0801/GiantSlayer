@@ -92,6 +92,8 @@ void CGameObject::Update(double fTimeElapsed)
 	float fDeceleration = ( Friction * fTimeElapsed);
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
+
+	Animate(fTimeElapsed);
 }
 
 void CGameObject::OnPrepareRender()

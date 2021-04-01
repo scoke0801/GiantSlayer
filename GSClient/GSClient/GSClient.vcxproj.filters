@@ -99,9 +99,6 @@
     <ClCompile Include="EnemyState.cpp">
       <Filter>State</Filter>
     </ClCompile>
-    <ClCompile Include="FbxSceneContext.cpp">
-      <Filter>FBXLoader</Filter>
-    </ClCompile>
     <ClCompile Include="GameSceneProto.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -205,9 +202,6 @@
     </ClInclude>
     <ClInclude Include="EnemyState.h">
       <Filter>State</Filter>
-    </ClInclude>
-    <ClInclude Include="FbxSceneContext.h">
-      <Filter>FBXLoader</Filter>
     </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Light</Filter>
