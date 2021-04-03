@@ -14,7 +14,7 @@ class GameSceneProcessor
 {
 private:
 	CRITICAL_SECTION			m_cs;
-	CPlayer*					m_Players[MAX_USER];
+	CPlayer*					m_Players[MAX_PLAYER];
 
 	bool						m_isInitialized = false;
 

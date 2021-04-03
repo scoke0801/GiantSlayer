@@ -16,25 +16,35 @@ bool GameSceneProcessor::ProcessGameScene(SOCKET& socket)
 	int retval = 0;
 	RecvPacket(socket, buffer, retval); 
 
-	// buffer[1]의 값은 protocol type
+	// buffer[0]의 값은 packet protocol size
+	// buffer[1]의 값은 packet protocol type
 	PACKET_PROTOCOL type = (PACKET_PROTOCOL)buffer[1];
 	switch (type) {
 	case PACKET_PROTOCOL::C2S_LOGIN:
 	{
 		P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(buffer);
 
-		m_Players[m_CurrentPlayerNum]->SetId(m_CurrentPlayerNum);
 
 		P_S2C_PROCESS_LOGIN p_processLogin;
 		p_processLogin.size = sizeof(p_processLogin);
 		p_processLogin.type = PACKET_PROTOCOL::S2C_LOGIN_HANDLE;
-		p_processLogin.isSuccess = true;
+		
+
+		if (m_CurrentPlayerNum > MAX_PLAYER) {
+			p_processLogin.isSuccess = false;
+		}
+		else{
+			p_processLogin.isSuccess = true;
+
+			m_Players[m_CurrentPlayerNum]->SetId(m_CurrentPlayerNum);
+			XMFLOAT3 pos = m_Players[m_CurrentPlayerNum]->GetPosition();
+
+			p_processLogin.x = FloatToInt(pos.x);
+			p_processLogin.y = FloatToInt(pos.y);
+			p_processLogin.z = FloatToInt(pos.z);
+		} 
 		p_processLogin.id = m_CurrentPlayerNum;
 
-		XMFLOAT3 pos = m_Players[m_CurrentPlayerNum]->GetPosition();
-		p_processLogin.x = FloatToInt(pos.x);
-		p_processLogin.y = FloatToInt(pos.y);
-		p_processLogin.z = FloatToInt(pos.z);
 		SendPacket(socket, reinterpret_cast<char*>(&p_processLogin), sizeof(p_processLogin), retval);
 		
 		m_CurrentPlayerNum++;
@@ -56,6 +66,10 @@ bool GameSceneProcessor::ProcessGameScene(SOCKET& socket)
 			*reinterpret_cast<P_C2S_KEYBOARD_INPUT*>(buffer);
 		
 		XMFLOAT3 pos = m_Players[p_keyboard.id]->GetPosition();
+
+		//m_Players[p_keyboard.id]->Update();
+
+		// update player using key...
 		switch (p_keyboard.keyInput)
 		{
 		case VK_W:
@@ -120,14 +134,15 @@ void GameSceneProcessor::InitAll()
 
 void GameSceneProcessor::InitPlayers()
 {
-	XMFLOAT3 positions[MAX_USER] = {
+	// 플레이어 시작 위치..
+	XMFLOAT3 positions[MAX_PLAYER] = {
 		{ 750.0f, 230.0f, 1850.0f },
 		{ 750.0f,  230.0f, 2250.0f },
 		{ 950.0f,  230.0f, 1850.0f },
 		{ 750.0f,  230.0f, 2050.0f },
 		{ 1150.0f,  230.0f, 2250.0f }
 	};
-	for (int i = 0; i < MAX_USER; ++i) {
+	for (int i = 0; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer();
 		m_Players[i]->SetPosition(positions[i]);
 	}

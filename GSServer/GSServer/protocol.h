@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr int MAX_USER = 5;
+constexpr int MAX_PLAYER = 5;
 
 constexpr int MAX_PLAYER_NAME = 200;
 constexpr int SERVERPORT = 9000;
@@ -156,17 +156,17 @@ struct P_S2C_UPDATE_SYNC {
 	PACKET_PROTOCOL type;
 	char playerNum;
 	 
-	char id[MAX_USER];
+	char id[MAX_PLAYER];
 
-	int posX[MAX_USER];
-	int posY[MAX_USER];
-	int posZ[MAX_USER];
+	int posX[MAX_PLAYER];
+	int posY[MAX_PLAYER];
+	int posZ[MAX_PLAYER];
 
-	short angle[MAX_USER];
+	short angle[MAX_PLAYER];
 
-	char hp[MAX_USER];
-	char sp[MAX_USER];
+	char hp[MAX_PLAYER];
+	char sp[MAX_PLAYER];
 
-	WEAPON_TYPE weaponType[MAX_USER];  
+	WEAPON_TYPE weaponType[MAX_PLAYER];  
 };
 #pragma pack (pop)
