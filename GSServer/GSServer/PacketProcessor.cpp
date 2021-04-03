@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "GameSceneProcessor.h"
+#include "PacketProcessor.h"
 #include "protocol.h"
 
 bool PacketProcessor::ProcessGameScene(SOCKET& socket)
@@ -171,6 +171,7 @@ void PacketProcessor::UpdateLoop()
 
 void PacketProcessor::InitAll()
 {
+	InitTerrainHeightMap();
 	InitPlayers(); 
 	InitMonsters();
 }
@@ -203,4 +204,25 @@ void PacketProcessor::InitPlayers()
 
 void PacketProcessor::InitMonsters()
 {
+	
+}
+
+void PacketProcessor::InitTerrainHeightMap()
+{
+	ifstream fileIn("resources/Heights.txt");
+	for (int i = 0; i <= TERRAIN_HEIGHT_MAP_HEIGHT; ++i)
+	{
+		for (int j = 0; j <= TERRAIN_HEIGHT_MAP_WIDTH; ++j)
+		{
+			string text;
+			fileIn >> text;
+			if (text.compare("//") == 0)
+			{
+				j--;
+				continue;
+			} 
+			m_Heights[i][j] = stoi(text);
+		} 
+	}
+	int stop = 3;
 }

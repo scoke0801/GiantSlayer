@@ -22,7 +22,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GameSceneProcessor.cpp">
+    <ClCompile Include="PacketProcessor.cpp">
       <Filter>Communicates\GameSceneProcessor</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
@@ -42,7 +42,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameSceneProcessor.h">
+    <ClInclude Include="PacketProcessor.h">
       <Filter>Communicates\GameSceneProcessor</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">

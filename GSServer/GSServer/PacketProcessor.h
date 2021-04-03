@@ -20,6 +20,8 @@ private:
 
 	int							m_CurrentlyDeletedPlayerId;
 
+	int							m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
+
 private:
 	// for update timer
 	chrono::system_clock::time_point currentTime;
@@ -48,11 +50,15 @@ public:
 	bool ProcessGameScene(SOCKET& socket);
 
 	void UpdateLoop();
+
+private:
+	void Update(float elapsedTime);
+
 private:
 	void InitAll();
 	void InitPlayers();
 	void InitMonsters();
 
-	void Update(float elapsedTime);
+	void InitTerrainHeightMap(); 
 };
 

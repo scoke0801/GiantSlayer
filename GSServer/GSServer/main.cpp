@@ -1,8 +1,9 @@
 #include "stdafx.h"
-
+#include "PacketProcessor.h"
 #include "Communicates.h"  
 int main(int argc, char* argv[])
 {
+	PacketProcessor::GetInstance();
 #pragma region ForDebugHide
 	int retVal;
 

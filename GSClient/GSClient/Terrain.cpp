@@ -912,10 +912,8 @@ void CTerrain::FileRead()
 			{
 				j--;
 				continue;
-			}
-			//cout << stoi(text) << " ";
+			} 
 			m_Heights[i][j] = stoi(text);
-		}
-		//cout << "\n";
+		} 
 	}
 }

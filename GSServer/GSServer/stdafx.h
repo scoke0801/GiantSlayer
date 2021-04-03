@@ -19,7 +19,8 @@ using namespace std;
 
 #define width 480 
 #define height 960
-
+constexpr int TERRAIN_HEIGHT_MAP_HEIGHT = 100;
+constexpr int TERRAIN_HEIGHT_MAP_WIDTH = 100;
 #define FPS 1 / 30.0f
 //프레임을 따라잡기까지 최대 몇번 루프를 돌 것인지를 지정합니다.
 #define MAX_LOOP_TIME 5
