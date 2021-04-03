@@ -18,8 +18,9 @@ void CPlayer::Update(double fTimeElapsed)
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
-	Move(vel); 
-
+	Move(vel);  
+	cout << "pos : " << m_xmf3Position.x << " , " << m_xmf3Position.y << " " << m_xmf3Position.z << " \n";
+	
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 
 	if (fDeceleration > fLength) fDeceleration = fLength;
@@ -35,18 +36,18 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	switch (direction)
 	{
 	case OBJ_DIRECTION::Front:
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(look, PLAYER_RUN_VELOCITY));
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(XMFLOAT3{0.0f, 0.0f, 1.0f}, PLAYER_RUN_VELOCITY));
 		break;
 	case OBJ_DIRECTION::Back:
 		//look.z *= -1;
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(Vector3::Multifly(look, -1), PLAYER_RUN_VELOCITY));
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(XMFLOAT3{ 0.0f, 0.0f, -1.0f }, PLAYER_RUN_VELOCITY));
 		break;
 	case OBJ_DIRECTION::Left:
 		//right.x *= -1;
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(Vector3::Multifly(right, -1), PLAYER_RUN_VELOCITY));
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(XMFLOAT3{ -1.0f, 0.0f, 0.0f }, PLAYER_RUN_VELOCITY));
 		break;
 	case OBJ_DIRECTION::Right:
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(right, PLAYER_RUN_VELOCITY));
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(XMFLOAT3{ 1.0f, 0.0f, 1.0f }, PLAYER_RUN_VELOCITY));
 		break;
 	default:
 		assert("잘못된 방향으로 이동할 수 없어요~");

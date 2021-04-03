@@ -420,7 +420,7 @@ void CFramework::Draw()
 
 	m_CurrentScene->Draw(m_pd3dCommandList);
 
-	m_CurrentScene->DrawPlayer(m_pd3dCommandList);
+	//m_CurrentScene->DrawPlayer(m_pd3dCommandList);
 	 
 	m_CurrentScene->DrawUI(m_pd3dCommandList);
 

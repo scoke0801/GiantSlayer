@@ -22,7 +22,7 @@ protected:
 	CPlayer*					m_Player = nullptr;
 
 	int							m_CurrentPlayerNum = 0;
-	CPlayer*					m_Players[MAX_USER];
+	CPlayer*					m_Players[MAX_PLAYER];
 
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;

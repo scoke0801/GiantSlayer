@@ -294,9 +294,11 @@ void CSceneJH::Update(double elapsedTime)
 	}
 	m_HelpTextUI->Update(elapsedTime);
 
-	m_Player->Update(elapsedTime);
-	m_Player->FixPositionByTerrain(m_Terrain);
-
+	for(auto player : m_Players){
+		player->Update(elapsedTime);
+		player->FixPositionByTerrain(m_Terrain);	
+	} 
+	
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
 	if (m_MirrorCamera)
@@ -353,14 +355,15 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Mirror->Draw(pd3dCommandList, m_CurrentCamera);
 	 
-	for (auto pObject : m_BillboardObjects)
-	{
+	for (auto pObject : m_BillboardObjects) {
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 
-	for (auto pObject : m_Objects)
-	{
+	for (auto pObject : m_Objects) {
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+	for (auto player : m_Players) {
+		player->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 
@@ -431,7 +434,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	{
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
-
+	 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
 
@@ -531,22 +534,42 @@ void CSceneJH::Communicate(SOCKET& sock)
 	char buffer[BUFSIZE + 1] = {};
 	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
 	PACKET_PROTOCOL type = (PACKET_PROTOCOL)buffer[1];
+
+	// 플레이어 추가 혹은 삭제 패킷 수신
 	if (type == PACKET_PROTOCOL::S2C_NEW_PLAYER) {
+		cout << "Packet::NewPlayer[ServerToClient]\n";
 		P_S2C_ADD_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_ADD_PLAYER*>(&buffer);
-		AddPlayer(p_addPlayer.id);
+		XMFLOAT3 pos = { IntToFloat(p_addPlayer.x), IntToFloat(p_addPlayer.y), IntToFloat(p_addPlayer.z) };
+
+		m_Players[p_addPlayer.id]->SetPosition(pos);
+		m_Players[p_addPlayer.id]->SetDrawable(true);
+		++m_CurrentPlayerNum;
 		haveToRecv = true;
 	}
-	if (type == PACKET_PROTOCOL::S2C_DELETE_PLAYER) { 
-		P_S2C_DELETE_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_DELETE_PLAYER*>(&buffer);
-		DeletePlayer(p_addPlayer.id);
+	else if (type == PACKET_PROTOCOL::S2C_DELETE_PLAYER) { 
+		cout << "Packet::DeletePlayer[ServerToClient]\n";
+		P_S2C_DELETE_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_DELETE_PLAYER*>(&buffer); 
+		m_Players[p_addPlayer.id]->SetDrawable(false);
 		haveToRecv = true;
 	}
+	// 갱신 정보를 다시 받아와야 하는 경우.
+	if (haveToRecv) {
+		ZeroMemory(buffer, sizeof(buffer));
+		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+		haveToRecv = false;
+	}
+
+	// 새롭게 받아온 정보가 갱신 정보가 아닌 기타 정보인 경우.
 	if (type == PACKET_PROTOCOL::S2C_INGAME_DOOR_EVENT) {
+		cout << "Packet::DoorEvent[ServerToClient]\n";
 		haveToRecv = true;
 	}
-	if (type == PACKET_PROTOCOL::S2C_INGAME_END) { 
+	if (type == PACKET_PROTOCOL::S2C_INGAME_END) {
+		cout << "Packet::GameEnd[ServerToClient]\n";
 		return;
 	}
+
+	// 모든 부가 정보들 갱신을 마치고 플레이어들 정보를 다시 받아와야 하는 경우.
 	if (haveToRecv) {
 		ZeroMemory(buffer, sizeof(buffer));
 		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
@@ -1707,7 +1730,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_MinimapCamera->SetTarget(m_Players[0]);
 
-	for (int i = 1; i < MAX_USER; ++i) {
+	for (int i = 1; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 		m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 		m_Players[i]->Scale(50, 50, 50);
@@ -1719,5 +1742,6 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_Players[i]->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
 		m_Players[i]->SetDrawable(false); 
 	}
-	m_Player;
+
+	m_Player = m_Players[0];
 }

@@ -20,7 +20,10 @@ using namespace std;
 #define width 480 
 #define height 960
 
-#define FPS 1 / 60
+#define FPS 1 / 30.0f
+//프레임을 따라잡기까지 최대 몇번 루프를 돌 것인지를 지정합니다.
+#define MAX_LOOP_TIME 5
+
 #include <Windowsx.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>

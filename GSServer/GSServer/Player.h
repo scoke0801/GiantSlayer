@@ -12,8 +12,9 @@ class CPlayer : public CGameObject
 private:
 	Player_Move_Type m_MovingType = Player_Move_Type::Run;
 
-	short m_Id;
-	string m_Name;
+	short	m_Id;
+	string	m_Name;
+	bool	m_isExist = false;
 
 public:
 	CPlayer();
@@ -32,4 +33,7 @@ public:
 
 	void SetId(short id) { m_Id = id; }
 	short GetId() const { return m_Id; }
+
+	void SetExistence(bool existence) { m_isExist = existence; };
+	bool IsExist() const { return m_isExist; }
 };

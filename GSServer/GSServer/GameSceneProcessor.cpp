@@ -2,15 +2,8 @@
 #include "GameSceneProcessor.h"
 #include "protocol.h"
 
-bool GameSceneProcessor::ProcessGameScene(SOCKET& socket)
-{
-	//static std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
-	//static std::chrono::duration<double> timeElapsed;
-	//
-	//timeElapsed = std::chrono::system_clock::now() - currentTime;
-	//currentTime = std::chrono::system_clock::now();
-	////cout << "TimeElapsed: " << timeElapsed.count() << " ";
-
+bool PacketProcessor::ProcessGameScene(SOCKET& socket)
+{ 
 	char buffer[BUFSIZE + 1] = {}; 
 	int count = 0;
 	int retval = 0;
@@ -34,8 +27,9 @@ bool GameSceneProcessor::ProcessGameScene(SOCKET& socket)
 			p_processLogin.isSuccess = false;
 		}
 		else{
-			p_processLogin.isSuccess = true;
+			p_processLogin.isSuccess = true; 
 
+			m_Players[m_CurrentPlayerNum]->SetExistence(true);
 			m_Players[m_CurrentPlayerNum]->SetId(m_CurrentPlayerNum);
 			XMFLOAT3 pos = m_Players[m_CurrentPlayerNum]->GetPosition();
 
@@ -75,12 +69,16 @@ bool GameSceneProcessor::ProcessGameScene(SOCKET& socket)
 		switch (p_keyboard.keyInput)
 		{
 		case VK_W:
+			m_Players[p_keyboard.id]->SetVelocity(OBJ_DIRECTION::Front);
 			break;
 		case VK_S:
-			break;
+			m_Players[p_keyboard.id]->SetVelocity(OBJ_DIRECTION::Back);
+			break; 
 		case VK_A:
+			m_Players[p_keyboard.id]->SetVelocity(OBJ_DIRECTION::Left);
 			break;
 		case VK_D:
+			m_Players[p_keyboard.id]->SetVelocity(OBJ_DIRECTION::Right);
 			break;
 		}
 
@@ -135,7 +133,7 @@ bool GameSceneProcessor::ProcessGameScene(SOCKET& socket)
 		p_syncUpdate.playerNum = m_CurrentPlayerNum;
 
 		for (int i = 0; i < m_CurrentPlayerNum; ++i) {
-			p_syncUpdate.id[i] = m_Players[i]->GetId(); 
+			p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId()); 
 			
 			XMFLOAT3 pos = m_Players[i]->GetPosition();
 			p_syncUpdate.posX[i] = FloatToInt(pos.x);
@@ -150,13 +148,43 @@ bool GameSceneProcessor::ProcessGameScene(SOCKET& socket)
 	return false;
 }
 
-void GameSceneProcessor::InitAll()
+void PacketProcessor::UpdateLoop()
+{	 
+	timeElapsed = std::chrono::system_clock::now() - currentTime;
+	float dLag = 0.0f;
+
+	if (timeElapsed.count() > FPS)
+	{
+		currentTime = std::chrono::system_clock::now();
+
+		//게임 시간이 늦어진 경우 이를 따라잡을 때 까지 업데이트 시킵니다.
+		dLag += timeElapsed.count();
+		for (int i = 0; dLag > FPS && i < MAX_LOOP_TIME; ++i)
+		{
+			Update(FPS);
+			dLag -= FPS;
+		}
+	}
+	else
+		return; 
+}
+
+void PacketProcessor::InitAll()
 {
 	InitPlayers(); 
 	InitMonsters();
 }
 
-void GameSceneProcessor::InitPlayers()
+void PacketProcessor::Update(float elapsedTime)
+{ 
+	for (int i = 0; i < MAX_PLAYER; ++i) {
+		if (m_Players[i]->IsExist()) {
+			m_Players[i]->Update(elapsedTime);
+		}
+	}
+}
+
+void PacketProcessor::InitPlayers()
 {
 	// 플레이어 시작 위치..
 	XMFLOAT3 positions[MAX_PLAYER] = {
@@ -169,9 +197,10 @@ void GameSceneProcessor::InitPlayers()
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer();
 		m_Players[i]->SetPosition(positions[i]);
+		m_Players[i]->SetExistence(false);
 	}
 }
 
-void GameSceneProcessor::InitMonsters()
+void PacketProcessor::InitMonsters()
 {
 }

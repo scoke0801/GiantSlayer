@@ -112,13 +112,7 @@ DWORD __stdcall MainServerThread(LPVOID arg)
 	// 클라이언트 정보 받기
 	addrLen = sizeof(clientAddr);
 	getpeername(client_sock, (SOCKADDR*)&clientAddr, &addrLen);
-
-	// +1, null value
-	char buffer[BUFSIZE + 1];
-	int receivedSize = 0;
-	int count = 0;
-	int retval = 0;
-
+	  
 	while (1) {
 		static std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
 		static std::chrono::duration<double> timeElapsed;
@@ -126,8 +120,10 @@ DWORD __stdcall MainServerThread(LPVOID arg)
 		timeElapsed = std::chrono::system_clock::now() - currentTime;
 		currentTime = std::chrono::system_clock::now();
 		//cout << "TimeElapsed: " << timeElapsed.count() << " \n";
+
+		PacketProcessor::GetInstance()->UpdateLoop();
 		
-		GameSceneProcessor::GetInstance()->ProcessGameScene(client_sock); 
+		PacketProcessor::GetInstance()->ProcessGameScene(client_sock); 
 	}
 
 	// closesocket()
