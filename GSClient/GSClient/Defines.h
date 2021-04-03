@@ -40,8 +40,7 @@
 #define SHOW_CAPTIONFPS
 //-------------------------------------------------------------------
 //
-#define FRAME_BUFFER_WIDTH		1280
-#define FRAME_BUFFER_HEIGHT		768
+
 #define SWAP_BUFFER_COUNT		2
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE

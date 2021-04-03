@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"  
+#include "Camera.h"
 
 enum class Player_Move_Type
 {

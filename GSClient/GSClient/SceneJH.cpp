@@ -1713,6 +1713,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
+	m_Player = m_Players[0];
 
 	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
 	m_Cameras[0]->SetTarget(m_Players[0]);
@@ -1736,12 +1737,27 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_Players[i]->Scale(50, 50, 50);
 		m_Players[i]->SetObjectName(OBJ_NAME::Player);
 
-		m_Players[i]->SetCamera(m_Cameras[0]);
+		//m_Players[i]->SetCamera(m_Cameras[0]);
 		m_Players[i]->SetTextureIndex(0x200);
 		m_Players[i]->SetMesh(fbxMesh);
 		m_Players[i]->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
 		m_Players[i]->SetDrawable(false); 
 	}
 
-	m_Player = m_Players[0];
+	
+	/*
+	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+	m_Cameras[0]->SetTarget(m_Player);
+
+	m_Player->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	m_Player->Scale(50, 50, 50);
+	m_Player->SetObjectName(OBJ_NAME::Player);
+	m_Player->SetPosition({ 750,  230, 1850 });
+	m_Player->SetCamera(m_Cameras[0]);
+	m_Player->SetTextureIndex(0x80);
+	m_Player->SetMesh(fbxMesh);
+	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+
+	m_MinimapCamera->SetTarget(m_Player); 
+	*/
 }

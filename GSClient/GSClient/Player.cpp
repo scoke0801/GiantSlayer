@@ -25,10 +25,12 @@ void CPlayer::Update(double fTimeElapsed)
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
 	Move(vel);
-	  
-	m_Camera->Update(m_xmf3Position, fTimeElapsed);
-	m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
-	m_Camera->UpdateViewMatrix(); 
+
+	if (m_Camera != nullptr) {
+		m_Camera->Update(m_xmf3Position, fTimeElapsed);
+		m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
+		m_Camera->UpdateViewMatrix();
+	}
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 

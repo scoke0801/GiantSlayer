@@ -63,8 +63,6 @@ private:
 	XMFLOAT4X4					m_TargetTransform;
 	XMFLOAT3					m_xmf3Offset = { 0.0f, 0.0f, 0.0f };
 	 
-	float						m_TestXAngle = 0.0f;
-	float						m_TestYAngle = 0.0f;
 public:
 	CCamera();
 	~CCamera();
