@@ -1,11 +1,13 @@
 /.vs
 /vs
 /GSClient/.vs
+/GSServer/.vs
 /.Debug
 /Debug
 /x64
 /ipch
 /Debug
+/v16/*
 *.exe
 *.ilk
 *.pdb
@@ -20,3 +22,4 @@
 *.ipch
 *.res
 /GSClient/lib/libfbxsdk-md.lib
+*.recipe

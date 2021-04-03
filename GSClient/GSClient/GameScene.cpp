@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "GameObject.h"
 #include "Camera.h"
+#include "Terrain.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_CAMERA			1
@@ -41,16 +42,13 @@ void CGameScene::BuildCamera(ID3D12Device* pd3dDevice,
 	for (int i = 0; i < nCameras; ++i)
 	{
 		CCamera* pCamera = new CCamera;
-		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 5000.0f);
+		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 100000.0f);
 		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
 		pCamera->SetScissorRect(0, 0, width, height);
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		m_Cameras[i] = pCamera;
 	}
-	//m_Cameras[0]->SetPosition(0.0f, 300.0f, 0.0f);
-	////m_Cameras[0]->RotateY(XMConvertToRadians(180));
-	//m_Cameras[0]->Pitch(XMConvertToRadians(90));
-	m_Cameras[0]->SetPosition(125.0f, 250.0f, 140.0f);
+	m_Cameras[0]->SetPosition(0.0f, 0.0f, 0.0f);
 	m_Cameras[0]->RotateY(XMConvertToRadians(45));
 	m_Cameras[0]->Pitch(XMConvertToRadians(65));
 	m_Cameras[1]->SetPosition(1000.0f, 10.0f, -150.0f);
@@ -137,13 +135,6 @@ void CGameScene::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
 	m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
 
-	//m_pLights->m_pLights[3].m_bEnable = true;
-	//m_pLights->m_pLights[3].m_nType = DIRECTIONAL_LIGHT;
-	//m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	//m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	//m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
-	//m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(-1.0f, 0.0f, 0.0f);
-
 	m_pLights->m_pLights[3].m_bEnable = true;
 	m_pLights->m_pLights[3].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[3].m_fRange = 600.0f;
@@ -167,17 +158,16 @@ void CGameScene::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 }
 
 void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	// 지형 메쉬 
-	CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000);
-	CTerrainWayMesh* pEdgeMeshTex = new CTerrainWayMesh(pd3dDevice, pd3dCommandList, 0, 0, 100, 100);
-
+{  
 	m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
 	//CMeshFbx* pTowerMeshTex = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Medieval tower_Mid.fbx");
+
+	// 지형 메쉬 
+	//CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000, 10, 10); 
 
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -195,83 +185,40 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, pSkyBoxShader);
-
-	CShader* pShader = new CShader();
-	pShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
-	pShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	 
+	CShader* pTerrainShader = new CTerrainTessellationShader();
+	pTerrainShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTerrainTessellation");
+	pTerrainShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTerrainTessellation");
+	pTerrainShader->CreateDomainShader(L"Shaders\\Shaders.hlsl", "DSTerrainTessellation");
+	pTerrainShader->CreateHullShader(L"Shaders\\Shaders.hlsl", "HSTerrainTessellation");
+	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
+	pTerrainShader->CreateTerrainShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 #pragma region Create Terrain
-	// 지형
-	m_ppObjects[0]->SetMesh(pPlaneMeshTex);
-	m_ppObjects[0]->SetPosition({ 0,  0,  0 });
-	m_ppObjects[0]->SetTextureIndex(0x01);
-	m_ppObjects[0]->SetShader(pShader);
+	//m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, 257, 257, 9, 9, pTerrainShader);
+#pragma endregion 
 
-	//m_ppObjects[1]->SetMesh(pPlaneMeshTex);
-	//m_ppObjects[1]->SetPosition({ 500,  0,  0 });
-	//m_ppObjects[1]->SetTextureIndex(0x01);
-	//m_ppObjects[1]->SetShader(pShader);
-	//
-	//m_ppObjects[2]->SetMesh(pPlaneMeshTex);
-	//m_ppObjects[2]->SetPosition({ 0,  0,  500 });
-	//m_ppObjects[2]->SetTextureIndex(0x01);
-	//m_ppObjects[2]->SetShader(pShader);
-	//
-	//m_ppObjects[3]->SetMesh(pPlaneMeshTex);
-	//m_ppObjects[3]->SetPosition({ 500,  0,  500 });
-	//m_ppObjects[3]->SetTextureIndex(0x01);
-	//m_ppObjects[3]->SetShader(pShader);
-	//
-	////// 아래
-	//m_ppObjects[4]->SetMesh(pEdgeMeshTex);
-	//m_ppObjects[4]->SetPosition({ -800,  -20,  0 });
-	//m_ppObjects[4]->Rotate(XMFLOAT3(0, 1, 0), 90);
-	//m_ppObjects[4]->Rotate(XMFLOAT3(0, 0, 1), 30);
-	//m_ppObjects[4]->SetTextureIndex(0x01);
-	//m_ppObjects[4]->SetShader(pShader);
-	//
-	//// 왼쪽
-	//m_ppObjects[6]->SetMesh(pEdgeMeshTex);
-	//m_ppObjects[6]->SetPosition({ 0,  -20,  1700 });
-	//m_ppObjects[6]->Rotate(XMFLOAT3(0, 1, 0), 180);
-	//m_ppObjects[6]->Rotate(XMFLOAT3(0, 0, 1), 30);
-	//m_ppObjects[6]->SetTextureIndex(0x01);
-	//m_ppObjects[6]->SetShader(pShader);
-	//
-	////// 오른쪽
-	//m_ppObjects[7]->SetMesh(pEdgeMeshTex);
-	//m_ppObjects[7]->SetPosition({ 1810,  470,  1700 });
-	//m_ppObjects[7]->Rotate(XMFLOAT3(0, 1, 0), 180);
-	//m_ppObjects[7]->Rotate(XMFLOAT3(0, 0, 1), -30);
-	//m_ppObjects[7]->SetTextureIndex(0x01);
-	//m_ppObjects[7]->SetShader(pShader);
-	//
-	////// 모서리 위
-	//m_ppObjects[8]->SetMesh(pEdgeMeshTex);
-	//m_ppObjects[8]->SetPosition({ -1200,  470,  1820 });
-	//m_ppObjects[8]->Rotate(XMFLOAT3(0, 1, 0), 90);
-	//m_ppObjects[8]->Rotate(XMFLOAT3(0, 0, 1), -30);
-	//m_ppObjects[8]->SetTextureIndex(0x01);
-	//m_ppObjects[8]->SetShader(pShader);
+	CShader* pObjectShader = new CShader();
+	pObjectShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
+	pObjectShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
+	pObjectShader->CreateInputLayout(ShaderTypes::Textured);
+	pObjectShader->CreateGeneralShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-#pragma endregion  
 	CBox* pBox = new CBox(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 50.0f);
-	pBox->SetShader(pShader);
+	pBox->SetShader(pObjectShader);
 	pBox->SetObjectName(OBJ_NAME::Box);
 
 	m_ppObjects[5] = pBox;
 	m_ppObjects[5]->SetPosition({ 250,  25, 250 });
 	m_ppObjects[5]->SetTextureIndex(0x80);
 
-	/*CGameObject* ptower = new CGameObject();
-	ptower->SetShader(pShader);
+	//CGameObject* ptower = new CGameObject();
+	//ptower->SetShader(pShader);
 
-	m_ppObjects[6] = ptower;
-	m_ppObjects[6]->SetMesh(pTowerMeshTex);
-	m_ppObjects[6]->SetPosition({ 250,  125, 250 });
-	m_ppObjects[6]->SetTextureIndex(0x100);*/
+	//m_ppObjects[6] = ptower;
+	//m_ppObjects[6]->SetMesh(pTowerMeshTex);
+	//m_ppObjects[6]->SetPosition({ 250,  125, 250 });
+	//m_ppObjects[6]->SetTextureIndex(0x100);
 }
 
 void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -434,7 +381,8 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
 
-	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
+	//m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
 	//씬을 렌더링하는 것은 씬을 구성하는 게임 객체(셰이더를 포함하는 객체)들을 렌더링하는 것이다.
 	for (int j = 0; j < m_nObjects; j++)
@@ -472,8 +420,6 @@ void CGameScene::ProcessInput()
 	{
 		m_CurrentCamera->Strafe(cameraSpeed);
 	}
-
-	
 	if (keyInput.KEY_B)
 	{
 		m_CurrentCamera->SetShake(true, 0.5f, 5.0f);
@@ -500,7 +446,7 @@ void CGameScene::ProcessInput()
 	}
 	if (keyInput.KEY_ADD)
 	{
-		m_CurrentCamera->SetSpeed(min(cameraSpeed + 1.0f, 25.0f));
+		m_CurrentCamera->SetSpeed(min(cameraSpeed + 1.0f, 2.0f));
 	}
 	if (keyInput.KEY_SUBTRACT)
 	{
@@ -587,14 +533,9 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dRootParameters[4].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[4].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
 	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
-
+	 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
-		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 #pragma region sampler
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
@@ -624,8 +565,7 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	pd3dSamplerDescs[1].ShaderRegister = 1;
 	pd3dSamplerDescs[1].RegisterSpace = 0;
 	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-#pragma endregion
-
+#pragma endregion 
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
@@ -633,7 +573,7 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	d3dRootSignatureDesc.NumStaticSamplers = _countof(pd3dSamplerDescs);
 	d3dRootSignatureDesc.pStaticSamplers = pd3dSamplerDescs;
 	d3dRootSignatureDesc.Flags
-		= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+		= d3dRootSignatureFlags;
 
 	ID3DBlob* pd3dSignatureBlob = NULL;
 	ID3DBlob* pd3dErrorBlob = NULL;

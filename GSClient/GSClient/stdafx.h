@@ -76,7 +76,8 @@ extern UINT gnDsvDescriptorIncrementSize;
 
 extern bool gbTerrainTessellationWireframe;
 extern bool gbBlurOn;
-
+extern bool gbBoundaryOn;
+extern bool gbWireframeOn;
 extern const int gNumFrameResources;
 
 extern void SynchronizeResourceTransition(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dResource, D3D12_RESOURCE_STATES d3dStateBefore, D3D12_RESOURCE_STATES d3dStateAfter);
@@ -204,7 +205,13 @@ namespace Vector3
 	inline float AngleAtan(const XMFLOAT3& from, const XMFLOAT3& to)
 	{
 		XMFLOAT3 xmf3Result = Subtract(to, from);
-		return XMConvertToDegrees(atan2f(xmf3Result.x, xmf3Result.z));
+		return XMConvertToDegrees(atan2f(xmf3Result.z, xmf3Result.x));
+	}
+	inline float GetAngle(const XMFLOAT3& vStart, const XMFLOAT3& vEnd)
+	{
+		XMFLOAT3 v = Subtract(vEnd, vStart);
+
+		return XMConvertToDegrees(atan2f(v.z, v.x));
 	}
 	inline XMFLOAT3 TransformNormal(XMFLOAT3& xmf3Vector, XMMATRIX& xmmtxTransform)
 	{
@@ -376,5 +383,5 @@ static T Clamp(const T& x, const T& low, const T& high)
 #include "Material.h"
 #include "GameFramework.h"
 #include "Light.h"
-
+#include "ShaderHandler.h"
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.

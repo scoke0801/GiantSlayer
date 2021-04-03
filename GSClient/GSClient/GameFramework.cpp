@@ -6,15 +6,14 @@
 #include "TitleScene.h"
 #include "Mesh.h"
 #include "Camera.h"
-
+#include "Communicates.h"
 CFramework::CFramework()
 {
 	m_GameTimer.Init();
 	m_FPSTimer.Init();
 
 	m_nWndClientWidth = FRAME_BUFFER_WIDTH;
-	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
-	m_FPSTimer.Init();
+	m_nWndClientHeight = FRAME_BUFFER_HEIGHT; 
 }
 
 void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
@@ -40,17 +39,10 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	CoInitialize(NULL);
 
 	//CreateAboutD2D();
-
-	m_d3dViewport.TopLeftX = 0;
-	m_d3dViewport.TopLeftY = 0;
-	m_d3dViewport.Width = static_cast<float>(m_nWndClientWidth);
-	m_d3dViewport.Height = static_cast<float>(m_nWndClientHeight);
-	m_d3dViewport.MinDepth = 0.0f;
-	m_d3dViewport.MaxDepth = 1.0f;
-
-	m_d3dScissorRect = { 0, 0, m_nWndClientWidth, m_nWndClientHeight };
-
+	 
 	BuildScene();
+	
+	InitializeCriticalSection(&m_cs);
 }
 
 void CFramework::OnDestroy()
@@ -75,6 +67,8 @@ void CFramework::OnDestroy()
 	if (m_pdxgiFactory) m_pdxgiFactory->Release();
 
 	CoUninitialize();
+
+	DeleteCriticalSection(&m_cs);
 }
 
 void CFramework::CreateSwapChain()
@@ -303,92 +297,14 @@ void CFramework::BuildScene()
 
 	m_CurrentScene->ReleaseUploadBuffers();
 }
-
-void CFramework::CreateAboutD2D()
+   
+void CFramework::SinglePlayUpdate()
 {
-	// create the DirectWrite factory
-	if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), &m_pd2dWriteFactory)))
-		assert(!"Critical error: Unable to create the DirectWrite factory!");
-
-	// create the Direct2D factory
-	D2D1_FACTORY_OPTIONS options;
-#ifndef NDEBUG
-	options.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
-#else
-	options.debugLevel = D2D1_DEBUG_LEVEL_NONE;
-#endif 
-	if (FAILED(D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED, __uuidof(ID2D1Factory2), &options, &m_pd2dFactory)))
-		assert(!"Critical error: Unable to create Direct2D Factory!");
-
-	// get the dxgi device
-	//m_pd3dDevice->As;
-
-	//m_pd3dDevice->As(&m_pdxgiDevice);
-
-	if (FAILED(m_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice), &m_pdxgiDevice)))
-		return assert(!"Critical error: Unable to get the DXGI device!");
-
-	if (FAILED(m_pd2dFactory->CreateDevice(m_pdxgiDevice.Get(), &m_pd2Device)))
-		return assert(!"Critical error: Unable to create the Direct2D device!");
-
-	// create the device context
-	if (FAILED(m_pd2Device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS, &m_pd2devCon)))
-		return assert(!"Critical error: Unable to create the Direct2D device context!");
-
-	CreateBitmapRenderTarget();
-}
-
-void CFramework::CreateBitmapRenderTarget()
-{
-	// specify the desired bitmap properties
-	D2D1_BITMAP_PROPERTIES1 bp;
-	bp.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	bp.pixelFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE;
-	bp.dpiX = 96.0f;
-	bp.dpiY = 96.0f;
-	bp.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
-	bp.colorContext = nullptr;
-
-	// Direct2D needs the DXGI version of the back buffer
-	Microsoft::WRL::ComPtr<IDXGISurface> dxgiBuffer;
-
-	if (FAILED(m_pdxgiSwapChain->GetBuffer(0, __uuidof(IDXGISurface), &dxgiBuffer)))
-		return assert(!"Critical error: Unable to retrieve the back buffer!");
-
-	//// create the bitmap
-	Microsoft::WRL::ComPtr<ID2D1Bitmap1> targetBitmap;
-	if (FAILED(m_pd2devCon->CreateBitmapFromDxgiSurface(dxgiBuffer.Get(), &bp, &targetBitmap)))
-		return assert(!"Critical error: Unable to create the Direct2D bitmap from the DXGI surface!");
-
-	// set the newly created bitmap as render target
-	m_pd2devCon->SetTarget(targetBitmap.Get());
-}
-
-void CFramework::InitializeTextFormats()
-{
-	ID2D1SolidColorBrush* yellowBrush, * blackBrush, * whiteBrush;
-	// create standard brushes
-	if (FAILED(m_pd2devCon->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Yellow), &yellowBrush)))
-		return assert(!"Critical error: Unable to create the yellow brush!");
-	if (FAILED(m_pd2devCon->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &blackBrush)))
-		return assert(!"Critical error: Unable to create the black brush!");
-	if (FAILED(m_pd2devCon->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &whiteBrush)))
-		return assert(!"Critical error: Unable to create the white brush!");
-
-	// set up text formats
-
-	// FPS text
-	//if (FAILED(writeFactory.Get()->CreateTextFormat(L"Lucida Console", nullptr, DWRITE_FONT_WEIGHT_LIGHT, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 12.0f, L"en-GB", &textFormatFPS)))
-	//	return assert(!"Critical error: Unable to create text format for FPS information!");
-	//if (FAILED(textFormatFPS->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING)))
-	//	return assert(!"Critical error: Unable to set text alignment!");
-	//if (FAILED(textFormatFPS->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR)))
-	//	return assert(!"Critical error: Unable to set paragraph alignment!");
-
-}
-
-void CFramework::Update()
-{
+	if (IsOnConntected())
+	{
+		Draw();
+		return;
+	}
 	m_GameTimer.UpdateElapsedTime();
 
 	CInputHandler::GetInstance().ProcessInput();
@@ -442,20 +358,26 @@ void CFramework::Update()
 #endif
 }
 
+void CFramework::MultiplayUpdate()
+{
+	//Draw();
+}
+
+void CFramework::SceneUpdate()
+{
+	m_CurrentScene->Update(FPS);
+}
+
 void CFramework::Animate()
 {
 }
 
 void CFramework::Draw()
 {
+	EnterCriticalSection(&m_cs);
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-
-	// 뷰포트와 씨저 사각형을 설정한다.
-	// 씬 클래스 내부로 옮겨야 함
-	m_pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
-	m_pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
-
+	 
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
 	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -476,19 +398,30 @@ void CFramework::Draw()
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
+
 	m_CurrentScene->DrawMinimap(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex]);
 	
+	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);  
+	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+
+
+	m_CurrentScene->DrawMirror(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex]);
+
 	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	//m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+
+	m_pd3dCommandList->OMSetRenderTargets(0, NULL, false, &d3dDsvCPUDescriptorHandle);
+	m_CurrentScene->DrawShadow(m_pd3dCommandList, m_pd3dDepthStencilBuffer);
+
+	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);
+	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+
 	m_CurrentScene->Draw(m_pd3dCommandList);
 
 	m_CurrentScene->DrawPlayer(m_pd3dCommandList);
-
-	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	//m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
-
-	//m_CurrentScene->DrawMinimap(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex]);
+	 
 	m_CurrentScene->DrawUI(m_pd3dCommandList);
 
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
@@ -509,9 +442,142 @@ void CFramework::Draw()
 	m_pdxgiSwapChain->Present(0, 0);
 
 	MoveToNextFrame();
+
+	LeaveCriticalSection(&m_cs);
+}
+
+bool CFramework::ConnectToServer()
+{
+	static bool isFirst = true;
+	if (!isFirst) return 0;
+
+	int retval = 0;
+	// 윈속 초기화
+	if (WSAStartup(MAKEWORD(2, 2), &m_WSA) != 0) return false;
+
+	// set serveraddr
+	SOCKADDR_IN serveraddr;
+	ZeroMemory(&serveraddr, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET;
+	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
+	serveraddr.sin_port = htons(SERVERPORT);
+	 
+	// socket()
+	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (m_Sock == INVALID_SOCKET)
+	{
+		m_IsServerConnected = false;
+		return false;
+	}
+	int opt_val = TRUE;
+	setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
+	retval = connect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+	if (retval == SOCKET_ERROR)
+	{
+		m_IsServerConnected = false; 
+		cout << "서버 연결 실패\n";
+		return false;
+	}
+
+	// 소켓 통신 스레드 생성
+	CreateThread(NULL, 0, ClientMain,
+		NULL/*reinterpret_cast<LPVOID>(&gFramework)*/, 0, NULL);
+	isFirst = false;
+	m_IsServerConnected = true;
+
+	return true;	
+}
+
+void CFramework::LoginToServer()
+{
+	
+}
+
+void CFramework::LogoutToServer()
+{
+	P_C2S_LOGOUT p_logout;
+
+	p_logout.size = sizeof(p_logout);
+	p_logout.type = PACKET_PROTOCOL::C2S_LOGOUT;
+	p_logout.id = CFramework::GetInstance().GetPlayerId();
+	strcpy_s(p_logout.name, CFramework::GetInstance().GetPlayerName().c_str());	
+	
+	int retVal;
+	SendPacket(m_Sock, reinterpret_cast<char*>(&p_logout), p_logout.size, retVal); 
+}
+
+void CFramework::Communicate()
+{
+	if (m_CurrentScene) m_CurrentScene->Communicate(m_Sock);
 }
 
 DWORD __stdcall ClientMain(LPVOID arg)
 {
+	cout << "---Enter ClientMain()\n";
+
+	CGameTimer					m_GameTimer;
+	CGameTimer					m_FPSTimer;	
+	m_GameTimer.Init();
+	m_FPSTimer.Init();
+	   
+	double lag = 0.0f;
+	double fps = 0.0f;
+	double elapsedTime = m_GameTimer.GetElapsedTime();
+	 
+	while (1)
+	{
+		m_GameTimer.UpdateElapsedTime();
+
+		CInputHandler::GetInstance().ProcessInput();
+
+		lag = 0.0f;
+		fps = 0.0f;
+		elapsedTime = m_GameTimer.GetElapsedTime();
+
+		if (elapsedTime > FPS)				//지정된 시간이 흘렀다면
+		{
+			m_GameTimer.UpdateCurrentTime();
+
+			if (elapsedTime > 0.0)
+			{
+				fps = 1.0 / elapsedTime;
+			}
+
+			//게임 시간이 늦어진 경우 이를 따라잡을 때 까지 업데이트 시킵니다.
+			lag += elapsedTime;
+			for (int i = 0; lag > FPS && i < MAX_LOOP_TIME; ++i)
+			{
+				//Communicate(); 
+				CFramework::GetInstance().Communicate(); 
+				CFramework::GetInstance().SceneUpdate();
+				lag -= FPS;
+			}
+		}
+		// 최대 FPS 미만의 시간이 경과하면 진행 생략(Frame Per Second)
+		else
+			continue;
+
+		//CFramework::GetInstance().Draw();
+#if defined(SHOW_CAPTIONFPS)
+
+		std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();
+
+		double updateElapsed = m_FPSTimer.GetElapsedTime(lastUpdateTime);
+
+		if (updateElapsed > MAX_UPDATE_FPS)
+			m_FPSTimer.UpdateCurrentTime();
+		else
+			continue;
+		fps = 1.0 / m_GameTimer.GetElapsedTime();
+
+		_itow_s(fps + 0.1f,
+			CFramework::GetInstance().m_captionTitle +
+			CFramework::GetInstance().m_titleLength,
+			TITLE_LENGTH - CFramework::GetInstance().m_titleLength, 10);
+		wcscat_s(CFramework::GetInstance().m_captionTitle + CFramework::GetInstance().m_titleLength, 
+			TITLE_LENGTH - CFramework::GetInstance().m_titleLength, TEXT(" FPS)"));
+		SetWindowText(CFramework::GetInstance().GetHWND(), CFramework::GetInstance().m_captionTitle);
+#endif
+	} 
 	return 0;
 }

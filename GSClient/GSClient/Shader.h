@@ -3,11 +3,6 @@
 #include "GameObject.h"
 #include "Camera.h"
 
-//게임 객체의 정보를 셰이더에게 넘겨주기 위한 구조체(상수 버퍼)이다.
-struct CB_GAMEOBJECT_INFO
-{
-	XMFLOAT4X4 m_xmf4x4World;
-}; 
 
 enum class ShaderTypes
 {
@@ -15,6 +10,7 @@ enum class ShaderTypes
 	Diffused,
 	Textured,
 	Billboard,
+	Terrain,
 	Count,
 	FbxGeneral,
 	FbxSkinned
@@ -28,10 +24,14 @@ private:
 protected:
 	D3D12_SHADER_BYTECODE			m_d3dVSBytecode;
 	D3D12_SHADER_BYTECODE			m_d3dPSBytecode;
+	D3D12_SHADER_BYTECODE			m_d3dHSBytecode;
+	D3D12_SHADER_BYTECODE			m_d3dDSBytecode;
 	D3D12_SHADER_BYTECODE			m_d3dGSBytecode;
 
 	ID3DBlob*						m_pd3dVertexShaderBlob = nullptr;
 	ID3DBlob*						m_pd3dPixelShaderBlob = nullptr;
+	ID3DBlob*						m_pd3dHullShaderBlob = nullptr;
+	ID3DBlob*						m_pd3dDomainShaderBlob = nullptr;
 	ID3DBlob*						m_pd3dGeometryShaderBlob = nullptr;
 
 	D3D12_INPUT_LAYOUT_DESC			m_d3dInputLayoutDesc; 
@@ -39,6 +39,8 @@ protected:
 protected:
 	ID3D12PipelineState**			m_ppd3dPipelineStates = NULL;
 	int								m_nPipelineStates = 0;
+
+	ID3D12PipelineState*			m_pd3dBoundaryPipelineState = NULL;
 
 public:
 	CShader();
@@ -58,18 +60,31 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 	
-	D3D12_SHADER_BYTECODE CreateVertexShader(WCHAR* pszFileName, LPCSTR pszShaderName);
-	D3D12_SHADER_BYTECODE CreatePixelShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+
+	virtual D3D12_SHADER_BYTECODE CreateDomainShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE CreateHullShader(ID3DBlob** ppd3dShaderBlob);
+
+	// 테셀 추가
+	D3D12_SHADER_BYTECODE CreateDomainShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+	D3D12_SHADER_BYTECODE CreateHullShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+
 	D3D12_SHADER_BYTECODE CreateGeometryShader(WCHAR* pszFileName, LPCSTR pszShaderName);
 
 	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* pszFileName, LPCSTR pszShaderName,
 		LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
 
-	virtual void CreateShader(ID3D12Device* pd3dDevice,
-		ID3D12RootSignature* pd3dGraphicsRootSignature);
-	virtual void CreateGeneralShader(ID3D12Device* pd3dDevice,
-		ID3D12RootSignature* pd3dGraphicsRootSignature,
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual void CreateGeneralShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
+		bool isCullModeOn=false, bool isBlendOn = false);
+	void CreateBoundaryShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	void CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, bool isLeftSide = true);
+	void CreateUIShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	virtual void CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList);
@@ -81,6 +96,7 @@ public:
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void RenderBoundary(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 }; 
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -99,6 +115,7 @@ public:
 	virtual void CreateShader(ID3D12Device* pd3dDevice,
 		ID3D12RootSignature* pd3dGraphicsRootSignature);
 };
+
 class CTexturedShader : public CShader
 {
 private:
@@ -152,6 +169,13 @@ public:
 	virtual ~CBillboardShader();
 
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
+};
+
+class CTerrainTessellationShader : public CShader
+{
+public:
+	CTerrainTessellationShader();
+	virtual ~CTerrainTessellationShader();
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

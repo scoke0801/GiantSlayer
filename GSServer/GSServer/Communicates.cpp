@@ -1,11 +1,12 @@
 #include "stdafx.h"
 #include "Communicates.h"
+#include "GameSceneProcessor.h"
 
 void charToWchar(const char* msg, wchar_t* out)
 {
 	mbstowcs(out, msg, strlen(msg) + 1);//Plus null
 }
-void err_quit(const char* msg)
+void error_quit(const char* msg)
 {
 	wchar_t wMsg[20];
 	LPVOID lpMsgBuf;
@@ -21,7 +22,7 @@ void err_quit(const char* msg)
 	exit(1);
 
 }
-void err_display(const char* msg)
+void error_display(const char* msg)
 {
 	LPVOID lpMsgBuf;
 	FormatMessage(
@@ -51,7 +52,58 @@ int recvn(SOCKET s, char* buf, int len, int flags)
 
 	return (len - left);
 }
-DWORD __stdcall ClientThread(LPVOID arg)
+
+bool SendPacket(SOCKET& sock, char* packet, int packetSize, int& retVal)
+{
+	// 데이터 보내기(고정 길이)
+	retVal = send(sock, (char*)&packetSize, sizeof(int), 0);
+	if (retVal == SOCKET_ERROR)
+	{
+		error_display("send()");
+		return false;
+	}
+	// 데이터 보내기(가변 길이)
+	retVal = send(sock, packet, packetSize, 0);
+	if (retVal == SOCKET_ERROR)
+	{
+		error_display("send()");
+		return false;
+	}
+	return true;
+}
+
+bool RecvPacket(SOCKET& sock, char* buf, int& retVal)
+{
+	// 데이터 받기(고정 길이)
+	int len;
+	retVal = recvn(sock, (char*)&len, sizeof(int), 0);
+
+	if (retVal == SOCKET_ERROR)
+	{
+		error_display("recv()");
+		return false;
+	}
+	else if (retVal == 0) return false;
+
+	// 데이터 받기(가변 길이)
+	retVal = recvn(sock, buf, len, 0);
+
+	if (retVal == SOCKET_ERROR)
+	{
+		error_display("recv()");
+		return false;
+	}
+
+	buf[retVal] = '\0';
+	return true;
+}
+
+XMFLOAT3 GetVectorFromText(const char* text)
+{
+	return XMFLOAT3();
+}
+
+DWORD __stdcall MainServerThread(LPVOID arg)
 {
 	SOCKET client_sock = (SOCKET)arg;
 	SOCKADDR_IN clientAddr;
@@ -65,6 +117,7 @@ DWORD __stdcall ClientThread(LPVOID arg)
 	char buffer[BUFSIZE + 1];
 	int receivedSize = 0;
 	int count = 0;
+	int retval = 0;
 
 	while (1) {
 		static std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
@@ -73,8 +126,8 @@ DWORD __stdcall ClientThread(LPVOID arg)
 		timeElapsed = std::chrono::system_clock::now() - currentTime;
 		currentTime = std::chrono::system_clock::now();
 		//cout << "TimeElapsed: " << timeElapsed.count() << " \n";
-		 
-		break; 
+		
+		GameSceneProcessor::GetInstance()->ProcessGameScene(client_sock); 
 	}
 
 	// closesocket()

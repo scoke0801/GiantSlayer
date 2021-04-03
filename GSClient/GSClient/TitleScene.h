@@ -34,6 +34,10 @@ struct TestVertex
 
 class CTitleScene : public CScene
 {
+private:	
+	D3D12_VIEWPORT			m_d3dViewport;
+	D3D12_RECT				m_d3dScissorRect;
+
 private:
 	ID3D12RootSignature*	m_pd3dGraphicsRootSignature;
 	ID3D12PipelineState*	m_pd3dPipelineState;
@@ -45,11 +49,15 @@ private:
 	ID3D12DescriptorHeap*	m_pd3dSrvDescriptorHeap = nullptr;
 
 private:	// 서버와 통신하기 위한 데이터 입니다.
-	WSADATA m_WSA;
-	SOCKET m_Sock;
-	SOCKADDR m_ServerAddr;
+	WSADATA					m_WSA;
+	SOCKET					m_Sock;
+	SOCKADDR				m_ServerAddr;
 
-	bool m_IsServerConnected;
+	bool					m_IsServerConnected;
+	bool					m_IsSingleplay = true;
+
+private:
+	POINT					m_LastMousePos;
 
 public:
 	CTitleScene();
@@ -57,10 +65,17 @@ public:
 
 	virtual void Update(double elapsedTime) override; 
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override; 
-	virtual void ProcessInput(); 
+
+public:
+	virtual void ProcessInput() override; 
+	 
+	virtual void OnMouseDown(WPARAM btnState, int x, int y) override;
+	virtual void OnMouseUp(WPARAM btnState, int x, int y)	override;
+	virtual void OnMouseMove(WPARAM btnState, int x, int y) override;
+
 public:
 	virtual void SendDataToNextScene(void* context) override {}
-	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override;
 
 private: // 객체 생성 관련
 	void CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -71,9 +86,5 @@ private: // 객체 생성 관련
 
 	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-
-private: // 서버 관련
-	void ConnectToServer();
-	bool PrepareCommunicate();
 };
 

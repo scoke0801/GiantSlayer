@@ -2,15 +2,9 @@
 #include "Bridge.h"
 #include "Shader.h" 
 CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	ID3D12RootSignature* pd3dRootSignature)
+	ID3D12RootSignature* pd3dRootSignature, CShader* pShader)
 {
-	m_Name = OBJ_NAME::Bridge; 
-
-	CShader* pShader = new CShader();	
-	pShader->CreateVertexShader(L"Shaders\\TerrainAndLight.hlsl", "VSTexturedLighting");
-	pShader->CreatePixelShader(L"Shaders\\TerrainAndLight.hlsl", "PSBridgeLight"); 
-	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, pd3dRootSignature);
+	m_Name = OBJ_NAME::Bridge;  
 	 
 // 官蹿 积己
 	for (int i = 0; i < 10; i += 5)
@@ -26,7 +20,7 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		AddObject(pCubeMeshTex, pShader, 0x01);
 	}
 // 抄埃 积己
-	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
+	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,	
 		XMFLOAT3(-250.0f, 250.0f+12.5f, 0.0f),
 		50, 25, 1000);
 	//m_Meshes.push_back(pCubeMeshTex); 
@@ -128,6 +122,14 @@ void CBridge::SetPosition(XMFLOAT3 pos)
 		pObject->SetPosition(pos);
 	}
 	CGameObject::SetPosition(pos);
+}
+
+void CBridge::RotateAll(const XMFLOAT3& axis, float angle)
+{
+	for (CGameObject* pObject : m_Objects)
+	{
+		pObject->Rotate(axis, angle);
+	}
 }
 
 void CBridge::AddObject(CMesh* pMesh, CShader* pShader, UINT textureIndex)

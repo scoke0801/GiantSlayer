@@ -6,6 +6,11 @@ class CCamera;
 
 class CFramework
 {
+public:// 타이틀바 출력 관련 변수입니다.
+	_TCHAR						m_pszFrameRate[50];
+	TCHAR						m_captionTitle[50];
+	int							m_titleLength;
+
 private:
 	HWND						m_hWnd;
 	HINSTANCE					m_hInst;
@@ -15,11 +20,7 @@ private:
 
 	CScene*						m_CurrentScene;
 
-	// 타이틀바 출력 관련 변수입니다.
-	_TCHAR						m_pszFrameRate[50];
-	TCHAR						m_captionTitle[50];
-	int							m_titleLength;
-
+	
 	// 다이렉트X 관련 변수입니다.
 	int							m_nWndClientWidth;
 	int							m_nWndClientHeight;
@@ -53,17 +54,18 @@ private:
 	ID3D12DescriptorHeap*		m_pd3dCbvSrvUavDescriptorHeap = nullptr;
 	ID3D12DescriptorHeap*		m_pd3dCbvSrvUavDescriptorHeapShadow = nullptr;
 
-private:	// 텍스트 및 2D 관련~!@#!@
-	Microsoft::WRL::ComPtr<IDWriteFactory2>			m_pd2dWriteFactory;
-	Microsoft::WRL::ComPtr<ID2D1Factory2>			m_pd2dFactory;
-	Microsoft::WRL::ComPtr<IDXGIDevice>				m_pdxgiDevice;
-	Microsoft::WRL::ComPtr<ID2D1Device1>			m_pd2Device;
-	Microsoft::WRL::ComPtr<ID2D1DeviceContext1>		m_pd2devCon;
+private:
+	string						m_PlayerName;
+	int							m_PlayerId = 0;
+	 
+private:	// 서버와 통신하기 위한 데이터 입니다.
+	WSADATA					m_WSA;
+	SOCKET					m_Sock;
+	SOCKADDR				m_ServerAddr;
 
-private:	// 임시 테스트용!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-	D3D12_VIEWPORT									m_d3dViewport;
-	D3D12_RECT										m_d3dScissorRect; 
-	   
+	bool					m_IsServerConnected; 
+
+	CRITICAL_SECTION		m_cs; 
 private:
 	CFramework();
 
@@ -94,12 +96,10 @@ private:
 
 	void BuildScene();
 
-	void CreateAboutD2D();
-	void CreateBitmapRenderTarget();
-	void InitializeTextFormats();
-
 public:	// about Update
-	void Update();
+	void SinglePlayUpdate();
+	void MultiplayUpdate();
+	void SceneUpdate();
 	void Animate();
 	void Draw();
 
@@ -110,6 +110,21 @@ public: // about Mouse process
 
 public:
 	HWND GetHWND() const { return m_hWnd; }
+
+public:	// about server
+	bool ConnectToServer();
+
+	void LoginToServer();
+	void LogoutToServer();
+	void Communicate();
+
+	bool IsOnConntected() const { return m_IsServerConnected; }
+
+	string GetPlayerName() const { return m_PlayerName; }
+	void SetPlayerName(const string& id) { m_PlayerName = id; }
+
+	int GetPlayerId() const { return m_PlayerId; }
+	void SetPlayerId(int id) { m_PlayerId = id; }
 
 public:	// about scene change
 	template <typename SceneName>
@@ -139,6 +154,10 @@ public:	// about scene change
 
 		m_CurrentScene = scene;
 	}
+
+	CScene* GetCurrentScene() const { return m_CurrentScene; }
+
+	SOCKET& GetSocket() { return m_Sock; }
 };
 
 DWORD WINAPI ClientMain(LPVOID arg);

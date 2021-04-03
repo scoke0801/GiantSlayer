@@ -36,17 +36,17 @@ public:
 	~CDiffusedVertex() { }
 };
 
-class CDiffused2TexturedVertex : public CDiffusedVertex
+class CTerrainVertex : public CVertex
 {
 public:
-	XMFLOAT2						m_xmf2TexCoord0;
-	XMFLOAT2						m_xmf2TexCoord1;
+	XMFLOAT2				m_xmf2TexCoord; 
+	XMFLOAT3				m_xmf3Normal;
 
 public:
-	CDiffused2TexturedVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf4Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f); m_xmf2TexCoord0 = m_xmf2TexCoord1 = XMFLOAT2(0.0f, 0.0f); }
-	CDiffused2TexturedVertex(float x, float y, float z, XMFLOAT4 xmf4Diffuse, XMFLOAT2 xmf2TexCoord0, XMFLOAT2 xmf2TexCoord1) { m_xmf3Position = XMFLOAT3(x, y, z); m_xmf4Diffuse = xmf4Diffuse; m_xmf2TexCoord0 = xmf2TexCoord0; m_xmf2TexCoord1 = xmf2TexCoord1; }
-	CDiffused2TexturedVertex(XMFLOAT3 xmf3Position, XMFLOAT4 xmf4Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f), XMFLOAT2 xmf2TexCoord0 = XMFLOAT2(0.0f, 0.0f), XMFLOAT2 xmf2TexCoord1 = XMFLOAT2(0.0f, 0.0f)) { m_xmf3Position = xmf3Position; m_xmf4Diffuse = xmf4Diffuse; m_xmf2TexCoord0 = xmf2TexCoord0; m_xmf2TexCoord1 = xmf2TexCoord1; }
-	~CDiffused2TexturedVertex() { }
+	CTerrainVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f); }
+	CTerrainVertex(float x, float y, float z, XMFLOAT2 xmf2TexCoord) { m_xmf3Position = XMFLOAT3(x, y, z); m_xmf2TexCoord = xmf2TexCoord;  }
+	CTerrainVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2TexCoord = XMFLOAT2(0.0f, 0.0f)) { m_xmf3Position = xmf3Position; m_xmf2TexCoord = xmf2TexCoord;  }
+	~CTerrainVertex() { }
 };
 
 class CTexturedVertex : public CVertex
@@ -61,6 +61,11 @@ public:
 		m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); 
 		m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f); 
 		m_xmf3Normal = XMFLOAT3(0.0f, 0.0f, 0.0f); 
+	}
+	CTexturedVertex(float x, float y, float z, float uvX, float uvY)
+	{
+		m_xmf3Position = XMFLOAT3(x, y, z);
+		m_xmf2TexCoord = XMFLOAT2(uvX, uvY);
 	}
 	CTexturedVertex(float x, float y, float z, XMFLOAT2 xmf2TexCoord) 
 	{ 
@@ -179,13 +184,30 @@ public:
 	CPlaneMeshTextured(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
 		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f,
-		bool isVertical = true);
+		bool isVertical = true,
+		bool isHalfSize = false); 
 	CPlaneMeshTextured(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
 		XMFLOAT3 startPos,
 		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f,
-		bool isVertical = true);
+		bool isVertical = true); 
+	CPlaneMeshTextured(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float uvXStart, float uvYStart,
+		float uvXEnd, float uvYEnd,
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CPlaneMeshTextured();
+};
+//////////////////////////////////////////////////////////////////////////////
+//
+class CSphereMesh : public CMesh
+{
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CSphereMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float radius, UINT32 sliceCount, UINT32 stackCount);
+	virtual ~CSphereMesh();
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -197,6 +219,7 @@ public:
 	//직육면체의 가로, 세로, 깊이의 길이를 지정하여 직육면체 메쉬를 생성한다. 
 	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
+		bool isHeightHalfOn,
 		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 
 	virtual ~CCubeMeshDiffused();
@@ -245,6 +268,8 @@ class CBillboardMesh : public CMesh
 {
 public:
 	CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		float sizeX, float sizeY);
+	CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		CBillboardVertex* pGeometryBillboardVertices, UINT nGeometryBillboardVertices);
 	virtual ~CBillboardMesh();
 };
@@ -267,8 +292,8 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////
-//
-
+// Ui Meshes
+/////////////////////////////////////////////////////////////////////////////
 class CMinimapMesh : public CMesh
 {
 public:
@@ -276,7 +301,31 @@ public:
 		float radius);
 	~CMinimapMesh();
 };
-
+class CHpSpPercentMesh : public CMesh
+{
+public:
+	CHpSpPercentMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f,
+		bool isHp = true);
+	~CHpSpPercentMesh();
+};
+class CMinimapAroowMesh : public CMesh
+{
+public:
+	CMinimapAroowMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	~CMinimapAroowMesh();
+};
+//////////////////////////////////////////////////////////////////////////////
+//
+enum class MapMeshHeightType
+{
+	Plane = 0,
+	UpRidge,
+	DownRidge,
+};
 class CTerrainMesh : public CMesh
 {
 protected:
@@ -285,30 +334,22 @@ protected:
 	int m_nWidth;
 	int m_nDepth;
 
-public:
+public: 
+	// 벽 생성	 
+	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+		int heights[25],
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		int xNomalPos, int zNormalPos);
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		int nWidth, int nLength, int BlockWidth, int BlockDepth);
-	
+		bool xZero, bool zZero,
+		int* heights,
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		int xNomalPos, int zNormalPos);
+
+	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		int x_Index, int z_Index,  
+		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
+
 	~CTerrainMesh();
-
-	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
-	virtual float OnGetHeight(float x, float z);
-
-};
-class CTerrainWayMesh : public CMesh
-{
-protected:
-	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
-
-	int m_nWidth;
-	int m_nDepth;
-
-public:
-	CTerrainWayMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		int nWidth, int nLength, int BlockWidth, int BlockDepth);
-
-	~CTerrainWayMesh();
-	 
-	//격자의 좌표가 (x, z)일 때 교점(정점)의 높이를 반환하는 함수이다.
-	virtual float OnGetHeight(float x, float z); 
 };

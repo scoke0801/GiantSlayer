@@ -116,7 +116,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <ConformanceMode>false</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,13 +141,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Communicates.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GameSceneProcessor.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Communicates.h" />
+    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GameSceneProcessor.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="protocol.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

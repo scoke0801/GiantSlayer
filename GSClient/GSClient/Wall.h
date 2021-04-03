@@ -7,7 +7,6 @@ public:
     CWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
         float width, float height, float depth);
     ~CWall();
-
 };
 
 class CDoor : public CGameObject
@@ -17,6 +16,8 @@ private:
 
     float m_fAngle = 0.0f;
     float m_IsOpening = true;
+
+    float m_Height;
 public:
     CDoor(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
         float width, float height, float depth, bool isLeft = true);
@@ -24,6 +25,8 @@ public:
 
 public:
     virtual void Update(double fTimeElapsed);
+
+    float GetHeight() const { return m_Height; }
 };
  
 class CDoorWall : public CGameObject
@@ -37,9 +40,19 @@ public:
     CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
         float width, float height, float depth,
         CShader* pShader);
+    CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+        float width, float height, float depth,
+        bool isRotated,
+        CShader* pShader);
     ~CDoorWall();
 
 public:
     virtual void Update(double fTimeElapsed) override;
     virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
+
+    void SetPosition(XMFLOAT3 xmf3Position);
+
+    void SetTextureIndexes(int idx);
+
+    void RotateAll(XMFLOAT3 xmf3Axis, float angle);
 };

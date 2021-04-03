@@ -2,32 +2,31 @@
 #include "TitleScene.h"
 #include "GameFramework.h" 
 
+#include "SceneJH.h"
 CTitleScene::CTitleScene()
 {
+	cout << "Enter CSceneJH \n";
 	m_pd3dGraphicsRootSignature = NULL;
 	m_pd3dPipelineState = NULL;
+
+	m_d3dViewport.TopLeftX = 0;
+	m_d3dViewport.TopLeftY = 0;
+	m_d3dViewport.Width = static_cast<float>(FRAME_BUFFER_WIDTH);
+	m_d3dViewport.Height = static_cast<float>(FRAME_BUFFER_HEIGHT);
+	m_d3dViewport.MinDepth = 0.0f;
+	m_d3dViewport.MaxDepth = 1.0f;
+
+	m_d3dScissorRect = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 }
 
 CTitleScene::~CTitleScene()
-{
+{ 
 }
 
 void CTitleScene::Update(double elapsedTime)
 {
-	POINT mousePos = GET_MOUSE_POS;
+	ProcessInput();
 
-	if ((mousePos.x >= 128 && mousePos.x <= 384)
-		&&(mousePos.y >= 508 && mousePos.y <= 585))
-	{
-		cout << "멀티 플레이\n";
-		CInputHandler::GetInstance().ResetMousePos();
-	}
-	else if ((mousePos.x >= 639 && mousePos.x <= 896)
-		&& (mousePos.y >= 508 && mousePos.y <= 585))
-	{
-		cout << "싱글 플레이\n"; 
-		CInputHandler::GetInstance().ResetMousePos();
-	}
 	//m_pcbMappedTestData->MouseClikced = CInputHandler::GetInstance().TestingMouseClick;
 	//
 	//D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dTestData->GetGPUVirtualAddress();
@@ -36,7 +35,9 @@ void CTitleScene::Update(double elapsedTime)
 }
 
 void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
-{		
+{			 
+	pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
+	pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
 	// 그래픽 루트 시그너쳐를 설정한다.
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	// 파이프라인 상태를 설정한다.
@@ -62,9 +63,68 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CTitleScene::ProcessInput()
 {
+	static bool isFirst = true;
+	if (!isFirst) return;
+	auto keyInput = GAME_INPUT;
+	if (keyInput.KEY_SPACE)
+	{
+		if (!m_IsSingleplay)
+		{
+			isFirst = false;
+			if (CFramework::GetInstance().ConnectToServer()) { 
+
+				cout << "ChangeScene to CSceneJH\n";
+				ChangeScene<CSceneJH>((void*)m_IsSingleplay);
+
+				CFramework::GetInstance().GetCurrentScene()->LoginToServer();;
+			}
+		} 
+	}
 }
 
-void CTitleScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
+{
+	m_LastMousePos.x = x;
+	m_LastMousePos.y = y;
+
+	SetCapture(CFramework::GetInstance().GetHWND());
+	 
+	if ((m_LastMousePos.x >= 128 && m_LastMousePos.x <= 384)
+		&& (m_LastMousePos.y >= 508 && m_LastMousePos.y <= 585))
+	{
+		cout << "멀티 플레이\n";
+		CInputHandler::GetInstance().ResetMousePos();
+		m_IsSingleplay = false;
+	}
+	else if ((m_LastMousePos.x >= 639 && m_LastMousePos.x <= 896)
+		&& (m_LastMousePos.y >= 508 && m_LastMousePos.y <= 585))
+	{
+		cout << "싱글 플레이\n";
+		CInputHandler::GetInstance().ResetMousePos();
+		m_IsSingleplay = true;
+	}
+}
+
+void CTitleScene::OnMouseUp(WPARAM btnState, int x, int y)
+{
+	ReleaseCapture();
+}
+
+void CTitleScene::OnMouseMove(WPARAM btnState, int x, int y)
+{
+	if ((btnState & MK_LBUTTON) != 0)
+	{ 
+	}
+
+	if ((btnState & MK_RBUTTON) != 0)
+	{ 
+	}
+	m_LastMousePos.x = x;
+	m_LastMousePos.y = y;
+}
+
+void CTitleScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	int width, int height)
 {
 	CreateRootSignature(pd3dDevice, pd3dCommandList);
 	CreatePipelineState(pd3dDevice, pd3dCommandList);
@@ -145,10 +205,10 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif 
-	HRESULT hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
+	HRESULT hRes = D3DCompileFromFile(L"Shaders\\TitleScene.hlsl", NULL, NULL,
 		"VSTextured", "vs_5_1", nCompileFlags, 0, &pd3dVertexShaderBlob, NULL);
 	
-	hRes = D3DCompileFromFile(L"TitleScene.hlsl", NULL, NULL,
+	hRes = D3DCompileFromFile(L"Shaders\\TitleScene.hlsl", NULL, NULL,
 		"PSTextured", "ps_5_1", nCompileFlags, 0, &pd3dPixelShaderBlob, NULL);
 
 	//	그래픽 파이프라인 상태를 설정한다.
@@ -161,6 +221,8 @@ void CTitleScene::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	d3dPipelineStateDesc.PS.BytecodeLength = pd3dPixelShaderBlob->GetBufferSize();
 	d3dPipelineStateDesc.RasterizerState = CreateDefaultRasterizerDesc();
 	d3dPipelineStateDesc.BlendState = CreateDefaultBlendDesc();
+	d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = TRUE;
+	d3dPipelineStateDesc.BlendState.RenderTarget[0].BlendEnable = TRUE;
 	d3dPipelineStateDesc.DepthStencilState = CreateDefaultDepthStencilDesc();
 	d3dPipelineStateDesc.InputLayout.NumElements = 0;
 	d3dPipelineStateDesc.InputLayout.pInputElementDescs = NULL;
@@ -246,43 +308,4 @@ void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	srvDesc.Format = titleTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(titleTex, &srvDesc, hDescriptor);
 }
-
-void CTitleScene::ConnectToServer()
-{
-	PrepareCommunicate();
-}
-
-bool CTitleScene::PrepareCommunicate()
-{
-	//CreateThread(NULL, 0, ClientMain, NULL, 0, NULL);
-	int retval = 0;
-	// 윈속 초기화
-	if (WSAStartup(MAKEWORD(2, 2), &m_WSA) != 0) return false;
-
-	// set serveraddr
-	SOCKADDR_IN serveraddr;
-	ZeroMemory(&serveraddr, sizeof(serveraddr));
-	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
-	serveraddr.sin_port = htons(SERVERPORT);
-
-	m_IsServerConnected = true;
-
-	// socket()
-	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (m_Sock == INVALID_SOCKET)
-	{
-		m_IsServerConnected = false; 
-		return false;
-	}
-	int opt_val = TRUE;
-	setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val)); 
-	retval = connect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
-	if (retval == SOCKET_ERROR)
-	{
-		m_IsServerConnected = false; 
-		return false;
-	}
-
-	return true;
-}
+ 

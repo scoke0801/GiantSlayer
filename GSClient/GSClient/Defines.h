@@ -3,9 +3,17 @@
 #define _CRT_SECURE_NO_WARNINGS         // 최신 VC++ 컴파일 시 경고 방지
 #define _WINSOCK_DEPRECATED_NO_WARNINGS // 최신 VC++ 컴파일 시 경고 방지
 #pragma warning(disable  : 4996)    // mbstowcs unsafe###
-#define SERVERIP   "127.0.0.1"		 // 루프백
-#define SERVERPORT 9000
+#define SERVERIP   "127.0.0.1"		 // 루프백 
+//#define SERVERIP   "211.207.24.227"// 종현 
+//#define SERVERIP	 "192.168.35.229"// 태훈?
+//#define SERVERIP   "192.168.0.15"  // 영진 
+ 
 #define MAX_FILE_NAME_LAN 256
+
+#define UV_TEX 100.0F
+
+#define TERRAIN_HEIGHT_MAP_WIDTH 100
+#define TERRAIN_HEIGHT_MAP_HEIGHT 100
 
 //-------------------------------------------------------------------
 //
@@ -32,7 +40,7 @@
 #define SHOW_CAPTIONFPS
 //-------------------------------------------------------------------
 //
-#define FRAME_BUFFER_WIDTH		1024
+#define FRAME_BUFFER_WIDTH		1280
 #define FRAME_BUFFER_HEIGHT		768
 #define SWAP_BUFFER_COUNT		2
 
@@ -85,3 +93,15 @@ inline double GetRadian(int num)
 {
 	return num * (PI / 180);
 }
+
+struct CB_GAMESCENE_FRAME_DATA
+{
+	UINT m_PlayerHP = 0;
+	UINT m_PlayerSP = 0;
+	UINT m_PlayerWeapon = 0x01;
+
+	//XMFLOAT4 m_FogColor = { 0.7f,0.7f,0.7f,1.0f };
+	//float m_FogStart = 5.0f;
+	//float m_FogRange = 150.0f;
+};
+

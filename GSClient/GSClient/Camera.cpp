@@ -6,6 +6,9 @@ CCamera::CCamera()
 {
 	m_xmf4x4View = Matrix4x4::Identity();
 	m_xmf4x4Proj = Matrix4x4::Identity();
+
+	m_xmf4x4ViewProjection = Matrix4x4::Multiply(m_xmf4x4View, m_xmf4x4Proj);
+
 	SetLens(0.25f * PI, 1.0f, 1.0f, 1000.0f);
 }
 
@@ -19,7 +22,6 @@ void CCamera::Update(float elapsedTime)
 	{
 		m_TimerForShake.UpdateElapsedTime();
 		auto res = m_TimerForShake.GetElapsedTime();
-		cout << res << "\n";
 	 
 		if (res >= m_ShakeTime)
 		{
@@ -63,6 +65,7 @@ void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
 	float fLength = Vector3::Length(xmf3Direction);
 	xmf3Direction = Vector3::Normalize(xmf3Direction);
+
 	//float fTimeLagScale = (m_fTimeLag) ? fTimeElapsed * (1.0f / m_fTimeLag) : 1.0f;
 	float fTimeLagScale = 1.0f;
 	float fDistance = fLength * fTimeLagScale;
@@ -463,6 +466,18 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, 
 	::memcpy(&m_pcbMappedCamera->m_xmf4x4Projection, &xmf4x4Projection, sizeof(XMFLOAT4X4));
 
 	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
+
+	XMFLOAT4X4 T(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.0f, 1.0f);
+
+	XMFLOAT4X4 xmf4x4ShadowTransform = Matrix4x4::Multiply(m_xmf4x4ViewProjection, T);
+
+	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4ViewProjection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewProjection)));
+	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4ShadowTransform, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4ShadowTransform)));
+
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(rootParameterIndex, d3dGpuVirtualAddress);

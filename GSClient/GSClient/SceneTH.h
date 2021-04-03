@@ -36,11 +36,12 @@ private:	// about Meterail
 
 private:	// about Lights
 	LIGHTS*						m_pLights = NULL;
+	POINT						m_LastMousePos;
 
 	ID3D12Resource*				m_pd3dcbLights = NULL;
 	LIGHTS*						m_pcbMappedLights = NULL;
 
-private: // FBX
+private:	// FBX
 	FbxManager*					m_pfbxManager = nullptr;
 	FbxScene*					m_pfbxScene = nullptr;
 	FbxIOSettings*				m_pfbxIOs = nullptr;

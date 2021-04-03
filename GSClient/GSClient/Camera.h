@@ -7,6 +7,8 @@ struct VS_CB_CAMERA_INFO
 	XMFLOAT4X4 m_xmf4x4View;
 	XMFLOAT4X4 m_xmf4x4Projection;
 	XMFLOAT3   m_xmf3Position;
+	XMFLOAT4X4	m_xmf4x4ViewProjection;
+	XMFLOAT4X4	m_xmf4x4ShadowTransform;
 };
 
 class CPlayer;
@@ -20,7 +22,9 @@ private:
 	DirectX::XMFLOAT3			m_xmf3Up = { 0.0f, 1.0f, 0.0f };
 	DirectX::XMFLOAT3			m_xmf3Look = { 0.0f, 0.0f, 1.0f };
 
-	float						m_Speed = 15.0f;
+	XMFLOAT4X4					m_xmf4x4ViewProjection;
+
+	float						m_Speed = 100.0f;
 
 	// Cache frustum properties.
 	float						m_NearZ = 0.0f;
