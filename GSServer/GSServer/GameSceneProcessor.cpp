@@ -52,7 +52,9 @@ bool GameSceneProcessor::ProcessGameScene(SOCKET& socket)
 	return true;
 	case PACKET_PROTOCOL::C2S_LOGOUT:
 	{
-
+		P_C2S_LOGOUT p_logout = 
+			*reinterpret_cast<P_C2S_LOGOUT*>(buffer);
+		m_CurrentlyDeletedPlayerId = p_logout.id;
 	}
 	return true;
 	case PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT: 
@@ -98,12 +100,34 @@ bool GameSceneProcessor::ProcessGameScene(SOCKET& socket)
 		P_C2S_UPDATE_SYNC_REQUEST p_updateSyncRequest =
 			*reinterpret_cast<P_C2S_UPDATE_SYNC_REQUEST*>(buffer);
 
-		// 
-		// 플레이어 수에 따라서,
+		// 클라이언트의 유저 수와 다르게
+		// 새롭게 추가된 유저가 있는 경우 
+		// 추가된 유저의 정보를 클라이언트에 전송합니다.
+		int clientPlayerNum = p_updateSyncRequest.playerNum;
+		if (clientPlayerNum < m_CurrentPlayerNum) {
+			P_S2C_ADD_PLAYER p_addPlayer;
+			p_addPlayer.size = sizeof(p_addPlayer);
+			p_addPlayer.type = PACKET_PROTOCOL::S2C_NEW_PLAYER;
+			p_addPlayer.id = m_CurrentPlayerNum - 1;	// 가장 마지막에 들어온 유저
+			
+			XMFLOAT3 pos = m_Players[p_addPlayer.id]->GetPosition();
+			p_addPlayer.x = FloatToInt(pos.x);
+			p_addPlayer.y = FloatToInt(pos.y);
+			p_addPlayer.z = FloatToInt(pos.z);
+			SendPacket(socket, reinterpret_cast<char*>(&p_addPlayer), sizeof(p_addPlayer), retval);
+		}
+		else if (clientPlayerNum > m_CurrentPlayerNum) {
+			P_S2C_DELETE_PLAYER p_deletePlayer;
+			p_deletePlayer.size = sizeof(p_deletePlayer);
+			p_deletePlayer.type = PACKET_PROTOCOL::S2C_DELETE_PLAYER;
+			p_deletePlayer.id = m_CurrentlyDeletedPlayerId;
+			SendPacket(socket, reinterpret_cast<char*>(&p_deletePlayer), p_deletePlayer.size, retval);
+		} 
+
 		// 도어 변경 조건에 따라서
 		// 게임 엔딩 조건에 따라서 
-		// 추가적인 내용을 더 보내도록 코드 수정 필요
-		//
+		// 추가적인 내용을 더 보내도록 코드 수정 필요 
+
 		P_S2C_UPDATE_SYNC p_syncUpdate;
 		p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
 		p_syncUpdate.size = sizeof(p_syncUpdate);

@@ -19,6 +19,8 @@ private:
 	bool						m_isInitialized = false;
 
 	int							m_CurrentPlayerNum = 0;
+
+	int							m_CurrentlyDeletedPlayerId;
 private:
 	GameSceneProcessor()
 	{
