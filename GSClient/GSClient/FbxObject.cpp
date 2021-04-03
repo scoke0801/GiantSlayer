@@ -216,97 +216,6 @@ void ComputeLinearDeformation(FbxMesh* pfbxMesh, FbxTime& fbxCurrentTime, FbxVec
 	delete[] pfSumOfClusterWeights;
 }
 
-void ComputeDualQuaternionDeformation(FbxMesh* pfbxMesh, FbxTime& fbxCurrentTime, FbxVector4* pfbxv4Vertices, int nVertices)
-{
-	FbxDualQuaternion* pfbxDQClusterDeformations = new FbxDualQuaternion[nVertices];
-	memset(pfbxDQClusterDeformations, 0, nVertices * sizeof(FbxDualQuaternion));
-	double* pfClusterWeights = new double[nVertices];
-	memset(pfClusterWeights, 0, nVertices * sizeof(double));
-
-	FbxCluster::ELinkMode nClusterMode = ((FbxSkin*)pfbxMesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0)->GetLinkMode();
-	int nSkinDeformers = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
-	for (int i = 0; i < nSkinDeformers; i++)
-	{
-		FbxSkin* pfbxSkinDeformer = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
-		int nClusters = pfbxSkinDeformer->GetClusterCount();
-		for (int j = 0; j < nClusters; j++)
-		{
-			FbxCluster* pfbxCluster = pfbxSkinDeformer->GetCluster(j);
-			if (!pfbxCluster->GetLink()) continue;
-
-			FbxAMatrix fbxmtxCluster = ComputeClusterDeformation(pfbxMesh, pfbxCluster, nClusterMode, fbxCurrentTime);
-
-			FbxQuaternion Q = fbxmtxCluster.GetQ();
-			FbxVector4 T = fbxmtxCluster.GetT();
-			FbxDualQuaternion fbxDualQuaternion(Q, T);
-
-			int nIndices = pfbxCluster->GetControlPointIndicesCount();
-			int* pnControlPointIndices = pfbxCluster->GetControlPointIndices();
-			double* pfControlPointWeights = pfbxCluster->GetControlPointWeights();
-			for (int k = 0; k < nIndices; ++k)
-			{
-				int nIndex = pnControlPointIndices[k];
-				if (nIndex >= nVertices) continue;
-
-				double fWeight = pfControlPointWeights[k];
-				if (fWeight == 0.0) continue;
-
-				FbxDualQuaternion fbxmtxInfluence = fbxDualQuaternion * fWeight;
-				if (nClusterMode == FbxCluster::eAdditive)
-				{
-					pfbxDQClusterDeformations[nIndex] = fbxmtxInfluence;
-					pfClusterWeights[nIndex] = 1.0;
-				}
-				else // FbxCluster::eNormalize || FbxCluster::eTotalOne
-				{
-					if (j == 0)
-					{
-						pfbxDQClusterDeformations[nIndex] = fbxmtxInfluence;
-					}
-					else
-					{
-						double fSign = pfbxDQClusterDeformations[nIndex].GetFirstQuaternion().DotProduct(fbxDualQuaternion.GetFirstQuaternion());
-						if (fSign >= 0.0)
-						{
-							pfbxDQClusterDeformations[nIndex] += fbxmtxInfluence;
-						}
-						else
-						{
-							pfbxDQClusterDeformations[nIndex] -= fbxmtxInfluence;
-						}
-					}
-					pfClusterWeights[nIndex] += fWeight;
-				}
-			}
-		}
-	}
-
-	for (int i = 0; i < nVertices; i++)
-	{
-		FbxVector4 fbxv4SrcVertex = pfbxv4Vertices[i];
-		double fWeightSum = pfClusterWeights[i];
-
-		if (fWeightSum != 0.0)
-		{
-			pfbxDQClusterDeformations[i].Normalize();
-			pfbxv4Vertices[i] = pfbxDQClusterDeformations[i].Deform(pfbxv4Vertices[i]);
-
-			if (nClusterMode == FbxCluster::eNormalize)
-			{
-				pfbxv4Vertices[i] /= fWeightSum;
-			}
-			else if (nClusterMode == FbxCluster::eTotalOne)
-			{
-				fbxv4SrcVertex *= (1.0 - fWeightSum);
-				pfbxv4Vertices[i] += fbxv4SrcVertex;
-			}
-		}
-	}
-
-	delete[] pfbxDQClusterDeformations;
-	delete[] pfClusterWeights;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -470,23 +379,17 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 		MeshInfo* pMeshinfo = new MeshInfo();
 		//pMeshinfo->pMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, numCP, numPG * 3, pnIndices);
-		pMeshinfo->pMesh = new CMeshFbxTextured(pd3dDevice, pd3dCommandList, numCP, numPG * 3, pnIndices, pfbxMesh);
+		pMeshinfo->pMesh = new CMeshFbxTextured(pd3dDevice, pd3dCommandList, numCP, numPG * 3, pnIndices);
 
 		CShader* tempShader = new CShader();
 
 		if (numDC > 0) {
-			//tempShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSFbxSkinnedModel");
-			//tempShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSFbxSkinnedModel");
-			//tempShader->CreateInputLayout(ShaderTypes::FbxSkinned);
 			tempShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
 			tempShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
 			tempShader->CreateInputLayout(ShaderTypes::Textured);
 			cout << "애니메이션 있음 | [Polygon]: " << numPG << " | [ControlPoint]: " << numCP << " | [DeformerCount]: " << numDC << endl;
 		}
 		else {
-			//tempShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSFbxModel");
-			//tempShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSFbxModel");
-			//tempShader->CreateInputLayout(ShaderTypes::FbxGeneral);
 			tempShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
 			tempShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
 			tempShader->CreateInputLayout(ShaderTypes::Textured);
@@ -532,40 +435,15 @@ void CFbxObject::AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime)
 				//cout << "SkinningType: eLinear or eRigid" << endl;
 				ComputeLinearDeformation(pfbxMesh, fbxCurrentTime, pfbxv4Vertices, numCP);
 			}
-			else if (nSkinningType == FbxSkin::eDualQuaternion)
-			{
-				//cout << "SkinningType: eDualQuaternion" << endl;
-				ComputeDualQuaternionDeformation(pfbxMesh, fbxCurrentTime, pfbxv4Vertices, numCP);
-			}
-			else if (nSkinningType == FbxSkin::eBlend)
-			{
-				//cout << "SkinningType: eBlend" << endl;
-				FbxVector4* pfbxv4LinearVertices = new FbxVector4[numCP];
-				memcpy(pfbxv4LinearVertices, pfbxMesh->GetControlPoints(), numCP * sizeof(FbxVector4));
-				ComputeLinearDeformation(pfbxMesh, fbxCurrentTime, pfbxv4LinearVertices, numCP);
-
-				FbxVector4* pfbxv4DQVertices = new FbxVector4[numCP];
-				memcpy(pfbxv4DQVertices, pfbxMesh->GetControlPoints(), numCP * sizeof(FbxVector4));
-				ComputeDualQuaternionDeformation(pfbxMesh, fbxCurrentTime, pfbxv4DQVertices, numCP);
-
-				int nBlendWeights = pfbxSkinDeformer->GetControlPointIndicesCount();
-				double* pfControlPointBlendWeights = pfbxSkinDeformer->GetControlPointBlendWeights();
-				for (int i = 0; i < nBlendWeights; i++)
-				{
-					pfbxv4Vertices[i] = pfbxv4DQVertices[i] * pfControlPointBlendWeights[i] + pfbxv4LinearVertices[i] * (1 - pfControlPointBlendWeights[i]);
-				}
-
-				delete[] pfbxv4LinearVertices;
-				delete[] pfbxv4DQVertices;
-			}
 		}
 
 		MeshInfo* pMeshinfo = (MeshInfo*)pfbxMesh->GetUserDataPtr();
 
 		for (int i = 0; i < numCP; i++) {
-			pMeshinfo->pMesh->m_pxmf4MappedPositions[i] = XMFLOAT4(	(float)pfbxv4Vertices[i][0],
+			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf3Position = XMFLOAT3(	(float)pfbxv4Vertices[i][0],
 																	(float)pfbxv4Vertices[i][2],
-																	(float)pfbxv4Vertices[i][1], 1.0f);
+																	(float)pfbxv4Vertices[i][1]);
+			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf2TexCoord = XMFLOAT2(0, 0);
 		}
 
 		delete[] pfbxv4Vertices;
@@ -668,7 +546,7 @@ void CFbxObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCame
 {
 	OnPrepareRender();
 
-	FbxAMatrix fbxf4x4World = ::XmFloat4x4MatrixToFbxMatrix(m_xmf4x4World);
+	FbxAMatrix fbxf4x4World = XmFloat4x4MatrixToFbxMatrix(m_xmf4x4World);
 	if (m_pfbxScene) DrawFbxMesh(pd3dCommandList, m_pfbxScene->GetRootNode(), m_pAnimationController->GetCurrentTime(), fbxf4x4World);
 }
 

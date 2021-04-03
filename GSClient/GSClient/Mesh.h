@@ -136,7 +136,7 @@ protected:
 	D3D12_INDEX_BUFFER_VIEW m_d3dIndexBufferView;
 
 public:
-	XMFLOAT4* m_pxmf4MappedPositions = NULL;
+	CTexturedVertex* m_pxmf4MappedPositions = NULL;
 
 public:
 	CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -262,7 +262,7 @@ public:
 class CMeshFbxTextured : public CMesh
 {
 public:
-	CMeshFbxTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices, FbxMesh* pfbxMesh);
+	CMeshFbxTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices);
 	virtual ~CMeshFbxTextured();
 };
 

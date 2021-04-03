@@ -29,6 +29,18 @@ public:
 	void SetPosition(int nAnimationStack, float fPosition);
 };
 
+class MeshData
+{
+private:
+	int nControlPoint = 0;
+	int nPolygon = 0;
+	int nDeformer = 0;
+
+	int* pIndices = NULL;
+
+public:
+};
+
 class CFbxObject : public CGameObject
 {
 public:

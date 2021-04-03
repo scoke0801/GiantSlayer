@@ -223,10 +223,17 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	CFbxObject* pFbxtest = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
 	m_ppObjects[6] = pFbxtest;
-	m_ppObjects[6]->SetAnimationStack(nAnim);
+	m_ppObjects[6]->SetAnimationStack(0);
 	m_ppObjects[6]->m_pAnimationController->SetPosition(0, 0.0f);
 	m_ppObjects[6]->SetPosition({ 600, 100, 600 });
 	m_ppObjects[6]->SetTextureIndex(0x100);
+
+	/*CFbxObject* pFbxtest2 = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/angrybot.fbx");
+	m_ppObjects[7] = pFbxtest2;
+	m_ppObjects[7]->SetAnimationStack(0);
+	m_ppObjects[7]->m_pAnimationController->SetPosition(0, 0.0f);
+	m_ppObjects[7]->SetPosition({ 800, 100, 600 });
+	m_ppObjects[7]->SetTextureIndex(0x100);*/
 }
 
 void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

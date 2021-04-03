@@ -150,7 +150,7 @@ VS_FBX_MODEL_OUTPUT VSFbxModel(VS_FBX_MODEL_INPUT input)
 
 float4 PSFbxModel(VS_FBX_MODEL_OUTPUT input) : SV_TARGET
 {
-	float4 cColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	return(cColor);
 }
@@ -166,7 +166,7 @@ VS_FBX_MODEL_OUTPUT VSFbxSkinnedModel(VS_FBX_MODEL_INPUT input)
 
 float4 PSFbxSkinnedModel(VS_FBX_MODEL_OUTPUT input) : SV_TARGET
 {
-	float4 cColor = float4(0.0f, 0.0f, 1.0f, 1.0f);
+	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	return(cColor);
 }
