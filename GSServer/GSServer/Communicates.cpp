@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Communicates.h"
-#include "GameSceneProcessor.h"
+#include "PacketProcessor.h"
 
 void charToWchar(const char* msg, wchar_t* out)
 {

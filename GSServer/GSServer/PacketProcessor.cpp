@@ -181,6 +181,7 @@ void PacketProcessor::Update(float elapsedTime)
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		if (m_Players[i]->IsExist()) {
 			m_Players[i]->Update(elapsedTime);
+			m_Players[i]->FixPositionByTerrain(m_Heights);
 		}
 	}
 }
@@ -223,6 +224,5 @@ void PacketProcessor::InitTerrainHeightMap()
 			} 
 			m_Heights[i][j] = stoi(text);
 		} 
-	}
-	int stop = 3;
+	} 
 }

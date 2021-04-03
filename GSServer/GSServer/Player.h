@@ -23,6 +23,8 @@ public:
 public:
 	virtual void Update(double fTimeElapsed);
 
+	void FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
+
 public:
 	virtual void SetVelocity(OBJ_DIRECTION direction) override;
 

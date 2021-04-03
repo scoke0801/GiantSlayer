@@ -27,6 +27,13 @@ void CPlayer::Update(double fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 }
 
+void CPlayer::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1])
+{
+	int x = m_xmf3Position.x / 200.0f;
+	int z = m_xmf3Position.z / 200.0f;
+	m_xmf3Position.y = heightsMap[z][x]; 
+}
+
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 {   
 	XMFLOAT3 look = GetLook();// m_Camera->GetLook3f(); 
