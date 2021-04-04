@@ -21,6 +21,9 @@ protected:
 	CGameObject*				m_Mirror = nullptr;
 	CPlayer*					m_Player = nullptr;
 
+	int							m_CurrentPlayerNum = 0;
+	CPlayer*					m_Players[MAX_PLAYER];
+
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
 	vector<UI*>					m_SPGauges;
@@ -95,6 +98,11 @@ public:
 public:
 	virtual void Communicate(SOCKET& sock) override;
 
+	virtual void LoginToServer()  override;
+	virtual void LogoutToServer() override;
+
+	virtual void DeletePlayer(int playerId) override {}
+	virtual void AddPlayer(int palyerId) override {}
 public:
 	virtual void ProcessInput();
 
@@ -121,6 +129,7 @@ private:
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice); 
 	 
+	void BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 private:
 	void BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

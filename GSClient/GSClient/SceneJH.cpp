@@ -9,10 +9,9 @@
 #include "Player.h"
 #include "Bridge.h"
 #include "Wall.h"
-#include "Communicates.h"
 #include "Terrain.h"
 #include "Sign.h"
-#include "Puzzle.h"
+#include "Puzzle.h" 
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
@@ -33,9 +32,10 @@ CSceneJH::~CSceneJH()
 }
 
 void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
-{
+{  
 	BuildMirrorResource(pd3dDevice);
 	BuildMinimapResource(pd3dDevice);
+	
 	LoadTextures(pd3dDevice, pd3dCommandList);
 	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
 
@@ -107,7 +107,7 @@ void CSceneJH::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 }
 
 void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
+{  
 	m_pLights = new LIGHTS;
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 
@@ -162,9 +162,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 
-	BuildMapSector1(pd3dDevice, pd3dCommandList);
+	//BuildMapSector1(pd3dDevice, pd3dCommandList);
 	//BuildMapSector2(pd3dDevice, pd3dCommandList);
-	BuildMapSector3(pd3dDevice, pd3dCommandList);
+	//BuildMapSector3(pd3dDevice, pd3dCommandList);
 	BuildMapSector4(pd3dDevice, pd3dCommandList);
 	BuildMapSector5(pd3dDevice, pd3dCommandList);
 
@@ -175,25 +175,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildSigns(pd3dDevice, pd3dCommandList);
 	BuildMirror(pd3dDevice, pd3dCommandList);
-
-	CMeshFbx* fbxMesh;
-
-	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
-	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
-
-	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
-	m_Cameras[0]->SetTarget(m_Player);
-
-	m_Player->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	m_Player->Scale(50, 50, 50);
-	m_Player->SetObjectName(OBJ_NAME::Player);
-	m_Player->SetPosition({ 750,  230, 1850 });
-	m_Player->SetCamera(m_Cameras[0]);
-	m_Player->SetTextureIndex(0x200);
-	m_Player->SetMesh(fbxMesh);
-	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
-
-	m_MinimapCamera->SetTarget(m_Player);
+	 
+	BuildPlayers(pd3dDevice, pd3dCommandList);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -244,6 +227,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+
 	srvHeapDesc.NumDescriptors = m_Textures.size() + 2;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
@@ -310,8 +294,11 @@ void CSceneJH::Update(double elapsedTime)
 	}
 	m_HelpTextUI->Update(elapsedTime);
 
-	m_Player->Update(elapsedTime);
-
+	for(auto player : m_Players){
+		player->Update(elapsedTime);
+		player->FixPositionByTerrain(m_Terrain);	
+	} 
+	
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
 	if (m_MirrorCamera)
@@ -345,8 +332,8 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
-	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	//ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
+	//pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
 	m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
@@ -354,28 +341,29 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
-
-	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
-
-	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dBasicSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
+	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
+	//
+	//::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
+	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
+	//
+	//D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dBasicSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	//pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Mirror->Draw(pd3dCommandList, m_CurrentCamera);
-
-	for (auto pObject : m_BillboardObjects)
-	{
+	 
+	for (auto pObject : m_BillboardObjects) {
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 
-	for (auto pObject : m_Objects)
-	{
+	for (auto pObject : m_Objects) {
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+	for (auto player : m_Players) {
+		player->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
 
@@ -424,7 +412,8 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 
 	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
 	m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
+	m_pcbMappedSceneFrameData->m_PlayerWeapon = m_Player->GetSelectedWeapon();
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress(); 
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
@@ -445,7 +434,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	{
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
-
+	 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
 
@@ -478,23 +467,23 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 		m_MirrorCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
-	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
-	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dBasicSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
-
-	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
-	m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
-
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
-
-	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
+	//ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
+	//pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	//
+	//D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dBasicSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	//pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
+	//
+	//m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
+	//m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
+	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
+	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
+	//
+	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
+	//
+	//::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
+	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
 
 	m_Skybox->Draw(pd3dCommandList, m_MirrorCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
@@ -533,87 +522,186 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 
 void CSceneJH::Communicate(SOCKET& sock)
 {
-	int retVal = 0;
+	P_C2S_UPDATE_SYNC_REQUEST p_syncUpdateRequest;
+	p_syncUpdateRequest.size = sizeof(P_C2S_UPDATE_SYNC_REQUEST);
+	p_syncUpdateRequest.type = PACKET_PROTOCOL::C2S_INGAME_UPDATE_SYNC;
+	p_syncUpdateRequest.playerNum = m_CurrentPlayerNum;
 
-	string toSendData = "\n";
-	XMFLOAT3 xmf3PlayerPos = m_Player->GetPosition();
-	XMFLOAT3 xmf3PlayerLook = m_Player->GetLook();
-	toSendData += "<PlayerPosition>:\n";
-	toSendData += to_string(xmf3PlayerPos.x);
-	toSendData += " ";
-	toSendData += to_string(xmf3PlayerPos.y);
-	toSendData += " ";
-	toSendData += to_string(xmf3PlayerPos.z);
-	toSendData += "\n";
-	toSendData += "<PlayerLook>:\n";
-	toSendData += to_string(xmf3PlayerLook.x);
-	toSendData += " ";
-	toSendData += to_string(xmf3PlayerLook.y);
-	toSendData += " ";
-	toSendData += to_string(xmf3PlayerLook.z);
-	toSendData += "\n";
+	int retVal;
+	bool haveToRecv = false;
+	SendPacket(CFramework::GetInstance().GetSocket(), reinterpret_cast<char*>(&p_syncUpdateRequest), p_syncUpdateRequest.size, retVal);
 
-	auto keyInput = GAME_INPUT;
-	toSendData += "<Command>\n";
-	toSendData += to_string(CInputHandler::GetInstance().GetCommandType());
-	toSendData += "\n";
-	SendFrameData(sock, toSendData, retVal);
+	char buffer[BUFSIZE + 1] = {};
+	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+	PACKET_PROTOCOL type = (PACKET_PROTOCOL)buffer[1];
 
-	char buffer[BUFSIZE + 1];
+	// 플레이어 추가 혹은 삭제 패킷 수신
+	if (type == PACKET_PROTOCOL::S2C_NEW_PLAYER) {
+		cout << "Packet::NewPlayer[ServerToClient]\n";
+		P_S2C_ADD_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_ADD_PLAYER*>(&buffer);
+		XMFLOAT3 pos = { IntToFloat(p_addPlayer.x), IntToFloat(p_addPlayer.y), IntToFloat(p_addPlayer.z) };
 
-	RecvFrameData(sock, buffer, retVal);
-	char* token = strtok(buffer, "\n");
-	while (token != NULL)
-	{
-		if (strstr(token, "<PlayerPosition>:"))
-		{
-			XMFLOAT3 res = GetVectorFromText(token);
-			cout << "<PlayerPosition>: ";
-			DisplayVector3(res);
-		}
-		else if (strstr(token, "<PlayerLook>:"))
-		{
-			XMFLOAT3 res = GetVectorFromText(token);
-			cout << "<PlayerLook>: ";
-			DisplayVector3(res);
-		}
-		token = strtok(NULL, "\n");
+		m_Players[p_addPlayer.id]->SetPosition(pos);
+		m_Players[p_addPlayer.id]->SetDrawable(true);
+		++m_CurrentPlayerNum;
+		haveToRecv = true;
 	}
+	else if (type == PACKET_PROTOCOL::S2C_DELETE_PLAYER) { 
+		cout << "Packet::DeletePlayer[ServerToClient]\n";
+		P_S2C_DELETE_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_DELETE_PLAYER*>(&buffer); 
+		m_Players[p_addPlayer.id]->SetDrawable(false);
+		haveToRecv = true;
+	}
+	// 갱신 정보를 다시 받아와야 하는 경우.
+	if (haveToRecv) {
+		ZeroMemory(buffer, sizeof(buffer));
+		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+		haveToRecv = false;
+	}
+
+	// 새롭게 받아온 정보가 갱신 정보가 아닌 기타 정보인 경우.
+	if (type == PACKET_PROTOCOL::S2C_INGAME_DOOR_EVENT) {
+		cout << "Packet::DoorEvent[ServerToClient]\n";
+		haveToRecv = true;
+	}
+	if (type == PACKET_PROTOCOL::S2C_INGAME_END) {
+		cout << "Packet::GameEnd[ServerToClient]\n";
+		return;
+	}
+
+	// 모든 부가 정보들 갱신을 마치고 플레이어들 정보를 다시 받아와야 하는 경우.
+	if (haveToRecv) {
+		ZeroMemory(buffer, sizeof(buffer));
+		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+	}
+	P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&buffer);
+
+	for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
+		XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
+
+		m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
+	}
+}
+
+void CSceneJH::LoginToServer()
+{
+	P_C2S_LOGIN p_login;
+	p_login.size = sizeof(p_login);
+	p_login.type = PACKET_PROTOCOL::C2S_LOGIN; 
+	strcpy_s(p_login.name, CFramework::GetInstance().GetPlayerName().c_str());
+
+	int retVal;
+	SendPacket(CFramework::GetInstance().GetSocket(), reinterpret_cast<char*>(&p_login), p_login.size, retVal);
+
+	char buffer[BUFSIZE + 1] = {}; 
+	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+
+	P_S2C_PROCESS_LOGIN p_processLogin = *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&buffer);
+	if (p_processLogin.isSuccess)
+	{
+		XMFLOAT3 pos = XMFLOAT3{IntToFloat(p_processLogin.x), 
+			IntToFloat(p_processLogin.y), IntToFloat(p_processLogin.z) };
+		
+		CFramework::GetInstance().SetPlayerId(p_processLogin.id);
+
+		cout << "Login id = " << p_processLogin.id << "\n";
+
+		//m_Player->SetPosition(pos); 
+		
+		m_Players[p_processLogin.id]->SetPosition(pos);
+		m_Player = m_Players[p_processLogin.id]; 
+		m_Player->SetDrawable(true);
+
+		m_MinimapCamera->SetTarget(m_Player);
+
+		m_CurrentPlayerNum++;
+	}  
+}
+
+void CSceneJH::LogoutToServer()
+{
 }
 
 void CSceneJH::ProcessInput()
 {
+	if (CFramework::GetInstance().IsOnConntected())
+	{
+		auto keyInput = GAME_INPUT; 
+		bool processKey = false;
+		P_C2S_KEYBOARD_INPUT p_keyboard;
+		p_keyboard.size = sizeof(P_C2S_KEYBOARD_INPUT);
+		p_keyboard.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
+		p_keyboard.id = CFramework::GetInstance().GetPlayerId();
+
+		if (keyInput.KEY_W){ 
+			p_keyboard.keyInput = VK_W;
+			processKey = true;
+		}
+		if (keyInput.KEY_A){ 
+			p_keyboard.keyInput = VK_A;
+			processKey = true;
+		}
+		if (keyInput.KEY_S){ 
+			p_keyboard.keyInput = VK_S;
+			processKey = true;
+		}
+		if (keyInput.KEY_D){ 
+			p_keyboard.keyInput = VK_D; 
+			processKey = true;
+		}
+		if (processKey == false) return;
+		int retVal = 0;
+		SendPacket(CFramework::GetInstance().GetSocket(),
+			reinterpret_cast<char*>(&p_keyboard), p_keyboard.size, retVal);
+
+		char buffer[BUFSIZE + 1] = {};
+		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+		 
+		P_S2C_PROCESS_KEYBOARD p_keyboardProcess = *reinterpret_cast<P_S2C_PROCESS_KEYBOARD*>(&buffer);
+		
+		XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_keyboardProcess.posX),
+			IntToFloat(p_keyboardProcess.posY), 
+			IntToFloat(p_keyboardProcess.posZ) };
+
+		m_Players[p_keyboard.id]->SetPosition(pos);
+		m_Players[p_keyboard.id]->FixPositionByTerrain(m_Terrain);
+
+		DisplayVector3(pos, true);
+		return;
+	}
 	if (m_CurrentCamera == nullptr) return;
 
 	float cameraSpeed = m_CurrentCamera->GetSpeed();
 	XMFLOAT3 velocity = m_Player->GetVelocity();
+	XMFLOAT3 temp = m_CurrentCamera->GetRight3f();
 
+	temp = Vector3::Multifly(temp, -1.0f);
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(OBJ_DIRECTION::Front);
+			m_Player->SetVelocity(m_CurrentCamera->GetLook3f());
 		else
 			m_CurrentCamera->Walk(cameraSpeed);
 	}
 	if (keyInput.KEY_A)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(OBJ_DIRECTION::Left);
+			m_Player->SetVelocity(Vector3::Multifly(m_CurrentCamera->GetRight3f(), -1.0f));
 		else
 			m_CurrentCamera->Strafe(-cameraSpeed);
 	}
 	if (keyInput.KEY_S)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(OBJ_DIRECTION::Back);
+			m_Player->SetVelocity(Vector3::Multifly(m_CurrentCamera->GetLook3f(), -1.0f));
 		else
 			m_CurrentCamera->Walk(-cameraSpeed);
 	}
 	if (keyInput.KEY_D)
 	{
 		if (m_isPlayerSelected)
-			m_Player->SetVelocity(OBJ_DIRECTION::Right);
+			m_Player->SetVelocity(m_CurrentCamera->GetRight3f());
 		else
 			m_CurrentCamera->Strafe(cameraSpeed);
 	}
@@ -692,12 +780,15 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_J)
 	{
+		
 	}
 	if (keyInput.KEY_K)
 	{
+		gbWireframeOn = true;
 	}
 	if (keyInput.KEY_L)
 	{
+		gbWireframeOn = false;
 	}
 	//DisplayVector3(m_CurrentCamera->GetPosition3f());
 
@@ -1614,4 +1705,59 @@ void CSceneJH::BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CSceneJH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+}
+
+void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CMeshFbx* fbxMesh;
+
+	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
+	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
+	m_Player = m_Players[0];
+
+	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+	m_Cameras[0]->SetTarget(m_Players[0]);
+
+	m_Players[0]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	m_Players[0]->Scale(50, 50, 50);
+	m_Players[0]->SetObjectName(OBJ_NAME::Player);
+	m_Players[0]->SetPosition({ 750,  230, 1850 });
+
+	m_Players[0]->SetCamera(m_Cameras[0]);
+	m_Players[0]->SetTextureIndex(0x200);
+	m_Players[0]->SetMesh(fbxMesh);
+	m_Players[0]->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+	m_Players[0]->SetDrawable(true); 
+
+	m_MinimapCamera->SetTarget(m_Players[0]);
+
+	for (int i = 1; i < MAX_PLAYER; ++i) {
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
+		m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		m_Players[i]->Scale(50, 50, 50);
+		m_Players[i]->SetObjectName(OBJ_NAME::Player);
+
+		//m_Players[i]->SetCamera(m_Cameras[0]);
+		m_Players[i]->SetTextureIndex(0x200);
+		m_Players[i]->SetMesh(fbxMesh);
+		m_Players[i]->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+		m_Players[i]->SetDrawable(false); 
+	}
+
+	
+	/*
+	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+	m_Cameras[0]->SetTarget(m_Player);
+
+	m_Player->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	m_Player->Scale(50, 50, 50);
+	m_Player->SetObjectName(OBJ_NAME::Player);
+	m_Player->SetPosition({ 750,  230, 1850 });
+	m_Player->SetCamera(m_Cameras[0]);
+	m_Player->SetTextureIndex(0x80);
+	m_Player->SetMesh(fbxMesh);
+	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+
+	m_MinimapCamera->SetTarget(m_Player); 
+	*/
 }

@@ -77,6 +77,7 @@ class CGameObject
 private:
 	int					m_nReferences = 0;
 	 
+	bool				m_isDrawbale = true;
 protected:	// 좌표 관련 변수
 	XMFLOAT4X4			m_xmf4x4World;
 
@@ -132,7 +133,7 @@ public:
 
 	virtual void OnPrepareRender();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
+	
 public:
 	virtual void Move(XMFLOAT3 shift);
 	void Move();
@@ -155,8 +156,9 @@ public:
 	virtual void SetShader(CShader* pShader);
 	virtual void SetPosition(XMFLOAT3 pos);
 	virtual void SetPositionPlus(XMFLOAT3 pos);
-	void SetVelocity(XMFLOAT3 vel); 
+	//void SetVelocity(XMFLOAT3 vel); 
 	virtual void SetVelocity(OBJ_DIRECTION direction);
+	virtual void SetVelocity(XMFLOAT3 dir);
 
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }
@@ -175,6 +177,10 @@ public:
 
 	void SetSize(const XMFLOAT3& size) { m_xmf3Size = size; }
 	XMFLOAT3 GetSize()const { return m_xmf3Size; }
+
+	void SetDrawable(bool drawable) { m_isDrawbale = drawable; }
+	bool IsDrawable() const { return m_isDrawbale; }
+
 public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;

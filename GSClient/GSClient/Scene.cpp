@@ -15,8 +15,7 @@ CScene::CScene()
 CScene::~CScene()
 {
 
-}
-
+} 
 CNullScene::CNullScene()
 {
 

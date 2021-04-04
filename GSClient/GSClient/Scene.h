@@ -4,6 +4,8 @@
 #include "UploadBuffer.h"
 #include "Mesh.h" 
 
+#include "Communicates.h"
+
 #define GET_PSO(key) *m_PSOs[key].get() 
 
 class CScene
@@ -13,9 +15,9 @@ protected:
 	//unordered_map<string, unique_ptr<CMaterial>> m_Materials; 
 
 	unordered_map<string, unique_ptr<ID3D12PipelineState*>> m_PSOs;
-	
+
 	unordered_map<string, unique_ptr<CShader*>> m_pShaders;
-	 
+
 protected:
 	// about FBX
 	FbxManager* m_pfbxManager = nullptr;
@@ -23,18 +25,22 @@ protected:
 	FbxIOSettings* m_pfbxIOs = nullptr;
 	FbxImporter* m_pfbxImporter = nullptr;
 
+	//protected:
+	//	GAME_STATE	m_GameState;
+
 public:
 	CScene();
 	virtual ~CScene();
 
 	// just proto, fill with d3d obj
-	virtual void Update(double elapsedTime) {} 
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {} 	
+	virtual void Update(double elapsedTime) {}
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) {}
-	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) {} 
+	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) {}
 	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) {}
+	virtual void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) {}
 
 public:
 	// about Keyboard process
@@ -48,6 +54,11 @@ public:
 public:
 	virtual void Communicate(SOCKET& sock) {}
 
+	virtual void LoginToServer() {}
+	virtual void LogoutToServer() {}
+
+	virtual void DeletePlayer(int playerId) {}
+	virtual void AddPlayer(int palyerId) {}
 public: 
 	virtual void SendDataToNextScene(void* context) {}	
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) {}
