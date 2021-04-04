@@ -19,7 +19,7 @@ void CPlayer::Update(double fTimeElapsed)
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
 	Move(vel);  
-	cout << "pos : " << m_xmf3Position.x << " , " << m_xmf3Position.y << " " << m_xmf3Position.z << " \n";
+	//cout << "pos : " << m_xmf3Position.x << " , " << m_xmf3Position.y << " " << m_xmf3Position.z << " \n";
 	
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 

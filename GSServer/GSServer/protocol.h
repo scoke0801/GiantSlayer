@@ -116,6 +116,8 @@ struct P_S2C_PROCESS_LOGIN {
 	short id;
 	bool isSuccess;
 	int x, y, z;
+
+	bool existPlayer[MAX_PLAYER];
 };
 struct P_S2C_ADD_PLAYER {
 	BYTE size;
@@ -159,7 +161,7 @@ struct P_S2C_UPDATE_SYNC {
 	PACKET_PROTOCOL type;
 	char playerNum;
 	 
-	char id[MAX_PLAYER];
+	char id[MAX_PLAYER]; 
 
 	int posX[MAX_PLAYER];
 	int posY[MAX_PLAYER];

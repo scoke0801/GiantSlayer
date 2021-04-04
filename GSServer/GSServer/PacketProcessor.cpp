@@ -15,14 +15,12 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 	switch (type) {
 	case PACKET_PROTOCOL::C2S_LOGIN:
 	{
-		P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(buffer);
-
-
+		//P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(buffer);
+		 
 		P_S2C_PROCESS_LOGIN p_processLogin;
 		p_processLogin.size = sizeof(p_processLogin);
 		p_processLogin.type = PACKET_PROTOCOL::S2C_LOGIN_HANDLE;
 		
-
 		if (m_CurrentPlayerNum > MAX_PLAYER) {
 			p_processLogin.isSuccess = false;
 		}
@@ -38,10 +36,29 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 			p_processLogin.z = FloatToInt(pos.z);
 		} 
 		p_processLogin.id = m_CurrentPlayerNum;
-
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			p_processLogin.existPlayer[i] = m_Players[i]->IsExist();
+		}
 		SendPacket(socket, reinterpret_cast<char*>(&p_processLogin), sizeof(p_processLogin), retval);
 		
 		m_CurrentPlayerNum++;
+
+		// 로그인 이후 데이터 싱크 맞추기 작업용 패킷 전송
+		P_S2C_UPDATE_SYNC p_syncUpdate;
+		p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
+		p_syncUpdate.size = sizeof(p_syncUpdate);
+
+		p_syncUpdate.playerNum = m_CurrentPlayerNum;
+
+		for (int i = 0; i < m_CurrentPlayerNum; ++i) {
+			p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId());
+
+			XMFLOAT3 pos = m_Players[i]->GetPosition();
+			p_syncUpdate.posX[i] = FloatToInt(pos.x);
+			p_syncUpdate.posY[i] = FloatToInt(pos.y);
+			p_syncUpdate.posZ[i] = FloatToInt(pos.z);
+		}
+		SendPacket(socket, reinterpret_cast<char*>(&p_syncUpdate), sizeof(p_syncUpdate), retval);
 	}
 	return true;
 	case PACKET_PROTOCOL::C2S_LOGOUT:
@@ -49,6 +66,7 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 		P_C2S_LOGOUT p_logout = 
 			*reinterpret_cast<P_C2S_LOGOUT*>(buffer);
 		m_CurrentlyDeletedPlayerId = p_logout.id;
+		m_Players[p_logout.id]->SetExistence(false);
 	}
 	return true;
 	case PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT: 

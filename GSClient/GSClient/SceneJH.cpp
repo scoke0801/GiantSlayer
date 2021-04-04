@@ -577,6 +577,8 @@ void CSceneJH::Communicate(SOCKET& sock)
 	P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&buffer);
 
 	for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
+		if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
+
 		XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 
 		m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
@@ -613,8 +615,26 @@ void CSceneJH::LoginToServer()
 		m_Player->SetDrawable(true);
 
 		m_MinimapCamera->SetTarget(m_Player);
+		  
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
+		}
 
-		m_CurrentPlayerNum++;
+		// Sync Data
+		ZeroMemory(buffer, sizeof(buffer));
+		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+		
+		P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&buffer);
+		
+		m_CurrentPlayerNum = p_syncUpdate.playerNum;
+
+		for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
+			if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
+
+			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
+
+			m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
+		}
 	}  
 }
 
