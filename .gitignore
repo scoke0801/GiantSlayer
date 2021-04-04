@@ -23,3 +23,5 @@
 *.res
 /GSClient/lib/libfbxsdk-md.lib
 *.recipe
+/GSClient/Debug/Resources
+/GSClient/Debug/Shaders
