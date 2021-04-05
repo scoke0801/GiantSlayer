@@ -98,8 +98,8 @@ protected: // 렌더링 관련 변수
 	CCamera*			m_Camera = nullptr;
 
 protected:	// 객체 관련 속성 변수
-	UINT				m_HP = 0;
-	UINT				m_SP = 0;
+	int					m_HP = 0;
+	int					m_SP = 0;
 
 	OBJ_NAME			m_Name;
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;

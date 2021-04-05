@@ -21,6 +21,14 @@ class CTerrain;
 class CPlayer : public CGameObject
 {   
 private:
+	// 
+	// testing, 지워야 함 
+	//
+	bool TestHPDown = false;
+	bool TestSPDown = false;
+
+
+private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
 	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
 	 

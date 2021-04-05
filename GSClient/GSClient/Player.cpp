@@ -39,23 +39,22 @@ void CPlayer::Update(double fTimeElapsed)
 
 /////////////////////////////////////////////////////////////////////
 #pragma region For Hp_Sp UI Testing 
-	static bool TestHPDown = false;
-	static bool TestSPDown = false;
-	if (TestHPDown) {
+	if (TestHPDown == true) {
 		m_HP -= 1;
 		if (m_HP <= 0) TestHPDown = false;
 	}
-	else if(!TestHPDown)
+	else if(TestHPDown == false)
 	{
 		m_HP += 1;
 		if (m_HP >= 100) TestHPDown = true;
 	}
-	if (TestSPDown)
+	cout << " HP : " << m_HP << "\n";
+	if (TestSPDown == true)
 	{
 		m_SP -= 1;
 		if (m_SP <= 0) TestSPDown = false;
 	}
-	else if (!TestSPDown)
+	else if (TestSPDown == false)
 	{
 		m_SP += 1;
 		if (m_SP >= 100) TestSPDown = true;
