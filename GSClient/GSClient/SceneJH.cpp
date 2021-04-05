@@ -162,11 +162,11 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 
-	BuildMapSector1(pd3dDevice, pd3dCommandList);
-	BuildMapSector2(pd3dDevice, pd3dCommandList);
-	BuildMapSector3(pd3dDevice, pd3dCommandList);
-	BuildMapSector4(pd3dDevice, pd3dCommandList);
-	BuildMapSector5(pd3dDevice, pd3dCommandList);
+	//BuildMapSector1(pd3dDevice, pd3dCommandList);
+	//BuildMapSector2(pd3dDevice, pd3dCommandList);
+	//BuildMapSector3(pd3dDevice, pd3dCommandList);
+	//BuildMapSector4(pd3dDevice, pd3dCommandList);
+	//BuildMapSector5(pd3dDevice, pd3dCommandList);
 
 	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 
@@ -1116,6 +1116,7 @@ void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 			pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
 			pObject->SetTextureIndex(0x200);
 			pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+			pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f, XMFLOAT3{ 0,0,0 });
 			m_Objects.push_back(std::move(pObject));
 		}
 	}
@@ -1152,7 +1153,8 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	pObject->SetTextureIndex(0x80);
-	pObject->Scale(35, 35, 35);
+	pObject->Scale(35, 35, 35); 
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
 	m_Objects.push_back(std::move(pObject));
 }
 
@@ -1745,8 +1747,17 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_Players[0]->SetCamera(m_Cameras[0]);
 	m_Players[0]->SetTextureIndex(0x200);
-	m_Players[0]->SetMesh(fbxMesh);
-	m_Players[0]->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+	m_Players[0]->SetMesh(fbxMesh); 
+	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{ 0,0,0 });
+	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5, 10, 10, XMFLOAT3{ 0,0,0 });
+
+	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{  10,   0,   0 });
+	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{ -10,   0,   0 });
+	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{   0,  10,   0 });
+	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{   0, -10,   0 });
+	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{   0,   0,  10 });
+	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{   0,   0, -10 });
+
 	m_Players[0]->SetDrawable(true); 
 
 	m_MinimapCamera->SetTarget(m_Players[0]);
@@ -1757,27 +1768,9 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_Players[i]->Scale(50, 50, 50);
 		m_Players[i]->SetObjectName(OBJ_NAME::Player);
 
-		//m_Players[i]->SetCamera(m_Cameras[0]);
 		m_Players[i]->SetTextureIndex(0x200);
 		m_Players[i]->SetMesh(fbxMesh);
-		m_Players[i]->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{0,0,0});
 		m_Players[i]->SetDrawable(false); 
 	}
-
-	
-	/*
-	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
-	m_Cameras[0]->SetTarget(m_Player);
-
-	m_Player->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	m_Player->Scale(50, 50, 50);
-	m_Player->SetObjectName(OBJ_NAME::Player);
-	m_Player->SetPosition({ 750,  230, 1850 });
-	m_Player->SetCamera(m_Cameras[0]);
-	m_Player->SetTextureIndex(0x80);
-	m_Player->SetMesh(fbxMesh);
-	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
-
-	m_MinimapCamera->SetTarget(m_Player); 
-	*/
 }

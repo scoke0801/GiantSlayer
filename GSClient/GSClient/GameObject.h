@@ -119,10 +119,6 @@ public:
 
 	virtual void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 
-	virtual void BuildBoundigMeshes(ID3D12Device* pd3dDevice,
-		ID3D12GraphicsCommandList* pd3dCommandList,
-		float fWidth, float fHeight, float fDepth);
-
 	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseShaderVariables();
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -145,6 +141,30 @@ public:
 	bool CollisionCheck() { return false; };
 
 	void Scale(float x, float y, float z, bool setSize = true);
+
+public:
+	// about collision
+
+public:
+	// about bounding box 
+	void BuildBoundigBoxMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float fWidth, float fHeight, float fDepth,
+		const XMFLOAT3& shift);
+	void BuildBoundigSphereMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		PulledModel pulledModel,
+		float radius, UINT32 sliceCount, UINT32 stackCount,
+		const XMFLOAT3& shift);
+	//메쉬가 중심에서 시작되지 않고 
+	// 왼쪽 혹은 오른쪽에서 시작하는 경우 ex) 문 객체
+	void BuildBoundigBoxMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		PulledModel pulledModel,
+		float fWidth, float fHeight, float fDepth,
+		const XMFLOAT3& shift);
+
+	void MoveBoundingMesh(int index, const XMFLOAT3& shift);
 
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }

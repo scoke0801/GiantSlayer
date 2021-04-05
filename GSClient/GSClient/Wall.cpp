@@ -83,7 +83,8 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice,
 	pWall->SetShader(pShader);
 	pWall->SetObjectName(OBJ_NAME::Wall);
 	pWall->SetTextureIndex(0x01);
-	pWall->SetPosition({ fWidthRatio * 2,  height * 0.5f, depth * 0.5f });
+	pWall->SetPosition({ fWidthRatio * 2,  height * 0.5f, depth * 0.5f }); 
+	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth, XMFLOAT3{ 0,0,0 });
 	m_Walls.push_back(pWall);
 	  
 	pWall = new CWall(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth);
@@ -91,6 +92,7 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice,
 	pWall->SetObjectName(OBJ_NAME::Wall);
 	pWall->SetTextureIndex(0x01);
 	pWall->SetPosition({ fWidthRatio * 6 + fWidthRatio * 2,  height * 0.5f, depth * 0.5f });
+	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth, XMFLOAT3{ 0,0,0 });
 	m_Walls.push_back(pWall);  
 
 	float createdHeight;
@@ -98,7 +100,9 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice,
 	m_LeftDoor->SetShader(pShader);
 	m_LeftDoor->SetObjectName(OBJ_NAME::Wall);
 	m_LeftDoor->SetTextureIndex(0x10);
-	createdHeight = m_LeftDoor->GetHeight();
+	createdHeight = m_LeftDoor->GetHeight(); 
+	m_LeftDoor->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Left, fWidthRatio, createdHeight, depth * 0.2f, XMFLOAT3{ 0,0,0 });
+
 	if (height != createdHeight)
 		m_LeftDoor->SetPosition({ fWidthRatio * 4,  height * 0.5f - createdHeight * 0.5f, depth * 0.5f });
 	else
@@ -109,7 +113,8 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice,
 	m_RightDoor->SetShader(pShader);
 	m_RightDoor->SetObjectName(OBJ_NAME::Wall);
 	m_RightDoor->SetTextureIndex(0x10);  
-	m_RightDoor->GetHeight();
+	createdHeight = m_RightDoor->GetHeight();
+	m_RightDoor->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Left, fWidthRatio, createdHeight, depth * 0.2f, XMFLOAT3{ 0,0,0 });
 	if (height != createdHeight)
 		m_RightDoor->SetPosition({ fWidthRatio * 6,  height * 0.5f - createdHeight * 0.5f, depth * 0.5f });
 	else
@@ -127,7 +132,8 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	pWall->SetObjectName(OBJ_NAME::Wall);
 	pWall->SetTextureIndex(0x01);
 	pWall->Rotate({ 0,1,0 }, 90);
-	pWall->SetPosition({ depth * 0.5f,  height * 0.5f, fWidthRatio * 2 });
+	pWall->SetPosition({ depth * 0.5f,  height * 0.5f, fWidthRatio * 2 });	
+	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth, XMFLOAT3{ 0,0,0 });
 	m_Walls.push_back(pWall);
 
 	pWall = new CWall(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth);
@@ -135,7 +141,8 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	pWall->SetObjectName(OBJ_NAME::Wall);
 	pWall->SetTextureIndex(0x01);
 	pWall->Rotate({ 0,1,0 }, 90);
-	pWall->SetPosition({ depth * 0.5f,  height * 0.5f, fWidthRatio * 6 + fWidthRatio * 2 });
+	pWall->SetPosition({ depth * 0.5f,  height * 0.5f, fWidthRatio * 6 + fWidthRatio * 2 });	
+	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth, XMFLOAT3{ 0,0,0 });
 	m_Walls.push_back(pWall);
 
 	m_LeftDoor = new CDoor(pd3dDevice, pd3dCommandList, fWidthRatio, height, depth * 0.2f, true);
@@ -144,6 +151,7 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	m_LeftDoor->SetTextureIndex(0x10);
 	m_LeftDoor->Rotate({ 0,1,0 }, 90);
 	m_LeftDoor->Rotate({ 0,1,0 }, 180);
+	m_LeftDoor->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Left, fWidthRatio, height, depth * 0.2f, XMFLOAT3{ 0,0,0 });
 	m_LeftDoor->SetPosition({ depth * 0.5f,  height * 0.5f,  fWidthRatio * 4 });
 
 	m_RightDoor = new CDoor(pd3dDevice, pd3dCommandList, fWidthRatio, height, depth * 0.2f, false);
@@ -151,7 +159,8 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	m_RightDoor->SetObjectName(OBJ_NAME::Wall);
 	m_RightDoor->SetTextureIndex(0x10);
 	m_RightDoor->Rotate({ 0,1,0 }, 90); 
-	m_RightDoor->Rotate({ 0,1,0 }, 180);
+	m_RightDoor->Rotate({ 0,1,0 }, 180); 
+	m_RightDoor->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Right, fWidthRatio, height, depth * 0.2f, XMFLOAT3{ 0,0,0 });
 	m_RightDoor->SetPosition({ depth * 0.5f,  height * 0.5f, fWidthRatio * 6 });
 }
 

@@ -52,9 +52,27 @@ void CGameObject::SetMesh(CMesh* pMesh)
 
 	if (m_pMesh) m_pMesh->AddRef();
 }  
-void CGameObject::BuildBoundigMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth)
+void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	float fWidth, float fHeight, float fDepth,
+	const XMFLOAT3& shift)
 {
 	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, false, fWidth, fHeight, fDepth);
+	m_BoundingObjectMeshes.push_back(std::move(pMesh));
+}
+void CGameObject::BuildBoundigSphereMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	PulledModel pulledModel,
+	float radius, UINT32 sliceCount, UINT32 stackCount,
+	const XMFLOAT3& shift)
+{
+	CMesh* pMesh = new CSphereMeshDiffused(pd3dDevice, pd3dCommandList, pulledModel,  radius, sliceCount, stackCount, shift);
+	m_BoundingObjectMeshes.push_back(std::move(pMesh));
+}
+void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	PulledModel pulledModel, 
+	float fWidth, float fHeight, float fDepth,
+	const XMFLOAT3& shift)
+{
+	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, pulledModel, fWidth, fHeight, fDepth);
 	m_BoundingObjectMeshes.push_back(std::move(pMesh));
 }
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

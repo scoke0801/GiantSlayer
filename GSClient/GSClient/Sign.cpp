@@ -15,14 +15,19 @@ CSign::CSign(ID3D12Device* pd3dDevice,
 	m_Pillar->SetShader(pShader);
 	m_Pillar->SetTextureIndex(0x01);
 
-	float width = 500.0f, height = 300.0f, depth = 10.0f; 
+	float width = 500.0f, height = 300.0f, depth = 50.0f; 
 	if (isRotated) 
 	{
 		width = 300.0f; height = 500.0f;
-	}
+	} 
+
+	m_Pillar->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 75, 500, 50, XMFLOAT3{ 0,0,0 });
+	 
 	pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
 		width, height, depth);
 	CPlaneMeshTextured* pMesh;
+
+	m_Board = new CGameObject();
 	switch (boardInfo)
 	{
 	case SignBoardInfos::None:
@@ -31,7 +36,7 @@ CSign::CSign(ID3D12Device* pd3dDevice,
 			0.0f, 0.0f,
 			1.0f, 0.25f,
 			500.0f, 300.0f, 10.0f);
-		break;
+		break; 
 
 	case SignBoardInfos::Scroll:
 		pMesh = new CPlaneMeshTextured(pd3dDevice,
@@ -47,6 +52,7 @@ CSign::CSign(ID3D12Device* pd3dDevice,
 			0.0f, 0.5f,
 			1.0f, 0.75f,
 			500.0f, 300.0f, 10.0f);
+
 		break;
 
 	case SignBoardInfos::Medusa:
@@ -55,14 +61,15 @@ CSign::CSign(ID3D12Device* pd3dDevice,
 			0.0f, 0.75f,
 			1.0f, 1.0f,
 			500.0f, 300.0f, 10.0f);
+
 		break;
 	}
 
-	m_Board = new CGameObject();
 	m_Board->SetMesh(pMesh);
 	m_Board->SetShader(pShader);
-	
 	m_Board->SetTextureIndex(0x02);
+
+	m_Board->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 500.0f, 300.0f, 5.0f, XMFLOAT3{ 0,0,0 });
 
 	if (isFrontSide)
 	{

@@ -47,8 +47,7 @@ void CPlayer::Update(double fTimeElapsed)
 	{
 		m_HP += 1;
 		if (m_HP >= 100) TestHPDown = true;
-	}
-	cout << " HP : " << m_HP << "\n";
+	} 
 	if (TestSPDown == true)
 	{
 		m_SP -= 1;

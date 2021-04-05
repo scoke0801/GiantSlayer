@@ -211,6 +211,7 @@ void CShaderHandler::CreateDoorWallShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 	}
 	pDoorWallShader->CreateInputLayout(ShaderTypes::Textured);
 	pDoorWallShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pDoorWallShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("DoorWall", pDoorWallShader);
 }
 
@@ -243,6 +244,7 @@ void CShaderHandler::CreatePuzzleShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 	}
 	pPuzzleShader->CreateInputLayout(ShaderTypes::Textured);
 	pPuzzleShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
+	pPuzzleShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Puzzle", pPuzzleShader);
 }
 
@@ -259,6 +261,7 @@ void CShaderHandler::CreateSignShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	}
 	pSignShader->CreateInputLayout(ShaderTypes::Textured);
 	pSignShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
+	pSignShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Sign", pSignShader);
 }
 
