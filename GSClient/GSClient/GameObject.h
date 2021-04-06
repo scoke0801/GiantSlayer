@@ -2,6 +2,7 @@
 #include "Mesh.h"
 #include "FbxSceneContext.h"
 
+class Colider;
 class CShader;
 class CCamera;
  
@@ -84,6 +85,9 @@ protected:	// 좌표 관련 변수
 	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
 	XMFLOAT3			m_xmf3Velocity = XMFLOAT3{ 0,0,0 };
 	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
+
+protected:// 충돌처리 관련 변수
+	vector<Colider*>	m_Coliders;
 
 protected: // 렌더링 관련 변수
 	CMesh*				m_pMesh = NULL;

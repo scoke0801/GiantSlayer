@@ -29,6 +29,14 @@ enum class GAME_STATE : short {
 	S_RESULT
 };
 
+enum class MOUSE_INPUT_TYPE : short {
+	M_LMOVE,
+	M_RMOVE,
+	M_LBUTTON_UP,
+	M_LBUTTON_DOWN,
+	M_RBUTTON_UP,
+	M_RBUTTON_DOWN
+};
 enum class ROTATION_AXIS : short {
 	ROTATE_AXIS_X = 1,
 	ROTATE_AXIS_Y,
@@ -97,6 +105,7 @@ struct P_C2S_KEYBOARD_INPUT {
 struct P_C2S_MOUSE_INPUT {
 	BYTE size; 
 	PACKET_PROTOCOL type;
+	MOUSE_INPUT_TYPE InputType;
 	short xInput;
 	short yInput;
 }; 

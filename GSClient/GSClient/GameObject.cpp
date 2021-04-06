@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "Colider.h"
 
 string ConvertToObjectName(const OBJ_NAME& name)
 {
@@ -16,6 +17,7 @@ string ConvertToObjectName(const OBJ_NAME& name)
 	default:
 		assert(!"UnDefinedObjectName");
 	}
+	return "";
 }
 
 CGameObject::CGameObject()

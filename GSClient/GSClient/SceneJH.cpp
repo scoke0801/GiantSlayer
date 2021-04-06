@@ -817,6 +817,9 @@ void CSceneJH::ProcessInput()
 
 void CSceneJH::OnMouseDown(WPARAM btnState, int x, int y)
 {
+	if (CFramework::GetInstance().IsOnConntected())
+	{
+	}
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
 
