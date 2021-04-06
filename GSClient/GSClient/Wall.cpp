@@ -168,7 +168,7 @@ CDoorWall::~CDoorWall()
 {
 }
 
-void CDoorWall::Update(double fTimeElapsed)
+void CDoorWall::Update(float fTimeElapsed)
 {
 	m_LeftDoor->Update(fTimeElapsed);
 	m_RightDoor->Update(fTimeElapsed);

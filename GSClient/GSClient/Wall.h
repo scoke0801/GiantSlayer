@@ -47,7 +47,7 @@ public:
     ~CDoorWall();
 
 public:
-    virtual void Update(double fTimeElapsed) override;
+    virtual void Update(float fTimeElapsed) override;
     virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
 
     void SetPosition(XMFLOAT3 xmf3Position);

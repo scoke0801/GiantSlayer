@@ -21,7 +21,7 @@ public:
 
 	CStateMachine<CEnemy>* GetFSM()const { return m_Statemachine; }
 
-	virtual void Update(double elapsedTime) override;
+	virtual void Update(float elapsedTime) override;
 
 	bool IsEnemyInSight();
 	void MoveRandom();
@@ -46,7 +46,7 @@ public:
 
 	CStateMachine<CEnemyCloseATK>* GetFSM()const { return m_Statemachine; }
 
-	virtual void Update(double elapsedTime) override;
+	virtual void Update(float elapsedTime) override;
 
 };
 

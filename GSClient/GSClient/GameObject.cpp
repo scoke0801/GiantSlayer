@@ -112,7 +112,7 @@ void CGameObject::Animate(float fTimeElapsed)
 
 }
 
-void CGameObject::Update(double fTimeElapsed)
+void CGameObject::Update(float fTimeElapsed)
 {
 	if (!m_isDrawbale) return;
 	static float MaxVelocityXZ = 120.0f;
