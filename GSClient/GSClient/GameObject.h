@@ -7,7 +7,7 @@ class CShader;
 class CCamera;
  
 #define OBJECT_MAX_VELOCITY 120.0f
-#define PLAYER_RUN_VELOCITY 250.0f
+#define PLAYER_RUN_VELOCITY 250.0f * 4
 #define PLAYER_WALK_VELOCITY 80.0f 
 
 enum class OBJ_TYPE
@@ -87,7 +87,7 @@ protected:	// 좌표 관련 변수
 	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
 
 protected:// 충돌처리 관련 변수
-	vector<Colider*>	m_Coliders;
+	vector<Collider*>	m_Colliders;
 
 protected: // 렌더링 관련 변수
 	CMesh*				m_pMesh = NULL;
@@ -130,7 +130,7 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
-
+	 
 	virtual void OnPrepareRender();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	
@@ -148,10 +148,15 @@ public:
 
 public:
 	// about collision
-	virtual bool ColisionCheck() { return false; }
-	virtual void BuildColliders() {};
+	bool CollisionCheck(Collider* pCollider);
+	bool CollisionCheck(CGameObject* other);
+	
+	virtual void UpdateColliders();
 
-	void AddColider(Colider* pColider) { m_Coliders.push_back(std::move(pColider)); }
+	void AddColider(Collider* pCollider) { m_Colliders.push_back(std::move(pCollider)); }
+
+	int GetColliderCount() const { return m_Colliders.size(); }
+	vector<Collider*>& GetColliders() { return m_Colliders; }
 
 public:
 	// about bounding box 

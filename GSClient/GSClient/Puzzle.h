@@ -21,6 +21,7 @@ public:
     void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
     void RotateAll(const XMFLOAT3& axis, float angle);
 
+    void UpdateColliders() override;
 public:
     void SetPosition(XMFLOAT3 pos) override;
 };

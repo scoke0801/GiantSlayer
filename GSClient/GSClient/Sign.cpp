@@ -22,7 +22,7 @@ CSign::CSign(ID3D12Device* pd3dDevice,
 	} 
 
 	m_Pillar->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 75, 500, 50, XMFLOAT3{ 0,0,0 });
-	m_Pillar->AddColider(new ColiderOriBox(XMFLOAT3{ 0, 0, 0 }, XMFLOAT3{ 75, 500, 50 }, XMFLOAT4{ 0, 0, 0, 0 }));
+	m_Pillar->AddColider(new ColiderBox(XMFLOAT3{ 0, 0, 0 }, XMFLOAT3{ 75, 500, 50 }));
 
 	pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
 		width, height, depth);
@@ -71,7 +71,7 @@ CSign::CSign(ID3D12Device* pd3dDevice,
 	m_Board->SetTextureIndex(0x02);
 
 	m_Board->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 500.0f, 300.0f, 5.0f, XMFLOAT3{ 0,0,0 });
-	m_Board->AddColider(new ColiderOriBox(XMFLOAT3{ 0, 0, 0 }, XMFLOAT3{ 75, 500, 50 }, XMFLOAT4{ 0, 0, 0, 0 }));
+	m_Board->AddColider(new ColiderBox(XMFLOAT3{ 0, 0, 0 }, XMFLOAT3{ 75, 500, 50 }));
 
 	if (isFrontSide)
 	{
@@ -95,6 +95,12 @@ void CSign::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	m_Board->Draw(pd3dCommandList, pCamera);
 	m_Pillar->Draw(pd3dCommandList, pCamera);
+}
+
+void CSign::UpdateColliders()
+{
+	m_Board->UpdateColliders();
+	m_Pillar->UpdateColliders();
 }
 
 void CSign::SetPosition(XMFLOAT3 pos)

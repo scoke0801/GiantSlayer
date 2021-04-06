@@ -1,24 +1,32 @@
 #pragma once
 
+enum class ColliderType : short { None, Box, OrientedBox, Sphere };
 // BoundingBox, BoundingOrientedBox ,BoundingSphere 
-// 객체들을 위한 interface 클래스  
-class Colider
+// 객체들을 위한 interface 클래스   
+
+class Collider
 {
 public:
-	Colider() {}
-	virtual ~Colider() {}
+	Collider() {}
+	virtual ~Collider() {}
 
 	virtual BoundingBox& GetBox() = 0;
 	virtual BoundingOrientedBox& GetOrientedBox() = 0;
 	virtual BoundingSphere& GetSphere() = 0;
 
+	virtual void Update(const XMFLOAT3& pos) = 0;
+
+	ColliderType GetType() const { return m_Type; }
+
 protected:
-	BoundingBox	m_BoundingBox;
+	BoundingBox			m_BoundingBox;
 	BoundingOrientedBox	m_BoundingOrientedBox;
-	BoundingSphere	m_BoundingSphere;
+	BoundingSphere		m_BoundingSphere; 
+	
+	ColliderType	m_Type;
 };
 
-class ColiderBox : public Colider {
+class ColiderBox : public Collider {
 public:
 	// Center of the box.
 	// Distance from the center to each side.
@@ -28,9 +36,11 @@ public:
 	BoundingBox& GetBox() override { return m_BoundingBox; }
 	BoundingOrientedBox& GetOrientedBox() override { assert(!"ColiderBox instance only use BoundingBox"); return m_BoundingOrientedBox;}
 	BoundingSphere& GetSphere() override { assert(!"ColiderBox instance only use BoundingBox"); return m_BoundingSphere; } 
+
+	void Update(const XMFLOAT3& pos) override;
 };
  
-class ColiderOriBox : public Colider {
+class ColiderOriBox : public Collider {
 public:
 	// Center of the box.
 	// Distance from the center to each side.
@@ -41,9 +51,11 @@ public:
 	BoundingBox& GetBox() override { assert(!"ColiderOriBox instance only use BoundingBox"); return m_BoundingBox;}
 	BoundingOrientedBox& GetOrientedBox() override { return m_BoundingOrientedBox; }
 	BoundingSphere& GetSphere() override { assert(!"ColiderOriBox instance only use BoundingBox"); return m_BoundingSphere; }
+
+	void Update(const XMFLOAT3& pos) override;
 };
 
-class ColiderSphere : public Colider {
+class ColiderSphere : public Collider {
 public:    
 	// Center of the sphere.
 	// Radius of the sphere.
@@ -53,4 +65,6 @@ public:
 	BoundingBox& GetBox() override { assert(!"ColiderSphere instance only use BoundingBox"); return m_BoundingBox;}
 	BoundingOrientedBox& GetOrientedBox() override { assert(!"ColiderSphere instance only use BoundingBox"); return m_BoundingOrientedBox;}
 	BoundingSphere& GetSphere() override { return m_BoundingSphere; }  
+
+	void Update(const XMFLOAT3& pos) override;
 };

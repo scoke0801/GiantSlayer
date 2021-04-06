@@ -239,7 +239,7 @@ XMFLOAT3 CGameObject::GetLook()const
 
 void CGameObject::Move(XMFLOAT3 shift)
 {
-	SetPosition(Vector3::Add(m_xmf3Position, shift));
+	SetPosition(Vector3::Add(m_xmf3Position, shift)); 
 }
 
 void CGameObject::Move()
@@ -287,6 +287,37 @@ void CGameObject::Scale(float x, float y, float z, bool setSize)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World); 
 }
 
+bool CGameObject::CollisionCheck(Collider* pCollider)
+{
+	for (int i = 0; i < m_Colliders.size(); ++i) {
+		auto thisBox = m_Colliders[i]->GetBox();
+		bool result = thisBox.Contains(pCollider->GetBox());
+		if (result) return true;
+		result = thisBox.Intersects(pCollider->GetBox()); 
+		if (result) return true;
+	}
+
+	return false;
+}
+
+bool CGameObject::CollisionCheck(CGameObject* other)
+{
+	auto otherColliders = other->GetColliders();
+	for (int i = 0; i < otherColliders.size(); ++i) {
+		bool result = CollisionCheck(otherColliders[i]);
+		if (result) return true; 
+	}
+
+	return false;
+}
+
+void CGameObject::UpdateColliders()
+{
+	for (auto collider : m_Colliders) {
+		collider->Update(m_xmf3Position);
+	}
+}
+ 
 //void CGameObject::Rotate(float x, float y, float z)
 //{
 //	static float pitch, yaw, roll;

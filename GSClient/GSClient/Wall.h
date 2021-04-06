@@ -24,7 +24,7 @@ public:
     ~CDoor();
 
 public:
-    virtual void Update(double fTimeElapsed);
+    virtual void Update(float fTimeElapsed);
 
     float GetHeight() const { return m_Height; }
 };
@@ -50,6 +50,8 @@ public:
     virtual void Update(float fTimeElapsed) override;
     virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
 
+    void UpdateColliders() override;
+    
     void SetPosition(XMFLOAT3 xmf3Position);
 
     void SetTextureIndexes(int idx);

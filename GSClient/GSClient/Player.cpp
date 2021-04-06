@@ -24,7 +24,7 @@ void CPlayer::Update(double fTimeElapsed)
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
-	Move(vel);
+	Move(vel); 
 
 	if (m_Camera != nullptr) {
 		m_Camera->Update(m_xmf3Position, fTimeElapsed);
@@ -64,13 +64,7 @@ void CPlayer::Update(double fTimeElapsed)
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
 	 m_xmf3Position.y = pTerrain->GetHeight(m_xmf3Position.x, m_xmf3Position.z);
-}
-
-void CPlayer::BuildColliders()
-{ 
-	m_Coliders.push_back(new ColiderOriBox(XMFLOAT3(0,0,0), XMFLOAT3(10,10,10), XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f)));
-	m_Coliders.push_back(new ColiderSphere(XMFLOAT3(0, 0, 0), 10.0f));
-}
+} 
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 { 	
@@ -141,7 +135,7 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	dir.y = 0;
 	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);
 
-	DisplayVector3(dir);
+	//DisplayVector3(dir);
 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY)); 
 	XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook());
@@ -158,7 +152,7 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	//float dot = Vector3::DotProduct(playerLookAt, dir);
 	//float det = playerLookAt.x * dir.y - playerLookAt.y * dir.x;
 	//float angle = atan2(det, dot);
-	cout << "각도 : " << XMConvertToDegrees( angle) << "\n";
+//	cout << "각도 : " << XMConvertToDegrees( angle) << "\n";
 	
 	Rotate(XMFLOAT3(0, 1, 0), (angle)); 
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;

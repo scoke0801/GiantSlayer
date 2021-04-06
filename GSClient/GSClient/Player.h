@@ -40,10 +40,7 @@ public:
 	virtual void Update(double fTimeElapsed);
 
 	void FixPositionByTerrain(CTerrain* pTerrain);
-
-public:
-	void BuildColliders() override;
-
+	 
 public:
 	virtual void SetVelocity(OBJ_DIRECTION direction) override;
 	virtual void SetVelocity(XMFLOAT3 dir) override;

@@ -290,15 +290,23 @@ void CSceneJH::Update(double elapsedTime)
 
 	for (auto pObject : m_Objects)
 	{
-		pObject->Update(elapsedTime);
+		pObject->Update(elapsedTime); 
+		pObject->UpdateColliders();
 	}
 	m_HelpTextUI->Update(elapsedTime);
 
 	for(auto player : m_Players){
 		player->Update(elapsedTime);
+		player->UpdateColliders();
 		player->FixPositionByTerrain(m_Terrain);	
 	} 
-	
+	for (auto pObject : m_Objects) {
+		if (m_Player->CollisionCheck(pObject)) {
+			cout << "충돌했습니다!!!!!!!!!!!!\n";
+		}
+	}
+	//m_Player->ColisionCheck();
+
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
 	if (m_MirrorCamera)
@@ -1158,7 +1166,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->SetTextureIndex(0x80);
 	pObject->Scale(35, 35, 35); 
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColiderOriBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30), XMFLOAT4(0, 0, 0, 0)));
+	pObject->AddColider(new ColiderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
 	m_Objects.push_back(std::move(pObject));
 }
 
@@ -1753,17 +1761,9 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->SetTextureIndex(0x200);
 	m_Players[0]->SetMesh(fbxMesh); 
 	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{ 0,0,0 });
-	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5, 10, 10, XMFLOAT3{ 0,0,0 });
-
-	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{  10,   0,   0 });
-	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{ -10,   0,   0 });
-	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{   0,  10,   0 });
-	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{   0, -10,   0 });
-	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{   0,   0,  10 });
-	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{   0,   0, -10 });
 
 	m_Players[0]->SetDrawable(true); 
-	m_Players[0]->BuildColliders();
+	m_Players[0]->AddColider(new ColiderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 10, 10))); 
 
 	m_MinimapCamera->SetTarget(m_Players[0]);
 
@@ -1778,6 +1778,6 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{0,0,0});
 		m_Players[i]->SetDrawable(false); 
 
-		m_Players[i]->BuildColliders();
+		//m_Players[i]->BuildColliders();
 	}
 }

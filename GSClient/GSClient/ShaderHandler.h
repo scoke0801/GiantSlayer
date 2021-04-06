@@ -42,6 +42,7 @@ public:
 		string resultText = "지정되지 않은 셰이더 호출!";
 		resultText += (" " + id);
 		assert(!resultText.c_str());
+		return nullptr;
 	}
 public:
 	CShader* GetData22(const string& id)
@@ -87,6 +88,7 @@ public:
 		string resultText = "지정되지 않은 셰이더 호출!";
 		resultText += (" " + id);
 		assert(!resultText.c_str());
+		return nullptr;
 	}
 public:
 	void CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
