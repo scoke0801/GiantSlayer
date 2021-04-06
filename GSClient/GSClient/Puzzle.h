@@ -21,7 +21,9 @@ public:
     void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
     void RotateAll(const XMFLOAT3& axis, float angle);
 
-    void UpdateColliders() override;
+    void UpdateColliders() override;  
+    bool CollisionCheck(Collider* pCollider) override;
+
 public:
     void SetPosition(XMFLOAT3 pos) override;
 };
@@ -38,6 +40,8 @@ public:
 
 public:
     void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+
+    bool CollisionCheck(Collider* pCollider) override;
 
 public:
     void SetPosition(XMFLOAT3 pos) override;

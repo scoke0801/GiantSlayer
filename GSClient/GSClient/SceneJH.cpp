@@ -168,7 +168,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList);
 
-	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
+	//BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 
 	BuildDoorWall(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("DoorWall"));
 	BuildPuzzles(pd3dDevice, pd3dCommandList);
@@ -299,9 +299,10 @@ void CSceneJH::Update(double elapsedTime)
 		player->Update(elapsedTime);
 		player->UpdateColliders();
 		player->FixPositionByTerrain(m_Terrain);	
-	} 
+	}
 	for (auto pObject : m_Objects) {
-		if (m_Player->CollisionCheck(pObject)) {
+		//if (m_Player->CollisionCheck(pObject)) {
+		if (pObject->CollisionCheck(m_Player)) {
 			cout << "충돌했습니다!!!!!!!!!!!!\n";
 		}
 	}
@@ -1166,7 +1167,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->SetTextureIndex(0x80);
 	pObject->Scale(35, 35, 35); 
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColiderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
 	m_Objects.push_back(std::move(pObject));
 }
 
@@ -1763,7 +1764,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{ 0,0,0 });
 
 	m_Players[0]->SetDrawable(true); 
-	m_Players[0]->AddColider(new ColiderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 10, 10))); 
+	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 10, 10))); 
 
 	m_MinimapCamera->SetTarget(m_Players[0]);
 

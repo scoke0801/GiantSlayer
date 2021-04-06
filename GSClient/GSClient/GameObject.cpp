@@ -237,6 +237,17 @@ XMFLOAT3 CGameObject::GetLook()const
 	return XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33);
 }
 
+void CGameObject::AddAABB(Collider* pCollider)
+{
+	auto type = pCollider->GetType();
+	if (type == ColliderType::Box) {
+		m_AABB.push_back(new ColliderBox(pCollider->GetBox().Center, pCollider->GetBox().Extents));
+	}
+	else {
+		assert(!" CGameObject::AddAABB(Collider* pCollider)");
+	}
+}
+
 void CGameObject::Move(XMFLOAT3 shift)
 {
 	SetPosition(Vector3::Add(m_xmf3Position, shift)); 
@@ -287,13 +298,13 @@ void CGameObject::Scale(float x, float y, float z, bool setSize)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World); 
 }
 
-bool CGameObject::CollisionCheck(Collider* pCollider)
+bool CGameObject::CollisionCheck(Collider* pAABB)
 {
-	for (int i = 0; i < m_Colliders.size(); ++i) {
-		auto thisBox = m_Colliders[i]->GetBox();
-		bool result = thisBox.Contains(pCollider->GetBox());
-		if (result) return true;
-		result = thisBox.Intersects(pCollider->GetBox()); 
+	for (int i = 0; i < m_AABB.size(); ++i) {
+		auto thisBox = m_AABB[i]->GetBox(); 
+		bool result = thisBox.Intersects(pAABB->GetBox());
+		if (result) return true; 
+		result = thisBox.Contains(pAABB->GetBox());
 		if (result) return true;
 	}
 
@@ -302,9 +313,9 @@ bool CGameObject::CollisionCheck(Collider* pCollider)
 
 bool CGameObject::CollisionCheck(CGameObject* other)
 {
-	auto otherColliders = other->GetColliders();
-	for (int i = 0; i < otherColliders.size(); ++i) {
-		bool result = CollisionCheck(otherColliders[i]);
+	auto otherAABB = other->GetAABB();
+	for (int i = 0; i < otherAABB.size(); ++i) {
+		bool result = CollisionCheck(otherAABB[i]);
 		if (result) return true; 
 	}
 
@@ -313,9 +324,12 @@ bool CGameObject::CollisionCheck(CGameObject* other)
 
 void CGameObject::UpdateColliders()
 {
-	for (auto collider : m_Colliders) {
-		collider->Update(m_xmf3Position);
+	for (int i = 0; i < m_Colliders.size(); ++i) {
+		m_Colliders[i]->GetBox().Transform(m_AABB[i]->GetBox(), XMLoadFloat4x4(&m_xmf4x4World));
 	}
+	/*for (auto collider : m_Colliders) {
+		collider->Update(m_xmf4x4World);
+	}*/
 }
  
 //void CGameObject::Rotate(float x, float y, float z)

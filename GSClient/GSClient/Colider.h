@@ -15,6 +15,7 @@ public:
 	virtual BoundingSphere& GetSphere() = 0;
 
 	virtual void Update(const XMFLOAT3& pos) = 0;
+	virtual void Update(const XMFLOAT4X4& world) = 0;
 
 	ColliderType GetType() const { return m_Type; }
 
@@ -26,40 +27,42 @@ protected:
 	ColliderType	m_Type;
 };
 
-class ColiderBox : public Collider {
+class ColliderBox : public Collider {
 public:
 	// Center of the box.
 	// Distance from the center to each side.
-	ColiderBox(const XMFLOAT3& center, const XMFLOAT3& extents);
+	ColliderBox(const XMFLOAT3& center, const XMFLOAT3& extents);
 
 public:
 	BoundingBox& GetBox() override { return m_BoundingBox; }
 	BoundingOrientedBox& GetOrientedBox() override { assert(!"ColiderBox instance only use BoundingBox"); return m_BoundingOrientedBox;}
 	BoundingSphere& GetSphere() override { assert(!"ColiderBox instance only use BoundingBox"); return m_BoundingSphere; } 
 
-	void Update(const XMFLOAT3& pos) override;
+	void Update(const XMFLOAT3& pos) override; 
+	void Update(const XMFLOAT4X4& world) override;
 };
  
-class ColiderOriBox : public Collider {
+class ColliderOriBox : public Collider {
 public:
 	// Center of the box.
 	// Distance from the center to each side.
 	// Unit quaternion representing rotation (box -> world).
-	ColiderOriBox(const XMFLOAT3& center, const XMFLOAT3& extents, const XMFLOAT4& orientation);
+	ColliderOriBox(const XMFLOAT3& center, const XMFLOAT3& extents, const XMFLOAT4& orientation);
 		
 public:
 	BoundingBox& GetBox() override { assert(!"ColiderOriBox instance only use BoundingBox"); return m_BoundingBox;}
 	BoundingOrientedBox& GetOrientedBox() override { return m_BoundingOrientedBox; }
 	BoundingSphere& GetSphere() override { assert(!"ColiderOriBox instance only use BoundingBox"); return m_BoundingSphere; }
 
-	void Update(const XMFLOAT3& pos) override;
+	void Update(const XMFLOAT3& pos) override; 
+	void Update(const XMFLOAT4X4& world) override;
 };
 
-class ColiderSphere : public Collider {
+class ColliderSphere : public Collider {
 public:    
 	// Center of the sphere.
 	// Radius of the sphere.
-	ColiderSphere(const XMFLOAT3& center, float radius);
+	ColliderSphere(const XMFLOAT3& center, float radius);
 	
 public:
 	BoundingBox& GetBox() override { assert(!"ColiderSphere instance only use BoundingBox"); return m_BoundingBox;}
@@ -67,4 +70,5 @@ public:
 	BoundingSphere& GetSphere() override { return m_BoundingSphere; }  
 
 	void Update(const XMFLOAT3& pos) override;
+	void Update(const XMFLOAT4X4& world) override;
 };

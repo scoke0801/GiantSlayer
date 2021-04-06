@@ -88,6 +88,7 @@ protected:	// 좌표 관련 변수
 
 protected:// 충돌처리 관련 변수
 	vector<Collider*>	m_Colliders;
+	vector<Collider*>	m_AABB;
 
 protected: // 렌더링 관련 변수
 	CMesh*				m_pMesh = NULL;
@@ -148,15 +149,17 @@ public:
 
 public:
 	// about collision
-	bool CollisionCheck(Collider* pCollider);
-	bool CollisionCheck(CGameObject* other);
+	virtual bool CollisionCheck(Collider* pCollider);
+	virtual bool CollisionCheck(CGameObject* other);
 	
 	virtual void UpdateColliders();
 
-	void AddColider(Collider* pCollider) { m_Colliders.push_back(std::move(pCollider)); }
+	void AddColider(Collider* pCollider) { m_Colliders.push_back(pCollider); AddAABB(pCollider); }
+	void AddAABB(Collider* pCollider);
 
 	int GetColliderCount() const { return m_Colliders.size(); }
 	vector<Collider*>& GetColliders() { return m_Colliders; }
+	vector<Collider*>& GetAABB() { return m_AABB; }
 
 public:
 	// about bounding box 

@@ -51,7 +51,9 @@ public:
     virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
 
     void UpdateColliders() override;
-    
+
+    bool CollisionCheck(Collider* pCollider) override;
+
     void SetPosition(XMFLOAT3 xmf3Position);
 
     void SetTextureIndexes(int idx);
