@@ -1,50 +1,71 @@
 #pragma once
-
-#include "GameTimer.h"
-#include "Shader.h"
 #include "Scene.h"
-#include "Mesh.h"
 
 class CShader;
 class CGameObject;
+class CFbxObject;
 class CCamera;
+class CPlayer;
+class UI;
+class HelpTextUI;
+class CTerrain;
 
 class CSceneTH : public CScene
 {
+private:
+	bool						m_isPlayerSelected = true;
+
 protected:
-	CGameObject**				m_ppObjects = NULL;
-	int							m_nObjects = 0;
-	int							nAnim = 0;
+	vector<CGameObject*>		m_Objects;
+	vector<CGameObject*>		m_BillboardObjects;
 
-	CSkyBox*					m_Skybox;
+	CGameObject* m_Mirror = nullptr;
+	CPlayer* m_Player = nullptr;
 
-	ID3D12RootSignature*		m_pd3dGraphicsRootSignature = NULL;
+	CPlayer* m_Players[MAX_USER];
 
-	CCamera**					m_Cameras;
-	CCamera*					m_CurrentCamera = nullptr;
+	vector<UI*>					m_UIs;
+	vector<UI*>					m_HPGauges;
+	vector<UI*>					m_SPGauges;
+	HelpTextUI* m_HelpTextUI;
 
+	CSkyBox* m_Skybox;
+	CTerrain* m_Terrain;
+
+	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
+
+	CCamera** m_Cameras;
+	CCamera* m_CurrentCamera = nullptr;
+	CCamera* m_MinimapCamera = nullptr;
+	CCamera* m_MirrorCamera = nullptr;
 private:
 	POINT						m_LastMousePos;
 
-	ID3D12DescriptorHeap*		m_pd3dSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap* m_pd3dBasicSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap* m_pd3dMonsterDescriptorHeap = nullptr;
 
 private:	// about Meterail
-	MATERIALS*					m_pMaterials = NULL;
+	MATERIALS* m_pMaterials = NULL;
 
-	ID3D12Resource*				m_pd3dcbMaterials = NULL;
-	MATERIAL*					m_pcbMappedMaterials = NULL;
+	ID3D12Resource* m_pd3dcbMaterials = NULL;
+	MATERIAL* m_pcbMappedMaterials = NULL;
 
 private:	// about Lights
-	LIGHTS*						m_pLights = NULL;
+	LIGHTS* m_pLights = NULL;
 
-	ID3D12Resource*				m_pd3dcbLights = NULL;
-	LIGHTS*						m_pcbMappedLights = NULL;
+	ID3D12Resource* m_pd3dcbLights = NULL;
+	LIGHTS* m_pcbMappedLights = NULL;
 
-private:	// FBX
-	FbxManager*					m_pfbxManager = nullptr;
-	FbxScene*					m_pfbxScene = nullptr;
-	FbxIOSettings*				m_pfbxIOs = nullptr;
-	FbxImporter*				m_pfbxImporter = nullptr;
+private:	// about Minimap
+	ID3D12Resource* m_pd3dMinimapTex = NULL;
+	UI* m_MinimapArrow;
+
+private:
+	ID3D12Resource* m_pd3dMirrorTex = NULL;
+
+private:	// about SceneInfo
+	ID3D12Resource* m_pd3dcbSceneInfo = NULL;
+	CB_GAMESCENE_FRAME_DATA* m_pcbMappedSceneFrameData = NULL;
 
 public:
 	CSceneTH();
@@ -58,19 +79,27 @@ public:
 	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height);
-
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void BuildFbxManager() override;
 
 	void ReleaseObjects();
-
 public:
 	virtual void Update(double elapsedTime) override;
 	void AnimateObjects(float fTimeElapsed);
 
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
+	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 
+public:
+	virtual void Communicate(SOCKET& sock) override;
+	virtual void LoginToServer()  override;
+	virtual void LogoutToServer() override;
 public:
 	virtual void ProcessInput();
 
@@ -84,4 +113,23 @@ public:
 	//그래픽 루트 시그너쳐를 생성한다.
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
+
+private:
+	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
+	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
+	void BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void BuildMinimapResource(ID3D12Device* pd3dDevice);
+	void BuildMirrorResource(ID3D12Device* pd3dDevice);
+
+private:
+	void BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };

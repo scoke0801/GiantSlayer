@@ -7,9 +7,6 @@
     <FxCompile Include="Shaders\Light.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\SceneTH.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\TitleScene.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
@@ -20,6 +17,9 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\ShaderJH.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShaderTH.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
@@ -98,9 +98,6 @@
     </ClCompile>
     <ClCompile Include="EnemyState.cpp">
       <Filter>State</Filter>
-    </ClCompile>
-    <ClCompile Include="FbxSceneContext.cpp">
-      <Filter>FBXLoader</Filter>
     </ClCompile>
     <ClCompile Include="FBXLoader.cpp">
       <Filter>FBXLoader</Filter>
@@ -223,9 +220,6 @@
     </ClInclude>
     <ClInclude Include="EnemyState.h">
       <Filter>State</Filter>
-    </ClInclude>
-    <ClInclude Include="FbxSceneContext.h">
-      <Filter>FBXLoader</Filter>
     </ClInclude>
     <ClInclude Include="FBXLoader.h">
       <Filter>FBXLoader</Filter>

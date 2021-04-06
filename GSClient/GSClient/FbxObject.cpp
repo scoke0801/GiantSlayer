@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "FbxObject.h"
 #include "Shader.h"
+#include "ShaderHandler.h"
 #include "Camera.h"
 
 // FbxUtils
@@ -13,7 +14,7 @@ public:
 	~MeshInfo() { };
 
 public:
-	CMesh*	pMesh;
+	CMesh*		pMesh;
 	CShader*	pShader;
 	bool animation = false;
 };
@@ -384,9 +385,10 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		CShader* tempShader = new CShader();
 
 		if (numDC > 0) {
-			tempShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
+			/*tempShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
 			tempShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
-			tempShader->CreateInputLayout(ShaderTypes::Textured);
+			tempShader->CreateInputLayout(ShaderTypes::Textured);*/
+			tempShader = CShaderHandler::GetInstance().GetData("Object");
 			cout << "애니메이션 있음 | [Polygon]: " << numPG << " | [ControlPoint]: " << numCP << " | [DeformerCount]: " << numDC << endl;
 		}
 		else {
@@ -399,7 +401,6 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pMeshinfo->pShader = tempShader;
 
 		pMeshinfo->pShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
-
 
 		pfbxMesh->SetUserDataPtr(pMeshinfo);
 

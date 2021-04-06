@@ -18,6 +18,7 @@ CGameScene::CGameScene()
 
 CGameScene::~CGameScene()
 {
+
 }
 
 void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
