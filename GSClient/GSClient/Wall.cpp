@@ -85,6 +85,9 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice,
 	pWall->SetTextureIndex(0x01);
 	pWall->SetPosition({ fWidthRatio * 2,  height * 0.5f, depth * 0.5f }); 
 	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth, XMFLOAT3{ 0,0,0 });
+	pWall->AddColider(new ColiderOriBox(XMFLOAT3(0.0f, 0.0f, 0.0f), 
+		XMFLOAT3{ fWidthRatio * 4 *0.5f, height *0.5f, depth *0.5f},
+		XMFLOAT4(0,0,0,0)));
 	m_Walls.push_back(pWall);
 	  
 	pWall = new CWall(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth);
@@ -93,6 +96,9 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice,
 	pWall->SetTextureIndex(0x01);
 	pWall->SetPosition({ fWidthRatio * 6 + fWidthRatio * 2,  height * 0.5f, depth * 0.5f });
 	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth, XMFLOAT3{ 0,0,0 });
+	pWall->AddColider(new ColiderOriBox(XMFLOAT3(0.0f, 0.0f, 0.0f), 
+		XMFLOAT3{ fWidthRatio * 4 * 0.5f, height * 0.5f, depth * 0.5f },
+		XMFLOAT4(0, 0, 0, 0)));
 	m_Walls.push_back(pWall);  
 
 	float createdHeight;
@@ -102,7 +108,9 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice,
 	m_LeftDoor->SetTextureIndex(0x10);
 	createdHeight = m_LeftDoor->GetHeight(); 
 	m_LeftDoor->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Left, fWidthRatio, createdHeight, depth * 0.2f, XMFLOAT3{ 0,0,0 });
-
+	m_LeftDoor->AddColider(new ColiderOriBox(XMFLOAT3(fWidthRatio * 0.5f, 0.0f, 0.0f), 
+		XMFLOAT3{ fWidthRatio * 0.5f, createdHeight * 0.5f, depth * 0.2f * 0.5f }, 
+		XMFLOAT4(0, 0, 0, 0)));
 	if (height != createdHeight)
 		m_LeftDoor->SetPosition({ fWidthRatio * 4,  height * 0.5f - createdHeight * 0.5f, depth * 0.5f });
 	else
@@ -115,6 +123,9 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice,
 	m_RightDoor->SetTextureIndex(0x10);  
 	createdHeight = m_RightDoor->GetHeight();
 	m_RightDoor->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Left, fWidthRatio, createdHeight, depth * 0.2f, XMFLOAT3{ 0,0,0 });
+	m_RightDoor->AddColider(new ColiderOriBox(XMFLOAT3(fWidthRatio * 0.5f, 0.0f, 0.0f),
+		XMFLOAT3{ fWidthRatio * 0.5f, createdHeight * 0.5f, depth * 0.2f * 0.5f },
+		XMFLOAT4(0, 0, 0, 0)));
 	if (height != createdHeight)
 		m_RightDoor->SetPosition({ fWidthRatio * 6,  height * 0.5f - createdHeight * 0.5f, depth * 0.5f });
 	else

@@ -1158,6 +1158,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->SetTextureIndex(0x80);
 	pObject->Scale(35, 35, 35); 
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColiderOriBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30), XMFLOAT4(0, 0, 0, 0)));
 	m_Objects.push_back(std::move(pObject));
 }
 
@@ -1762,6 +1763,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->BuildBoundigSphereMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 2, 10, 10, XMFLOAT3{   0,   0, -10 });
 
 	m_Players[0]->SetDrawable(true); 
+	m_Players[0]->BuildColliders();
 
 	m_MinimapCamera->SetTarget(m_Players[0]);
 
@@ -1775,5 +1777,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_Players[i]->SetMesh(fbxMesh);
 		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{0,0,0});
 		m_Players[i]->SetDrawable(false); 
+
+		m_Players[i]->BuildColliders();
 	}
 }

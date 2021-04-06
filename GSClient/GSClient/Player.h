@@ -42,12 +42,14 @@ public:
 	void FixPositionByTerrain(CTerrain* pTerrain);
 
 public:
+	void BuildColliders() override;
+
+public:
 	virtual void SetVelocity(OBJ_DIRECTION direction) override;
 	virtual void SetVelocity(XMFLOAT3 dir) override;
 
 	bool IsMoving() const { return Vector3::Length(m_xmf3Velocity) > 0.01f; }
 
 	void SetWeapon(PlayerWeaponType weaponID) { m_WeaponType = weaponID; }
-	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; }
-	 
+	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; } 
 };

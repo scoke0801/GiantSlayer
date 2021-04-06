@@ -63,11 +63,13 @@ void CPlayer::Update(double fTimeElapsed)
 
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
-	/*cout << "x : [" << int(m_xmf3Position.x / 200.0f) << "] z : ["
-		<< int(m_xmf3Position.z / 200.0f)<< "]";
-	cout << " xPlus : [" << int((m_xmf3Position.x +m_xmf3Size.x)/ 200.0f) << "] zPlus : ["
-		<< int((m_xmf3Position.z + m_xmf3Size.z)/ 200.0f) << "]\n";*/
-	m_xmf3Position.y = pTerrain->GetHeight(m_xmf3Position.x, m_xmf3Position.z);
+	 m_xmf3Position.y = pTerrain->GetHeight(m_xmf3Position.x, m_xmf3Position.z);
+}
+
+void CPlayer::BuildColliders()
+{ 
+	m_Coliders.push_back(new ColiderOriBox(XMFLOAT3(0,0,0), XMFLOAT3(10,10,10), XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f)));
+	m_Coliders.push_back(new ColiderSphere(XMFLOAT3(0, 0, 0), 10.0f));
 }
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)

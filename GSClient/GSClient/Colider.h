@@ -22,7 +22,7 @@ class ColiderBox : public Colider {
 public:
 	// Center of the box.
 	// Distance from the center to each side.
-	ColiderBox(XMFLOAT3 center, XMFLOAT3 extents);
+	ColiderBox(const XMFLOAT3& center, const XMFLOAT3& extents);
 
 public:
 	BoundingBox& GetBox() override { return m_BoundingBox; }
@@ -35,7 +35,7 @@ public:
 	// Center of the box.
 	// Distance from the center to each side.
 	// Unit quaternion representing rotation (box -> world).
-	ColiderOriBox(XMFLOAT3 center, XMFLOAT3 extents, XMFLOAT4 orientation);
+	ColiderOriBox(const XMFLOAT3& center, const XMFLOAT3& extents, const XMFLOAT4& orientation);
 		
 public:
 	BoundingBox& GetBox() override { assert(!"ColiderOriBox instance only use BoundingBox"); return m_BoundingBox;}
@@ -47,8 +47,8 @@ class ColiderSphere : public Colider {
 public:    
 	// Center of the sphere.
 	// Radius of the sphere.
-	ColiderSphere(XMFLOAT3 center, float radius);
-
+	ColiderSphere(const XMFLOAT3& center, float radius);
+	
 public:
 	BoundingBox& GetBox() override { assert(!"ColiderSphere instance only use BoundingBox"); return m_BoundingBox;}
 	BoundingOrientedBox& GetOrientedBox() override { assert(!"ColiderSphere instance only use BoundingBox"); return m_BoundingOrientedBox;}

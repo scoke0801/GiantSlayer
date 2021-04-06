@@ -1,8 +1,8 @@
 #pragma once
 #include "Mesh.h"
 #include "FbxSceneContext.h"
+#include "Colider.h" 
 
-class Colider;
 class CShader;
 class CCamera;
  
@@ -148,6 +148,10 @@ public:
 
 public:
 	// about collision
+	virtual bool ColisionCheck() { return false; }
+	virtual void BuildColliders() {};
+
+	void AddColider(Colider* pColider) { m_Coliders.push_back(std::move(pColider)); }
 
 public:
 	// about bounding box 
