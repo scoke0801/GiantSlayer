@@ -156,7 +156,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="FbxObject.h" />
-    <ClInclude Include="GameSceneProto.h" />
     <ClInclude Include="Communicates.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="EnemyState.h" />
@@ -205,7 +204,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="FbxObject.cpp" />
-    <ClCompile Include="GameSceneProto.cpp" />
     <ClCompile Include="Communicates.cpp" />
     <ClCompile Include="ShaderHandler.cpp" />
     <ClCompile Include="Sign.cpp" />

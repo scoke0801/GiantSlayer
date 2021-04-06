@@ -99,9 +99,6 @@
     <ClCompile Include="EnemyState.cpp">
       <Filter>State</Filter>
     </ClCompile>
-    <ClCompile Include="GameSceneProto.cpp">
-      <Filter>Scene</Filter>
-	</ClCompile>
     <ClCompile Include="FbxSceneContext.cpp">
       <Filter>FBXLoader</Filter>
     </ClCompile>

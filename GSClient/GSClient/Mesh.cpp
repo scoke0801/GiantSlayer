@@ -614,33 +614,148 @@ CPlaneMeshTextured::~CPlaneMeshTextured()
 //////////////////////////////////////////////////////////////////////////////
 //
 
-CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices) : CMesh(pd3dDevice, pd3dCommandList)
-
+FbxScene* LoadFbxSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName)
 {
-	m_nVertices = nVertices;
+	FbxScene* pfbxScene = NULL;
+
+	int nSDKMajor, nSDKMinor, nSDKRevision;
+	FbxManager::GetFileFormatVersion(nSDKMajor, nSDKMinor, nSDKRevision);
+
+	FbxIOSettings* pfbxIOSettings = pfbxSdkManager->GetIOSettings();
+	FbxImporter* pfbxImporter = FbxImporter::Create(pfbxSdkManager, " ");
+	bool bImportStatus = pfbxImporter->Initialize(pstrFbxFileName, -1, pfbxIOSettings);
+
+	int nFileFormatMajor, nFileFormatMinor, nFileFormatRevision;
+	pfbxImporter->GetFileVersion(nFileFormatMajor, nFileFormatMinor, nFileFormatRevision);
+
+	pfbxScene = FbxScene::Create(pfbxSdkManager, " ");
+	bool bStatus = pfbxImporter->Import(pfbxScene);
+
+	FbxGeometryConverter fbxGeomConverter(pfbxSdkManager);
+	fbxGeomConverter.Triangulate(pfbxScene, true);
+
+	FbxSystemUnit fbxSceneSystemUnit = pfbxScene->GetGlobalSettings().GetSystemUnit();
+	if (fbxSceneSystemUnit.GetScaleFactor() != 1.0) FbxSystemUnit::cm.ConvertScene(pfbxScene);
+
+	pfbxImporter->Destroy();
+
+	return(pfbxScene);
+}
+
+CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	FbxManager* pfbxSdkManager, char* pstrFbxFileName,
+	bool rotateFlag)
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	FbxScene* m_pfbxScene = FbxScene::Create(pfbxSdkManager, "");
+	m_pfbxScene = LoadFbxSceneFromFile(pd3dDevice, pd3dCommandList, pfbxSdkManager, pstrFbxFileName);
+
+	FbxGeometryConverter geometryConverter(pfbxSdkManager);
+	geometryConverter.Triangulate(m_pfbxScene, true);
+
+	FbxAxisSystem sceneAxisSystem = m_pfbxScene->GetGlobalSettings().GetAxisSystem();
+	FbxAxisSystem::DirectX.ConvertScene(m_pfbxScene);
+
+	CMeshinfo fbxmesh;
+	fbxmesh.vertics = 0;
+	CMeshinfo* temp = &fbxmesh;
+
+	cout << "-메쉬 로드:" << pstrFbxFileName << endl;
+
+	LoadMesh(m_pfbxScene->GetRootNode(), temp, rotateFlag);
+
+	m_nVertices = fbxmesh.vertics;
+	m_nStride = sizeof(CTexturedVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, sizeof(XMFLOAT4) * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	cout << "-메쉬 로드 끝 ||| [정점]: " << m_nVertices << "개 " << endl;
 
-	m_pd3dVertexBuffer->Map(0, NULL, (void**)&m_pxmf4MappedPositions);
+	CTexturedVertex* pVertices = new CTexturedVertex[fbxmesh.vertex.size()];
+	copy(fbxmesh.vertex.begin(), fbxmesh.vertex.end(), pVertices);
 
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	//정점 버퍼 뷰를 생성한다. 
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-	m_d3dVertexBufferView.StrideInBytes = sizeof(XMFLOAT4);
-	m_d3dVertexBufferView.SizeInBytes = sizeof(XMFLOAT4) * m_nVertices;
-
-	m_nIndices = nIndices;
-
-	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
-
-	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
-	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 }
 
 CMeshFbx::~CMeshFbx()
 {
-	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
-	if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
+
+}
+
+
+void CMeshFbx::LoadMesh(FbxNode* node, CMeshinfo* info, bool rotateFlag)
+{
+	FbxNodeAttribute* pfbxNodeAttribute = node->GetNodeAttribute();
+
+	if ((pfbxNodeAttribute != NULL) &&
+		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
+	{
+		FbxMesh* pfbxMesh = node->GetMesh();
+
+		//info->vertics += pfbxMesh->GetControlPointsCount();
+		int nPolygons = pfbxMesh->GetPolygonCount();
+		int v = pfbxMesh->GetControlPointsCount();
+		int vv = info->vertics;
+		int vvv = v + vv;
+
+		cout << "[메쉬발견] 현재 노드 정점 수: " << v << "  기존 정점 수: " << vv << "  합: " << vvv << endl;
+
+		for (int pindex = 0; pindex < nPolygons; pindex++) {
+			for (int vindex = 0; vindex < 3; vindex++) {
+				int pvindex = pfbxMesh->GetPolygonVertex(pindex, vindex);
+				int uvindex = pfbxMesh->GetTextureUVIndex(pindex, vindex, FbxLayerElement::eTextureDiffuse);
+
+				FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
+				FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
+
+				fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
+
+				float uv1 = fbxUV[0];
+				float uv2 = 1.0f - fbxUV[1];
+
+				float y = pfbxMesh->GetControlPointAt(pvindex).mData[2];
+				float z = pfbxMesh->GetControlPointAt(pvindex).mData[1];
+				if (rotateFlag)
+				{
+					y = pfbxMesh->GetControlPointAt(pvindex).mData[1];
+					z = pfbxMesh->GetControlPointAt(pvindex).mData[2];
+				}
+
+				FbxGeometryElementNormal* pnormal = pfbxMesh->GetElementNormal(0);
+
+				info->vertex.push_back(
+					CTexturedVertex(
+						XMFLOAT3(
+							pfbxMesh->GetControlPointAt(pvindex).mData[0],
+							y,
+							z
+						),
+						XMFLOAT2(
+							uv1,
+							uv2
+						),
+						XMFLOAT3(
+							pnormal->GetDirectArray().GetAt(pvindex).mData[0],
+							pnormal->GetDirectArray().GetAt(pvindex).mData[1],
+							pnormal->GetDirectArray().GetAt(pvindex).mData[2]
+						)
+					)
+				);
+			}
+		}
+		info->vertics += nPolygons * 3;
+	}
+
+	int nChilds = node->GetChildCount();
+	cout << "연결된 차일드 노드 수: " << nChilds << endl;
+	for (int i = 0; i < nChilds; i++)
+		LoadMesh(node->GetChild(i), info, rotateFlag);
 }
 
 CMeshFbxTextured::CMeshFbxTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices) : CMesh(pd3dDevice, pd3dCommandList)
