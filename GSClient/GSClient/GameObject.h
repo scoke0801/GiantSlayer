@@ -82,7 +82,11 @@ private:
 protected:	// 좌표 관련 변수
 	XMFLOAT4X4			m_xmf4x4World;
 
+	// frame update loop, update 갱신 후의 좌표
 	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
+	// frame update loop, update 갱신 전의 좌표
+	XMFLOAT3			m_xmf3PrevPosition = XMFLOAT3{ 0,0,0 };
+
 	XMFLOAT3			m_xmf3Velocity = XMFLOAT3{ 0,0,0 };
 	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
 
@@ -142,8 +146,7 @@ public:
 	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
 
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
-
-	bool CollisionCheck() { return false; };
+ 
 
 	void Scale(float x, float y, float z, bool setSize = true);
 
@@ -151,7 +154,9 @@ public:
 	// about collision
 	virtual bool CollisionCheck(Collider* pCollider);
 	virtual bool CollisionCheck(CGameObject* other);
-	
+
+	void FixCollision(SetPosition(m_xmf3PrevPosition));
+
 	virtual void UpdateColliders();
 
 	void AddColider(Collider* pCollider) { m_Colliders.push_back(pCollider); AddAABB(pCollider); }

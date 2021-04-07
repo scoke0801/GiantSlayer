@@ -303,6 +303,7 @@ void CSceneJH::Update(double elapsedTime)
 	for (auto pObject : m_Objects) {
 		//if (m_Player->CollisionCheck(pObject)) {
 		if (pObject->CollisionCheck(m_Player)) {
+			m_Player->FixCollision();
 			cout << "충돌했습니다!!!!!!!!!!!!\n";
 		}
 	}

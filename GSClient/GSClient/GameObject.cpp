@@ -168,6 +168,7 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 
 void CGameObject::SetPosition(XMFLOAT3 pos)
 {
+	m_xmf3PrevPosition = m_xmf3Position;
 	m_xmf3Position = pos;
 
 	m_xmf4x4World._41 = pos.x;
@@ -178,6 +179,7 @@ void CGameObject::SetPosition(XMFLOAT3 pos)
 void CGameObject::SetPositionPlus(XMFLOAT3 pos)
 {
 	pos = Vector3::Add(m_xmf3Position, pos);
+	m_xmf3PrevPosition = m_xmf3Position;
 	m_xmf3Position = pos;
 
 	m_xmf4x4World._41 = pos.x;
@@ -255,7 +257,8 @@ void CGameObject::Move(XMFLOAT3 shift)
 
 void CGameObject::Move()
 {
-	m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
+	SetPosition(Vector3::Add(m_xmf3Position, m_xmf3Velocity));
+	//m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
 }
 
 void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
@@ -320,6 +323,11 @@ bool CGameObject::CollisionCheck(CGameObject* other)
 	}
 
 	return false;
+}
+
+void CGameObject::FixCollision()
+{
+	SetPosition(m_xmf3PrevPosition));
 }
 
 void CGameObject::UpdateColliders()
