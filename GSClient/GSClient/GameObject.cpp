@@ -327,7 +327,8 @@ bool CGameObject::CollisionCheck(CGameObject* other)
 
 void CGameObject::FixCollision()
 {
-	SetPosition(m_xmf3PrevPosition));
+	SetPosition(m_xmf3PrevPosition);
+	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 }
 
 void CGameObject::UpdateColliders()

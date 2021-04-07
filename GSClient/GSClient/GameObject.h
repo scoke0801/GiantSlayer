@@ -77,7 +77,7 @@ class CGameObject
 {
 private:
 	int					m_nReferences = 0;
-	 
+
 	bool				m_isDrawbale = true;
 protected:	// 좌표 관련 변수
 	XMFLOAT4X4			m_xmf4x4World;
@@ -95,16 +95,16 @@ protected:// 충돌처리 관련 변수
 	vector<Collider*>	m_AABB;
 
 protected: // 렌더링 관련 변수
-	CMesh*				m_pMesh = NULL;
+	CMesh* m_pMesh = NULL;
 	vector<CMesh*>		m_BoundingObjectMeshes;
 
-	CShader*			m_pShader = NULL;
- 
+	CShader* m_pShader = NULL;
+
 	UINT				m_nTextureIndex = 0x00;
-	 
-	MATERIAL*			m_Material;
-	  
-	CCamera*			m_Camera = nullptr;
+
+	MATERIAL* m_Material;
+
+	CCamera* m_Camera = nullptr;
 
 protected:	// 객체 관련 속성 변수
 	int					m_HP = 0;
@@ -115,8 +115,8 @@ protected:	// 객체 관련 속성 변수
 	bool				m_isCollidable = true;
 
 private:	// GPU 전달 데이터
-	ID3D12Resource*		m_pd3dcbGameObject = NULL;
-	GAMEOBJECT_INFO*	m_pcbMappedGameObjInfo = NULL;
+	ID3D12Resource* m_pd3dcbGameObject = NULL;
+	GAMEOBJECT_INFO* m_pcbMappedGameObjInfo = NULL;
 
 public:
 	CGameObject();
@@ -131,14 +131,14 @@ public:
 	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseShaderVariables();
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	void ReleaseUploadBuffers(); 
+	void ReleaseUploadBuffers();
 public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
-	 
+
 	virtual void OnPrepareRender();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	
+
 public:
 	virtual void Move(XMFLOAT3 shift);
 	void Move();
@@ -146,7 +146,7 @@ public:
 	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
 
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
- 
+
 
 	void Scale(float x, float y, float z, bool setSize = true);
 
@@ -155,7 +155,7 @@ public:
 	virtual bool CollisionCheck(Collider* pCollider);
 	virtual bool CollisionCheck(CGameObject* other);
 
-	void FixCollision(SetPosition(m_xmf3PrevPosition));
+	void FixCollision();
 
 	virtual void UpdateColliders();
 
