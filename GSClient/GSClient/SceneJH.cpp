@@ -1743,6 +1743,11 @@ void CSceneJH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 }
 
+int CSceneJH::FindTargetObject()
+{
+	return 0;
+}
+
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CMeshFbx* fbxMesh;
