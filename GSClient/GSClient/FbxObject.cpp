@@ -301,6 +301,7 @@ CFbxObject::CFbxObject()
 {
 	m_xmf3Position = { 0, 0, 0 };
 	m_xmf3Velocity = { 0, 0, 0 };
+	m_time = 0;
 
 	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
 }
@@ -318,6 +319,8 @@ CFbxObject::CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 		m_pAnimationController = new CAnimationController(m_pfbxScene);
 		cout << "fbx 메쉬 로드 성공!" << endl;
 	}
+
+	m_time = 0;
 }
 
 CFbxObject::~CFbxObject()
@@ -400,7 +403,7 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 		pMeshinfo->pShader = tempShader;
 
-		pMeshinfo->pShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
+		//pMeshinfo->pShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 		pfbxMesh->SetUserDataPtr(pMeshinfo);
 
@@ -445,6 +448,7 @@ void CFbxObject::AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime)
 																	(float)pfbxv4Vertices[i][2],
 																	(float)pfbxv4Vertices[i][1]);
 			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf2TexCoord = XMFLOAT2(0, 0);
+			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf3Normal = XMFLOAT3(0.5, 0.1, 0.3);
 		}
 
 		delete[] pfbxv4Vertices;
@@ -536,6 +540,14 @@ void CFbxObject::Update(double fTimeElapsed)
 	float fDeceleration = (Friction * fTimeElapsed);
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+
+	//cout << fTimeElapsed << endl;
+
+	m_time++;
+	if (m_time > 5) {
+		Animate(0.15);
+		m_time = 0;
+	}
 }
 
 void CFbxObject::SetAnimationStack(int nAnimationStack)

@@ -200,12 +200,8 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
 	pfbxTestObject->SetAnimationStack(0);
 	pfbxTestObject->m_pAnimationController->SetPosition(0, 0.0f);
-	/*CMeshFbx* fbxmesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/fbx/human.fbx");
-	CGameObject* pfbxTestObject = new CGameObject();
-	pfbxTestObject->SetMesh(fbxmesh);*/
 	pfbxTestObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	pfbxTestObject->SetPosition({ 100,  150, 100 });
-	pfbxTestObject->SetTextureIndex(0x200);
 	m_Objects.push_back(std::move(pfbxTestObject));
 
 	m_MinimapCamera->SetTarget(m_Player);

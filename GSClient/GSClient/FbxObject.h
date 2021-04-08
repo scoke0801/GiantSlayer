@@ -53,6 +53,7 @@ public:
 	FbxLoader*					m_pfbxLoader = NULL;
 
 	int							vertexnum;
+	int	m_time;
 
 	vector<CTexturedVertex>		m_vertex;
 
