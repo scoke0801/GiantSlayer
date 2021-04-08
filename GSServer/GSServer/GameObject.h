@@ -59,15 +59,15 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 	  
 public: 
-	virtual void Update(double fTimeElapsed); 
+	virtual void Update(float fTimeElapsed); 
 
 public:
 	virtual void Move(XMFLOAT3 shift);
 	void Move();
 
 	//void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
-	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
-	//void Rotate(float x, float y, float z);
+	virtual void Rotate(const XMFLOAT3& pxmf3Axis, float fAngle);
+	//void Rotate(float x, float y, float z); 
 
 	void Scale(float x, float y, float z);
 
@@ -93,7 +93,7 @@ public:
 
 	virtual void UpdateColliders();
 
-	void AddColider(const BoundingBox& boundingBox) { m_BoundingBox.push_back(boundingBox); AddAABB(boundingBox); }
+	void AddBoundingBox(const BoundingBox& boundingBox) { m_BoundingBox.push_back(boundingBox); AddAABB(boundingBox); }
 	void AddAABB(const BoundingBox& boundingBox);
 
 	int GetColliderCount() const { return m_BoundingBox.size(); }

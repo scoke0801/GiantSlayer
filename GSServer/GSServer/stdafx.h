@@ -16,9 +16,7 @@
 #include <algorithm>
 #pragma warning(disable  : 4996)    // mbstowcs unsafe###
 using namespace std;
-
-#define width 480 
-#define height 960
+ 
 constexpr int TERRAIN_HEIGHT_MAP_HEIGHT = 100;
 constexpr int TERRAIN_HEIGHT_MAP_WIDTH = 100;
 #define FPS 1 / 30.0f

@@ -2,6 +2,7 @@
 #include "PacketProcessor.h"
 #include "protocol.h"
 #include "ObjCollector.h"
+#include "MapObjects.h"
 
 bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 { 
@@ -245,14 +246,31 @@ void PacketProcessor::ReadObstaclesPosition()
 		GetPosition("BRIDEGE_SEC2_SEC3_2", d));
 	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_3,
 		GetPosition("BRIDEGE_SEC2_SEC3_3", d));
+
+	m_ObjectPositions.emplace(OBJECT_ID::SIGN_SCROLL,
+		GetPosition("SIGN_SCROLL", d));
+	m_ObjectPositions.emplace(OBJECT_ID::SIGN_PUZZLE,
+		GetPosition("SIGN_PUZZLE", d));
+	m_ObjectPositions.emplace(OBJECT_ID::SIGN_MEDUSA,
+		GetPosition("SIGN_MEDUSA", d)); 
+	m_ObjectPositions.emplace(OBJECT_ID::SIGN_BOSS,
+		GetPosition("SIGN_BOSS", d));
+
+	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC1,
+		GetPosition("DOOR_WALL_SEC1", d));
+	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC2,
+		GetPosition("DOOR_WALL_SEC2", d));
+	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC3,
+		GetPosition("DOOR_WALL_SEC3", d));
+	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC4,
+		GetPosition("DOOR_WALL_SEC4", d));
+	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC5,
+		GetPosition("DOOR_WALL_SEC5", d));
 }
 
 XMFLOAT3 PacketProcessor::GetPosition(const string& name, const Document& document)
 {
-	XMFLOAT3 pos;
-	if (document.HasMember(name.c_str())){
-		int stop = 3;
-	}
+	XMFLOAT3 pos; 
 	pos.x = document[name.c_str()].GetArray()[0].GetInt();
 	pos.y = document[name.c_str()].GetArray()[1].GetInt();
 	pos.z = document[name.c_str()].GetArray()[2].GetInt(); 
@@ -263,58 +281,59 @@ XMFLOAT3 PacketProcessor::GetPosition(const string& name, const Document& docume
 void PacketProcessor::InitObstacle()
 {
 // Bridge --------------------------------------------------------------------
-	CGameObject* pObject = new CObjCollector(OBJ_NAME::Bridge);
+	CGameObject* pObject = new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_1]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJ_NAME::Bridge);
+	pObject = new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_2]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJ_NAME::Bridge);
+	pObject = new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
 	pObject->Rotate({ 0, 1, 0 }, 90); 
 	m_Objects.push_back(std::move(pObject));
 /////////////////////////////////////////////////////////////////////////////////
 
 // DoorWall----------------------------------------------------------------------
-	pObject = new CObjCollector(OBJ_NAME::DoorWall);
+	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC1);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC1]);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJ_NAME::DoorWall);
+	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC2);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC2]);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJ_NAME::DoorWall);
+	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC3);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC3]);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJ_NAME::DoorWall);
+	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC4);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC4]);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJ_NAME::DoorWall);
+	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC5);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC5]);
 	m_Objects.push_back(std::move(pObject));
 ////////////////////////////////////////////////////////////////////////////////
 
 // Sign-------------------------------------------------------------------------
-	pObject = new CObjCollector(OBJ_NAME::Sign);
+	pObject = new CSign(OBJECT_ID::SIGN_SCROLL);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_SCROLL]);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJ_NAME::Sign);
+	pObject = new CSign(OBJECT_ID::SIGN_PUZZLE);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_PUZZLE]);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJ_NAME::Sign);
+	pObject = new CSign(OBJECT_ID::SIGN_MEDUSA);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_MEDUSA]);
+	pObject->Rotate({ 0,1,0 }, 90.0f);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJ_NAME::Sign);
+	pObject = new CSign(OBJECT_ID::BOSS);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BOSS]);
 	m_Objects.push_back(std::move(pObject));
 ////////////////////////////////////////////////////////////////////////////////

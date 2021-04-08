@@ -29,7 +29,7 @@ CGameObject::~CGameObject()
 }
   
 
-void CGameObject::Update(double fTimeElapsed)
+void CGameObject::Update(float fTimeElapsed)
 {
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
@@ -166,12 +166,13 @@ void CGameObject::Move()
 	m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
 }
 
-void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
+void CGameObject::Rotate(const XMFLOAT3& pxmf3Axis, float fAngle)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
 		XMConvertToRadians(fAngle));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
+ 
 
 void CGameObject::Scale(float x, float y, float z)
 {
