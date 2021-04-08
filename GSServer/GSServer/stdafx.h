@@ -33,15 +33,25 @@ constexpr int TERRAIN_HEIGHT_MAP_WIDTH = 100;
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
+#include <unordered_map>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
-  
+
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
- 
+
+// to read JSON file
+#include "../include/rapidjson/document.h"
+#include "../include/rapidjson/writer.h"
+#include "../include/rapidjson/prettywriter.h"
+#include "../include/rapidjson/stringbuffer.h"
+#include "../include/rapidjson/filereadstream.h"
+#include "../include/rapidjson/filewritestream.h"
+using namespace rapidjson;
+
 #define EPSILON					1.0e-10f
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
@@ -305,3 +315,4 @@ namespace Matrix4x4
 #define VK_J 0x4A
 #define VK_K 0x4B
 #define VK_L 0x4C 
+#include "protocol.h"

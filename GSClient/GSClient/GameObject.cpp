@@ -306,9 +306,7 @@ bool CGameObject::CollisionCheck(Collider* pAABB)
 	for (int i = 0; i < m_AABB.size(); ++i) {
 		auto thisBox = m_AABB[i]->GetBox(); 
 		bool result = thisBox.Intersects(pAABB->GetBox());
-		if (result) return true; 
-		result = thisBox.Contains(pAABB->GetBox());
-		if (result) return true;
+		if (result) return true;  
 	}
 
 	return false;

@@ -22,6 +22,8 @@ private:
 
 	int							m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 
+	vector<CGameObject*>		m_Objects;
+
 private:
 	// for update timer
 	chrono::system_clock::time_point currentTime;
@@ -58,7 +60,15 @@ private:
 	void InitAll();
 	void InitPlayers();
 	void InitMonsters();
+	
+	void ReadObstaclesPosition();
+	XMFLOAT3 GetPosition(const string& name, const Document& document);
+
+	void InitObstacle();
 
 	void InitTerrainHeightMap(); 
+
+private:
+	unordered_map<OBJECT_ID, XMFLOAT3> m_ObjectPositions;
 };
 

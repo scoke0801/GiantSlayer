@@ -55,8 +55,9 @@ void CGameObject::Update(double fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
 }
   
-void CGameObject::SetPosition(XMFLOAT3 pos)
+void CGameObject::SetPosition(const XMFLOAT3& pos)
 {
+	m_xmf3PrevPosition = m_xmf3Position;
 	m_xmf3Position = pos;
 
 	m_xmf4x4World._41 = pos.x;
@@ -64,7 +65,7 @@ void CGameObject::SetPosition(XMFLOAT3 pos)
 	m_xmf4x4World._43 = pos.z;
 }
 
-void CGameObject::SetVelocity(XMFLOAT3 vel)
+void CGameObject::SetVelocity(const XMFLOAT3& vel)
 {
 	m_xmf3Velocity = vel;
 }
@@ -99,12 +100,51 @@ void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
 {	
 	
 }
+
+bool CGameObject::CollisionCheck(const BoundingBox& pAABB)
+{
+	for (int i = 0; i < m_AABB.size(); ++i) {
+		auto thisBox = m_AABB[i];
+		bool result = thisBox.Intersects(pAABB);
+		if (result) return true; 
+	}
+
+	return false;
+}
+
+bool CGameObject::CollisionCheck(CGameObject* other)
+{
+	auto otherAABB = other->GetAABB();
+	for (int i = 0; i < otherAABB.size(); ++i) {
+		bool result = CollisionCheck(otherAABB[i]);
+		if (result) return true;
+	}
+
+	return false;
+}
+
+void CGameObject::FixCollision()
+{
+	SetPosition(m_xmf3PrevPosition);
+	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+}
+
+void CGameObject::UpdateColliders()
+{
+	for (int i = 0; i < m_BoundingBox.size(); ++i) {
+		m_BoundingBox[i].Transform(m_AABB[i], XMLoadFloat4x4(&m_xmf4x4World)); 
+	}
+}
+
+void CGameObject::AddAABB(const BoundingBox& boundingBox)
+{ 
+	m_AABB.push_back(boundingBox);
+}
   
 XMFLOAT3 CGameObject::GetRight()const
 {
 	return XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13);
 }
-
 
 XMFLOAT3 CGameObject::GetUp()const
 {

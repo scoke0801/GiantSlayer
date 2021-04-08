@@ -284,6 +284,8 @@ void CSceneJH::ReleaseObjects()
 
 void CSceneJH::Update(double elapsedTime)
 {
+	//m_pLights->m_pLights[1].m_xmf3Position = m_CurrentCamera->GetPosition3f();
+	//m_pLights->m_pLights[1].m_xmf3Direction = m_CurrentCamera->GetLook3f();
 	ProcessInput();
 
 	m_Skybox->Rotate(XMFLOAT3(0, 1, 0), 0.3 * elapsedTime);
@@ -1031,7 +1033,7 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 2500, 500, true, pShader);
 	pDoorWall->SetTextureIndexes(0x04);
 	//pDoorWall->RotateAll({ 0,1,0 }, 90);
-	pDoorWall->SetPosition({ 13500, -3500, 00 });
+	pDoorWall->SetPosition({ 13500, -3500, 0 });
 	m_Objects.push_back(pDoorWall);
 
 	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
@@ -1068,6 +1070,7 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 		pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 		m_HPGauges.push_back(pUI);
 	}
+
 	for (int i = 0; i < 20; ++i)
 	{
 		pUI = new HpSpPercentUI(pd3dDevice, pd3dCommandList, 0.011, 0.053f, 0.0f, false);
@@ -1770,7 +1773,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{ 0,0,0 });
 
 	m_Players[0]->SetDrawable(true); 
-	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 10, 10))); 
+	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 5))); 
 
 	m_MinimapCamera->SetTarget(m_Players[0]);
 

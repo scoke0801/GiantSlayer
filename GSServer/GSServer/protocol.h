@@ -26,8 +26,10 @@ enum class OBJECT_ID : USHORT {
 	TERRAIN = 0,
 	PLAYER = 1,		// 1 ~ 6 
 	
-	BRIDEGE_SEC2_SEC3 = 10,
-	
+	BRIDEGE_SEC2_SEC3_1 = 10,
+	BRIDEGE_SEC2_SEC3_2,
+	BRIDEGE_SEC2_SEC3_3,
+
 	SIGN_SCROLL = 15,
 	SIGN_PUZZLE,
 	SIGN_MEDUSA,
@@ -63,6 +65,7 @@ enum class OBJECT_ID : USHORT {
 
 	BOSS = 100
 };
+
 enum class GAME_STATE : short {
 	S_STANDBY = 0,	// 로딩하게 된다면..
 	S_LOGIN,  

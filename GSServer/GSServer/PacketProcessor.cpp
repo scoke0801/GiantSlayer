@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "PacketProcessor.h"
 #include "protocol.h"
+#include "ObjCollector.h"
 
 bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 { 
@@ -190,8 +191,11 @@ void PacketProcessor::UpdateLoop()
 void PacketProcessor::InitAll()
 {
 	InitTerrainHeightMap();
+	ReadObstaclesPosition();
+
 	InitPlayers(); 
 	InitMonsters();
+	InitObstacle();
 }
 
 void PacketProcessor::Update(float elapsedTime)
@@ -224,6 +228,96 @@ void PacketProcessor::InitPlayers()
 void PacketProcessor::InitMonsters()
 {
 	
+}
+
+void PacketProcessor::ReadObstaclesPosition()
+{
+	FILE* fp = fopen("resources/ObjectPositionData.json", "rb"); // non-Windows use "r"
+	char readBuffer[4096];
+	FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+	Document d;
+	d.ParseStream(is);	//==d.Parse(is);
+	fclose(fp);
+	auto res = d.HasMember("ImageSize");
+	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_1,
+		GetPosition("BRIDEGE_SEC2_SEC3_1", d));
+	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_2,
+		GetPosition("BRIDEGE_SEC2_SEC3_2", d));
+	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_3,
+		GetPosition("BRIDEGE_SEC2_SEC3_3", d));
+}
+
+XMFLOAT3 PacketProcessor::GetPosition(const string& name, const Document& document)
+{
+	XMFLOAT3 pos;
+	if (document.HasMember(name.c_str())){
+		int stop = 3;
+	}
+	pos.x = document[name.c_str()].GetArray()[0].GetInt();
+	pos.y = document[name.c_str()].GetArray()[1].GetInt();
+	pos.z = document[name.c_str()].GetArray()[2].GetInt(); 
+
+	return pos;
+}
+
+void PacketProcessor::InitObstacle()
+{
+// Bridge --------------------------------------------------------------------
+	CGameObject* pObject = new CObjCollector(OBJ_NAME::Bridge);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_1]);
+	pObject->Rotate({ 0, 1, 0 }, 90);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CObjCollector(OBJ_NAME::Bridge);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_2]);
+	pObject->Rotate({ 0, 1, 0 }, 90);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CObjCollector(OBJ_NAME::Bridge);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
+	pObject->Rotate({ 0, 1, 0 }, 90); 
+	m_Objects.push_back(std::move(pObject));
+/////////////////////////////////////////////////////////////////////////////////
+
+// DoorWall----------------------------------------------------------------------
+	pObject = new CObjCollector(OBJ_NAME::DoorWall);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC1]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CObjCollector(OBJ_NAME::DoorWall);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC2]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CObjCollector(OBJ_NAME::DoorWall);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC3]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CObjCollector(OBJ_NAME::DoorWall);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC4]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CObjCollector(OBJ_NAME::DoorWall);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC5]);
+	m_Objects.push_back(std::move(pObject));
+////////////////////////////////////////////////////////////////////////////////
+
+// Sign-------------------------------------------------------------------------
+	pObject = new CObjCollector(OBJ_NAME::Sign);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_SCROLL]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CObjCollector(OBJ_NAME::Sign);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_PUZZLE]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CObjCollector(OBJ_NAME::Sign);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_MEDUSA]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CObjCollector(OBJ_NAME::Sign);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BOSS]);
+	m_Objects.push_back(std::move(pObject));
+////////////////////////////////////////////////////////////////////////////////
 }
 
 void PacketProcessor::InitTerrainHeightMap()

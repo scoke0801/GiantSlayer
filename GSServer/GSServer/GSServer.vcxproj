@@ -72,12 +72,16 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>include;$(IncludePath)</IncludePath>
+    <LibraryPath>lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>include;$(IncludePath)</IncludePath>
+    <LibraryPath>lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -143,6 +147,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Communicates.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="ObjCollector.cpp" />
     <ClCompile Include="PacketProcessor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -154,6 +159,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Communicates.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="ObjCollector.h" />
     <ClInclude Include="PacketProcessor.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="protocol.h" />

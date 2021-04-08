@@ -46,6 +46,7 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
+    <ClCompile Include="ObjCollector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PacketProcessor.h">
@@ -67,5 +68,6 @@
     <ClInclude Include="Camera.h">
       <Filter>Camera</Filter>
     </ClInclude>
+    <ClInclude Include="ObjCollector.h" />
   </ItemGroup>
 </Project>
