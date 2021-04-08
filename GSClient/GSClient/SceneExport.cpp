@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "SceneTH.h"
+#include "SceneExport.h"
 
 #include "stdafx.h" 
 #include "GameFramework.h"
@@ -21,19 +21,19 @@
 #define ROOT_PARAMETER_LIGHT			4
 #define ROOT_PARAMETER_TEXTURE			5
 
-CSceneTH::CSceneTH()
+CSceneExport::CSceneExport()
 {
-	cout << "Enter CSceneTH \n";
+	cout << "Enter CSceneExport \n";
 	m_pd3dGraphicsRootSignature = NULL;
 	m_isPlayerSelected = false;
 }
 
-CSceneTH::~CSceneTH()
+CSceneExport::~CSceneExport()
 {
 
 }
 
-void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
+void CSceneExport::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
 {
 	BuildMirrorResource(pd3dDevice);
 	BuildMinimapResource(pd3dDevice);
@@ -55,7 +55,7 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	BuildUIs(pd3dDevice, pd3dCommandList);
 }
 
-void CSceneTH::BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
+void CSceneExport::BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
 {
 	int nCameras = 5;
 	m_Cameras = new CCamera * [nCameras];
@@ -85,7 +85,7 @@ void CSceneTH::BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_MinimapCamera = m_Cameras[1];
 }
 
-void CSceneTH::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pMaterials = new MATERIALS;
 	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
@@ -107,7 +107,7 @@ void CSceneTH::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
 }
 
-void CSceneTH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pLights = new LIGHTS;
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
@@ -141,7 +141,7 @@ void CSceneTH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 }
 
-void CSceneTH::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbMaterialBytes = ((sizeof(CB_GAMESCENE_FRAME_DATA) + 255) & ~255); //256의 배수
 	m_pd3dcbSceneInfo = ::CreateBufferResource(pd3dDevice, pd3dCommandList,
@@ -151,7 +151,7 @@ void CSceneTH::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pd3dcbSceneInfo->Map(0, NULL, (void**)&m_pcbMappedSceneFrameData);
 }
 
-void CSceneTH::BuildFbxManager()
+void CSceneExport::BuildFbxManager()
 {
 	m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
@@ -159,7 +159,7 @@ void CSceneTH::BuildFbxManager()
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 }
 
-void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_Objects.reserve(30);
 
@@ -207,7 +207,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_MinimapCamera->SetTarget(m_Player);
 }
 
-void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	const char* keyNames[] =
 	{
@@ -251,7 +251,7 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	}
 }
 
-void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
@@ -304,13 +304,13 @@ void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pd3dDevice->CreateShaderResourceView(m_pd3dMirrorTex, &srvDesc, hDescriptor);
 }
 
-void CSceneTH::ReleaseObjects()
+void CSceneExport::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 	m_Objects.clear();
 }
 
-void CSceneTH::Update(double elapsedTime)
+void CSceneExport::Update(double elapsedTime)
 {
 	ProcessInput();
 
@@ -344,11 +344,11 @@ void CSceneTH::Update(double elapsedTime)
 	}
 }
 
-void CSceneTH::AnimateObjects(float fTimeElapsed)
+void CSceneExport::AnimateObjects(float fTimeElapsed)
 {
 }
 
-void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
@@ -392,7 +392,7 @@ void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
-void CSceneTH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	for (UI* pUI : m_UIs)
 	{
@@ -410,16 +410,16 @@ void CSceneTH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
-void CSceneTH::DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_Player) m_Player->Draw(pd3dCommandList, m_CurrentCamera);
 }
 
-void CSceneTH::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 
-void CSceneTH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
+void CSceneExport::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
@@ -482,7 +482,7 @@ void CSceneTH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	}
 }
 
-void CSceneTH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
+void CSceneExport::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
@@ -545,7 +545,7 @@ void CSceneTH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 	}
 }
 
-void CSceneTH::Communicate(SOCKET& sock)
+void CSceneExport::Communicate(SOCKET& sock)
 {
 	P_C2S_UPDATE_SYNC_REQUEST p_syncUpdateRequest;
 	p_syncUpdateRequest.size = sizeof(P_C2S_UPDATE_SYNC_REQUEST);
@@ -568,7 +568,7 @@ void CSceneTH::Communicate(SOCKET& sock)
 	cout << "Sync Update Processed \n";
 }
 
-void CSceneTH::LoginToServer()
+void CSceneExport::LoginToServer()
 {
 	P_C2S_LOGIN p_login;
 	p_login.size = sizeof(p_login);
@@ -593,11 +593,11 @@ void CSceneTH::LoginToServer()
 	}
 }
 
-void CSceneTH::LogoutToServer()
+void CSceneExport::LogoutToServer()
 {
 }
 
-void CSceneTH::ProcessInput()
+void CSceneExport::ProcessInput()
 {
 	if (m_CurrentCamera == nullptr) return;
 
@@ -725,7 +725,7 @@ void CSceneTH::ProcessInput()
 	m_CurrentCamera->UpdateViewMatrix();
 }
 
-void CSceneTH::OnMouseDown(WPARAM btnState, int x, int y)
+void CSceneExport::OnMouseDown(WPARAM btnState, int x, int y)
 {
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
@@ -733,12 +733,12 @@ void CSceneTH::OnMouseDown(WPARAM btnState, int x, int y)
 	SetCapture(CFramework::GetInstance().GetHWND());
 }
 
-void CSceneTH::OnMouseUp(WPARAM btnState, int x, int y)
+void CSceneExport::OnMouseUp(WPARAM btnState, int x, int y)
 {
 	ReleaseCapture();
 }
 
-void CSceneTH::OnMouseMove(WPARAM btnState, int x, int y)
+void CSceneExport::OnMouseMove(WPARAM btnState, int x, int y)
 {
 	if ((btnState & MK_LBUTTON) != 0)
 	{
@@ -775,7 +775,7 @@ void CSceneTH::OnMouseMove(WPARAM btnState, int x, int y)
 	m_LastMousePos.y = y;
 }
 
-void CSceneTH::ReleaseUploadBuffers()
+void CSceneExport::ReleaseUploadBuffers()
 {
 	for (auto pObject : m_Objects)
 	{
@@ -783,7 +783,7 @@ void CSceneTH::ReleaseUploadBuffers()
 	}
 }
 
-ID3D12RootSignature* CSceneTH::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
+ID3D12RootSignature* CSceneExport::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
 	// Ground
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
@@ -888,7 +888,7 @@ ID3D12RootSignature* CSceneTH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	return(pd3dGraphicsRootSignature);
 }
 
-void CSceneTH::BuildBridges(ID3D12Device* pd3dDevice,
+void CSceneExport::BuildBridges(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
 	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
@@ -913,7 +913,7 @@ void CSceneTH::BuildBridges(ID3D12Device* pd3dDevice,
 	m_Objects.push_back(pBridge);
 }
 
-void CSceneTH::BuildDoorWall(ID3D12Device* pd3dDevice,
+void CSceneExport::BuildDoorWall(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
 	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 1000, 500, pShader);
@@ -942,7 +942,7 @@ void CSceneTH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	m_Objects.push_back(pDoorWall);
 }
 
-void CSceneTH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CShader* pShader = new CShader();
 	UI* pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.09f, 0.0f, true);
@@ -1007,7 +1007,7 @@ void CSceneTH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	m_UIs.push_back(pUI);
 }
 
-void CSceneTH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
 	pPuzzlePlate->SetPosition({ 10600.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f });
@@ -1031,7 +1031,7 @@ void CSceneTH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	}
 }
 
-void CSceneTH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// 첫번째 지형 표지판
 	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::Scroll,
@@ -1053,7 +1053,7 @@ void CSceneTH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_Objects.push_back(pSign);
 }
 
-void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	CGameObject* pObject = new CGameObject();
@@ -1066,7 +1066,7 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_Objects.push_back(std::move(pObject));
 }
 
-void CSceneTH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_Mirror = new CGameObject();
 
@@ -1080,7 +1080,7 @@ void CSceneTH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_Mirror->SetTextureIndex(0x01);
 }
 
-void CSceneTH::BuildMinimapResource(ID3D12Device* pd3dDevice)
+void CSceneExport::BuildMinimapResource(ID3D12Device* pd3dDevice)
 {
 	D3D12_RESOURCE_DESC texDesc;
 	ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
@@ -1105,7 +1105,7 @@ void CSceneTH::BuildMinimapResource(ID3D12Device* pd3dDevice)
 		IID_PPV_ARGS(&m_pd3dMinimapTex));
 }
 
-void CSceneTH::BuildMirrorResource(ID3D12Device* pd3dDevice)
+void CSceneExport::BuildMirrorResource(ID3D12Device* pd3dDevice)
 {
 	D3D12_RESOURCE_DESC texDesc;
 	ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
@@ -1130,7 +1130,7 @@ void CSceneTH::BuildMirrorResource(ID3D12Device* pd3dDevice)
 		IID_PPV_ARGS(&m_pd3dMirrorTex));
 }
 
-void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 #pragma region Create Tree
 	// 지나가지 못하는 첫번째 지형쪽의 나무 빌보드
@@ -1408,7 +1408,7 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_Objects.push_back(std::move(pObject));
 }
 
-void CSceneTH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CMeshFbx* fbx_Rock_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/rock.fbx", true);
 	CGameObject* pObject;
@@ -1504,7 +1504,7 @@ void CSceneTH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	}
 }
 
-void CSceneTH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CMeshFbx* fbx_Desert_Rock_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true);
 	CGameObject* pObject;
@@ -1629,10 +1629,10 @@ void CSceneTH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	}
 }
 
-void CSceneTH::BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 
-void CSceneTH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneExport::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }

@@ -163,6 +163,7 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="SceneExport.h" />
     <ClInclude Include="ShaderHandler.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Light.h" />
@@ -205,6 +206,7 @@
     </ClCompile>
     <ClCompile Include="FbxObject.cpp" />
     <ClCompile Include="Communicates.cpp" />
+    <ClCompile Include="SceneExport.cpp" />
     <ClCompile Include="ShaderHandler.cpp" />
     <ClCompile Include="Sign.cpp" />
     <ClCompile Include="Terrain.cpp" />

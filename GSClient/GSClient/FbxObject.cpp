@@ -110,7 +110,7 @@ FbxAMatrix ComputeClusterDeformation(FbxMesh* pfbxMesh, FbxCluster* pfbxCluster,
 	}
 	else
 	{ //FbxCluster::eAdditive
-		if (pfbxCluster->GetAssociateModel())
+		/*if (pfbxCluster->GetAssociateModel())
 		{
 			FbxAMatrix fbxmtxAssociateModel;
 			pfbxCluster->GetTransformAssociateModelMatrix(fbxmtxAssociateModel);
@@ -135,7 +135,7 @@ FbxAMatrix ComputeClusterDeformation(FbxMesh* pfbxMesh, FbxCluster* pfbxCluster,
 			FbxAMatrix fbxmtxClusterLinkToRoot = pfbxCluster->GetLink()->EvaluateGlobalTransform(fbxCurrentTime);
 
 			fbxmtxVertexTransform = fbxmtxClusterTransform.Inverse() * fbxmtxAssociateModel * fbxmtxAssociateModelGlobal.Inverse() * fbxmtxClusterLinkToRoot * fbxmtxClusterLinkTransform.Inverse() * fbxmtxClusterTransform;
-		}
+		}*/
 	}
 	return(fbxmtxVertexTransform);
 }
@@ -151,7 +151,7 @@ void ComputeLinearDeformation(FbxMesh* pfbxMesh, FbxTime& fbxCurrentTime, FbxVec
 	FbxCluster::ELinkMode nClusterMode = ((FbxSkin*)pfbxMesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0)->GetLinkMode();
 	if (nClusterMode == FbxCluster::eAdditive)
 	{
-		for (int i = 0; i < nVertices; ++i) pfbxmtxClusterDeformations[i].SetIdentity();
+		//for (int i = 0; i < nVertices; ++i) pfbxmtxClusterDeformations[i].SetIdentity();
 	}
 
 	int nSkinDeformers = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
@@ -182,9 +182,9 @@ void ComputeLinearDeformation(FbxMesh* pfbxMesh, FbxTime& fbxCurrentTime, FbxVec
 
 				if (nClusterMode == FbxCluster::eAdditive)
 				{
-					MatrixAddToDiagonal(fbxmtxInfluence, 1.0 - fWeight);
-					pfbxmtxClusterDeformations[nIndex] = fbxmtxInfluence * pfbxmtxClusterDeformations[nIndex];
-					pfSumOfClusterWeights[nIndex] = 1.0;
+					//MatrixAddToDiagonal(fbxmtxInfluence, 1.0 - fWeight);
+				//	pfbxmtxClusterDeformations[nIndex] = fbxmtxInfluence * pfbxmtxClusterDeformations[nIndex];
+				//	pfSumOfClusterWeights[nIndex] = 1.0;
 				}
 				else
 				{
@@ -207,8 +207,8 @@ void ComputeLinearDeformation(FbxMesh* pfbxMesh, FbxTime& fbxCurrentTime, FbxVec
 			}
 			else if (nClusterMode == FbxCluster::eTotalOne)
 			{
-				fbxv4Vertex *= (1.0 - pfSumOfClusterWeights[i]);
-				pfbxv4Vertices[i] += fbxv4Vertex;
+				//fbxv4Vertex *= (1.0 - pfSumOfClusterWeights[i]);
+				//pfbxv4Vertices[i] += fbxv4Vertex;
 			}
 		}
 	}
@@ -377,27 +377,24 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		int indicecount = 0;
 
 		for (int i = 0; i < numPG; i++) {
-			for (int j = 0; j < 3; j++) 
-				pnIndices[indicecount++] = pfbxMesh->GetPolygonVertex(i, j);
+			for (int j = 0; j < 3; j++) {
+				int indexCP = pfbxMesh->GetPolygonVertex(i, j);
+
+				pnIndices[indicecount++] = indexCP;
+			}
 		}
 
 		MeshInfo* pMeshinfo = new MeshInfo();
-		//pMeshinfo->pMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, numCP, numPG * 3, pnIndices);
 		pMeshinfo->pMesh = new CMeshFbxTextured(pd3dDevice, pd3dCommandList, numCP, numPG * 3, pnIndices);
 
 		CShader* tempShader = new CShader();
 
 		if (numDC > 0) {
-			/*tempShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
-			tempShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
-			tempShader->CreateInputLayout(ShaderTypes::Textured);*/
 			tempShader = CShaderHandler::GetInstance().GetData("Object");
 			cout << "애니메이션 있음 | [Polygon]: " << numPG << " | [ControlPoint]: " << numCP << " | [DeformerCount]: " << numDC << endl;
 		}
 		else {
-			tempShader->CreateVertexShader(L"Shaders\\Shaders.hlsl", "VSTextured");
-			tempShader->CreatePixelShader(L"Shaders\\Shaders.hlsl", "PSTextured");
-			tempShader->CreateInputLayout(ShaderTypes::Textured);
+			tempShader = CShaderHandler::GetInstance().GetData("Object");
 			cout << "애니메이션 없음 | [Polygon]: " << numPG << " | [ControlPoint]: " << numCP << endl;
 		}
 
@@ -445,10 +442,10 @@ void CFbxObject::AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime)
 
 		for (int i = 0; i < numCP; i++) {
 			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf3Position = XMFLOAT3(	(float)pfbxv4Vertices[i][0],
-																	(float)pfbxv4Vertices[i][2],
-																	(float)pfbxv4Vertices[i][1]);
+																					(float)pfbxv4Vertices[i][2],
+																					(float)pfbxv4Vertices[i][1]);
 			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf2TexCoord = XMFLOAT2(0, 0);
-			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf3Normal = XMFLOAT3(0.5, 0.1, 0.3);
+			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf3Normal = XMFLOAT3(0, 0, 0);
 		}
 
 		delete[] pfbxv4Vertices;

@@ -1,112 +1,21 @@
 #pragma once
 
-struct BlendingIndexWeightPair
+struct FbxSubMesh
 {
-	unsigned int mBlendingIndex;
-	double mBlendingWeight;
+	int nControlPoint;
+	int nPolygon;
+	int nDeformer;
 
-	BlendingIndexWeightPair() :
-		mBlendingIndex(0),
-		mBlendingWeight(0)
-	{}
+	vector<int> mIndex;
+	vector<CTexturedVertex> mVertex;
+
+	vector<double> mClusterWeight;
+	vector<XMFLOAT3> mClusterDef;
 };
 
-struct VertexBlendingInfo
+struct FbxModel
 {
-	int mBlendingIndex;
-	double mBlendingWeight;
-
-	VertexBlendingInfo() :
-		mBlendingIndex(0),
-		mBlendingWeight(0.0)
-	{}
-
-	bool operator < (const VertexBlendingInfo& rhs)
-	{
-		return (mBlendingWeight > rhs.mBlendingWeight);
-	}
-};
-
-struct Keyframe
-{
-	FbxLongLong mFrameNum;
-	FbxAMatrix mGlobalTransform;
-	Keyframe* mNext;
-
-	Keyframe() :
-		mNext(nullptr)
-	{}
-};
-
-/////////////////////////////////////////////////////////////////////////
-
-struct ControlPoint
-{
-	XMFLOAT3 pos;
-	XMFLOAT2 uv;
-	vector<BlendingIndexWeightPair> mBlendingInfo;
-	vector<VertexBlendingInfo> mVertexBlendingInfos;
-
-	ControlPoint()
-	{
-		mBlendingInfo.reserve(4);
-	}
-
-	void SortBlendingInfoByWeight()
-	{
-		std::sort(mVertexBlendingInfos.begin(), mVertexBlendingInfos.end());
-	}
-};
-
-//struct MeshVertex
-//{
-//	XMFLOAT3 pos;
-//	XMFLOAT2 uv;
-//	vector<VertexBlendingInfo> mVertexBlendingInfos;
-//
-//	void SortBlendingInfoByWeight()
-//	{
-//		std::sort(mVertexBlendingInfos.begin(), mVertexBlendingInfos.end());
-//	}
-//};
-
-struct TriPolygon
-{
-	vector<int> mIndices;
-	string mMaterialName;
-	int mMaterialIndex;
-
-	bool operator<(const TriPolygon& rhs)
-	{
-		return mMaterialIndex < rhs.mMaterialIndex;
-	}
-};
-
-struct Joint
-{
-	std::string mName;
-	int mParentIndex;
-	FbxAMatrix mGlobalBindposeInverse;
-	Keyframe* mAnimation;
-	FbxNode* mNode;
-
-	Joint() :
-		mNode(nullptr),
-		mAnimation(nullptr)
-	{
-		mGlobalBindposeInverse.SetIdentity();
-		mParentIndex = -1;
-	}
-
-	~Joint()
-	{
-		while (mAnimation)
-		{
-			Keyframe* temp = mAnimation->mNext;
-			delete mAnimation;
-			mAnimation = temp;
-		}
-	}
+	vector<FbxSubMesh> mMesh;
 };
 
 class FbxLoader
@@ -118,15 +27,9 @@ private:
 	FbxLongLong mAnimationLength;
 	string mAnimationName;
 
-	bool Animation = 0;
-	int modelcount = 0;
+	////////////////////////////////////////////////////////
 
-	vector<ControlPoint*> mControlPoint;
-	//vector<MeshVertex> mVertex;
-	vector<TriPolygon> mPolygon;
-	vector<Joint> mSkeleton;
-
-
+	vector<FbxSubMesh> mFbxMesh;
 
 public:
 	FbxLoader();

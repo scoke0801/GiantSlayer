@@ -1,13 +1,30 @@
 #include "stdafx.h"
 #include "FbxLoader.h"
+#include "Mesh.h"
 
-FbxMatrix GetGeometryTransform(FbxNode* pNode)
+FbxAMatrix GeometricOffsetTransform(FbxNode* pfbxNode)
 {
-	const FbxVector4 lT = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
-	const FbxVector4 lR = pNode->GetGeometricRotation(FbxNode::eSourcePivot);
-	const FbxVector4 lS = pNode->GetGeometricScaling(FbxNode::eSourcePivot);
+	const FbxVector4 T = pfbxNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+	const FbxVector4 R = pfbxNode->GetGeometricRotation(FbxNode::eSourcePivot);
+	const FbxVector4 S = pfbxNode->GetGeometricScaling(FbxNode::eSourcePivot);
 
-	return FbxAMatrix(lT, lR, lS);
+	return(FbxAMatrix(T, R, S));
+}
+
+void SetMatrixScale(FbxAMatrix& fbxmtxSrcMatrix, double pValue)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++) fbxmtxSrcMatrix[i][j] *= pValue;
+	}
+}
+
+void SetMatrixAdd(FbxAMatrix& fbxmtxDstMatrix, FbxAMatrix& fbxmtxSrcMatrix)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++) fbxmtxDstMatrix[i][j] += fbxmtxSrcMatrix[i][j];
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -23,12 +40,12 @@ FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName)
 
 	LoadScene(FileName);
 
-	LoadSkeletonHierarchy(mFbxScene->GetRootNode());
-	if (!mSkeleton.empty()) Animation = true;
+	//LoadSkeletonHierarchy(mFbxScene->GetRootNode());
+	//if (!mSkeleton.empty()) Animation = true;
 
 	ExploreFbxHierarchy(mFbxScene->GetRootNode());
 
-	cout << "구성 모델 수: " << modelcount << endl;
+	cout << "구성 모델 수: " << mFbxMesh.size() << endl;
 
 	ExportFbxFile();
 }
@@ -78,16 +95,12 @@ void FbxLoader::LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex
 	if ((pfbxNodeAttribute != NULL) &&
 		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton))
 	{
-		Joint currJoint;
-		currJoint.mParentIndex = inParentIndex;
-		currJoint.mName = pNode->GetName();
-		cout << "[JointNum]: " << currJoint.mParentIndex << "\t[JointName]: " << currJoint.mName << endl;
-		mSkeleton.push_back(currJoint);
+		
 	}
 
 	for (int i = 0; i < pNode->GetChildCount(); i++)
 	{
-		LoadSkeletonRecursively(pNode->GetChild(i), inDepth + 1, mSkeleton.size(), myIndex);
+		//LoadSkeletonRecursively(pNode->GetChild(i), inDepth + 1, mSkeleton.size(), myIndex);
 	}
 }
 
@@ -100,154 +113,113 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 	{
 		FbxMesh* pfbxMesh = pNode->GetMesh();
 
-		modelcount++;
+		FbxSubMesh tempSubMesh;
 
-		//===========================================================
+		// Mesh ===============================================================
 		int numCP = pfbxMesh->GetControlPointsCount();
 		int numPG = pfbxMesh->GetPolygonCount();
-		cout << "ControlPoint Count: " << numCP << endl;
 
 		for (int pindex = 0; pindex < numPG; pindex++) {
 			for (int vindex = 0; vindex < 3; vindex++) {
 				int pvindex = pfbxMesh->GetPolygonVertex(pindex, vindex);
 				int uvindex = pfbxMesh->GetTextureUVIndex(pindex, vindex, FbxLayerElement::eTextureDiffuse);
 
+				FbxSubMesh tempSubMesh;
+				CTexturedVertex tempVertex;
+
+				// Position ==========================================================
+				tempVertex.m_xmf3Position.x = pfbxMesh->GetControlPointAt(pvindex).mData[0];
+				tempVertex.m_xmf3Position.y = pfbxMesh->GetControlPointAt(pvindex).mData[2];
+				tempVertex.m_xmf3Position.z = pfbxMesh->GetControlPointAt(pvindex).mData[1];
+
+				// Uv ================================================================
 				FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
 				FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
+				fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
 
-				ControlPoint* tempCP = new ControlPoint();
-				XMFLOAT3 tempPos;
-				tempPos.x = pfbxMesh->GetControlPointAt(pvindex).mData[0];
-				tempPos.y = pfbxMesh->GetControlPointAt(pvindex).mData[2];
-				tempPos.z = pfbxMesh->GetControlPointAt(pvindex).mData[1];
-				XMFLOAT2 tempUv;
+				tempVertex.m_xmf2TexCoord.x = fbxUV[0];
+				tempVertex.m_xmf2TexCoord.y = 1.0f - fbxUV[1];
 
-				if (fbxLayerUV != NULL) {
-					fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
+				// Normal ============================================================
+				FbxGeometryElementNormal* pnormal = pfbxMesh->GetElementNormal(0);
 
-					tempUv.x = fbxUV[0];
-					tempUv.y = 1.0f - fbxUV[1];
-				}
-				else {
-					tempUv.x = 0;
-					tempUv.y = 0;
-				}
-
-				tempCP->pos = tempPos;
-				tempCP->uv = tempUv;
-				mControlPoint.push_back(tempCP);
-
-				for (int b = 0; b < tempCP->mBlendingInfo.size(); b++)
-				{
-					//cout << b << endl;
-					VertexBlendingInfo tempblendinfo;
-					tempblendinfo.mBlendingIndex = tempCP->mBlendingInfo[b].mBlendingIndex;
-					tempblendinfo.mBlendingIndex = tempCP->mBlendingInfo[b].mBlendingWeight;
-					tempCP->mVertexBlendingInfos.push_back(tempblendinfo);
-					//cout << "binfosize: " << temp.mvertexblendinginfos.size() << endl;
-				}
-
-				tempCP->SortBlendingInfoByWeight();
+				tempVertex.m_xmf3Normal.x = pnormal->GetDirectArray().GetAt(pvindex).mData[0];
+				tempVertex.m_xmf3Normal.y = pnormal->GetDirectArray().GetAt(pvindex).mData[1];
+				tempVertex.m_xmf3Normal.z = pnormal->GetDirectArray().GetAt(pvindex).mData[2];
+				
+				tempSubMesh.mIndex.push_back(pvindex);
+				tempSubMesh.mVertex.push_back(tempVertex);
 			}
 		}
 
-		/*ofstream file;
-		file.open("MeshVertexFromExportedControlPoint.txt");
+		// Animation ==========================================================
+		int numDC = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
 
-		for (int i = 0; i < mControlPoint.size(); i++) {
-			file << mControlPoint[i]->pos.x << " " << mControlPoint[i]->pos.y << " " << mControlPoint[i]->pos.z << " " <<
-				mControlPoint[i]->uv.x << " " << mControlPoint[i]->uv.y << endl;
-		}
+		FbxVector4* tempDefVertex = new FbxVector4[numCP];
+		::memcpy(tempDefVertex, pfbxMesh->GetControlPoints(), numCP * sizeof(FbxVector4));
 
-		file.close();*/
+		FbxAMatrix* tempClusterDef = new FbxAMatrix[numCP];
+		::memset(tempClusterDef, 0, numCP * sizeof(FbxAMatrix));
 
-		//===========================================================
+		double* tempClusterWeight = new double[numCP];
+		::memset(tempClusterWeight, 0, numCP * sizeof(double));
 
-		//===========================================================
-		if (Animation == true) {
-			int numDF = pfbxMesh->GetDeformerCount();
+		FbxAMatrix geometryTransform = GeometricOffsetTransform(pfbxMesh->GetNode());
 
-			FbxMatrix geometryTransform = GetGeometryTransform(pNode);
+		FbxCluster::ELinkMode nClusterMode = 
+			((FbxSkin*)pfbxMesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0)->GetLinkMode();
 
-			for (int i = 0; i < numDF; i++) {
-				FbxSkin* tempSkin = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
-			
-				if (!tempSkin) 
-					continue;
+		for (int i = 0; i < numDC; i++) {
+			FbxSkin* pSkinDef = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
+			int nClusters = pSkinDef->GetClusterCount();
 
-				int numCS = tempSkin->GetClusterCount();
+			for (int j = 0; j < nClusters; j++) {
+				FbxCluster* pCluster = pSkinDef->GetCluster(j);
+				if (!pCluster->GetLink()) continue;
 
-				for (int i = 0; i < numCS; i++) {
-					FbxCluster* tempCS = tempSkin->GetCluster(i);
-					string jointName = tempCS->GetLink()->GetName();
-					
-					int jointIndex = 0;
+				FbxAMatrix clusterDefMatrix; // = 아래꺼
 
-					for (int i = 0; i < mSkeleton.size(); i++) {
-						if (mSkeleton[i].mName == jointName) {
-							jointIndex = i;
-							break;
-						}
-					}
+				if (nClusterMode == FbxCluster::eNormalize) {
 
 					FbxAMatrix transformMatrix;
+					pCluster->GetTransformMatrix(transformMatrix);
+
 					FbxAMatrix transformLinkMatrix;
-					FbxAMatrix globalBindposeInverseMatrix;
+					pCluster->GetTransformLinkMatrix(transformLinkMatrix);
 
-					tempCS->GetTransformMatrix(transformMatrix);
-					tempCS->GetTransformLinkMatrix(transformLinkMatrix);
-					globalBindposeInverseMatrix = transformLinkMatrix.Inverse() * transformMatrix * 
-						FbxAMatrix(pNode->GetGeometricTranslation(FbxNode::eSourcePivot),
-									pNode->GetGeometricRotation(FbxNode::eSourcePivot),
-									pNode->GetGeometricScaling(FbxNode::eSourcePivot));
-
-					mSkeleton[jointIndex].mGlobalBindposeInverse = globalBindposeInverseMatrix;
-					mSkeleton[jointIndex].mNode = tempCS->GetLink();
-
-					int numCPID = tempCS->GetControlPointIndicesCount();
-
-					for (int i = 0; i < numCPID; i++)
-					{
-						BlendingIndexWeightPair currBlendingIndexWeightPair;
-						currBlendingIndexWeightPair.mBlendingIndex = jointIndex;
-						currBlendingIndexWeightPair.mBlendingWeight = tempCS->GetControlPointWeights()[i];
-						mControlPoint[tempCS->GetControlPointIndices()[i]]->mBlendingInfo.push_back(currBlendingIndexWeightPair);
-					}
-
-					FbxAnimStack* currAnimStack = mFbxScene->GetSrcObject<FbxAnimStack>(0);
-					FbxString animStackName = currAnimStack->GetName();
-					mAnimationName = animStackName.Buffer();
-					FbxTakeInfo* takeInfo = mFbxScene->GetTakeInfo(animStackName);
-					FbxTime start = takeInfo->mLocalTimeSpan.GetStart();
-					FbxTime end = takeInfo->mLocalTimeSpan.GetStop();
-					mAnimationLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
-					Keyframe** currAnim = &mSkeleton[jointIndex].mAnimation;
-
-					for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); ++i)
-					{
-						FbxTime currTime;
-						currTime.SetFrame(i, FbxTime::eFrames24);
-						*currAnim = new Keyframe();
-						(*currAnim)->mFrameNum = i;
-						FbxAMatrix currentTransformOffset = pNode->EvaluateGlobalTransform(currTime) *
-							FbxAMatrix(pNode->GetGeometricTranslation(FbxNode::eSourcePivot),
-								pNode->GetGeometricRotation(FbxNode::eSourcePivot),
-								pNode->GetGeometricScaling(FbxNode::eSourcePivot));
-						(*currAnim)->mGlobalTransform = currentTransformOffset.Inverse() * tempCS->GetLink()->EvaluateGlobalTransform(currTime);
-						currAnim = &((*currAnim)->mNext);
-					}
+					clusterDefMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransform;
 				}
-			}
 
-			BlendingIndexWeightPair currBlendingIndexWeightPair;
-			currBlendingIndexWeightPair.mBlendingIndex = 0;
-			currBlendingIndexWeightPair.mBlendingWeight = 0;
-			for (int i = 0; i < mControlPoint.size(); i++){
-				for (int j = mControlPoint[i]->mBlendingInfo.size(); j <= 4; j++){
-					mControlPoint[i]->mBlendingInfo.push_back(currBlendingIndexWeightPair);
+				int nIndices = pCluster->GetControlPointIndicesCount();
+				int* pnIndices = pCluster->GetControlPointIndices();
+				double* pfWeights = pCluster->GetControlPointWeights();
+
+				for (int k = 0; k < nIndices; k++) {
+					int nIndex = pnIndices[k];
+					double fWeight = pfWeights[k];
+					
+					if ((nIndex >= numCP) || (fWeight == 0.0)) continue;
+
+					SetMatrixScale(clusterDefMatrix, fWeight);
+					SetMatrixAdd(tempClusterDef[nIndex], clusterDefMatrix);
+					tempClusterWeight[nIndex] = fWeight;
 				}
 			}
 		}
+
+
+
+		//tempSubMesh.mClusterWeight = tempClusterWeight
+		//tempSubMesh.mClusterDef = tempClusterDef
+
+		tempSubMesh.nControlPoint = numCP;
+		tempSubMesh.nPolygon = numPG;
+
+		cout << "[메쉬 발견] CP: " << numCP << ", PG: " << numPG << ", VT: " << tempSubMesh.mVertex.size();
+		if (numDC != 0) cout << ", AM: [O]" << endl;
+		else cout << ", AM: [X]" << endl;
+
+		mFbxMesh.push_back(tempSubMesh);
 	}
 
 	for (int i = 0; i < pNode->GetChildCount(); ++i)
@@ -285,81 +257,81 @@ void FbxLoader::ExportFbxFile()
 	file.write((char*)&writetemp, sizeof(writetemp));
 	*/
 
-	file << "[Vertex]" << endl;
-	file << mControlPoint.size() << endl;
+	//file << "[Vertex]" << endl;
+	//file << mControlPoint.size() << endl;
 
-	for (int i = 0; i < mControlPoint.size(); i++) {
-		file << mControlPoint[i]->pos.x << " " << mControlPoint[i]->pos.y << " " << mControlPoint[i]->pos.z << " " <<
-			mControlPoint[i]->uv.x << " " << mControlPoint[i]->uv.y << endl;
-	}
+	//for (int i = 0; i < mControlPoint.size(); i++) {
+	//	file << mControlPoint[i]->pos.x << " " << mControlPoint[i]->pos.y << " " << mControlPoint[i]->pos.z << " " <<
+	//		mControlPoint[i]->uv.x << " " << mControlPoint[i]->uv.y << endl;
+	//}
 
-	file << "[VertexEnd]" << endl;
-	
-	file << "\n";
+	//file << "[VertexEnd]" << endl;
+	//
+	//file << "\n";
 
-	//Animation = false;
+	////Animation = false;
 
-	if (Animation == true) {
-		file << "[JointCount]: " << mSkeleton.size() << "\n";
-		for (int i = 0; i < mSkeleton.size(); i++) {
-			file << "[" << i << "]: " <<
-				"Name " << mSkeleton[i].mName << "ParentIndex " << mSkeleton[i].mParentIndex <<
-				" BindPose " << mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 0) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 1) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 2) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 3) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 0) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 1) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 2) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 3) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 0) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 1) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 2) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 3) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 0) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 1) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 2) << "," <<
-				mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 3) << "\n";
-		}
+	//if (Animation == true) {
+	//	file << "[JointCount]: " << mSkeleton.size() << "\n";
+	//	for (int i = 0; i < mSkeleton.size(); i++) {
+	//		file << "[" << i << "]: " <<
+	//			"Name " << mSkeleton[i].mName << "ParentIndex " << mSkeleton[i].mParentIndex <<
+	//			" BindPose " << mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 0) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 1) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 2) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 3) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 0) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 1) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 2) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 3) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 0) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 1) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 2) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 3) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 0) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 1) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 2) << "," <<
+	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 3) << "\n";
+	//	}
 
-		file << "\n";
+	//	file << "\n";
 
-		file << "[Animation]" << "\n";
-		for (int i = 0; i < mSkeleton.size(); i++) {
-			Keyframe* temp = mSkeleton[i].mAnimation;
+	//	file << "[Animation]" << "\n";
+	//	for (int i = 0; i < mSkeleton.size(); i++) {
+	//		Keyframe* temp = mSkeleton[i].mAnimation;
 
-			file << "[" << i << "]: " << "Name " << mSkeleton[i].mName << "\n";
+	//		file << "[" << i << "]: " << "Name " << mSkeleton[i].mName << "\n";
 
-			while(temp) {
-				FbxVector4 translation = temp->mGlobalTransform.GetT();
-				FbxVector4 rotation = temp->mGlobalTransform.GetR();
-				translation.Set(translation.mData[0], translation.mData[1], -translation.mData[2]);
-				rotation.Set(-rotation.mData[0], -rotation.mData[1], rotation.mData[2]);
-				temp->mGlobalTransform.SetT(translation);
-				temp->mGlobalTransform.SetR(rotation);
-		
-				file << "[FrameNum]: " << temp->mFrameNum - 1 << " " <<
-					temp->mGlobalTransform.Transpose().Get(0, 0) << "," <<
-					temp->mGlobalTransform.Transpose().Get(0, 1) << "," <<
-					temp->mGlobalTransform.Transpose().Get(0, 2) << "," <<
-					temp->mGlobalTransform.Transpose().Get(0, 3) << "," <<
-					temp->mGlobalTransform.Transpose().Get(1, 0) << "," <<
-					temp->mGlobalTransform.Transpose().Get(1, 1) << "," <<
-					temp->mGlobalTransform.Transpose().Get(1, 2) << "," <<
-					temp->mGlobalTransform.Transpose().Get(1, 3) << "," <<
-					temp->mGlobalTransform.Transpose().Get(2, 0) << "," <<
-					temp->mGlobalTransform.Transpose().Get(2, 1) << "," <<
-					temp->mGlobalTransform.Transpose().Get(2, 2) << "," <<
-					temp->mGlobalTransform.Transpose().Get(2, 3) << "," <<
-					temp->mGlobalTransform.Transpose().Get(3, 0) << "," <<
-					temp->mGlobalTransform.Transpose().Get(3, 1) << "," <<
-					temp->mGlobalTransform.Transpose().Get(3, 2) << "," <<
-					temp->mGlobalTransform.Transpose().Get(3, 3) << "\n";
+	//		while(temp) {
+	//			FbxVector4 translation = temp->mGlobalTransform.GetT();
+	//			FbxVector4 rotation = temp->mGlobalTransform.GetR();
+	//			translation.Set(translation.mData[0], translation.mData[1], -translation.mData[2]);
+	//			rotation.Set(-rotation.mData[0], -rotation.mData[1], rotation.mData[2]);
+	//			temp->mGlobalTransform.SetT(translation);
+	//			temp->mGlobalTransform.SetR(rotation);
+	//	
+	//			file << "[FrameNum]: " << temp->mFrameNum - 1 << " " <<
+	//				temp->mGlobalTransform.Transpose().Get(0, 0) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(0, 1) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(0, 2) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(0, 3) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(1, 0) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(1, 1) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(1, 2) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(1, 3) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(2, 0) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(2, 1) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(2, 2) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(2, 3) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(3, 0) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(3, 1) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(3, 2) << "," <<
+	//				temp->mGlobalTransform.Transpose().Get(3, 3) << "\n";
 
-				temp = temp->mNext;
-			}
-		}
-	}
+	//			temp = temp->mNext;
+	//		}
+	//	}
+	//}
 	
 	file.close();
 }

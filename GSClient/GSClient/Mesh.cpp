@@ -726,7 +726,7 @@ void CMeshFbx::LoadMesh(FbxNode* node, CMeshinfo* info, bool rotateFlag)
 					y = pfbxMesh->GetControlPointAt(pvindex).mData[1];
 					z = pfbxMesh->GetControlPointAt(pvindex).mData[2];
 				}
-
+				
 				FbxGeometryElementNormal* pnormal = pfbxMesh->GetElementNormal(0);
 
 				info->vertex.push_back(
