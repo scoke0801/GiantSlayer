@@ -69,6 +69,7 @@ public:
 
 	// for Update Loop
 	void Update(float elapsedTime);
+	void Update(const XMFLOAT3& xmf3LookAt);
 	void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	void UpdateLights(float elapsedTime);
 

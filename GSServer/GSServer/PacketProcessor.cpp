@@ -213,13 +213,29 @@ void PacketProcessor::Update(float elapsedTime)
 		pObject->UpdateColliders();
 	}
 
+	// 오브젝트 - 플레이어 간 충돌처리
 	for (auto pObject : m_Objects) {
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			if (m_Players[i]->IsExist() == false) continue;
 
 			if (pObject->CollisionCheck(m_Players[i])) {
 				m_Players[i]->FixCollision();
-				cout << "충돌했습니다!!!!!!!!!!!!\n";
+				cout << "충돌발생 - [오브젝트, 플레이어] n";
+			}
+		}
+	}
+
+	// 플레이어 - 플레이어 간 충돌처리
+	for (int i = 0; i < MAX_PLAYER; ++i) {
+		if (m_Players[i]->IsExist() == false) continue;
+
+		for (int j = i + 1; j < MAX_PLAYER; ++j) {
+			if (m_Players[j]->IsExist() == false) continue;
+
+			if (m_Players[j]->CollisionCheck(m_Players[i])) {
+				m_Players[i]->FixCollision(); 
+				m_Players[j]->FixCollision();
+				cout << "충돌발생 - [플레이어, 플레이어] n";
 			}
 		}
 	}
@@ -229,11 +245,11 @@ void PacketProcessor::InitPlayers()
 {
 	// 플레이어 시작 위치..
 	XMFLOAT3 positions[MAX_PLAYER] = {
-		{ 750.0f, 230.0f, 1850.0f },
-		{ 750.0f,  230.0f, 2250.0f },
-		{ 950.0f,  230.0f, 1850.0f },
-		{ 750.0f,  230.0f, 2050.0f },
-		{ 1150.0f,  230.0f, 2250.0f }
+		{ 550.0f,   230.0f,  1850.0f },
+		{ 850.0f,   230.0f,  1850.0f },
+		{ 1250.0f,  230.0f,  1850.0f },
+		{ 850.0f,   230.0f,  2200.0f },
+		{ 850.0f,   230.0f,  1500.0f }
 	};
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer();

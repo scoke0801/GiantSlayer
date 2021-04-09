@@ -16,7 +16,7 @@ CPlayer::~CPlayer()
 
 }
 
-void CPlayer::Update(double fTimeElapsed)
+void CPlayer::Update(float fTimeElapsed)
 {
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
@@ -25,12 +25,8 @@ void CPlayer::Update(double fTimeElapsed)
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
 	Move(vel); 
-
-	if (m_Camera != nullptr) {
-		m_Camera->Update(m_xmf3Position, fTimeElapsed);
-		m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
-		m_Camera->UpdateViewMatrix();
-	}
+	
+	UpdateCamera(); 
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 
@@ -59,6 +55,15 @@ void CPlayer::Update(double fTimeElapsed)
 		if (m_SP >= 100) TestSPDown = true;
 	}
 #pragma endregion
+}
+
+void CPlayer::UpdateCamera()
+{
+	if (m_Camera != nullptr) {
+		m_Camera->Update(m_xmf3Position);
+		m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
+		m_Camera->UpdateViewMatrix();
+	}
 }
 
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)

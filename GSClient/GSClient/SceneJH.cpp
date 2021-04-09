@@ -646,6 +646,8 @@ void CSceneJH::LoginToServer()
 			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 
 			m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
+
+			m_Players[p_syncUpdate.id[i]]->UpdateCamera();
 		}
 	}  
 }

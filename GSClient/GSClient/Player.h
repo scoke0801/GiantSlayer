@@ -37,7 +37,9 @@ public:
 	~CPlayer();	
 	
 public:
-	virtual void Update(double fTimeElapsed);
+	void Update(float fTimeElapsed) override;
+
+	void UpdateCamera();
 
 	void FixPositionByTerrain(CTerrain* pTerrain);
 	 
@@ -49,4 +51,5 @@ public:
 
 	void SetWeapon(PlayerWeaponType weaponID) { m_WeaponType = weaponID; }
 	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; } 
+
 };
