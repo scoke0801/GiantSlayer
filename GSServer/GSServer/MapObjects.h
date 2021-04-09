@@ -20,6 +20,8 @@ public:
 	void Rotate(const XMFLOAT3& axis, float angle) override;
 
 	bool CollisionCheck(const BoundingBox& aabb) override;
+
+	void UpdateColliders() override;
 };
 
 
@@ -57,4 +59,6 @@ public:
 	void Rotate(const XMFLOAT3& axis, float angle) override;
 
 	bool CollisionCheck(const BoundingBox& aabb) override;
+
+	void UpdateColliders() override;
 };

@@ -49,6 +49,12 @@ bool CSign::CollisionCheck(const BoundingBox& aabb)
 	return false;
 }
 
+void CSign::UpdateColliders()
+{
+	m_Board->UpdateColliders();
+	m_Pillar->UpdateColliders();
+}
+
 
 CDoor::CDoor(bool isLeft)
 {
@@ -203,4 +209,14 @@ bool CDoorWall::CollisionCheck(const BoundingBox& aabb)
 		if (pWall->CollisionCheck(aabb)) return true;
 	}
 	return false;
+}
+
+void CDoorWall::UpdateColliders()
+{ 
+	m_LeftDoor->UpdateColliders();
+	m_RightDoor->UpdateColliders();
+
+	for (auto pWall : m_Walls) {
+		pWall->UpdateColliders();
+	}
 }

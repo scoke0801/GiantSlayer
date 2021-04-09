@@ -200,11 +200,27 @@ void PacketProcessor::InitAll()
 }
 
 void PacketProcessor::Update(float elapsedTime)
-{ 
+{
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		if (m_Players[i]->IsExist()) {
 			m_Players[i]->Update(elapsedTime);
 			m_Players[i]->FixPositionByTerrain(m_Heights);
+		}
+	}
+
+	for (auto pObject : m_Objects) {
+		pObject->Update(elapsedTime);
+		pObject->UpdateColliders();
+	}
+
+	for (auto pObject : m_Objects) {
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+
+			if (pObject->CollisionCheck(m_Players[i])) {
+				m_Players[i]->FixCollision();
+				cout << "충돌했습니다!!!!!!!!!!!!\n";
+			}
 		}
 	}
 }
@@ -222,7 +238,8 @@ void PacketProcessor::InitPlayers()
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer();
 		m_Players[i]->SetPosition(positions[i]);
-		m_Players[i]->SetExistence(false);
+		m_Players[i]->SetExistence(false); 
+		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 5)));
 	}
 }
 
@@ -239,7 +256,7 @@ void PacketProcessor::ReadObstaclesPosition()
 	Document d;
 	d.ParseStream(is);	//==d.Parse(is);
 	fclose(fp);
-	auto res = d.HasMember("ImageSize");
+
 	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_1,
 		GetPosition("BRIDEGE_SEC2_SEC3_1", d));
 	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_2,
