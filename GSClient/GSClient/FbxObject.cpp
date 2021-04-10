@@ -159,7 +159,7 @@ void ComputeLinearDeformation(FbxMesh* pfbxMesh, FbxTime& fbxCurrentTime, FbxVec
 	{
 		FbxSkin* pfbxSkinDeformer = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
 		int nClusters = pfbxSkinDeformer->GetClusterCount();
-
+		cout << nClusters << endl;
 		for (int j = 0; j < nClusters; j++)
 		{
 			FbxCluster* pfbxCluster = pfbxSkinDeformer->GetCluster(j);
@@ -501,7 +501,6 @@ void CFbxObject::DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode
 	int nChild = pNode->GetChildCount();
 	for (int i = 0; i < nChild; i++) DrawFbxMesh(pd3dCommandList, pNode->GetChild(i), fbxCurrentTime, fbxmtxWorld);
 }
-
 
 void CFbxObject::Animate(float fTimeElapsed)
 {

@@ -664,6 +664,27 @@ void CSceneTH::ProcessInput()
 		m_isPlayerSelected = false;
 		//m_CurrentCamera = m_Cameras[3];
 	}
+	if (keyInput.KEY_7)
+	{
+		for (auto pObject : m_Objects)
+		{
+			pObject->SetAnimationStack(0);
+		}
+	}
+	if (keyInput.KEY_8)
+	{
+		for (auto pObject : m_Objects)
+		{
+			pObject->SetAnimationStack(1);
+		}
+	}
+	if (keyInput.KEY_9)
+	{
+		for (auto pObject : m_Objects)
+		{
+			pObject->SetAnimationStack(2);
+		}
+	}
 
 	////////////////////////////////////////////////////////// 
 	if (keyInput.KEY_ADD)

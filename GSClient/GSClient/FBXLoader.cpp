@@ -48,6 +48,8 @@ FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName)
 	cout << "구성 모델 수: " << mFbxMesh.size() << endl;
 
 	ExportFbxFile();
+
+	cout << "파일 생성 끝" << endl;
 }
 
 FbxLoader::~FbxLoader()
@@ -124,7 +126,6 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 				int pvindex = pfbxMesh->GetPolygonVertex(pindex, vindex);
 				int uvindex = pfbxMesh->GetTextureUVIndex(pindex, vindex, FbxLayerElement::eTextureDiffuse);
 
-				FbxSubMesh tempSubMesh;
 				CTexturedVertex tempVertex;
 
 				// Position ==========================================================
@@ -155,69 +156,85 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 		// Animation ==========================================================
 		int numDC = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
 
-		FbxVector4* tempDefVertex = new FbxVector4[numCP];
-		::memcpy(tempDefVertex, pfbxMesh->GetControlPoints(), numCP * sizeof(FbxVector4));
+		FbxVector4* tempDefVertex;
+		FbxAMatrix* tempClusterDef;
+		double* tempClusterWeight;
 
-		FbxAMatrix* tempClusterDef = new FbxAMatrix[numCP];
-		::memset(tempClusterDef, 0, numCP * sizeof(FbxAMatrix));
+		//numDC = 0;
+		if (numDC != 0) {
+			tempDefVertex = new FbxVector4[numCP];
+			::memcpy(tempDefVertex, pfbxMesh->GetControlPoints(), numCP * sizeof(FbxVector4));
 
-		double* tempClusterWeight = new double[numCP];
-		::memset(tempClusterWeight, 0, numCP * sizeof(double));
+			tempClusterDef = new FbxAMatrix[numCP];
+			::memset(tempClusterDef, 0, numCP * sizeof(FbxAMatrix));
 
-		FbxAMatrix geometryTransform = GeometricOffsetTransform(pfbxMesh->GetNode());
+			tempClusterWeight = new double[numCP];
+			::memset(tempClusterWeight, 0, numCP * sizeof(double));
 
-		FbxCluster::ELinkMode nClusterMode = 
-			((FbxSkin*)pfbxMesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0)->GetLinkMode();
+			tempSubMesh.mClusterWeight = new double[numCP];
+			::memset(tempSubMesh.mClusterWeight, 0, numCP * sizeof(double));
+			tempSubMesh.mClusterDef = new XMFLOAT3[numCP];
+			::memset(tempSubMesh.mClusterDef, 0, numCP * sizeof(XMFLOAT3));
 
-		for (int i = 0; i < numDC; i++) {
-			FbxSkin* pSkinDef = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
-			int nClusters = pSkinDef->GetClusterCount();
+			FbxAMatrix geometryTransform = GeometricOffsetTransform(pfbxMesh->GetNode());
 
-			for (int j = 0; j < nClusters; j++) {
-				FbxCluster* pCluster = pSkinDef->GetCluster(j);
-				if (!pCluster->GetLink()) continue;
+			FbxCluster::ELinkMode nClusterMode =
+				((FbxSkin*)pfbxMesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0)->GetLinkMode();
 
-				FbxAMatrix clusterDefMatrix; // = 아래꺼
+			for (int i = 0; i < numDC; i++) {
+				FbxSkin* pSkinDef = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
+				int nClusters = pSkinDef->GetClusterCount();	// 뼈 개수
 
-				if (nClusterMode == FbxCluster::eNormalize) {
+				for (int j = 0; j < nClusters; j++) {
+					FbxCluster* pCluster = pSkinDef->GetCluster(j);
+					if (!pCluster->GetLink()) continue;
 
-					FbxAMatrix transformMatrix;
-					pCluster->GetTransformMatrix(transformMatrix);
+					FbxAMatrix clusterDefMatrix;
 
-					FbxAMatrix transformLinkMatrix;
-					pCluster->GetTransformLinkMatrix(transformLinkMatrix);
+					if (nClusterMode == FbxCluster::eNormalize) {
 
-					clusterDefMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransform;
-				}
+						FbxAMatrix transformMatrix;
+						pCluster->GetTransformMatrix(transformMatrix);
 
-				int nIndices = pCluster->GetControlPointIndicesCount();
-				int* pnIndices = pCluster->GetControlPointIndices();
-				double* pfWeights = pCluster->GetControlPointWeights();
+						FbxAMatrix transformLinkMatrix;
+						pCluster->GetTransformLinkMatrix(transformLinkMatrix);
 
-				for (int k = 0; k < nIndices; k++) {
-					int nIndex = pnIndices[k];
-					double fWeight = pfWeights[k];
-					
-					if ((nIndex >= numCP) || (fWeight == 0.0)) continue;
+						clusterDefMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransform;
+					}
 
-					SetMatrixScale(clusterDefMatrix, fWeight);
-					SetMatrixAdd(tempClusterDef[nIndex], clusterDefMatrix);
-					tempClusterWeight[nIndex] = fWeight;
+					int* pnIndices = pCluster->GetControlPointIndices();
+					double* pfWeights = pCluster->GetControlPointWeights();
+
+					int nIndices = pCluster->GetControlPointIndicesCount();
+					for (int k = 0; k < nIndices; k++) {
+						int nIndex = pnIndices[k];
+						double fWeight = pfWeights[k];
+
+						if ((nIndex >= numCP) || (fWeight == 0.0)) continue;
+
+						SetMatrixScale(clusterDefMatrix, fWeight);
+						SetMatrixAdd(tempClusterDef[nIndex], clusterDefMatrix);
+						tempClusterWeight[nIndex] = fWeight;
+
+						FbxVector4 tempFVec4 = tempClusterDef[nIndex].GetT();
+						XMFLOAT3 tempXF3 = XMFLOAT3((float)tempFVec4.mData[0], (float)tempFVec4.mData[1], (float)tempFVec4.mData[2]);
+
+						tempSubMesh.mClusterWeight[nIndex] = tempClusterWeight[nIndex];
+						tempSubMesh.mClusterDef[nIndex] = tempXF3;
+					}
 				}
 			}
+
+			//for (int i = 0; i < numCP; i++) cout << tempSubMesh.mClusterDef[i].x << endl;
 		}
-
-
-
-		//tempSubMesh.mClusterWeight = tempClusterWeight
-		//tempSubMesh.mClusterDef = tempClusterDef
 
 		tempSubMesh.nControlPoint = numCP;
 		tempSubMesh.nPolygon = numPG;
+		tempSubMesh.nDeformer = numDC;
 
-		cout << "[메쉬 발견] CP: " << numCP << ", PG: " << numPG << ", VT: " << tempSubMesh.mVertex.size();
-		if (numDC != 0) cout << ", AM: [O]" << endl;
-		else cout << ", AM: [X]" << endl;
+		cout << "[메쉬 발견] CP:" << numCP << ", PG:" << numPG << ", ID:" << tempSubMesh.mIndex.size() << ", VT:" << tempSubMesh.mVertex.size();
+		if (numDC != 0) cout << ", AM:[O]" << endl;
+		else cout << ", AM:[X]" << endl;
 
 		mFbxMesh.push_back(tempSubMesh);
 	}
@@ -230,6 +247,37 @@ void FbxLoader::ExportFbxFile()
 {
 	ofstream file;
 	file.open("FbxExportedFile.bin", ios::out | ios::binary);
+
+	file << "[MeshCount]" << endl;
+	file << mFbxMesh.size() << endl;
+
+	for (int i = 0; i < mFbxMesh.size(); i++) {
+		file << "[MeshInfo]" << endl;
+		file << mFbxMesh[i].nControlPoint << " " << mFbxMesh[i].nPolygon << " " << mFbxMesh[i].nDeformer << endl;
+
+		file << "[Vertex]" << endl;
+		for (int j = 0; j < mFbxMesh[i].mVertex.size(); j++) {
+			file << mFbxMesh[i].mIndex[j] << " " <<
+				mFbxMesh[i].mVertex[j].m_xmf3Position.x << " " <<
+				mFbxMesh[i].mVertex[j].m_xmf3Position.y << " " <<
+				mFbxMesh[i].mVertex[j].m_xmf3Position.z << " " <<
+				mFbxMesh[i].mVertex[j].m_xmf3Normal.x << " " <<
+				mFbxMesh[i].mVertex[j].m_xmf3Normal.y << " " <<
+				mFbxMesh[i].mVertex[j].m_xmf3Normal.z << " " <<
+				mFbxMesh[i].mVertex[j].m_xmf2TexCoord.x << " " <<
+				mFbxMesh[i].mVertex[j].m_xmf2TexCoord.y << endl;
+		}
+
+		if (mFbxMesh[i].nDeformer != 0) {
+			file << "[Animation]" << endl;
+			for (int j = 0; j < mFbxMesh[i].nControlPoint; j++) {
+				file << mFbxMesh[i].mClusterWeight[j] << " " <<
+					mFbxMesh[i].mClusterDef[j].x << " " <<
+					mFbxMesh[i].mClusterDef[j].y << " " <<
+					mFbxMesh[i].mClusterDef[j].z << endl;
+			}
+		}
+	}
 
 	/*
 	int num = 0;

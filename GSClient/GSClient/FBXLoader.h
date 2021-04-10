@@ -9,13 +9,10 @@ struct FbxSubMesh
 	vector<int> mIndex;
 	vector<CTexturedVertex> mVertex;
 
-	vector<double> mClusterWeight;
-	vector<XMFLOAT3> mClusterDef;
-};
-
-struct FbxModel
-{
-	vector<FbxSubMesh> mMesh;
+	//vector<double> mClusterWeight;
+	//vector<XMFLOAT3> mClusterDef;
+	double* mClusterWeight;
+	XMFLOAT3* mClusterDef;
 };
 
 class FbxLoader

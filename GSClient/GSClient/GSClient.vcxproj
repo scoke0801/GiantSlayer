@@ -153,7 +153,7 @@
     <ClInclude Include="Bridge.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FbxLoader.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="FbxObject.h" />
     <ClInclude Include="Communicates.h" />
@@ -202,7 +202,7 @@
     <ClCompile Include="Bridge.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FbxLoader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="FbxObject.cpp" />
     <ClCompile Include="Communicates.cpp" />
