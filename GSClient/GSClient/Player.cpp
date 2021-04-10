@@ -16,7 +16,7 @@ CPlayer::~CPlayer()
 
 }
 
-void CPlayer::Update(double fTimeElapsed)
+void CPlayer::Update(float fTimeElapsed)
 {
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
@@ -24,13 +24,9 @@ void CPlayer::Update(double fTimeElapsed)
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
-	Move(vel);
-
-	if (m_Camera != nullptr) {
-		m_Camera->Update(m_xmf3Position, fTimeElapsed);
-		m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
-		m_Camera->UpdateViewMatrix();
-	}
+	Move(vel); 
+	
+	UpdateCamera(); 
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 
@@ -39,23 +35,21 @@ void CPlayer::Update(double fTimeElapsed)
 
 /////////////////////////////////////////////////////////////////////
 #pragma region For Hp_Sp UI Testing 
-	static bool TestHPDown = false;
-	static bool TestSPDown = false;
-	if (TestHPDown) {
+	if (TestHPDown == true) {
 		m_HP -= 1;
 		if (m_HP <= 0) TestHPDown = false;
 	}
-	else if(!TestHPDown)
+	else if(TestHPDown == false)
 	{
 		m_HP += 1;
 		if (m_HP >= 100) TestHPDown = true;
-	}
-	if (TestSPDown)
+	} 
+	if (TestSPDown == true)
 	{
 		m_SP -= 1;
 		if (m_SP <= 0) TestSPDown = false;
 	}
-	else if (!TestSPDown)
+	else if (TestSPDown == false)
 	{
 		m_SP += 1;
 		if (m_SP >= 100) TestSPDown = true;
@@ -63,14 +57,19 @@ void CPlayer::Update(double fTimeElapsed)
 #pragma endregion
 }
 
+void CPlayer::UpdateCamera()
+{
+	if (m_Camera != nullptr) {
+		m_Camera->Update(m_xmf3Position);
+		m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
+		m_Camera->UpdateViewMatrix();
+	}
+}
+
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
-	/*cout << "x : [" << int(m_xmf3Position.x / 200.0f) << "] z : ["
-		<< int(m_xmf3Position.z / 200.0f)<< "]";
-	cout << " xPlus : [" << int((m_xmf3Position.x +m_xmf3Size.x)/ 200.0f) << "] zPlus : ["
-		<< int((m_xmf3Position.z + m_xmf3Size.z)/ 200.0f) << "]\n";*/
-	m_xmf3Position.y = pTerrain->GetHeight(m_xmf3Position.x, m_xmf3Position.z);
-}
+	 m_xmf3Position.y = pTerrain->GetHeight(m_xmf3Position.x, m_xmf3Position.z);
+} 
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 { 	
@@ -110,23 +109,7 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	float angle = Vector3::GetAngle(xmf3Dir, playerLookAt);
 	//cout << "각도 : " << angle << "\n"; 
 	
-	LookAt(m_xmf3Position, xmf3Dir, { 0,1,0 });
-	//Rotate(XMFLOAT3(0, 1, 0), (angle)); 
-	//bool isMoving = IsMoving();
-	//if (!isMoving)
-	//{
-	//	if (m_Camera != nullptr)
-	//	{  
-	//		XMFLOAT3 cameraLookAt = Vector3::Normalize(m_Camera->GetLook3f()); 
-	//		XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook()); 
-	//
-	//		//float angle = Vector3::Angle(cameraLookAt, playerLookAt);
-	//		float angle = Vector3::AngleAtan(cameraLookAt, playerLookAt) ;
-	//		cout << "각도 : " << angle << "\n";
-	//
-	//		Rotate(XMFLOAT3(0, 1, 0),(-angle));  
-	//	}
-	//}	
+	LookAt(m_xmf3Position, xmf3Dir, { 0,1,0 }); 
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
 	if (m_xmf3Velocity.x >  speed) m_xmf3Velocity.x =  speed;
 	if (m_xmf3Velocity.y >  speed) m_xmf3Velocity.y =  speed;
@@ -141,7 +124,7 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	dir.y = 0;
 	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);
 
-	DisplayVector3(dir);
+	//DisplayVector3(dir);
 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY)); 
 	XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook());
@@ -158,7 +141,7 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	//float dot = Vector3::DotProduct(playerLookAt, dir);
 	//float det = playerLookAt.x * dir.y - playerLookAt.y * dir.x;
 	//float angle = atan2(det, dot);
-	cout << "각도 : " << XMConvertToDegrees( angle) << "\n";
+//	cout << "각도 : " << XMConvertToDegrees( angle) << "\n";
 	
 	Rotate(XMFLOAT3(0, 1, 0), (angle)); 
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;

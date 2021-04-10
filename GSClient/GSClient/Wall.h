@@ -24,7 +24,7 @@ public:
     ~CDoor();
 
 public:
-    virtual void Update(double fTimeElapsed);
+    virtual void Update(float fTimeElapsed);
 
     float GetHeight() const { return m_Height; }
 };
@@ -47,8 +47,12 @@ public:
     ~CDoorWall();
 
 public:
-    virtual void Update(double fTimeElapsed) override;
+    virtual void Update(float fTimeElapsed) override;
     virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
+
+    void UpdateColliders() override;
+
+    bool CollisionCheck(Collider* pCollider) override;
 
     void SetPosition(XMFLOAT3 xmf3Position);
 

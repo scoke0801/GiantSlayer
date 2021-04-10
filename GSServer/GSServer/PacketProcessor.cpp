@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "PacketProcessor.h"
-#include "protocol.h"
+#include "protocol.h" 
+#include "MapObjects.h"
 
 bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 { 
@@ -15,14 +16,12 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 	switch (type) {
 	case PACKET_PROTOCOL::C2S_LOGIN:
 	{
-		P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(buffer);
-
-
+		//P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(buffer);
+		 
 		P_S2C_PROCESS_LOGIN p_processLogin;
 		p_processLogin.size = sizeof(p_processLogin);
 		p_processLogin.type = PACKET_PROTOCOL::S2C_LOGIN_HANDLE;
 		
-
 		if (m_CurrentPlayerNum > MAX_PLAYER) {
 			p_processLogin.isSuccess = false;
 		}
@@ -38,10 +37,29 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 			p_processLogin.z = FloatToInt(pos.z);
 		} 
 		p_processLogin.id = m_CurrentPlayerNum;
-
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			p_processLogin.existPlayer[i] = m_Players[i]->IsExist();
+		}
 		SendPacket(socket, reinterpret_cast<char*>(&p_processLogin), sizeof(p_processLogin), retval);
 		
 		m_CurrentPlayerNum++;
+
+		// 로그인 이후 데이터 싱크 맞추기 작업용 패킷 전송
+		P_S2C_UPDATE_SYNC p_syncUpdate;
+		p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
+		p_syncUpdate.size = sizeof(p_syncUpdate);
+
+		p_syncUpdate.playerNum = m_CurrentPlayerNum;
+
+		for (int i = 0; i < m_CurrentPlayerNum; ++i) {
+			p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId());
+
+			XMFLOAT3 pos = m_Players[i]->GetPosition();
+			p_syncUpdate.posX[i] = FloatToInt(pos.x);
+			p_syncUpdate.posY[i] = FloatToInt(pos.y);
+			p_syncUpdate.posZ[i] = FloatToInt(pos.z);
+		}
+		SendPacket(socket, reinterpret_cast<char*>(&p_syncUpdate), sizeof(p_syncUpdate), retval);
 	}
 	return true;
 	case PACKET_PROTOCOL::C2S_LOGOUT:
@@ -49,6 +67,7 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 		P_C2S_LOGOUT p_logout = 
 			*reinterpret_cast<P_C2S_LOGOUT*>(buffer);
 		m_CurrentlyDeletedPlayerId = p_logout.id;
+		m_Players[p_logout.id]->SetExistence(false);
 	}
 	return true;
 	case PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT: 
@@ -172,16 +191,37 @@ void PacketProcessor::UpdateLoop()
 void PacketProcessor::InitAll()
 {
 	InitTerrainHeightMap();
+	ReadObstaclesPosition();
+
 	InitPlayers(); 
 	InitMonsters();
+	InitObstacle();
 }
 
 void PacketProcessor::Update(float elapsedTime)
-{ 
+{
+	for (auto pObject : m_Objects) {
+		pObject->Update(elapsedTime);
+		pObject->UpdateColliders();
+	}
+	  
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		if (m_Players[i]->IsExist()) {
 			m_Players[i]->Update(elapsedTime);
 			m_Players[i]->FixPositionByTerrain(m_Heights);
+			m_Players[i]->UpdateColliders();
+		}
+	}
+
+	// 오브젝트 - 플레이어 간 충돌처리
+	for (auto pObject : m_Objects) {
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+
+			if (pObject->CollisionCheck(m_Players[i])) {
+				m_Players[i]->FixCollision(); 
+				cout << "충돌발생 - [오브젝트, 플레이어 " << i << "]\n";
+			}
 		}
 	}
 }
@@ -190,22 +230,132 @@ void PacketProcessor::InitPlayers()
 {
 	// 플레이어 시작 위치..
 	XMFLOAT3 positions[MAX_PLAYER] = {
-		{ 750.0f, 230.0f, 1850.0f },
-		{ 750.0f,  230.0f, 2250.0f },
-		{ 950.0f,  230.0f, 1850.0f },
-		{ 750.0f,  230.0f, 2050.0f },
-		{ 1150.0f,  230.0f, 2250.0f }
+		{ 550.0f,   230.0f,  1850.0f },
+		{ 850.0f,   230.0f,  1850.0f },
+		{ 1250.0f,  230.0f,  1850.0f },
+		{ 850.0f,   230.0f,  2200.0f },
+		{ 850.0f,   230.0f,  1500.0f }
 	};
 	for (int i = 0; i < MAX_PLAYER; ++i) {
-		m_Players[i] = new CPlayer();
+		m_Players[i] = new CPlayer(); 
+		m_Players[i]->Scale(50, 50, 50);
 		m_Players[i]->SetPosition(positions[i]);
-		m_Players[i]->SetExistence(false);
+		m_Players[i]->SetExistence(false); 
+		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 5)));
 	}
 }
 
 void PacketProcessor::InitMonsters()
 {
 	
+}
+
+void PacketProcessor::ReadObstaclesPosition()
+{
+	FILE* fp = fopen("resources/ObjectPositionData.json", "rb"); // non-Windows use "r"
+	char readBuffer[4096];
+	FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+	Document d;
+	d.ParseStream(is);	//==d.Parse(is);
+	fclose(fp);
+
+	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_1,
+		GetPosition("BRIDEGE_SEC2_SEC3_1", d));
+	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_2,
+		GetPosition("BRIDEGE_SEC2_SEC3_2", d));
+	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_3,
+		GetPosition("BRIDEGE_SEC2_SEC3_3", d));
+
+	m_ObjectPositions.emplace(OBJECT_ID::SIGN_SCROLL,
+		GetPosition("SIGN_SCROLL", d));
+	m_ObjectPositions.emplace(OBJECT_ID::SIGN_PUZZLE,
+		GetPosition("SIGN_PUZZLE", d));
+	m_ObjectPositions.emplace(OBJECT_ID::SIGN_MEDUSA,
+		GetPosition("SIGN_MEDUSA", d)); 
+	m_ObjectPositions.emplace(OBJECT_ID::SIGN_BOSS,
+		GetPosition("SIGN_BOSS", d));
+
+	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC1,
+		GetPosition("DOOR_WALL_SEC1", d));
+	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC2,
+		GetPosition("DOOR_WALL_SEC2", d));
+	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC3,
+		GetPosition("DOOR_WALL_SEC3", d));
+	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC4,
+		GetPosition("DOOR_WALL_SEC4", d));
+	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC5,
+		GetPosition("DOOR_WALL_SEC5", d));
+}
+
+XMFLOAT3 PacketProcessor::GetPosition(const string& name, const Document& document)
+{
+	XMFLOAT3 pos; 
+	pos.x = document[name.c_str()].GetArray()[0].GetInt();
+	pos.y = document[name.c_str()].GetArray()[1].GetInt();
+	pos.z = document[name.c_str()].GetArray()[2].GetInt(); 
+
+	return pos;
+}
+
+void PacketProcessor::InitObstacle()
+{
+// Bridge --------------------------------------------------------------------
+	CGameObject* pObject; /*= new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_1]);
+	pObject->Rotate({ 0, 1, 0 }, 90);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_2]);
+	pObject->Rotate({ 0, 1, 0 }, 90);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
+	pObject->Rotate({ 0, 1, 0 }, 90); 
+	m_Objects.push_back(std::move(pObject));*/
+/////////////////////////////////////////////////////////////////////////////////
+
+// DoorWall----------------------------------------------------------------------
+	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC1);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC1]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC2);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC2]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC3);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC3]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC4);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC4]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC5);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC5]);
+	m_Objects.push_back(std::move(pObject));
+////////////////////////////////////////////////////////////////////////////////
+
+// Sign-------------------------------------------------------------------------
+	pObject = new CSign(OBJECT_ID::SIGN_SCROLL);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_SCROLL]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CSign(OBJECT_ID::SIGN_PUZZLE);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_PUZZLE]);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CSign(OBJECT_ID::SIGN_MEDUSA);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_MEDUSA]);
+	pObject->Rotate({ 0,1,0 }, 90.0f);
+	m_Objects.push_back(std::move(pObject));
+
+	//pObject = new CSign(OBJECT_ID::BOSS);
+	//pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BOSS]);
+	//m_Objects.push_back(std::move(pObject));
+////////////////////////////////////////////////////////////////////////////////
 }
 
 void PacketProcessor::InitTerrainHeightMap()

@@ -54,7 +54,7 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	//fWidth: 직육면체 가로(x-축) 길이, fHeight: 직육면체 세로(y-축) 길이, fDepth: 직육면체 깊이(z-축) 길이
 	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
-	float fyStart = fHeight, fyEnd = 0.0f;
+	float fyStart = fy, fyEnd = -fy;
 	if (isHeightHalfOn)
 	{
 		fyStart = fHeight * 0.5;
@@ -112,6 +112,105 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, fyStart, -fz), RANDOM_COLOR);
 	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, fyEnd, +fz), RANDOM_COLOR);
 	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, fyEnd, -fz), RANDOM_COLOR);
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	//정점 버퍼 뷰를 생성한다. 
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	PulledModel pulledModelInfo, 
+	float fWidth, float fHeight, float fDepth)
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	//직육면체는 6개의 면 가로(x-축) 길이
+	m_nVertices = 36;
+	m_nStride = sizeof(CDiffusedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	//fWidth: 직육면체 가로(x-축) 길이, fHeight: 직육면체 세로(y-축) 길이, fDepth: 직육면체 깊이(z-축) 길이
+	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
+	float fyStart = fy, fyEnd = -fy;
+	float fxStart = fx, fxEnd = -fx;
+	if (pulledModelInfo == PulledModel::Left)
+	{
+		fxStart = 0;
+		fxEnd = fWidth;
+	}
+	else if (pulledModelInfo == PulledModel::Right) {
+		fxStart = 0;
+		fxEnd = -fWidth;
+	}
+	else if (pulledModelInfo == PulledModel::Top) {
+		fyStart = 0;
+		fyEnd = fHeight;
+	}
+	else if (pulledModelInfo == PulledModel::Bottom) {
+		fyStart = 0;
+		fyEnd = -fHeight;
+	}
+	BoundingOrientedBox;
+	BoundingBox;
+	CDiffusedVertex pVertices[36];
+	int i = 0;
+
+	//정점 버퍼 데이터는 삼각형 리스트이므로 36개의 정점 데이터를 준비한다.
+	//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, -fz), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, -fz), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, -fz), XMFLOAT4(1, 0, 0, 0));
+	//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, -fz), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, -fz), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, -fz), XMFLOAT4(1, 0, 0, 0));
+	//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, +fz), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, +fz), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, -fz), XMFLOAT4(0, 0, 1, 0));
+	//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, +fz), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, -fz), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, -fz), XMFLOAT4(0, 0, 1, 0));
+	//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, +fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, +fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, +fz), RANDOM_COLOR);
+	//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, +fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, +fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, +fz), RANDOM_COLOR);
+	//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, -fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, -fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, +fz), RANDOM_COLOR);
+	//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, -fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, +fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, +fz), RANDOM_COLOR);
+	//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, +fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, -fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, -fz), RANDOM_COLOR);
+	//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, +fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, -fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, +fz), RANDOM_COLOR);
+	//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, -fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, +fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, +fz), RANDOM_COLOR);
+	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, -fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, +fz), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, -fz), RANDOM_COLOR);
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
@@ -1139,6 +1238,132 @@ CDoorMeshTest::~CDoorMeshTest()
 
 ///////////////////////////////////////////////////////////////////////////////
 //
+
+
+CSphereMeshDiffused::CSphereMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	PulledModel pulledModelInfo,
+	float radius, UINT32 sliceCount, UINT32 stackCount,
+	const XMFLOAT3& shift)
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = stackCount * sliceCount + 1;
+	m_nStride = sizeof(CDiffusedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	float xCorrectionValue = 0.0f, yCorrectionValue = 0.0f;		
+	if (pulledModelInfo == PulledModel::Left) {
+		xCorrectionValue = -radius;
+	}
+	else if (pulledModelInfo == PulledModel::Right) {
+		xCorrectionValue = radius;
+	}
+	else if (pulledModelInfo == PulledModel::Top) {
+		yCorrectionValue = radius;
+	}
+	else if (pulledModelInfo == PulledModel::Bottom) {
+		yCorrectionValue = -radius;
+	}
+	XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f); 
+
+	CDiffusedVertex topVertex(XMFLOAT3(shift.x + xCorrectionValue, shift.y + yCorrectionValue +radius, shift.z), xmf4Color);
+	CDiffusedVertex bottomVertex(XMFLOAT3(shift.x + xCorrectionValue, shift.y + yCorrectionValue -radius, shift.z), xmf4Color);
+
+	const int a = m_nVertices;
+	CDiffusedVertex* pVertices = new CDiffusedVertex[m_nVertices];
+	pVertices[0] = topVertex;
+
+	float phiStep = XM_PI / stackCount;
+	float thetaStep = 2.0f * XM_PI / sliceCount;
+	// Compute vertices for each stack ring (do not count the poles as rings).
+	int idx = 1;
+	for (UINT32 i = 1; i <= stackCount - 1; ++i)
+	{
+		float phi = i * phiStep;
+
+		// Vertices of ring.
+		for (UINT32 j = 0; j <= sliceCount; ++j)
+		{
+			float theta = j * thetaStep;
+
+			// spherical to cartesian
+			float x = shift.x + xCorrectionValue + radius * sinf(phi) * cosf(theta);
+			float y = shift.y + yCorrectionValue + radius * cosf(phi);
+			float z = shift.z + radius * sinf(phi) * sinf(theta);
+			 
+			pVertices[idx++] = CDiffusedVertex(
+				XMFLOAT3(x, y, z),
+				xmf4Color
+			);
+		}
+	}
+	pVertices[idx++] = bottomVertex;
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	vector<UINT> pnVecIndices;
+
+	for (UINT32 i = 1; i <= sliceCount; ++i)
+	{
+		pnVecIndices.push_back(0);
+		pnVecIndices.push_back(i + 1);
+		pnVecIndices.push_back(i);
+	}
+
+	UINT32 baseIndex = 1;
+	UINT32 ringVertexCount = sliceCount + 1;
+	for (UINT32 i = 0; i < stackCount - 2; ++i)
+	{
+		for (UINT32 j = 0; j < sliceCount; ++j)
+		{
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j);
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j + 1);
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j);
+
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j);
+			pnVecIndices.push_back(baseIndex + i * ringVertexCount + j + 1);
+			pnVecIndices.push_back(baseIndex + (i + 1) * ringVertexCount + j + 1);
+		}
+	}
+
+	UINT32 southPoleIndex = (UINT32)m_nVertices - 1;
+
+	// Offset the indices to the index of the first vertex in the last ring.
+	baseIndex = southPoleIndex - ringVertexCount;
+
+	for (UINT32 i = 0; i < sliceCount; ++i)
+	{
+		pnVecIndices.push_back(southPoleIndex);
+		pnVecIndices.push_back(baseIndex + i);
+		pnVecIndices.push_back(baseIndex + i + 1);
+	}
+	m_nIndices = pnVecIndices.size();
+	UINT* pnIndices = new UINT[m_nIndices];
+
+	copy(pnVecIndices.begin(), pnVecIndices.end(), pnIndices);
+
+	m_pd3dIndexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList,
+		pnIndices, sizeof(UINT) * m_nIndices,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER,
+		&m_pd3dIndexUploadBuffer);
+
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+	delete[] pnIndices;
+}
+
+CSphereMeshDiffused::~CSphereMeshDiffused()
+{
+}
+
+
 CSphereMesh::CSphereMesh(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	float radius, UINT32 sliceCount, UINT32 stackCount)

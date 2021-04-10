@@ -18,6 +18,7 @@
 //-------------------------------------------------------------------
 //
 #define FPS 1 / 60.0f
+#define SERVER_FPS 1 / 30.0f
 //프레임을 따라잡기까지 최대 몇번 루프를 돌 것인지를 지정합니다.
 #define MAX_LOOP_TIME 50
 
@@ -97,10 +98,7 @@ struct CB_GAMESCENE_FRAME_DATA
 {
 	UINT m_PlayerHP = 0;
 	UINT m_PlayerSP = 0;
-	UINT m_PlayerWeapon = 0x01;
-
-	//XMFLOAT4 m_FogColor = { 0.7f,0.7f,0.7f,1.0f };
-	//float m_FogStart = 5.0f;
-	//float m_FogRange = 150.0f;
+	UINT m_PlayerWeapon = 0x01; 
 };
 
+enum class PulledModel : int { Center = 0, Left = 1, Right, Top, Bottom };

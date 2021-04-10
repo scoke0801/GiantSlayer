@@ -129,6 +129,9 @@
     <ClCompile Include="ShaderHandler.cpp">
       <Filter>Handler</Filter>
     </ClCompile>
+    <ClCompile Include="Colider.cpp">
+      <Filter>GameObject\Colider</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -256,6 +259,9 @@
     <ClInclude Include="..\..\GSServer\GSServer\protocol.h">
       <Filter>Communicate</Filter>
     </ClInclude>
+    <ClInclude Include="Colider.h">
+      <Filter>GameObject\Colider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -352,6 +358,9 @@
     </Filter>
     <Filter Include="GameObject\Sign">
       <UniqueIdentifier>{639e0d57-1a7b-492e-aac3-2c5c5fc89552}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Colider">
+      <UniqueIdentifier>{627dc5b6-b871-4132-9396-60fd010d0a67}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

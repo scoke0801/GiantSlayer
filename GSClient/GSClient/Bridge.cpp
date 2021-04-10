@@ -5,7 +5,10 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	ID3D12RootSignature* pd3dRootSignature, CShader* pShader)
 {
 	m_Name = OBJ_NAME::Bridge;  
-	 
+	//AddColider(new ColiderOriBox(XMFLOAT3(fWidthRatio * 0.5f, 0.0f, 0.0f),
+	//	XMFLOAT3{ fWidthRatio * 0.5f, createdHeight * 0.5f, depth * 0.2f * 0.5f },
+	//	XMFLOAT4(0, 0, 0, 0)));
+	// 
 // 官蹿 积己
 	for (int i = 0; i < 10; i += 5)
 	{
@@ -15,8 +18,10 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
 			XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i),
 			500, 1, 500);
+	
+//		AddBoundingMesh;
 		//m_Meshes.push_back(pPlaneMeshTex);	
-
+		//BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
 		AddObject(pCubeMeshTex, pShader, 0x01);
 	}
 // 抄埃 积己

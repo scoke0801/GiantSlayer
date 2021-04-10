@@ -24,5 +24,6 @@ public:
 	void RotateAll(const XMFLOAT3& axis, float angle);
 private:
 	void AddObject(CMesh* pMesh, CShader* pShader, UINT textureIndex);
+	void AddBoundingMesh();
 };
 

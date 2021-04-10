@@ -62,6 +62,6 @@ public:
 	~HelpTextUI();
 
 public:
-	void Update(double fTimeElapsed) override;
+	void Update(float fTimeElapsed) override;
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
 };

@@ -152,6 +152,7 @@
     <ClInclude Include="..\..\GSServer\GSServer\protocol.h" />
     <ClInclude Include="Bridge.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Colider.h" />
     <ClInclude Include="Communicates.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="EnemyState.h" />
@@ -202,6 +203,7 @@
   <ItemGroup>
     <ClCompile Include="Bridge.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Colider.cpp" />
     <ClCompile Include="Communicates.cpp" />
     <ClCompile Include="ShaderHandler.cpp" />
     <ClCompile Include="Sign.cpp" />

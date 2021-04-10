@@ -486,8 +486,7 @@ void CShader::RenderBoundary(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	{
 		pd3dCommandList->SetPipelineState(m_pd3dBoundaryPipelineState);
 	} 
-}
-
+} 
 void CShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	* pd3dCommandList)
 {

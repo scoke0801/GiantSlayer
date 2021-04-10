@@ -1,12 +1,13 @@
 #pragma once
 #include "Mesh.h"
 #include "FbxSceneContext.h"
+#include "Colider.h" 
 
 class CShader;
 class CCamera;
  
 #define OBJECT_MAX_VELOCITY 120.0f
-#define PLAYER_RUN_VELOCITY 250.0f
+#define PLAYER_RUN_VELOCITY 250.0f * 4
 #define PLAYER_WALK_VELOCITY 80.0f 
 
 enum class OBJ_TYPE
@@ -26,34 +27,6 @@ enum class OBJ_NAME
 	Bridge = 11,
 	Wall = 12,
 	Door = 13
-};
-
-enum class Map_Configuration_Name
-{
-	First_Ground =0,
-	Second_Ground,
-	Third_Ground,
-	Fourth_Ground,
-	Boss_Ground,
-
-	Plane_Pattern_Ground,
-	Plane_Pattern_Ground_Vertical,
-
-	Up_Pattern_Ground,
-	Up_Pattern_Ground_Rotate,
-
-	Down_Pattern_Ground,
-	Down_Pattern_Ground_Rotate,
-
-	Cliff_Pattern_Ground,
-	Cliff_Pattern_Ground_Vertical,
-	Cliff_Pattern_Ground_Rotate,
-};
-
-struct MapData
-{
-	Map_Configuration_Name Name;
-	int Height;
 };
 
 enum class OBJ_DIRECTION
@@ -76,38 +49,46 @@ class CGameObject
 {
 private:
 	int					m_nReferences = 0;
-	 
+
 	bool				m_isDrawbale = true;
 protected:	// 좌표 관련 변수
 	XMFLOAT4X4			m_xmf4x4World;
 
+	// frame update loop, update 갱신 후의 좌표
 	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
+	// frame update loop, update 갱신 전의 좌표
+	XMFLOAT3			m_xmf3PrevPosition = XMFLOAT3{ 0,0,0 };
+
 	XMFLOAT3			m_xmf3Velocity = XMFLOAT3{ 0,0,0 };
 	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
 
+protected:// 충돌처리 관련 변수
+	vector<Collider*>	m_Colliders;
+	vector<Collider*>	m_AABB;
+
 protected: // 렌더링 관련 변수
-	CMesh*				m_pMesh = NULL;
+	CMesh* m_pMesh = NULL;
 	vector<CMesh*>		m_BoundingObjectMeshes;
 
-	CShader*			m_pShader = NULL;
- 
+	CShader* m_pShader = NULL;
+
 	UINT				m_nTextureIndex = 0x00;
-	 
-	MATERIAL*			m_Material;
-	  
-	CCamera*			m_Camera = nullptr;
+
+	MATERIAL* m_Material;
+
+	CCamera* m_Camera = nullptr;
 
 protected:	// 객체 관련 속성 변수
-	UINT				m_HP = 0;
-	UINT				m_SP = 0;
+	int					m_HP = 0;
+	int					m_SP = 0;
 
 	OBJ_NAME			m_Name;
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
 	bool				m_isCollidable = true;
 
 private:	// GPU 전달 데이터
-	ID3D12Resource*		m_pd3dcbGameObject = NULL;
-	GAMEOBJECT_INFO*	m_pcbMappedGameObjInfo = NULL;
+	ID3D12Resource* m_pd3dcbGameObject = NULL;
+	GAMEOBJECT_INFO* m_pcbMappedGameObjInfo = NULL;
 
 public:
 	CGameObject();
@@ -119,21 +100,17 @@ public:
 
 	virtual void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 
-	virtual void BuildBoundigMeshes(ID3D12Device* pd3dDevice,
-		ID3D12GraphicsCommandList* pd3dCommandList,
-		float fWidth, float fHeight, float fDepth);
-
 	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseShaderVariables();
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	void ReleaseUploadBuffers(); 
+	void ReleaseUploadBuffers();
 public:
 	virtual void Animate(float fTimeElapsed);
-	virtual void Update(double fTimeElapsed);
+	virtual void Update(float fTimeElapsed);
 
 	virtual void OnPrepareRender();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	
+
 public:
 	virtual void Move(XMFLOAT3 shift);
 	void Move();
@@ -142,9 +119,45 @@ public:
 
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 
-	bool CollisionCheck() { return false; };
 
 	void Scale(float x, float y, float z, bool setSize = true);
+
+public:
+	// about collision
+	virtual bool CollisionCheck(Collider* pCollider);
+	virtual bool CollisionCheck(CGameObject* other);
+
+	void FixCollision();
+
+	virtual void UpdateColliders();
+
+	void AddColider(Collider* pCollider) { m_Colliders.push_back(pCollider); AddAABB(pCollider); }
+	void AddAABB(Collider* pCollider);
+
+	int GetColliderCount() const { return m_Colliders.size(); }
+	vector<Collider*>& GetColliders() { return m_Colliders; }
+	vector<Collider*>& GetAABB() { return m_AABB; }
+
+public:
+	// about bounding box 
+	void BuildBoundigBoxMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		float fWidth, float fHeight, float fDepth,
+		const XMFLOAT3& shift);
+	void BuildBoundigSphereMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		PulledModel pulledModel,
+		float radius, UINT32 sliceCount, UINT32 stackCount,
+		const XMFLOAT3& shift);
+	//메쉬가 중심에서 시작되지 않고 
+	// 왼쪽 혹은 오른쪽에서 시작하는 경우 ex) 문 객체
+	void BuildBoundigBoxMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		PulledModel pulledModel,
+		float fWidth, float fHeight, float fDepth,
+		const XMFLOAT3& shift);
+
+	void MoveBoundingMesh(int index, const XMFLOAT3& shift);
 
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }

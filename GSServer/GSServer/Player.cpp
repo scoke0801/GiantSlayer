@@ -10,16 +10,16 @@ CPlayer::~CPlayer()
 
 }
 
-void CPlayer::Update(double fTimeElapsed)
+void CPlayer::Update(float fTimeElapsed)
 {
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
-	float Friction = (m_MovingType == Player_Move_Type::Run) ? 200.0f : 50.0f;
+	float Friction = (m_MovingType == Player_Move_Type::Run) ? 360.0f : 50.0f;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
 	Move(vel);  
-	cout << "pos : " << m_xmf3Position.x << " , " << m_xmf3Position.y << " " << m_xmf3Position.z << " \n";
+	//cout << "pos : " << m_xmf3Position.x << " , " << m_xmf3Position.y << " " << m_xmf3Position.z << " \n";
 	
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 
@@ -31,7 +31,10 @@ void CPlayer::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1]
 {
 	int x = m_xmf3Position.x / 200.0f;
 	int z = m_xmf3Position.z / 200.0f;
+
 	m_xmf3Position.y = heightsMap[z][x]; 
+
+	m_xmf4x4World._42 = m_xmf3Position.y;
 }
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)
@@ -61,7 +64,7 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 		break;
 
 	}
-	float speed = m_MovingType == (Player_Move_Type::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
+	float speed = m_MovingType == (Player_Move_Type::Run) ? PLAYER_RUN_VELOCITY  : PLAYER_WALK_VELOCITY;
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;
 	if (m_xmf3Velocity.z > speed) m_xmf3Velocity.z = speed;

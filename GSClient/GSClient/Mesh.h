@@ -198,6 +198,18 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////////
 //
+class CSphereMeshDiffused : public CMesh
+{
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CSphereMeshDiffused(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		PulledModel pulledModelInfo,
+		float radius, UINT32 sliceCount, UINT32 stackCount,
+		const XMFLOAT3& shift);
+	virtual ~CSphereMeshDiffused();
+};
+
 class CSphereMesh : public CMesh
 {
 public:
@@ -218,7 +230,12 @@ public:
 	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
 		bool isHeightHalfOn,
-		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+		float fWidth, float fHeight, float fDepth);
+
+	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		PulledModel pulledModelInfo,
+		float fWidth, float fHeight, float fDepth);
 
 	virtual ~CCubeMeshDiffused();
 };

@@ -22,6 +22,50 @@ inline float IntToFloat(int num)
 	return (float)num / I_TO_F; 
 }
 
+enum class OBJECT_ID : USHORT {
+	TERRAIN = 0,
+	PLAYER = 1,		// 1 ~ 6 
+	
+	BRIDEGE_SEC2_SEC3_1 = 10,
+	BRIDEGE_SEC2_SEC3_2,
+	BRIDEGE_SEC2_SEC3_3,
+
+	SIGN_SCROLL = 15,
+	SIGN_PUZZLE,
+	SIGN_MEDUSA,
+	SIGN_BOSS,
+
+	DOOR_WALL_SEC1 = 20,
+	DOOR_WALL_SEC2,
+	DOOR_WALL_SEC3,
+	DOOR_WALL_SEC4,
+	DOOR_WALL_SEC5,
+	 
+	MONSTER_MELEE_1 = 30,
+	MONSTER_MELEE_2,
+	MONSTER_MELEE_3,
+	MONSTER_MELEE_4,
+	MONSTER_MELEE_5,
+	MONSTER_MELEE_6,
+	MONSTER_MELEE_7,
+	MONSTER_MELEE_8,
+	MONSTER_MELEE_9,
+	MONSTER_MELEE_10,
+
+	MONSTER_RANGE_1	= 70,	
+	MONSTER_RANGE_2,
+	MONSTER_RANGE_3,
+	MONSTER_RANGE_4,
+	MONSTER_RANGE_5,
+	MONSTER_RANGE_6,
+	MONSTER_RANGE_7,
+	MONSTER_RANGE_8,
+	MONSTER_RANGE_9,
+	MONSTER_RANGE_10,
+
+	BOSS = 100
+};
+
 enum class GAME_STATE : short {
 	S_STANDBY = 0,	// 로딩하게 된다면..
 	S_LOGIN,  
@@ -29,6 +73,14 @@ enum class GAME_STATE : short {
 	S_RESULT
 };
 
+enum class MOUSE_INPUT_TYPE : short {
+	M_LMOVE,
+	M_RMOVE,
+	M_LBUTTON_UP,
+	M_LBUTTON_DOWN,
+	M_RBUTTON_UP,
+	M_RBUTTON_DOWN
+};
 enum class ROTATION_AXIS : short {
 	ROTATE_AXIS_X = 1,
 	ROTATE_AXIS_Y,
@@ -97,6 +149,7 @@ struct P_C2S_KEYBOARD_INPUT {
 struct P_C2S_MOUSE_INPUT {
 	BYTE size; 
 	PACKET_PROTOCOL type;
+	MOUSE_INPUT_TYPE InputType;
 	short xInput;
 	short yInput;
 }; 
@@ -116,6 +169,8 @@ struct P_S2C_PROCESS_LOGIN {
 	short id;
 	bool isSuccess;
 	int x, y, z;
+
+	bool existPlayer[MAX_PLAYER];
 };
 struct P_S2C_ADD_PLAYER {
 	BYTE size;
@@ -159,7 +214,7 @@ struct P_S2C_UPDATE_SYNC {
 	PACKET_PROTOCOL type;
 	char playerNum;
 	 
-	char id[MAX_PLAYER];
+	char id[MAX_PLAYER]; 
 
 	int posX[MAX_PLAYER];
 	int posY[MAX_PLAYER];

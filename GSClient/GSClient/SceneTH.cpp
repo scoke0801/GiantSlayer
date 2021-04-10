@@ -129,11 +129,11 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
 	//¸Þ½¬ =============================================================================
-	CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
-		5.0f, 5.0f, 5.0f);
-
-	CCubeMeshDiffused* pPlatformMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
-		500.0f, 0.0f, 500.0f);
+	//CCubeMeshDiffused* pCubeMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
+	//	5.0f, 5.0f, 5.0f);
+	//
+	//CCubeMeshDiffused* pPlatformMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList,
+	//	500.0f, 0.0f, 500.0f);
 
 	CMeshFbx* meshbot = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Medieval tower_Mid.fbx");
 	//CMeshFbx* meshtree = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/testtree.fbx");
