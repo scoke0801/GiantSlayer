@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "PacketProcessor.h"
-#include "protocol.h"
-#include "ObjCollector.h"
+#include "protocol.h" 
 #include "MapObjects.h"
 
 bool PacketProcessor::ProcessGameScene(SOCKET& socket)
@@ -201,17 +200,18 @@ void PacketProcessor::InitAll()
 
 void PacketProcessor::Update(float elapsedTime)
 {
-	for (int i = 0; i < MAX_PLAYER; ++i) {
-		if (m_Players[i]->IsExist()) {
-			m_Players[i]->Update(elapsedTime);
-			m_Players[i]->FixPositionByTerrain(m_Heights);
-		}
-	}
-
 	for (auto pObject : m_Objects) {
 		pObject->Update(elapsedTime);
 		pObject->UpdateColliders();
 	}
+
+	for (int i = 0; i < MAX_PLAYER; ++i) {
+		if (m_Players[i]->IsExist()) {
+			m_Players[i]->Update(elapsedTime);
+			m_Players[i]->FixPositionByTerrain(m_Heights);
+			m_Players[i]->UpdateColliders();		
+		}
+	} 
 
 	// 오브젝트 - 플레이어 간 충돌처리
 	for (auto pObject : m_Objects) {
@@ -225,20 +225,20 @@ void PacketProcessor::Update(float elapsedTime)
 		}
 	}
 
-	// 플레이어 - 플레이어 간 충돌처리
-	for (int i = 0; i < MAX_PLAYER; ++i) {
-		if (m_Players[i]->IsExist() == false) continue;
-
-		for (int j = i + 1; j < MAX_PLAYER; ++j) {
-			if (m_Players[j]->IsExist() == false) continue;
-
-			if (m_Players[j]->CollisionCheck(m_Players[i])) {
-				m_Players[i]->FixCollision(); 
-				m_Players[j]->FixCollision();
-				cout << "충돌발생 - [플레이어, 플레이어] n";
-			}
-		}
-	}
+	//// 플레이어 - 플레이어 간 충돌처리
+	//for (int i = 0; i < MAX_PLAYER; ++i) {
+	//	if (m_Players[i]->IsExist() == false) continue;
+	//
+	//	for (int j = i + 1; j < MAX_PLAYER; ++j) {
+	//		if (m_Players[j]->IsExist() == false) continue;
+	//
+	//		if (m_Players[j]->CollisionCheck(m_Players[i])) {
+	//			m_Players[i]->FixCollision(); 
+	//			m_Players[j]->FixCollision();
+	//			cout << "충돌발생 - [플레이어, 플레이어] n";
+	//		}
+	//	}
+	//}
 }
 
 void PacketProcessor::InitPlayers()
@@ -314,7 +314,7 @@ XMFLOAT3 PacketProcessor::GetPosition(const string& name, const Document& docume
 void PacketProcessor::InitObstacle()
 {
 // Bridge --------------------------------------------------------------------
-	CGameObject* pObject = new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
+	CGameObject* pObject; /*= new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_1]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	m_Objects.push_back(std::move(pObject));
@@ -327,7 +327,7 @@ void PacketProcessor::InitObstacle()
 	pObject = new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
 	pObject->Rotate({ 0, 1, 0 }, 90); 
-	m_Objects.push_back(std::move(pObject));
+	m_Objects.push_back(std::move(pObject));*/
 /////////////////////////////////////////////////////////////////////////////////
 
 // DoorWall----------------------------------------------------------------------
@@ -366,9 +366,9 @@ void PacketProcessor::InitObstacle()
 	pObject->Rotate({ 0,1,0 }, 90.0f);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CSign(OBJECT_ID::BOSS);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BOSS]);
-	m_Objects.push_back(std::move(pObject));
+	//pObject = new CSign(OBJECT_ID::BOSS);
+	//pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BOSS]);
+	//m_Objects.push_back(std::move(pObject));
 ////////////////////////////////////////////////////////////////////////////////
 }
 

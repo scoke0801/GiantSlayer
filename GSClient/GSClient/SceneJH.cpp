@@ -594,6 +594,7 @@ void CSceneJH::Communicate(SOCKET& sock)
 		XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 
 		m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
+		m_Players[p_syncUpdate.id[i]]->UpdateCamera();
 	}
 }
 
@@ -682,6 +683,16 @@ void CSceneJH::ProcessInput()
 		if (keyInput.KEY_D){ 
 			p_keyboard.keyInput = VK_D; 
 			processKey = true;
+		}
+		if (keyInput.KEY_3)
+		{
+			m_isPlayerSelected = true;
+			m_CurrentCamera = m_Cameras[0];
+		}
+		if (keyInput.KEY_4)
+		{
+			m_isPlayerSelected = false;
+			m_CurrentCamera = m_Cameras[2];
 		}
 		if (processKey == false) return;
 		int retVal = 0;

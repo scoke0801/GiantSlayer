@@ -3,7 +3,7 @@
 //class CCamera;
  
 #define OBJECT_MAX_VELOCITY 120.0f
-#define PLAYER_RUN_VELOCITY 250.0f
+#define PLAYER_RUN_VELOCITY 250.0f * 4
 #define PLAYER_WALK_VELOCITY 80.0f 
 
 enum class OBJ_NAME

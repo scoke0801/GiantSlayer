@@ -103,9 +103,8 @@ void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
 
 bool CGameObject::CollisionCheck(const BoundingBox& pAABB)
 {
-	for (int i = 0; i < m_AABB.size(); ++i) {
-		auto thisBox = m_AABB[i];
-		bool result = thisBox.Intersects(pAABB);
+	for (int i = 0; i < m_AABB.size(); ++i) { 
+		bool result = m_AABB[i].Intersects(pAABB);
 		if (result) return true; 
 	}
 
@@ -163,7 +162,7 @@ void CGameObject::Move(XMFLOAT3 shift)
 
 void CGameObject::Move()
 {
-	m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
+	SetPosition(Vector3::Add(m_xmf3Position, m_xmf3Velocity)); 
 }
 
 void CGameObject::Rotate(const XMFLOAT3& pxmf3Axis, float fAngle)

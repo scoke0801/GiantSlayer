@@ -14,7 +14,7 @@ void CPlayer::Update(double fTimeElapsed)
 {
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
-	float Friction = (m_MovingType == Player_Move_Type::Run) ? 200.0f : 50.0f;
+	float Friction = (m_MovingType == Player_Move_Type::Run) ? 360.0f : 50.0f;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
@@ -61,7 +61,7 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 		break;
 
 	}
-	float speed = m_MovingType == (Player_Move_Type::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
+	float speed = m_MovingType == (Player_Move_Type::Run) ? PLAYER_RUN_VELOCITY  : PLAYER_WALK_VELOCITY;
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;
 	if (m_xmf3Velocity.z > speed) m_xmf3Velocity.z = speed;

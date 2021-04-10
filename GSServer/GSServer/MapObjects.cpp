@@ -4,15 +4,17 @@
 CSign::CSign(OBJECT_ID id)
 {
 	m_Pillar = new CGameObject(); 
-	m_Pillar->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0, 0 }, XMFLOAT3{ 75 * 0.5f, 500 * 0.5f, 50 * 0.5f })); 	
-	
+	m_Pillar->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0, 0 }, 
+		XMFLOAT3{ 75 * 0.5f, 500 * 0.5f, 50 * 0.5f })); 	
+
 	m_Board = new CGameObject();
-	m_Board->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0, 0 }, XMFLOAT3{ 500.0f * 0.5f, 300.0f * 0.5f, 5.0f * 0.5f })); 
+	m_Board->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0, 0 }, 
+		XMFLOAT3{ 500.0f * 0.5f, 300.0f * 0.5f, 5.0f * 0.5f })); 
   
 	switch (id)
 	{ 
 	case OBJECT_ID::SIGN_SCROLL:
-		m_Board->SetPosition({ -40, 250, 0.0f });
+		m_Board->SetPosition({ 0, 250, -40 });
 		break;
 	case OBJECT_ID::SIGN_PUZZLE:
 		m_Board->SetPosition({ 0, 250, 20 });
@@ -23,6 +25,10 @@ CSign::CSign(OBJECT_ID id)
 	case OBJECT_ID::SIGN_BOSS:
 		break; 
 	}
+	//"SIGN_SCROLL": [2700, 200, 7000] ,
+	//"SIGN_PUZZLE" : [11200, -1800, 8200] ,
+	//"SIGN_MEDUSA" : [13000, -3250, 1300] ,
+	//"SIGN_BOSS" : [14000, -4500, 8000] ,
 }
 
 CSign::~CSign()
@@ -31,8 +37,8 @@ CSign::~CSign()
 
 void CSign::SetPosition(const XMFLOAT3& pos)
 {
-	m_Pillar->SetPosition(pos);
-	m_Board->SetPosition(pos);
+	m_Pillar->Move(pos);
+	m_Board->Move(pos);
 }
 
 void CSign::Rotate(const XMFLOAT3& axis, float angle)
@@ -141,16 +147,18 @@ CDoorWall::CDoorWall(OBJECT_ID id)
 	}
 	 
 	float fWidthRatio = width * 0.1f;
-	CGameObject* pWall = new CGameObject();
+	CGameObject* pWall = new CGameObject(); 
 	pWall->SetPosition({ fWidthRatio * 2,  height * 0.5f, depth * 0.5f });
 	pWall->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f),
-		XMFLOAT3{ fWidthRatio * 4 * 0.5f, height * 0.5f, depth * 0.5f }));
- 	
+		XMFLOAT3{ fWidthRatio * 4 * 0.5f, height * 0.5f, depth * 0.5f })); 
+	m_Walls.push_back(std::move(pWall));
+
 	pWall = new CGameObject();
 	pWall->SetPosition({ fWidthRatio * 6 + fWidthRatio * 2,  height * 0.5f, depth * 0.5f });
 	pWall->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f),
 		XMFLOAT3{ fWidthRatio * 4 * 0.5f, height * 0.5f, depth * 0.5f }));
-	 
+	m_Walls.push_back(std::move(pWall));
+
 	m_LeftDoor = new CDoor(true);
 	m_LeftDoor->AddBoundingBox(BoundingBox(XMFLOAT3(fWidthRatio * 0.5f, 0.0f, 0.0f),
 		XMFLOAT3{ fWidthRatio * 0.5f, doorHeight * 0.5f, depth * 0.2f * 0.5f }));
