@@ -408,6 +408,7 @@ void CSceneJH::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
 {
+	//return;
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
 	if (m_MinimapCamera)
@@ -471,6 +472,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 
 void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
 {
+	return;
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
 	if (m_MirrorCamera)
@@ -1778,7 +1780,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	m_Players[0]->Scale(50, 50, 50);
 	m_Players[0]->SetObjectName(OBJ_NAME::Player);
-	m_Players[0]->SetPosition({ 750,  230, 1850 });
+	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 
 	m_Players[0]->SetCamera(m_Cameras[0]);
 	m_Players[0]->SetTextureIndex(0x200);

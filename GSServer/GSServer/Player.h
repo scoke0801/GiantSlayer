@@ -22,7 +22,7 @@ public:
 	~CPlayer();	
 	
 public:
-	virtual void Update(double fTimeElapsed);
+	void Update(float fTimeElapsed) override;
 
 	void FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 

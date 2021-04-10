@@ -109,23 +109,7 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	float angle = Vector3::GetAngle(xmf3Dir, playerLookAt);
 	//cout << "각도 : " << angle << "\n"; 
 	
-	LookAt(m_xmf3Position, xmf3Dir, { 0,1,0 });
-	//Rotate(XMFLOAT3(0, 1, 0), (angle)); 
-	//bool isMoving = IsMoving();
-	//if (!isMoving)
-	//{
-	//	if (m_Camera != nullptr)
-	//	{  
-	//		XMFLOAT3 cameraLookAt = Vector3::Normalize(m_Camera->GetLook3f()); 
-	//		XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook()); 
-	//
-	//		//float angle = Vector3::Angle(cameraLookAt, playerLookAt);
-	//		float angle = Vector3::AngleAtan(cameraLookAt, playerLookAt) ;
-	//		cout << "각도 : " << angle << "\n";
-	//
-	//		Rotate(XMFLOAT3(0, 1, 0),(-angle));  
-	//	}
-	//}	
+	LookAt(m_xmf3Position, xmf3Dir, { 0,1,0 }); 
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
 	if (m_xmf3Velocity.x >  speed) m_xmf3Velocity.x =  speed;
 	if (m_xmf3Velocity.y >  speed) m_xmf3Velocity.y =  speed;

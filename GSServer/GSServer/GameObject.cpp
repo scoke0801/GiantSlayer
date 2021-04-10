@@ -55,7 +55,7 @@ void CGameObject::Update(float fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
 }
   
-void CGameObject::SetPosition(const XMFLOAT3& pos)
+void CGameObject::SetPosition(XMFLOAT3 pos)
 {
 	m_xmf3PrevPosition = m_xmf3Position;
 	m_xmf3Position = pos;
@@ -124,7 +124,11 @@ bool CGameObject::CollisionCheck(CGameObject* other)
 
 void CGameObject::FixCollision()
 {
+	cout << "prev : ";
+	DisplayVector3(m_xmf3PrevPosition, false);
 	SetPosition(m_xmf3PrevPosition);
+	cout << " cur : ";
+	DisplayVector3(m_xmf3Position);
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 }
 

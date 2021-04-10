@@ -35,7 +35,7 @@ CSign::~CSign()
 {
 }
 
-void CSign::SetPosition(const XMFLOAT3& pos)
+void CSign::SetPosition(XMFLOAT3 pos)
 {
 	m_Pillar->Move(pos);
 	m_Board->Move(pos);
@@ -187,7 +187,7 @@ void CDoorWall::Update(float fTimeElapsed)
 	m_RightDoor->Update(fTimeElapsed);  
 }
 
-void CDoorWall::SetPosition(const XMFLOAT3& pos)
+void CDoorWall::SetPosition(XMFLOAT3 pos)
 {
 	m_LeftDoor->Move(pos);
 	m_RightDoor->Move(pos);

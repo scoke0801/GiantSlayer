@@ -10,7 +10,7 @@ CPlayer::~CPlayer()
 
 }
 
-void CPlayer::Update(double fTimeElapsed)
+void CPlayer::Update(float fTimeElapsed)
 {
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
@@ -31,7 +31,10 @@ void CPlayer::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1]
 {
 	int x = m_xmf3Position.x / 200.0f;
 	int z = m_xmf3Position.z / 200.0f;
+
 	m_xmf3Position.y = heightsMap[z][x]; 
+
+	m_xmf4x4World._42 = m_xmf3Position.y;
 }
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)

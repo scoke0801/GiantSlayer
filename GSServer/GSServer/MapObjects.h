@@ -16,7 +16,7 @@ public:
 	CSign(OBJECT_ID id);
 	~CSign();
 
-	void SetPosition(const XMFLOAT3& pos) override;
+	void SetPosition(XMFLOAT3 pos) override;
 	void Rotate(const XMFLOAT3& axis, float angle) override;
 
 	bool CollisionCheck(const BoundingBox& aabb) override;
@@ -55,7 +55,7 @@ public:
 public:
 	void Update(float fTimeElapsed) override;
 	
-	void SetPosition(const XMFLOAT3& pos) override;
+	void SetPosition(XMFLOAT3 pos) override;
 	void Rotate(const XMFLOAT3& axis, float angle) override;
 
 	bool CollisionCheck(const BoundingBox& aabb) override;

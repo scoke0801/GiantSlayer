@@ -77,7 +77,7 @@ public:
 	XMFLOAT3 GetVelocity() const { return m_xmf3Velocity; }
 	XMFLOAT4X4 GetWorldTransform() const { return m_xmf4x4World; }
 	 
-	virtual void SetPosition(const XMFLOAT3& pos);
+	virtual void SetPosition(XMFLOAT3 pos);
 	virtual void SetVelocity(const XMFLOAT3& vel);
 	virtual void SetVelocity(OBJ_DIRECTION direction);
 

@@ -204,14 +204,14 @@ void PacketProcessor::Update(float elapsedTime)
 		pObject->Update(elapsedTime);
 		pObject->UpdateColliders();
 	}
-
+	  
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		if (m_Players[i]->IsExist()) {
 			m_Players[i]->Update(elapsedTime);
 			m_Players[i]->FixPositionByTerrain(m_Heights);
-			m_Players[i]->UpdateColliders();		
+			m_Players[i]->UpdateColliders();
 		}
-	} 
+	}
 
 	// 오브젝트 - 플레이어 간 충돌처리
 	for (auto pObject : m_Objects) {
@@ -219,26 +219,11 @@ void PacketProcessor::Update(float elapsedTime)
 			if (m_Players[i]->IsExist() == false) continue;
 
 			if (pObject->CollisionCheck(m_Players[i])) {
-				m_Players[i]->FixCollision();
-				cout << "충돌발생 - [오브젝트, 플레이어] n";
+				m_Players[i]->FixCollision(); 
+				cout << "충돌발생 - [오브젝트, 플레이어 " << i << "]\n";
 			}
 		}
 	}
-
-	//// 플레이어 - 플레이어 간 충돌처리
-	//for (int i = 0; i < MAX_PLAYER; ++i) {
-	//	if (m_Players[i]->IsExist() == false) continue;
-	//
-	//	for (int j = i + 1; j < MAX_PLAYER; ++j) {
-	//		if (m_Players[j]->IsExist() == false) continue;
-	//
-	//		if (m_Players[j]->CollisionCheck(m_Players[i])) {
-	//			m_Players[i]->FixCollision(); 
-	//			m_Players[j]->FixCollision();
-	//			cout << "충돌발생 - [플레이어, 플레이어] n";
-	//		}
-	//	}
-	//}
 }
 
 void PacketProcessor::InitPlayers()
@@ -252,7 +237,8 @@ void PacketProcessor::InitPlayers()
 		{ 850.0f,   230.0f,  1500.0f }
 	};
 	for (int i = 0; i < MAX_PLAYER; ++i) {
-		m_Players[i] = new CPlayer();
+		m_Players[i] = new CPlayer(); 
+		m_Players[i]->Scale(50, 50, 50);
 		m_Players[i]->SetPosition(positions[i]);
 		m_Players[i]->SetExistence(false); 
 		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 5)));
