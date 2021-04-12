@@ -300,9 +300,11 @@ void CFramework::BuildScene()
    
 void CFramework::SinglePlayUpdate()
 {
-	if (IsOnConntected())
-	{
-		Draw();
+	if (IsOnConntected()) {
+		if (m_FrameDirtyFlag) {
+			Draw();
+			m_FrameDirtyFlag = false;
+		}
 		return;
 	}
 	m_GameTimer.UpdateElapsedTime();
@@ -557,6 +559,7 @@ DWORD __stdcall ClientMain(LPVOID arg)
 		else
 			continue;
 
+		CFramework::GetInstance().SetFrameDirtyFlag(true);
 		//CFramework::GetInstance().Draw();
 #if defined(SHOW_CAPTIONFPS)
 

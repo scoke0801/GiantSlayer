@@ -65,7 +65,8 @@ private:	// 서버와 통신하기 위한 데이터 입니다.
 
 	bool					m_IsServerConnected; 
 
-	CRITICAL_SECTION		m_cs; 
+	CRITICAL_SECTION		m_cs;
+	bool					m_FrameDirtyFlag = false;
 private:
 	CFramework();
 
@@ -125,6 +126,9 @@ public:	// about server
 
 	int GetPlayerId() const { return m_PlayerId; }
 	void SetPlayerId(int id) { m_PlayerId = id; }
+
+	void SetFrameDirtyFlag(bool flag) { m_FrameDirtyFlag = flag; }
+	bool IsFrameDirty() const { return m_FrameDirtyFlag; }
 
 public:	// about scene change
 	template <typename SceneName>
