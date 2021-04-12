@@ -79,8 +79,15 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	//m_Cameras[3]->Pitch(XMConvertToRadians(90));
 	m_Cameras[4]->SetPosition({ 0,0,0 });
 
+	if (CFramework::GetInstance().IsOnConntected())
+	{
+		m_CurrentCamera = m_Cameras[0];
+		m_isPlayerSelected = true;
+	}
+	else { 
+		m_CurrentCamera = m_Cameras[2];
+	}
 	m_MirrorCamera = m_Cameras[3];
-	m_CurrentCamera = m_Cameras[2];
 	m_MinimapCamera = m_Cameras[1];
 }
 
@@ -473,7 +480,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
 {
 	return;
-	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature); 
 
 	if (m_MirrorCamera)
 	{
@@ -855,11 +862,49 @@ void CSceneJH::OnMouseDown(WPARAM btnState, int x, int y)
 
 void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 {
+	if (CFramework::GetInstance().IsOnConntected())
+	{
+		if (m_MousePositions.size() > 0) {
+			SendMouseInputPacket();
+			//RecvMouseProcessPacket();
+		}
+	}
 	ReleaseCapture();
 }
 
 void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 {
+	//
+	// 싱글플레이, 멀티 플레이 코드 분리 작업 진행 필요
+	//
+	if (CFramework::GetInstance().IsOnConntected())
+	{
+		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
+		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
+		if ((btnState & MK_LBUTTON) != 0)
+		{
+			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_LMOVE;
+			 
+			m_MousePositions.emplace_back(dx, dy);
+
+			if (m_MousePositions.size() >= MAX_MOUSE_INPUT) {
+				SendMouseInputPacket();
+				//RecvMouseProcessPacket();
+			} 
+		}
+		else if ((btnState & MK_LBUTTON) != 0)
+		{
+			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_RMOVE;
+
+			m_MousePositions.emplace_back(dx, dy);
+
+			if (m_MousePositions.size() >= MAX_MOUSE_INPUT) {
+				SendMouseInputPacket();
+				//RecvMouseProcessPacket();
+			}
+		}
+		return;
+	}
 	if ((btnState & MK_LBUTTON) != 0)
 	{
 		// Make each pixel correspond to a quarter of a degree.
@@ -876,11 +921,12 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 				m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
 				m_MinimapArrow->Rotate(-dx * 150);
 			}
+			 
 		}
 		else {
 			m_CurrentCamera->Pitch(dy);
 			m_CurrentCamera->RotateY(dx);
-		}
+		} 
 	}
 
 	if ((btnState & MK_RBUTTON) != 0)
@@ -1759,12 +1805,7 @@ void CSceneJH::BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CSceneJH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-}
-
-int CSceneJH::FindTargetObject()
-{
-	return 0;
-}
+} 
 
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -1805,4 +1846,39 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 		//m_Players[i]->BuildColliders();
 	}
+}
+
+void CSceneJH::SendMouseInputPacket()
+{
+	P_C2S_MOUSE_INPUT p_mouseInput;
+	p_mouseInput.size = sizeof(p_mouseInput);
+	p_mouseInput.type = PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT;
+	p_mouseInput.inputNum = m_MousePositions.size();
+
+	for (int i = 0; i < p_mouseInput.inputNum; ++i) {
+		p_mouseInput.xInput[i] = m_MousePositions[i].x;
+		p_mouseInput.yInput[i] = m_MousePositions[i].y;
+	}
+	p_mouseInput.InputType = m_prevMouseInputType; 
+
+	int retVal = 0;
+	SendPacket(CFramework::GetInstance().GetSocket(),
+		reinterpret_cast<char*>(&p_mouseInput), p_mouseInput.size, retVal);
+	m_MousePositions.clear();
+}
+
+void CSceneJH::RecvMouseProcessPacket()
+{
+	int retVal;
+	char buffer[BUFSIZE + 1] = {};
+	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+
+	P_S2C_PROCESS_MOUSE p_mouseProcess = *reinterpret_cast<P_S2C_PROCESS_MOUSE*>(&buffer); 
+
+	XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_mouseProcess.posX),
+		IntToFloat(p_mouseProcess.posY),
+		IntToFloat(p_mouseProcess.posZ) };
+	 
+	m_Player->SetPosition(pos);
+	m_Player->FixPositionByTerrain(m_Terrain);
 }

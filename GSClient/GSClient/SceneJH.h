@@ -67,6 +67,9 @@ private:	// about SceneInfo
 	ID3D12Resource*				m_pd3dcbSceneInfo = NULL;
 	CB_GAMESCENE_FRAME_DATA*	m_pcbMappedSceneFrameData = NULL;
 
+private: // for server mouse input process
+	vector<POINTF>				m_MousePositions;
+	MOUSE_INPUT_TYPE			m_prevMouseInputType;
 public:
 	CSceneJH();
 	~CSceneJH();
@@ -139,7 +142,6 @@ private:
 	void BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 private:
-
-	// return :: object Index , if -1 : failed
-	int	FindTargetObject();
+	void SendMouseInputPacket();
+	void RecvMouseProcessPacket();
 };
