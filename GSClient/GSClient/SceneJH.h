@@ -70,6 +70,7 @@ private:	// about SceneInfo
 private: // for server mouse input process
 	vector<POINTF>				m_MousePositions;
 	MOUSE_INPUT_TYPE			m_prevMouseInputType;
+
 public:
 	CSceneJH();
 	~CSceneJH();

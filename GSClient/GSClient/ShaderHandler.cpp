@@ -228,6 +228,7 @@ void CShaderHandler::CreateBridgeShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 	}
 	pBridgeShader->CreateInputLayout(ShaderTypes::Textured);
 	pBridgeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pBridgeShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Bridge", pBridgeShader);
 }
 

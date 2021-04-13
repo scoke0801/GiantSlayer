@@ -175,7 +175,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList);
 
-	//BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
+	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 
 	BuildDoorWall(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("DoorWall"));
 	BuildPuzzles(pd3dDevice, pd3dCommandList);
@@ -305,6 +305,7 @@ void CSceneJH::Update(double elapsedTime)
 	m_HelpTextUI->Update(elapsedTime);
 
 	for(auto player : m_Players){
+		if (!player->IsDrawable()) continue;
 		player->Update(elapsedTime);
 		player->UpdateColliders();
 		player->FixPositionByTerrain(m_Terrain);	
@@ -885,7 +886,7 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		{
 			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_LMOVE;
 			 
-			m_MousePositions.emplace_back(dx, dy);
+			m_MousePositions.emplace_back(POINTF{ dx, dy });
 
 			if (m_MousePositions.size() >= MAX_MOUSE_INPUT) {
 				SendMouseInputPacket();
@@ -896,7 +897,7 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		{
 			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_RMOVE;
 
-			m_MousePositions.emplace_back(dx, dy);
+			m_MousePositions.emplace_back(POINTF{ dx, dy });
 
 			if (m_MousePositions.size() >= MAX_MOUSE_INPUT) {
 				SendMouseInputPacket();
@@ -1855,9 +1856,9 @@ void CSceneJH::SendMouseInputPacket()
 	p_mouseInput.type = PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT;
 	p_mouseInput.inputNum = m_MousePositions.size();
 
-	for (int i = 0; i < p_mouseInput.inputNum; ++i) {
-		p_mouseInput.xInput[i] = m_MousePositions[i].x;
-		p_mouseInput.yInput[i] = m_MousePositions[i].y;
+	for (int i = 0; i < p_mouseInput.inputNum; ++i) {   
+		p_mouseInput.xInput[i] = FloatToInt(m_MousePositions[i].x);
+		p_mouseInput.yInput[i] = FloatToInt(m_MousePositions[i].y);
 	}
 	p_mouseInput.InputType = m_prevMouseInputType; 
 
@@ -1875,9 +1876,11 @@ void CSceneJH::RecvMouseProcessPacket()
 
 	P_S2C_PROCESS_MOUSE p_mouseProcess = *reinterpret_cast<P_S2C_PROCESS_MOUSE*>(&buffer); 
 
-	XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_mouseProcess.posX),
+	XMFLOAT3 pos = XMFLOAT3{
+		IntToFloat(p_mouseProcess.posX),
 		IntToFloat(p_mouseProcess.posY),
-		IntToFloat(p_mouseProcess.posZ) };
+		IntToFloat(p_mouseProcess.posZ) 
+	};
 	 
 	m_Player->SetPosition(pos);
 	m_Player->FixPositionByTerrain(m_Terrain);
