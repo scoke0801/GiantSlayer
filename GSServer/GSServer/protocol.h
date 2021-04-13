@@ -152,8 +152,8 @@ struct P_C2S_MOUSE_INPUT {
 	PACKET_PROTOCOL type;
 	MOUSE_INPUT_TYPE InputType;
 	short inputNum;
-	short xInput[MAX_MOUSE_INPUT];
-	short yInput[MAX_MOUSE_INPUT];
+	int xInput[MAX_MOUSE_INPUT];
+	int yInput[MAX_MOUSE_INPUT];
 }; 
 
 struct P_C2S_UPDATE_SYNC_REQUEST {

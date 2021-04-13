@@ -237,6 +237,11 @@ public:
 		PulledModel pulledModelInfo,
 		float fWidth, float fHeight, float fDepth);
 
+	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		PulledModel pulledModelInfo,
+		float fWidth, float fHeight, float fDepth,
+		const XMFLOAT3& shift);
 	virtual ~CCubeMeshDiffused();
 };
 

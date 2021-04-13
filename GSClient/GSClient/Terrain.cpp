@@ -92,6 +92,43 @@ float CTerrain::GetHeight(int xPosition, int zPosition)
 	return m_Heights[z][x];
 }
 
+float CTerrain::GetDetailHeight(float xPosition, float zPosition)
+{
+	// 1. center
+	// 2. left end
+	// 3. right end
+
+	float fx = xPosition / 200.0f;
+	float fz = zPosition / 200.0f;
+
+	/*지형의 좌표 (fx, fz)는 이미지 좌표계이다.
+	높이 맵의 x-좌표와 z-좌표가 높이 맵의 범위를 벗어나면
+	지형의 높이는0이다.*/
+	if ((fx < 0.0f)
+		|| (fz < 0.0f)
+		|| (fx > 100)
+		|| (fz > 100))
+		return(0.0f);
+	//높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다.
+
+	int x = (int)fx;
+	int z = (int)fz;
+	float fxPercent = fx - x;
+	float fzPercent = fz - z;
+
+	int BottomLeft = m_Heights[z][x];
+	int BottomRight = m_Heights[z][x + 1];
+	int TopLeft = m_Heights[z+1][x];
+	int TopRight = m_Heights[z+1][x + 1];
+	 
+	//사각형의 네 점을 보간하여 높이(픽셀 값)를 계산한다.
+	float fTopHeight = TopLeft * (1 - fxPercent) + TopRight * fxPercent;
+	float fBottomHeight = BottomLeft * (1 - fxPercent) + BottomRight * fxPercent;
+	float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
+
+	return(fHeight);
+}
+
 void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
 	CGameObject* pObject;

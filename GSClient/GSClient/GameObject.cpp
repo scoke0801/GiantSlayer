@@ -73,7 +73,8 @@ void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	float fWidth, float fHeight, float fDepth,
 	const XMFLOAT3& shift)
 {
-	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, pulledModel, fWidth, fHeight, fDepth);
+	//CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, pulledModel, fWidth, fHeight, fDepth);
+	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, pulledModel, fWidth, fHeight, fDepth,shift);
 	m_BoundingObjectMeshes.push_back(std::move(pMesh));
 }
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

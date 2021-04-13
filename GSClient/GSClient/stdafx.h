@@ -374,6 +374,11 @@ static T Clamp(const T& x, const T& low, const T& high)
 {
 	return x < low ? low : (x > high ? high : x);
 }
+
+inline float lerp(float a, float b, float alpha)
+{
+	return a * (1 - alpha) + b * alpha;
+}
 #include "resource.h"
 #include "GameTimer.h"
 #include "InputHandler.h"
