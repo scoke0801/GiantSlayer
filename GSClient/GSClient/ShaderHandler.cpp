@@ -278,7 +278,8 @@ void CShaderHandler::CreateTreeShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 		pTreeShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSFBXFeatureShader");
 	}
 	pTreeShader->CreateInputLayout(ShaderTypes::Textured);
-	pTreeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
+	pTreeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true); 
+	pTreeShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Tree", pTreeShader);
 }
 
