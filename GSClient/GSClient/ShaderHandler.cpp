@@ -23,7 +23,7 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateMinmapShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateSkyboxShader(pd3dDevice, pd3dGraphicsRootSignature);
-	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature); 
 }
 
 void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)

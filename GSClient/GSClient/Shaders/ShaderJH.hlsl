@@ -536,8 +536,7 @@ HS_TERRAIN_TESSELLATION_CONSTANT HSTerrainTessellationConstant(InputPatch<VS_TER
 	float3 f3Sum = float3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < 25; i++)
 		f3Sum += input[i].positionW;
-
-
+	 
 	float3 f3Center = f3Sum / 25.0f;
 	output.fTessInsides[0] = output.fTessInsides[1] = CalculateTessFactor(f3Center);
 
@@ -621,8 +620,7 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		toEyeW /= distToEye; // normalize
 
 		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
-
-
+		 
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
 	if (gnTexturesMask & 0x20)
@@ -638,8 +636,7 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		toEyeW /= distToEye; // normalize
 
 		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
-
-
+		 
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
 	input.normalW = normalize(input.normalW);

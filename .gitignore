@@ -26,3 +26,5 @@
 /GSClient/Debug/Resources
 /GSClient/Debug/Shaders
 **/libfbxsdk-md.lib
+/GSClient/x64/Debug/Resources
+/GSClient/x64/Debug/Shaders

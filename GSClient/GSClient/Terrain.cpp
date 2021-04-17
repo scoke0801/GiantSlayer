@@ -7,9 +7,10 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_nWidth = 100, m_nLength = 100;
 	InitHeightDatas();
 	InitNormals();
-
-	CGameObject* pObject;
 	 
+	int meshVertexCount = 833 * 25;//20825
+	m_BindTerrainMesh = new CBindingTerrainMesh(pd3dDevice, pd3dCommandList, meshVertexCount);
+
 	for (int i = 0; i < 25; ++i)
 	{
 		for (int j = 0; j < 25; ++j)
@@ -24,43 +25,36 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			if ((j == 19 || j == 22)&& i == 17) 
 				continue;
 
-			pObject = new CGameObject();
-			pObject->SetShader(pShader);
-
 			if (i < 19 && j < 12)
 			{
-				pObject->SetTextureIndex(0x01);
+				//pObject->SetTextureIndex(0x01);
 			}
 			else if (i >= 19 && j < 12)
 			{
-				pObject->SetTextureIndex(0x02);
+				//pObject->SetTextureIndex(0x02);
 			}
 			else if (i >= 5 && j >= 12 && j < 17)
 			{
-				pObject->SetTextureIndex(0x04);
+				//pObject->SetTextureIndex(0x04);
 			}
 			else if (i < 5 && j >= 12 && j < 25)
 			{
-				pObject->SetTextureIndex(0x08);
+				//pObject->SetTextureIndex(0x08);
 			}
 			else if (i > 0 && i <= 10 && j >= 17 && j < 25)
 			{
-				pObject->SetTextureIndex(0x08);
+				//pObject->SetTextureIndex(0x08);
 			}
 			else
 			{
-				pObject->SetTextureIndex(0x10);
+				//pObject->SetTextureIndex(0x10);
 			}
 			
-			if (i == 24)
-				int stop = 3;
-			pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+			m_BindTerrainMesh->CreateGridMesh(pd3dDevice, pd3dCommandList, 
+				{ 800.0f * j, 0, 800.0f * i },
 				4 * j, 4 * i,
 				m_Heights,
-				m_Normals));
-			pObject->Scale(200.0f, 1.0f, 200.0f);
-			pObject->SetPosition({ 800.0f * j, 0, 800.0f * i });
-			m_Objects.push_back(std::move(pObject));
+				m_Normals);   
 		}
 	} 
 	
@@ -70,6 +64,16 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	BuildBackWalls(pd3dDevice, pd3dCommandList, pShader);
 
 	ReviseLoosedTextureWall(pd3dDevice, pd3dCommandList, pShader);
+
+	m_BindTerrainMesh->CreateVertexBuffer(pd3dDevice, pd3dCommandList);
+
+	CGameObject* pObject = new CGameObject();
+	pObject->SetShader(pShader); 
+	pObject->SetTextureIndex(0x01); 
+	pObject->SetMesh(m_BindTerrainMesh);
+	//pObject->Scale(200.0f, 1.0f, 200.0f); 
+	pObject->Scale(200.0f, 1.0f, 200.0f);
+	m_Objects.push_back(std::move(pObject));
 }
 
 CTerrain::~CTerrain()
@@ -131,13 +135,10 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 
 void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
-	CGameObject* pObject;
 	int heightWallIndex = 99;
 	for (int j = 0; j < 68; j += 4)
 	{
-		pObject = new CGameObject();
-		(j < 48) ? pObject->SetTextureIndex(0x02) : pObject->SetTextureIndex(0x04);
-		pObject->SetShader(pShader);
+		//(j < 48) ? pObject->SetTextureIndex(0x02) : pObject->SetTextureIndex(0x04);
 
 		int heightsTemp[25] = {
 			m_Heights[heightWallIndex][j] + 200.0f, m_Heights[heightWallIndex][j + 1] + 200.0f, m_Heights[heightWallIndex][j + 2] + 200.0f, m_Heights[heightWallIndex][j + 3] + 200.0f, m_Heights[heightWallIndex][j + 4] + 200.0f,
@@ -145,22 +146,17 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			m_Heights[heightWallIndex][j] + 700.0f, m_Heights[heightWallIndex][j + 1] + 700.0f, m_Heights[heightWallIndex][j + 2] + 700.0f, m_Heights[heightWallIndex][j + 3] + 700.0f, m_Heights[heightWallIndex][j + 4] + 700.0f,
 			m_Heights[heightWallIndex][j] + 700.0f, m_Heights[heightWallIndex][j + 1] + 700.0f, m_Heights[heightWallIndex][j + 2] + 700.0f, m_Heights[heightWallIndex][j + 3] + 700.0f, m_Heights[heightWallIndex][j + 4] + 700.0f,
 			m_Heights[heightWallIndex][j],          m_Heights[heightWallIndex][j + 1],			m_Heights[heightWallIndex][j + 2],		    m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 4] };
-
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		 
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
+			{ 200.0f * j, 0, 20000.0f },
 			heightsTemp,
 			m_Normals,
-			j, 96));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ 200.0f * j, 0, 20000.0f });
-		m_Objects.push_back(std::move(pObject));
+			j, 96);  
 	}
 
 	for (int j = 72; j < 100; j += 4)
 	{
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x20);
-		pObject->SetShader(pShader);
+		//pObject->SetTextureIndex(0x20);
 
 		int heightsTemp[25] = {
 			m_Heights[heightWallIndex][j] + 200.0f,  m_Heights[heightWallIndex][j + 1] + 200.0f,  m_Heights[heightWallIndex][j + 2] + 200.0f,  m_Heights[heightWallIndex][j + 3] + 200.0f,  m_Heights[heightWallIndex][j + 4] + 200.0f,
@@ -168,21 +164,16 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			m_Heights[heightWallIndex][j] + 1500.0f, m_Heights[heightWallIndex][j + 1] + 1500.0f, m_Heights[heightWallIndex][j + 2] + 1500.0f, m_Heights[heightWallIndex][j + 3] + 1500.0f, m_Heights[heightWallIndex][j + 4] + 1500.0f,
 			m_Heights[heightWallIndex][j] + 700.0f,  m_Heights[heightWallIndex][j + 1] + 700.0f,  m_Heights[heightWallIndex][j + 2] + 700.0f,  m_Heights[heightWallIndex][j + 3] + 700.0f,  m_Heights[heightWallIndex][j + 4] + 700.0f,
 			m_Heights[heightWallIndex][j],           m_Heights[heightWallIndex][j + 1],			  m_Heights[heightWallIndex][j + 2],		   m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 4] };
-
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		 
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
+			{ 200.0f * j, 0, 20000.0f },
 			heightsTemp,
 			m_Normals,
-			j, 96));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ 200.0f * j, 0, 20000.0f });
-		m_Objects.push_back(std::move(pObject));
+			j, 96); 
 	}
 	{
 		int j = 0;
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x02);
-		pObject->SetShader(pShader);
+		///pObject->SetTextureIndex(0x02);
 
 		int heightsTemp[25] = {
 		m_Heights[heightWallIndex][j + 4] + 200.0f, m_Heights[heightWallIndex][j + 3] + 200.0f, m_Heights[heightWallIndex][j + 2] + 200.0f, m_Heights[heightWallIndex][j + 1] + 200.0f, m_Heights[heightWallIndex][j] + 200.0f,
@@ -190,21 +181,16 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		m_Heights[heightWallIndex][j + 4] + 700.0f, m_Heights[heightWallIndex][j + 3] + 700.0f, m_Heights[heightWallIndex][j + 2] + 700.0f, m_Heights[heightWallIndex][j + 1] + 700.0f, m_Heights[heightWallIndex][j] + 700.0f,
 		m_Heights[heightWallIndex][j + 4] + 700.0f, m_Heights[heightWallIndex][j + 3] + 700.0f, m_Heights[heightWallIndex][j + 2] + 700.0f, m_Heights[heightWallIndex][j + 1] + 700.0f, m_Heights[heightWallIndex][j] + 700.0f,
 		m_Heights[heightWallIndex][j + 4],          m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 2],		    m_Heights[heightWallIndex][j + 1],			m_Heights[heightWallIndex][j] };
-
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		 
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
+			{ -800.0f, 0, 20000.0f },
 			heightsTemp,
 			m_Normals,
-			j, 96));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ -800.0f, 0, 20000.0f });
-		m_Objects.push_back(std::move(pObject));
+			j, 96);  
 	}
 	{
-		int j = 96;
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x20);
-		pObject->SetShader(pShader);
+		int j = 96; 
+		//pObject->SetTextureIndex(0x20); 
 
 		int heightsTemp[25] = {
 				m_Heights[heightWallIndex][j + 4] + 200.0f, m_Heights[heightWallIndex][j + 3] + 200.0f, m_Heights[heightWallIndex][j + 2] + 200.0f, m_Heights[heightWallIndex][j + 1] + 200.0f, m_Heights[heightWallIndex][j] + 200.0f,
@@ -212,21 +198,16 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[heightWallIndex][j + 4] + 1500.0f, m_Heights[heightWallIndex][j + 3] + 1500.0f, m_Heights[heightWallIndex][j + 2] + 1500.0f, m_Heights[heightWallIndex][j + 1] + 1500.0f, m_Heights[heightWallIndex][j] + 1500.0f,
 				m_Heights[heightWallIndex][j + 4] + 700.0f, m_Heights[heightWallIndex][j + 3] + 700.0f, m_Heights[heightWallIndex][j + 2] + 700.0f, m_Heights[heightWallIndex][j + 1] + 700.0f, m_Heights[heightWallIndex][j] + 700.0f,
 				m_Heights[heightWallIndex][j + 4],          m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 2],		    m_Heights[heightWallIndex][j + 1],			m_Heights[heightWallIndex][j] };
-
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		 
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
+			{ 20000.0f, 0, 20000.0f },
 			heightsTemp,
 			m_Normals,
-			j, 96));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ 20000.0f, 0, 20000.0f });
-		m_Objects.push_back(std::move(pObject));
+			j, 96);
 	}
 	{
-		int j = 72;
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x20);
-		pObject->SetShader(pShader);
+		int j = 72; 
+		//pObject->SetTextureIndex(0x20); 
 
 		int heightsTemp[25] = {
 				m_Heights[heightWallIndex][j + 4] + 200.0f, m_Heights[heightWallIndex][j + 3] + 200.0f, m_Heights[heightWallIndex][j + 2] + 200.0f, m_Heights[heightWallIndex][j + 1] + 200.0f, m_Heights[heightWallIndex][j] + 200.0f,
@@ -234,25 +215,19 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[heightWallIndex][j + 4] + 1500.0f, m_Heights[heightWallIndex][j + 3] + 1500.0f, m_Heights[heightWallIndex][j + 2] + 1500.0f, m_Heights[heightWallIndex][j + 1] + 1500.0f, m_Heights[heightWallIndex][j] + 1500.0f,
 				m_Heights[heightWallIndex][j + 4] + 700.0f, m_Heights[heightWallIndex][j + 3] + 700.0f, m_Heights[heightWallIndex][j + 2] + 700.0f, m_Heights[heightWallIndex][j + 1] + 700.0f, m_Heights[heightWallIndex][j] + 700.0f,
 				m_Heights[heightWallIndex][j + 4],          m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 2],		    m_Heights[heightWallIndex][j + 1],			m_Heights[heightWallIndex][j] };
-
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		 
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
+			{ 200.0f * j - 800.0f, 0, 20000.0f },
 			heightsTemp,
 			m_Normals,
-			j, 96));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ 200.0f * j - 800.0f, 0, 20000.0f });
-		m_Objects.push_back(std::move(pObject));
+			j, 96);  
 	}
 }
 
 void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
-	CGameObject* pObject;
 	for (int j = 0; j < 48; j += 4) {
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x01);
-		pObject->SetShader(pShader);
+		//SetTextureIndex(0x01);
 
 		int heightsTemp[25] = {
 				m_Heights[0][j],		  m_Heights[0][j + 1],		    m_Heights[0][j + 2],		  m_Heights[0][j + 3],		    m_Heights[0][j + 4],
@@ -260,20 +235,16 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[0][j] + 700.0f, m_Heights[0][j + 1] + 700.0f, m_Heights[0][j + 2] + 700.0f, m_Heights[0][j + 3] + 700.0f, m_Heights[0][j + 4] + 700.0f,
 				m_Heights[0][j] + 500.0f, m_Heights[0][j + 1] + 500.0f, m_Heights[0][j + 2] + 500.0f, m_Heights[0][j + 3] + 500.0f, m_Heights[0][j + 4] + 500.0f,
 				m_Heights[0][j] + 200.0f, m_Heights[0][j + 1] + 200.0f, m_Heights[0][j + 2] + 200.0f, m_Heights[0][j + 3] + 200.0f, m_Heights[0][j + 4] + 200.0f };
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
+			{ 200.0f * j , 0, -800.0f },
 			heightsTemp,
 			m_Normals,
-			j, 0));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ 200.0f * j , 0, -800.0f });
-		m_Objects.push_back(std::move(pObject));
+			j, 0); 
 	}
 	
 	for (int j = 52; j < 100; j += 4) {
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x08);
-		pObject->SetShader(pShader);
+		//SetTextureIndex(0x08);
 		int heightsTemp[25] = {
 		m_Heights[0][j],		  m_Heights[0][j + 1],		    m_Heights[0][j + 2],		  m_Heights[0][j + 3],		    m_Heights[0][j + 4],
 		m_Heights[0][j] + 700.0f, m_Heights[0][j + 1] + 700.0f, m_Heights[0][j + 2] + 700.0f, m_Heights[0][j + 3] + 700.0f, m_Heights[0][j + 4] + 700.0f,
@@ -281,20 +252,15 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_Heights[0][j] + 500.0f, m_Heights[0][j + 1] + 500.0f, m_Heights[0][j + 2] + 500.0f, m_Heights[0][j + 3] + 500.0f, m_Heights[0][j + 4] + 500.0f,
 		m_Heights[0][j] + 200.0f, m_Heights[0][j + 1] + 200.0f, m_Heights[0][j + 2] + 200.0f, m_Heights[0][j + 3] + 200.0f, m_Heights[0][j + 4] + 200.0f };
 
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
+			{ 200.0f * j , 0.0f, -800.0f },
 			heightsTemp,
 			m_Normals,
-			j, 0));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ 200.0f * j , 0.0f, -800.0f });
-		m_Objects.push_back(std::move(pObject));
+			j, 0);   
 	} 
 
 	{
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x01);
-		pObject->SetShader(pShader);
+		//SetTextureIndex(0x01);
 
 		int heightsTemp[25] = {
 				m_Heights[0][0],		  m_Heights[0][1],		    m_Heights[0][2],		  m_Heights[0][3],		    m_Heights[0][4],
@@ -302,21 +268,17 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[0][0] + 700.0f, m_Heights[0][1] + 700.0f, m_Heights[0][2] + 700.0f, m_Heights[0][3] + 700.0f, m_Heights[0][4] + 700.0f,
 				m_Heights[0][0] + 500.0f, m_Heights[0][1] + 500.0f, m_Heights[0][2] + 500.0f, m_Heights[0][3] + 500.0f, m_Heights[0][4] + 500.0f,
 				m_Heights[0][0] + 200.0f, m_Heights[0][1] + 200.0f, m_Heights[0][2] + 200.0f, m_Heights[0][3] + 200.0f, m_Heights[0][4] + 200.0f };
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
+			{ -800.0f , 0, -800.0f },
 			heightsTemp,
 			m_Normals,
-			0, 0));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ -800.0f , 0, -800.0f });
-		m_Objects.push_back(std::move(pObject));
+			0, 0); 
 	}
 
 	{
 		int j = 52;
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x08);
-		pObject->SetShader(pShader);
+		//SetTextureIndex(0x08);
 		int heightsTemp[25] = {
 		m_Heights[0][j + 4] - 100.0f, m_Heights[0][j + 3] - 100.0f,	m_Heights[0][j + 2] - 100.0f, m_Heights[0][j + 1] - 100.0f, m_Heights[0][j] - 100.0f,
 		m_Heights[0][j + 4] + 700.0f, m_Heights[0][j + 3] + 700.0f, m_Heights[0][j + 2] + 700.0f, m_Heights[0][j + 1] + 700.0f, m_Heights[0][j] + 700.0f,
@@ -324,25 +286,19 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_Heights[0][j + 4] + 500.0f, m_Heights[0][j + 3] + 500.0f, m_Heights[0][j + 2] + 500.0f, m_Heights[0][j + 1] + 500.0f, m_Heights[0][j] + 500.0f,
 		m_Heights[0][j + 4] + 200.0f, m_Heights[0][j + 3] + 200.0f, m_Heights[0][j + 2] + 200.0f, m_Heights[0][j + 1] + 200.0f, m_Heights[0][j] + 200.0f };
 
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
+			{ 200.0f * j - 800.0f, 0.0f, -800.0f },
 			heightsTemp,
 			m_Normals,
-			j, 0));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ 200.0f * j - 800.0f, 0.0f, -800.0f });
-		m_Objects.push_back(std::move(pObject));
+			j, 0); 
 	}
 }
 
 void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
-	CGameObject* pObject;
 	for (int j = 0; j < 100; j += 4)
 	{
-		pObject = new CGameObject();
-		(j < 76) ? pObject->SetTextureIndex(0x01) : pObject->SetTextureIndex(0x02);
-		pObject->SetShader(pShader);
+		//(j < 76) ? pObject->SetTextureIndex(0x01) : pObject->SetTextureIndex(0x02);
 
 		int heightsTemp[25] = {
 				m_Heights[j + 4][0] + 200.0f, m_Heights[j + 4][0] + 500.0f, m_Heights[j + 4][0] + 700.0f, m_Heights[j + 4][0] + 700.0f, m_Heights[j + 4][0],
@@ -351,19 +307,14 @@ void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[j + 1][0] + 200.0f, m_Heights[j + 1][0] + 500.0f, m_Heights[j + 1][0] + 700.0f, m_Heights[j + 1][0] + 700.0f, m_Heights[j + 1][0],
 				m_Heights[j + 0][0] + 200.0f, m_Heights[j + 0][0] + 500.0f, m_Heights[j + 0][0] + 700.0f, m_Heights[j + 0][0] + 700.0f, m_Heights[j + 0][0] };
 
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
+			{ -800.0f, 0, 200.0f * j },
 			heightsTemp,
 			m_Normals,
-			0, j));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ -800.0f, 0, 200.0f * j });
-		m_Objects.push_back(std::move(pObject));
+			0, j); 
 	}
 	{
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x01);
-		pObject->SetShader(pShader);
+		//pObject->SetTextureIndex(0x01);
 
 		int heightsTemp[25] = {
 				m_Heights[4][0] + 200.0f, m_Heights[4][0] + 500.0f, m_Heights[4][0] + 700.0f, m_Heights[4][0] + 700.0f, m_Heights[4][0],
@@ -372,20 +323,15 @@ void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[1][0] + 200.0f, m_Heights[1][0] + 500.0f, m_Heights[1][0] + 700.0f, m_Heights[1][0] + 700.0f, m_Heights[1][0],
 				m_Heights[0][0] + 200.0f, m_Heights[0][0] + 500.0f, m_Heights[0][0] + 700.0f, m_Heights[0][0] + 700.0f, m_Heights[0][0] };
 
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
+			{ -800.0f, 0, -800.0f },
 			heightsTemp,
 			m_Normals,
-			0, 0));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ -800.0f, 0, -800.0f });
-		m_Objects.push_back(std::move(pObject));
+			0, 0); 
 	}
 
 	{
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x02);
-		pObject->SetShader(pShader);
+		//pObject->SetTextureIndex(0x02);
 
 		int heightsTemp[25] = {
 				m_Heights[96][0] + 200.0f,    m_Heights[96][0] + 500.0f, m_Heights[96][0] + 700.0f,  m_Heights[96][0] + 700.0f,  m_Heights[96][0] ,
@@ -394,26 +340,20 @@ void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[99][0] + 200.0f,   m_Heights[99][0] + 500.0f,  m_Heights[99][0] + 700.0f,  m_Heights[99][0] + 700.0f,  m_Heights[99][0] ,
 				m_Heights[100][0] + 200.0f,  m_Heights[100][0] + 500.0f, m_Heights[100][0] + 700.0f, m_Heights[100][0] + 700.0f, m_Heights[100][0] };
 
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
+			{ -800.0f, 0, 20000.0f },
 			heightsTemp,
 			m_Normals,
-			0, 96));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ -800.0f, 0, 20000.0f });
-		m_Objects.push_back(std::move(pObject));
+			0, 96); 
 	}
 }
 
 void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
-	CGameObject* pObject;
 	int heightWallIndex = 99;
 	for (int j = 0; j < 68; j += 4)
 	{
-		pObject = new CGameObject();//66
-		(j < 42) ? pObject->SetTextureIndex(0x08) : pObject->SetTextureIndex(0x20);
-		pObject->SetShader(pShader);
+		//(j < 42) ? pObject->SetTextureIndex(0x08) : pObject->SetTextureIndex(0x20);
 
 		int heightsTemp[25] = {
 				m_Heights[j + 4][heightWallIndex], m_Heights[j + 4][heightWallIndex] + 700.0f, m_Heights[j + 4][heightWallIndex] + 700.0f, m_Heights[j + 4][heightWallIndex] + 500.0f, m_Heights[j + 4][heightWallIndex] + 200.0f,
@@ -421,21 +361,16 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[j + 2][heightWallIndex], m_Heights[j + 2][heightWallIndex] + 700.0f, m_Heights[j + 2][heightWallIndex] + 700.0f, m_Heights[j + 2][heightWallIndex] + 500.0f, m_Heights[j + 2][heightWallIndex] + 200.0f,
 				m_Heights[j + 1][heightWallIndex], m_Heights[j + 1][heightWallIndex] + 700.0f, m_Heights[j + 1][heightWallIndex] + 700.0f, m_Heights[j + 1][heightWallIndex] + 500.0f, m_Heights[j + 1][heightWallIndex] + 200.0f,
 				m_Heights[j + 0][heightWallIndex], m_Heights[j + 0][heightWallIndex] + 700.0f, m_Heights[j + 0][heightWallIndex] + 700.0f, m_Heights[j + 0][heightWallIndex] + 500.0f, m_Heights[j + 0][heightWallIndex] + 200.0f };
-
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		 
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
+			{ 20000.0f, 0, 200.0f * j },
 			heightsTemp,
 			m_Normals,
-			100, j));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ 20000.0f, 0, 200.0f * j });
-		m_Objects.push_back(std::move(pObject));
+			100, j);  
 	}
 	for (int j = 72; j < 100; j += 4)
-	{
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x20);
-		pObject->SetShader(pShader);
+	{ 
+		//pObject->SetTextureIndex(0x20); 
 
 		int heightsTemp[25] = {
 				m_Heights[j + 4][heightWallIndex], m_Heights[j + 4][heightWallIndex] + 700.0f, m_Heights[j + 4][heightWallIndex] + 1500.0f, m_Heights[j + 4][heightWallIndex] + 500.0f, m_Heights[j + 4][heightWallIndex] + 200.0f,
@@ -443,21 +378,16 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[j + 2][heightWallIndex], m_Heights[j + 2][heightWallIndex] + 700.0f, m_Heights[j + 2][heightWallIndex] + 1500.0f, m_Heights[j + 2][heightWallIndex] + 500.0f, m_Heights[j + 2][heightWallIndex] + 200.0f,
 				m_Heights[j + 1][heightWallIndex], m_Heights[j + 1][heightWallIndex] + 700.0f, m_Heights[j + 1][heightWallIndex] + 1500.0f, m_Heights[j + 1][heightWallIndex] + 500.0f, m_Heights[j + 1][heightWallIndex] + 200.0f,
 				m_Heights[j + 0][heightWallIndex], m_Heights[j + 0][heightWallIndex] + 700.0f, m_Heights[j + 0][heightWallIndex] + 1500.0f, m_Heights[j + 0][heightWallIndex] + 500.0f, m_Heights[j + 0][heightWallIndex] + 200.0f };
-		 
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		  
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
+			{ 20000.0f, 0, 200.0f * j },
 			heightsTemp,
 			m_Normals,
-			100, j));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ 20000.0f, 0, 200.0f * j });
-		m_Objects.push_back(std::move(pObject));
+			100, j);   
 	}
 	{
-		int j = 72;
-		pObject = new CGameObject();
-		pObject->SetTextureIndex(0x20);
-		pObject->SetShader(pShader);
+		int j = 72; 
+		//pObject->SetTextureIndex(0x20); 
 
 		int heightsTemp[25] = {
 				m_Heights[j + 0][heightWallIndex], m_Heights[j + 0][heightWallIndex] + 700.0f, m_Heights[j + 0][heightWallIndex] + 1500.0f, m_Heights[j + 0][heightWallIndex] + 500.0f, m_Heights[j + 0][heightWallIndex] + 200.0f,
@@ -465,15 +395,12 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[j + 2][heightWallIndex], m_Heights[j + 2][heightWallIndex] + 700.0f, m_Heights[j + 2][heightWallIndex] + 1500.0f, m_Heights[j + 2][heightWallIndex] + 500.0f, m_Heights[j + 2][heightWallIndex] + 200.0f,
 				m_Heights[j + 3][heightWallIndex], m_Heights[j + 3][heightWallIndex] + 700.0f, m_Heights[j + 3][heightWallIndex] + 1500.0f, m_Heights[j + 3][heightWallIndex] + 500.0f, m_Heights[j + 3][heightWallIndex] + 200.0f,
 				m_Heights[j + 4][heightWallIndex], m_Heights[j + 4][heightWallIndex] + 700.0f, m_Heights[j + 4][heightWallIndex] + 1500.0f, m_Heights[j + 4][heightWallIndex] + 500.0f, m_Heights[j + 4][heightWallIndex] + 200.0f };
-
-		pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
+		 
+		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
+			{ 20000.0f, 0, 200.0f * j - 800.0f },
 			heightsTemp,
 			m_Normals,
-			100, j));
-
-		pObject->Scale(200.0f, 1.0f, 200.0f);
-		pObject->SetPosition({ 20000.0f, 0, 200.0f * j - 800.0f});
-		m_Objects.push_back(std::move(pObject));
+			100, j); 
 	}
 }
 
@@ -481,7 +408,6 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	CShader* pShader)
 {
-	CGameObject* pObject;
 	int tolerance = 30;
 	for (int i = 0; i < 25; ++i)
 	{
@@ -546,87 +472,78 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k * 4 + 3),
 						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k * 4 + 4),
 					};
-					pObject = new CGameObject();
-					pObject->SetTextureIndex(0x20);
-					if (i == 10)pObject->SetTextureIndex(0x08);
-					pObject->SetShader(pShader); 
-					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList, 
+					//pObject->SetTextureIndex(0x20);
+					//if (i == 10)pObject->SetTextureIndex(0x08); 
+					m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
+						{ 800.0f * j + 160.0f * k, 0, 800.0f * i },
 						heightsTemp,
 						m_Normals,
-						j, i));
-
-					pObject->Scale(40.0f, 1.0f, 200.0f); 
-					pObject->SetPosition({ 800.0f * j + 160.0f * k, 0, 800.0f * i });
-					m_Objects.push_back(std::move(pObject));
+						j, i);
+					//pObject->Scale(40.0f, 1.0f, 200.0f				}
+					if (j != 17 || i != 17) continue;
 				}
-				if (j != 17 || i != 17) continue;
-			}
-			if ((j == 24 || j == 23 || j == 18 || j == 17) && i == 17 ) {
-				tolerance = 10;
-				int heightsGap[5] = {
-					m_Heights[(i + 1) * 4][j * 4] - m_Heights[i * 4][j * 4] - tolerance,
-					m_Heights[(i + 1) * 4][j * 4 + 1] - m_Heights[i * 4][j * 4 + 1] - tolerance,
-					m_Heights[(i + 1) * 4][j * 4 + 2] - m_Heights[i * 4][j * 4 + 2] - tolerance,
-					m_Heights[(i + 1) * 4][j * 4 + 3] - m_Heights[i * 4][j * 4 + 3] - tolerance,
-					m_Heights[(i + 1) * 4][j * 4 + 4] - m_Heights[i * 4][j * 4 + 4] - tolerance
-				};
-				if (j == 17)
-				{
-					heightsGap[0] = m_Heights[i * 4][j * 4] - 4000;
-					heightsGap[1] = m_Heights[i * 4][j * 4 + 1] - 4000;
-					heightsGap[2] = m_Heights[i * 4][j * 4 + 2] - 4000;
-					heightsGap[3] = m_Heights[i * 4][j * 4 + 3] - 4000;
-					heightsGap[4] = m_Heights[i * 4][j * 4 + 4] - 4000;
-				}
-				for (int k = 0; k < 5; ++k)
-				{
-					int heightsTemp[25] =
-					{
-						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 4),
-						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 4),
-						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 4),
-						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 4),
-						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 4),
-						
-						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 3),
-						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 3),
-						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 3),
-						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 3),
-						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 3),
-						
-						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 2),
-						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 2),
-						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 2),
-						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 2),
-						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 2),
-						
-						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 1),
-						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 1),
-						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 1),
-						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 1),
-						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 1),
-						
-						m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4),
-						m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4),
-						m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4),
-						m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4),
-						m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4),
+				if ((j == 24 || j == 23 || j == 18 || j == 17) && i == 17) {
+					tolerance = 10;
+					int heightsGap[5] = {
+						m_Heights[(i + 1) * 4][j * 4] - m_Heights[i * 4][j * 4] - tolerance,
+						m_Heights[(i + 1) * 4][j * 4 + 1] - m_Heights[i * 4][j * 4 + 1] - tolerance,
+						m_Heights[(i + 1) * 4][j * 4 + 2] - m_Heights[i * 4][j * 4 + 2] - tolerance,
+						m_Heights[(i + 1) * 4][j * 4 + 3] - m_Heights[i * 4][j * 4 + 3] - tolerance,
+						m_Heights[(i + 1) * 4][j * 4 + 4] - m_Heights[i * 4][j * 4 + 4] - tolerance
 					};
-					pObject = new CGameObject();
-					pObject->SetTextureIndex(0x20);
-					if (i == 10)pObject->SetTextureIndex(0x08);
-					pObject->SetShader(pShader);
-					pObject->SetMesh(new CTerrainMesh(pd3dDevice, pd3dCommandList,
-						heightsTemp,
-						m_Normals,
-						j, i));
+					if (j == 17)
+					{
+						heightsGap[0] = m_Heights[i * 4][j * 4] - 4000;
+						heightsGap[1] = m_Heights[i * 4][j * 4 + 1] - 4000;
+						heightsGap[2] = m_Heights[i * 4][j * 4 + 2] - 4000;
+						heightsGap[3] = m_Heights[i * 4][j * 4 + 3] - 4000;
+						heightsGap[4] = m_Heights[i * 4][j * 4 + 4] - 4000;
+					}
+					for (int k = 0; k < 5; ++k)
+					{
+						int heightsTemp[25] =
+						{
+							m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 4),
+							m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 4),
+							m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 4),
+							m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 4),
+							m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 4),
 
-					pObject->Scale(200.0f, 1.0f, 40.0f);
-					pObject->SetPosition({ 800.0f * j , 0, 800.0f * i + 160.0f * k });
+							m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 3),
+							m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 3),
+							m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 3),
+							m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 3),
+							m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 3),
 
-					m_Objects.push_back(std::move(pObject));
+							m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 2),
+							m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 2),
+							m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 2),
+							m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 2),
+							m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 2),
+
+							m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4 + 1),
+							m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4 + 1),
+							m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4 + 1),
+							m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4 + 1),
+							m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4 + 1),
+
+							m_Heights[i * 4][j * 4 + 0] + (heightsGap[0] / 20) * (k * 4),
+							m_Heights[i * 4][j * 4 + 1] + (heightsGap[1] / 20) * (k * 4),
+							m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4),
+							m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4),
+							m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4),
+						};
+						//pObject->SetTextureIndex(0x20);
+						//if (i == 10)pObject->SetTextureIndex(0x08); 
+						m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
+							{ 800.0f * j , 0, 800.0f * i + 160.0f * k },
+							heightsTemp,
+							m_Normals,
+							j, i);
+						//pObject->Scale(200.0f, 1.0f, 40.0f);
+					}
 				}
-			} 
+			}
 		}
 	}
 }
