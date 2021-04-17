@@ -11,6 +11,34 @@ FbxAMatrix GeometricOffsetTransform(FbxNode* pfbxNode)
 	return(FbxAMatrix(T, R, S));
 }
 
+XMFLOAT4X4 FbxMatrixToXmFloat4x4(FbxAMatrix* pfbxmtxSource)
+{
+	FbxVector4 S = pfbxmtxSource->GetS();
+	FbxVector4 R = pfbxmtxSource->GetR();
+	FbxVector4 T = pfbxmtxSource->GetT();
+
+	FbxAMatrix fbxmtxTransform = FbxAMatrix(T, R, S);
+
+	XMFLOAT4X4 xmf4x4Result;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++) xmf4x4Result.m[i][j] = (float)(*pfbxmtxSource)[i][j];
+	}
+
+	XMFLOAT3 xmf3S = XMFLOAT3((float)S.mData[0], (float)S.mData[1], (float)S.mData[2]);
+	XMFLOAT3 xmf3R = XMFLOAT3((float)R.mData[0], (float)R.mData[1], (float)R.mData[2]);
+	XMFLOAT3 xmf3T = XMFLOAT3((float)T.mData[0], (float)T.mData[1], (float)T.mData[2]);
+
+	XMMATRIX Rx = XMMatrixRotationX(XMConvertToRadians(xmf3R.x));
+	XMMATRIX Ry = XMMatrixRotationY(XMConvertToRadians(xmf3R.y));
+	XMMATRIX Rz = XMMatrixRotationZ(XMConvertToRadians(xmf3R.z));
+	XMMATRIX xmR = XMMatrixMultiply(XMMatrixMultiply(Rx, Ry), Rz);
+	XMFLOAT4X4 xmf4x4Multiply;
+	XMStoreFloat4x4(&xmf4x4Multiply, XMMatrixMultiply(XMMatrixMultiply(XMMatrixScaling(xmf3S.x, xmf3S.y, xmf3S.z), xmR), XMMatrixTranslation(xmf3T.x, xmf3T.y, xmf3T.z)));
+
+	return(xmf4x4Result);
+}
+
 void SetMatrixScale(FbxAMatrix& fbxmtxSrcMatrix, double pValue)
 {
 	for (int i = 0; i < 4; i++)
@@ -145,8 +173,8 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 				FbxGeometryElementNormal* pnormal = pfbxMesh->GetElementNormal(0);
 
 				tempVertex.m_xmf3Normal.x = pnormal->GetDirectArray().GetAt(pvindex).mData[0];
-				tempVertex.m_xmf3Normal.y = pnormal->GetDirectArray().GetAt(pvindex).mData[1];
-				tempVertex.m_xmf3Normal.z = pnormal->GetDirectArray().GetAt(pvindex).mData[2];
+				tempVertex.m_xmf3Normal.y = pnormal->GetDirectArray().GetAt(pvindex).mData[2];
+				tempVertex.m_xmf3Normal.z = pnormal->GetDirectArray().GetAt(pvindex).mData[1];
 				
 				tempSubMesh.mIndex.push_back(pvindex);
 				tempSubMesh.mVertex.push_back(tempVertex);
@@ -159,6 +187,8 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 		FbxVector4* tempDefVertex;
 		FbxAMatrix* tempClusterDef;
 		double* tempClusterWeight;
+		//tempSubMesh.gTransform = XMFLOAT4X4(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+
 
 		//numDC = 0;
 		if (numDC != 0) {
@@ -177,6 +207,7 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 			::memset(tempSubMesh.mClusterDef, 0, numCP * sizeof(XMFLOAT3));
 
 			FbxAMatrix geometryTransform = GeometricOffsetTransform(pfbxMesh->GetNode());
+			tempSubMesh.gTransform = FbxMatrixToXmFloat4x4(&geometryTransform);
 
 			FbxCluster::ELinkMode nClusterMode =
 				((FbxSkin*)pfbxMesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0)->GetLinkMode();

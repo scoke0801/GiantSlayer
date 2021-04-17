@@ -289,7 +289,7 @@ class CMeshFbx : public CMesh
 public:
 	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName,
 		bool rotateFlag = false);
-
+	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int* pnIndices, vector<CTexturedVertex> vertics);
 	virtual ~CMeshFbx();
 
 public:

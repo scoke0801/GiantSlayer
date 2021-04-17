@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "Mesh.h"
 
 class CAnimationController
 {
@@ -29,6 +30,18 @@ public:
 	void SetPosition(int nAnimationStack, float fPosition);
 };
 
+class MeshInfo
+{
+public:
+	MeshInfo() { }
+	~MeshInfo() { };
+
+public:
+	CMesh* pMesh;
+	CShader* pShader;
+	bool animation = false;
+};
+
 class MeshData
 {
 private:
@@ -53,8 +66,12 @@ public:
 	FbxLoader*					m_pfbxLoader = NULL;
 
 	int							vertexnum;
-	int	m_time;
+	int							m_time;
 
+
+
+	int* cpIndex = nullptr;
+	XMFLOAT3* mControlPoint = nullptr;
 	vector<CTexturedVertex>		m_vertex;
 
 public:
@@ -76,4 +93,37 @@ public:
 
 	void SetAnimationStack(int nAnimationStack) override;
 	void LoadFbxModelFromFile(char* pstrFbxFileName);
+};
+
+class CFbxObjectFileLoadVer : public CGameObject
+{
+public:
+	CFbxObjectFileLoadVer();
+	CFbxObjectFileLoadVer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFbxFileName);
+	virtual ~CFbxObjectFileLoadVer();
+
+public:
+	vector<FbxSubMesh>			mFbxMesh;
+	vector<MeshInfo>			mMesh;
+
+	int							vertexnum;
+	int							m_time;
+
+public:
+	void LoadFbxModelFromFile(char* pstrFbxFileName);
+
+	void AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime);
+	void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void Animate(float fTimeElapsed) override;
+	void Update(double fTimeElapsed) override;
+	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+
+	static void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
+	static void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	virtual void ReleaseUploadBuffers();
+
+	void SetAnimationStack(int nAnimationStack) override;
 };

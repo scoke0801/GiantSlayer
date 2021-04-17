@@ -1,10 +1,19 @@
 #pragma once
 
+struct Joint
+{
+	string name;
+	int parentIndex;
+	XMFLOAT4X4 globalBindpose;
+
+};
+
 struct FbxSubMesh
 {
 	int nControlPoint;
 	int nPolygon;
 	int nDeformer;
+	XMFLOAT4X4 gTransform;
 
 	vector<int> mIndex;
 	vector<CTexturedVertex> mVertex;
@@ -14,6 +23,11 @@ struct FbxSubMesh
 	double* mClusterWeight;
 	XMFLOAT3* mClusterDef;
 };
+
+/*
+ControlPoint = Mesh Vertics
+Vertex = Triangles Vertics
+*/
 
 class FbxLoader
 {

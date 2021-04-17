@@ -7,18 +7,6 @@
 // FbxUtils
 //////////////////////////////////////////////////////////////////////////////////////
 
-class MeshInfo
-{
-public:
-	MeshInfo() { }
-	~MeshInfo() { };
-
-public:
-	CMesh*		pMesh;
-	CShader*	pShader;
-	bool animation = false;
-};
-
 XMFLOAT4X4 FbxMatrixToXmFloat4x4Matrix(FbxAMatrix* pfbxmtxSource)
 {
 	FbxVector4 S = pfbxmtxSource->GetS();
@@ -105,6 +93,7 @@ FbxAMatrix ComputeClusterDeformation(FbxMesh* pfbxMesh, FbxCluster* pfbxCluster,
 		pfbxCluster->GetTransformLinkMatrix(fbxmtxBindPoseBoneToRoot);
 
 		FbxAMatrix fbxmtxAnimatedBoneToRoot = pfbxCluster->GetLink()->EvaluateGlobalTransform(fbxCurrentTime); //Cluster Link Node Global Transform
+		// ㄴ애니메이션 변경시마다 달라지는값
 
 		fbxmtxVertexTransform = fbxmtxAnimatedBoneToRoot * fbxmtxBindPoseBoneToRoot.Inverse() * fbxmtxBindPoseMeshToRoot * fbxmtxGeometryOffset;
 	}
@@ -159,7 +148,7 @@ void ComputeLinearDeformation(FbxMesh* pfbxMesh, FbxTime& fbxCurrentTime, FbxVec
 	{
 		FbxSkin* pfbxSkinDeformer = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
 		int nClusters = pfbxSkinDeformer->GetClusterCount();
-		cout << nClusters << endl;
+		//cout << nClusters << endl;
 		for (int j = 0; j < nClusters; j++)
 		{
 			FbxCluster* pfbxCluster = pfbxSkinDeformer->GetCluster(j);
@@ -377,6 +366,7 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		int indicecount = 0;
 
 		for (int i = 0; i < numPG; i++) {
+			//cpIndex[i] = 
 			for (int j = 0; j < 3; j++) {
 				int indexCP = pfbxMesh->GetPolygonVertex(i, j);
 
@@ -399,8 +389,6 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		}
 
 		pMeshinfo->pShader = tempShader;
-
-		//pMeshinfo->pShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 		pfbxMesh->SetUserDataPtr(pMeshinfo);
 
@@ -556,12 +544,14 @@ void CFbxObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCame
 	OnPrepareRender();
 
 	FbxAMatrix fbxf4x4World = XmFloat4x4MatrixToFbxMatrix(m_xmf4x4World);
+
 	if (m_pfbxScene) DrawFbxMesh(pd3dCommandList, m_pfbxScene->GetRootNode(), m_pAnimationController->GetCurrentTime(), fbxf4x4World);
 }
 
 void CFbxObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
 {
 	XMFLOAT4X4 xmf4x4World;
+
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
 }
@@ -626,4 +616,223 @@ void CFbxObject::LoadFbxModelFromFile(char* pstrFbxFileName)
 	}
 
 	file.close();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CFbxObjectFileLoadVer::CFbxObjectFileLoadVer()
+{
+	m_xmf3Position = { 0, 0, 0 };
+	m_xmf3Velocity = { 0, 0, 0 };
+	m_time = 0;
+
+	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
+}
+
+CFbxObjectFileLoadVer::CFbxObjectFileLoadVer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFbxFileName)
+{
+	LoadFbxModelFromFile(pstrFbxFileName);
+
+	m_time = 0;
+
+	for (int i = 0; i < mFbxMesh.size(); i++) {
+		MeshInfo pMeshinfo;
+
+		int* tempArray = new int[mFbxMesh[i].nControlPoint];
+		
+		for (int j = 0; j < mFbxMesh[i].nControlPoint; j++) {
+			tempArray[j] = mFbxMesh[i].mIndex[j];
+		}
+		pMeshinfo.pMesh = new CMeshFbxTextured(pd3dDevice, pd3dCommandList, mFbxMesh[i].nControlPoint, mFbxMesh[i].nPolygon * 3, tempArray);
+		
+
+		CShader* tempShader = new CShader();
+		tempShader = CShaderHandler::GetInstance().GetData("Object");
+		pMeshinfo.pShader = tempShader;
+
+		pMeshinfo.pMesh->m_pxmf4MappedPositions = new CTexturedVertex[mFbxMesh[i].nControlPoint];
+
+		for (int j = 0; j < mFbxMesh[i].nControlPoint; j++) {
+			pMeshinfo.pMesh->m_pxmf4MappedPositions[i].m_xmf3Position = mFbxMesh[i].mVertex[j].m_xmf3Position;
+			pMeshinfo.pMesh->m_pxmf4MappedPositions[i].m_xmf2TexCoord = mFbxMesh[i].mVertex[j].m_xmf2TexCoord;
+			pMeshinfo.pMesh->m_pxmf4MappedPositions[i].m_xmf3Normal = mFbxMesh[i].mVertex[j].m_xmf3Normal;
+		}
+		mMesh.push_back(pMeshinfo);
+	}
+}
+
+CFbxObjectFileLoadVer::~CFbxObjectFileLoadVer()
+{
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void CFbxObjectFileLoadVer::LoadFbxModelFromFile(char* pstrFbxFileName)
+{
+	ifstream file(pstrFbxFileName);
+
+	string buffer;
+	//int num = 0;
+	//vector<CTexturedVertex> tempVector;
+
+	int nMesh = 0;
+
+	getline(file, buffer);
+	if (buffer == "[MeshCount]") {
+		getline(file, buffer);
+		nMesh = atoi(buffer.c_str());
+	}
+
+	for (int i = 0; i < nMesh; i++) {
+		FbxSubMesh tempMesh;
+
+		getline(file, buffer);
+		if (buffer == "[MeshInfo]") {
+			getline(file, buffer, ' '); tempMesh.nControlPoint = atoi(buffer.c_str());
+			getline(file, buffer, ' '); tempMesh.nPolygon = atoi(buffer.c_str());
+			getline(file, buffer); tempMesh.nDeformer = atoi(buffer.c_str());
+		}
+		getline(file, buffer);
+		if (buffer == "[Vertex]") {
+			for (int j = 0; j < tempMesh.nPolygon * 3; j++) {
+				int tempIndex;
+				XMFLOAT3 tempPos, tempNormal;
+				XMFLOAT2 tempUv;
+
+				getline(file, buffer, ' '); tempIndex = atoi(buffer.c_str());
+				getline(file, buffer, ' '); tempPos.x = atof(buffer.c_str());
+				getline(file, buffer, ' '); tempPos.y = atof(buffer.c_str());
+				getline(file, buffer, ' '); tempPos.z = atof(buffer.c_str());
+				getline(file, buffer, ' '); tempNormal.x = atof(buffer.c_str());
+				getline(file, buffer, ' '); tempNormal.y = atof(buffer.c_str());
+				getline(file, buffer, ' '); tempNormal.z = atof(buffer.c_str());
+				getline(file, buffer, ' '); tempUv.x = atof(buffer.c_str());
+				getline(file, buffer);		tempUv.y = atof(buffer.c_str());
+
+				CTexturedVertex tempVertex = { tempPos, tempUv, tempNormal };
+
+				//cout << tempIndex << " " << tempPos.x << endl;
+
+				tempMesh.mIndex.push_back(tempIndex);
+				tempMesh.mVertex.push_back(tempVertex);
+			}
+		}
+
+		cout << "[메쉬" << i << "로드]" << tempMesh.nControlPoint << " " << tempMesh.nPolygon << " " << tempMesh.nDeformer << endl;
+
+		mFbxMesh.push_back(tempMesh);
+	}
+
+	file.close();
+}
+
+void CFbxObjectFileLoadVer::AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime)
+{
+}
+
+void CFbxObjectFileLoadVer::DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	for (int i = 0; i < mMesh.size(); i++) {
+		mMesh[i].pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		mMesh[i].pShader->Render(pd3dCommandList, NULL);
+		mMesh[i].pMesh->Render(pd3dCommandList);
+	}
+}
+
+void CFbxObjectFileLoadVer::Animate(float fTimeElapsed)
+{
+}
+
+void CFbxObjectFileLoadVer::Update(double fTimeElapsed)
+{
+	static float MaxVelocityXZ = 120.0f;
+	static float MaxVelocityY = 120.0f;
+	static float Friction = 50.0f;
+
+	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Gravity, fTimeElapsed, false));
+	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ = MaxVelocityXZ * fTimeElapsed;
+	if (fLength > MaxVelocityXZ)
+	{
+		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+	}
+	float fMaxVelocityY = MaxVelocityY * fTimeElapsed;
+	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+	if (fLength > MaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
+
+	Move(m_xmf3Velocity);
+
+	fLength = Vector3::Length(m_xmf3Velocity);
+	float fDeceleration = (Friction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+
+	//cout << fTimeElapsed << endl;
+
+	/*m_time++;
+	if (m_time > 5) {
+		Animate(0.15);
+		m_time = 0;
+	}*/
+}
+
+void CFbxObjectFileLoadVer::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	OnPrepareRender();
+	/*
+	FbxAMatrix fbxmtxNodeToRoot = pNode->EvaluateGlobalTransform(fbxCurrentTime);
+			FbxAMatrix fbxmtxGeometryOffset = GetGeometricOffsetTransform(pNode);
+
+			int numCP = pfbxMesh->GetControlPointsCount();
+
+			if (numCP > 0)
+			{
+				FbxAMatrix fbxmtxTransform = fbxmtxWorld;
+				int nSkinDeformers = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
+				if (nSkinDeformers == 0) fbxmtxTransform = fbxmtxWorld * fbxmtxNodeToRoot * fbxmtxGeometryOffset;
+
+				//CFbxObject::UpdateShaderVariable(pd3dCommandList, &fbxmtxTransform);
+				//&FbxMatrixToXmFloat4x4Matrix(&fbxmtxTransform)
+
+				MeshInfo* pMeshinfo = (MeshInfo*)pfbxMesh->GetUserDataPtr();
+				if (pMeshinfo->pShader) pMeshinfo->pShader->UpdateShaderVariable(pd3dCommandList, &FbxMatrixToXmFloat4x4Matrix(&fbxmtxTransform));
+				if (pMeshinfo->pShader) pMeshinfo->pShader->Render(pd3dCommandList, NULL);
+				if (pMeshinfo->pMesh) pMeshinfo->pMesh->Render(pd3dCommandList);
+			}
+	*/
+
+	for (int i = 0; i < mMesh.size(); i++) {
+		if (mMesh[i].animation == false) {
+			mMesh[i].pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+			mMesh[i].pShader->Render(pd3dCommandList, NULL);
+			mMesh[i].pMesh->Render(pd3dCommandList);
+		}
+		else {
+
+		}
+	}
+}
+
+void CFbxObjectFileLoadVer::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
+{
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
+}
+
+void CFbxObjectFileLoadVer::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+
+}
+
+void CFbxObjectFileLoadVer::ReleaseUploadBuffers()
+{
+}
+
+void CFbxObjectFileLoadVer::SetAnimationStack(int nAnimationStack)
+{
+	//m_pAnimationController->SetAnimationStack(m_pfbxScene, nAnimationStack);
 }
