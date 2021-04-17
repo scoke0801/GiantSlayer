@@ -1312,7 +1312,6 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			pVertices[i].m_xmf3Normal = normals[zIndex + j][xIndex + i % 5];
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9); 
 		}
-		
 	}
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
@@ -1328,6 +1327,132 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 CTerrainMesh::~CTerrainMesh()
 {
 }
+ 
+CBindingTerrainMesh::CBindingTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	int verticesCount)
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = verticesCount;
+	m_Vertices = new CTerrainVertex[m_nVertices]; 
+	m_CurrentVertexIndex = 0;
+
+	m_nStride = sizeof(CTerrainVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST;
+}
+
+CBindingTerrainMesh::~CBindingTerrainMesh()
+{
+}
+
+void CBindingTerrainMesh::CreateWallMesh(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList, int heights[25],
+	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+	int xNomalPos, int zNormalPos) 
+{
+	int WidthBlock_Count = 9, DepthBlock_Count = 9;
+	int WidthBlock_Index = 257, DepthBlock_Index = 257;
+	int xStart = 0, zStart = 0;
+
+	m_xmf4Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	m_nWidth = WidthBlock_Count + 1;
+	m_nDepth = DepthBlock_Count + 1;
+	  
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+	for (int i = 0, j = 0, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2, ++j)
+	{
+		for (int x = xStart; x < (xStart + m_nWidth - 1); x += 2, i++)
+		{
+			if (i >= 25) break;
+
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(x / 2, heights[i], z / 2);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Normal = normals[zNormalPos][xNomalPos];
+			m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
+			++m_CurrentVertexIndex;
+		}
+	} 
+}
+
+void CBindingTerrainMesh::CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	bool xZero, bool zZero,
+	int* heights,
+	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+	int xNomalPos, int zNormalPos) 
+{
+	int WidthBlock_Count = 9, DepthBlock_Count = 9;
+	int WidthBlock_Index = 257, DepthBlock_Index = 257;
+	int xStart = 0, zStart = 0;
+
+	m_xmf4Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	m_nWidth = WidthBlock_Count + 1;
+	m_nDepth = DepthBlock_Count + 1;
+	  
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+	for (int i = 0, j = 0, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2, ++j)
+	{
+		for (int x = xStart; x < (xStart + m_nWidth - 1); x += 2, i++)
+		{
+			if (i >= 25) break;
+
+			if (xZero) {
+				m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(xStart, heights[i], z / 2);
+			}
+			else if (zZero) {
+				m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(x / 2, heights[i], zStart);
+			}
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Normal = normals[zNormalPos][xNomalPos];
+			m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
+			++m_CurrentVertexIndex; 
+		}
+	} 
+}
+void CBindingTerrainMesh::CreateGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	int xIndex, int zIndex,
+	int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]) 
+{
+	int WidthBlock_Count = 9, DepthBlock_Count = 9;
+	int WidthBlock_Index = 257, DepthBlock_Index = 257;
+	int xStart = 0, zStart = 0;
+
+	m_xmf4Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	m_nWidth = WidthBlock_Count + 1;
+	m_nDepth = DepthBlock_Count + 1; 
+	 
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+	for (int i = 0, j = 4, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2, --j)
+	{
+		for (int x = xStart; x < (xStart + m_nWidth - 1); x += 2, i++)
+		{
+			if (i >= 25) break;
+
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(x / 2, heights[zIndex + j][xIndex + i % 5], z / 2);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Normal = normals[zIndex + j][xIndex + i % 5];
+			m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9); 
+			++m_CurrentVertexIndex;
+		}
+	} 
+}
+
+void CBindingTerrainMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_Vertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	delete[] m_Vertices;
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //

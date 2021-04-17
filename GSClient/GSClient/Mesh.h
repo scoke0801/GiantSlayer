@@ -367,7 +367,7 @@ enum class MapMeshHeightType
 	DownRidge,
 };
 class CTerrainMesh : public CMesh
-{
+{ 
 protected:
 	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
 
@@ -385,7 +385,7 @@ public:
 		int* heights,
 		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
 		int xNomalPos, int zNormalPos);
-
+	 
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		int x_Index, int z_Index,  
 		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
@@ -393,4 +393,40 @@ public:
 
 	~CTerrainMesh();
 };
- 
+  
+class CBindingTerrainMesh : public CMesh
+{
+private:
+	CTerrainVertex*	m_Vertices; 
+	int				m_CurrentVertexIndex = 0;
+
+protected:
+	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+
+	int m_nWidth;
+	int m_nDepth;
+
+public:
+	CBindingTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int verticesCount);
+	~CBindingTerrainMesh();
+
+public:
+	// 寒 积己	 
+	void CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		int heights[25],
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		int xNomalPos, int zNormalPos);
+	// 寒 积己	 
+	void CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		bool xZero, bool zZero,
+		int* heights,
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		int xNomalPos, int zNormalPos);
+
+	void CreateGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		int x_Index, int z_Index,
+		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
+
+	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+};
