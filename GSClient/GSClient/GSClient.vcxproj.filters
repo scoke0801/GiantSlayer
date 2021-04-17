@@ -7,9 +7,6 @@
     <FxCompile Include="Shaders\Light.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\SceneTH.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\TitleScene.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
@@ -20,6 +17,9 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\ShaderJH.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShaderTH.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
@@ -99,9 +99,6 @@
     <ClCompile Include="EnemyState.cpp">
       <Filter>State</Filter>
     </ClCompile>
-    <ClCompile Include="FbxSceneContext.cpp">
-      <Filter>FBXLoader</Filter>
-    </ClCompile>
     <ClCompile Include="FBXLoader.cpp">
       <Filter>FBXLoader</Filter>
     </ClCompile>
@@ -128,9 +125,18 @@
     </ClCompile>
     <ClCompile Include="ShaderHandler.cpp">
       <Filter>Handler</Filter>
-    </ClCompile>
+    </ClCompile> 
     <ClCompile Include="Colider.cpp">
       <Filter>GameObject\Colider</Filter>
+    </ClCompile> 
+    <ClCompile Include="FbxLoader.cpp">
+      <Filter>FBXLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="FbxObject.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneExport.cpp">
+      <Filter>Scene</Filter> 
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -221,9 +227,6 @@
     <ClInclude Include="EnemyState.h">
       <Filter>State</Filter>
     </ClInclude>
-    <ClInclude Include="FbxSceneContext.h">
-      <Filter>FBXLoader</Filter>
-    </ClInclude>
     <ClInclude Include="FBXLoader.h">
       <Filter>FBXLoader</Filter>
     </ClInclude>
@@ -258,9 +261,20 @@
     </ClInclude>
     <ClInclude Include="..\..\GSServer\GSServer\protocol.h">
       <Filter>Communicate</Filter>
-    </ClInclude>
+    </ClInclude> 
     <ClInclude Include="Colider.h">
       <Filter>GameObject\Colider</Filter>
+    </ClInclude> 
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="FrameResource.h" />
+    <ClInclude Include="FbxLoader.h">
+      <Filter>FBXLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="FbxObject.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneExport.h">
+      <Filter>Scene</Filter> 
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

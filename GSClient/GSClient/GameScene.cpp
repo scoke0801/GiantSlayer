@@ -18,6 +18,7 @@ CGameScene::CGameScene()
 
 CGameScene::~CGameScene()
 {
+
 }
 
 void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
@@ -165,6 +166,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
 	//CMeshFbx* pTowerMeshTex = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Medieval tower_Mid.fbx");
+
 	// 지형 메쉬 
 	//CTerrainMesh* pPlaneMeshTex = new CTerrainMesh(pd3dDevice, pd3dCommandList, 0, 0, 1000, 1000, 10, 10); 
 

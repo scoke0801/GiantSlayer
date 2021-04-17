@@ -10,7 +10,12 @@
 #define VK_2 0x32
 #define VK_3 0x33
 #define VK_4 0x34
-#define VK_5 0x35 
+#define VK_5 0x35
+#define VK_6 0x36 
+#define VK_7 0x37 
+#define VK_8 0x38 
+#define VK_9 0x39
+
 
 #define VK_U 0x55
 #define VK_I 0x49
@@ -26,6 +31,10 @@ struct GameInputs
 	bool KEY_3 = false;
 	bool KEY_4 = false;
 	bool KEY_5 = false;
+	bool KEY_6 = false;
+	bool KEY_7 = false;
+	bool KEY_8 = false;
+	bool KEY_9 = false;
 
 	bool KEY_W = false;
 	bool KEY_A = false;
@@ -40,6 +49,7 @@ struct GameInputs
 	bool KEY_F3 = false;
 	bool KEY_F4 = false;
 	bool KEY_F5 = false;
+	bool KEY_F9 = false;
 
 	bool KEY_ADD = false;
 	bool KEY_SUBTRACT = false;

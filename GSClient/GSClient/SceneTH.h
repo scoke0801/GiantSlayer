@@ -1,48 +1,135 @@
 #pragma once
 #include "Scene.h"
-#include "GameObject.h"
-#include "Player.h"
+
+class CShader;
+class CGameObject;
+class CFbxObject;
+class CCamera;
+class CPlayer;
+class UI;
+class HelpTextUI;
+class CTerrain;
 
 class CSceneTH : public CScene
 {
 private:
-	ID3D12RootSignature*	m_pd3dGraphicsRootSignature = NULL;
+	bool						m_isPlayerSelected = true;
 
-	//배치(Batch) 처리를 하기 위하여 씬을 셰이더들의 리스트로 표현한다. 
-	CGameObject**			m_ppObjects = NULL;
-	CPlayer**				m_ppPlayers = NULL;
+protected:
+	vector<CGameObject*>		m_Objects;
+	vector<CGameObject*>		m_BillboardObjects;
 
-	CCamera**				m_Cameras;
-	CCamera*				m_CurrentCamera = nullptr;
+	CGameObject* m_Mirror = nullptr;
+	CPlayer* m_Player = nullptr;
 
-	int						m_nObjects = 0;
-	int						m_nPlayers = 0;
+	CPlayer* m_Players[MAX_USER];
 
-	POINT					m_LastMousePos;
-	 
+	vector<UI*>					m_UIs;
+	vector<UI*>					m_HPGauges;
+	vector<UI*>					m_SPGauges;
+	HelpTextUI* m_HelpTextUI;
+
+	CSkyBox* m_Skybox;
+	CTerrain* m_Terrain;
+
+	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
+
+	CCamera** m_Cameras;
+	CCamera* m_CurrentCamera = nullptr;
+	CCamera* m_MinimapCamera = nullptr;
+	CCamera* m_MirrorCamera = nullptr;
+private:
+	POINT						m_LastMousePos;
+
+	ID3D12DescriptorHeap* m_pd3dBasicSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap* m_pd3dMonsterDescriptorHeap = nullptr;
+
+private:	// about Meterail
+	MATERIALS* m_pMaterials = NULL;
+
+	ID3D12Resource* m_pd3dcbMaterials = NULL;
+	MATERIAL* m_pcbMappedMaterials = NULL;
+
+private:	// about Lights
+	LIGHTS* m_pLights = NULL;
+
+	ID3D12Resource* m_pd3dcbLights = NULL;
+	LIGHTS* m_pcbMappedLights = NULL;
+
+private:	// about Minimap
+	ID3D12Resource* m_pd3dMinimapTex = NULL;
+	UI* m_MinimapArrow;
+
+private:
+	ID3D12Resource* m_pd3dMirrorTex = NULL;
+
+private:	// about SceneInfo
+	ID3D12Resource* m_pd3dcbSceneInfo = NULL;
+	CB_GAMESCENE_FRAME_DATA* m_pcbMappedSceneFrameData = NULL;
+
 public:
 	CSceneTH();
 	~CSceneTH();
 
-	virtual void Update(double elapsedTime) override;
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
-	 
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override;
-	virtual void ReleaseUploadBuffers() override;
-	void ReleaseObjects();
 
-	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override;
+	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height);
+	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void BuildFbxManager() override;
+
+	void ReleaseObjects();
+public:
+	virtual void Update(double elapsedTime) override;
+	void AnimateObjects(float fTimeElapsed);
+
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
+	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
+
+public:
+	virtual void Communicate(SOCKET& sock) override;
+	virtual void LoginToServer()  override;
+	virtual void LogoutToServer() override;
+public:
+	virtual void ProcessInput();
+
+	virtual void OnMouseDown(WPARAM btnState, int x, int y) override;
+	virtual void OnMouseUp(WPARAM btnState, int x, int y)	override;
+	virtual void OnMouseMove(WPARAM btnState, int x, int y) override;
+
+public:
+	virtual void ReleaseUploadBuffers() override;
 
 	//그래픽 루트 시그너쳐를 생성한다.
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
-	virtual ID3D12RootSignature* GetGraphicsRootSignature() override;
+	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
 
-public:
-	// about Keyboard process
-	virtual void ProcessInput();
+private:
+	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
+	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
+	void BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
-	// about Mouse process
-	virtual void OnMouseDown(WPARAM btnState, int x, int y) override;
-	virtual void OnMouseUp(WPARAM btnState, int x, int y)	override;
-	virtual void OnMouseMove(WPARAM btnState, int x, int y) override; 
+	void BuildMinimapResource(ID3D12Device* pd3dDevice);
+	void BuildMirrorResource(ID3D12Device* pd3dDevice);
+
+private:
+	void BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };

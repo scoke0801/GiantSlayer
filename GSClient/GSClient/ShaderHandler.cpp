@@ -41,7 +41,7 @@ void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignatu
 		pFBXFeatureShaderRight->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
 		pFBXFeatureShaderRight->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSFBXFeatureShader");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ){
 		pFBXShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 		pFBXShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting"); 
 
@@ -51,6 +51,17 @@ void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignatu
 		pFBXFeatureShaderRight->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 		pFBXFeatureShaderRight->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSFBXFeatureShader");
 	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pFBXShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
+		pFBXShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSTexturedLighting");
+
+		pFBXFeatureShaderLeft->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
+		pFBXFeatureShaderLeft->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFBXFeatureShader");
+
+		pFBXFeatureShaderRight->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
+		pFBXFeatureShaderRight->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFBXFeatureShader");
+	}
+
 	pFBXShader->CreateInputLayout(ShaderTypes::Textured);
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pFBXShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -78,12 +89,19 @@ void CShaderHandler::CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignatur
 		pUiHelpTextShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VS_UI_Textured");
 		pUiHelpTextShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PS_UI_HelpText");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pUiShader->CreateVertexShader(L"Shaders/ShaderYJ.hlsl", "VS_UI_Textured");
 		pUiShader->CreatePixelShader(L"Shaders/ShaderYJ.hlsl", "PS_UI_Textured");	
 		
 		pUiHelpTextShader->CreateVertexShader(L"Shaders/ShaderYJ.hlsl", "VS_UI_Textured");
 		pUiHelpTextShader->CreatePixelShader(L"Shaders/ShaderYJ.hlsl", "PS_UI_HelpText");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pUiShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VS_UI_Textured");
+		pUiShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PS_UI_Textured");
+
+		pUiHelpTextShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VS_UI_Textured");
+		pUiHelpTextShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PS_UI_HelpText");
 	}
 	pUiShader->CreateInputLayout(ShaderTypes::Textured);
 	pUiShader->CreateUIShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -101,9 +119,13 @@ void CShaderHandler::CreatePlayerShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		pPlayerShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
 		pPlayerShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
 	}
-	else{
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pPlayerShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 		pPlayerShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pPlayerShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
+		pPlayerShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSTexturedLighting");
 	}
 	pPlayerShader->CreateInputLayout(ShaderTypes::Textured);
 	pPlayerShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -118,9 +140,13 @@ void CShaderHandler::CreateMinmapShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		pMinimapShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSMinimap");
 		pMinimapShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSMinimap");
 	}
-	else{
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pMinimapShader->CreateVertexShader(L"Shaders/ShaderYJ.hlsl", "VSMinimap");
 		pMinimapShader->CreatePixelShader(L"Shaders/ShaderYJ.hlsl", "PSMinimap");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pMinimapShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VSMinimap");
+		pMinimapShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PSMinimap");
 	}
 	pMinimapShader->CreateInputLayout(ShaderTypes::Textured);
 	pMinimapShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -134,10 +160,14 @@ void CShaderHandler::CreateSkyboxShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTextured");
 		pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTextured");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTextured");
 		pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTextured");
-	}		
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTextured");
+		pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSTextured");
+	}
 	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("SkyBox", pSkyBoxShader);
@@ -152,11 +182,17 @@ void CShaderHandler::CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 		pTerrainShader->CreateDomainShader(L"Shaders\\ShaderJH.hlsl", "DSTerrainTessellation");
 		pTerrainShader->CreateHullShader(L"Shaders\\ShaderJH.hlsl", "HSTerrainTessellation");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pTerrainShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTerrainTessellation");
 		pTerrainShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTerrainTessellation");
 		pTerrainShader->CreateDomainShader(L"Shaders\\ShaderYJ.hlsl", "DSTerrainTessellation");
 		pTerrainShader->CreateHullShader(L"Shaders\\ShaderYJ.hlsl", "HSTerrainTessellation");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pTerrainShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTerrainTessellation");
+		pTerrainShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSTerrainTessellation");
+		pTerrainShader->CreateDomainShader(L"Shaders\\ShaderTH.hlsl", "DSTerrainTessellation");
+		pTerrainShader->CreateHullShader(L"Shaders\\ShaderTH.hlsl", "HSTerrainTessellation");
 	}
 	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
 	pTerrainShader->CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature); 
@@ -170,9 +206,13 @@ void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12Roo
 		pShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
 		pShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTexturedLighting");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 		pShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSTexturedLighting");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
+		pShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSTexturedLighting");
 	}
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -188,10 +228,15 @@ void CShaderHandler::CreateBillboardShader(ID3D12Device* pd3dDevice, ID3D12RootS
 		pBillboardShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSBillboard");
 		pBillboardShader->CreateGeometryShader(L"Shaders\\ShaderJH.hlsl", "GSBillboard");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pBillboardShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSBillboard");
 		pBillboardShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSBillboard");
 		pBillboardShader->CreateGeometryShader(L"Shaders\\ShaderYJ.hlsl", "GSBillboard");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pBillboardShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSBillboard");
+		pBillboardShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSBillboard");
+		pBillboardShader->CreateGeometryShader(L"Shaders\\ShaderTH.hlsl", "GSBillboard");
 	}
 	pBillboardShader->CreateInputLayout(ShaderTypes::Billboard);
 	pBillboardShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);	
@@ -205,9 +250,13 @@ void CShaderHandler::CreateDoorWallShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 		pDoorWallShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
 		pDoorWallShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSDoorWall");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pDoorWallShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 		pDoorWallShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSDoorWall");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pDoorWallShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
+		pDoorWallShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSDoorWall");
 	}
 	pDoorWallShader->CreateInputLayout(ShaderTypes::Textured);
 	pDoorWallShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -222,9 +271,13 @@ void CShaderHandler::CreateBridgeShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		pBridgeShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
 		pBridgeShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSBridgeLight");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pBridgeShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 		pBridgeShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSBridgeLight");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pBridgeShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
+		pBridgeShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSBridgeLight");
 	}
 	pBridgeShader->CreateInputLayout(ShaderTypes::Textured);
 	pBridgeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -239,9 +292,13 @@ void CShaderHandler::CreatePuzzleShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		pPuzzleShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
 		pPuzzleShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSPuzzle");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pPuzzleShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 		pPuzzleShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSPuzzle");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pPuzzleShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
+		pPuzzleShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSPuzzle");
 	}
 	pPuzzleShader->CreateInputLayout(ShaderTypes::Textured);
 	pPuzzleShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
@@ -256,9 +313,13 @@ void CShaderHandler::CreateSignShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 		pSignShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
 		pSignShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSSign");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pSignShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 		pSignShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSSign");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pSignShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
+		pSignShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSSign");
 	}
 	pSignShader->CreateInputLayout(ShaderTypes::Textured);
 	pSignShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
@@ -273,9 +334,13 @@ void CShaderHandler::CreateTreeShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 		pTreeShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
 		pTreeShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSFBXFeatureShader");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pTreeShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 		pTreeShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSFBXFeatureShader");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pTreeShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
+		pTreeShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFBXFeatureShader");
 	}
 	pTreeShader->CreateInputLayout(ShaderTypes::Textured);
 	pTreeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true); 
@@ -290,9 +355,13 @@ void CShaderHandler::CreateMirrorShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		pMirrorShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTexturedLighting");
 		pMirrorShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSMirror");
 	}
-	else {
+	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pMirrorShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSTexturedLighting");
 		pMirrorShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSMirror");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pMirrorShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
+		pMirrorShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSMirror");
 	}
 	pMirrorShader->CreateInputLayout(ShaderTypes::Textured);
 	pMirrorShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
