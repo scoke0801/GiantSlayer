@@ -3,6 +3,9 @@
 class CTerrain
 {
 private:
+	CBindingTerrainMesh* m_BindTerrainMesh;
+
+private:
 	int m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 	XMFLOAT3 m_Normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 
