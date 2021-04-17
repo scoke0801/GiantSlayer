@@ -195,7 +195,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x200);
 	m_Player->SetMesh(golemMesh);
-	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+	m_Player->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{ 0,0,0 });
 
 	CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
 	pfbxTestObject->SetAnimationStack(0);

@@ -83,7 +83,7 @@ public:
 	void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, FbxTime& fbxCurrentTime, FbxAMatrix& fbxmtxWorld);
 	
 	void Animate(float fTimeElapsed) override;
-	void Update(double fTimeElapsed) override;
+	void Update(float fTimeElapsed) override;
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
 
 	static void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
@@ -117,7 +117,7 @@ public:
 	void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void Animate(float fTimeElapsed) override;
-	void Update(double fTimeElapsed) override;
+	void Update(float fTimeElapsed) override;
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
 
 	static void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);

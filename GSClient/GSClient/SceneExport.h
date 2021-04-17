@@ -22,7 +22,7 @@ protected:
 	CGameObject* m_Mirror = nullptr;
 	CPlayer* m_Player = nullptr;
 
-	CPlayer* m_Players[MAX_USER];
+	CPlayer* m_Players[MAX_PLAYER];
 
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;

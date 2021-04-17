@@ -500,7 +500,7 @@ void CFbxObject::Animate(float fTimeElapsed)
 	}
 }
 
-void CFbxObject::Update(double fTimeElapsed)
+void CFbxObject::Update(float fTimeElapsed)
 {
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
@@ -745,7 +745,7 @@ void CFbxObjectFileLoadVer::Animate(float fTimeElapsed)
 {
 }
 
-void CFbxObjectFileLoadVer::Update(double fTimeElapsed)
+void CFbxObjectFileLoadVer::Update(float fTimeElapsed)
 {
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
