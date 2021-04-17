@@ -1367,7 +1367,7 @@ void CBindingTerrainMesh::CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12Graphic
 		{
 			if (i >= 25) break;
 
-			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(shift.x + x / 2, heights[i], shift.z + z / 2);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(x / 2, heights[i], z / 2);
 			m_Vertices[m_CurrentVertexIndex].m_xmf3Normal = normals[zNormalPos][xNomalPos];
 			m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
 			++m_CurrentVertexIndex;
@@ -1400,10 +1400,10 @@ void CBindingTerrainMesh::CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12Graphic
 			if (i >= 25) break;
 
 			if (xZero) {
-				m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(shift.x + xStart, heights[i], shift.z + z / 2);
+				m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(xStart, heights[i], z / 2);
 			}
 			else if (zZero) {
-				m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(shift.x + x / 2, heights[i], shift.z + zStart);
+				m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(x / 2, heights[i],  zStart);
 			}
 			m_Vertices[m_CurrentVertexIndex].m_xmf3Normal = normals[zNormalPos][xNomalPos];
 			m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
@@ -1434,7 +1434,7 @@ void CBindingTerrainMesh::CreateGridMesh(ID3D12Device* pd3dDevice, ID3D12Graphic
 		{
 			if (i >= 25) break;
 
-			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(shift.x + x / 2, heights[zIndex + j][xIndex + i % 5], shift.z + z / 2);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(shift.x + x / 2, heights[zIndex + j][xIndex + i % 5], shift.z +z / 2);
 			m_Vertices[m_CurrentVertexIndex].m_xmf3Normal = normals[zIndex + j][xIndex + i % 5];
 			m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9); 
 			++m_CurrentVertexIndex;
@@ -1454,9 +1454,6 @@ void CBindingTerrainMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	delete[] m_Vertices;
 }
-
-
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 CDoorMesh::CDoorMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,

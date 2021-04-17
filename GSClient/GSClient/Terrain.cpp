@@ -71,8 +71,8 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	pObject->SetShader(pShader); 
 	pObject->SetTextureIndex(0x01); 
 	pObject->SetMesh(m_BindTerrainMesh);
+	//pObject->Scale(200.0f, 1.0f, 200.0f); 
 	pObject->Scale(200.0f, 1.0f, 200.0f);
-	m_Objects.clear();
 	m_Objects.push_back(std::move(pObject));
 }
 
