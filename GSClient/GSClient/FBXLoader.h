@@ -20,6 +20,8 @@ struct FbxSubMesh
 
 	//vector<double> mClusterWeight;
 	//vector<XMFLOAT3> mClusterDef;
+	XMFLOAT3* mCP;
+
 	double* mClusterWeight;
 	XMFLOAT3* mClusterDef;
 };

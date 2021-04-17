@@ -138,17 +138,18 @@ void ComputeLinearDeformation(FbxMesh* pfbxMesh, FbxTime& fbxCurrentTime, FbxVec
 	::memset(pfSumOfClusterWeights, 0, nVertices * sizeof(double));
 
 	FbxCluster::ELinkMode nClusterMode = ((FbxSkin*)pfbxMesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0)->GetLinkMode();
-	if (nClusterMode == FbxCluster::eAdditive)
+
+	/*if (nClusterMode == FbxCluster::eAdditive)
 	{
-		//for (int i = 0; i < nVertices; ++i) pfbxmtxClusterDeformations[i].SetIdentity();
-	}
+		for (int i = 0; i < nVertices; ++i) pfbxmtxClusterDeformations[i].SetIdentity();
+	}*/
 
 	int nSkinDeformers = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
 	for (int i = 0; i < nSkinDeformers; i++)
 	{
 		FbxSkin* pfbxSkinDeformer = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
 		int nClusters = pfbxSkinDeformer->GetClusterCount();
-		//cout << nClusters << endl;
+
 		for (int j = 0; j < nClusters; j++)
 		{
 			FbxCluster* pfbxCluster = pfbxSkinDeformer->GetCluster(j);
@@ -169,37 +170,42 @@ void ComputeLinearDeformation(FbxMesh* pfbxMesh, FbxTime& fbxCurrentTime, FbxVec
 				FbxAMatrix fbxmtxInfluence = fbxmtxClusterDeformation;
 				MatrixScale(fbxmtxInfluence, fWeight);
 
-				if (nClusterMode == FbxCluster::eAdditive)
+				MatrixAdd(pfbxmtxClusterDeformations[nIndex], fbxmtxInfluence);
+				pfSumOfClusterWeights[nIndex] += fWeight;
+
+				/*if (nClusterMode == FbxCluster::eAdditive)
 				{
-					//MatrixAddToDiagonal(fbxmtxInfluence, 1.0 - fWeight);
-				//	pfbxmtxClusterDeformations[nIndex] = fbxmtxInfluence * pfbxmtxClusterDeformations[nIndex];
-				//	pfSumOfClusterWeights[nIndex] = 1.0;
+					MatrixAddToDiagonal(fbxmtxInfluence, 1.0 - fWeight);
+					pfbxmtxClusterDeformations[nIndex] = fbxmtxInfluence * pfbxmtxClusterDeformations[nIndex];
+					pfSumOfClusterWeights[nIndex] = 1.0;
 				}
 				else
 				{
 					MatrixAdd(pfbxmtxClusterDeformations[nIndex], fbxmtxInfluence);
 					pfSumOfClusterWeights[nIndex] += fWeight;
-				}
+				}*/
 			}
 		}
 	}
 
 	for (int i = 0; i < nVertices; i++)
 	{
-		if (pfSumOfClusterWeights[i] != 0.0)
-		{
-			FbxVector4 fbxv4Vertex = pfbxv4Vertices[i];
-			pfbxv4Vertices[i] = pfbxmtxClusterDeformations[i].MultT(fbxv4Vertex);
-			if (nClusterMode == FbxCluster::eNormalize)
-			{
-				pfbxv4Vertices[i] /= pfSumOfClusterWeights[i];
-			}
-			else if (nClusterMode == FbxCluster::eTotalOne)
-			{
-				//fbxv4Vertex *= (1.0 - pfSumOfClusterWeights[i]);
-				//pfbxv4Vertices[i] += fbxv4Vertex;
-			}
-		}
+		FbxVector4 fbxv4Vertex = pfbxv4Vertices[i];
+		pfbxv4Vertices[i] = pfbxmtxClusterDeformations[i].MultT(fbxv4Vertex) / pfSumOfClusterWeights[i];
+		//if (pfSumOfClusterWeights[i] != 0.0)
+		//{
+		//	FbxVector4 fbxv4Vertex = pfbxv4Vertices[i];
+		//	pfbxv4Vertices[i] = pfbxmtxClusterDeformations[i].MultT(fbxv4Vertex);
+		//	if (nClusterMode == FbxCluster::eNormalize)
+		//	{
+		//		pfbxv4Vertices[i] /= pfSumOfClusterWeights[i];
+		//	}
+		//	else if (nClusterMode == FbxCluster::eTotalOne)
+		//	{
+		//		//fbxv4Vertex *= (1.0 - pfSumOfClusterWeights[i]);
+		//		//pfbxv4Vertices[i] += fbxv4Vertex;
+		//	}
+		//}
 	}
 
 	delete[] pfbxmtxClusterDeformations;
@@ -366,7 +372,6 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		int indicecount = 0;
 
 		for (int i = 0; i < numPG; i++) {
-			//cpIndex[i] = 
 			for (int j = 0; j < 3; j++) {
 				int indexCP = pfbxMesh->GetPolygonVertex(i, j);
 
@@ -375,22 +380,33 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		}
 
 		MeshInfo* pMeshinfo = new MeshInfo();
+		pMeshinfo->numCP = numCP; pMeshinfo->numPG = numPG; pMeshinfo->numDC = numDC;
 		pMeshinfo->pMesh = new CMeshFbxTextured(pd3dDevice, pd3dCommandList, numCP, numPG * 3, pnIndices);
 
 		CShader* tempShader = new CShader();
-
-		if (numDC > 0) {
-			tempShader = CShaderHandler::GetInstance().GetData("Object");
-			cout << "애니메이션 있음 | [Polygon]: " << numPG << " | [ControlPoint]: " << numCP << " | [DeformerCount]: " << numDC << endl;
-		}
-		else {
-			tempShader = CShaderHandler::GetInstance().GetData("Object");
-			cout << "애니메이션 없음 | [Polygon]: " << numPG << " | [ControlPoint]: " << numCP << endl;
-		}
-
+		tempShader = CShaderHandler::GetInstance().GetData("Object");
 		pMeshinfo->pShader = tempShader;
 
+		FbxVector4* pfbxv4Vertices = new FbxVector4[numCP];
+		::memcpy(pfbxv4Vertices, pfbxMesh->GetControlPoints(), numCP * sizeof(FbxVector4));
+
+		pMeshinfo->mControlPoint = new XMFLOAT3[numCP];
+		for (int i = 0; i < numCP; i++) {
+			pMeshinfo->mControlPoint[i].x = (float)pfbxv4Vertices[i][0];
+			pMeshinfo->mControlPoint[i].y = (float)pfbxv4Vertices[i][2];
+			pMeshinfo->mControlPoint[i].z = (float)pfbxv4Vertices[i][1];
+
+			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf3Position = pMeshinfo->mControlPoint[i];
+			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf2TexCoord = XMFLOAT2(0, 0);
+			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf3Normal = XMFLOAT3(0, 0, 0);
+		}
+
+		vMesh.push_back(*pMeshinfo);
+
 		pfbxMesh->SetUserDataPtr(pMeshinfo);
+
+		if (numDC > 0) cout << "애니메이션 있음 | [Polygon]: " << numPG << " | [ControlPoint]: " << numCP << " | [DeformerCount]: " << numDC << endl;
+		else cout << "애니메이션 없음 | [Polygon]: " << numPG << " | [ControlPoint]: " << numCP << endl;
 
 		if (pnIndices) delete[] pnIndices;
 	}
@@ -407,7 +423,7 @@ void CFbxObject::AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime)
 		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
 	{
 		FbxMesh* pfbxMesh = pNode->GetMesh();
-
+		
 		int numCP = pfbxMesh->GetControlPointsCount();
 		int numDC = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
 
@@ -543,9 +559,15 @@ void CFbxObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCame
 {
 	OnPrepareRender();
 
-	FbxAMatrix fbxf4x4World = XmFloat4x4MatrixToFbxMatrix(m_xmf4x4World);
+	//FbxAMatrix fbxf4x4World = XmFloat4x4MatrixToFbxMatrix(m_xmf4x4World);
 
-	if (m_pfbxScene) DrawFbxMesh(pd3dCommandList, m_pfbxScene->GetRootNode(), m_pAnimationController->GetCurrentTime(), fbxf4x4World);
+	//if (m_pfbxScene) DrawFbxMesh(pd3dCommandList, m_pfbxScene->GetRootNode(), m_pAnimationController->GetCurrentTime(), fbxf4x4World);
+
+	for (int i = 0; i < vMesh.size(); i++) {
+		if (vMesh[i].pShader) vMesh[i].pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		if (vMesh[i].pShader) vMesh[i].pShader->Render(pd3dCommandList, NULL);
+		if (vMesh[i].pMesh) vMesh[i].pMesh->Render(pd3dCommandList);
+	}
 }
 
 void CFbxObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
@@ -570,52 +592,7 @@ void CFbxObject::ReleaseUploadBuffers()
 
 void CFbxObject::LoadFbxModelFromFile(char* pstrFbxFileName)
 {
-	ifstream file(pstrFbxFileName);
-
-	string buffer;
-	//int num = 0;
-	//vector<CTexturedVertex> tempVector;
-	CTexturedVertex tempvertex;
-
-	while (file.peek() != EOF) {
-		getline(file, buffer);
-
-		if (buffer == "[Vertex]") {
-			getline(file, buffer);
-			vertexnum = atoi(buffer.c_str());
-
-			for (int i = 0; i < vertexnum; i++) {
-				getline(file, buffer, ' ');
-				tempvertex.m_xmf3Position.x = atof(buffer.c_str());
-				getline(file, buffer, ' ');
-				tempvertex.m_xmf3Position.y = atof(buffer.c_str());
-				getline(file, buffer, ' ');
-				tempvertex.m_xmf3Position.z = atof(buffer.c_str());
-				getline(file, buffer, ' ');
-				tempvertex.m_xmf2TexCoord.x = atof(buffer.c_str());
-				getline(file, buffer);
-				tempvertex.m_xmf2TexCoord.y = atof(buffer.c_str());
-
-
-				//cout << tempvertex.m_xmf3Position.x << " " << tempvertex.m_xmf3Position.y << " " << tempvertex.m_xmf3Position.z << " "
-				//	<< tempvertex.m_xmf2TexCoord.x << " " << tempvertex.m_xmf2TexCoord.y << endl;
-
-				m_vertex.push_back(tempvertex);
-			}
-
-			//cout << "메쉬 로드 완료: " << m_vertex.size() << " 개" << endl;
-		}
-
-		if (buffer == "[Joint]") {
-
-		}
-
-		if (buffer == "[Animation]") {
-
-		}
-	}
-
-	file.close();
+	
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -645,6 +622,7 @@ CFbxObjectFileLoadVer::CFbxObjectFileLoadVer(ID3D12Device* pd3dDevice, ID3D12Gra
 		}
 		pMeshinfo.pMesh = new CMeshFbxTextured(pd3dDevice, pd3dCommandList, mFbxMesh[i].nControlPoint, mFbxMesh[i].nPolygon * 3, tempArray);
 		
+		delete[] tempArray;
 
 		CShader* tempShader = new CShader();
 		tempShader = CShaderHandler::GetInstance().GetData("Object");
@@ -653,9 +631,10 @@ CFbxObjectFileLoadVer::CFbxObjectFileLoadVer(ID3D12Device* pd3dDevice, ID3D12Gra
 		pMeshinfo.pMesh->m_pxmf4MappedPositions = new CTexturedVertex[mFbxMesh[i].nControlPoint];
 
 		for (int j = 0; j < mFbxMesh[i].nControlPoint; j++) {
-			pMeshinfo.pMesh->m_pxmf4MappedPositions[i].m_xmf3Position = mFbxMesh[i].mVertex[j].m_xmf3Position;
-			pMeshinfo.pMesh->m_pxmf4MappedPositions[i].m_xmf2TexCoord = mFbxMesh[i].mVertex[j].m_xmf2TexCoord;
-			pMeshinfo.pMesh->m_pxmf4MappedPositions[i].m_xmf3Normal = mFbxMesh[i].mVertex[j].m_xmf3Normal;
+			pMeshinfo.pMesh->m_pxmf4MappedPositions[i].m_xmf3Position = mFbxMesh[i].mCP[j];
+			cout << pMeshinfo.pMesh->m_pxmf4MappedPositions[i].m_xmf3Position.x << endl;
+			pMeshinfo.pMesh->m_pxmf4MappedPositions[i].m_xmf2TexCoord = {0, 0};
+			pMeshinfo.pMesh->m_pxmf4MappedPositions[i].m_xmf3Normal = {0, 0, 0};
 		}
 		mMesh.push_back(pMeshinfo);
 	}
@@ -694,6 +673,7 @@ void CFbxObjectFileLoadVer::LoadFbxModelFromFile(char* pstrFbxFileName)
 			getline(file, buffer, ' '); tempMesh.nPolygon = atoi(buffer.c_str());
 			getline(file, buffer); tempMesh.nDeformer = atoi(buffer.c_str());
 		}
+
 		getline(file, buffer);
 		if (buffer == "[Vertex]") {
 			for (int j = 0; j < tempMesh.nPolygon * 3; j++) {
@@ -717,6 +697,21 @@ void CFbxObjectFileLoadVer::LoadFbxModelFromFile(char* pstrFbxFileName)
 
 				tempMesh.mIndex.push_back(tempIndex);
 				tempMesh.mVertex.push_back(tempVertex);
+			}
+		}
+
+		tempMesh.mCP = new XMFLOAT3[tempMesh.nControlPoint];
+
+		getline(file, buffer);
+		if (buffer == "[ControlPoint]") {
+			for (int j = 0; j < tempMesh.nControlPoint; j++) {
+				XMFLOAT3 tempPos;
+
+				getline(file, buffer, ' '); tempPos.x = atof(buffer.c_str());
+				getline(file, buffer, ' '); tempPos.y = atof(buffer.c_str());
+				getline(file, buffer);		tempPos.z = atof(buffer.c_str());
+
+				tempMesh.mCP[j] = tempPos;
 			}
 		}
 
@@ -811,7 +806,9 @@ void CFbxObjectFileLoadVer::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 			mMesh[i].pMesh->Render(pd3dCommandList);
 		}
 		else {
-
+			mMesh[i].pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+			mMesh[i].pShader->Render(pd3dCommandList, NULL);
+			mMesh[i].pMesh->Render(pd3dCommandList);
 		}
 	}
 }
