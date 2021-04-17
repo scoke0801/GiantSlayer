@@ -171,7 +171,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	BuildMapSector1(pd3dDevice, pd3dCommandList);
 	BuildMapSector2(pd3dDevice, pd3dCommandList);
-	//BuildMapSector3(pd3dDevice, pd3dCommandList);
+	BuildMapSector3(pd3dDevice, pd3dCommandList);
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList);
 
@@ -1613,8 +1613,8 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) , z_Tree });
 		pObject->SetTextureIndex(0x04);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
-		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(200, 1500, 200)));
-		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 200, 1500, 200, { 0, 0,0 });
+		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200, 1500, 150)));
+		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 200, 1500, 150, { 0, 0, 100 });
 		m_Objects.push_back(std::move(pObject));
 	}
 	 
@@ -1630,8 +1630,8 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree), z_Tree });
 		pObject->SetTextureIndex(0x04);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
-		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(200, 1500, 200)));
-		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 200, 1500, 200, { 0, 0,0 });
+		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200, 1500, 150)));
+		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 200, 1500, 150, { 0, 0, 100 });
 		m_Objects.push_back(std::move(pObject));
 	}
 
@@ -1647,20 +1647,22 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(15, 10, 15)));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 15, 10, 15, { 0,0,0 });
-	m_BillboardObjects.push_back(std::move(pObject));
+	m_Objects.push_back(std::move(pObject));
+
+///////////////////////////////////////////////////////////////////////////////////
 
 	pObject = new CGameObject();
 	pObject->SetMesh(fbx_Dead_Tree_Mesh);
 
 	x_Tree = 3700;
 	z_Tree = 19000;
-	pObject->Scale(150.0f, 150.0f, 150.0f); 
 	pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 1000.0f,z_Tree });
 	pObject->SetTextureIndex(0x10);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-	//pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 5)));
-	//pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 5, 5, 5, { 0,0,0 });
-	m_BillboardObjects.push_back(std::move(pObject));
+	pObject->AddColider(new ColliderBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1, 5, 1)));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 1, 5, 1, { 1, -5,-2.5 });
+	pObject->Scale(150.0f, 150.0f, 150.0f);
+	m_Objects.push_back(std::move(pObject));
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -1670,13 +1672,13 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		x_Tree = 1500 + 5000 * i;
 		z_Tree = 17500;
 		pObject->Scale(150.0f + 50 * i, 150.0f + 50 * i, 150.0f + 50 * i);
-		pObject->Rotate({ 0,1,0 }, 30 + 30 * i);
+		//pObject->Rotate({ 0,1,0 }, 30 + 30 * i);
 		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 1500.0f, z_Tree });
 		pObject->SetTextureIndex(0x10);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-		//pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 5)));
-		//pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 5, 5, 5, { 0,0,0 });
-		m_BillboardObjects.push_back(std::move(pObject));
+		pObject->AddColider(new ColliderBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1, 5, 1)));
+		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 1, 5, 1, { 1, -5,-2.5 });
+		m_Objects.push_back(std::move(pObject));
 	}
 }
 
@@ -1721,10 +1723,11 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 		pObject->Scale(0.5f, 0.5f, 0.5f);
 
-		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree), z_Tree });
+		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree), z_Tree });
 		pObject->SetTextureIndex(0x020);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-
+		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600, 250, 600)));
+		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 600, 250, 600, { 0, 220, 0 });
 		m_Objects.push_back(std::move(pObject));
 	}
 
@@ -1775,10 +1778,11 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 
 		pObject->Scale(0.5f, 0.5f, 0.5f);
-		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) , z_Tree });
+		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) , z_Tree });
 		pObject->SetTextureIndex(0x020);
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));		
+		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600, 250, 600)));
+		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 600, 250, 600, { 0, 220, 0 });
 		m_Objects.push_back(std::move(pObject));
 	}
 
@@ -1797,10 +1801,11 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		}
 
 		pObject->Scale(0.5f, 0.5f, 0.5f);
-		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) , z_Tree });
+		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) , z_Tree });
 		pObject->SetTextureIndex(0x020);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-
+		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600, 250, 600)));
+		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 600, 250, 600, { 0, 220, 0 });
 		m_Objects.push_back(std::move(pObject));
 	}
 }

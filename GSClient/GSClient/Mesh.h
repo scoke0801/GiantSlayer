@@ -236,6 +236,12 @@ public:
 
 	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
+		bool isHeightHalfOn,
+		float fWidth, float fHeight, float fDepth,
+		const XMFLOAT3& shift);
+
+	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
 		PulledModel pulledModelInfo,
 		float fWidth, float fHeight, float fDepth);
 
@@ -387,3 +393,4 @@ public:
 
 	~CTerrainMesh();
 };
+ 
