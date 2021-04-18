@@ -15,6 +15,8 @@
 #define TERRAIN_HEIGHT_MAP_WIDTH 100
 #define TERRAIN_HEIGHT_MAP_HEIGHT 100
 
+#define TERRAIN_DETAIL_HEIGHT_MAP_WIDTH 20000
+#define TERRAIN_DETAIL_HEIGHT_MAP_HEIGHT 20000
 //-------------------------------------------------------------------
 //
 #define FPS 1 / 60.0f

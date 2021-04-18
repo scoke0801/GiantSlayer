@@ -1,14 +1,16 @@
 #pragma once
-#include "Mesh.h"
-#include "FbxSceneContext.h"
-#include "Colider.h" 
+
+#include "Mesh.h" 
+#include "Colider.h"  
+//#include "FbxSceneContext.h"
+#include "FbxLoader.h" 
 
 class CShader;
 class CCamera;
  
-#define OBJECT_MAX_VELOCITY 120.0f
+#define OBJECT_MAX_VELOCITY 120.0f 
 #define PLAYER_RUN_VELOCITY 250.0f * 4
-#define PLAYER_WALK_VELOCITY 80.0f 
+#define PLAYER_WALK_VELOCITY 80.0f  
 
 enum class OBJ_TYPE
 {
@@ -45,6 +47,8 @@ struct GAMEOBJECT_INFO
 	UINT							m_nTextureIndex;
 };
 
+class CAnimationController;
+
 class CGameObject
 {
 private:
@@ -61,10 +65,10 @@ protected:	// 좌표 관련 변수
 
 	XMFLOAT3			m_xmf3Velocity = XMFLOAT3{ 0,0,0 };
 	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
-
+	 
 protected:// 충돌처리 관련 변수
 	vector<Collider*>	m_Colliders;
-	vector<Collider*>	m_AABB;
+	vector<Collider*>	m_AABB; 
 
 protected: // 렌더링 관련 변수
 	CMesh* m_pMesh = NULL;
@@ -85,6 +89,10 @@ protected:	// 객체 관련 속성 변수
 	OBJ_NAME			m_Name;
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
 	bool				m_isCollidable = true;
+
+public:
+	FbxScene*				m_pfbxScene = NULL;
+	CAnimationController*	m_pAnimationController = NULL;
 
 private:	// GPU 전달 데이터
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
@@ -182,6 +190,8 @@ public:
 	void SetCamera(CCamera* camera) { m_Camera = camera; }
 	CCamera* GetCamera() const { return m_Camera; }
 
+	virtual void SetAnimationStack(int nAnimationStack) { }
+
 	void SetHP(UINT HP) { m_HP = HP; }
 	UINT GetHP() const { return m_HP; }
 
@@ -190,10 +200,10 @@ public:
 
 	void SetSize(const XMFLOAT3& size) { m_xmf3Size = size; }
 	XMFLOAT3 GetSize()const { return m_xmf3Size; }
-
+	 
 	void SetDrawable(bool drawable) { m_isDrawbale = drawable; }
 	bool IsDrawable() const { return m_isDrawbale; }
-
+	 
 public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;
@@ -221,61 +231,6 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 //
 
-class CAnimationController
-{
-public:
-	CAnimationController(FbxScene* pfbxScene);
-	~CAnimationController();
-
-public:
-	float 					m_fTime = 0.0f;
-
-	int 					m_nAnimationStacks = 0;
-	FbxAnimStack**			m_ppfbxAnimationStacks = NULL;
-
-	int 					m_nAnimationStack = 0;
-
-	FbxTime*				m_pfbxStartTimes = NULL;
-	FbxTime*				m_pfbxStopTimes = NULL;
-
-	FbxTime*				m_pfbxCurrentTimes = NULL;
-
-public:
-	void SetAnimationStack(FbxScene* pfbxScene, int nAnimationStack);
-
-	void AdvanceTime(float fElapsedTime);
-	FbxTime GetCurrentTime() { return(m_pfbxCurrentTimes[m_nAnimationStack]); }
-
-	void SetPosition(int nAnimationStack, float fPosition);
-};
-
-class CFbxObject : public CGameObject
-{
-public:
-	CFbxObject();
-	CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
-		FbxManager* pfbxSdkManager, FbxScene* pfbxScene, char* pstrFbxFileName);
-	virtual ~CFbxObject();
-
-public:
-	FbxScene*				m_pfbxScene = NULL;
-	CAnimationController*	m_pAnimationController = NULL;
-
-public:
-	virtual void Update(float fTimeElapsed);
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	
-	static void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
-	static void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, FbxAMatrix* pfbxf4x4World);
-
-	virtual void ReleaseUploadBuffers();
-
-	void SetAnimationStack(int nAnimationStack) { m_pAnimationController->SetAnimationStack(m_pfbxScene, nAnimationStack); }
-};
-
-//////////////////////////////////////////////////////////////////////////////
-//
-
 class CSkyBox  
 {
 protected:
@@ -291,6 +246,7 @@ public:
 	virtual ~CSkyBox();
 
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
 	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle); 
 };
 

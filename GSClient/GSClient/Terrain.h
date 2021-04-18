@@ -3,6 +3,9 @@
 class CTerrain
 {
 private:
+	CBindingTerrainMesh* m_BindTerrainMesh;
+
+private:
 	int m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 	XMFLOAT3 m_Normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 
@@ -29,6 +32,7 @@ public:
 	// x,z위치의 지형 높이를 반환하는 함수이다.
 	// 오브젝트가 지형 위에 위치하도록 하기 위해 필요한 함수.  
 	float GetHeight(int xPosition, int zPosition);
+	float GetDetailHeight(float xPosition, float zPosition);
 	float GetHeight(const XMFLOAT3& xmf3Position) { return 0.0f; }
 
 private: // 경계선 지형을 추가적으로 생성해주기 위한 함수.

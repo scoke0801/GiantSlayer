@@ -19,6 +19,9 @@ string ConvertToObjectName(const OBJ_NAME& name)
 	return "";
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 CGameObject::CGameObject()
 {
 	m_xmf3Position = { 0, 0, 0 };
@@ -57,7 +60,7 @@ void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	float fWidth, float fHeight, float fDepth,
 	const XMFLOAT3& shift)
 {
-	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, false, fWidth, fHeight, fDepth);
+	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, false, fWidth, fHeight, fDepth, shift);
 	m_BoundingObjectMeshes.push_back(std::move(pMesh));
 }
 void CGameObject::BuildBoundigSphereMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
@@ -73,7 +76,8 @@ void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	float fWidth, float fHeight, float fDepth,
 	const XMFLOAT3& shift)
 {
-	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, pulledModel, fWidth, fHeight, fDepth);
+	//CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, pulledModel, fWidth, fHeight, fDepth);
+	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, pulledModel, fWidth, fHeight, fDepth,shift);
 	m_BoundingObjectMeshes.push_back(std::move(pMesh));
 }
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -136,6 +140,8 @@ void CGameObject::Update(float fTimeElapsed)
 	float fDeceleration = ( Friction * fTimeElapsed);
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
+
+	Animate(fTimeElapsed);
 }
 
 void CGameObject::OnPrepareRender()
@@ -392,149 +398,6 @@ CBox::~CBox()
 
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-CAnimationController::CAnimationController(FbxScene* pfbxScene)
-{
-	FbxArray<FbxString*> fbxAnimationStackNames;
-	pfbxScene->FillAnimStackNameArray(fbxAnimationStackNames);
-
-	m_nAnimationStacks = fbxAnimationStackNames.Size();
-
-	m_ppfbxAnimationStacks = new FbxAnimStack * [m_nAnimationStacks];
-	m_pfbxStartTimes = new FbxTime[m_nAnimationStacks];
-	m_pfbxStopTimes = new FbxTime[m_nAnimationStacks];
-	m_pfbxCurrentTimes = new FbxTime[m_nAnimationStacks];
-
-	for (int i = 0; i < m_nAnimationStacks; i++)
-	{
-		FbxString* pfbxStackName = fbxAnimationStackNames[i];
-		FbxAnimStack* pfbxAnimationStack = pfbxScene->FindMember<FbxAnimStack>(pfbxStackName->Buffer());
-		m_ppfbxAnimationStacks[i] = pfbxAnimationStack;
-
-		FbxTakeInfo* pfbxTakeInfo = pfbxScene->GetTakeInfo(*pfbxStackName);
-		FbxTime fbxStartTime, fbxStopTime;
-		if (pfbxTakeInfo)
-		{
-			fbxStartTime = pfbxTakeInfo->mLocalTimeSpan.GetStart();
-			fbxStopTime = pfbxTakeInfo->mLocalTimeSpan.GetStop();
-		}
-		else
-		{
-			FbxTimeSpan fbxTimeLineTimeSpan;
-			pfbxScene->GetGlobalSettings().GetTimelineDefaultTimeSpan(fbxTimeLineTimeSpan);
-			fbxStartTime = fbxTimeLineTimeSpan.GetStart();
-			fbxStopTime = fbxTimeLineTimeSpan.GetStop();
-		}
-
-		m_pfbxStartTimes[i] = fbxStartTime;
-		m_pfbxStopTimes[i] = fbxStopTime;
-		m_pfbxCurrentTimes[i] = FbxTime(0);
-	}
-
-	FbxArrayDelete(fbxAnimationStackNames);
-}
-
-CAnimationController::~CAnimationController()
-{
-	if (m_ppfbxAnimationStacks) delete[] m_ppfbxAnimationStacks;
-	if (m_pfbxStartTimes) delete[] m_pfbxStartTimes;
-	if (m_pfbxStopTimes) delete[] m_pfbxStopTimes;
-	if (m_pfbxCurrentTimes) delete[] m_pfbxCurrentTimes;
-}
-
-void CAnimationController::SetAnimationStack(FbxScene* pfbxScene, int nAnimationStack)
-{
-	m_nAnimationStack = nAnimationStack;
-	pfbxScene->SetCurrentAnimationStack(m_ppfbxAnimationStacks[nAnimationStack]);
-}
-
-void CAnimationController::SetPosition(int nAnimationStack, float fPosition)
-{
-	m_pfbxCurrentTimes[nAnimationStack].SetSecondDouble(fPosition);;
-}
-
-void CAnimationController::AdvanceTime(float fTimeElapsed)
-{
-	m_fTime += fTimeElapsed;
-
-	FbxTime fbxElapsedTime;
-	fbxElapsedTime.SetSecondDouble(fTimeElapsed);
-
-	m_pfbxCurrentTimes[m_nAnimationStack] += fbxElapsedTime;
-	if (m_pfbxCurrentTimes[m_nAnimationStack] > m_pfbxStopTimes[m_nAnimationStack]) m_pfbxCurrentTimes[m_nAnimationStack] = m_pfbxStartTimes[m_nAnimationStack];
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-CFbxObject::CFbxObject()
-{
-	m_xmf4x4World = Matrix4x4::Identity();
-}
-
-CFbxObject::CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, FbxScene* pfbxScene, char* pstrFbxFileName)
-{
-	m_pfbxScene = pfbxScene;
-	if (!m_pfbxScene)
-	{
-		m_pfbxScene = ::LoadFbxSceneFromFile(pd3dDevice, pd3dCommandList, pfbxSdkManager, pstrFbxFileName);
-		::CreateMeshFromFbxNodeHierarchy(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, m_pfbxScene->GetRootNode());
-	}
-	else
-	{
-		cout << "¾À ¾øÀ½..." << endl;
-	}
-	m_pAnimationController = new CAnimationController(m_pfbxScene);
-}
-
-CFbxObject::~CFbxObject()
-{
-	if (m_pfbxScene) ::ReleaseMeshFromFbxNodeHierarchy(m_pfbxScene->GetRootNode());
-	if (m_pfbxScene) m_pfbxScene->Destroy();
-
-	if (m_pAnimationController) delete m_pAnimationController;
-}
-
-void CFbxObject::Update(float fTimeElapsed)
-{
-	if (m_pAnimationController)
-	{
-		m_pAnimationController->AdvanceTime(fTimeElapsed);
-		FbxTime fbxCurrentTime = m_pAnimationController->GetCurrentTime();
-		::AnimateFbxNodeHierarchy(m_pfbxScene->GetRootNode(), fbxCurrentTime);
-	}
-}
-
-void CFbxObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-	OnPrepareRender();
-
-	FbxAMatrix fbxf4x4World = ::XmFloat4x4MatrixToFbxMatrix(m_xmf4x4World);
-	if (m_pfbxScene) ::RenderFbxNodeHierarchy(pd3dCommandList, m_pfbxScene->GetRootNode(), m_pAnimationController->GetCurrentTime(), fbxf4x4World);
-}
-
-void CFbxObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
-{
-	XMFLOAT4X4 xmf4x4World;
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-}
-
-void CFbxObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, FbxAMatrix* pfbxf4x4World)
-{
-	XMFLOAT4X4 xmf4x4World = ::FbxMatrixToXmFloat4x4Matrix(pfbxf4x4World);
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-}
-
-void CFbxObject::ReleaseUploadBuffers()
-{
-	if (m_pfbxScene) ::ReleaseUploadBufferFromFbxNodeHierarchy(m_pfbxScene->GetRootNode());
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)

@@ -26,6 +26,7 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	//메쉬의 정점 버퍼 뷰를 설정한다.
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dVertexBufferView);
+
 	if (m_pd3dIndexBuffer)
 	{
 		pd3dCommandList->IASetIndexBuffer(&m_d3dIndexBufferView);
@@ -112,6 +113,98 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, fyStart, -fz), RANDOM_COLOR);
 	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, fyEnd, +fz), RANDOM_COLOR);
 	pVertices[i++] = CDiffusedVertex(XMFLOAT3(+fx, fyEnd, -fz), RANDOM_COLOR);
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	//정점 버퍼 뷰를 생성한다. 
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	bool isHeightHalfOn,
+	float fWidth, float fHeight, float fDepth,
+	const XMFLOAT3& shift) 
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	//직육면체는 6개의 면 가로(x-축) 길이
+	m_nVertices = 36;
+	m_nStride = sizeof(CDiffusedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	//fWidth: 직육면체 가로(x-축) 길이, fHeight: 직육면체 세로(y-축) 길이, fDepth: 직육면체 깊이(z-축) 길이
+	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
+	float fyStart = fy, fyEnd = -fy;
+	float fxStart = fx, fxEnd = -fx;
+	float fzStart = fz, fzEnd = -fz; 
+
+	fxStart += shift.x;
+	fxEnd += shift.x;
+	fyStart += shift.y;
+	fyEnd += shift.y;
+	fzStart += shift.z;
+	fzEnd += shift.z;
+
+	BoundingOrientedBox;
+	BoundingBox;
+	CDiffusedVertex pVertices[36];
+	int i = 0;
+
+	//정점 버퍼 데이터는 삼각형 리스트이므로 36개의 정점 데이터를 준비한다.
+	//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzStart), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzStart), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzEnd), XMFLOAT4(0, 0, 1, 0));
+	//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzStart), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzEnd), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzEnd), XMFLOAT4(0, 0, 1, 0));
+	//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzStart), RANDOM_COLOR);
+	//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzStart), RANDOM_COLOR);
+	//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzStart), RANDOM_COLOR);
+	//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzStart), RANDOM_COLOR);
+	//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzEnd), RANDOM_COLOR);
+	//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzStart), RANDOM_COLOR);
+	//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzStart), RANDOM_COLOR);
+	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzEnd), RANDOM_COLOR);
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
@@ -211,6 +304,112 @@ CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, -fz), RANDOM_COLOR);
 	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, +fz), RANDOM_COLOR);
 	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, -fz), RANDOM_COLOR);
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	//정점 버퍼 뷰를 생성한다. 
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+CCubeMeshDiffused::CCubeMeshDiffused(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	PulledModel pulledModelInfo, 
+	float fWidth, float fHeight, float fDepth,
+	const XMFLOAT3& shift) : CMesh(pd3dDevice, pd3dCommandList)
+{	//직육면체는 6개의 면 가로(x-축) 길이
+	m_nVertices = 36;
+	m_nStride = sizeof(CDiffusedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
+
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	//fWidth: 직육면체 가로(x-축) 길이, fHeight: 직육면체 세로(y-축) 길이, fDepth: 직육면체 깊이(z-축) 길이
+	float fx = fWidth * 0.5f, fy = fHeight * 0.5f, fz = fDepth * 0.5f;
+	float fyStart = fy, fyEnd = -fy;
+	float fxStart = fx, fxEnd = -fx;
+	float fzStart = fz, fzEnd = -fz;
+	if (pulledModelInfo == PulledModel::Left)
+	{
+		fxStart = 0;
+		fxEnd = fWidth; 
+	}
+	else if (pulledModelInfo == PulledModel::Right) {
+		fxStart = 0;
+		fxEnd = -fWidth;
+	}
+	else if (pulledModelInfo == PulledModel::Top) {
+		fyStart = 0;
+		fyEnd = fHeight;
+	}
+	else if (pulledModelInfo == PulledModel::Bottom) {
+		fyStart = 0;
+		fyEnd = -fHeight;
+	}
+	fxStart += shift.x;
+	fxEnd += shift.x;
+	fyStart += shift.y;
+	fyEnd += shift.y; 
+	fzStart += shift.z;
+	fzEnd += shift.z;
+
+	BoundingOrientedBox;
+	BoundingBox;
+	CDiffusedVertex pVertices[36];
+	int i = 0;
+
+	//정점 버퍼 데이터는 삼각형 리스트이므로 36개의 정점 데이터를 준비한다.
+	//ⓐ 앞면(Front) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	//ⓑ 앞면(Front) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzEnd), XMFLOAT4(1, 0, 0, 0));
+	//ⓒ 윗면(Top) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzStart), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzStart), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzEnd), XMFLOAT4(0, 0, 1, 0));
+	//ⓓ 윗면(Top) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzStart), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzEnd), XMFLOAT4(0, 0, 1, 0));
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzEnd), XMFLOAT4(0, 0, 1, 0));
+	//ⓔ 뒷면(Back) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzStart), RANDOM_COLOR);
+	//ⓕ 뒷면(Back) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzStart), RANDOM_COLOR);
+	//ⓖ 아래면(Bottom) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzStart), RANDOM_COLOR);
+	//ⓗ 아래면(Bottom) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzStart), RANDOM_COLOR);
+	//ⓘ 옆면(Left) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzEnd), RANDOM_COLOR);
+	//ⓙ 옆면(Left) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyStart, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxEnd, fyEnd, fzStart), RANDOM_COLOR);
+	//ⓚ 옆면(Right) 사각형의 위쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzStart), RANDOM_COLOR);
+	//ⓛ 옆면(Right) 사각형의 아래쪽 삼각형
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyStart, fzEnd), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzStart), RANDOM_COLOR);
+	pVertices[i++] = CDiffusedVertex(XMFLOAT3(fxStart, fyEnd, fzEnd), RANDOM_COLOR);
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
@@ -575,6 +774,7 @@ CPlaneMeshDiffused::CPlaneMeshDiffused(ID3D12Device* pd3dDevice,
 
 CPlaneMeshDiffused::~CPlaneMeshDiffused()
 {
+
 }
 
 CPlaneMeshTextured::CPlaneMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
@@ -588,7 +788,7 @@ CPlaneMeshTextured::CPlaneMeshTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	CTexturedVertex pVertices[6];
-	 
+	
 	float widthHalf = fWidth * 0.5f;
 	float heightHalf = fHeight * 0.5f;
 	float uvXStart = 0.0f, uvXEnd = 1.0f;
@@ -710,6 +910,35 @@ CPlaneMeshTextured::~CPlaneMeshTextured()
 #pragma region About FBXMeshes
 //////////////////////////////////////////////////////////////////////////////
 //
+
+FbxScene* LoadFbxSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName)
+{
+	FbxScene* pfbxScene = NULL;
+
+	int nSDKMajor, nSDKMinor, nSDKRevision;
+	FbxManager::GetFileFormatVersion(nSDKMajor, nSDKMinor, nSDKRevision);
+
+	FbxIOSettings* pfbxIOSettings = pfbxSdkManager->GetIOSettings();
+	FbxImporter* pfbxImporter = FbxImporter::Create(pfbxSdkManager, " ");
+	bool bImportStatus = pfbxImporter->Initialize(pstrFbxFileName, -1, pfbxIOSettings);
+
+	int nFileFormatMajor, nFileFormatMinor, nFileFormatRevision;
+	pfbxImporter->GetFileVersion(nFileFormatMajor, nFileFormatMinor, nFileFormatRevision);
+
+	pfbxScene = FbxScene::Create(pfbxSdkManager, " ");
+	bool bStatus = pfbxImporter->Import(pfbxScene);
+
+	FbxGeometryConverter fbxGeomConverter(pfbxSdkManager);
+	fbxGeomConverter.Triangulate(pfbxScene, true);
+
+	FbxSystemUnit fbxSceneSystemUnit = pfbxScene->GetGlobalSettings().GetSystemUnit();
+	if (fbxSceneSystemUnit.GetScaleFactor() != 1.0) FbxSystemUnit::cm.ConvertScene(pfbxScene);
+
+	pfbxImporter->Destroy();
+
+	return(pfbxScene);
+}
+
 CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	FbxManager* pfbxSdkManager, char* pstrFbxFileName,
 	bool rotateFlag)
@@ -724,9 +953,9 @@ CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	FbxAxisSystem sceneAxisSystem = m_pfbxScene->GetGlobalSettings().GetAxisSystem();
 	FbxAxisSystem::DirectX.ConvertScene(m_pfbxScene);
 
-	Meshinfo fbxmesh;
+	CMeshinfo fbxmesh;
 	fbxmesh.vertics = 0;
-	Meshinfo* temp = &fbxmesh;
+	CMeshinfo* temp = &fbxmesh;
 
 	cout << "-메쉬 로드:" << pstrFbxFileName << endl;
 
@@ -751,13 +980,64 @@ CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 }
 
+CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int* pnIndices, vector<CTexturedVertex> vertics) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	/*
+	m_nVertices = nVertices;
+	m_nStride = sizeof(CTexturedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, 
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dIndexUploadBuffer);
+
+	m_pd3dVertexBuffer->Map(0, NULL, (void**)&m_pxmf4MappedPositions);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	원본 백업
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	*/
+
+
+	m_nVertices = vertics.size();
+	m_nStride = sizeof(CTexturedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	CTexturedVertex* pVertices = new CTexturedVertex[m_nVertices];
+	copy(vertics.begin(), vertics.end(), pVertices);
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dIndexUploadBuffer);
+
+	m_pd3dVertexBuffer->Map(0, NULL, (void**)&m_pxmf4MappedPositions);
+
+	//정점 버퍼 뷰를 생성한다. 
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	m_nIndices = vertics.size();
+
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices,
+		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+}
+
 CMeshFbx::~CMeshFbx()
 {
 
 }
 
 
-void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag)
+void CMeshFbx::LoadMesh(FbxNode* node, CMeshinfo* info, bool rotateFlag)
 {
 	FbxNodeAttribute* pfbxNodeAttribute = node->GetNodeAttribute();
 
@@ -794,7 +1074,7 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag)
 					y = pfbxMesh->GetControlPointAt(pvindex).mData[1];
 					z = pfbxMesh->GetControlPointAt(pvindex).mData[2];
 				}
-
+				
 				FbxGeometryElementNormal* pnormal = pfbxMesh->GetElementNormal(0);
 
 				info->vertex.push_back(
@@ -812,7 +1092,7 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag)
 							pnormal->GetDirectArray().GetAt(pvindex).mData[0],
 							pnormal->GetDirectArray().GetAt(pvindex).mData[1],
 							pnormal->GetDirectArray().GetAt(pvindex).mData[2]
-							)
+						)
 					)
 				);
 			}
@@ -826,22 +1106,25 @@ void CMeshFbx::LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag)
 		LoadMesh(node->GetChild(i), info, rotateFlag);
 }
 
-CMeshFromFbx::CMeshFromFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices)
+CMeshFbxTextured::CMeshFbxTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = nVertices;
+	m_nStride = sizeof(CTexturedVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, sizeof(XMFLOAT4) * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, 
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dIndexUploadBuffer);
 
-	m_pd3dPositionBuffer->Map(0, NULL, (void**)&m_pxmf4MappedPositions);
+	m_pd3dVertexBuffer->Map(0, NULL, (void**)&m_pxmf4MappedPositions);
 
-	m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
-	m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT4);
-	m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT4) * m_nVertices;
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
 	m_nIndices = nIndices;
 
-	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices, sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices, 
+		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
 
 	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
@@ -849,27 +1132,15 @@ CMeshFromFbx::CMeshFromFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 
 
-CMeshFromFbx::~CMeshFromFbx()
+CMeshFbxTextured::~CMeshFbxTextured()
 {
-	if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Release();
+	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
 	if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
 }
-
-void CMeshFromFbx::ReleaseUploadBuffers()
-{
-	if (m_pd3dIndexUploadBuffer) m_pd3dIndexUploadBuffer->Release();
-	m_pd3dIndexUploadBuffer = NULL;
-}
-
-void CMeshFromFbx::Render(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
-	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
-
-	pd3dCommandList->IASetIndexBuffer(&m_d3dIndexBufferView);
-	pd3dCommandList->DrawIndexedInstanced(m_nIndices, 1, 0, 0, 0);
-}
 #pragma endregion
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 CMinimapMesh::CMinimapMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float radius)
@@ -953,7 +1224,7 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice,
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-	delete[] pVertices;
+	delete[] pVertices; 
 }
 
 CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -1006,7 +1277,7 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-	delete[] pVertices;
+	delete[] pVertices; 
 }
 CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	int xIndex, int zIndex, 
@@ -1041,7 +1312,6 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			pVertices[i].m_xmf3Normal = normals[zIndex + j][xIndex + i % 5];
 			pVertices[i].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9); 
 		}
-		
 	}
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
@@ -1052,12 +1322,138 @@ CTerrainMesh::CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-	delete[] pVertices;
+	delete[] pVertices; 
 }
 CTerrainMesh::~CTerrainMesh()
 {
 }
+ 
+CBindingTerrainMesh::CBindingTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	int verticesCount)
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = verticesCount;
+	m_Vertices = new CTerrainVertex[m_nVertices]; 
+	m_CurrentVertexIndex = 0;
 
+	m_nStride = sizeof(CTerrainVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_25_CONTROL_POINT_PATCHLIST;
+}
+
+CBindingTerrainMesh::~CBindingTerrainMesh()
+{
+}
+
+void CBindingTerrainMesh::CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	const XMFLOAT3& shift, 
+	int heights[25],
+	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+	int xNomalPos, int zNormalPos) 
+{
+	int WidthBlock_Count = 9, DepthBlock_Count = 9;
+	int WidthBlock_Index = 257, DepthBlock_Index = 257;
+	int xStart = 0, zStart = 0;
+
+	m_xmf4Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	m_nWidth = WidthBlock_Count + 1;
+	m_nDepth = DepthBlock_Count + 1;
+	  
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+	for (int i = 0, j = 0, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2, ++j)
+	{
+		for (int x = xStart; x < (xStart + m_nWidth - 1); x += 2, i++)
+		{
+			if (i >= 25) break;
+
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(x / 2, heights[i], z / 2);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Normal = normals[zNormalPos][xNomalPos];
+			m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
+			++m_CurrentVertexIndex;
+		}
+	} 
+}
+
+void CBindingTerrainMesh::CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	const XMFLOAT3& shift,
+	bool xZero, bool zZero,
+	int* heights,
+	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+	int xNomalPos, int zNormalPos) 
+{
+	int WidthBlock_Count = 9, DepthBlock_Count = 9;
+	int WidthBlock_Index = 257, DepthBlock_Index = 257;
+	int xStart = 0, zStart = 0;
+
+	m_xmf4Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	m_nWidth = WidthBlock_Count + 1;
+	m_nDepth = DepthBlock_Count + 1;
+	  
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+	for (int i = 0, j = 0, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2, ++j)
+	{
+		for (int x = xStart; x < (xStart + m_nWidth - 1); x += 2, i++)
+		{
+			if (i >= 25) break;
+
+			if (xZero) {
+				m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(xStart, heights[i], z / 2);
+			}
+			else if (zZero) {
+				m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(x / 2, heights[i],  zStart);
+			}
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Normal = normals[zNormalPos][xNomalPos];
+			m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
+			++m_CurrentVertexIndex; 
+		}
+	} 
+}
+void CBindingTerrainMesh::CreateGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	const XMFLOAT3& shift,
+	int xIndex, int zIndex,
+	int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]) 
+{
+	int WidthBlock_Count = 9, DepthBlock_Count = 9;
+	int WidthBlock_Index = 257, DepthBlock_Index = 257;
+	int xStart = 0, zStart = 0;
+
+	m_xmf4Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	m_nWidth = WidthBlock_Count + 1;
+	m_nDepth = DepthBlock_Count + 1; 
+	 
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+	for (int i = 0, j = 4, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2, --j)
+	{
+		for (int x = xStart; x < (xStart + m_nWidth - 1); x += 2, i++)
+		{
+			if (i >= 25) break;
+
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(shift.x + x / 2, heights[zIndex + j][xIndex + i % 5], shift.z +z / 2);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Normal = normals[zIndex + j][xIndex + i % 5];
+			m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9); 
+			++m_CurrentVertexIndex;
+		}
+	} 
+}
+
+void CBindingTerrainMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_Vertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	delete[] m_Vertices;
+}
 ///////////////////////////////////////////////////////////////////////////////
 //
 CDoorMesh::CDoorMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,

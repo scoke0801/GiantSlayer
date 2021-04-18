@@ -11,6 +11,7 @@ constexpr int BUFSIZE = 4096;
 constexpr int F_TO_I = 10000;
 constexpr int I_TO_F = F_TO_I;
 
+constexpr int MAX_MOUSE_INPUT = 10;
 // x,y,z 크기를 short로 보내면 맵 크기 20000에서 
 // int, float 형 변환 계산하기에 크기가 작아서 int형으로 사용
 inline int FloatToInt(float num)
@@ -150,8 +151,9 @@ struct P_C2S_MOUSE_INPUT {
 	BYTE size; 
 	PACKET_PROTOCOL type;
 	MOUSE_INPUT_TYPE InputType;
-	short xInput;
-	short yInput;
+	short inputNum;
+	int xInput[MAX_MOUSE_INPUT];
+	int yInput[MAX_MOUSE_INPUT];
 }; 
 
 struct P_C2S_UPDATE_SYNC_REQUEST {

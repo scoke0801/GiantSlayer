@@ -138,8 +138,10 @@ protected:
 	D3D12_VERTEX_BUFFER_VIEW m_d3dVertexBufferView;
 	D3D12_PRIMITIVE_TOPOLOGY m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-
 	D3D12_INDEX_BUFFER_VIEW m_d3dIndexBufferView;
+
+public:
+	CTexturedVertex* m_pxmf4MappedPositions = NULL;
 
 public:
 	CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -234,9 +236,20 @@ public:
 
 	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
+		bool isHeightHalfOn,
+		float fWidth, float fHeight, float fDepth,
+		const XMFLOAT3& shift);
+
+	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
 		PulledModel pulledModelInfo,
 		float fWidth, float fHeight, float fDepth);
 
+	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		PulledModel pulledModelInfo,
+		float fWidth, float fHeight, float fDepth,
+		const XMFLOAT3& shift);
 	virtual ~CCubeMeshDiffused();
 };
 
@@ -292,65 +305,30 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 //
 
-typedef struct Meshinfo
+typedef struct CMeshinfo
 {
 	vector<CTexturedVertex> vertex;
 	//vector<CDiffusedVertex> vertex;
 	int vertics;
 };
 
-//////////////////////////////////////////////////////////////////////////////
-//
 class CMeshFbx : public CMesh
 {
 public:
 	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName,
 		bool rotateFlag = false);
-
-
+	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int* pnIndices, vector<CTexturedVertex> vertics);
 	virtual ~CMeshFbx();
 
 public:
-	void LoadMesh(FbxNode* node, Meshinfo* info, bool rotateFlag = false);
+	void LoadMesh(FbxNode* node, CMeshinfo* info, bool rotateFlag = false);
 };
 
-class CMeshFromFbx
+class CMeshFbxTextured : public CMesh
 {
 public:
-	CMeshFromFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices);
-	virtual ~CMeshFromFbx();
-
-private:
-	int								m_nReferences = 0;
-
-public:
-	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
-
-protected:
-	D3D12_PRIMITIVE_TOPOLOGY		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	UINT							m_nSlot = 0;
-	UINT							m_nOffset = 0;
-
-protected:
-	int								m_nVertices = 0;
-
-	ID3D12Resource* m_pd3dPositionBuffer = NULL;
-	D3D12_VERTEX_BUFFER_VIEW		m_d3dPositionBufferView;
-
-	int								m_nIndices = 0;
-
-	ID3D12Resource* m_pd3dIndexBuffer = NULL;
-	ID3D12Resource* m_pd3dIndexUploadBuffer = NULL;
-	D3D12_INDEX_BUFFER_VIEW			m_d3dIndexBufferView;
-
-public:
-	XMFLOAT4* m_pxmf4MappedPositions = NULL;
-
-public:
-	virtual void ReleaseUploadBuffers();
-
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+	CMeshFbxTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices);
+	virtual ~CMeshFbxTextured();
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -389,7 +367,7 @@ enum class MapMeshHeightType
 	DownRidge,
 };
 class CTerrainMesh : public CMesh
-{
+{ 
 protected:
 	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
 
@@ -407,11 +385,51 @@ public:
 		int* heights,
 		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
 		int xNomalPos, int zNormalPos);
-
+	 
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		int x_Index, int z_Index,  
 		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
 		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 
 	~CTerrainMesh();
+};
+  
+class CBindingTerrainMesh : public CMesh
+{
+private:
+	CTerrainVertex*	m_Vertices; 
+	int				m_CurrentVertexIndex = 0;
+
+protected:
+	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+
+	int m_nWidth;
+	int m_nDepth;
+
+public:
+	CBindingTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int verticesCount);
+	~CBindingTerrainMesh();
+
+public:
+	// 寒 积己	 
+	void CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		const XMFLOAT3& shift,
+		int heights[25],
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		int xNomalPos, int zNormalPos);
+	// 寒 积己	 
+	void CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		const XMFLOAT3& shift,
+		bool xZero, bool zZero,
+		int* heights,
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		int xNomalPos, int zNormalPos);
+
+	void CreateGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		const XMFLOAT3& shift,
+		int x_Index, int z_Index,
+		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
+
+	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };

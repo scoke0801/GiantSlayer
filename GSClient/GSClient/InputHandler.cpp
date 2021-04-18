@@ -18,6 +18,10 @@ void CInputHandler::ProcessInput()
 	if (GetAsyncKeyState(VK_3) & 0x8000)		m_Inputs.KEY_3 = true;
 	if (GetAsyncKeyState(VK_4) & 0x8000)		m_Inputs.KEY_4 = true;
 	if (GetAsyncKeyState(VK_5) & 0x8000)		m_Inputs.KEY_5 = true;
+	if (GetAsyncKeyState(VK_6) & 0x8000)		m_Inputs.KEY_6 = true;
+	if (GetAsyncKeyState(VK_7) & 0x8000)		m_Inputs.KEY_7 = true;
+	if (GetAsyncKeyState(VK_8) & 0x8000)		m_Inputs.KEY_8 = true;
+	if (GetAsyncKeyState(VK_9) & 0x8000)		m_Inputs.KEY_9 = true;
 
 	if (GetAsyncKeyState(VK_W) & 0x8000)		m_Inputs.KEY_W = true;
 	if (GetAsyncKeyState(VK_A) & 0x8000)		m_Inputs.KEY_A = true;
@@ -32,6 +36,7 @@ void CInputHandler::ProcessInput()
 	if (GetAsyncKeyState(VK_F3) & 0x8000)		m_Inputs.KEY_F3 = true;
 	if (GetAsyncKeyState(VK_F4) & 0x8000)		m_Inputs.KEY_F4 = true;
 	if (GetAsyncKeyState(VK_F5) & 0x8000)		m_Inputs.KEY_F5 = true;
+	if (GetAsyncKeyState(VK_F9) & 0x8000)		m_Inputs.KEY_F9 = true;
 
 	if (GetAsyncKeyState(VK_ADD) & 0x8000)		m_Inputs.KEY_ADD = true;
 	if (GetAsyncKeyState(VK_SUBTRACT) & 0x8000) m_Inputs.KEY_SUBTRACT = true;

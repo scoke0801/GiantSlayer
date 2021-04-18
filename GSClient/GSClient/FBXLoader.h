@@ -1,17 +1,58 @@
 #pragma once
 
-class FBXLoader
+struct Joint
 {
+	string name;
+	int parentIndex;
+	XMFLOAT4X4 globalBindpose;
 
 };
 
-extern FbxAMatrix XmFloat4x4MatrixToFbxMatrix(XMFLOAT4X4& xmf4x4Source);
+struct FbxSubMesh
+{
+	int nControlPoint;
+	int nPolygon;
+	int nDeformer;
+	XMFLOAT4X4 gTransform;
 
-extern FbxScene* LoadFbxScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
-extern void LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pfbxNode);
-extern void CreateFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pfbxNode);
+	vector<int> mIndex;
+	vector<CTexturedVertex> mVertex;
 
-extern void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxMesh* pfbxMesh, FbxAMatrix& fbxmtxNodeToRoot, FbxAMatrix& fbxmtxGeometryOffset, FbxAMatrix fbxmtxWorld);
+	//vector<double> mClusterWeight;
+	//vector<XMFLOAT3> mClusterDef;
+	double* mClusterWeight;
+	XMFLOAT3* mClusterDef;
+};
 
-extern void RenderFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxMesh* pfbxMesh, FbxAMatrix& fbxmtxNodeToRoot, FbxAMatrix& fbxmtxGeometryOffset, FbxAMatrix fbxmtxWorld);
-extern void RenderFbxNodeHierarchy(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pfbxNode, FbxTime& fbxCurrentTime, FbxAMatrix& fbxmtxWorld);
+/*
+ControlPoint = Mesh Vertics
+Vertex = Triangles Vertics
+*/
+
+class FbxLoader
+{
+private:
+	FbxManager* mFbxManager;
+	FbxScene* mFbxScene;
+
+	FbxLongLong mAnimationLength;
+	string mAnimationName;
+
+	////////////////////////////////////////////////////////
+
+	vector<FbxSubMesh> mFbxMesh;
+
+public:
+	FbxLoader();
+	FbxLoader(FbxManager* pfbxSdkManager, char* FileName);
+	~FbxLoader();
+
+	void LoadScene(char* pstrFbxFileName);
+
+	void LoadSkeletonHierarchy(FbxNode* pNode);
+	void LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex, int inParentIndex);
+
+	void ExploreFbxHierarchy(FbxNode* pNode);
+	void ExportFbxFile();
+
+};

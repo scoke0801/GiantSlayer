@@ -68,7 +68,7 @@ void CPlayer::UpdateCamera()
 
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
-	 m_xmf3Position.y = pTerrain->GetHeight(m_xmf3Position.x, m_xmf3Position.z);
+	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z);
 } 
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)
