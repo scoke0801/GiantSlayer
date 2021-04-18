@@ -95,6 +95,8 @@ FbxAMatrix ComputeClusterDeformation(FbxMesh* pfbxMesh, FbxCluster* pfbxCluster,
 		FbxAMatrix fbxmtxAnimatedBoneToRoot = pfbxCluster->GetLink()->EvaluateGlobalTransform(fbxCurrentTime); //Cluster Link Node Global Transform
 		// ㄴ애니메이션 변경시마다 달라지는값
 
+		//cout << fbxmtxAnimatedBoneToRoot.GetT()[0] << endl;
+
 		fbxmtxVertexTransform = fbxmtxAnimatedBoneToRoot * fbxmtxBindPoseBoneToRoot.Inverse() * fbxmtxBindPoseMeshToRoot * fbxmtxGeometryOffset;
 	}
 	else
@@ -401,6 +403,69 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 			pMeshinfo->pMesh->m_pxmf4MappedPositions[i].m_xmf3Normal = XMFLOAT3(0, 0, 0);
 		}
 
+		if (numDC > 0) {
+			FbxSkin* pfbxSkinDeformer = (FbxSkin*)pfbxMesh->GetDeformer(0, FbxDeformer::eSkin);
+			FbxSkin::EType nSkinningType = pfbxSkinDeformer->GetSkinningType();
+
+			FbxAMatrix fbxmtxGeometryOffset = GetGeometricOffsetTransform(pfbxMesh->GetNode());
+
+			if ((nSkinningType == FbxSkin::eLinear) || (nSkinningType == FbxSkin::eRigid))
+			{
+				// part of ComputeLinearDeformation
+				FbxAMatrix* pfbxmtxClusterDeformations = new FbxAMatrix[numCP];
+				::memset(pfbxmtxClusterDeformations, 0, numCP * sizeof(FbxAMatrix));
+
+				double* pfSumOfClusterWeights = new double[numCP];
+				::memset(pfSumOfClusterWeights, 0, numCP * sizeof(double));
+
+				FbxCluster::ELinkMode nClusterMode = ((FbxSkin*)pfbxMesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0)->GetLinkMode();
+				
+				for (int i = 0; i < numDC; i++) {
+					FbxSkin* pfbxSkinDeformer = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
+					int nCurCluster = pfbxSkinDeformer->GetClusterCount();
+					for (int j = 0; j < nCurCluster; j++) {
+						FbxCluster* pfbxCluster = pfbxSkinDeformer->GetCluster(j);
+						if (!pfbxCluster->GetLink()) continue;
+
+						FbxAMatrix fbxTransformMTX;
+						pfbxCluster->GetTransformMatrix(fbxTransformMTX);
+						FbxAMatrix fbxTransformLinkMTX;
+						pfbxCluster->GetTransformLinkMatrix(fbxTransformLinkMTX);
+
+						// 애니메이션 연산 전 기본 매트릭스
+						FbxAMatrix fbxBindPoseInvMTX = fbxmtxGeometryOffset * fbxTransformMTX * fbxTransformLinkMTX.Inverse();
+
+						int* pnIndices = pfbxCluster->GetControlPointIndices();
+						double* pfWeights = pfbxCluster->GetControlPointWeights();
+
+						int nIndice = pfbxCluster->GetControlPointIndicesCount();
+						for (int k = 0; k < nIndice; k++) {
+							int nIndex = pnIndices[k];
+							double fWeight = pfWeights[k];
+						}
+
+						// 현 애니메이션 정보 로드 및 30프레임 변환행렬 로드
+						FbxAnimStack* pCurAnimStack = m_pfbxScene->GetSrcObject<FbxAnimStack>(0);
+						FbxString curAnimName = pCurAnimStack->GetName();
+						FbxTakeInfo* pTakeInfo = m_pfbxScene->GetTakeInfo(curAnimName);
+
+						FbxTime start = pTakeInfo->mLocalTimeSpan.GetStart();
+						FbxTime end = pTakeInfo->mLocalTimeSpan.GetStop();
+						double animLength = end.GetFrameCount(FbxTime::eFrames30) - start.GetFrameCount(FbxTime::eFrames30) + 1;
+
+						for (double k = start.GetFrameCount(FbxTime::eFrames30); k <= end.GetFrameCount(FbxTime::eFrames24); k++) {
+							FbxTime curTime;
+							curTime.SetFrame(k, FbxTime::eFrames30);
+
+							FbxMatrix globalTransform = pNode->EvaluateGlobalTransform(curTime).Inverse() * 
+														pfbxCluster->GetLink()->EvaluateGlobalTransform(curTime) * fbxmtxGeometryOffset;
+							// 컨테이너에 저장 후 실시간 연산 or 미리 연산해놓고 로드만...?
+						}
+					}
+				}
+			}
+		}
+
 		vMesh.push_back(*pMeshinfo);
 
 		pfbxMesh->SetUserDataPtr(pMeshinfo);
@@ -512,6 +577,7 @@ void CFbxObject::Animate(float fTimeElapsed)
 	{
 		m_pAnimationController->AdvanceTime(fTimeElapsed);
 		FbxTime fbxCurrentTime = m_pAnimationController->GetCurrentTime();
+
 		AnimateFbxMesh(m_pfbxScene->GetRootNode(), fbxCurrentTime);
 	}
 }
@@ -544,8 +610,8 @@ void CFbxObject::Update(double fTimeElapsed)
 	//cout << fTimeElapsed << endl;
 
 	m_time++;
-	if (m_time > 5) {
-		Animate(0.15);
+	if (m_time > 4) {
+		Animate(fTimeElapsed*4);
 		m_time = 0;
 	}
 }
