@@ -1,12 +1,23 @@
 #pragma once
 
-struct Joint
-{
-	string name;
-	int parentIndex;
-	XMFLOAT4X4 globalBindpose;
-
-};
+//struct Keyframe
+//{
+//	FbxLongLong nFrame;
+//	FbxAMatrix mGlobalTransform;
+//	Keyframe* mNext;
+//
+//	Keyframe() :
+//		mNext(nullptr)
+//	{}
+//};
+//
+//struct Joint
+//{
+//	string name;
+//	int parentIndex;
+//	XMFLOAT4X4 globalBindpose;
+//	Keyframe* mAnimation;
+//};
 
 struct FbxSubMesh
 {

@@ -30,6 +30,25 @@ public:
 	void SetPosition(int nAnimationStack, float fPosition);
 };
 
+struct Keyframe
+{
+	FbxLongLong nFrame;
+	FbxAMatrix mGlobalTransform;
+	Keyframe* mNext;
+
+	Keyframe() :
+		mNext(nullptr)
+	{}
+};
+
+struct Joint
+{
+	string name;
+	int parentIndex;
+	XMFLOAT4X4 globalBindpose;
+	Keyframe* mAnimation;
+};
+
 class MeshInfo
 {
 public:
@@ -92,6 +111,7 @@ public:
 public:
 	vector<FbxSubMesh>			mFbxMesh;
 	vector<MeshInfo>			mMesh;
+	vector<Joint>				mSkeleton;
 
 	int							vertexnum;
 	int							m_time;

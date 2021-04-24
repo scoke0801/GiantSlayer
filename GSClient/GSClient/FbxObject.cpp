@@ -451,12 +451,12 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 						FbxTime start = pTakeInfo->mLocalTimeSpan.GetStart();
 						FbxTime end = pTakeInfo->mLocalTimeSpan.GetStop();
-						double animLength = end.GetFrameCount(FbxTime::eFrames30) - start.GetFrameCount(FbxTime::eFrames30) + 1;
+						double animLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
 
-						for (double k = start.GetFrameCount(FbxTime::eFrames30); k <= end.GetFrameCount(FbxTime::eFrames24); k++) {
+						for (double k = start.GetFrameCount(FbxTime::eFrames24); k <= end.GetFrameCount(FbxTime::eFrames24); k++) {
 							FbxTime curTime;
-							curTime.SetFrame(k, FbxTime::eFrames30);
-
+							curTime.SetFrame(k, FbxTime::eFrames24);
+							cout << k << endl;
 							FbxMatrix globalTransform = pNode->EvaluateGlobalTransform(curTime).Inverse() * 
 														pfbxCluster->GetLink()->EvaluateGlobalTransform(curTime) * fbxmtxGeometryOffset;
 							// 컨테이너에 저장 후 실시간 연산 or 미리 연산해놓고 로드만...?
