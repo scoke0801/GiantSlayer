@@ -34,11 +34,12 @@ CSceneYJ::~CSceneYJ()
 
 void CSceneYJ::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
 {
-	CreateDsvDescriptorHeaps(pd3dDevice);
-	BuildShadowMapResource(pd3dDevice);
 	BuildMirrorResource(pd3dDevice);
 	BuildMinimapResource(pd3dDevice);
 	
+	mShadowMap = std::make_unique<ShadowMap>(
+		pd3dDevice, 2048, 2048);
+
 	LoadTextures(pd3dDevice, pd3dCommandList);
 	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
 
@@ -80,8 +81,9 @@ void CSceneYJ::BuildCamera(ID3D12Device* pd3dDevice,
 	m_Cameras[2]->SetPosition({ 500,  500, 500 }); 
 	m_Cameras[3]->SetPosition({ 2000, 1000, 8000 });
 	//m_Cameras[3]->Pitch(XMConvertToRadians(90));
-	m_Cameras[4]->SetPosition({ 0,0,0 });
+	m_Cameras[4]->SetPosition({ 0,1000,0 });
 
+	m_ShadowCamera = m_Cameras[4];
 	m_MirrorCamera = m_Cameras[3];
 	m_CurrentCamera = m_Cameras[2];
 	m_MinimapCamera = m_Cameras[1];
@@ -166,9 +168,9 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	 
 	BuildMapSector1(pd3dDevice, pd3dCommandList);  
 	//BuildMapSector2(pd3dDevice, pd3dCommandList);
-	BuildMapSector3(pd3dDevice, pd3dCommandList);
-	BuildMapSector4(pd3dDevice, pd3dCommandList);
-	BuildMapSector5(pd3dDevice, pd3dCommandList);
+	//BuildMapSector3(pd3dDevice, pd3dCommandList);
+	//BuildMapSector4(pd3dDevice, pd3dCommandList);
+	//BuildMapSector5(pd3dDevice, pd3dCommandList);
 
 	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 
@@ -251,6 +253,15 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
 
+	// Add +1 DSV for shadow map.
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
+	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	dsvHeapDesc.NodeMask = 0;
+	pd3dDevice->CreateDescriptorHeap(
+		&dsvHeapDesc, IID_PPV_ARGS(&m_pd3dDsvDescriptorHeap));
+
 	// Fill out the heap with actual descriptors. 
 	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor = m_pd3dSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
@@ -285,6 +296,10 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		pd3dDevice->CreateShaderResourceView(texResource, &srvDesc, hDescriptor);
 	}
 
+	D3D12_CPU_DESCRIPTOR_HANDLE srvCpuStart = m_pd3dSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_GPU_DESCRIPTOR_HANDLE srvGpuStart = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuStart = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = m_pd3dMinimapTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(m_pd3dMinimapTex, &srvDesc, hDescriptor);
@@ -293,11 +308,29 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	srvDesc.Format = m_pd3dMirrorTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(m_pd3dMirrorTex, &srvDesc, hDescriptor);
 
-	// 그림자
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	//srvDesc.Format = m_pd3dShadowMap->GetDesc().Format;
 	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-	pd3dDevice->CreateShaderResourceView(m_pd3dShadowMap, &srvDesc, hDescriptor);
+	pd3dDevice->CreateShaderResourceView(mShadowMap->Resource(), &srvDesc, hDescriptor);
+
+
+	mShadowMap->BuildDescriptors(
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(srvCpuStart, m_Textures.size() + 3, gnCbvSrvDescriptorIncrementSize),
+		CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 3, gnCbvSrvDescriptorIncrementSize),
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart));
+
+
+	// 그림자
+	/*hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	pd3dDevice->CreateShaderResourceView(mShadowMap->Resource(), &srvDesc, hDescriptor);
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.Texture2D.MipSlice = 0;
+	pd3dDevice->CreateDepthStencilView(mShadowMap->Resource(), &dsvDesc, dsvCpuStart);*/
+
 }
 
 void CSceneYJ::ReleaseObjects()
@@ -326,6 +359,12 @@ void CSceneYJ::Update(double elapsedTime)
 	{
 		m_MirrorCamera->UpdateViewMatrix();
 	}
+
+	if (m_ShadowCamera)
+	{
+		m_ShadowCamera->UpdateViewMatrix();
+	}
+
 	if (m_MinimapCamera)
 	{
 		XMFLOAT3 pos = m_Player->GetPosition();
@@ -505,16 +544,16 @@ void CSceneYJ::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
 
 	m_Skybox->Draw(pd3dCommandList, m_MirrorCamera);
-	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
-	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Terrain->Draw(pd3dCommandList, m_MirrorCamera);
+	m_Player->Draw(pd3dCommandList, m_MirrorCamera);
 
 	for (auto pObject : m_BillboardObjects)
 	{
-		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+		pObject->Draw(pd3dCommandList, m_MirrorCamera);
 	}
 	for (auto pObject : m_Objects)
 	{
-		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+		pObject->Draw(pd3dCommandList, m_MirrorCamera);
 	}
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
@@ -532,21 +571,26 @@ void CSceneYJ::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	if (m_CurrentCamera)
+	if (m_MirrorCamera)
 	{
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
-		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		m_MirrorCamera->UpdateShaderVariables(pd3dCommandList, 1);
+		m_MirrorCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 }
 
 void CSceneYJ::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dDSV)
 {
+
+	pd3dCommandList->ClearDepthStencilView(mShadowMap->Dsv(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+
+	pd3dCommandList->OMSetRenderTargets(0, NULL, false, &mShadowMap->Dsv());
+
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
-	if (m_CurrentCamera)
+	if (m_ShadowCamera)
 	{
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
-		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		m_ShadowCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
+		m_ShadowCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 
 	//ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
@@ -567,38 +611,40 @@ void CSceneYJ::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
 
-	m_Skybox->Draw(pd3dCommandList, m_MirrorCamera);
-	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
-	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Skybox->Draw(pd3dCommandList, m_ShadowCamera);
+	m_Terrain->Draw(pd3dCommandList, m_ShadowCamera);
+	m_Player->Draw(pd3dCommandList, m_ShadowCamera);
+
 
 	for (auto pObject : m_BillboardObjects)
 	{
-		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+		pObject->Draw(pd3dCommandList, m_ShadowCamera);
 	}
 	for (auto pObject : m_Objects)
 	{
-		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+		pObject->Draw(pd3dCommandList, m_ShadowCamera);
 	}
 
-	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dDSV,
-		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_COPY_SOURCE));
 
-	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dDSV,
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mShadowMap->Resource(),
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
 
 	// Copy the input (back-buffer) to MimapTexture
-	pd3dCommandList->CopyResource(m_pd3dShadowMap, pd3dDSV);
+	pd3dCommandList->CopyResource(mShadowMap->Resource(), pd3dDSV);
 
-	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mShadowMap->Resource(),
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON));
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dDSV,
-		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	if (m_CurrentCamera)
+	if (m_ShadowCamera)
 	{
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
-		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		m_ShadowCamera->UpdateShaderVariables(pd3dCommandList, 1);
+		m_ShadowCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 }
 
@@ -913,30 +959,18 @@ ID3D12RootSignature* CSceneYJ::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	return(pd3dGraphicsRootSignature);
 }
 
-void CSceneYJ::CreateDepthStencilView(ID3D12Device* pd3dDevice, ID3D12Resource* pd3dResource, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dSaveCPUHandle)
-{
-	D3D12_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
-	::ZeroMemory(&d3dDepthStencilViewDesc, sizeof(D3D12_DEPTH_STENCIL_VIEW_DESC));
-	d3dDepthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	d3dDepthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	d3dDepthStencilViewDesc.Flags = D3D12_DSV_FLAG_NONE;
-
-	pd3dDevice->CreateDepthStencilView(pd3dResource, &d3dDepthStencilViewDesc, m_d3dDsvCPUDesciptorStartHandle);
-	(*pd3dSaveCPUHandle) = m_d3dDsvCPUDesciptorStartHandle;
-
-}
-
-void CSceneYJ::CreateDsvDescriptorHeaps(ID3D12Device* pd3dDevice)
-{
-	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
-	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
-	d3dDescriptorHeapDesc.NumDescriptors = 1;
-	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dDsvDescriptorHeap);
-
-	m_d3dDsvCPUDesciptorStartHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	m_d3dDsvGPUDesciptorStartHandle = m_pd3dDsvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-}
+//void CSceneYJ::CreateDepthStencilView(ID3D12Device* pd3dDevice, ID3D12Resource* pd3dResource, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dSaveCPUHandle)
+//{
+//	D3D12_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
+//	::ZeroMemory(&d3dDepthStencilViewDesc, sizeof(D3D12_DEPTH_STENCIL_VIEW_DESC));
+//	d3dDepthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+//	d3dDepthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+//	d3dDepthStencilViewDesc.Flags = D3D12_DSV_FLAG_NONE;
+//
+//	pd3dDevice->CreateDepthStencilView(pd3dResource, &d3dDepthStencilViewDesc, m_d3dDsvCPUDesciptorStartHandle);
+//	(*pd3dSaveCPUHandle) = m_d3dDsvCPUDesciptorStartHandle;
+//
+//}
 
 void CSceneYJ::BuildBridges(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
@@ -1180,56 +1214,6 @@ void CSceneYJ::BuildMirrorResource(ID3D12Device* pd3dDevice)
 		IID_PPV_ARGS(&m_pd3dMirrorTex));
 }
 
-void CSceneYJ::BuildShadowMapResource(ID3D12Device* pd3dDevice)
-{
-	D3D12_HEAP_PROPERTIES d3dHeapPropertiesDesc;
-	::ZeroMemory(&d3dHeapPropertiesDesc, sizeof(D3D12_HEAP_PROPERTIES));
-	d3dHeapPropertiesDesc.Type = D3D12_HEAP_TYPE_DEFAULT;
-	d3dHeapPropertiesDesc.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-	d3dHeapPropertiesDesc.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-	d3dHeapPropertiesDesc.CreationNodeMask = 1;
-	d3dHeapPropertiesDesc.VisibleNodeMask = 1;
-
-	D3D12_RESOURCE_DESC texDesc;
-	ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
-
-	texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	texDesc.Alignment = 0;
-	texDesc.Width = FRAME_BUFFER_WIDTH;
-	texDesc.Height = FRAME_BUFFER_HEIGHT;
-	texDesc.DepthOrArraySize = 1;
-	texDesc.MipLevels = 1;
-	texDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	//texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	texDesc.SampleDesc.Count = 1;
-	texDesc.SampleDesc.Quality = 0;
-	texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-	//texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-
-	D3D12_CLEAR_VALUE d3dClear;
-	d3dClear.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	d3dClear.DepthStencil.Depth = 1.0f;
-	d3dClear.DepthStencil.Stencil = 0;
-
-	HRESULT Hres=pd3dDevice->CreateCommittedResource(
-		&d3dHeapPropertiesDesc,
-		D3D12_HEAP_FLAG_NONE,
-		&texDesc,
-		D3D12_RESOURCE_STATE_COMMON,
-		&d3dClear,
-		IID_PPV_ARGS(&m_pd3dShadowMap));
-
-	/*pd3dDevice->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-		D3D12_HEAP_FLAG_NONE,
-		&texDesc,
-		D3D12_RESOURCE_STATE_COMMON,
-		nullptr,
-		IID_PPV_ARGS(&m_pd3dShadowMap));*/
-
-	CreateDepthStencilView(pd3dDevice, m_pd3dShadowMap, &m_d3dDsvShadowMapCPUHandle);
-}
 
 void CSceneYJ::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {

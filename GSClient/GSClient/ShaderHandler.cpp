@@ -13,17 +13,26 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateSignShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateTreeShader(pd3dDevice, pd3dGraphicsRootSignature);
 
+	CreatePlayerShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature);
+
+	/*for (auto& shader : m_Data)
+	{
+		shader.second->
+	}*/
+
+	CreateBillboardShader(pd3dDevice, pd3dGraphicsRootSignature);
+
 	CreateMirrorShader(pd3dDevice, pd3dGraphicsRootSignature);
 
-	CreatePlayerShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateUiShader(pd3dDevice, pd3dGraphicsRootSignature);
 
-	CreateBillboardShader(pd3dDevice, pd3dGraphicsRootSignature);
+	
 	CreateMinmapShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateSkyboxShader(pd3dDevice, pd3dGraphicsRootSignature);
-	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature);
+	
 }
 
 void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -110,6 +119,10 @@ void CShaderHandler::CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignatur
 	pUiHelpTextShader->CreateInputLayout(ShaderTypes::Textured);
 	pUiHelpTextShader->CreateUIShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("UiHelpText", pUiHelpTextShader);
+}
+
+void CShaderHandler::CreateShadowShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
 }
 
 void CShaderHandler::CreatePlayerShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)

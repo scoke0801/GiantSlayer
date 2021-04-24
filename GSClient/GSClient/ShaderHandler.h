@@ -84,6 +84,9 @@ public:
 		if (id.compare("Bridge")) { 
 			return GetData("Bridge");
 		}
+		if (id.compare("Shadow")) {
+			return GetData("Shadow");
+		}
 		string resultText = "지정되지 않은 셰이더 호출!";
 		resultText += (" " + id);
 		assert(!resultText.c_str());
@@ -105,6 +108,9 @@ public:
 	void CreatePlayerShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	void CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	void CreateShadowShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
 
 	void CreateBillboardShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	void CreateMinmapShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
