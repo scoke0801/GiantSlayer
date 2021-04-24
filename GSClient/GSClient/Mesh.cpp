@@ -1416,7 +1416,7 @@ void CBindingTerrainMesh::CreateGridMesh(ID3D12Device* pd3dDevice, ID3D12Graphic
 	int xIndex, int zIndex,
 	int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
 	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]) 
-{ 
+{  
 	int WidthBlock_Count = 9, DepthBlock_Count = 9;
 	int WidthBlock_Index = 257, DepthBlock_Index = 257;
 	int xStart = 0, zStart = 0;

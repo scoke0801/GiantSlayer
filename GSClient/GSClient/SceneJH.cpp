@@ -169,17 +169,17 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 
-	BuildMapSector1(pd3dDevice, pd3dCommandList);
-	BuildMapSector2(pd3dDevice, pd3dCommandList);
-	BuildMapSector3(pd3dDevice, pd3dCommandList);
-	//BuildMapSector4(pd3dDevice, pd3dCommandList);
-	//BuildMapSector5(pd3dDevice, pd3dCommandList);
-	
+	//BuildMapSector1(pd3dDevice, pd3dCommandList);
+	//BuildMapSector2(pd3dDevice, pd3dCommandList);
+	//BuildMapSector3(pd3dDevice, pd3dCommandList);
+	////BuildMapSector4(pd3dDevice, pd3dCommandList);
+	////BuildMapSector5(pd3dDevice, pd3dCommandList);
+	//
 	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 	
 	BuildDoorWall(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("DoorWall"));
 	BuildPuzzles(pd3dDevice, pd3dCommandList);
-	BuildEnemys(pd3dDevice, pd3dCommandList);
+	//BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildSigns(pd3dDevice, pd3dCommandList);
 	BuildMirror(pd3dDevice, pd3dCommandList);
 	 
@@ -1103,7 +1103,7 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pDoorWall->SetTextureIndexes(0x08);
 	m_Objects.push_back(pDoorWall);
 
-	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5700, 4500, 800, pShader);
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5800, 4500, 800, pShader);
 	pDoorWall->SetPosition({ 14000, -7050, 13650 });
 	pDoorWall->SetTextureIndexes(0x08);
 	m_Objects.push_back(pDoorWall);

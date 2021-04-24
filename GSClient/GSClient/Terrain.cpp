@@ -8,8 +8,13 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	InitHeightDatas();
 	InitNormals();
 	 
-	int meshVertexCount = 833 * 25;//20825
+	int vertexMeshCount = 25;
+	int meshVertexCount = 833 * vertexMeshCount;//20825
+	int loosedWallCount[2] = { 110, 5 };
+
 	m_BindTerrainMesh = new CBindingTerrainMesh(pd3dDevice, pd3dCommandList, meshVertexCount);
+	m_BindTerrainMeshForLoosedWall[0] = new CBindingTerrainMesh(pd3dDevice, pd3dCommandList, vertexMeshCount * loosedWallCount[0]);
+	m_BindTerrainMeshForLoosedWall[1] = new CBindingTerrainMesh(pd3dDevice, pd3dCommandList, vertexMeshCount * loosedWallCount[1]);
 
 	for (int i = 0; i < 25; ++i)
 	{
@@ -66,13 +71,28 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	ReviseLoosedTextureWall(pd3dDevice, pd3dCommandList, pShader);
 
 	m_BindTerrainMesh->CreateVertexBuffer(pd3dDevice, pd3dCommandList);
+	m_BindTerrainMeshForLoosedWall[0]->CreateVertexBuffer(pd3dDevice, pd3dCommandList);
+	m_BindTerrainMeshForLoosedWall[1]->CreateVertexBuffer(pd3dDevice, pd3dCommandList);
 
 	CGameObject* pObject = new CGameObject();
 	pObject->SetShader(pShader); 
 	pObject->SetTextureIndex(0x01); 
-	pObject->SetMesh(m_BindTerrainMesh);
-	//pObject->Scale(200.0f, 1.0f, 200.0f); 
+	pObject->SetMesh(m_BindTerrainMesh); 
 	pObject->Scale(200.0f, 1.0f, 200.0f);
+	m_Objects.push_back(std::move(pObject)); 
+
+	pObject = new CGameObject();
+	pObject->SetShader(pShader);
+	pObject->SetTextureIndex(0x01);
+	pObject->SetMesh(m_BindTerrainMeshForLoosedWall[0]);
+	pObject->Scale(40.0f, 1.0f, 200.0f);
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetShader(pShader);
+	pObject->SetTextureIndex(0x01);
+	pObject->SetMesh(m_BindTerrainMeshForLoosedWall[1]);
+	pObject->Scale(200.0f, 1.0f, 40.0f);
 	m_Objects.push_back(std::move(pObject));
 }
 
@@ -408,8 +428,7 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	CShader* pShader)
 {
-	return;
-	int tolerance = 30;
+	int tolerance = 30; 
 	for (int i = 0; i < 25; ++i)
 	{
 		for (int j = 0; j < 25; ++j)
@@ -474,14 +493,13 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k * 4 + 4),
 					};
 					//pObject->SetTextureIndex(0x20);
-					//if (i == 10)pObject->SetTextureIndex(0x08); 
-					m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
-						{ 4.0f * j + 0.8f * k, 0, 4.0f * i },
+					m_BindTerrainMeshForLoosedWall[0]->CreateWallMesh(pd3dDevice, pd3dCommandList,
+						{ 20.0f * j + 4.0f * k, 0, 4.0f * i },
 						heightsTemp,
 						m_Normals,
-						j, i);
+						j, i); 
 					//pObject->Scale(40.0f, 1.0f, 200.0f				}
-					if (j != 17 || i != 17) continue;
+					if (j != 17 ) continue;
 				}
 				if ((j == 24 || j == 23 || j == 18 || j == 17) && i == 17) {
 					tolerance = 10;
@@ -533,20 +551,20 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 							m_Heights[i * 4][j * 4 + 2] + (heightsGap[2] / 20) * (k * 4),
 							m_Heights[i * 4][j * 4 + 3] + (heightsGap[3] / 20) * (k * 4),
 							m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4),
-						};
+						};	
+
 						//pObject->SetTextureIndex(0x20);
 						//if (i == 10)pObject->SetTextureIndex(0x08); 
-						m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
-							{ 4.0f * j , 0, 4.0f * i + 0.8f * k },
+						m_BindTerrainMeshForLoosedWall[1]->CreateWallMesh(pd3dDevice, pd3dCommandList,
+							{ 4.0f * j , 0, 20.0f * i + 4.0f * k },
 							heightsTemp,
 							m_Normals,
-							j, i);
-						//pObject->Scale(200.0f, 1.0f, 40.0f);
+							j, i); 
 					}
 				}
 			}
 		}
-	}
+	} 
 }
 
 void CTerrain::InitNormals()
