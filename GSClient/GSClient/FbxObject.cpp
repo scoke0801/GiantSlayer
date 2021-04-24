@@ -312,6 +312,7 @@ CFbxObject::CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	if (m_pfbxScene == NULL)
 		cout << "fbx 메쉬 로드 실패" << endl;
 	else {
+		LoadSkeletonHierarchy(m_pfbxScene->GetRootNode());
 		LoadFbxMesh(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, m_pfbxScene->GetRootNode());
 		m_pAnimationController = new CAnimationController(m_pfbxScene);
 		cout << "fbx 메쉬 로드 성공!" << endl;
@@ -353,6 +354,31 @@ void CFbxObject::LoadScene(char* pstrFbxFileName, FbxManager* pfbxSdkManager)
 	if (fbxSceneSystemUnit.GetScaleFactor() != 1.0) FbxSystemUnit::cm.ConvertScene(m_pfbxScene);
 
 	pfbxImporter->Destroy();
+}
+
+void CFbxObject::LoadSkeletonHierarchy(FbxNode* pNode)
+{
+	for (int i = 0; i < pNode->GetChildCount(); i++)
+	{
+		FbxNode* curNode = pNode->GetChild(i);
+		LoadSkeletonRecursively(curNode, 0, 0, -1);
+	}
+}
+
+void CFbxObject::LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex, int inParentIndex)
+{
+	FbxNodeAttribute* pfbxNodeAttribute = pNode->GetNodeAttribute();
+
+	if ((pfbxNodeAttribute != NULL) &&
+		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton))
+	{
+
+	}
+
+	for (int i = 0; i < pNode->GetChildCount(); i++)
+	{
+		LoadSkeletonRecursively(pNode->GetChild(i), inDepth + 1, mSkeleton.size(), myIndex);
+	}
 }
 
 void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pNode)
@@ -422,10 +448,23 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 				
 				for (int i = 0; i < numDC; i++) {
 					FbxSkin* pfbxSkinDeformer = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
+
 					int nCurCluster = pfbxSkinDeformer->GetClusterCount();
 					for (int j = 0; j < nCurCluster; j++) {
 						FbxCluster* pfbxCluster = pfbxSkinDeformer->GetCluster(j);
+
 						if (!pfbxCluster->GetLink()) continue;
+
+						int jointIndex = 0;
+						string currJointName = pfbxCluster->GetLink()->GetName();
+						for (int j = 0; j < mSkeleton.size(); j++)
+						{
+							if (mSkeleton[j].name == currJointName)
+							{
+								jointIndex = j;
+								break;
+							}
+						}
 
 						FbxAMatrix fbxTransformMTX;
 						pfbxCluster->GetTransformMatrix(fbxTransformMTX);
@@ -434,6 +473,8 @@ void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 						// 애니메이션 연산 전 기본 매트릭스
 						FbxAMatrix fbxBindPoseInvMTX = fbxmtxGeometryOffset * fbxTransformMTX * fbxTransformLinkMTX.Inverse();
+
+						mSkeleton[jointIndex].globalBindpose = fbxBindPoseInvMTX;
 
 						int* pnIndices = pfbxCluster->GetControlPointIndices();
 						double* pfWeights = pfbxCluster->GetControlPointWeights();

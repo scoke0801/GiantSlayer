@@ -45,7 +45,7 @@ struct Joint
 {
 	string name;
 	int parentIndex;
-	XMFLOAT4X4 globalBindpose;
+	FbxMatrix globalBindpose;
 	Keyframe* mAnimation;
 };
 
@@ -76,6 +76,7 @@ public:
 
 public:
 	vector<MeshInfo> vMesh;
+	vector<Joint> mSkeleton;
 	int m_time;
 
 
@@ -83,6 +84,8 @@ public:
 	void LoadScene(char* pstrFbxFileName, FbxManager* pfbxSdkManager);
 	void LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pNode);
+	void LoadSkeletonHierarchy(FbxNode* pNode);
+	void LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex, int inParentIndex);
 
 	void AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime);
 	void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, FbxTime& fbxCurrentTime, FbxAMatrix& fbxmtxWorld);
