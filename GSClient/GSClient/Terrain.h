@@ -4,7 +4,7 @@ class CTerrain
 {
 private:
 	CBindingTerrainMesh* m_BindTerrainMesh;
-
+	CBindingTerrainMesh* m_BindTerrainMeshForLoosedWall[2];
 private:
 	int m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 	XMFLOAT3 m_Normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
@@ -20,8 +20,7 @@ private:
 	long					cxBlocks;
 	long					czBlocks;
 
-public:
-	// 앞으로 수정하여 사용할 방식
+public: 
 	CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	virtual ~CTerrain();
 
