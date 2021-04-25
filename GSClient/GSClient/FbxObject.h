@@ -30,6 +30,25 @@ public:
 	void SetPosition(int nAnimationStack, float fPosition);
 };
 
+struct Keyframe
+{
+	FbxLongLong nFrame;
+	FbxAMatrix mGlobalTransform;
+	Keyframe* mNext;
+
+	Keyframe() :
+		mNext(nullptr)
+	{}
+};
+
+struct Joint
+{
+	string name;
+	int parentIndex;
+	FbxMatrix globalBindpose;
+	Keyframe* mAnimation;
+};
+
 class MeshInfo
 {
 public:
@@ -37,21 +56,14 @@ public:
 	~MeshInfo() { };
 
 public:
+	int numCP, numPG, numDC;
+
+	int* indexCP;
+	XMFLOAT3* mControlPoint;
+
 	CMesh* pMesh;
 	CShader* pShader;
 	bool animation = false;
-};
-
-class MeshData
-{
-private:
-	int nControlPoint = 0;
-	int nPolygon = 0;
-	int nDeformer = 0;
-
-	int* pIndices = NULL;
-
-public:
 };
 
 class CFbxObject : public CGameObject
@@ -63,21 +75,17 @@ public:
 	virtual ~CFbxObject();
 
 public:
-	FbxLoader*					m_pfbxLoader = NULL;
+	vector<MeshInfo> vMesh;
+	vector<Joint> mSkeleton;
+	int m_time;
 
-	int							vertexnum;
-	int							m_time;
-
-
-
-	int* cpIndex = nullptr;
-	XMFLOAT3* mControlPoint = nullptr;
-	vector<CTexturedVertex>		m_vertex;
 
 public:
 	void LoadScene(char* pstrFbxFileName, FbxManager* pfbxSdkManager);
 	void LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pNode);
+	void LoadSkeletonHierarchy(FbxNode* pNode);
+	void LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex, int inParentIndex);
 
 	void AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime);
 	void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, FbxTime& fbxCurrentTime, FbxAMatrix& fbxmtxWorld);
@@ -106,6 +114,7 @@ public:
 public:
 	vector<FbxSubMesh>			mFbxMesh;
 	vector<MeshInfo>			mMesh;
+	vector<Joint>				mSkeleton;
 
 	int							vertexnum;
 	int							m_time;

@@ -149,6 +149,17 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 		int numCP = pfbxMesh->GetControlPointsCount();
 		int numPG = pfbxMesh->GetPolygonCount();
 
+		FbxVector4* pfbxv4Vertices = new FbxVector4[numCP];
+		::memcpy(pfbxv4Vertices, pfbxMesh->GetControlPoints(), numCP * sizeof(FbxVector4));
+
+		tempSubMesh.mCP = new XMFLOAT3[numCP];
+		for (int i = 0; i < numCP; i++) {
+			tempSubMesh.mCP[i].x = (float)pfbxv4Vertices[i][0];
+			tempSubMesh.mCP[i].y = (float)pfbxv4Vertices[i][2];
+			tempSubMesh.mCP[i].z = (float)pfbxv4Vertices[i][1];
+		}
+		
+
 		for (int pindex = 0; pindex < numPG; pindex++) {
 			for (int vindex = 0; vindex < 3; vindex++) {
 				int pvindex = pfbxMesh->GetPolygonVertex(pindex, vindex);
@@ -299,7 +310,14 @@ void FbxLoader::ExportFbxFile()
 				mFbxMesh[i].mVertex[j].m_xmf2TexCoord.y << endl;
 		}
 
-		if (mFbxMesh[i].nDeformer != 0) {
+		file << "[ControlPoint]" << endl;
+		for (int j = 0; j < mFbxMesh[i].nControlPoint; j++) {
+			file << mFbxMesh[i].mCP[j].x << " " <<
+				mFbxMesh[i].mCP[j].y << " " <<
+				mFbxMesh[i].mCP[j].z << endl;
+		}
+
+		/*if (mFbxMesh[i].nDeformer != 0) {
 			file << "[Animation]" << endl;
 			for (int j = 0; j < mFbxMesh[i].nControlPoint; j++) {
 				file << mFbxMesh[i].mClusterWeight[j] << " " <<
@@ -307,110 +325,8 @@ void FbxLoader::ExportFbxFile()
 					mFbxMesh[i].mClusterDef[j].y << " " <<
 					mFbxMesh[i].mClusterDef[j].z << endl;
 			}
-		}
+		}*/
 	}
 
-	/*
-	int num = 0;
-
-	for (int i = 0; i < 10; i++) {
-		num = i;
-		file.write((char*)&num, sizeof(num));
-	}
-
-	string mtext = "asdewxfsdfesfwererwrwesf23423sfser3";
-	string mtext2 = "dhtfydrrsetttttre!grrger";
-
-	file.write((char*)&mtext, sizeof(mtext));
-	file.write((char*)&mtext2, sizeof(mtext2));
-	
-	string writetemp;
-	writetemp.clear();
-
-	writetemp = "[VertexCount]: ";
-	writetemp += mVertex.size();
-	writetemp += "\n";
-
-	file << writetemp;
-
-	file.write((char*)&writetemp, sizeof(writetemp));
-	*/
-
-	//file << "[Vertex]" << endl;
-	//file << mControlPoint.size() << endl;
-
-	//for (int i = 0; i < mControlPoint.size(); i++) {
-	//	file << mControlPoint[i]->pos.x << " " << mControlPoint[i]->pos.y << " " << mControlPoint[i]->pos.z << " " <<
-	//		mControlPoint[i]->uv.x << " " << mControlPoint[i]->uv.y << endl;
-	//}
-
-	//file << "[VertexEnd]" << endl;
-	//
-	//file << "\n";
-
-	////Animation = false;
-
-	//if (Animation == true) {
-	//	file << "[JointCount]: " << mSkeleton.size() << "\n";
-	//	for (int i = 0; i < mSkeleton.size(); i++) {
-	//		file << "[" << i << "]: " <<
-	//			"Name " << mSkeleton[i].mName << "ParentIndex " << mSkeleton[i].mParentIndex <<
-	//			" BindPose " << mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 0) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 1) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 2) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(0, 3) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 0) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 1) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 2) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(1, 3) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 0) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 1) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 2) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(2, 3) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 0) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 1) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 2) << "," <<
-	//			mSkeleton[i].mGlobalBindposeInverse.Transpose().Get(3, 3) << "\n";
-	//	}
-
-	//	file << "\n";
-
-	//	file << "[Animation]" << "\n";
-	//	for (int i = 0; i < mSkeleton.size(); i++) {
-	//		Keyframe* temp = mSkeleton[i].mAnimation;
-
-	//		file << "[" << i << "]: " << "Name " << mSkeleton[i].mName << "\n";
-
-	//		while(temp) {
-	//			FbxVector4 translation = temp->mGlobalTransform.GetT();
-	//			FbxVector4 rotation = temp->mGlobalTransform.GetR();
-	//			translation.Set(translation.mData[0], translation.mData[1], -translation.mData[2]);
-	//			rotation.Set(-rotation.mData[0], -rotation.mData[1], rotation.mData[2]);
-	//			temp->mGlobalTransform.SetT(translation);
-	//			temp->mGlobalTransform.SetR(rotation);
-	//	
-	//			file << "[FrameNum]: " << temp->mFrameNum - 1 << " " <<
-	//				temp->mGlobalTransform.Transpose().Get(0, 0) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(0, 1) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(0, 2) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(0, 3) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(1, 0) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(1, 1) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(1, 2) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(1, 3) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(2, 0) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(2, 1) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(2, 2) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(2, 3) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(3, 0) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(3, 1) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(3, 2) << "," <<
-	//				temp->mGlobalTransform.Transpose().Get(3, 3) << "\n";
-
-	//			temp = temp->mNext;
-	//		}
-	//	}
-	//}
-	
 	file.close();
 }
