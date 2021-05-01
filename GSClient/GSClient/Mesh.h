@@ -40,7 +40,8 @@ class CTerrainVertex : public CVertex
 {
 public:
 	XMFLOAT2				m_xmf2TexCoord; 
-	XMFLOAT3				m_xmf3Normal;  
+	XMFLOAT3				m_xmf3Normal; 
+	BYTE					m_TextureInfo;
 
 public:
 	CTerrainVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f); }
@@ -412,11 +413,13 @@ public:
 
 public:
 	// 寒 积己	 
-	void CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		const XMFLOAT3& shift,
+	void CreateWallMesh(ID3D12Device* pd3dDevice,
+ ID3D12GraphicsCommandList* pd3dCommandList,
+
+		const XMFLOAT3& shift, BYTE textureInfo,
+
 		int heights[25],
-		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
-		int xNomalPos, int zNormalPos);
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], int xNomalPos, int zNormalPos);
 	// 寒 积己	 
 	//void CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	//	const XMFLOAT3& shift,
@@ -425,11 +428,14 @@ public:
 	//	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
 	//	int xNomalPos, int zNormalPos);
 
-	void CreateGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		const XMFLOAT3& shift,
-		int x_Index, int z_Index,
-		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
-		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
+	void CreateGridMesh(ID3D12Device* pd3dDevice,
+ ID3D12GraphicsCommandList* pd3dCommandList,
+
+		const XMFLOAT3& shift, BYTE textureInfo,
+ int x_Index,
+
+		int z_Index,
+		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 
 	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };

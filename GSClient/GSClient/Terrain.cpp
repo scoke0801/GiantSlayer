@@ -29,34 +29,35 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 				continue;
 			if ((j == 19 || j == 22)&& i == 17) 
 				continue;
-
+			BYTE textureInfo = 0x00;
 			if (i < 19 && j < 12)
 			{
-				//pObject->SetTextureIndex(0x01);
+				textureInfo = 0x01;
 			}
 			else if (i >= 19 && j < 12)
 			{
-				//pObject->SetTextureIndex(0x02);
+				textureInfo = 0x02;
 			}
 			else if (i >= 5 && j >= 12 && j < 17)
 			{
-				//pObject->SetTextureIndex(0x04);
+				textureInfo = 0x04;
 			}
 			else if (i < 5 && j >= 12 && j < 25)
 			{
-				//pObject->SetTextureIndex(0x08);
+				textureInfo = 0x08;
 			}
 			else if (i > 0 && i <= 10 && j >= 17 && j < 25)
 			{
-				//pObject->SetTextureIndex(0x08);
+				textureInfo = 0x08;
 			}
 			else
 			{
-				//pObject->SetTextureIndex(0x10);
+				textureInfo = 0x10;
 			}
 			
 			m_BindTerrainMesh->CreateGridMesh(pd3dDevice, pd3dCommandList, 
 				{ 4.0f * j, 0, 4.0f * i },
+				textureInfo,
 				4 * j, 4 * i,
 				m_Heights,
 				m_Normals);   
@@ -155,10 +156,11 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 
 void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
+	BYTE textureInfo = 0x00;
 	int heightWallIndex = 99;
 	for (int j = 0; j < 68; j += 4)
 	{
-		//(j < 48) ? pObject->SetTextureIndex(0x02) : pObject->SetTextureIndex(0x04);
+		(j < 48) ? textureInfo = (0x02) : textureInfo = 0x04;
 
 		int heightsTemp[25] = {
 			m_Heights[heightWallIndex][j] + 200.0f, m_Heights[heightWallIndex][j + 1] + 200.0f, m_Heights[heightWallIndex][j + 2] + 200.0f, m_Heights[heightWallIndex][j + 3] + 200.0f, m_Heights[heightWallIndex][j + 4] + 200.0f,
@@ -168,7 +170,8 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 			m_Heights[heightWallIndex][j],          m_Heights[heightWallIndex][j + 1],			m_Heights[heightWallIndex][j + 2],		    m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 4] };
 		 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
-			{ 1.0f * j, 0, 100.0f },
+			{ 1.0f * j, 0, 100.0f }, 
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			j, 96);  
@@ -176,7 +179,7 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	for (int j = 72; j < 100; j += 4)
 	{
-		//pObject->SetTextureIndex(0x20);
+		textureInfo = 0x20;
 
 		int heightsTemp[25] = {
 			m_Heights[heightWallIndex][j] + 200.0f,  m_Heights[heightWallIndex][j + 1] + 200.0f,  m_Heights[heightWallIndex][j + 2] + 200.0f,  m_Heights[heightWallIndex][j + 3] + 200.0f,  m_Heights[heightWallIndex][j + 4] + 200.0f,
@@ -187,13 +190,14 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
 			{ 1.0f * j, 0, 100.0f },
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			j, 96); 
 	}
 	{
 		int j = 0;
-		///pObject->SetTextureIndex(0x02);
+		textureInfo = (0x02);
 
 		int heightsTemp[25] = {
 		m_Heights[heightWallIndex][j + 4] + 200.0f, m_Heights[heightWallIndex][j + 3] + 200.0f, m_Heights[heightWallIndex][j + 2] + 200.0f, m_Heights[heightWallIndex][j + 1] + 200.0f, m_Heights[heightWallIndex][j] + 200.0f,
@@ -204,13 +208,14 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
 			{ -4.0f, 0, 100.0f },
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			j, 96);  
 	}
 	{
 		int j = 96; 
-		//pObject->SetTextureIndex(0x20); 
+		textureInfo = (0x20);
 
 		int heightsTemp[25] = {
 				m_Heights[heightWallIndex][j + 4] + 200.0f, m_Heights[heightWallIndex][j + 3] + 200.0f, m_Heights[heightWallIndex][j + 2] + 200.0f, m_Heights[heightWallIndex][j + 1] + 200.0f, m_Heights[heightWallIndex][j] + 200.0f,
@@ -221,13 +226,14 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
 			{ 100.0f, 0, 100.0f },
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			j, 96);
 	}
 	{
 		int j = 72; 
-		//pObject->SetTextureIndex(0x20); 
+		textureInfo = (0x20);
 
 		int heightsTemp[25] = {
 				m_Heights[heightWallIndex][j + 4] + 200.0f, m_Heights[heightWallIndex][j + 3] + 200.0f, m_Heights[heightWallIndex][j + 2] + 200.0f, m_Heights[heightWallIndex][j + 1] + 200.0f, m_Heights[heightWallIndex][j] + 200.0f,
@@ -237,7 +243,8 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[heightWallIndex][j + 4],          m_Heights[heightWallIndex][j + 3],			m_Heights[heightWallIndex][j + 2],		    m_Heights[heightWallIndex][j + 1],			m_Heights[heightWallIndex][j] };
 		 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
-			{ 1.0f * j - 4.0f, 0, 100.0f },
+			{ 1.0f * j - 4.0f, 0, 100.0f }, 
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			j, 96);  
@@ -246,8 +253,9 @@ void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
+	BYTE textureInfo = 0x00;
 	for (int j = 0; j < 48; j += 4) {
-		//SetTextureIndex(0x01);
+		textureInfo = 0x01;
 
 		int heightsTemp[25] = {
 				m_Heights[0][j],		  m_Heights[0][j + 1],		    m_Heights[0][j + 2],		  m_Heights[0][j + 3],		    m_Heights[0][j + 4],
@@ -258,13 +266,14 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
 			{ 1.0f * j , 0, -4.0f },
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			j, 0); 
 	}
 	
 	for (int j = 52; j < 100; j += 4) {
-		//SetTextureIndex(0x08);
+		textureInfo = 0x08;
 		int heightsTemp[25] = {
 		m_Heights[0][j],		  m_Heights[0][j + 1],		    m_Heights[0][j + 2],		  m_Heights[0][j + 3],		    m_Heights[0][j + 4],
 		m_Heights[0][j] + 700.0f, m_Heights[0][j + 1] + 700.0f, m_Heights[0][j + 2] + 700.0f, m_Heights[0][j + 3] + 700.0f, m_Heights[0][j + 4] + 700.0f,
@@ -273,14 +282,15 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_Heights[0][j] + 200.0f, m_Heights[0][j + 1] + 200.0f, m_Heights[0][j + 2] + 200.0f, m_Heights[0][j + 3] + 200.0f, m_Heights[0][j + 4] + 200.0f };
 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
-			{ 1.0f * j , 0.0f, -4.0f },
+			{ 1.0f * j , 0.0f, -4.0f }, 
+			textureInfo, 
 			heightsTemp,
 			m_Normals,
 			j, 0);   
 	} 
 
 	{
-		//SetTextureIndex(0x01);
+		textureInfo = 0x01;
 
 		int heightsTemp[25] = {
 				m_Heights[0][0],		  m_Heights[0][1],		    m_Heights[0][2],		  m_Heights[0][3],		    m_Heights[0][4],
@@ -290,7 +300,8 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[0][0] + 200.0f, m_Heights[0][1] + 200.0f, m_Heights[0][2] + 200.0f, m_Heights[0][3] + 200.0f, m_Heights[0][4] + 200.0f };
 		
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
-			{ -4.0f , 0, -4.0f },
+			{ -4.0f , 0, -4.0f }, 
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			0, 0); 
@@ -298,7 +309,7 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	{
 		int j = 52;
-		//SetTextureIndex(0x08);
+		textureInfo = 0x08;
 		int heightsTemp[25] = {
 		m_Heights[0][j + 4] - 100.0f, m_Heights[0][j + 3] - 100.0f,	m_Heights[0][j + 2] - 100.0f, m_Heights[0][j + 1] - 100.0f, m_Heights[0][j] - 100.0f,
 		m_Heights[0][j + 4] + 700.0f, m_Heights[0][j + 3] + 700.0f, m_Heights[0][j + 2] + 700.0f, m_Heights[0][j + 1] + 700.0f, m_Heights[0][j] + 700.0f,
@@ -307,7 +318,8 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_Heights[0][j + 4] + 200.0f, m_Heights[0][j + 3] + 200.0f, m_Heights[0][j + 2] + 200.0f, m_Heights[0][j + 1] + 200.0f, m_Heights[0][j] + 200.0f };
 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
-			{ 1.0f * j - 4.0f, 0.0f, -4.0f },
+			{ 1.0f * j - 4.0f, 0.0f, -4.0f }, 
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			j, 0); 
@@ -316,9 +328,10 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
+	BYTE textureInfo = 0x00;
 	for (int j = 0; j < 100; j += 4)
 	{
-		//(j < 76) ? pObject->SetTextureIndex(0x01) : pObject->SetTextureIndex(0x02);
+		(j < 76) ? textureInfo = (0x01) : textureInfo = (0x02);
 
 		int heightsTemp[25] = {
 				m_Heights[j + 4][0] + 200.0f, m_Heights[j + 4][0] + 500.0f, m_Heights[j + 4][0] + 700.0f, m_Heights[j + 4][0] + 700.0f, m_Heights[j + 4][0],
@@ -329,12 +342,13 @@ void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
 			{ -4.0f, 0, 1.0f * j },
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			0, j); 
 	}
 	{
-		//pObject->SetTextureIndex(0x01);
+		textureInfo = 0x01;
 
 		int heightsTemp[25] = {
 				m_Heights[4][0] + 200.0f, m_Heights[4][0] + 500.0f, m_Heights[4][0] + 700.0f, m_Heights[4][0] + 700.0f, m_Heights[4][0],
@@ -345,13 +359,14 @@ void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
 			{ -4.0f, 0, -4.0f },
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			0, 0); 
 	}
 
 	{
-		//pObject->SetTextureIndex(0x02);
+		textureInfo = 0x02;
 
 		int heightsTemp[25] = {
 				m_Heights[96][0] + 200.0f,    m_Heights[96][0] + 500.0f, m_Heights[96][0] + 700.0f,  m_Heights[96][0] + 700.0f,  m_Heights[96][0] ,
@@ -361,7 +376,8 @@ void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 				m_Heights[100][0] + 200.0f,  m_Heights[100][0] + 500.0f, m_Heights[100][0] + 700.0f, m_Heights[100][0] + 700.0f, m_Heights[100][0] };
 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
-			{ -4.0f, 0, 100.0f },
+			{ -4.0f, 0, 100.0f }, 
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			0, 96); 
@@ -370,10 +386,11 @@ void CTerrain::BuildLeftWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
+	BYTE textureInfo = 0x00;
 	int heightWallIndex = 99;
 	for (int j = 0; j < 68; j += 4)
 	{
-		//(j < 42) ? pObject->SetTextureIndex(0x08) : pObject->SetTextureIndex(0x20);
+		(j < 42) ? textureInfo = (0x08) : textureInfo = (0x20);
 
 		int heightsTemp[25] = {
 				m_Heights[j + 4][heightWallIndex], m_Heights[j + 4][heightWallIndex] + 700.0f, m_Heights[j + 4][heightWallIndex] + 700.0f, m_Heights[j + 4][heightWallIndex] + 500.0f, m_Heights[j + 4][heightWallIndex] + 200.0f,
@@ -384,13 +401,14 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
 			{ 100.0f, 0, 1.0f * j },
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			100, j);  
 	}
 	for (int j = 72; j < 100; j += 4)
 	{ 
-		//pObject->SetTextureIndex(0x20); 
+		textureInfo = (0x20);
 
 		int heightsTemp[25] = {
 				m_Heights[j + 4][heightWallIndex], m_Heights[j + 4][heightWallIndex] + 700.0f, m_Heights[j + 4][heightWallIndex] + 1500.0f, m_Heights[j + 4][heightWallIndex] + 500.0f, m_Heights[j + 4][heightWallIndex] + 200.0f,
@@ -401,13 +419,14 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		  
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
 			{ 100.0f, 0, 1.0f * j },
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			100, j);   
 	}
 	{
 		int j = 72; 
-		//pObject->SetTextureIndex(0x20); 
+		textureInfo = (0x20);
 
 		int heightsTemp[25] = {
 				m_Heights[j + 0][heightWallIndex], m_Heights[j + 0][heightWallIndex] + 700.0f, m_Heights[j + 0][heightWallIndex] + 1500.0f, m_Heights[j + 0][heightWallIndex] + 500.0f, m_Heights[j + 0][heightWallIndex] + 200.0f,
@@ -417,7 +436,8 @@ void CTerrain::BuildRightWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 				m_Heights[j + 4][heightWallIndex], m_Heights[j + 4][heightWallIndex] + 700.0f, m_Heights[j + 4][heightWallIndex] + 1500.0f, m_Heights[j + 4][heightWallIndex] + 500.0f, m_Heights[j + 4][heightWallIndex] + 200.0f };
 		 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList,
-			{ 100.0f, 0, 1.0f * j - 4.0f },
+			{ 100.0f, 0, 1.0f * j - 4.0f }, 
+			textureInfo,
 			heightsTemp,
 			m_Normals,
 			100, j); 
@@ -428,6 +448,7 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	CShader* pShader)
 {
+	BYTE textureInfo = 0x00;
 	int tolerance = 30; 
 	for (int i = 0; i < 25; ++i)
 	{
@@ -492,10 +513,11 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k * 4 + 3),
 						m_Heights[i * 4][j * 4] + (heightsGap[4] / 20) * (k * 4 + 4),
 					};
-					//pObject->SetTextureIndex(0x20);
+					textureInfo = (0x20);
 					m_BindTerrainMeshForLoosedWall[0]->CreateWallMesh(pd3dDevice, pd3dCommandList,
-						{ 20.0f * j + 4.0f * k, 0, 4.0f * i },
-						heightsTemp,
+						{ 20.0f * j + 4.0f * k, 0, 4.0f * i }, 
+						textureInfo,
+						heightsTemp,							
 						m_Normals,
 						j, i); 
 					//pObject->Scale(40.0f, 1.0f, 200.0f				}
@@ -553,10 +575,11 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 							m_Heights[i * 4][j * 4 + 4] + (heightsGap[4] / 20) * (k * 4),
 						};	
 
-						//pObject->SetTextureIndex(0x20);
-						//if (i == 10)pObject->SetTextureIndex(0x08); 
+						textureInfo = (0x20);
+						if (i == 10)textureInfo = (0x08);
 						m_BindTerrainMeshForLoosedWall[1]->CreateWallMesh(pd3dDevice, pd3dCommandList,
-							{ 4.0f * j , 0, 20.0f * i + 4.0f * k },
+							{ 4.0f * j , 0, 20.0f * i + 4.0f * k }, 
+							textureInfo,
 							heightsTemp,
 							m_Normals,
 							j, i); 
