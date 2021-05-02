@@ -1,5 +1,19 @@
 #include "stdafx.h"
 #include "Mesh.h"
+
+CParticleVertex::CParticleVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time)
+{
+	m_xmf3Position = xmf3Position;
+	m_xmf4Diffuse = xmf4Diffuse;
+	m_xmf3Time = xmf2Time;
+}
+
+CParticleTextureVertex::CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time,
+	UINT textureCode) : CParticleVertex(xmf3Position, xmf4Diffuse, xmf2Time)
+{
+
+}
+
 #pragma region About Basic Meshes
 CMesh::CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -1345,10 +1359,8 @@ CBindingTerrainMesh::~CBindingTerrainMesh()
 }
 
 void CBindingTerrainMesh::CreateWallMesh(ID3D12Device* pd3dDevice,
- ID3D12GraphicsCommandList* pd3dCommandList,
-
-	const XMFLOAT3& shift, BYTE textureInfo,
-
+ ID3D12GraphicsCommandList* pd3dCommandList, 
+	const XMFLOAT3& shift, BYTE textureInfo, 
 	int heights[25],
 	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], int xNomalPos, int zNormalPos) 
 {
@@ -1378,49 +1390,10 @@ void CBindingTerrainMesh::CreateWallMesh(ID3D12Device* pd3dDevice,
 	} 
 }
 
-//void CBindingTerrainMesh::CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-//	const XMFLOAT3& shift,
-//	bool xZero, bool zZero,
-//	int* heights,
-//	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
-//	int xNomalPos, int zNormalPos) 
-//{
-//	int WidthBlock_Count = 9, DepthBlock_Count = 9;
-//	int WidthBlock_Index = 257, DepthBlock_Index = 257;
-//	int xStart = 0, zStart = 0;
-//
-//	m_xmf4Color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-//
-//	m_nWidth = WidthBlock_Count + 1;
-//	m_nDepth = DepthBlock_Count + 1;
-//	  
-//	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
-//
-//	for (int i = 0, j = 0, z = (zStart + m_nDepth - 1); z >= zStart; z -= 2, ++j)
-//	{
-//		for (int x = xStart; x < (xStart + m_nWidth - 1); x += 2, i++)
-//		{
-//			if (i >= 25) break;
-//
-//			if (xZero) {
-//				m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(shift.x + xStart, heights[i], shift.z + z / 2);
-//			}
-//			else if (zZero) {
-//				m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(shift.x + x / 2, heights[i], shift.z + zStart);
-//			}
-//			m_Vertices[m_CurrentVertexIndex].m_xmf3Normal = normals[zNormalPos][xNomalPos];
-//			m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);
-//			++m_CurrentVertexIndex; 
-//		}
-//	} 
-//}
 void CBindingTerrainMesh::CreateGridMesh(ID3D12Device* pd3dDevice,
  ID3D12GraphicsCommandList* pd3dCommandList,
-
 	const XMFLOAT3& shift, BYTE textureInfo,
- int xIndex,
-
-	int zIndex,
+	int xIndex, int zIndex,
 	int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]) 
 {  
 	int WidthBlock_Count = 9, DepthBlock_Count = 9;
@@ -1953,4 +1926,37 @@ CHpSpPercentMesh::CHpSpPercentMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 CHpSpPercentMesh::~CHpSpPercentMesh()
 {
+}
+
+CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, 
+	ID3D12GraphicsCommandList* pd3dCommandList,
+	int particleCount) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = particleCount * 6;
+	m_Vertices = new CTerrainVertex[m_nVertices];
+	m_CurrentVertexIndex = 0;
+
+	m_nStride = sizeof(CParticleVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;  
+}
+
+CParticleMesh::~CParticleMesh()
+{
+}
+
+void CParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count)
+{
+}
+
+void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_Vertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	delete[] m_Vertices;
 }
