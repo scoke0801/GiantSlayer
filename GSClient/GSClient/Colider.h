@@ -24,7 +24,7 @@ protected:
 	BoundingOrientedBox	m_BoundingOrientedBox;
 	BoundingSphere		m_BoundingSphere; 
 	
-	ColliderType	m_Type;
+	ColliderType	m_Type = ColliderType::None;
 };
 
 class ColliderBox : public Collider {

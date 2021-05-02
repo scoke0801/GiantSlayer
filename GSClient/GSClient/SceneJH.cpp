@@ -291,7 +291,7 @@ void CSceneJH::ReleaseObjects()
 	m_Objects.clear();
 }
 
-void CSceneJH::Update(double elapsedTime)
+void CSceneJH::Update(float elapsedTime)
 {
 	//m_pLights->m_pLights[1].m_xmf3Position = m_CurrentCamera->GetPosition3f();
 	//m_pLights->m_pLights[1].m_xmf3Direction = m_CurrentCamera->GetLook3f();

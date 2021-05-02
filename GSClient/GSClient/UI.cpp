@@ -86,8 +86,8 @@ HelpTextUI::HelpTextUI(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	HELP_TEXT_INFO helpTextInfo)
 { 
 	CPlaneMeshTextured* pMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList,
-		0.0f, ((int)helpTextInfo * 0.1),
-		1.0f, ((int)helpTextInfo * 0.1) + 0.1,
+		0.0f, ((int)helpTextInfo * 0.1f),
+		1.0f, ((int)helpTextInfo * 0.1f) + 0.1f,
 		width, height, depth);
 	SetMesh(pMesh);
 }

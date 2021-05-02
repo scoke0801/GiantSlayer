@@ -311,7 +311,7 @@ void CSceneExport::ReleaseObjects()
 	m_Objects.clear();
 }
 
-void CSceneExport::Update(double elapsedTime)
+void CSceneExport::Update(float elapsedTime)
 {
 	ProcessInput();
 

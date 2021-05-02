@@ -33,7 +33,7 @@ public:
 	virtual ~CScene();
 
 	// just proto, fill with d3d obj
-	virtual void Update(double elapsedTime) {}
+	virtual void Update(float elapsedTime) {}
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) {}
@@ -84,7 +84,7 @@ public:
 	CNullScene();
 	~CNullScene();
 
-	virtual void Update(double elapsedTime) override; 
+	virtual void Update(float elapsedTime) override;
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override; 
 
 public:
