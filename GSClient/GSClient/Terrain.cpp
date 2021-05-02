@@ -94,7 +94,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	pObject->SetTextureIndex(0x01);
 	pObject->SetMesh(m_BindTerrainMeshForLoosedWall[1]);
 	pObject->Scale(200.0f, 1.0f, 40.0f);
-	m_Objects.push_back(std::move(pObject));
+	m_Objects.push_back(std::move(pObject)); 
 }
 
 CTerrain::~CTerrain()
@@ -107,8 +107,12 @@ void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	{
 		pObj->Draw(pd3dCommandList, pCamera);
 	}
-}
 
+	for (auto pBlockingObj : m_BlockingObjects) {
+		pBlockingObj->DrawForBoundingObj(pd3dCommandList, pCamera);
+	}
+}
+ 
 float CTerrain::GetHeight(int xPosition, int zPosition)
 {
 	int x = xPosition / 200.0f;
@@ -122,9 +126,9 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 	// 1. center
 	// 2. left end
 	// 3. right end
-
-	float fx = xPosition / 200.0f;
-	float fz = zPosition / 200.0f;
+	const float SCALE_SIZE = 200.0f;
+	float fx = xPosition / SCALE_SIZE;
+	float fz = zPosition / SCALE_SIZE;
 
 	/*ÁöÇüÀÇ ÁÂÇ¥ (fx, fz)´Â ÀÌ¹ÌÁö ÁÂÇ¥°èÀÌ´Ù.
 	³ôÀÌ ¸ÊÀÇ x-ÁÂÇ¥¿Í z-ÁÂÇ¥°¡ ³ôÀÌ ¸ÊÀÇ ¹üÀ§¸¦ ¹þ¾î³ª¸é
@@ -589,7 +593,7 @@ void CTerrain::ReviseLoosedTextureWall(ID3D12Device* pd3dDevice,
 		}
 	} 
 }
-
+  
 void CTerrain::InitNormals()
 {
 	for (int i = 0; i <= TERRAIN_HEIGHT_MAP_HEIGHT; ++i) {

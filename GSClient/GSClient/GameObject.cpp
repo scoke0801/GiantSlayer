@@ -172,6 +172,19 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 	}
 }
 
+void CGameObject::DrawForBoundingObj(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (gbBoundaryOn)
+	{
+		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0); 
+		m_pShader->RenderBoundary(pd3dCommandList, pCamera);
+		for (auto pBoundingMesh : m_BoundingObjectMeshes)
+		{
+			pBoundingMesh->Render(pd3dCommandList);
+		}
+	}
+}
+
 void CGameObject::SetPosition(XMFLOAT3 pos)
 {
 	m_xmf3PrevPosition = m_xmf3Position;
