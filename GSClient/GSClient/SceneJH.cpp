@@ -183,7 +183,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildSigns(pd3dDevice, pd3dCommandList);
 	BuildMirror(pd3dDevice, pd3dCommandList);
 	 
-	BuildPlayers(pd3dDevice, pd3dCommandList);
+	BuildPlayers(pd3dDevice, pd3dCommandList); 
+	
+	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -315,10 +317,9 @@ void CSceneJH::Update(double elapsedTime)
 		if (pObject->CollisionCheck(m_Player)) {
 			m_Player->FixCollision();
 			cout << "충돌했습니다!!!!!!!!!!!!\n";
-		}
+		} 
 	}
-	//m_Player->ColisionCheck();
-
+	 
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
 	if (m_MirrorCamera)
@@ -1837,10 +1838,10 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->SetCamera(m_Cameras[0]);
 	m_Players[0]->SetTextureIndex(0x200);
 	m_Players[0]->SetMesh(fbxMesh); 
-	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{ 0,0,0 });
+	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 5, XMFLOAT3{ 0,0,0 });
 
 	m_Players[0]->SetDrawable(true); 
-	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 5))); 
+	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 2.5f)));
 
 	m_MinimapCamera->SetTarget(m_Players[0]);
 
@@ -1852,11 +1853,22 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 		m_Players[i]->SetTextureIndex(0x200);
 		m_Players[i]->SetMesh(fbxMesh);
-		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{0,0,0});
+		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 5, XMFLOAT3{0,0,0});
 		m_Players[i]->SetDrawable(false); 
 
 		//m_Players[i]->BuildColliders();
 	}
+}
+
+void CSceneJH::EnterNewSector(int sectorNum)
+{
+	if (m_BlockingPlateToPreviousSector.size() <= 0) return;
+
+	CGameObject* obj = m_BlockingPlateToPreviousSector[sectorNum - 1];
+	m_BlockingPlateToPreviousSector.erase(sectorNum - 1);
+
+	m_Objects.push_back(std::move(obj));
+	EnterNewSector(sectorNum - 1); 
 }
 
 void CSceneJH::SendMouseInputPacket()
@@ -1876,6 +1888,116 @@ void CSceneJH::SendMouseInputPacket()
 	SendPacket(CFramework::GetInstance().GetSocket(),
 		reinterpret_cast<char*>(&p_mouseInput), p_mouseInput.size, retVal);
 	m_MousePositions.clear();
+}
+
+void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+// 4개 벽 테두리
+	CGameObject* pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 100, 10000, 20000, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f)));
+	pObject->SetPosition({ 0,-2000,10000 });
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 100, 10000, 20000, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f)));
+	pObject->SetPosition({ 19950,-2000,10000 });
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 20000, 10000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 10000,-2000,00 });
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 20000, 10000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 10000,-2000,19950 });
+	m_Objects.push_back(std::move(pObject));
+
+// Forest to DryDesrt 아래 방향 벽  
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 9600, 800, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(9600 * 0.5f, 800 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 4800,-1000, 15900 });
+	m_BlockingPlateToPreviousSector[0] = (std::move(pObject));
+
+// Forest to Desert 왼쪽 벽
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 15200, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 15200 * 0.5f)));
+	pObject->SetPosition({ 10000,-2000, 7600 });
+	m_Objects.push_back(std::move(pObject));	
+	
+// Forest 지역 내 못가는 지형 
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2000, 10000, 7000, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2000 * 0.5f, 10000 * 0.5f, 7000 * 0.5f)));
+	pObject->SetPosition({ 4000 + 1000, -2000, 11100});
+	pObject->UpdateColliders();
+	m_Objects.push_back(std::move(pObject));  
+
+// Desrt to DryDesrt and Rock 왼쪽 벽
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 400, 10000, 16000, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 16000 * 0.5f)));
+	pObject->SetPosition({ 13800, -2000, 8400 + 3600 });
+	m_Objects.push_back(std::move(pObject));
+
+// boss 지역 중간 벽
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 5600, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
+	pObject->SetPosition({ 15200 + 400,-2000, 2800 + 8000});
+	m_Objects.push_back(std::move(pObject)); 
+
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 5600, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
+	pObject->SetPosition({ 17600 + 400,-2000, 2800 + 8000 });
+	m_Objects.push_back(std::move(pObject)); 
+
+// 사막 지역 가로 벽
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 4000, 1000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 2000 + 9600,-2000, 15600 }); 
+	m_BlockingPlateToPreviousSector[1] = (std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 4000, 1000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 2000 + 9600,-3000, 3600 });
+	m_BlockingPlateToPreviousSector[2] = (std::move(pObject));
+
+// 보스 지역 입구 가로 벽
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2400, 10000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 1200 + 13600,-2000, 8000 });
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2400, 10000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 1200 + 13600 + 1600 + 2400,-2000, 8000 });
+	m_Objects.push_back(std::move(pObject));
 }
 
 void CSceneJH::RecvMouseProcessPacket()

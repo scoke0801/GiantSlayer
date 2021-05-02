@@ -14,9 +14,13 @@ class CSceneJH : public CScene
 private:
 	bool						m_isPlayerSelected = true;
 
-protected:
+private:
 	vector<CGameObject*>		m_Objects; 
 	vector<CGameObject*>		m_BillboardObjects; 
+	
+	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
+	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
+	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;	
 
 	CGameObject*				m_Mirror = nullptr;
 	CPlayer*					m_Player = nullptr;
@@ -141,6 +145,10 @@ private:
 	void BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void EnterNewSector(int sectorNum);
 
 private:
 	void SendMouseInputPacket();
