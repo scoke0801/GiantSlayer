@@ -23,7 +23,10 @@ private:
 	int							m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 
 	vector<CGameObject*>		m_Objects;
-
+	
+	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
+	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
+	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;
 private:
 	// for update timer
 	chrono::system_clock::time_point currentTime;
@@ -68,6 +71,9 @@ private:
 
 	void InitTerrainHeightMap(); 
 
+	void BuildBlockingRegionOnMap();
+
+	void EnterNewSector(int sectorNum);
 private:
 	unordered_map<OBJECT_ID, XMFLOAT3> m_ObjectPositions;
 };
