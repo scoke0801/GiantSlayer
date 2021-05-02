@@ -1833,7 +1833,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	m_Players[0]->Scale(50, 50, 50);
 	m_Players[0]->SetObjectName(OBJ_NAME::Player);
-	m_Players[0]->SetPosition({ 1550.0f,   230.0f,  1850.0f });
+	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 
 	m_Players[0]->SetCamera(m_Cameras[0]);
 	m_Players[0]->SetTextureIndex(0x200);
@@ -1841,7 +1841,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 5, XMFLOAT3{ 0,0,0 });
 
 	m_Players[0]->SetDrawable(true); 
-	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 10, 5)));
+	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 2.5f)));
 
 	m_MinimapCamera->SetTarget(m_Players[0]);
 
@@ -1858,6 +1858,17 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 		//m_Players[i]->BuildColliders();
 	}
+}
+
+void CSceneJH::EnterNewSector(int sectorNum)
+{
+	if (m_BlockingPlateToPreviousSector.size() <= 0) return;
+
+	CGameObject* obj = m_BlockingPlateToPreviousSector[sectorNum - 1];
+	m_BlockingPlateToPreviousSector.erase(sectorNum - 1);
+
+	m_Objects.push_back(std::move(obj));
+	EnterNewSector(sectorNum - 1); 
 }
 
 void CSceneJH::SendMouseInputPacket()
@@ -1916,7 +1927,7 @@ void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 9600, 800, 100, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(9600 * 0.5f, 800 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 4800,-1000, 15900 });
-	//m_Objects.push_back(std::move(pObject));
+	m_BlockingPlateToPreviousSector[0] = (std::move(pObject));
 
 // Forest to Desert 왼쪽 벽
 	pObject = new CGameObject();
@@ -1963,15 +1974,15 @@ void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 4000, 1000, 100, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
-	pObject->SetPosition({ 2000 + 9600,-2000, 15600 });
-	//m_Objects.push_back(std::move(pObject));
+	pObject->SetPosition({ 2000 + 9600,-2000, 15600 }); 
+	m_BlockingPlateToPreviousSector[1] = (std::move(pObject));
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 4000, 1000, 100, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 2000 + 9600,-3000, 3600 });
-	//m_Objects.push_back(std::move(pObject));
+	m_BlockingPlateToPreviousSector[2] = (std::move(pObject));
 
 // 보스 지역 입구 가로 벽
 	pObject = new CGameObject();
