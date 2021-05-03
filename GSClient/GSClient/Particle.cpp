@@ -51,7 +51,7 @@ void ParticleObject::SetParticleParameter(int idx, float parameter)
 
 CParticle::CParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count)
 {
-	CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, count);
+	CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, 1000);
 
 	ParticleObject* pObject = new ParticleObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("Particle"));

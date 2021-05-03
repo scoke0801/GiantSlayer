@@ -385,7 +385,7 @@ D3D12_DEPTH_STENCIL_DESC CreateDefaultDepthStencilDesc()
 
 float GetRandomValue(float scale, float min)
 {
-	return (rand() / (float)RAND_MAX) * scale - min;
+	return (rand() / (float)RAND_MAX) * scale + min;
 }
 
 XMFLOAT4 GetRandomVector4(float scale, float min)

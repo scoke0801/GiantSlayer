@@ -45,8 +45,13 @@ VS_PARTICLE_OUT VSParticle(VS_PARTICLE_IN input)
 	float parameter = gmtxWorld._31;
 
 	VS_PARTICLE_OUT outRes;
-	outRes.position.x = position.x + cos(2 * 3.14 * parameter);
-	outRes.position = float4(input.position, 1.0f);
+	
+	position.x = input.position.x + cos(2 * 3.14 * parameter * 1000);   
+	position.y = input.position.y + sin(2 * 3.14 * parameter * 1000);
+	position.z = input.position.z;
+
+	outRes.position = mul(mul(float4(position, 1.0f), gmtxView), gmtxProjection);
+
 	outRes.color = input.color;
 	outRes.time = input.time;
 	return outRes;
@@ -54,6 +59,6 @@ VS_PARTICLE_OUT VSParticle(VS_PARTICLE_IN input)
 
 float4 PSParticle(VS_PARTICLE_OUT input) : SV_TARGET
 {
-	float4 cColor = 0.0f;
+	float4 cColor = input.color; 
 	return cColor;
 }

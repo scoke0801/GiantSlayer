@@ -45,52 +45,6 @@ public:
 		return nullptr;
 	}
 public:
-	CShader* GetData22(const string& id)
-	{
-		auto targetData = m_Data.find(id);
-		if (targetData != m_Data.end())
-			return targetData->second;
-
-		if (id.compare("FBX")){ 
-			return GetData("FBX");
-		} 
-		if (id.compare("UI") || id.compare("Ui")){ 
-			return GetData("UI");
-		}
-		if (id.compare("Minimap"))
-		{ 
-			return GetData("Minimap");
-		}
-		if (id.compare("Player")){ 
-			return GetData("Player");
-		}
-		if (id.compare("Skybox")){ 
-			return GetData("SkyboxShader");
-		}
-		if (id.compare("Terrain")){ 
-			return GetData("Terrain");
-		}
-		if (id.compare("Billboard")){ 
-			return GetData("Billboard");
-		}
-		if (id.compare("Object") || id.compare("BasicObject")){ 
-			return GetData("BasicObject");
-		}
-		if (id.compare("DoorWall")){ 
-			return GetData("DoorWall");
-		}
-		if (id.compare("Puzzle")) { 
-			return GetData("Puzzle");
-		}
-		if (id.compare("Bridge")) { 
-			return GetData("Bridge");
-		}
-		string resultText = "지정되지 않은 셰이더 호출!";
-		resultText += (" " + id);
-		assert(!resultText.c_str());
-		return nullptr;
-	}
-public:
 	void CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	void CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);

@@ -117,7 +117,7 @@ public:
 public:
 	CParticleVertex() {}
 	CParticleVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time);
-	virtual ~CParticleVertex() { }
+	~CParticleVertex() { }
 };
 
 class CParticleTextureVertex : public CParticleVertex
