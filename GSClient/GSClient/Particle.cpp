@@ -1,30 +1,6 @@
 #include "stdafx.h"
 #include "Particle.h"
 
-CParticle::CParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count)
-{
-	CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, count);
-
-	//CGameObject* pObject = new CGameObject();
-	//pObject->SetShader(CShaderHandler::GetInstance().GetData("Particle"));
-	//pObject->SetTextureIndex(0x01);
-	//pObject->SetMesh(m_BindTerrainMesh);
-	//pObject->Scale(200.0f, 1.0f, 200.0f);
-	//m_ParticleObjs.push_back(std::move(pObject));
-}
-
-CParticle::~CParticle()
-{
-}
-
-void CParticle::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-}
-
-void CParticle::Update(float elapsedTime)
-{
-}
-
 ParticleObject::ParticleObject() :CGameObject()
 {
 }
@@ -72,3 +48,33 @@ void ParticleObject::SetParticleParameter(int idx, float parameter)
 		m_xmf4x4World._34 = parameter;
 	} 
 } 
+
+CParticle::CParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count)
+{
+	CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, count);
+
+	ParticleObject* pObject = new ParticleObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Particle"));
+	//pObject->SetTextureIndex(0x01);
+	pObject->SetMesh(pMesh);
+	pObject->SetParticleParameter(0, GetRandomValue(1, 0));
+	m_ParticleObjs.push_back(std::move(pObject));
+}
+
+CParticle::~CParticle()
+{
+}
+
+void CParticle::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	for (auto particle : m_ParticleObjs) {
+		particle->Draw(pd3dCommandList, pCamera);
+	}
+}
+
+void CParticle::Update(float elapsedTime)
+{
+	for (auto particle : m_ParticleObjs) {
+		particle->Update(elapsedTime);
+	}
+}

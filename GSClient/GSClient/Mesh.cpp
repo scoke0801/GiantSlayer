@@ -5,7 +5,7 @@ CParticleVertex::CParticleVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& x
 {
 	m_xmf3Position = xmf3Position;
 	m_xmf4Diffuse = xmf4Diffuse;
-	m_xmf3Time = xmf2Time;
+	m_xmf2Time = xmf2Time;
 }
 
 CParticleTextureVertex::CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time,
@@ -1933,11 +1933,14 @@ CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice,
 	int particleCount) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = particleCount * 6;
-	m_Vertices = new CTerrainVertex[m_nVertices];
+	m_Vertices = new CParticleVertex[m_nVertices];
 	m_CurrentVertexIndex = 0;
 
 	m_nStride = sizeof(CParticleVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;  
+
+	CreateMeshes(pd3dDevice, pd3dCommandList, particleCount);
+	CreateVertexBuffer(pd3dDevice, pd3dCommandList);
 }
 
 CParticleMesh::~CParticleMesh()
@@ -1946,6 +1949,13 @@ CParticleMesh::~CParticleMesh()
 
 void CParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count)
 {
+	for (int i = 0; i < count; ++i) {
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = GetRandomVector3(1, 0);
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = GetRandomVector3(1, 0);
+		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = GetRandomVector4(1, 0);
+		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = GetRandomVector2(1, 0);
+		++m_CurrentVertexIndex;
+	}
 }
 
 void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

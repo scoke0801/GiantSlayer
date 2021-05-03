@@ -24,6 +24,8 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 
 	CreateSkyboxShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature); 
+	
+	CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
 }
 
 void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -197,6 +199,17 @@ void CShaderHandler::CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
 	pTerrainShader->CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature); 
 	m_Data.emplace("Terrain", pTerrainShader);
+}
+
+void CShaderHandler::CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CShader* pParticleShader = new CTerrainTessellationShader();
+	pParticleShader->CreateVertexShader(L"Shaders\\ParticleShader.hlsl", "VSParticle");
+	pParticleShader->CreatePixelShader(L"Shaders\\ParticleShader.hlsl", "PSParticle");
+
+	pParticleShader->CreateInputLayout(ShaderTypes::Particle);
+	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("Particle", pParticleShader);
 }
 
 void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)

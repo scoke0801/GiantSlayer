@@ -22,6 +22,9 @@
     <FxCompile Include="Shaders\ShaderTH.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\ParticleShader.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader12.cpp">

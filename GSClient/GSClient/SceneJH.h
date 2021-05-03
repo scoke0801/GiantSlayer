@@ -8,6 +8,7 @@ class CPlayer;
 class UI;
 class HelpTextUI;
 class CTerrain;
+class CParticle;
 
 class CSceneJH : public CScene
 {
@@ -17,7 +18,8 @@ private:
 private:
 	vector<CGameObject*>		m_Objects; 
 	vector<CGameObject*>		m_BillboardObjects; 
-	
+	vector<CParticle*>			m_Particles;
+
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
 	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;	

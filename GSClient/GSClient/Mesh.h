@@ -109,23 +109,25 @@ public:
 
 class CParticleVertex : public CVertex
 {
-protected:
+public:
 	XMFLOAT4						m_xmf4Diffuse; // 색상
 	XMFLOAT3						m_xmf3Speed;   // 속도
-	XMFLOAT2						m_xmf3Time;   // x: emitTime, y: lifeTime 
+	XMFLOAT2						m_xmf2Time;   // x: emitTime, y: lifeTime 
 
 public:
+	CParticleVertex() {}
 	CParticleVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time);
 	virtual ~CParticleVertex() { }
 };
 
 class CParticleTextureVertex : public CParticleVertex
 {
-private: 
+public:
 	XMFLOAT2						m_xmf2TexCoord;
 	UINT							m_nTexture;
 
 public:
+	CParticleTextureVertex() {}
 	CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time,
 		UINT textureCode);
 	virtual ~CParticleTextureVertex() { } 
@@ -229,8 +231,8 @@ public:
 class CParticleMesh : public CMesh
 {
 private:
-	CTerrainVertex* m_Vertices;
-	int				m_CurrentVertexIndex = 0;
+	CParticleVertex*	m_Vertices;
+	int					m_CurrentVertexIndex = 0;
 
 public:
 	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
@@ -245,6 +247,7 @@ public:
 		ID3D12GraphicsCommandList* pd3dCommandList, int count);
 
 	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	 
 };
 //////////////////////////////////////////////////////////////////////////////
 //

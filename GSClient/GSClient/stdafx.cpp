@@ -383,6 +383,26 @@ D3D12_DEPTH_STENCIL_DESC CreateDefaultDepthStencilDesc()
 	return d3dDepthStencilDesc;
 }
 
+float GetRandomValue(float scale, float min)
+{
+	return (rand() / (float)RAND_MAX) * scale - min;
+}
+
+XMFLOAT4 GetRandomVector4(float scale, float min)
+{
+	return XMFLOAT4(GetRandomValue(scale, min), GetRandomValue(scale, min), GetRandomValue(scale, min), GetRandomValue(scale, min));
+}
+
+XMFLOAT3 GetRandomVector3(float scale, float min)
+{
+	return XMFLOAT3(GetRandomValue(scale, min), GetRandomValue(scale, min), GetRandomValue(scale, min));
+}
+
+XMFLOAT2 GetRandomVector2(float scale, float min)
+{
+	return XMFLOAT2(GetRandomValue(scale, min), GetRandomValue(scale, min));
+}
+
 
 
 
