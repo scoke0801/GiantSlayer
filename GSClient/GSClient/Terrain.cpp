@@ -917,3 +917,28 @@ void CTerrain::FileRead()
 		} 
 	}
 }
+
+CTerrainWater::CTerrainWater(ID3D12Device* pd3dDevice, 
+	ID3D12GraphicsCommandList* pd3dCommandList, 
+	ID3D12RootSignature* pd3dGraphicsRootSignature,
+	float fWidth, float fLength)
+{
+	CTexturedRectMesh* pWaterMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 
+		fWidth, 0.0f, fLength, 0.0f, 0.0f, 0.0f);
+
+	SetShader(CShaderHandler::GetInstance().GetData("TerrainWater"));
+	SetMesh(pWaterMesh);
+	SetTextureIndex(0x01);
+}
+
+CTerrainWater::~CTerrainWater()
+{
+}
+
+void CTerrainWater::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CTerrainWater::ReleaseShaderVariables()
+{
+}

@@ -174,9 +174,6 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 
-	CMeshFbx* fbxMesh;
-
-	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");
 	 
 	//BuildMapSector1(pd3dDevice, pd3dCommandList);
 	//BuildMapSector2(pd3dDevice, pd3dCommandList);
@@ -197,23 +194,31 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
 
-	CArrow* pObject = new CArrow(); 
-	pObject->SetMesh(fbxMesh);
-	pObject->SetPosition({ 500.0f,  100.0f, 1500.0f });
-	pObject->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
-	pObject->SetTextureIndex(0x20);
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pObject->Scale(15.0f, 15.0f, 15.0f);
-	pObject->SetUseable(false);
-	//pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
-	//pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
-	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+	//CMeshFbx* fbxMesh;
+	//fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");
+	//CArrow* pObject = new CArrow(); 
+	//pObject->SetMesh(fbxMesh);
+	//pObject->SetPosition({ 500.0f,  100.0f, 1500.0f });
+	//pObject->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
+	//pObject->SetTextureIndex(0x20);
+	//pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	//pObject->Scale(15.0f, 15.0f, 15.0f);
+	//pObject->SetUseable(false);
+	////pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
+	////pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
+	//m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
 
-	int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
-	if (-1 != idx) {
-		m_Particles->UseParticle(idx, pObject->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
-		pObject->ConnectParticle(m_Particles->GetParticleObj(idx));
-	}
+	//int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
+	//if (-1 != idx) {
+	//	m_Particles->UseParticle(idx, pObject->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+	//	pObject->ConnectParticle(m_Particles->GetParticleObj(idx));
+	//}
+
+	CTerrainWater* pTerrainWater = new CTerrainWater(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, 257 * 32, 257 * 32);
+	pTerrainWater->SetPosition(XMFLOAT3(5700.0f, -1300.0f, 16500.0f));
+
+	m_Objects.push_back(pTerrainWater);
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -231,7 +236,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"PuzzleBoard",
 		"HelpText",
 		"Dry_Tree","Stump","Dead_Tree",
-		"Desert_Rock"
+		"Desert_Rock", 
+		"TerrainWater"
 	};
 
 	const wchar_t* address[] =
@@ -249,7 +255,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Board.dds",
 		L"resources/UI/HelpText.dds",
 		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds",
-		L"resources/OBJ/Desert_Rock.dds"
+		L"resources/OBJ/Desert_Rock.dds",
+		L"resources/OBJ/Water.dds",
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -287,7 +294,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"PuzzleBoard",
 		"HelpText",
 		"Dry_Tree","Stump","Dead_Tree",
-		"Desert_Rock"
+		"Desert_Rock",
+		"TerrainWater"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -406,7 +414,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	//pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
-	//m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Mirror->Draw(pd3dCommandList, m_CurrentCamera);
 	 
 	m_Particles->Draw(pd3dCommandList, m_CurrentCamera); 

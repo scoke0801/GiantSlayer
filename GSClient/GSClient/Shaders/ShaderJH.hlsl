@@ -69,9 +69,10 @@ Texture2D gtxtDry_Tree	   : register(t33);
 Texture2D gtxtStump		   : register(t34);
 Texture2D gtxtDead_Tree	   : register(t35);
 Texture2D gtxtDesert_Rock  : register(t36);
+Texture2D gtxtWater  : register(t37);
 
-Texture2D gtxtMap          : register(t37);
-Texture2D gtxtMirror       : register(t38);
+Texture2D gtxtMap          : register(t38);
+Texture2D gtxtMirror       : register(t39);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -581,6 +582,8 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	return(output);
 }
 
+
+
 // PS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -652,7 +655,50 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	return (cColor * cIllumination);
 }
 
+static matrix<float, 3, 3> sf3x3TextureAnimation = { 
+	{ 0.0f, -1.0f, 0.0f },
+	{ 1.0f, 0.0f, 0.0f }, 
+	{ 0.0f, 0.0f, 0.0f }
+};
+struct VS_WATER_INPUT
+{
+	float3 position : POSITION;
+	float2 uv : TEXCOORD0;
+};
 
+struct VS_WATER_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD0;
+};
+
+VS_WATER_OUTPUT VSTerrainWater(VS_WATER_INPUT input)
+{
+	VS_WATER_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	return(output);
+}
+
+float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
+{
+	float2 uv = input.uv;
+	sf3x3TextureAnimation._m21 = gfTime * 0.016f;
+	uv = mul(float3(input.uv, 1.0f), sf3x3TextureAnimation).xy;
+
+	float4 cBaseTexColor = gtxtWater.Sample(gssWrap, uv);
+	//float4 cDetail0TexColor = gtxtWaterDetail0Texture.Sample(gssWrap, input.uv * 20.0f);
+	//float4 cDetail1TexColor = gtxtWaterDetail1Texture.Sample(gssWrap, input.uv * 20.0f);
+
+	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	cColor = cBaseTexColor; 
+	cColor.a = 0.6f;
+	//cColor = lerp(cBaseTexColor * cDetail0TexColor, cDetail1TexColor.r * 0.5f, 0.35f);
+	//cColor = cBaseTexColor * cDetail0TexColor;
+	return(cColor);
+}
 struct VS_TEXTURED_LIGHTING_INPUT
 {
 	float3 position : POSITION;
@@ -667,6 +713,7 @@ struct VS_TEXTURED_LIGHTING_OUTPUT
 	float3 normalW : NORMAL;
 	float2 uv : TEXCOORD;
 };
+
 
 VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
 {

@@ -24,7 +24,8 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 
 	CreateSkyboxShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature); 
-	
+	CreateTerrainWaterShader(pd3dDevice, pd3dGraphicsRootSignature);
+
 	CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
 }
 
@@ -199,6 +200,20 @@ void CShaderHandler::CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
 	pTerrainShader->CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature); 
 	m_Data.emplace("Terrain", pTerrainShader);
+}
+
+void CShaderHandler::CreateTerrainWaterShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CShader* pTerrainWaterShader = new CShader();
+	if (m_UserID == ShaderHandlerUser::JH) {
+		pTerrainWaterShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTerrainWater");
+		pTerrainWaterShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTerrainWater"); 
+	}
+	
+	pTerrainWaterShader->CreateInputLayout(ShaderTypes::TerrainWater);
+	pTerrainWaterShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
+		false, true);
+	m_Data.emplace("TerrainWater", pTerrainWaterShader);
 }
 
 void CShaderHandler::CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
