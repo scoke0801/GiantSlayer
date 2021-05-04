@@ -383,24 +383,33 @@ D3D12_DEPTH_STENCIL_DESC CreateDefaultDepthStencilDesc()
 	return d3dDepthStencilDesc;
 }
 
-float GetRandomValue(float scale, float min)
+float GetRandomValue(float scale, float min, float correctionValue)
 {
-	return (rand() / (float)RAND_MAX) * scale + min;
+	float t = (rand() / (float)RAND_MAX) * scale + correctionValue;
+	return Wrap(t, min, scale);
 }
 
-XMFLOAT4 GetRandomVector4(float scale, float min)
+XMFLOAT4 GetRandomVector4(float scale, float min, float correctionValue)
 {
-	return XMFLOAT4(GetRandomValue(scale, min), GetRandomValue(scale, min), GetRandomValue(scale, min), GetRandomValue(scale, min));
+	return XMFLOAT4(GetRandomValue(scale, min, correctionValue), GetRandomValue(scale, min, correctionValue),
+		GetRandomValue(scale, min, correctionValue), GetRandomValue(scale, min, correctionValue));
 }
 
-XMFLOAT3 GetRandomVector3(float scale, float min)
+XMFLOAT3 GetRandomVector3(float scale, float min, float correctionValue)
 {
-	return XMFLOAT3(GetRandomValue(scale, min), GetRandomValue(scale, min), GetRandomValue(scale, min));
+	return XMFLOAT3(GetRandomValue(scale, min, correctionValue), GetRandomValue(scale, min, correctionValue),
+		GetRandomValue(scale, min, correctionValue));
 }
 
-XMFLOAT2 GetRandomVector2(float scale, float min)
+XMFLOAT2 GetRandomVector2(float scale, float min, float correctionValue)
 {
-	return XMFLOAT2(GetRandomValue(scale, min), GetRandomValue(scale, min));
+	return XMFLOAT2(GetRandomValue(scale, min, correctionValue), GetRandomValue(scale, min, correctionValue));
+}
+
+float Wrap(float data, float min, float max)
+{
+	const float newData = fmod(data - min, max - min);
+	return (newData >= 0) ? (newData + min) : (newData + max);
 }
 
 

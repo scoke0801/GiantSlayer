@@ -100,7 +100,8 @@ struct CB_GAMESCENE_FRAME_DATA
 {
 	UINT m_PlayerHP = 0;
 	UINT m_PlayerSP = 0;
-	UINT m_PlayerWeapon = 0x01; 
+	UINT m_PlayerWeapon = 0x01;
+	float m_Time;
 };
 
 enum class PulledModel : int { Center = 0, Left = 1, Right, Top, Bottom };

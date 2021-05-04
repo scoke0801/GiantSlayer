@@ -72,6 +72,7 @@ private:
 private:	// about SceneInfo
 	ID3D12Resource*				m_pd3dcbSceneInfo = NULL;
 	CB_GAMESCENE_FRAME_DATA*	m_pcbMappedSceneFrameData = NULL;
+	chrono::steady_clock::time_point m_CreatedTime;
 
 private: // for server mouse input process
 	vector<POINTF>				m_MousePositions;

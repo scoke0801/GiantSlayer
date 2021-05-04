@@ -30,7 +30,7 @@ void ParticleObject::SetDirecionVector(const XMFLOAT3& direction)
 void ParticleObject::SetParticleParameter(int idx, float parameter)
 {
 	if (idx == 0) {      // randomParameter
-		m_xmf4x4World._31 = parameter;
+		m_xmf4x4World._31 = parameter; 
 	}
 	else if (idx == 1) { // emitTime
 		m_xmf4x4World._32 = parameter;
@@ -57,7 +57,7 @@ CParticle::CParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("Particle"));
 	//pObject->SetTextureIndex(0x01);
 	pObject->SetMesh(pMesh);
-	pObject->SetParticleParameter(0, GetRandomValue(1, 0));
+	pObject->SetParticleParameter(0, GetRandomValue(1.0f, 0.0f, 0.0f));
 	m_ParticleObjs.push_back(std::move(pObject));
 }
 

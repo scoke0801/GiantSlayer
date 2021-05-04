@@ -10,9 +10,10 @@ cbuffer cbGameOBJInfo : register(b0)
 //게임 씬의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbSceneFrameData : register(b1)
 {
-	uint	gnHP : packoffset(c0.x);
-	uint	gnSP : packoffset(c0.y);
-	uint	gnWeapon : packoffset(c0.z);
+	uint	gnHP : packoffset(c0.r);
+	uint	gnSP: packoffset(c0.g);
+	uint	gnWeapon: packoffset(c0.b);
+	float   gfTime : packoffset(c0.a);
 };
 
 //카메라의 정보를 위한 상수 버퍼를 선언한다. 

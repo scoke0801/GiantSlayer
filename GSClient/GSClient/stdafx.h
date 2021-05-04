@@ -99,11 +99,12 @@ extern D3D12_DEPTH_STENCIL_DESC CreateDefaultDepthStencilDesc();
 
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
 
-extern float GetRandomValue(float scale, float min);
+extern float GetRandomValue(float scale, float min, float correctionValue);
 
-extern XMFLOAT4 GetRandomVector4(float scale, float min);
-extern XMFLOAT3 GetRandomVector3(float scale, float min);
-extern XMFLOAT2 GetRandomVector2(float scale, float min);
+extern XMFLOAT4 GetRandomVector4(float scale, float min, float correctionValue);
+extern XMFLOAT3 GetRandomVector3(float scale, float min, float correctionValue);
+extern XMFLOAT2 GetRandomVector2(float scale, float min, float correctionValue);
+extern float Wrap(float data, float min, float max);
 
 #define EPSILON					1.0e-10f
 

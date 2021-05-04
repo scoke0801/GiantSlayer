@@ -9,10 +9,11 @@ cbuffer cbGameOBJInfo : register(b0)
 
 //게임 씬의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbSceneFrameData : register(b1)
-{
-	uint	gnHP : packoffset(c0.x);
-	uint	gnSP : packoffset(c0.y);
-	uint	gnWeapon : packoffset(c0.z);
+{ 
+	uint	gnHP : packoffset(c0.r);
+	uint	gnSP: packoffset(c0.g);
+	uint	gnWeapon: packoffset(c0.b);
+	float   gfTime : packoffset(c0.a);
 };
 
 //카메라의 정보를 위한 상수 버퍼를 선언한다. 
@@ -41,17 +42,42 @@ struct VS_PARTICLE_OUT
 //
 VS_PARTICLE_OUT VSParticle(VS_PARTICLE_IN input)
 {
-	float3 position = float3(gmtxWorld._41, gmtxWorld._42, gmtxWorld._43);
-	float parameter = gmtxWorld._31;
+	//copyMat._41 = position.x + cos(2 * 3.14 * parameter) * 10;
+	//copyMat._42 = position.y + sin(2 * 3.14 * parameter) * 10;
+	//copyMat._43 = position.z;
+	//copyMat._31 = 0;
+
+	
+	//outRes.position._43 = input.position.z;
+
+	//
+	//
 
 	VS_PARTICLE_OUT outRes;
+
+	matrix copyMat = gmtxWorld;
+	float3 position = input.position;
+	float parameter = gmtxWorld._31;
+	float emitTime = input.time.x;
+	float lifeTime = input.time.y;
+
+	float newTime = (gfTime - emitTime);
+	newTime = fmod(newTime, lifeTime); 
 	
-	position.x = input.position.x + cos(2 * 3.14 * parameter * 1000);   
-	position.y = input.position.y + sin(2 * 3.14 * parameter * 1000);
-	position.z = input.position.z;
-
-	outRes.position = mul(mul(float4(position, 1.0f), gmtxView), gmtxProjection);
-
+	if (newTime > 0.0f) {
+		float t = newTime;
+		float tt = newTime * newTime; 
+		//float3 temp = t * (float3(input.speed,1.0f));
+		float newAcc = float3(0, -9.8f, 0.0f);
+		position = position + t * input.speed + tt * newAcc * 0.5f;
+		//position.x = position.x + cos(2 * 3.14 * parameter) * 1000;
+		//position.y = position.y + sin(2 * 3.14 * parameter) * 1000;
+		//position.z = position.z + newTime;
+		outRes.position = mul(mul(mul(float4(position, 1.0f), copyMat), gmtxView), gmtxProjection);  
+	}
+	else {
+		outRes.position = 0.0f;
+	}
 	outRes.color = input.color;
 	outRes.time = input.time;
 	return outRes;
