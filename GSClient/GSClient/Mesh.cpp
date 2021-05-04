@@ -2030,3 +2030,120 @@ void CArrowParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12Grap
 
 	delete[] m_Vertices;
 }
+
+CTexParticleMesh::CTexParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	int particleCount) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = particleCount * 6;
+	m_Vertices = new CParticleTextureVertex[m_nVertices];
+	m_CurrentVertexIndex = 0; 
+
+	m_nStride = sizeof(CParticleTextureVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	CreateMeshes(pd3dDevice, pd3dCommandList, particleCount, PARTICLE_TYPE::HitParticleTex);
+	CreateVertexBuffer(pd3dDevice, pd3dCommandList);
+}
+
+CTexParticleMesh::~CTexParticleMesh()
+{
+}
+ 
+void CTexParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count, PARTICLE_TYPE type)
+{
+	const float PARTICLE_SIZE = 0.2f;
+
+	float goalSize = 15;
+	float perSize = goalSize / count;
+
+	float goalSpeed = 165.0f * 3.0f;
+	float perSpeed = goalSpeed / count;
+	UINT texIndex = 0;
+	for (int i = 0; i < count; ++i) {
+		XMFLOAT3 pos = GetRandomVector3(1000, 1, 50);
+		pos.x = 0.0f;
+		pos.y = 0.0f;
+		pos.z = 0.0f;
+		XMFLOAT4 color = XMFLOAT4(GetRandomValue(1.0f, 0.7f, 0.7f),
+			GetRandomValue(1.0f, 0.7f, 0.7f), 0.3f, 1.0f);
+		XMFLOAT3 speed = GetRandomVector3(200.0f, -400.0f, -200.0f);
+		speed.z = perSpeed * i;
+		XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f));
+
+		// 매개변수 방정식 값, 원 크기, 원 주기
+		XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(10.0f, 0.0f, 0.0f), perSize * (count - i), GetRandomValue(2.0f, 0.0f, 0.0f));
+		
+		// v0 
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
+		++m_CurrentVertexIndex;
+
+		// v1
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(1.0f, 0.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
+		++m_CurrentVertexIndex;
+
+		// v2
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(1.0f, 1.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
+		++m_CurrentVertexIndex;
+
+		// v3
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
+		++m_CurrentVertexIndex;
+
+		// v4
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(1.0f, 1.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
+		++m_CurrentVertexIndex;
+
+		// v5
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(0.0f, 1.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
+		++m_CurrentVertexIndex;
+	}
+}
+
+void CTexParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_Vertices,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	delete[] m_Vertices;
+}

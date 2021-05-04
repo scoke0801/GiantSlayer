@@ -1,13 +1,5 @@
 #pragma once
 
-// 객체 공격 피격 시점 등에서 사용할 파티클 시스템을 정의합니다.
-
-enum class PARTICLE_TYPE : UINT {
-	HitParticle,	// 피격시 사용할 파티클
-	ArrowParticle,	// 화살 뒤에 사용할 파티클
-};
-constexpr float ARROW_PARTICLE_LIFE_TIME = 10.0f;
-
 class ParticleObject : public CGameObject
 {
 private:

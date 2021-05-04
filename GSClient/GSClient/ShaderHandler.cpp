@@ -203,13 +203,20 @@ void CShaderHandler::CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 
 void CShaderHandler::CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
-	CShader* pParticleShader = new CTerrainTessellationShader();
-	pParticleShader->CreateVertexShader(L"Shaders\\ParticleShader.hlsl", "VSParticle");
+	CShader* pParticleShader = new CShader();
+	pParticleShader->CreateVertexShader(L"Shaders\\ParticleShader.hlsl", "VSArrowParticle");
 	pParticleShader->CreatePixelShader(L"Shaders\\ParticleShader.hlsl", "PSParticle");
 
 	pParticleShader->CreateInputLayout(ShaderTypes::Particle);
 	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
-	m_Data.emplace("Particle", pParticleShader);
+	m_Data.emplace("ArrowParticle", pParticleShader);
+
+	pParticleShader->CreateVertexShader(L"Shaders\\ParticleShader.hlsl", "VSArrowParticle");
+	pParticleShader->CreatePixelShader(L"Shaders\\ParticleShader.hlsl", "PSParticle");
+
+	pParticleShader->CreateInputLayout(ShaderTypes::Particle);
+	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("ArrowParticle", pParticleShader);
 }
 
 void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)

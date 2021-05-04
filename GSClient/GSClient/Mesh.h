@@ -1,4 +1,4 @@
-#pragma once
+#pragma once 
 
 //정점을 표현하기 위한 클래스를 선언한다. 
 class CVertex
@@ -131,7 +131,7 @@ public:
 	CParticleTextureVertex() {}
 	CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time,
 		UINT textureCode);
-	virtual ~CParticleTextureVertex() { } 
+	~CParticleTextureVertex() { } 
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -249,6 +249,29 @@ public:
 
 	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	 
+};
+
+class CTexParticleMesh : public CMesh
+{
+private:
+	CParticleTextureVertex * m_Vertices;
+	int					m_CurrentVertexIndex = 0;
+
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CTexParticleMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		int particleCount);
+
+	virtual ~CTexParticleMesh();
+
+public: 
+	void CreateMeshes(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		int count, PARTICLE_TYPE type);
+
+	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
 };
 //////////////////////////////////////////////////////////////////////////////
 //

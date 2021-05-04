@@ -12,6 +12,7 @@ enum class ShaderTypes
 	Billboard,
 	Terrain, 
 	Particle,
+	TexParticle,
 	Count
 };
 

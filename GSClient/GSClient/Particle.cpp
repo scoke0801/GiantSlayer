@@ -18,6 +18,12 @@ void ParticleObject::Update(float fTimeElapsed)
 			m_elapsedTime = 0.0f;
 		}
 	}
+	else if (m_Type == PARTICLE_TYPE::HitParticleTex) {
+		if (m_elapsedTime > HIT_PARTICLE_LIFE_TIME) {
+			m_IsCanUse = false;
+			m_elapsedTime = 0.0f;
+		}
+	}
 }
 
 void ParticleObject::SetSpeedVector(const XMFLOAT3& speed)
@@ -64,9 +70,12 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		CArrowParticleMesh* pMesh = new CArrowParticleMesh(pd3dDevice, pd3dCommandList, count);
 
 		ParticleObject* pObject = new ParticleObject();
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("Particle"));
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("ArrowParticle"));
 		pObject->SetMesh(pMesh);
 		m_ParticleObjs.push_back(std::move(pObject));
+	}
+	else if (type == PARTICLE_TYPE::HitParticleTex) {
+
 	}
 }
 
