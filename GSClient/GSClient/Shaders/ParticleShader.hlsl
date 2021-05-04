@@ -30,6 +30,7 @@ struct VS_PARTICLE_IN
 	float4 color    : COLOR;
 	float3 speed    : SPEED;
 	float2 time     : time;
+	float3 randomValues : RVALUE;
 };
 struct VS_PARTICLE_OUT
 {
@@ -46,34 +47,43 @@ VS_PARTICLE_OUT VSParticle(VS_PARTICLE_IN input)
 	//copyMat._42 = position.y + sin(2 * 3.14 * parameter) * 10;
 	//copyMat._43 = position.z;
 	//copyMat._31 = 0;
-
-	
-	//outRes.position._43 = input.position.z;
-
-	//
-	//
-
+	  
 	VS_PARTICLE_OUT outRes;
 
-	matrix copyMat = gmtxWorld;
-	float3 position = input.position;
-	float parameter = gmtxWorld._31;
 	float emitTime = input.time.x;
 	float lifeTime = input.time.y;
 
-	float newTime = (gfTime - emitTime);
-	newTime = fmod(newTime, lifeTime); 
-	
-	if (newTime > 0.0f) {
+	float newTime = (gfTime - emitTime); 
+	//newTime = fmod(newTime, lifeTime); 
+	if (newTime > lifeTime)
+		newTime = -1.0f;
+	if (newTime > 0.0f) 
+	{ 
 		float t = newTime;
 		float tt = newTime * newTime; 
-		//float3 temp = t * (float3(input.speed,1.0f));
-		float newAcc = float3(0, -9.8f, 0.0f);
-		position = position + t * input.speed + tt * newAcc * 0.5f;
-		//position.x = position.x + cos(2 * 3.14 * parameter) * 1000;
-		//position.y = position.y + sin(2 * 3.14 * parameter) * 1000;
-		//position.z = position.z + newTime;
-		outRes.position = mul(mul(mul(float4(position, 1.0f), copyMat), gmtxView), gmtxProjection);  
+
+		matrix copyMat = gmtxWorld;
+		float3 newAcc = float3(0, -0.0f, 0.0f);
+		float toDegree = degrees(2 * 3.14 * input.randomValues.x); 
+		float circleSize = input.randomValues.y;
+		  
+		float3 directionVec = float3(copyMat._21, copyMat._22, copyMat._23);
+		float speedLength = length(input.speed);
+		float3 speed = directionVec * speedLength;
+
+		float3 objPos = float3(copyMat._41, copyMat._42, copyMat._43);
+		float3 position = input.position + objPos; 
+		position.x = position.x + cos(toDegree) * circleSize;
+		position.y = position.y + sin(toDegree) * circleSize; 
+		position = position + t * speed + tt * newAcc * 0.5f;
+
+		copyMat._22 = 1.0f;
+		copyMat._21 = copyMat._23 = copyMat._24 = 0.0f;
+		copyMat._41 = position.x;
+		copyMat._42 = position.y;
+		copyMat._43 = position.z;
+
+		outRes.position = mul(mul(mul(float4(input.position, 1.0f), copyMat), gmtxView), gmtxProjection);   
 	}
 	else {
 		outRes.position = 0.0f;
@@ -85,6 +95,7 @@ VS_PARTICLE_OUT VSParticle(VS_PARTICLE_IN input)
 
 float4 PSParticle(VS_PARTICLE_OUT input) : SV_TARGET
 {
-	float4 cColor = input.color; 
+	float4 cColor = input.color;
+	//cColor = 1.0f;
 	return cColor;
 }

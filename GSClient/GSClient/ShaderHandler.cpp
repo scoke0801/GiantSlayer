@@ -77,7 +77,7 @@ void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignatu
 	pFBXFeatureShaderRight->CreateInputLayout(ShaderTypes::Textured);
 	pFBXFeatureShaderRight->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
 	pFBXFeatureShaderRight->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
-	m_Data.emplace("FBXFeatureRight", pFBXFeatureShaderRight);
+	m_Data.emplace("FBXFeatureRight", pFBXFeatureShaderRight); 
 }
 
 void CShaderHandler::CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)

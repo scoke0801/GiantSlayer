@@ -85,7 +85,7 @@
       <Filter>GameObject\Texture</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
-      <Filter>GameObject\Shader</Filter>
+      <Filter>Shader</Filter>
     </ClCompile>
     <ClCompile Include="SceneTH.cpp">
       <Filter>Scene</Filter>
@@ -219,7 +219,7 @@
       <Filter>GameObject\Texture</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
-      <Filter>GameObject\Shader</Filter>
+      <Filter>Shader</Filter>
     </ClInclude>
     <ClInclude Include="SceneTH.h">
       <Filter>Scene</Filter>
@@ -349,9 +349,6 @@
     <Filter Include="GameObject\Texture">
       <UniqueIdentifier>{2246ee66-e90c-4029-a56a-fb1013378e75}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameObject\Shader">
-      <UniqueIdentifier>{04f39449-42c1-42ab-bb97-94aa7f89a159}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GameObject\UI">
       <UniqueIdentifier>{957b4eb7-391b-4bc8-9c0d-74a018cb3ce4}</UniqueIdentifier>
     </Filter>
@@ -396,6 +393,9 @@
     </Filter>
     <Filter Include="Mesh">
       <UniqueIdentifier>{bd48eed7-ce34-411c-a356-d5a13f0e4a3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{04f39449-42c1-42ab-bb97-94aa7f89a159}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

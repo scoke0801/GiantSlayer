@@ -6,9 +6,16 @@ enum class PARTICLE_TYPE : UINT {
 	HitParticle,	// 피격시 사용할 파티클
 	ArrowParticle,	// 화살 뒤에 사용할 파티클
 };
+constexpr float ARROW_PARTICLE_LIFE_TIME = 10.0f;
 
 class ParticleObject : public CGameObject
 {
+private:
+	bool m_IsCanUse = false;
+	PARTICLE_TYPE m_Type;
+
+	float m_elapsedTime = 0.0f;
+
 public:
 	ParticleObject();
 	virtual ~ParticleObject();
@@ -24,20 +31,36 @@ public:
 	void SetSpeedVector(const XMFLOAT3& speed);
 	void SetDirecionVector(const XMFLOAT3& direction);
 	void SetParticleParameter(int idx, float parameter);
+
+	bool IsCanUse() const { return m_IsCanUse; }
+	void SetUseable(bool data) { m_IsCanUse = data; }
+
+	void SetType(PARTICLE_TYPE type) { m_Type = type; }
+	PARTICLE_TYPE GetParticleType() const { return m_Type; }
 };
 
 class CParticle
 {
 private:
 	vector<ParticleObject*> m_ParticleObjs;
-
 public:
-	CParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count);
+	CParticle( );
 	~CParticle();
 
-public:
+public: 
+	void AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		int count,
+		PARTICLE_TYPE type);
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void Update(float elapsedTime);
+
+	int GetCanUseableParticle(PARTICLE_TYPE type);
+
+	void SetPosition(int idx, const XMFLOAT3& pos);
+	void SetDirection(int idx, const XMFLOAT3& dir);
+
+	void UseParticle(int idx, const XMFLOAT3& pos, const XMFLOAT3& dir);
+	void UseParticle(int idx);
 };
 
 // 사용할지는 아직 고민.. 

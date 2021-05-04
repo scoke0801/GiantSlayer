@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Mesh.h"
-
+#include "Particle.h"
 CParticleVertex::CParticleVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time)
 {
 	m_xmf3Position = xmf3Position;
@@ -11,7 +11,6 @@ CParticleVertex::CParticleVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& x
 CParticleTextureVertex::CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time,
 	UINT textureCode) : CParticleVertex(xmf3Position, xmf4Diffuse, xmf2Time)
 {
-
 }
 
 #pragma region About Basic Meshes
@@ -1928,15 +1927,14 @@ CHpSpPercentMesh::~CHpSpPercentMesh()
 {
 }
 
-CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, 
+CArrowParticleMesh::CArrowParticleMesh(ID3D12Device* pd3dDevice, 
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	int particleCount) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = particleCount * 6;
 	m_Vertices = new CParticleVertex[m_nVertices];
 	m_CurrentVertexIndex = 0;
-
-	int test = sizeof(CVertex);
+	 
 	m_nStride = sizeof(CParticleVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;  
 
@@ -1944,37 +1942,38 @@ CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice,
 	CreateVertexBuffer(pd3dDevice, pd3dCommandList);
 }
 
-CParticleMesh::~CParticleMesh()
+CArrowParticleMesh::~CArrowParticleMesh()
 {
 }
 
-void CParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count)
-{
-	/*
-	pVertices[i++] = CTexturedVertex(XMFLOAT3(startPos.x + -fx, startPos.y + +fy, startPos.z-fz), XMFLOAT2(0.0f, 0.0f), normals[0]);
-	pVertices[i++] = CTexturedVertex(XMFLOAT3(startPos.x + +fx, startPos.y + +fy, startPos.z-fz), XMFLOAT2(1.0f, 0.0f), normals[0]);
-	pVertices[i++] = CTexturedVertex(XMFLOAT3(startPos.x + +fx, startPos.y + -fy, startPos.z-fz), XMFLOAT2(1.0f, 1.0f), normals[0]);
+void CArrowParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count)
+{  
+	const float PARTICLE_SIZE = 0.2f;
 
-	pVertices[i++] = CTexturedVertex(XMFLOAT3(startPos.x + -fx, startPos.y + +fy, startPos.z - fz), XMFLOAT2(0.0f, 0.0f), normals[0]);
-	pVertices[i++] = CTexturedVertex(XMFLOAT3(startPos.x + +fx, startPos.y + -fy, startPos.z - fz), XMFLOAT2(1.0f, 1.0f), normals[0]);
-	pVertices[i++] = CTexturedVertex(XMFLOAT3(startPos.x + -fx, startPos.y + -fy, startPos.z - fz), XMFLOAT2(0.0f, 1.0f), normals[0]);
-	*/
+	float goalSize = 15;
+	float perSize = goalSize / count;
 
-	const float PARTICLE_SIZE = 5.0f;
+	float goalSpeed = 165.0f * 3.0f;
+	float perSpeed = goalSpeed / count;
 	for (int i = 0; i < count; ++i) {
-		XMFLOAT3 pos = GetRandomVector3(1000, 0, 50);
-		//pos.x = 0;
-		//pos.y = 0;
-		pos.z = 500;
-		XMFLOAT4 color = XMFLOAT4(GetRandomValue(1.0f, 0.0f, 0.7f),
-			GetRandomValue(1.0f, 0.0f, 0.7f), 0.1f, GetRandomValue(1.0f, 0.0f, 0.0f));
-		XMFLOAT3 speed = GetRandomVector3(100.0f, -50.0f, -50.0f);
-		XMFLOAT2 time = XMFLOAT2(GetRandomValue(7.0f, 0.0f, 5.0f), GetRandomValue(10.0f, 0.0f, 5.0f)); 
+		XMFLOAT3 pos = GetRandomVector3(1000, 1, 50);
+		pos.x = 0.0f;
+		pos.y = 0.0f;
+		pos.z = 0.0f;
+		XMFLOAT4 color = XMFLOAT4(GetRandomValue(1.0f, 0.7f, 0.7f),
+			GetRandomValue(1.0f, 0.7f, 0.7f), 0.3f, 1.0f);
+		XMFLOAT3 speed = GetRandomVector3(200.0f, -400.0f, -200.0f); 
+		speed.z = perSpeed * i;
+		XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f));
+		 
+		// 매개변수 방정식 값, 원 크기, 원 주기
+		XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(10.0f, 0.0f, 0.0f), perSize * (count - i), GetRandomValue(2.0f, 0.0f, 0.0f)); 
 		// v0 
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
 		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;
 
 		// v1
@@ -1982,6 +1981,7 @@ void CParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
 		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;
 
 		// v2
@@ -1989,6 +1989,7 @@ void CParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
 		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;
 
 		// v3
@@ -1996,6 +1997,7 @@ void CParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
 		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;
 
 		// v4
@@ -2003,6 +2005,7 @@ void CParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
 		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;
 
 		// v5
@@ -2010,11 +2013,12 @@ void CParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
 		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;
 	}
 }
 
-void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CArrowParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_Vertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,

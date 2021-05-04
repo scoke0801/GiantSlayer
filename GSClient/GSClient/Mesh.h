@@ -113,6 +113,7 @@ public:
 	XMFLOAT4						m_xmf4Diffuse; // 색상
 	XMFLOAT3						m_xmf3Speed;   // 속도
 	XMFLOAT2						m_xmf2Time;   // x: emitTime, y: lifeTime 
+	XMFLOAT3						m_xmf2RandomValue;
 
 public:
 	CParticleVertex() {}
@@ -228,7 +229,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 //
-class CParticleMesh : public CMesh
+class CArrowParticleMesh : public CMesh
 {
 private:
 	CParticleVertex*	m_Vertices;
@@ -236,11 +237,11 @@ private:
 
 public:
 	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
-	CParticleMesh(ID3D12Device* pd3dDevice,
+	CArrowParticleMesh(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList, 
 		int particleCount); 
 
-	virtual ~CParticleMesh();
+	virtual ~CArrowParticleMesh();
 
 public:
 	void CreateMeshes(ID3D12Device* pd3dDevice,

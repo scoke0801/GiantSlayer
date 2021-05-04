@@ -172,7 +172,12 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 
-	m_Particles.emplace_back(new CParticle(pd3dDevice, pd3dCommandList, 1000));
+	m_Particles = new CParticle();
+	for (int i = 0; i < 20; ++i) {
+		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::ArrowParticle);
+		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+	}
+
 	//BuildMapSector1(pd3dDevice, pd3dCommandList);
 	//BuildMapSector2(pd3dDevice, pd3dCommandList);
 	//BuildMapSector3(pd3dDevice, pd3dCommandList);
@@ -301,9 +306,8 @@ void CSceneJH::Update(float elapsedTime)
 	//m_pLights->m_pLights[1].m_xmf3Direction = m_CurrentCamera->GetLook3f();
 	ProcessInput();
 	
-	for (auto particle : m_Particles) {
-		particle->Update(elapsedTime);
-	}
+	m_Particles->Update(elapsedTime);
+	
 	m_Skybox->Rotate(XMFLOAT3(0, 1, 0), 0.3 * elapsedTime);
 
 	for (auto pObject : m_Objects)
@@ -383,12 +387,10 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	//pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
-	//m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Mirror->Draw(pd3dCommandList, m_CurrentCamera);
-
-	for (auto particle : m_Particles) {
-		particle->Draw(pd3dCommandList, m_CurrentCamera);
-	}
+	 
+	m_Particles->Draw(pd3dCommandList, m_CurrentCamera); 
 
 	for (auto pObject : m_BillboardObjects) {
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
