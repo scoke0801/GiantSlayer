@@ -178,10 +178,14 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 	}
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::HitParticleTex);
-	int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::HitParticleTex);
-	if (-1 != idx) {
-		m_Particles->UseParticle(idx, XMFLOAT3(0, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
-	}
+	//int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::HitParticleTex);
+	//if (-1 != idx) {
+	//	m_Particles->UseParticle(idx, XMFLOAT3(0, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+	//}
+	//idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
+	//if (-1 != idx) {
+	//	m_Particles->UseParticle(idx, XMFLOAT3(100, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+	//}
 
 	//BuildMapSector1(pd3dDevice, pd3dCommandList);
 	//BuildMapSector2(pd3dDevice, pd3dCommandList);

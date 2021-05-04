@@ -148,7 +148,9 @@ VS_PARTICLE_OUT VSArrowParticle(VS_PARTICLE_IN input)
 	else {
 		outRes.position = 0.0f;
 	}
+	float intensity = 1 - (newTime / lifeTime);
 	outRes.color = input.color;
+	outRes.color.a = intensity;
 	outRes.time = input.time;
 	return outRes;
 }
