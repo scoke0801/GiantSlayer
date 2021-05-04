@@ -13,6 +13,7 @@
 #include "Sign.h"
 #include "Puzzle.h" 
 #include "Particle.h"
+#include "Arrow.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
@@ -34,8 +35,7 @@ CSceneJH::~CSceneJH()
 }
 
 void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
-{  
-	m_CreatedTime = chrono::high_resolution_clock::now();
+{   
 	BuildMirrorResource(pd3dDevice);
 	BuildMinimapResource(pd3dDevice);
 	
@@ -53,6 +53,8 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	BuildSceneFrameData(pd3dDevice, pd3dCommandList);
 	BuildObjects(pd3dDevice, pd3dCommandList);
 	BuildUIs(pd3dDevice, pd3dCommandList);
+	 
+	m_CreatedTime = chrono::high_resolution_clock::now();
 }
 
 void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
@@ -172,21 +174,10 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 
-	m_Particles = new CParticle();
-	for (int i = 0; i < 20; ++i) {
-		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::ArrowParticle);
-		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
-	}
-	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::HitParticleTex);
-	//int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::HitParticleTex);
-	//if (-1 != idx) {
-	//	m_Particles->UseParticle(idx, XMFLOAT3(0, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
-	//}
-	//idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
-	//if (-1 != idx) {
-	//	m_Particles->UseParticle(idx, XMFLOAT3(100, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
-	//}
+	CMeshFbx* fbxMesh;
 
+	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");
+	 
 	//BuildMapSector1(pd3dDevice, pd3dCommandList);
 	//BuildMapSector2(pd3dDevice, pd3dCommandList);
 	//BuildMapSector3(pd3dDevice, pd3dCommandList);
@@ -202,8 +193,27 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildMirror(pd3dDevice, pd3dCommandList);
 	 
 	BuildPlayers(pd3dDevice, pd3dCommandList); 
-	
+	BuildParticles(pd3dDevice, pd3dCommandList);
+
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
+
+	CArrow* pObject = new CArrow(); 
+	pObject->SetMesh(fbxMesh);
+	pObject->SetPosition({ 500.0f,  100.0f, 1500.0f });
+	pObject->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
+	pObject->SetTextureIndex(0x20);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pObject->Scale(15.0f, 15.0f, 15.0f);
+	pObject->SetUseable(false);
+	//pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
+	//pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+
+	int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
+	if (-1 != idx) {
+		m_Particles->UseParticle(idx, pObject->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		pObject->ConnectParticle(m_Particles->GetParticleObj(idx));
+	}
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1847,6 +1857,23 @@ void CSceneJH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 } 
 
+void CSceneJH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_Particles = new CParticle();
+	for (int i = 0; i < 20; ++i) {
+		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::ArrowParticle);
+		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+	}
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::HitParticleTex);
+	//int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::HitParticleTex);
+	//if (-1 != idx) {
+	//	m_Particles->UseParticle(idx, XMFLOAT3(0, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+	//}
+	//idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
+	//if (-1 != idx) {
+	//	m_Particles->UseParticle(idx, XMFLOAT3(100, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+	//}
+}
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CMeshFbx* fbxMesh;
@@ -1861,7 +1888,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	m_Players[0]->Scale(50, 50, 50);
 	m_Players[0]->SetObjectName(OBJ_NAME::Player);
-	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f } );
 
 	m_Players[0]->SetCamera(m_Cameras[0]);
 	m_Players[0]->SetTextureIndex(0x200);

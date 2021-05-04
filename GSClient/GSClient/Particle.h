@@ -53,6 +53,8 @@ public:
 
 	void UseParticle(int idx, const XMFLOAT3& pos, const XMFLOAT3& dir);
 	void UseParticle(int idx);
+
+	ParticleObject* GetParticleObj(int idx) { return m_ParticleObjs[idx]; }
 };
 
 // 사용할지는 아직 고민.. 

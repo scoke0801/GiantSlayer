@@ -153,6 +153,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\GSServer\GSServer\protocol.h" />
+    <ClInclude Include="Arrow.h" />
     <ClInclude Include="Bridge.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Effect.h" />
@@ -208,6 +209,7 @@
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Arrow.cpp" />
     <ClCompile Include="Bridge.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Effect.cpp" />

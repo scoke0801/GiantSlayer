@@ -147,6 +147,9 @@
     <ClCompile Include="Effect.cpp">
       <Filter>Effect</Filter>
     </ClCompile>
+    <ClCompile Include="Arrow.cpp">
+      <Filter>GameObject\Arrow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -291,6 +294,9 @@
     <ClInclude Include="Effect.h">
       <Filter>Effect</Filter>
     </ClInclude>
+    <ClInclude Include="Arrow.h">
+      <Filter>GameObject\Arrow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -396,6 +402,9 @@
     </Filter>
     <Filter Include="Shader">
       <UniqueIdentifier>{04f39449-42c1-42ab-bb97-94aa7f89a159}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Arrow">
+      <UniqueIdentifier>{13df2e8a-dd14-4fee-86b7-3f08fd19b807}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

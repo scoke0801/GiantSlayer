@@ -1954,7 +1954,7 @@ void CArrowParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	float goalSize = 15;
 	float perSize = goalSize / count;
 
-	float goalSpeed = 165.0f * 3.0f;
+	float goalSpeed = ARROW_SPEED;
 	float perSpeed = goalSpeed / count;
 	for (int i = 0; i < count; ++i) {
 		XMFLOAT3 pos = GetRandomVector3(1000, 1, 50);
@@ -1964,7 +1964,7 @@ void CArrowParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		XMFLOAT4 color = XMFLOAT4(GetRandomValue(1.0f, 0.7f, 0.7f),
 			GetRandomValue(1.0f, 0.7f, 0.7f), 0.3f, 1.0f);
 		XMFLOAT3 speed = GetRandomVector3(200.0f, -400.0f, -200.0f); 
-		speed.z = perSpeed * i;
+		speed.z = perSpeed * (count - i);
 		XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f));
 		 
 		// 매개변수 방정식 값, 원 크기, 원 주기
@@ -2064,9 +2064,7 @@ void CTexParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		XMFLOAT3 pos = GetRandomVector3(1000, 1, 50);
 		pos.x = 0.0f;
 		pos.y = 0.0f;
-		pos.z = 0.0f;
-		XMFLOAT4 color = XMFLOAT4(GetRandomValue(1.0f, 0.7f, 0.7f),
-			GetRandomValue(1.0f, 0.7f, 0.7f), 0.3f, 1.0f);
+		pos.z = 0.0f; 
 		XMFLOAT3 speed = GetRandomVector3(200.0f, -400.0f, -200.0f);
 		speed.z = perSpeed * i;
 		XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f));
