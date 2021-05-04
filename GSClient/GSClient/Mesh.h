@@ -121,16 +121,19 @@ public:
 	~CParticleVertex() { }
 };
 
-class CParticleTextureVertex : public CParticleVertex
+class CParticleTextureVertex : public CVertex
 {
-public:
+public:	
+	XMFLOAT3						m_xmf3Speed;   // ¼Óµµ
+	XMFLOAT2						m_xmf2Time;   // x: emitTime, y: lifeTime 
+	XMFLOAT3						m_xmf2RandomValue;
 	XMFLOAT2						m_xmf2TexCoord;
 	UINT							m_nTexture;
 
 public:
 	CParticleTextureVertex() {}
-	CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time,
-		UINT textureCode);
+	CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT2& xmf2Time,
+ UINT textureCode);
 	~CParticleTextureVertex() { } 
 };
 

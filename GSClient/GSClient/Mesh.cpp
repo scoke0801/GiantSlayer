@@ -8,9 +8,10 @@ CParticleVertex::CParticleVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& x
 	m_xmf2Time = xmf2Time;
 }
 
-CParticleTextureVertex::CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time,
-	UINT textureCode) : CParticleVertex(xmf3Position, xmf4Diffuse, xmf2Time)
+CParticleTextureVertex::CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT2& xmf2Time,
+ UINT textureCode)
 {
+	m_xmf3Position = xmf3Position; m_xmf2Time = xmf2Time; m_nTexture = textureCode;
 }
 
 #pragma region About Basic Meshes
@@ -2058,7 +2059,7 @@ void CTexParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	float goalSpeed = 165.0f * 3.0f;
 	float perSpeed = goalSpeed / count;
-	UINT texIndex = 0;
+	UINT texIndex = 0x01;
 	for (int i = 0; i < count; ++i) {
 		XMFLOAT3 pos = GetRandomVector3(1000, 1, 50);
 		pos.x = 0.0f;
@@ -2075,8 +2076,7 @@ void CTexParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		
 		// v0 
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed; 
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f);
@@ -2085,8 +2085,7 @@ void CTexParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 		// v1
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed; 
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(1.0f, 0.0f);
@@ -2095,8 +2094,7 @@ void CTexParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 		// v2
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed; 
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(1.0f, 1.0f);
@@ -2105,8 +2103,7 @@ void CTexParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 		// v3
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed; 
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f);
@@ -2115,8 +2112,7 @@ void CTexParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 		// v4
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed; 
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(1.0f, 1.0f);
@@ -2125,8 +2121,7 @@ void CTexParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 		// v5
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed; 
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(0.0f, 1.0f);

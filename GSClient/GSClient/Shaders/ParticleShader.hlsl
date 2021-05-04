@@ -1,4 +1,53 @@
 
+SamplerState gssWrap : register(s0);
+SamplerState gssClamp : register(s1);
+
+Texture2D gtxtForest	   : register(t0);
+Texture2D gtxtDryForest	   : register(t1);
+Texture2D gtxtDesert	   : register(t2);
+Texture2D gtxtDryDesert	   : register(t3);
+Texture2D gtxtRocky_Terrain: register(t4);
+Texture2D gtxtBossWall	   : register(t5); // 수정요망
+
+Texture2D gSkyBox_Front    : register(t6);
+Texture2D gSkyBox_Back     : register(t7);
+Texture2D gSkyBox_Right    : register(t8);
+Texture2D gSkyBox_Left     : register(t9);
+Texture2D gSkyBox_Top      : register(t10);
+Texture2D gSkyBox_Bottom   : register(t11);
+
+Texture2D gtxtBox          : register(t12);
+Texture2D gtxtWood         : register(t13);
+Texture2D gtxtWoodSignBoard: register(t14);
+Texture2D gtxtGrassWall    : register(t15);
+Texture2D gtxtSandWall     : register(t16);
+Texture2D gtxtRockyWall    : register(t17);
+Texture2D gtxtDoor         : register(t18);
+
+Texture2D gtxtHpSpGauge    : register(t19);
+Texture2D gtxtHpSpPer      : register(t20);
+Texture2D gtxtMinimap      : register(t21);
+Texture2D gtxtWeapons      : register(t22);
+
+Texture2D gtxtFlower_Red   : register(t23); // 여분
+Texture2D gtxtFlower_White : register(t24); // 여분
+Texture2D gtxtGrass_Width  : register(t25); // 여분
+Texture2D gtxtGrass_Depth  : register(t26); // 여분
+Texture2D gtxtTree         : register(t27);
+Texture2D gtxtNoLeafTrees  : register(t28);
+Texture2D gtxtLeaves       : register(t29);
+Texture2D gtxtMoss_Rock    : register(t30);
+
+Texture2D gtxtPuzzleBoard  : register(t31);
+Texture2D gtxtHelpText     : register(t32);
+Texture2D gtxtDry_Tree	   : register(t33);
+Texture2D gtxtStump		   : register(t34);
+Texture2D gtxtDead_Tree	   : register(t35);
+Texture2D gtxtDesert_Rock  : register(t36);
+
+Texture2D gtxtMap          : register(t37);
+Texture2D gtxtMirror       : register(t38);
+
 //게임 객체의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbGameOBJInfo : register(b0)
 {
@@ -36,7 +85,6 @@ struct VS_PARTICLE_IN
 struct VS_TEX_PARTICLE_IN
 {
 	float3 position : POSITION;
-	float4 color    : COLOR;
 	float3 speed    : SPEED;
 	float2 time     : time;
 	float3 randomValues : RVALUE;
@@ -53,7 +101,6 @@ struct VS_PARTICLE_OUT
 struct VS_TEX_PARTICLE_OUT
 {
 	float4 position : SV_POSITION;
-	float4 color : COLOR;
 	float2 time     : time; 
 	float2 uv	 : TEXCOORD;
 	uint index : TEXTURE;
@@ -123,6 +170,7 @@ VS_TEX_PARTICLE_OUT VSTexParticle(VS_TEX_PARTICLE_IN input)
 	float lifeTime = input.time.y;
 
 	float newTime = (gfTime - emitTime);
+	//newTime = fmod(newTime, lifeTime);
 	if (newTime > lifeTime)
 		newTime = -1.0f;
 	if (newTime > 0.0f)
@@ -155,8 +203,7 @@ VS_TEX_PARTICLE_OUT VSTexParticle(VS_TEX_PARTICLE_IN input)
 	}
 	else {
 		outRes.position = 0.0f;
-	}
-	outRes.color = input.color;
+	} 
 	outRes.time = input.time;
 	outRes.uv = input.uv;
 	outRes.index = input.index;
@@ -165,7 +212,12 @@ VS_TEX_PARTICLE_OUT VSTexParticle(VS_TEX_PARTICLE_IN input)
 
 float4 PSTexParticle(VS_TEX_PARTICLE_OUT input) : SV_TARGET
 {
-	float4 cColor = input.color;
+	float4 cColor;
+
+	if (input.index & 0x01)
+	{
+		cColor = gtxtBox.Sample(gssWrap, input.uv);
+	}
 	//cColor = 1.0f;
 	return cColor;
 }

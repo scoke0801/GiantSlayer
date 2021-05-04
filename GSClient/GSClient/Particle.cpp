@@ -72,10 +72,17 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		ParticleObject* pObject = new ParticleObject();
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("ArrowParticle"));
 		pObject->SetMesh(pMesh);
+		pObject->SetType(type);
 		m_ParticleObjs.push_back(std::move(pObject));
 	}
 	else if (type == PARTICLE_TYPE::HitParticleTex) {
-
+		CTexParticleMesh* pMesh = new CTexParticleMesh(pd3dDevice, pd3dCommandList, count);
+		
+		ParticleObject* pObject = new ParticleObject();
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("TexParticle"));
+		pObject->SetMesh(pMesh);
+		pObject->SetType(type);
+		m_ParticleObjs.push_back(std::move(pObject));
 	}
 }
 
@@ -98,10 +105,10 @@ void CParticle::Update(float elapsedTime)
 int CParticle::GetCanUseableParticle(PARTICLE_TYPE type)
 {
 	for (int i = 0; i < m_ParticleObjs.size(); ++i) {
-		if (false == m_ParticleObjs[i]->IsCanUse()) {
+		if (true == m_ParticleObjs[i]->IsCanUse()) {
 			continue;
 		}
-		if (type ==m_ParticleObjs[i]->GetParticleType()) {
+		if (type == m_ParticleObjs[i]->GetParticleType()) {
 			return i;
 		}
 	}
