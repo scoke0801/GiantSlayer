@@ -215,7 +215,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//}
 
 	CTerrainWater* pTerrainWater = new CTerrainWater(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, 257 * 32, 257 * 32);
+		m_pd3dGraphicsRootSignature, 257 * 35, 257 * 32);
 	pTerrainWater->SetPosition(XMFLOAT3(5700.0f, -1300.0f, 16500.0f));
 
 	m_Objects.push_back(pTerrainWater);
