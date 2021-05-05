@@ -241,7 +241,7 @@ void PacketProcessor::InitPlayers()
 		m_Players[i]->Scale(50, 50, 50);
 		m_Players[i]->SetPosition(positions[i]);
 		m_Players[i]->SetExistence(false); 
-		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 5)));
+		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.0f, 5.0f, 2.5f)));
 	}
 }
 
@@ -259,12 +259,11 @@ void PacketProcessor::ReadObstaclesPosition()
 	d.ParseStream(is);	//==d.Parse(is);
 	fclose(fp);
 
-	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_1,
-		GetPosition("BRIDEGE_SEC2_SEC3_1", d));
-	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_2,
-		GetPosition("BRIDEGE_SEC2_SEC3_2", d));
-	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_3,
-		GetPosition("BRIDEGE_SEC2_SEC3_3", d));
+	for (int i = 0; i < 3; ++i) {
+		string str = "BRIDEGE_SEC2_SEC3_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::BRIDEGE_SEC2_SEC3_1 + i),
+			GetPosition(str, d));
+	} 
 
 	m_ObjectPositions.emplace(OBJECT_ID::SIGN_SCROLL,
 		GetPosition("SIGN_SCROLL", d));
@@ -273,18 +272,36 @@ void PacketProcessor::ReadObstaclesPosition()
 	m_ObjectPositions.emplace(OBJECT_ID::SIGN_MEDUSA,
 		GetPosition("SIGN_MEDUSA", d)); 
 	m_ObjectPositions.emplace(OBJECT_ID::SIGN_BOSS,
-		GetPosition("SIGN_BOSS", d));
+		GetPosition("SIGN_BOSS", d)); 
+	 
+	for (int i = 0; i < 5; ++i) {
+		string str = "DOOR_WALL_SEC" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DOOR_WALL_SEC1 + i),
+			GetPosition(str, d));
+	}  
+	m_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_ROCK_1,
+		GetPosition("DRY_FOREST_ROCK_1", d));
+	m_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_ROCK_2,
+		GetPosition("DRY_FOREST_ROCK_2", d));
 
-	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC1,
-		GetPosition("DOOR_WALL_SEC1", d));
-	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC2,
-		GetPosition("DOOR_WALL_SEC2", d));
-	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC3,
-		GetPosition("DOOR_WALL_SEC3", d));
-	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC4,
-		GetPosition("DOOR_WALL_SEC4", d));
-	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC5,
-		GetPosition("DOOR_WALL_SEC5", d));
+	for (int i = 0; i < 4; ++i) {
+		string str = "DRY_FOREST_DRY_TREE_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DRY_FOREST_DRY_TREE_1 + i),
+			GetPosition(str, d));
+	}
+	m_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_STUMP_1,
+		GetPosition("DRY_FOREST_STUMP_1", d));
+
+	for (int i = 0; i < 3; ++i) {
+		string str = "DRY_FOREST_DEAD_TREE_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_1 + i),
+			GetPosition(str, d));
+	}
+	for (int i = 0; i < 15; ++i) {
+		string str = "DESERT_ROCK_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DESERT_ROCK_1 + i),
+			GetPosition(str, d));
+	}
 }
 
 XMFLOAT3 PacketProcessor::GetPosition(const string& name, const Document& document)
@@ -300,20 +317,20 @@ XMFLOAT3 PacketProcessor::GetPosition(const string& name, const Document& docume
 void PacketProcessor::InitObstacle()
 {
 // Bridge --------------------------------------------------------------------
-	CGameObject* pObject; /*= new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
+	CGameObject* pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_1]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
+	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_2]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
+	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
 	pObject->Rotate({ 0, 1, 0 }, 90); 
-	m_Objects.push_back(std::move(pObject));*/
+	m_Objects.push_back(std::move(pObject));
 /////////////////////////////////////////////////////////////////////////////////
 
 // DoorWall----------------------------------------------------------------------
@@ -356,6 +373,105 @@ void PacketProcessor::InitObstacle()
 	//pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BOSS]);
 	//m_Objects.push_back(std::move(pObject));
 ////////////////////////////////////////////////////////////////////////////////
+// FBX Models
+//
+	for (int i = 0; i < 2; ++i) {
+		pObject = new CGameObject();
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_ROCK_1 + i)]);
+		pObject->Scale(50, 50, 50);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5 * 0.5f, 7 * 0.5f, 3 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	} 
+
+	for (int i = 0; i < 2; ++i) {
+		pObject = new CGameObject(); 
+		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
+		pObject->Rotate({ 0,1,0 }, 60 + 30 * i);
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_1 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+	for (int i = 0; i < 2; ++i) {
+		pObject = new CGameObject();
+		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
+		pObject->Rotate({ 0,1,0 }, 0 + 15 * i);
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_3 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	pObject = new CGameObject();
+	pObject->Scale(20.0f, 20.0f, 20.0f);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DRY_FOREST_STUMP_1]);
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(15 *0.5f, 10 * 0.5f, 15 * 0.5f)));
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();	
+	pObject->Scale(150.0f, 150.0f, 150.0f);
+	pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_1)]);
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
+	m_Objects.push_back(std::move(pObject));
+
+	for (int i = 0; i < 2; ++i) {
+		pObject = new CGameObject(); 
+		pObject->Scale(150.0f + 50 * i, 150.0f + 50 * i, 150.0f + 50 * i);
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_2 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 5; ++i) {
+		if (i == 0){
+			pObject->Scale(4.0f, 4.0f, 4.0f);
+		}
+		else if (i == 1){
+			pObject->Rotate({ 0,1,0 }, 90);
+			pObject->Scale(2.0f, 2.0f, 2.0f);
+		}
+		else if (i == 4){
+			pObject->Scale(1.0f, 1.0f, 1.0f);
+		}
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+
+		pObject = new CGameObject();
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_1 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600*0.5f, 250 * 0.5f, 600 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 6; ++i) {
+		if (i == 0) {
+			pObject->Scale(3.0f, 3.0f, 3.0f);
+		}
+		else if (i == 3) { 
+			pObject->Rotate({ 0,1,0 }, 270);
+			pObject->Scale(3.0f, 3.0f, 3.0f); 
+		}
+		else if (i == 1) { 
+			pObject->Rotate({ 0,1,0 }, 90);
+			pObject->Scale(1.5f, 1.5f, 1.5f);
+		}
+		else if (i == 5) { 
+			pObject->Rotate({ 0,1,0 }, 135);
+			pObject->Scale(1.5f, 1.5f, 1.5f);
+		} 
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+
+		pObject = new CGameObject();
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_6 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 4; ++i) {
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+
+		pObject = new CGameObject();
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_12 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+	int stop = 3;
 }
 
 void PacketProcessor::InitTerrainHeightMap()

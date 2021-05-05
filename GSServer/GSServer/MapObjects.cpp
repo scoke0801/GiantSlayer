@@ -1,6 +1,115 @@
 #include "stdafx.h"
 #include "MapObjects.h"
 
+
+CBridge::CBridge(OBJECT_ID id)
+{
+	CGameObject* pObject;// = new CGameObject();
+	for (int i = 0; i < 10; i += 5) {
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i),
+			XMFLOAT3(1000 * 0.5f, 1 * 0.5f, 500 * 0.5f)));
+		m_Plates.emplace_back(std::move(pObject));
+	}
+
+	pObject = new CGameObject();
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 250.0f + 12.5f, 0.0f),
+		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f)));
+	m_Objects.emplace_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(500.0f, 250.0f + 12.5f, 0.0f),
+		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f)));
+	m_Objects.emplace_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 250.0f + 137.5f, 0.0f),
+		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f)));
+	m_Objects.emplace_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(500.0f, 250.0f + 137.5f, 0.0f),
+		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f))); 
+	m_Objects.emplace_back(std::move(pObject));
+
+	for (int i = 0; i < 5; ++i)
+	{
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
+			XMFLOAT3(50 * 0.5f, 100 * 0.5f, 50 * 0.5f))); 
+		m_Objects.emplace_back(std::move(pObject));
+
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
+			XMFLOAT3(50 * 0.5f, 100 * 0.5f, 50 * 0.5f)));
+		m_Objects.emplace_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 250.0f - 25.0f, -350.0f + 350.0f * i),
+			XMFLOAT3(1050.0f * 0.5f, 50.0f * 0.5f, 150.0f * 0.5f)));
+		m_Objects.emplace_back(std::move(pObject));
+
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, -350.0f + 350.0f * i),
+			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
+		m_Objects.emplace_back(std::move(pObject));
+		 
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
+			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
+		m_Objects.emplace_back(std::move(pObject));
+
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
+			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
+		m_Objects.emplace_back(std::move(pObject));
+	}
+}
+
+void CBridge::SetPosition(XMFLOAT3 pos)
+{
+	for (auto pObj : m_Objects) {
+		pObj->SetPosition(pos);
+	}
+	for (auto pPlate : m_Plates) {
+		pPlate->SetPosition(pos);
+	}
+}
+
+void CBridge::Rotate(const XMFLOAT3& axis, float angle)
+{
+	for (auto pObj : m_Objects) {
+		pObj->Rotate(axis, angle);
+	}
+	for (auto pPlate : m_Plates) {
+		pPlate->Rotate(axis, angle);
+	}
+}
+
+bool CBridge::CollisionCheck(const BoundingBox& aabb)
+{ 
+	for (auto pObj : m_Objects) {
+		if (pObj->CollisionCheck(aabb)) return true;
+	}
+	for (auto pPlate : m_Plates) {
+		if (pPlate->CollisionCheck(aabb)) return true;
+	}
+	return false;
+}
+
+void CBridge::UpdateColliders()
+{
+	for (auto pObj : m_Objects) {
+		pObj->UpdateColliders();
+	}
+	for (auto pPlate : m_Plates) {
+		pPlate->UpdateColliders();
+	} 
+}
+
 CSign::CSign(OBJECT_ID id)
 {
 	m_Pillar = new CGameObject(); 
