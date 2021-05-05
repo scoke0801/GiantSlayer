@@ -68,16 +68,14 @@ FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName)
 
 	LoadScene(FileName);
 
-	//LoadSkeletonHierarchy(mFbxScene->GetRootNode());
-	//if (!mSkeleton.empty()) Animation = true;
+	LoadSkeletonHierarchy(mFbxScene->GetRootNode());
+	if (mSkeleton.empty()) hasAnimation = false;
 
 	ExploreFbxHierarchy(mFbxScene->GetRootNode());
 
-	cout << "구성 모델 수: " << mFbxMesh.size() << endl;
+	SaveAsFile();
 
-	ExportFbxFile();
-
-	cout << "파일 생성 끝" << endl;
+	cout << FileName << " ||| [SKT]:" << mSkeleton.size() << " [PG]:" << triangles.size() << " [VT]:" << vertices.size() << endl;
 }
 
 FbxLoader::~FbxLoader()
@@ -125,13 +123,157 @@ void FbxLoader::LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex
 	if ((pfbxNodeAttribute != NULL) &&
 		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton))
 	{
-		
+		Joint currJoint;
+		currJoint.parentIndex = inParentIndex;
+		currJoint.name = pNode->GetName();
+		mSkeleton.push_back(currJoint);
 	}
 
 	for (int i = 0; i < pNode->GetChildCount(); i++)
 	{
-		//LoadSkeletonRecursively(pNode->GetChild(i), inDepth + 1, mSkeleton.size(), myIndex);
+		LoadSkeletonRecursively(pNode->GetChild(i), inDepth + 1, mSkeleton.size(), myIndex);
 	}
+}
+
+void FbxLoader::LoadControlPoints(FbxNode* pNode)
+{
+	FbxMesh* pfbxMesh = pNode->GetMesh();
+	int numCP = pfbxMesh->GetControlPointsCount();
+	for (int i = 0; i < numCP; ++i)
+	{
+		ControlPoint tempCP;
+		XMFLOAT3 currPosition;
+		tempCP.pos.x = pfbxMesh->GetControlPointAt(i).mData[0];
+		tempCP.pos.y = pfbxMesh->GetControlPointAt(i).mData[1];
+		tempCP.pos.z = pfbxMesh->GetControlPointAt(i).mData[2];
+		cpoints.push_back(tempCP);
+	}
+
+	for (int i = 0; i < pNode->GetChildCount(); i++)
+	{
+		LoadControlPoints(pNode->GetChild(i));
+	}
+}
+
+void FbxLoader::LoadAnimation(FbxNode* pNode)
+{
+
+	FbxMesh* pfbxMesh = pNode->GetMesh();
+
+	FbxAMatrix fbxmtxGeometryOffset = GeometricOffsetTransform(pfbxMesh->GetNode());
+
+	int numDF = pfbxMesh->GetDeformerCount();
+	for (int i = 0; i < numDF; i++) {
+		FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(pfbxMesh->GetDeformer(i, FbxDeformer::eSkin));
+		if (!currSkin) continue;
+
+		int numCS = currSkin->GetClusterCount();
+		for (int j = 0; j < numCS; j++) {
+			FbxCluster* currCluster = currSkin->GetCluster(j);
+
+			FbxAMatrix fbxTransformMTX;
+			currCluster->GetTransformMatrix(fbxTransformMTX);
+			FbxAMatrix fbxTransformLinkMTX;
+			currCluster->GetTransformLinkMatrix(fbxTransformLinkMTX);
+			FbxAMatrix fbxBindPoseInvMTX = fbxmtxGeometryOffset * fbxTransformMTX * fbxTransformLinkMTX.Inverse();
+			mSkeleton[j].mGlobalBindpose = fbxBindPoseInvMTX;
+
+			int numIDX = currCluster->GetControlPointIndicesCount();
+			for (int k = 0; k < numIDX; k++) {
+				BlendingInfo tempBlendinfo;
+				tempBlendinfo.index = j;
+				tempBlendinfo.weight = currCluster->GetControlPointWeights()[k];
+				cpoints[currCluster->GetControlPointIndices()[k]].blendInfo.push_back(tempBlendinfo);
+			}
+
+			FbxAnimStack* pCurAnimStack = mFbxScene->GetSrcObject<FbxAnimStack>(0);
+			FbxString curAnimName = pCurAnimStack->GetName();
+			FbxTakeInfo* pTakeInfo = mFbxScene->GetTakeInfo(curAnimName);
+			FbxTime start = pTakeInfo->mLocalTimeSpan.GetStart();
+			FbxTime end = pTakeInfo->mLocalTimeSpan.GetStop();
+
+			animLength = end.GetFrameCount(FbxTime::eFrames24) - start.GetFrameCount(FbxTime::eFrames24) + 1;
+			animName = curAnimName;
+
+			Keyframe** currAnim = &mSkeleton[j].mAnimation;
+
+			for (FbxLongLong i = start.GetFrameCount(FbxTime::eFrames24); i <= end.GetFrameCount(FbxTime::eFrames24); i++)
+			{
+				FbxTime currTime;
+				currTime.SetFrame(i, FbxTime::eFrames24);
+				*currAnim = new Keyframe();
+				(*currAnim)->nFrame = i;
+				FbxAMatrix currentTransformOffset = pNode->EvaluateGlobalTransform(currTime) * fbxmtxGeometryOffset;
+				(*currAnim)->mGlobalTransform = currentTransformOffset.Inverse() * currCluster->GetLink()->EvaluateGlobalTransform(currTime);
+				currAnim = &((*currAnim)->mNext);
+			}
+		}
+	}
+
+	BlendingInfo nullBlendinfo;
+	nullBlendinfo.index = 0;
+	nullBlendinfo.weight = 0;
+	for (auto itr = cpoints.begin(); itr != cpoints.end(); itr++)
+	{
+		for (int i = itr->blendInfo.size(); i <= 4; i++)
+		{
+			itr->blendInfo.push_back(nullBlendinfo);
+		}
+	}
+}
+
+void FbxLoader::LoadMesh(FbxNode* pNode)
+{
+	FbxMesh* pfbxMesh = pNode->GetMesh();
+
+	int numPG = pfbxMesh->GetPolygonCount();
+	int vertexCounter = 0;
+	triangles.reserve(numPG);
+
+	for (int i = 0; i < numPG; i++) {
+		TrianglePG tempTriangle;
+		triangles.push_back(tempTriangle);
+
+		for (int j = 0; j < 3; j++) {
+			int cpIndex = pfbxMesh->GetPolygonVertex(i, j);
+
+			FbxVertex tempVertex;
+
+			// position
+			ControlPoint currCP = cpoints[cpIndex];
+			tempVertex.pos = currCP.pos;
+
+			// normal
+			FbxGeometryElementNormal* pnormal = pfbxMesh->GetElementNormal(0);
+			tempVertex.normal = XMFLOAT3(
+				pnormal->GetDirectArray().GetAt(cpIndex).mData[0],
+				pnormal->GetDirectArray().GetAt(cpIndex).mData[1],
+				pnormal->GetDirectArray().GetAt(cpIndex).mData[2]);
+
+			// uv
+			int uvindex = pfbxMesh->GetTextureUVIndex(i, j, FbxLayerElement::eTextureDiffuse);
+			FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
+			FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
+			fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
+			tempVertex.uv = XMFLOAT2(fbxUV[0], 1.0f - fbxUV[1]);
+
+			// blending info
+			for (int k = 0; k < currCP.blendInfo.size(); k++)
+			{
+				BlendingInfo tempBlendinfo;
+				tempBlendinfo.index = currCP.blendInfo[k].index;
+				tempBlendinfo.weight = currCP.blendInfo[k].weight;
+				tempVertex.blendInfo.push_back(tempBlendinfo);
+			}
+			tempVertex.SortBlendingInfoByWeight();
+
+			vertices.push_back(tempVertex);
+			triangles.back().indices.push_back(vertexCounter);
+			vertexCounter++;
+		}
+	}
+
+	cpoints.clear();
 }
 
 void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
@@ -141,192 +283,95 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 	if ((pfbxNodeAttribute != NULL) &&
 		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
 	{
-		FbxMesh* pfbxMesh = pNode->GetMesh();
-
-		FbxSubMesh tempSubMesh;
-
-		// Mesh ===============================================================
-		int numCP = pfbxMesh->GetControlPointsCount();
-		int numPG = pfbxMesh->GetPolygonCount();
-
-		FbxVector4* pfbxv4Vertices = new FbxVector4[numCP];
-		::memcpy(pfbxv4Vertices, pfbxMesh->GetControlPoints(), numCP * sizeof(FbxVector4));
-
-		tempSubMesh.mCP = new XMFLOAT3[numCP];
-		for (int i = 0; i < numCP; i++) {
-			tempSubMesh.mCP[i].x = (float)pfbxv4Vertices[i][0];
-			tempSubMesh.mCP[i].y = (float)pfbxv4Vertices[i][2];
-			tempSubMesh.mCP[i].z = (float)pfbxv4Vertices[i][1];
-		}
-		
-
-		for (int pindex = 0; pindex < numPG; pindex++) {
-			for (int vindex = 0; vindex < 3; vindex++) {
-				int pvindex = pfbxMesh->GetPolygonVertex(pindex, vindex);
-				int uvindex = pfbxMesh->GetTextureUVIndex(pindex, vindex, FbxLayerElement::eTextureDiffuse);
-
-				CTexturedVertex tempVertex;
-
-				// Position ==========================================================
-				tempVertex.m_xmf3Position.x = pfbxMesh->GetControlPointAt(pvindex).mData[0];
-				tempVertex.m_xmf3Position.y = pfbxMesh->GetControlPointAt(pvindex).mData[2];
-				tempVertex.m_xmf3Position.z = pfbxMesh->GetControlPointAt(pvindex).mData[1];
-
-				// Uv ================================================================
-				FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
-				FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
-				fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
-
-				tempVertex.m_xmf2TexCoord.x = fbxUV[0];
-				tempVertex.m_xmf2TexCoord.y = 1.0f - fbxUV[1];
-
-				// Normal ============================================================
-				FbxGeometryElementNormal* pnormal = pfbxMesh->GetElementNormal(0);
-
-				tempVertex.m_xmf3Normal.x = pnormal->GetDirectArray().GetAt(pvindex).mData[0];
-				tempVertex.m_xmf3Normal.y = pnormal->GetDirectArray().GetAt(pvindex).mData[2];
-				tempVertex.m_xmf3Normal.z = pnormal->GetDirectArray().GetAt(pvindex).mData[1];
-				
-				tempSubMesh.mIndex.push_back(pvindex);
-				tempSubMesh.mVertex.push_back(tempVertex);
-			}
-		}
-
-		// Animation ==========================================================
-		int numDC = pfbxMesh->GetDeformerCount(FbxDeformer::eSkin);
-
-		FbxVector4* tempDefVertex;
-		FbxAMatrix* tempClusterDef;
-		double* tempClusterWeight;
-		//tempSubMesh.gTransform = XMFLOAT4X4(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-
-
-		//numDC = 0;
-		if (numDC != 0) {
-			tempDefVertex = new FbxVector4[numCP];
-			::memcpy(tempDefVertex, pfbxMesh->GetControlPoints(), numCP * sizeof(FbxVector4));
-
-			tempClusterDef = new FbxAMatrix[numCP];
-			::memset(tempClusterDef, 0, numCP * sizeof(FbxAMatrix));
-
-			tempClusterWeight = new double[numCP];
-			::memset(tempClusterWeight, 0, numCP * sizeof(double));
-
-			tempSubMesh.mClusterWeight = new double[numCP];
-			::memset(tempSubMesh.mClusterWeight, 0, numCP * sizeof(double));
-			tempSubMesh.mClusterDef = new XMFLOAT3[numCP];
-			::memset(tempSubMesh.mClusterDef, 0, numCP * sizeof(XMFLOAT3));
-
-			FbxAMatrix geometryTransform = GeometricOffsetTransform(pfbxMesh->GetNode());
-			tempSubMesh.gTransform = FbxMatrixToXmFloat4x4(&geometryTransform);
-
-			FbxCluster::ELinkMode nClusterMode =
-				((FbxSkin*)pfbxMesh->GetDeformer(0, FbxDeformer::eSkin))->GetCluster(0)->GetLinkMode();
-
-			for (int i = 0; i < numDC; i++) {
-				FbxSkin* pSkinDef = (FbxSkin*)pfbxMesh->GetDeformer(i, FbxDeformer::eSkin);
-				int nClusters = pSkinDef->GetClusterCount();	// 뼈 개수
-
-				for (int j = 0; j < nClusters; j++) {
-					FbxCluster* pCluster = pSkinDef->GetCluster(j);
-					if (!pCluster->GetLink()) continue;
-
-					FbxAMatrix clusterDefMatrix;
-
-					if (nClusterMode == FbxCluster::eNormalize) {
-
-						FbxAMatrix transformMatrix;
-						pCluster->GetTransformMatrix(transformMatrix);
-
-						FbxAMatrix transformLinkMatrix;
-						pCluster->GetTransformLinkMatrix(transformLinkMatrix);
-
-						clusterDefMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryTransform;
-					}
-
-					int* pnIndices = pCluster->GetControlPointIndices();
-					double* pfWeights = pCluster->GetControlPointWeights();
-
-					int nIndices = pCluster->GetControlPointIndicesCount();
-					for (int k = 0; k < nIndices; k++) {
-						int nIndex = pnIndices[k];
-						double fWeight = pfWeights[k];
-
-						if ((nIndex >= numCP) || (fWeight == 0.0)) continue;
-
-						SetMatrixScale(clusterDefMatrix, fWeight);
-						SetMatrixAdd(tempClusterDef[nIndex], clusterDefMatrix);
-						tempClusterWeight[nIndex] = fWeight;
-
-						FbxVector4 tempFVec4 = tempClusterDef[nIndex].GetT();
-						XMFLOAT3 tempXF3 = XMFLOAT3((float)tempFVec4.mData[0], (float)tempFVec4.mData[1], (float)tempFVec4.mData[2]);
-
-						tempSubMesh.mClusterWeight[nIndex] = tempClusterWeight[nIndex];
-						tempSubMesh.mClusterDef[nIndex] = tempXF3;
-					}
-				}
-			}
-
-			//for (int i = 0; i < numCP; i++) cout << tempSubMesh.mClusterDef[i].x << endl;
-		}
-
-		tempSubMesh.nControlPoint = numCP;
-		tempSubMesh.nPolygon = numPG;
-		tempSubMesh.nDeformer = numDC;
-
-		cout << "[메쉬 발견] CP:" << numCP << ", PG:" << numPG << ", ID:" << tempSubMesh.mIndex.size() << ", VT:" << tempSubMesh.mVertex.size();
-		if (numDC != 0) cout << ", AM:[O]" << endl;
-		else cout << ", AM:[X]" << endl;
-
-		mFbxMesh.push_back(tempSubMesh);
+		LoadControlPoints(pNode);
+		if(hasAnimation == true)
+			LoadAnimation(pNode);
+		LoadMesh(pNode);
 	}
 
-	for (int i = 0; i < pNode->GetChildCount(); ++i)
-		ExploreFbxHierarchy(pNode->GetChild(i));
+	int nChild = pNode->GetChildCount();
+	for (int i = 0; i < nChild; i++) ExploreFbxHierarchy(pNode->GetChild(i));
 }
 
-void FbxLoader::ExportFbxFile()
+void FbxLoader::SaveAsFile()
 {
 	ofstream file;
 	file.open("FbxExportedFile.bin", ios::out | ios::binary);
 
-	file << "[MeshCount]" << endl;
-	file << mFbxMesh.size() << endl;
+	file << "Vertex " << vertices.size() << endl;
+	file << "Triangle " << triangles.size() << endl;
+	file << "Bone " << mSkeleton.size() << endl;
+	file << endl;
 
-	for (int i = 0; i < mFbxMesh.size(); i++) {
-		file << "[MeshInfo]" << endl;
-		file << mFbxMesh[i].nControlPoint << " " << mFbxMesh[i].nPolygon << " " << mFbxMesh[i].nDeformer << endl;
+	// write vertex info
+	file << "[Vertex]" << endl;
+	for (int i = 0; i < vertices.size(); i++) {
+		// pos + uv + normal
+		file << vertices[i].pos.x << " " << vertices[i].pos.y << " " << vertices[i].pos.z << " " <<
+				vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
+				vertices[i].normal.x << " " << vertices[i].normal.y << " " << vertices[i].normal.z << endl;
+		// bindex 1~4 + bweight 1~4
+		file << vertices[i].blendInfo[0].index << " " << vertices[i].blendInfo[1].index << " " <<
+				vertices[i].blendInfo[2].index << " " << vertices[i].blendInfo[3].index << " " <<
+				vertices[i].blendInfo[0].weight << " " << vertices[i].blendInfo[1].weight << " " <<
+				vertices[i].blendInfo[2].weight << " " << vertices[i].blendInfo[3].weight << endl;
+	}
+	file << endl;
 
-		file << "[Vertex]" << endl;
-		for (int j = 0; j < mFbxMesh[i].mVertex.size(); j++) {
-			file << mFbxMesh[i].mIndex[j] << " " <<
-				mFbxMesh[i].mVertex[j].m_xmf3Position.x << " " <<
-				mFbxMesh[i].mVertex[j].m_xmf3Position.y << " " <<
-				mFbxMesh[i].mVertex[j].m_xmf3Position.z << " " <<
-				mFbxMesh[i].mVertex[j].m_xmf3Normal.x << " " <<
-				mFbxMesh[i].mVertex[j].m_xmf3Normal.y << " " <<
-				mFbxMesh[i].mVertex[j].m_xmf3Normal.z << " " <<
-				mFbxMesh[i].mVertex[j].m_xmf2TexCoord.x << " " <<
-				mFbxMesh[i].mVertex[j].m_xmf2TexCoord.y << endl;
-		}
-
-		file << "[ControlPoint]" << endl;
-		for (int j = 0; j < mFbxMesh[i].nControlPoint; j++) {
-			file << mFbxMesh[i].mCP[j].x << " " <<
-				mFbxMesh[i].mCP[j].y << " " <<
-				mFbxMesh[i].mCP[j].z << endl;
-		}
-
-		/*if (mFbxMesh[i].nDeformer != 0) {
-			file << "[Animation]" << endl;
-			for (int j = 0; j < mFbxMesh[i].nControlPoint; j++) {
-				file << mFbxMesh[i].mClusterWeight[j] << " " <<
-					mFbxMesh[i].mClusterDef[j].x << " " <<
-					mFbxMesh[i].mClusterDef[j].y << " " <<
-					mFbxMesh[i].mClusterDef[j].z << endl;
-			}
-		}*/
+	// write tiangle polygon info
+	file << "[Triangle]" << endl;
+	for (int i = 0; i < triangles.size(); i++) {
+		file << triangles[i].indices[0] << " " << triangles[i].indices[1] << " " << triangles[i].indices[2] << endl;
 	}
 
+	if (hasAnimation == true) {
+		file << "[Bone]" << endl;
+		for (int i = 0; i < mSkeleton.size(); i++) {
+			file << i << " " << mSkeleton[i].name << " " << mSkeleton[i].parentIndex << endl;
+
+			FbxVector4 translation = mSkeleton[i].mGlobalBindpose.GetT();
+			FbxVector4 rotation = mSkeleton[i].mGlobalBindpose.GetR();
+			translation.Set(translation.mData[0], translation.mData[1], -translation.mData[2]);
+			rotation.Set(-rotation.mData[0], -rotation.mData[1], rotation.mData[2]);
+			mSkeleton[i].mGlobalBindpose.SetT(translation);
+			mSkeleton[i].mGlobalBindpose.SetR(rotation);
+			FbxMatrix write = mSkeleton[i].mGlobalBindpose;
+
+			file << (float)write.Get(0, 0) << " " << (float)write.Get(0, 1) << " " << (float)write.Get(0, 2) << " " << (float)write.Get(0, 3) << " " <<
+				(float)write.Get(1, 0) << " " << (float)write.Get(1, 1) << " " << (float)write.Get(1, 2) << " " << (float)write.Get(1, 3) << " " <<
+				(float)write.Get(2, 0) << " " << (float)write.Get(2, 1) << " " << (float)write.Get(2, 2) << " " << (float)write.Get(2, 3) << " " <<
+				(float)write.Get(3, 0) << " " << (float)write.Get(3, 1) << " " << (float)write.Get(3, 2) << " " << (float)write.Get(3, 3) << endl;
+		}
+		file << endl;
+
+		file << "[Animation]" << endl;
+		file << "Name " << animName << endl;
+		file << "Length " << animLength << endl;
+		for (int i = 0; i < mSkeleton.size(); i++) {
+			file << i << " " << mSkeleton[i].name << endl;
+			
+			Keyframe* kframe = mSkeleton[i].mAnimation;
+			while (kframe)
+			{
+				file << kframe->nFrame << " ";
+
+				FbxVector4 translation = kframe->mGlobalTransform.GetT();
+				FbxVector4 rotation = kframe->mGlobalTransform.GetR();
+				translation.Set(translation.mData[0], translation.mData[1], -translation.mData[2]);
+				rotation.Set(-rotation.mData[0], -rotation.mData[1], rotation.mData[2]);
+				kframe->mGlobalTransform.SetT(translation);
+				kframe->mGlobalTransform.SetR(rotation);
+				FbxMatrix write = kframe->mGlobalTransform;
+
+				file << (float)write.Get(0, 0) << " " << (float)write.Get(0, 1) << " " << (float)write.Get(0, 2) << " " << (float)write.Get(0, 3) << " " <<
+						(float)write.Get(1, 0) << " " << (float)write.Get(1, 1) << " " << (float)write.Get(1, 2) << " " << (float)write.Get(1, 3) << " " <<
+						(float)write.Get(2, 0) << " " << (float)write.Get(2, 1) << " " << (float)write.Get(2, 2) << " " << (float)write.Get(2, 3) << " " <<
+						(float)write.Get(3, 0) << " " << (float)write.Get(3, 1) << " " << (float)write.Get(3, 2) << " " << (float)write.Get(3, 3) << endl;
+
+				kframe = kframe->mNext;
+			}
+		}
+		file << endl;
+	}
 	file.close();
 }

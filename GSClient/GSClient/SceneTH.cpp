@@ -4,6 +4,7 @@
 #include "stdafx.h" 
 #include "GameFramework.h"
 #include "FbxObject.h"
+#include "FbxLoader.h"
 #include "Shader.h"
 #include "UI.h"
 #include "Camera.h"
@@ -197,12 +198,13 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetMesh(golemMesh);
 	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
 
-	CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
+	FbxLoader(m_pfbxManager, "resources/Fbx/human.fbx");
+
+	/*CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
 	pfbxTestObject->SetAnimationStack(0);
 	pfbxTestObject->m_pAnimationController->SetPosition(0, 0.0f);
-	//pfbxTestObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	pfbxTestObject->SetPosition({ 100,  150, 100 });
-	m_Objects.push_back(std::move(pfbxTestObject));
+	m_Objects.push_back(std::move(pfbxTestObject));*/
 
 	m_MinimapCamera->SetTarget(m_Player);
 }
