@@ -216,7 +216,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	CTerrainWater* pTerrainWater = new CTerrainWater(pd3dDevice, pd3dCommandList,
 		m_pd3dGraphicsRootSignature, 257 * 35, 257 * 32);
-	pTerrainWater->SetPosition(XMFLOAT3(5700.0f, -1300.0f, 16500.0f));
+	pTerrainWater->SetPosition(XMFLOAT3(5450.0f, -1300.0f, 16500.0f));
 
 	m_Objects.push_back(pTerrainWater);
 }
@@ -1108,22 +1108,22 @@ void CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
 	CBridge* pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
-	pBridge->RotateAll({ 0,1,0 }, 90);
-	pBridge->SetPosition({ 8200,  -1301,  17800 });
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ 8000.0f,  -1301.0f,  18100.0f });
 	m_Objects.push_back(pBridge);
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
-	pBridge->RotateAll({ 0,1,0 }, 90);
-	pBridge->SetPosition({ 10200,  -1301,  17800 });
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ 10000.0f,  -1301.0f,  18100.0f });
 	m_Objects.push_back(pBridge);
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
-	pBridge->RotateAll({ 0,1,0 }, 90);
-	pBridge->SetPosition({ 9200,  -1301,  17800 });
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ 9000.0f,  -1301.0f,  18100.0f });
 	m_Objects.push_back(pBridge);
 }
 
