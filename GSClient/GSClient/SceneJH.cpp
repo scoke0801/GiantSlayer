@@ -164,6 +164,8 @@ void CSceneJH::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	auto start_t = chrono::high_resolution_clock::now();
+
 	m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
@@ -173,14 +175,26 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
+	CTerrainWater* pTerrainWater = new CTerrainWater(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, 257 * 35, 257 * 32);
+	pTerrainWater->SetPosition(XMFLOAT3(5450.0f, -1300.0f, 16500.0f)); 
+	m_Objects.push_back(pTerrainWater);
 
-	 
+	/*std::thread t1([this, pd3dDevice, pd3dCommandList]() {});
+	std::thread t2([this, pd3dDevice, pd3dCommandList]() {});
+	std::thread t3([this, pd3dDevice, pd3dCommandList]() {}); 
+	std::thread t4([this, pd3dDevice, pd3dCommandList]() {});
+	t1.join();
+	t2.join();
+	t3.join();
+	t4.join();*/
+
 	//BuildMapSector1(pd3dDevice, pd3dCommandList);
 	//BuildMapSector2(pd3dDevice, pd3dCommandList);
 	//BuildMapSector3(pd3dDevice, pd3dCommandList);
-	////BuildMapSector4(pd3dDevice, pd3dCommandList);
-	////BuildMapSector5(pd3dDevice, pd3dCommandList);
-	//
+	//BuildMapSector4(pd3dDevice, pd3dCommandList);
+	//BuildMapSector5(pd3dDevice, pd3dCommandList);
+	
 	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 	
 	BuildDoorWall(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("DoorWall"));
@@ -188,9 +202,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildSigns(pd3dDevice, pd3dCommandList);
 	BuildMirror(pd3dDevice, pd3dCommandList);
-	 
+	// 
 	BuildPlayers(pd3dDevice, pd3dCommandList); 
-	BuildParticles(pd3dDevice, pd3dCommandList);
+	//BuildParticles(pd3dDevice, pd3dCommandList);
 
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
 
@@ -214,11 +228,12 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//	pObject->ConnectParticle(m_Particles->GetParticleObj(idx));
 	//}
 
-	CTerrainWater* pTerrainWater = new CTerrainWater(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, 257 * 35, 257 * 32);
-	pTerrainWater->SetPosition(XMFLOAT3(5450.0f, -1300.0f, 16500.0f));
 
-	m_Objects.push_back(pTerrainWater);
+
+	auto end_t = chrono::high_resolution_clock::now();
+
+	auto elasepsed_t = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start_t);
+	cout << "InitElapsed Time : " << elasepsed_t.count() * 0.000001f << "\n";
 }
 
 void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
