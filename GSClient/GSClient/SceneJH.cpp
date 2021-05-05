@@ -27,6 +27,16 @@ CSceneJH::CSceneJH()
 	cout << "Enter CSceneJH \n";
 	m_pd3dGraphicsRootSignature = NULL;
 	m_isPlayerSelected = false;
+
+	for (int i = 0; i < (int)FBX_MESH_TYPE::COUNT; ++i) {
+		m_LoadedFbxMesh[i] = nullptr;
+	}
+	if (nullptr == m_LoadedFbxMesh[0]) {
+		int stop =3;
+	}
+	else {
+		int stop = 4;
+	}
 }
 
 CSceneJH::~CSceneJH()
@@ -165,14 +175,13 @@ void CSceneJH::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	auto start_t = chrono::high_resolution_clock::now();
-
 	m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
-
+	 
 	m_Objects.reserve(30);
-
+	
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 	CTerrainWater* pTerrainWater = new CTerrainWater(pd3dDevice, pd3dCommandList,
@@ -180,34 +189,28 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pTerrainWater->SetPosition(XMFLOAT3(5450.0f, -1300.0f, 16500.0f)); 
 	m_Objects.push_back(pTerrainWater);
 
-	/*std::thread t1([this, pd3dDevice, pd3dCommandList]() {});
-	std::thread t2([this, pd3dDevice, pd3dCommandList]() {});
-	std::thread t3([this, pd3dDevice, pd3dCommandList]() {}); 
-	std::thread t4([this, pd3dDevice, pd3dCommandList]() {});
-	t1.join();
-	t2.join();
-	t3.join();
-	t4.join();*/
-
+	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 	//BuildMapSector1(pd3dDevice, pd3dCommandList);
 	//BuildMapSector2(pd3dDevice, pd3dCommandList);
 	//BuildMapSector3(pd3dDevice, pd3dCommandList);
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList);
-	
+
 	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 	
 	BuildDoorWall(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("DoorWall"));
 	BuildPuzzles(pd3dDevice, pd3dCommandList);
 	//BuildEnemys(pd3dDevice, pd3dCommandList);
+
 	BuildSigns(pd3dDevice, pd3dCommandList);
-	BuildMirror(pd3dDevice, pd3dCommandList);
-	// 
+	BuildMirror(pd3dDevice, pd3dCommandList); 
 	BuildPlayers(pd3dDevice, pd3dCommandList); 
-	//BuildParticles(pd3dDevice, pd3dCommandList);
+	BuildParticles(pd3dDevice, pd3dCommandList);
 
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
 
+	//CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
+	//CGameObject* pObject = new CGameObject();
 	//CMeshFbx* fbxMesh;
 	//fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");
 	//CArrow* pObject = new CArrow(); 
@@ -227,8 +230,6 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//	m_Particles->UseParticle(idx, pObject->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 	//	pObject->ConnectParticle(m_Particles->GetParticleObj(idx));
 	//}
-
-
 
 	auto end_t = chrono::high_resolution_clock::now();
 
@@ -1655,8 +1656,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 7, 3)));
 		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 5, 7, 3, { 0,0,0 });
 		m_Objects.push_back(std::move(pObject));
-	}
-
+	} 
 	CMeshFbx* fbx_Dry_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
 	CMeshFbx* fbx_Stump_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
 	CMeshFbx* fbx_Dead_Tree_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
@@ -1880,6 +1880,45 @@ void CSceneJH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 } 
 
+void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//m_pfbxManager = FbxManager::Create();
+	//m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
+	//m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
+	//m_pfbxManager->SetIOSettings(m_pfbxIOs);
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Human];  
+	std::thread t1([this, pd3dDevice, pd3dCommandList]() {
+		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
+		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/rock.fbx", true);
+	});
+	std::thread t2([this, pd3dDevice, pd3dCommandList]() {
+		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
+		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
+	
+	});
+	std::thread t3([this, pd3dDevice, pd3dCommandList]() {
+		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
+		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true);
+	}); 
+	std::thread t4([this, pd3dDevice, pd3dCommandList]() {
+		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/babymos.fbx", true);
+		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Arrow.fbx");
+	});
+
+	t1.join();
+	t2.join();
+	t3.join();
+	t4.join();
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/rock.fbx", true);
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true);
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");
+}
+
 void CSceneJH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_Particles = new CParticle();
@@ -1911,7 +1950,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	m_Players[0]->Scale(50, 50, 50);
 	m_Players[0]->SetObjectName(OBJ_NAME::Player);
-	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f } );
+	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 
 	m_Players[0]->SetCamera(m_Cameras[0]);
 	m_Players[0]->SetTextureIndex(0x200);

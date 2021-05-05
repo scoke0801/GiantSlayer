@@ -9,13 +9,28 @@ class UI;
 class HelpTextUI;
 class CTerrain;
 class CParticle;
-
+enum class FBX_MESH_TYPE : UINT {
+	DryForestRock,
+	DesertRock,
+	Arrow,
+	Human,
+	DeadTree_01,
+	DeadTree_02,
+	DryTree_01,
+	DryTree_02,
+	Stump,
+	Bush_1,
+	Boss,
+	COUNT
+};
 class CSceneJH : public CScene
 {
 private:
 	bool						m_isPlayerSelected = true;
 
 private:
+	array<CMeshFbx*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
+
 	vector<CGameObject*>		m_Objects; 
 	vector<CGameObject*>		m_BillboardObjects; 
 	CParticle*					m_Particles;
@@ -143,6 +158,8 @@ private:
 	void BuildMirrorResource(ID3D12Device* pd3dDevice); 
 	 
 	void BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 private:
 	void BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
