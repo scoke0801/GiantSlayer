@@ -1242,12 +1242,12 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
-	pPuzzlePlate->SetPosition({ 10600.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f });
+	pPuzzlePlate->SetPosition({ 10600.0f, -2000.0f, 1500.0f + 8000.0f });
 	//pPuzzlePlate->RotateAll ({ 0,1,0 }, 180);
 	m_Objects.push_back(std::move(pPuzzlePlate));
 
 	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
-	pObject->SetPosition({ 10500.0f,  0.0f - 2000.0f, 1500.0f + 8000.0f });
+	pObject->SetPosition({ 10500.0f, -2000.0f, 1500.0f + 8000.0f });
 	m_Objects.push_back(std::move(pObject));
 
 	for (int i = 0; i < 2; ++i)

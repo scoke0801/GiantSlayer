@@ -273,7 +273,13 @@ void PacketProcessor::ReadObstaclesPosition()
 		GetPosition("SIGN_MEDUSA", d)); 
 	m_ObjectPositions.emplace(OBJECT_ID::SIGN_BOSS,
 		GetPosition("SIGN_BOSS", d)); 
-	 
+
+	for (int i = 0; i < 2; ++i) {
+		string str = "PUZZLE_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::PUZZLE_1 + i),
+			GetPosition(str, d));
+	}
+
 	for (int i = 0; i < 5; ++i) {
 		string str = "DOOR_WALL_SEC" + to_string(i + 1);
 		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DOOR_WALL_SEC1 + i),
@@ -300,6 +306,12 @@ void PacketProcessor::ReadObstaclesPosition()
 	for (int i = 0; i < 15; ++i) {
 		string str = "DESERT_ROCK_" + to_string(i + 1);
 		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DESERT_ROCK_1 + i),
+			GetPosition(str, d));
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		string str = "PUZZLE_BOX_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::PUZZLE_BOX_1 + i),
 			GetPosition(str, d));
 	}
 }
@@ -331,6 +343,27 @@ void PacketProcessor::InitObstacle()
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
 	pObject->Rotate({ 0, 1, 0 }, 90); 
 	m_Objects.push_back(std::move(pObject));
+///////////////////////////////////////////////////////////////////////////////// 
+
+// PUZZLE----------------------------------------------------------------------
+	pObject = new CPuzzle(OBJECT_ID::PUZZLE_1);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::PUZZLE_1]); 
+	m_Objects.push_back(std::move(pObject));
+
+	XMFLOAT3 tempPos = m_ObjectPositions[OBJECT_ID::PUZZLE_1];
+	tempPos.x += 100;
+	pObject = new CPlate(OBJECT_ID::PUZZLE_1_PLATE);
+	pObject->SetPosition(tempPos);
+	m_Objects.push_back(std::move(pObject));
+
+	for (int i = 0; i < 10; ++i) {
+		pObject = new CPuzzleBox((OBJECT_ID)((int)OBJECT_ID::PUZZLE_BOX_1 + i));
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::PUZZLE_BOX_1 + i)]);
+		m_Objects.push_back(std::move(pObject));
+	}
+	//pObject = new CPuzzle(OBJECT_ID::PUZZLE_2);
+	//pObject->SetPosition(m_ObjectPositions[OBJECT_ID::PUZZLE_2]);
+	//m_Objects.push_back(std::move(pObject));
 /////////////////////////////////////////////////////////////////////////////////
 
 // DoorWall----------------------------------------------------------------------

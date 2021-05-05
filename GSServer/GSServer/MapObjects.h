@@ -77,3 +77,48 @@ private:
 	CDoor* m_RightDoor;
 	vector<CGameObject*>  m_Walls;
 };
+
+
+// Puzzle Plate
+class CPlate :public CGameObject
+{
+private:
+	vector<CGameObject*> m_Objects;
+	 
+public:
+	CPlate(OBJECT_ID id);
+	~CPlate();
+
+public:
+	void SetPosition(XMFLOAT3 pos) override;
+	void Rotate(const XMFLOAT3& axis, float angle) override;
+	 
+	bool CollisionCheck(const BoundingBox& aabb) override;
+
+	void UpdateColliders() override;
+};
+
+class CPuzzle : public CGameObject
+{
+private:
+	vector<CGameObject*> m_Objects;
+
+public:
+	CPuzzle(OBJECT_ID id);
+	~CPuzzle();
+
+public:
+	void SetPosition(XMFLOAT3 pos) override;
+	 
+	bool CollisionCheck(const BoundingBox& aabb) override;
+
+	void UpdateColliders() override;
+};
+
+class CPuzzleBox : public CGameObject
+{
+	// 밀기 용으로 사용하기 위해 별도 정의
+public:
+	CPuzzleBox(OBJECT_ID id);
+	~CPuzzleBox();
+};
