@@ -84,7 +84,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	}
 	m_Cameras[0]->SetPosition({ 500,  250 + 150, 1200 });
 	m_Cameras[0]->Pitch(XMConvertToRadians(15));
-	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 70.0f, -300.0f));
+	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
 
 	m_Cameras[1]->SetPosition({ 500,  1500, 1500 });
 	m_Cameras[1]->Pitch(XMConvertToRadians(90));
@@ -670,6 +670,11 @@ void CSceneJH::Communicate(SOCKET& sock)
 		m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
 		m_Players[p_syncUpdate.id[i]]->UpdateCamera();
 	}
+
+	if (m_MousePositions.size() > 0) {
+		SendMouseInputPacket();
+		RecvMouseProcessPacket();
+	}
 }
 
 void CSceneJH::LoginToServer()
@@ -921,7 +926,6 @@ void CSceneJH::OnMouseDown(WPARAM btnState, int x, int y)
 	}
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
-
 	SetCapture(CFramework::GetInstance().GetHWND());
 }
 
@@ -931,7 +935,7 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 	{
 		if (m_MousePositions.size() > 0) {
 			SendMouseInputPacket();
-			//RecvMouseProcessPacket();
+			RecvMouseProcessPacket();
 		}
 	}
 	ReleaseCapture();
@@ -944,29 +948,22 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 	//
 	if (CFramework::GetInstance().IsOnConntected())
 	{
-		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
-		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
 		if ((btnState & MK_LBUTTON) != 0)
 		{
+			float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
+			float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
+
 			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_LMOVE;
 			 
-			m_MousePositions.emplace_back(POINTF{ dx, dy });
-
-			if (m_MousePositions.size() >= MAX_MOUSE_INPUT) {
-				SendMouseInputPacket();
-				//RecvMouseProcessPacket();
-			} 
+			m_MousePositions.emplace_back(POINTF{ dx, dy });  
 		}
-		else if ((btnState & MK_LBUTTON) != 0)
+		else if ((btnState & MK_RBUTTON) != 0)
 		{
+			float dx = static_cast<float>(x - m_LastMousePos.x);
+			float dy = static_cast<float>(y - m_LastMousePos.y);
 			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_RMOVE;
 
 			m_MousePositions.emplace_back(POINTF{ dx, dy });
-
-			if (m_MousePositions.size() >= MAX_MOUSE_INPUT) {
-				SendMouseInputPacket();
-				//RecvMouseProcessPacket();
-			}
 		}
 		return;
 	}
@@ -985,8 +982,7 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 			{
 				m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
 				m_MinimapArrow->Rotate(-dx * 150);
-			}
-			 
+			} 
 		}
 		else {
 			m_CurrentCamera->Pitch(dy);
@@ -1997,6 +1993,7 @@ void CSceneJH::SendMouseInputPacket()
 	P_C2S_MOUSE_INPUT p_mouseInput;
 	p_mouseInput.size = sizeof(p_mouseInput);
 	p_mouseInput.type = PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT;
+	p_mouseInput.id = CFramework::GetInstance().GetPlayerId();
 	p_mouseInput.inputNum = m_MousePositions.size();
 
 	for (int i = 0; i < p_mouseInput.inputNum; ++i) {   
@@ -2127,14 +2124,37 @@ void CSceneJH::RecvMouseProcessPacket()
 	char buffer[BUFSIZE + 1] = {};
 	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
 
-	P_S2C_PROCESS_MOUSE p_mouseProcess = *reinterpret_cast<P_S2C_PROCESS_MOUSE*>(&buffer); 
+	PACKET_PROTOCOL type = (PACKET_PROTOCOL)buffer[1];
 
-	XMFLOAT3 pos = XMFLOAT3{
-		IntToFloat(p_mouseProcess.posX),
-		IntToFloat(p_mouseProcess.posY),
-		IntToFloat(p_mouseProcess.posZ) 
-	};
-	 
-	m_Player->SetPosition(pos);
-	m_Player->FixPositionByTerrain(m_Terrain);
+	// 플레이어 추가 혹은 삭제 패킷 수신
+	if (type == PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT) {
+		P_S2C_PROCESS_MOUSE p_mouseProcess = *reinterpret_cast<P_S2C_PROCESS_MOUSE*>(&buffer);
+		if (p_mouseProcess.caemraOffset != 0) {
+			cout << "offset : " << p_mouseProcess.caemraOffset << "\n";
+			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, p_mouseProcess.caemraOffset * 0.01f));
+		}
+		if (p_mouseProcess.cameraRotateX != 0) {
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX * 0.075f);
+		}
+
+		if (p_mouseProcess.cameraRotateY != 0) {
+			cout << "cameraRotateY : " << p_mouseProcess.cameraRotateY << "\n";
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), p_mouseProcess.cameraRotateY * 0.075f);
+		}
+
+		if (p_mouseProcess.cameraRotateZ != 0) { 
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ * 0.075f);
+		}
+		if (p_mouseProcess.playerRotateX != 0) {
+			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX * 0.015f);
+		} 
+		if (p_mouseProcess.playerRotateY != 0) {
+			cout << "playerRotateY : " << p_mouseProcess.playerRotateY << "\n";
+			m_Player->Rotate(XMFLOAT3(0, 1, 0), p_mouseProcess.playerRotateY * 0.015f);
+			m_MinimapArrow->Rotate(-p_mouseProcess.playerRotateY * 150);
+		} 
+		if (p_mouseProcess.playerRotateZ != 0) {
+			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ * 0.015f);
+		}
+	}
 }

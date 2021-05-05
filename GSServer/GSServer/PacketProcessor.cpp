@@ -71,8 +71,43 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 	}
 	return true;
 	case PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT: 
-	{
+	{ 
+		P_C2S_MOUSE_INPUT p_mouse = *reinterpret_cast<P_C2S_MOUSE_INPUT*>(buffer);
+		
+		BYTE size;
+		PACKET_PROTOCOL type;
+		MOUSE_INPUT_TYPE InputType;
+		short inputNum;
+		int xInput[MAX_MOUSE_INPUT];
+		int yInput[MAX_MOUSE_INPUT];
 
+		P_S2C_PROCESS_MOUSE p_mouseProcess;
+		ZeroMemory(&p_mouseProcess, sizeof(P_S2C_PROCESS_MOUSE));
+		p_mouseProcess.size = sizeof(P_S2C_PROCESS_MOUSE);
+		p_mouseProcess.type = PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT;
+		//p_mouseProcess.playerRotateX = p_mouseProcess.playerRotateX = p_mouseProcess.playerRotateZ = 0;
+		//p_mouseProcess.cameraRotateX = p_mouseProcess.cameraRotateX = p_mouseProcess.cameraRotateZ = 0;
+		//p_mouseProcess.caemraOffset = 0;
+
+		if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_LMOVE) {
+			for (int i = 0; i < p_mouse.inputNum; ++i) {
+
+				m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), p_mouse.xInput[i] * 0.075f);
+				p_mouseProcess.cameraRotateY += p_mouse.xInput[i];
+				if (m_Players[p_mouse.id]->IsMoving())
+				{
+					p_mouseProcess.playerRotateY += p_mouse.xInput[i];
+					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), p_mouse.xInput[i] * 0.015f);
+				}
+			}
+		}
+		else if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_RMOVE) {
+			for (int i = 0; i < p_mouse.inputNum; ++i) {
+				p_mouseProcess.caemraOffset += p_mouse.yInput[i];
+				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, p_mouse.yInput[i] * 0.01f));
+			}
+		}
+		SendPacket(socket, reinterpret_cast<char*>(&p_mouseProcess), p_mouseProcess.size, retval);
 	}
 	return true;
 	case PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT:
@@ -194,6 +229,7 @@ void PacketProcessor::InitAll()
 	ReadObstaclesPosition();
 
 	InitPlayers(); 
+	InitCameras();
 	InitMonsters();
 	InitObstacle();
 }
@@ -242,6 +278,24 @@ void PacketProcessor::InitPlayers()
 		m_Players[i]->SetPosition(positions[i]);
 		m_Players[i]->SetExistence(false); 
 		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.0f, 5.0f, 2.5f)));
+	}
+}
+
+void PacketProcessor::InitCameras()
+{
+	int nCameras = MAX_PLAYER; 
+	const float PI = 3.141592; 
+	FRAME_BUFFER_WIDTH;
+	for (int i = 0; i < nCameras; ++i)
+	{
+		CCamera* pCamera = new CCamera;
+		pCamera->SetLens(0.25f * PI, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 1.0f, 60000.0f);
+		m_Cameras[i] = pCamera;
+
+		m_Cameras[i]->SetPosition(m_Players[i]->GetPosition());
+		m_Cameras[i]->Pitch(XMConvertToRadians(15));
+		m_Cameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));	
+		m_Cameras[i]->SetTarget(m_Players[i]);
 	}
 }
 

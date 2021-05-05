@@ -19,12 +19,23 @@ void CPlayer::Update(float fTimeElapsed)
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
 	Move(vel);  
+
+	UpdateCamera();
 	//cout << "pos : " << m_xmf3Position.x << " , " << m_xmf3Position.y << " " << m_xmf3Position.z << " \n";
 	
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+}
+
+void CPlayer::UpdateCamera()
+{
+	if (m_Camera != nullptr) {
+		m_Camera->Update(m_xmf3Position);
+		m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
+		m_Camera->UpdateViewMatrix();
+	}
 }
 
 void CPlayer::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1])

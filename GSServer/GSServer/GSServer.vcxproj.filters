@@ -70,4 +70,7 @@
     </ClInclude>
     <ClInclude Include="MapObjects.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\ObjectPositionData.json" />
+  </ItemGroup>
 </Project>

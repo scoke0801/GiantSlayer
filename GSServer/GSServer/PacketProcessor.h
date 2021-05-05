@@ -15,7 +15,7 @@ class PacketProcessor
 private:
 	CRITICAL_SECTION			m_cs;
 	CPlayer*					m_Players[MAX_PLAYER];
-
+	CCamera*				    m_Cameras[MAX_PLAYER];
 	int							m_CurrentPlayerNum = 0;
 
 	int							m_CurrentlyDeletedPlayerId;
@@ -62,6 +62,7 @@ private:
 private:
 	void InitAll();
 	void InitPlayers();
+	void InitCameras();
 	void InitMonsters();
 	
 	void ReadObstaclesPosition();
@@ -74,6 +75,7 @@ private:
 	void BuildBlockingRegionOnMap();
 
 	void EnterNewSector(int sectorNum);
+
 private:
 	unordered_map<OBJECT_ID, XMFLOAT3> m_ObjectPositions;
 };

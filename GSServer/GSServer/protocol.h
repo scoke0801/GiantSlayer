@@ -11,7 +11,7 @@ constexpr int BUFSIZE = 4096;
 constexpr int F_TO_I = 10000;
 constexpr int I_TO_F = F_TO_I;
 
-constexpr int MAX_MOUSE_INPUT = 10;
+constexpr int MAX_MOUSE_INPUT = 30;
 
 constexpr float ARROW_LIFE_TIME = 10.0f;
 constexpr float ARROW_SPEED = 165.0f * 3.5f;
@@ -199,10 +199,11 @@ struct P_C2S_KEYBOARD_INPUT {
 struct P_C2S_MOUSE_INPUT {
 	BYTE size; 
 	PACKET_PROTOCOL type;
-	MOUSE_INPUT_TYPE InputType;
+	short id;
+	MOUSE_INPUT_TYPE InputType; 
 	short inputNum;
-	int xInput[MAX_MOUSE_INPUT];
-	int yInput[MAX_MOUSE_INPUT];
+	short xInput[MAX_MOUSE_INPUT];
+	short yInput[MAX_MOUSE_INPUT];
 }; 
 
 struct P_C2S_UPDATE_SYNC_REQUEST {
@@ -254,10 +255,9 @@ struct P_S2C_PROCESS_MOUSE {
 	BYTE size;
 	PACKET_PROTOCOL type;
 
-	int posX, posY, posZ;
-
-	ROTATION_AXIS axis;
-	short angle;
+	short playerRotateX, playerRotateY, playerRotateZ;
+	short cameraRotateX, cameraRotateY, cameraRotateZ;
+	short caemraOffset;
 };
 
 struct P_S2C_UPDATE_SYNC {
