@@ -192,7 +192,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
 	//BuildMapSector1(pd3dDevice, pd3dCommandList);
-	BuildMapSector2(pd3dDevice, pd3dCommandList);
+	//BuildMapSector2(pd3dDevice, pd3dCommandList);
 	//BuildMapSector3(pd3dDevice, pd3dCommandList);
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList);
@@ -372,7 +372,8 @@ void CSceneJH::Update(float elapsedTime)
 		//if (m_Player->CollisionCheck(pObject)) {
 		if (pObject->CollisionCheck(m_Player)) {
 			m_Player->FixCollision();
-			cout << "충돌했습니다!!!!!!!!!!!!\n";
+			cout << "충돌 - ";
+			DisplayVector3(m_Player->GetPosition());
 		} 
 	}
 	 
@@ -1327,7 +1328,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->Scale(125.0f, 125.0f, 125.0f);
 	pObject->SetMesh(enemyMesh_1);
 	pObject->SetTextureIndex(0x200);
-	pObject->SetPosition({ 1900.0f, m_Terrain->GetDetailHeight(1900.0f, 11500.0f), 11500.0f });
+	pObject->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
 	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
 
 	pObject = new CGameObject();
@@ -1336,7 +1337,16 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->Scale(125.0f, 125.0f, 125.0f);
 	pObject->SetMesh(enemyMesh_1);
 	pObject->SetTextureIndex(0x200);
-	pObject->SetPosition({ 7650.0f, m_Terrain->GetDetailHeight(7700.0f, 11500.0f), 11500.0f });
+	pObject->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+	 
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pObject->Scale(125.0f, 125.0f, 125.0f);
+	pObject->SetMesh(enemyMesh_1);
+	pObject->SetTextureIndex(0x200);
+	pObject->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
 	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
 
 	pObject = new CGameObject();
@@ -1345,7 +1355,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->Scale(125.0f, 125.0f, 125.0f);
 	pObject->SetMesh(enemyMesh_1);
 	pObject->SetTextureIndex(0x200);
-	pObject->SetPosition({ 7650.0f, m_Terrain->GetDetailHeight(7650.0f, 11500.0f), 11500.0f });
+	pObject->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
 	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
 
 	pObject = new CGameObject();
@@ -1354,27 +1364,8 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->Scale(125.0f, 125.0f, 125.0f);
 	pObject->SetMesh(enemyMesh_1);
 	pObject->SetTextureIndex(0x200);
-	pObject->SetPosition({ 11750.0f, m_Terrain->GetDetailHeight(11750.0f, 18000.0f), 18000.0f });
-	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
-
-	pObject = new CGameObject();
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pObject->Scale(125.0f, 125.0f, 125.0f);
-	pObject->SetMesh(enemyMesh_1);
-	pObject->SetTextureIndex(0x200);
-	pObject->SetPosition({ 11750.0f, m_Terrain->GetDetailHeight(11750.0f, 13400.0f), 13400.0f });
-	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
-
-	pObject = new CGameObject();
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pObject->Scale(125.0f, 125.0f, 125.0f);
-	pObject->SetMesh(enemyMesh_1);
-	pObject->SetTextureIndex(0x200);
-	pObject->SetPosition({ 11750.0f, m_Terrain->GetDetailHeight(11750.0f, 3400.0f), 3400.0f });
-	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
-
+	pObject->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject))); 
 	//pObject = new CGameObject();
 	//pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	////pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
