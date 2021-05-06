@@ -763,20 +763,13 @@ void CTerrain::InitHeightDatas()
 	//	}
 	//}
 
-	//for (int i = 0; i < 80; i++)
+	//for (int i = 35; i < 80; i++)
 	//{
 	//	for (int Garo = 50; Garo < 70; Garo++)
 	//	{
 	//		m_Heights[i][Garo] = rand() % 300 - 2150;
 	//	}
-	//}
-	//for (int i = 0; i < 80; i++)
-	//{
-	//	for (int Garo = 50; Garo < 70; Garo++)
-	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 2150;
-	//	}
-	//}
+	//} 
 
 	//// ±¸µ¢ÀÌ
 	//for (int i = 95; i < 100; i++)
@@ -820,7 +813,7 @@ void CTerrain::InitHeightDatas()
 	//		m_Heights[i][Garo] = rand() % 300 - 1150;
 	//	}
 	//}
-	//for (int i = 0; i < 20; i++)
+	//for (int i = 0; i < 35; i++)
 	//{
 	//	for (int Garo = 50; Garo < 70; Garo++)
 	//	{
@@ -871,7 +864,7 @@ void CTerrain::InitHeightDatas()
 }
 void CTerrain::FileSave()
 {
-	ofstream fileOut("Heights.txt");
+	ofstream fileOut("resources/Heights.txt");
 	int indexX, indexY;
 	for (int i = 0; i <= TERRAIN_HEIGHT_MAP_HEIGHT; ++i)
 	{
