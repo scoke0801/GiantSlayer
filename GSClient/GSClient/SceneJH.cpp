@@ -193,7 +193,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	//BuildMapSector1(pd3dDevice, pd3dCommandList);
 	//BuildMapSector2(pd3dDevice, pd3dCommandList);
-	BuildMapSector3(pd3dDevice, pd3dCommandList);
+	//BuildMapSector3(pd3dDevice, pd3dCommandList);
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList);
 
@@ -201,7 +201,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	
 	BuildDoorWall(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("DoorWall"));
 	BuildPuzzles(pd3dDevice, pd3dCommandList);
-	//BuildEnemys(pd3dDevice, pd3dCommandList);
+	
+	BuildEnemys(pd3dDevice, pd3dCommandList);
 
 	BuildSigns(pd3dDevice, pd3dCommandList);
 	BuildMirror(pd3dDevice, pd3dCommandList); 
@@ -209,7 +210,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildParticles(pd3dDevice, pd3dCommandList);
 
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
-
+	 
 	//CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	//CGameObject* pObject = new CGameObject();
 	//CMeshFbx* fbxMesh;
@@ -1287,17 +1288,83 @@ void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
+	//CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
+	//CGameObject* pObject = new CGameObject();
+	//pObject->SetMesh(fbxMesh);
+	//pObject->SetPosition({ 16800,  -6070, 16500 });
+	//pObject->SetTextureIndex(0x01);
+	//pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	//pObject->SetTextureIndex(0x80);
+	//pObject->Scale(35, 35, 35); 
+	//pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
+	//pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
+	//m_Objects.push_back(std::move(pObject));
+	CMeshFbx* enemyMesh_1 = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager,
+		"resources/Fbx/Enemy_t1.fbx", true);
+	//CMeshFbx* enemyMesh_2 = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager,
+	//	"resources/Fbx/Enemy_t2.fbx", true);
 	CGameObject* pObject = new CGameObject();
-	pObject->SetMesh(fbxMesh);
-	pObject->SetPosition({ 16800,  -6070, 16500 });
-	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pObject->SetTextureIndex(0x80);
-	pObject->Scale(35, 35, 35); 
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
-	m_Objects.push_back(std::move(pObject));
+	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pObject->Scale(125.0f, 125.0f, 125.0f);
+	pObject->SetMesh(enemyMesh_1);
+	pObject->SetTextureIndex(0x200);
+	pObject->SetPosition({ 1900.0f, m_Terrain->GetDetailHeight(1900.0f, 11500.0f), 11500.0f });
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pObject->Scale(125.0f, 125.0f, 125.0f);
+	pObject->SetMesh(enemyMesh_1);
+	pObject->SetTextureIndex(0x200);
+	pObject->SetPosition({ 7650.0f, m_Terrain->GetDetailHeight(7700.0f, 11500.0f), 11500.0f });
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pObject->Scale(125.0f, 125.0f, 125.0f);
+	pObject->SetMesh(enemyMesh_1);
+	pObject->SetTextureIndex(0x200);
+	pObject->SetPosition({ 7650.0f, m_Terrain->GetDetailHeight(7650.0f, 11500.0f), 11500.0f });
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pObject->Scale(125.0f, 125.0f, 125.0f);
+	pObject->SetMesh(enemyMesh_1);
+	pObject->SetTextureIndex(0x200);
+	pObject->SetPosition({ 11750.0f, m_Terrain->GetDetailHeight(11750.0f, 18000.0f), 18000.0f });
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pObject->Scale(125.0f, 125.0f, 125.0f);
+	pObject->SetMesh(enemyMesh_1);
+	pObject->SetTextureIndex(0x200);
+	pObject->SetPosition({ 11750.0f, m_Terrain->GetDetailHeight(11750.0f, 13400.0f), 13400.0f });
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+
+	pObject = new CGameObject();
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pObject->Scale(125.0f, 125.0f, 125.0f);
+	pObject->SetMesh(enemyMesh_1);
+	pObject->SetTextureIndex(0x200);
+	pObject->SetPosition({ 11750.0f, m_Terrain->GetDetailHeight(11750.0f, 3400.0f), 3400.0f });
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+
+	//pObject = new CGameObject();
+	//pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	////pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	//pObject->Scale(75.0f, 75.0f, 75.0f);
+	//pObject->SetMesh(enemyMesh_2);
+	//pObject->SetTextureIndex(0x200);
+	//pObject->SetPosition({ 500.0f, m_Terrain->GetDetailHeight(500.0f, 2500.0f), 2500.0f });
+	//m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
 }
 
 void CSceneJH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
