@@ -196,7 +196,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x200);
 	m_Player->SetMesh(golemMesh);
-	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+	m_Player->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{ 0,0,0 });
 
 	//FbxLoader(m_pfbxManager, "resources/Fbx/human.fbx");
 
@@ -826,7 +826,7 @@ ID3D12RootSignature* CSceneTH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
 	pd3dRootParameters[0].Constants.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
+	 
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[1].Descriptor.ShaderRegister = 1; //SceneFrameData
 	pd3dRootParameters[1].Descriptor.RegisterSpace = 0;
@@ -835,7 +835,7 @@ ID3D12RootSignature* CSceneTH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[2].Descriptor.ShaderRegister = 2; //Camera
 	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL; 
 
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[3].Descriptor.ShaderRegister = 3; //Material

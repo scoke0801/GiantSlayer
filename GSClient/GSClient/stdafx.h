@@ -374,6 +374,11 @@ static T Clamp(const T& x, const T& low, const T& high)
 {
 	return x < low ? low : (x > high ? high : x);
 }
+
+inline float lerp(float a, float b, float alpha)
+{
+	return a * (1 - alpha) + b * alpha;
+}
 #include "resource.h"
 #include "GameTimer.h"
 #include "InputHandler.h"
@@ -383,5 +388,5 @@ static T Clamp(const T& x, const T& low, const T& high)
 #include "Material.h"
 #include "GameFramework.h"
 #include "Light.h"
-#include "ShaderHandler.h"
+#include "ShaderHandler.h" 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.

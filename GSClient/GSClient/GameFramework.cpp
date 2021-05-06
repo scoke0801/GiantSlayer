@@ -300,9 +300,11 @@ void CFramework::BuildScene()
    
 void CFramework::SinglePlayUpdate()
 {
-	if (IsOnConntected())
-	{
-		Draw();
+	if (IsOnConntected()) {
+		if (m_FrameDirtyFlag) {
+			Draw();
+			m_FrameDirtyFlag = false;
+		}
 		return;
 	}
 	m_GameTimer.UpdateElapsedTime();
@@ -420,7 +422,7 @@ void CFramework::Draw()
 
 	m_CurrentScene->Draw(m_pd3dCommandList);
 
-	m_CurrentScene->DrawPlayer(m_pd3dCommandList);
+	//m_CurrentScene->DrawPlayer(m_pd3dCommandList);
 	 
 	m_CurrentScene->DrawUI(m_pd3dCommandList);
 
@@ -534,7 +536,7 @@ DWORD __stdcall ClientMain(LPVOID arg)
 		fps = 0.0f;
 		elapsedTime = m_GameTimer.GetElapsedTime();
 
-		if (elapsedTime > FPS)				//지정된 시간이 흘렀다면
+		if (elapsedTime > SERVER_FPS)				//지정된 시간이 흘렀다면
 		{
 			m_GameTimer.UpdateCurrentTime();
 
@@ -545,18 +547,19 @@ DWORD __stdcall ClientMain(LPVOID arg)
 
 			//게임 시간이 늦어진 경우 이를 따라잡을 때 까지 업데이트 시킵니다.
 			lag += elapsedTime;
-			for (int i = 0; lag > FPS && i < MAX_LOOP_TIME; ++i)
+			for (int i = 0; lag > SERVER_FPS && i < MAX_LOOP_TIME; ++i)
 			{
 				//Communicate(); 
 				CFramework::GetInstance().Communicate(); 
 				CFramework::GetInstance().SceneUpdate();
-				lag -= FPS;
+				lag -= SERVER_FPS;
 			}
 		}
 		// 최대 FPS 미만의 시간이 경과하면 진행 생략(Frame Per Second)
 		else
 			continue;
 
+		CFramework::GetInstance().SetFrameDirtyFlag(true);
 		//CFramework::GetInstance().Draw();
 #if defined(SHOW_CAPTIONFPS)
 

@@ -16,11 +16,13 @@
 #include <algorithm>
 #pragma warning(disable  : 4996)    // mbstowcs unsafe###
 using namespace std;
+ 
+constexpr int TERRAIN_HEIGHT_MAP_HEIGHT = 100;
+constexpr int TERRAIN_HEIGHT_MAP_WIDTH = 100;
+#define FPS 1 / 30.0f
+//프레임을 따라잡기까지 최대 몇번 루프를 돌 것인지를 지정합니다.
+#define MAX_LOOP_TIME 5
 
-#define width 480 
-#define height 960
-
-#define FPS 1 / 60
 #include <Windowsx.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
@@ -29,15 +31,25 @@ using namespace std;
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
+#include <unordered_map>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
-  
+
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
- 
+
+// to read JSON file
+#include "../include/rapidjson/document.h"
+#include "../include/rapidjson/writer.h"
+#include "../include/rapidjson/prettywriter.h"
+#include "../include/rapidjson/stringbuffer.h"
+#include "../include/rapidjson/filereadstream.h"
+#include "../include/rapidjson/filewritestream.h"
+using namespace rapidjson;
+
 #define EPSILON					1.0e-10f
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
@@ -281,3 +293,24 @@ namespace Matrix4x4
 		return(xmmtx4x4Result);
 	}
 }
+
+#define VK_W 0x57
+#define VK_A 0x41
+#define VK_S 0x53
+#define VK_D 0x44
+#define VK_B 0x42
+#define VK_C 0x43
+#define VK_1 0x31
+#define VK_2 0x32
+#define VK_3 0x33
+#define VK_4 0x34
+#define VK_5 0x35 
+
+#define VK_U 0x55
+#define VK_I 0x49
+#define VK_O 0x4F
+#define VK_P 0x50
+#define VK_J 0x4A
+#define VK_K 0x4B
+#define VK_L 0x4C 
+#include "protocol.h"

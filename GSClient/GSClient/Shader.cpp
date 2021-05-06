@@ -125,12 +125,13 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout(ShaderTypes type)
 	}
 	else if (type == ShaderTypes::Terrain)
 	{
-		UINT nInputElementDescs = 3;
+		UINT nInputElementDescs = 4;
 		D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 		pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		pd3dInputElementDescs[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		pd3dInputElementDescs[3] = { "TEXTURE", 0, DXGI_FORMAT_R32_UINT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		//pd3dInputElementDescs[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		//pd3dInputElementDescs[4] = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 		
@@ -487,8 +488,7 @@ void CShader::RenderBoundary(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	{
 		pd3dCommandList->SetPipelineState(m_pd3dBoundaryPipelineState);
 	} 
-}
-
+} 
 void CShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	* pd3dCommandList)
 {

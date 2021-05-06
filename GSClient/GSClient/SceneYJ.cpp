@@ -193,7 +193,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x80);
 	m_Player->SetMesh(fbxMesh);
-	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+	m_Player->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 10, 10, 10, XMFLOAT3{ 0,0,0 });
 
 	m_MinimapCamera->SetTarget(m_Player);
 }

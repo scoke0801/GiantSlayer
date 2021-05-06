@@ -15,9 +15,12 @@
 #define TERRAIN_HEIGHT_MAP_WIDTH 100
 #define TERRAIN_HEIGHT_MAP_HEIGHT 100
 
+#define TERRAIN_DETAIL_HEIGHT_MAP_WIDTH 20000
+#define TERRAIN_DETAIL_HEIGHT_MAP_HEIGHT 20000
 //-------------------------------------------------------------------
 //
 #define FPS 1 / 60.0f
+#define SERVER_FPS 1 / 30.0f
 //프레임을 따라잡기까지 최대 몇번 루프를 돌 것인지를 지정합니다.
 #define MAX_LOOP_TIME 50
 
@@ -40,8 +43,7 @@
 #define SHOW_CAPTIONFPS
 //-------------------------------------------------------------------
 //
-#define FRAME_BUFFER_WIDTH		1280
-#define FRAME_BUFFER_HEIGHT		768
+
 #define SWAP_BUFFER_COUNT		2
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
@@ -98,10 +100,7 @@ struct CB_GAMESCENE_FRAME_DATA
 {
 	UINT m_PlayerHP = 0;
 	UINT m_PlayerSP = 0;
-	UINT m_PlayerWeapon = 0x01;
-
-	//XMFLOAT4 m_FogColor = { 0.7f,0.7f,0.7f,1.0f };
-	//float m_FogStart = 5.0f;
-	//float m_FogRange = 150.0f;
+	UINT m_PlayerWeapon = 0x01; 
 };
 
+enum class PulledModel : int { Center = 0, Left = 1, Right, Top, Bottom };

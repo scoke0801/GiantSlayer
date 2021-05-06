@@ -14,14 +14,19 @@ class CSceneJH : public CScene
 private:
 	bool						m_isPlayerSelected = true;
 
-protected:
+private:
 	vector<CGameObject*>		m_Objects; 
 	vector<CGameObject*>		m_BillboardObjects; 
+	
+	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
+	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
+	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;	
 
 	CGameObject*				m_Mirror = nullptr;
 	CPlayer*					m_Player = nullptr;
 
-	CPlayer*					m_Players[MAX_USER];
+	int							m_CurrentPlayerNum = 0;
+	CPlayer*					m_Players[MAX_PLAYER];
 
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
@@ -66,6 +71,10 @@ private:	// about SceneInfo
 	ID3D12Resource*				m_pd3dcbSceneInfo = NULL;
 	CB_GAMESCENE_FRAME_DATA*	m_pcbMappedSceneFrameData = NULL;
 
+private: // for server mouse input process
+	vector<POINTF>				m_MousePositions;
+	MOUSE_INPUT_TYPE			m_prevMouseInputType;
+
 public:
 	CSceneJH();
 	~CSceneJH();
@@ -96,8 +105,12 @@ public:
 
 public:
 	virtual void Communicate(SOCKET& sock) override;
+
 	virtual void LoginToServer()  override;
 	virtual void LogoutToServer() override;
+
+	virtual void DeletePlayer(int playerId) override {}
+	virtual void AddPlayer(int palyerId) override {}
 public:
 	virtual void ProcessInput();
 
@@ -124,10 +137,20 @@ private:
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice); 
 	 
+	void BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
 private:
 	void BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void EnterNewSector(int sectorNum);
+
+private:
+	void SendMouseInputPacket();
+	void RecvMouseProcessPacket();
 };

@@ -1,8 +1,10 @@
 #include "stdafx.h"
-
+#include "PacketProcessor.h"
 #include "Communicates.h"  
 int main(int argc, char* argv[])
 {
+	PacketProcessor::GetInstance();
+	wcout.imbue(std::locale("korean"));
 #pragma region ForDebugHide
 	int retVal;
 

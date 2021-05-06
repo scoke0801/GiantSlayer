@@ -125,7 +125,10 @@
     </ClCompile>
     <ClCompile Include="ShaderHandler.cpp">
       <Filter>Handler</Filter>
-    </ClCompile>
+    </ClCompile> 
+    <ClCompile Include="Colider.cpp">
+      <Filter>GameObject\Colider</Filter>
+    </ClCompile> 
     <ClCompile Include="FbxLoader.cpp">
       <Filter>FBXLoader</Filter>
     </ClCompile>
@@ -133,7 +136,7 @@
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="SceneExport.cpp">
-      <Filter>Scene</Filter>
+      <Filter>Scene</Filter> 
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -258,7 +261,10 @@
     </ClInclude>
     <ClInclude Include="..\..\GSServer\GSServer\protocol.h">
       <Filter>Communicate</Filter>
-    </ClInclude>
+    </ClInclude> 
+    <ClInclude Include="Colider.h">
+      <Filter>GameObject\Colider</Filter>
+    </ClInclude> 
     <ClInclude Include="Font.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="FbxLoader.h">
@@ -268,7 +274,7 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="SceneExport.h">
-      <Filter>Scene</Filter>
+      <Filter>Scene</Filter> 
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -366,6 +372,9 @@
     </Filter>
     <Filter Include="GameObject\Sign">
       <UniqueIdentifier>{639e0d57-1a7b-492e-aac3-2c5c5fc89552}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Colider">
+      <UniqueIdentifier>{627dc5b6-b871-4132-9396-60fd010d0a67}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

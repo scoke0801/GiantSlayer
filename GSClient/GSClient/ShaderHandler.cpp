@@ -23,7 +23,7 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateMinmapShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateSkyboxShader(pd3dDevice, pd3dGraphicsRootSignature);
-	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature); 
 }
 
 void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -260,6 +260,7 @@ void CShaderHandler::CreateDoorWallShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 	}
 	pDoorWallShader->CreateInputLayout(ShaderTypes::Textured);
 	pDoorWallShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pDoorWallShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("DoorWall", pDoorWallShader);
 }
 
@@ -280,6 +281,7 @@ void CShaderHandler::CreateBridgeShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 	}
 	pBridgeShader->CreateInputLayout(ShaderTypes::Textured);
 	pBridgeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pBridgeShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Bridge", pBridgeShader);
 }
 
@@ -300,6 +302,7 @@ void CShaderHandler::CreatePuzzleShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 	}
 	pPuzzleShader->CreateInputLayout(ShaderTypes::Textured);
 	pPuzzleShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
+	pPuzzleShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Puzzle", pPuzzleShader);
 }
 
@@ -320,6 +323,7 @@ void CShaderHandler::CreateSignShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	}
 	pSignShader->CreateInputLayout(ShaderTypes::Textured);
 	pSignShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
+	pSignShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Sign", pSignShader);
 }
 
@@ -339,7 +343,8 @@ void CShaderHandler::CreateTreeShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 		pTreeShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFBXFeatureShader");
 	}
 	pTreeShader->CreateInputLayout(ShaderTypes::Textured);
-	pTreeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
+	pTreeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true); 
+	pTreeShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Tree", pTreeShader);
 }
 

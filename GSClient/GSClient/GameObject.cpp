@@ -16,6 +16,7 @@ string ConvertToObjectName(const OBJ_NAME& name)
 	default:
 		assert(!"UnDefinedObjectName");
 	}
+	return "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,9 +56,28 @@ void CGameObject::SetMesh(CMesh* pMesh)
 
 	if (m_pMesh) m_pMesh->AddRef();
 }  
-void CGameObject::BuildBoundigMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth)
+void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	float fWidth, float fHeight, float fDepth,
+	const XMFLOAT3& shift)
 {
-	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, false, fWidth, fHeight, fDepth);
+	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, false, fWidth, fHeight, fDepth, shift);
+	m_BoundingObjectMeshes.push_back(std::move(pMesh));
+}
+void CGameObject::BuildBoundigSphereMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	PulledModel pulledModel,
+	float radius, UINT32 sliceCount, UINT32 stackCount,
+	const XMFLOAT3& shift)
+{
+	CMesh* pMesh = new CSphereMeshDiffused(pd3dDevice, pd3dCommandList, pulledModel,  radius, sliceCount, stackCount, shift);
+	m_BoundingObjectMeshes.push_back(std::move(pMesh));
+}
+void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	PulledModel pulledModel, 
+	float fWidth, float fHeight, float fDepth,
+	const XMFLOAT3& shift)
+{
+	//CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, pulledModel, fWidth, fHeight, fDepth);
+	CMesh* pMesh = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, pulledModel, fWidth, fHeight, fDepth,shift);
 	m_BoundingObjectMeshes.push_back(std::move(pMesh));
 }
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -95,8 +115,9 @@ void CGameObject::Animate(float fTimeElapsed)
 
 }
 
-void CGameObject::Update(double fTimeElapsed)
+void CGameObject::Update(float fTimeElapsed)
 {
+	if (!m_isDrawbale) return;
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
 	static float Friction = 50.0f;	
@@ -130,6 +151,7 @@ void CGameObject::OnPrepareRender()
 
 void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	if (!m_isDrawbale) return;
 	OnPrepareRender();
 
 	if (m_pShader)
@@ -150,8 +172,22 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 	}
 }
 
+void CGameObject::DrawForBoundingObj(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (gbBoundaryOn)
+	{
+		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0); 
+		m_pShader->RenderBoundary(pd3dCommandList, pCamera);
+		for (auto pBoundingMesh : m_BoundingObjectMeshes)
+		{
+			pBoundingMesh->Render(pd3dCommandList);
+		}
+	}
+}
+
 void CGameObject::SetPosition(XMFLOAT3 pos)
 {
+	m_xmf3PrevPosition = m_xmf3Position;
 	m_xmf3Position = pos;
 
 	m_xmf4x4World._41 = pos.x;
@@ -162,6 +198,7 @@ void CGameObject::SetPosition(XMFLOAT3 pos)
 void CGameObject::SetPositionPlus(XMFLOAT3 pos)
 {
 	pos = Vector3::Add(m_xmf3Position, pos);
+	m_xmf3PrevPosition = m_xmf3Position;
 	m_xmf3Position = pos;
 
 	m_xmf4x4World._41 = pos.x;
@@ -221,14 +258,26 @@ XMFLOAT3 CGameObject::GetLook()const
 	return XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33);
 }
 
+void CGameObject::AddAABB(Collider* pCollider)
+{
+	auto type = pCollider->GetType();
+	if (type == ColliderType::Box) {
+		m_AABB.push_back(new ColliderBox(pCollider->GetBox().Center, pCollider->GetBox().Extents));
+	}
+	else {
+		assert(!" CGameObject::AddAABB(Collider* pCollider)");
+	}
+}
+
 void CGameObject::Move(XMFLOAT3 shift)
 {
-	SetPosition(Vector3::Add(m_xmf3Position, shift));
+	SetPosition(Vector3::Add(m_xmf3Position, shift)); 
 }
 
 void CGameObject::Move()
 {
-	m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
+	SetPosition(Vector3::Add(m_xmf3Position, m_xmf3Velocity));
+	//m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
 }
 
 void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
@@ -271,6 +320,44 @@ void CGameObject::Scale(float x, float y, float z, bool setSize)
 	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World); 
 }
 
+bool CGameObject::CollisionCheck(Collider* pAABB)
+{
+	for (int i = 0; i < m_AABB.size(); ++i) {
+		auto thisBox = m_AABB[i]->GetBox(); 
+		bool result = thisBox.Intersects(pAABB->GetBox());
+		if (result) return true;  
+	}
+
+	return false;
+}
+
+bool CGameObject::CollisionCheck(CGameObject* other)
+{
+	auto otherAABB = other->GetAABB();
+	for (int i = 0; i < otherAABB.size(); ++i) {
+		bool result = CollisionCheck(otherAABB[i]);
+		if (result) return true; 
+	}
+
+	return false;
+}
+
+void CGameObject::FixCollision()
+{
+	SetPosition(m_xmf3PrevPosition);
+	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+}
+
+void CGameObject::UpdateColliders()
+{
+	for (int i = 0; i < m_Colliders.size(); ++i) {
+		m_Colliders[i]->GetBox().Transform(m_AABB[i]->GetBox(), XMLoadFloat4x4(&m_xmf4x4World));
+	}
+	/*for (auto collider : m_Colliders) {
+		collider->Update(m_xmf4x4World);
+	}*/
+}
+ 
 //void CGameObject::Rotate(float x, float y, float z)
 //{
 //	static float pitch, yaw, roll;

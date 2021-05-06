@@ -22,7 +22,10 @@ public:
 public:
 	virtual void SetPosition(XMFLOAT3 pos) override;
 	void RotateAll(const XMFLOAT3& axis, float angle);
+
+	void UpdateColliders() override;
+	bool CollisionCheck(Collider* pCollider) override;
 private:
-	void AddObject(CMesh* pMesh, CShader* pShader, UINT textureIndex);
+	int AddObject(CMesh* pMesh, CShader* pShader, UINT textureIndex);  
 };
 

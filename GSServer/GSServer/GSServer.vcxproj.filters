@@ -17,13 +17,16 @@
     <Filter Include="Communicates">
       <UniqueIdentifier>{c273b405-d727-4f74-abd2-790fc253807d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Communicates\GameSceneProcessor">
+    <Filter Include="Communicates\PacketProcessor">
       <UniqueIdentifier>{d55e1382-2bbc-431f-999d-82fc98f38beb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{b10d37d3-da58-4354-b8a3-82c0e630eacd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GameSceneProcessor.cpp">
-      <Filter>Communicates\GameSceneProcessor</Filter>
+    <ClCompile Include="PacketProcessor.cpp">
+      <Filter>Communicates\PacketProcessor</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Main</Filter>
@@ -40,10 +43,14 @@
     <ClCompile Include="Player.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="MapObjects.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameSceneProcessor.h">
-      <Filter>Communicates\GameSceneProcessor</Filter>
+    <ClInclude Include="PacketProcessor.h">
+      <Filter>Communicates\PacketProcessor</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>Main\stdafx</Filter>
@@ -58,5 +65,9 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="protocol.h" />
+    <ClInclude Include="Camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="MapObjects.h" />
   </ItemGroup>
 </Project>

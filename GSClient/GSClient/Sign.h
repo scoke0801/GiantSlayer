@@ -23,6 +23,9 @@ public:
      
 public:
     virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+    void UpdateColliders() override;
+
+    bool CollisionCheck(Collider* pCollider) override;
 
 public:
     virtual void SetPosition(XMFLOAT3 pos) override;

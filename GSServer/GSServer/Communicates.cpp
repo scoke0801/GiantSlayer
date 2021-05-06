@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Communicates.h"
-#include "GameSceneProcessor.h"
+#include "PacketProcessor.h"
 
 void charToWchar(const char* msg, wchar_t* out)
 {
@@ -24,15 +24,15 @@ void error_quit(const char* msg)
 }
 void error_display(const char* msg)
 {
-	LPVOID lpMsgBuf;
+	WCHAR* lpMsgBuf;
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
 		NULL, WSAGetLastError(),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR)&lpMsgBuf, 0, NULL);
-	printf("[%s] %s", msg, (char*)lpMsgBuf);
-	LocalFree(lpMsgBuf);
-
+	cout << msg;
+	wcout << lpMsgBuf << "\n";
+	LocalFree(lpMsgBuf); 
 }
 int recvn(SOCKET s, char* buf, int len, int flags)
 {
@@ -112,13 +112,7 @@ DWORD __stdcall MainServerThread(LPVOID arg)
 	// 클라이언트 정보 받기
 	addrLen = sizeof(clientAddr);
 	getpeername(client_sock, (SOCKADDR*)&clientAddr, &addrLen);
-
-	// +1, null value
-	char buffer[BUFSIZE + 1];
-	int receivedSize = 0;
-	int count = 0;
-	int retval = 0;
-
+	  
 	while (1) {
 		static std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
 		static std::chrono::duration<double> timeElapsed;
@@ -126,8 +120,9 @@ DWORD __stdcall MainServerThread(LPVOID arg)
 		timeElapsed = std::chrono::system_clock::now() - currentTime;
 		currentTime = std::chrono::system_clock::now();
 		//cout << "TimeElapsed: " << timeElapsed.count() << " \n";
-		
-		GameSceneProcessor::GetInstance()->ProcessGameScene(client_sock); 
+		PacketProcessor::GetInstance()->ProcessGameScene(client_sock);
+
+		PacketProcessor::GetInstance()->UpdateLoop();
 	}
 
 	// closesocket()

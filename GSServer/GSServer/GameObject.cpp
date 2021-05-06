@@ -29,7 +29,7 @@ CGameObject::~CGameObject()
 }
   
 
-void CGameObject::Update(double fTimeElapsed)
+void CGameObject::Update(float fTimeElapsed)
 {
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
@@ -57,6 +57,7 @@ void CGameObject::Update(double fTimeElapsed)
   
 void CGameObject::SetPosition(XMFLOAT3 pos)
 {
+	m_xmf3PrevPosition = m_xmf3Position;
 	m_xmf3Position = pos;
 
 	m_xmf4x4World._41 = pos.x;
@@ -64,7 +65,7 @@ void CGameObject::SetPosition(XMFLOAT3 pos)
 	m_xmf4x4World._43 = pos.z;
 }
 
-void CGameObject::SetVelocity(XMFLOAT3 vel)
+void CGameObject::SetVelocity(const XMFLOAT3& vel)
 {
 	m_xmf3Velocity = vel;
 }
@@ -99,12 +100,54 @@ void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
 {	
 	
 }
+
+bool CGameObject::CollisionCheck(const BoundingBox& pAABB)
+{
+	for (int i = 0; i < m_AABB.size(); ++i) { 
+		bool result = m_AABB[i].Intersects(pAABB);
+		if (result) return true; 
+	}
+
+	return false;
+}
+
+bool CGameObject::CollisionCheck(CGameObject* other)
+{
+	auto otherAABB = other->GetAABB();
+	for (int i = 0; i < otherAABB.size(); ++i) {
+		bool result = CollisionCheck(otherAABB[i]);
+		if (result) return true;
+	}
+
+	return false;
+}
+
+void CGameObject::FixCollision()
+{
+	cout << "prev : ";
+	DisplayVector3(m_xmf3PrevPosition, false);
+	SetPosition(m_xmf3PrevPosition);
+	cout << " cur : ";
+	DisplayVector3(m_xmf3Position);
+	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+}
+
+void CGameObject::UpdateColliders()
+{
+	for (int i = 0; i < m_BoundingBox.size(); ++i) {
+		m_BoundingBox[i].Transform(m_AABB[i], XMLoadFloat4x4(&m_xmf4x4World)); 
+	}
+}
+
+void CGameObject::AddAABB(const BoundingBox& boundingBox)
+{ 
+	m_AABB.push_back(boundingBox);
+}
   
 XMFLOAT3 CGameObject::GetRight()const
 {
 	return XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13);
 }
-
 
 XMFLOAT3 CGameObject::GetUp()const
 {
@@ -123,15 +166,16 @@ void CGameObject::Move(XMFLOAT3 shift)
 
 void CGameObject::Move()
 {
-	m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
+	SetPosition(Vector3::Add(m_xmf3Position, m_xmf3Velocity)); 
 }
 
-void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
+void CGameObject::Rotate(const XMFLOAT3& pxmf3Axis, float fAngle)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
 		XMConvertToRadians(fAngle));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
+ 
 
 void CGameObject::Scale(float x, float y, float z)
 {

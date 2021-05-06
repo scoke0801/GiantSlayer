@@ -24,7 +24,7 @@ CEnemy::~CEnemy()
 
 }
 
-void CEnemy::Update(double elapsedTime)
+void CEnemy::Update(float elapsedTime)
 {
 	m_Statemachine->Update(elapsedTime);
 }
@@ -114,7 +114,7 @@ CEnemyCloseATK::~CEnemyCloseATK()
 
 }
 
-void CEnemyCloseATK::Update(double elapsedTime)
+void CEnemyCloseATK::Update(float elapsedTime)
 {
 	m_Statemachine->Update(elapsedTime);
 }

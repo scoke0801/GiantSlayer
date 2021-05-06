@@ -96,7 +96,7 @@ HelpTextUI::~HelpTextUI()
 {
 }
 
-void HelpTextUI::Update(double fTimeElapsed)
+void HelpTextUI::Update(float fTimeElapsed)
 {
 	if (m_RenderingTime > 0.0f)
 	{

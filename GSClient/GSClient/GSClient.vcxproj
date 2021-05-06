@@ -154,11 +154,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\GSServer\GSServer\protocol.h" />
     <ClInclude Include="Bridge.h" />
-    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Camera.h" /> 
+    <ClInclude Include="Colider.h" /> 
     <ClInclude Include="FbxLoader.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="FbxObject.h" />
+    <ClInclude Include="FbxObject.h" /> 
     <ClInclude Include="Communicates.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="EnemyState.h" />
@@ -205,11 +206,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bridge.cpp" />
-    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Camera.cpp" /> 
+    <ClCompile Include="Colider.cpp" /> 
     <ClCompile Include="FbxLoader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="FbxObject.cpp" />
+    <ClCompile Include="FbxObject.cpp" /> 
     <ClCompile Include="Communicates.cpp" />
     <ClCompile Include="SceneExport.cpp" />
     <ClCompile Include="ShaderHandler.cpp" />

@@ -40,7 +40,8 @@ class CTerrainVertex : public CVertex
 {
 public:
 	XMFLOAT2				m_xmf2TexCoord; 
-	XMFLOAT3				m_xmf3Normal;
+	XMFLOAT3				m_xmf3Normal; 
+	BYTE					m_TextureInfo;
 
 public:
 	CTerrainVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f); }
@@ -200,6 +201,18 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////////
 //
+class CSphereMeshDiffused : public CMesh
+{
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CSphereMeshDiffused(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		PulledModel pulledModelInfo,
+		float radius, UINT32 sliceCount, UINT32 stackCount,
+		const XMFLOAT3& shift);
+	virtual ~CSphereMeshDiffused();
+};
+
 class CSphereMesh : public CMesh
 {
 public:
@@ -220,8 +233,24 @@ public:
 	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
 		bool isHeightHalfOn,
-		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+		float fWidth, float fHeight, float fDepth);
 
+	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		bool isHeightHalfOn,
+		float fWidth, float fHeight, float fDepth,
+		const XMFLOAT3& shift);
+
+	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		PulledModel pulledModelInfo,
+		float fWidth, float fHeight, float fDepth);
+
+	CCubeMeshDiffused(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		PulledModel pulledModelInfo,
+		float fWidth, float fHeight, float fDepth,
+		const XMFLOAT3& shift);
 	virtual ~CCubeMeshDiffused();
 };
 
@@ -339,7 +368,7 @@ enum class MapMeshHeightType
 	DownRidge,
 };
 class CTerrainMesh : public CMesh
-{
+{ 
 protected:
 	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
 
@@ -357,11 +386,56 @@ public:
 		int* heights,
 		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
 		int xNomalPos, int zNormalPos);
-
+	 
 	CTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		int x_Index, int z_Index,  
 		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
 		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 
 	~CTerrainMesh();
+};
+  
+class CBindingTerrainMesh : public CMesh
+{
+private:
+	CTerrainVertex*	m_Vertices; 
+	int				m_CurrentVertexIndex = 0;
+
+protected:
+	XMFLOAT4 m_xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+
+	int m_nWidth;
+	int m_nDepth;
+
+public:
+	CBindingTerrainMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int verticesCount);
+	~CBindingTerrainMesh();
+
+public:
+	// 벽 생성	 
+	void CreateWallMesh(ID3D12Device* pd3dDevice,
+ ID3D12GraphicsCommandList* pd3dCommandList,
+
+		const XMFLOAT3& shift, BYTE textureInfo,
+
+		int heights[25],
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], int xNomalPos, int zNormalPos);
+	// 벽 생성	 
+	//void CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	//	const XMFLOAT3& shift,
+	//	bool xZero, bool zZero,
+	//	int* heights,
+	//	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+	//	int xNomalPos, int zNormalPos);
+
+	void CreateGridMesh(ID3D12Device* pd3dDevice,
+ ID3D12GraphicsCommandList* pd3dCommandList,
+
+		const XMFLOAT3& shift, BYTE textureInfo,
+ int x_Index,
+
+		int z_Index,
+		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
+
+	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
