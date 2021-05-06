@@ -14,6 +14,7 @@
 #include "Puzzle.h" 
 #include "Particle.h"
 #include "Arrow.h"
+#include "Enemy.h"
 
 #define ROOT_PARAMETER_OBJECT			0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA 1
@@ -202,13 +203,13 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildDoorWall(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("DoorWall"));
 	BuildPuzzles(pd3dDevice, pd3dCommandList);
 	
-	BuildEnemys(pd3dDevice, pd3dCommandList);
 
 	BuildSigns(pd3dDevice, pd3dCommandList);
 	BuildMirror(pd3dDevice, pd3dCommandList); 
 	BuildPlayers(pd3dDevice, pd3dCommandList); 
 	BuildParticles(pd3dDevice, pd3dCommandList);
 
+	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
 	 
 	//CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
@@ -706,7 +707,7 @@ void CSceneJH::LoginToServer()
 		
 		m_Players[p_processLogin.id]->SetPosition(pos);
 		m_Player = m_Players[p_processLogin.id]; 
-		m_Player->SetDrawable(true);
+		m_Player->SetDrawable(true); 
 
 		m_MinimapCamera->SetTarget(m_Player);
 		  
@@ -1322,50 +1323,60 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		"resources/Fbx/Enemy_t1.fbx", true);
 	//CMeshFbx* enemyMesh_2 = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager,
 	//	"resources/Fbx/Enemy_t2.fbx", true);
-	CGameObject* pObject = new CGameObject();
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pObject->Scale(125.0f, 125.0f, 125.0f);
-	pObject->SetMesh(enemyMesh_1);
-	pObject->SetTextureIndex(0x200);
-	pObject->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
-	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+	CEnemy* pEnemy = new CEnemy();
+	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pEnemy->Scale(125.0f, 125.0f, 125.0f);
+	pEnemy->SetMesh(enemyMesh_1);
+	pEnemy->SetTextureIndex(0x200); 
+	pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f }); 
+	pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f } );
+	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
-	pObject = new CGameObject();
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pObject->Scale(125.0f, 125.0f, 125.0f);
-	pObject->SetMesh(enemyMesh_1);
-	pObject->SetTextureIndex(0x200);
-	pObject->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
-	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+	pEnemy = new CEnemy();
+	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pEnemy->Scale(125.0f, 125.0f, 125.0f);
+	pEnemy->SetMesh(enemyMesh_1);
+	pEnemy->SetTextureIndex(0x200);
+	pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });	
+	pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f } );
+	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 	 
-	pObject = new CGameObject();
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pObject->Scale(125.0f, 125.0f, 125.0f);
-	pObject->SetMesh(enemyMesh_1);
-	pObject->SetTextureIndex(0x200);
-	pObject->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
-	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+	pEnemy = new CEnemy();
+	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pEnemy->Scale(125.0f, 125.0f, 125.0f);
+	pEnemy->SetMesh(enemyMesh_1);
+	pEnemy->SetTextureIndex(0x200);
+	pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+	pEnemy->SetActivityScope({ 1300, 0, 1450 },{ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f } );
+	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
-	pObject = new CGameObject();
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pObject->Scale(125.0f, 125.0f, 125.0f);
-	pObject->SetMesh(enemyMesh_1);
-	pObject->SetTextureIndex(0x200);
-	pObject->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
-	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+	pEnemy = new CEnemy();
+	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pEnemy->Scale(125.0f, 125.0f, 125.0f);
+	pEnemy->SetMesh(enemyMesh_1);
+	pEnemy->SetTextureIndex(0x200);
+	pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
+	pEnemy->SetActivityScope({ 1400, 0, 1200 },{ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f } );
+	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
-	pObject = new CGameObject();
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pObject->Scale(125.0f, 125.0f, 125.0f);
-	pObject->SetMesh(enemyMesh_1);
-	pObject->SetTextureIndex(0x200);
-	pObject->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject))); 
+	pEnemy = new CEnemy();
+	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	pEnemy->Scale(125.0f, 125.0f, 125.0f);
+	pEnemy->SetMesh(enemyMesh_1);
+	pEnemy->SetTextureIndex(0x200);
+	pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+	pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+	m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
 	//pObject = new CGameObject();
 	//pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	////pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
@@ -2052,7 +2063,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_Players[0]->SetDrawable(true); 
 	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 2.5f)));
-
+	++m_CurrentPlayerNum;
 	m_MinimapCamera->SetTarget(m_Players[0]);
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {

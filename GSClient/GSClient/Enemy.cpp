@@ -1,24 +1,15 @@
 #include "stdafx.h"
 #include "Enemy.h"
+#include "Player.h"
 
 CEnemy::CEnemy()
 {
 	m_Type = OBJ_TYPE::Enemy;
 	m_Sight = 20.f;
 	m_Statemachine = new CStateMachine<CEnemy>(this);
-	m_Statemachine->SetCurrentState(Wandering::Instance());
-	m_Target = nullptr;
+	m_Statemachine->SetCurrentState(Wandering::Instance()); 
 }
-
-CEnemy::CEnemy(CGameObject* ptarget)
-{
-	m_Type = OBJ_TYPE::Enemy;
-	m_Sight = 20.f;
-	m_Statemachine = new CStateMachine<CEnemy>(this);
-	m_Statemachine->SetCurrentState(Wandering::Instance());
-	m_Target = ptarget;
-}
-
+  
 CEnemy::~CEnemy()
 {
 
@@ -26,51 +17,61 @@ CEnemy::~CEnemy()
 
 void CEnemy::Update(float elapsedTime)
 {
-	m_Statemachine->Update(elapsedTime);
+	//m_Statemachine->Update(elapsedTime);
+	if (false == m_IsOnMoving) {
+		FindNextPosition(); 
+		m_IsOnMoving = true;
+	}
+	else if(m_IsOnMoving){
+		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, 165.0f * elapsedTime)));
+		m_ToMovePosition.y = m_xmf3Position.y;
+		XMFLOAT3 gap = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
+		if (Vector3::Length(gap) < 30) {
+			SetPosition(m_ToMovePosition);
+			m_IsOnMoving = false;
+		}
+	}
 }
 
 bool CEnemy::IsEnemyInSight() // Chase State
-{
-	XMFLOAT3 tpos = m_Target->GetPosition();
-
-	if (abs(m_xmf4x4World._41 - tpos.x) <= m_Sight && 
-		abs(m_xmf4x4World._43 - tpos.z) <= m_Sight)
-		return TRUE;
-	else
-		return FALSE;
-
+{ 
 	return false;
 }
 
 void CEnemy::MoveRandom() // Moving State
-{
-	srand((unsigned int)time(NULL));
-
-	int num = rand() % 5;
-
-	float x = 0;
-	float z = 0;
-
-	switch (num)
-	{
-	case 0: x = +0.1; break;
-	case 1: x = -0.1; break;
-	case 2: z = -0.1; break;
-	case 3: z = +0.1; break;
-	case 4: break;
-	}
-
-	Move({x, 0, z});
+{ 
 }
 
 void CEnemy::TrackingTarget()
 {
-	XMFLOAT3 tpos = m_Target->GetPosition();
-		
-	if (m_xmf4x4World._41 > tpos.x) Move({ -0.1, 0, 0 });
-	if (m_xmf4x4World._41 < tpos.x) Move({ +0.1, 0, 0 });
-	if (m_xmf4x4World._43 > tpos.z) Move({ 0, 0, -0.1 });
-	if (m_xmf4x4World._43 < tpos.z) Move({ 0, 0, +0.1 });
+	
+}
+
+void CEnemy::SetActivityScope(const XMFLOAT3& xmf3ActivityScope, const XMFLOAT3& xmf3Center)
+{
+	m_xmf3ActivityScope = xmf3ActivityScope;
+
+	m_xmf3ActivityScopeCenter = xmf3Center;
+}
+
+void CEnemy::ConnectPlayer(CPlayer** pPlayers, int playerCount)
+{
+	for (int i = 0; i < playerCount; ++i) {
+		m_ConnectedPlayers.push_back( pPlayers[i] );
+	}
+}
+
+void CEnemy::FindNextPosition()
+{
+	m_xmf3ActivityScope;
+	m_ToMovePosition.x = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.x* 2 )) + m_xmf3ActivityScopeCenter.x - m_xmf3ActivityScope.x;
+	m_ToMovePosition.y = m_xmf3Position.y;
+	m_ToMovePosition.z = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.z * 2)) + m_xmf3ActivityScopeCenter.z - m_xmf3ActivityScope.z;
+
+	cout << "목표위치 설정 ";
+	DisplayVector3(m_ToMovePosition);
+	m_xmf3Velocity = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
+	m_xmf3Velocity = Vector3::Normalize(m_xmf3Velocity);
 }
 
 //////////////////////////////////////////////////////////////////////////
