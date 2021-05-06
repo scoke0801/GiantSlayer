@@ -192,7 +192,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
 	//BuildMapSector1(pd3dDevice, pd3dCommandList);
-	//BuildMapSector2(pd3dDevice, pd3dCommandList);
+	BuildMapSector2(pd3dDevice, pd3dCommandList);
 	//BuildMapSector3(pd3dDevice, pd3dCommandList);
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList);
@@ -1162,6 +1162,24 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pDoorWall->SetPosition({ 13500, -3500, 0 });
 	m_Objects.push_back(pDoorWall);
 
+	CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, 1500, 2500, 500); 
+	pWall->Rotate({ 0,1,0 }, 90);
+	pWall->SetPosition({ 13750, -3500 + 1250, 4750});
+	pWall->SetTextureIndex(0x04);
+	pWall->SetShader(pShader); 
+	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 1500, 2500, 500, XMFLOAT3{ 0,0,0 });
+	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
+	m_Objects.push_back(pWall);
+
+	pWall = new CWall(pd3dDevice, pd3dCommandList, 1500, 2500, 500);
+	pWall->Rotate({ 0,1,0 }, 90);
+	pWall->SetPosition({ 13750, -3500 + 1250, 6250});
+	pWall->SetTextureIndex(0x04);
+	pWall->SetShader(pShader); 
+	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 1500, 2500, 500, XMFLOAT3{ 0,0,0 });
+	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
+	m_Objects.push_back(pWall);
+
 	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
 	pDoorWall->SetPosition({ 14000,-4500, 8000 });
 	pDoorWall->SetTextureIndexes(0x08);
@@ -1733,7 +1751,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	float x_Tree, z_Tree;
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		pObject = new CGameObject();
 		pObject->SetMesh(fbx_Dry_Mesh);
@@ -1742,14 +1760,28 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		z_Tree = 18800;
 		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
 		pObject->Rotate({ 0,1,0 }, 60 + 30 * i);
-		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) - 100.0f , z_Tree });
+		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) - 30.0f , z_Tree });
 		pObject->SetTextureIndex(0x04);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
 		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
 		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 200, 1500, 150, { 0, 0, 100 });
 		m_Objects.push_back(std::move(pObject));
 	}
-	 
+
+	pObject = new CGameObject();
+	pObject->SetMesh(fbx_Dry_Mesh);
+
+	x_Tree = 900 + 6400;
+	z_Tree = 19300;
+	pObject->Scale(0.5f + 0.5, 0.5f, 0.5f + 0.5);
+	pObject->Rotate({ 0,1,0 }, 60 + 30);
+	pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) - 100.0f , z_Tree });
+	pObject->SetTextureIndex(0x04);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 200, 1500, 150, { 0, 0, 100 });
+	m_Objects.push_back(std::move(pObject));
+
 	for (int i = 0; i < 2; i++)
 	{
 		pObject = new CGameObject();
@@ -2140,9 +2172,9 @@ void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 // Desrt to DryDesrt and Rock 왼쪽 벽
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 400, 10000, 16000, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 16000 * 0.5f)));
-	pObject->SetPosition({ 13800, -2000, 8400 + 3600 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 400, 10000, 12800, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 12800 * 0.5f)));
+	pObject->SetPosition({ 13800, -2000, 7200 + 6400 });
 	m_Objects.push_back(std::move(pObject));
 
 // boss 지역 중간 벽

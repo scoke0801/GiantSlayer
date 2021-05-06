@@ -38,11 +38,11 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			{
 				textureInfo = 0x02;
 			}
-			else if (i >= 5 && j >= 12 && j < 17)
+			else if (i >= 9 && j >= 12 && j < 17)
 			{
 				textureInfo = 0x04;
 			}
-			else if (i < 5 && j >= 12 && j < 25)
+			else if (i < 9 && j >= 12 && j < 25)
 			{
 				textureInfo = 0x08;
 			}
@@ -646,7 +646,8 @@ void CTerrain::InitHeightDatas()
 	//{
 	//	for (int Garo = 5; Garo < 15; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 500 + (Garo * Garo *2);
+	//		m_Heights[i][Garo] = rand() % 300 - 150;
+	//		//m_Heights[i][Garo] = rand() % 500 + (Garo * Garo *2);
 	//	}
 	//}
 

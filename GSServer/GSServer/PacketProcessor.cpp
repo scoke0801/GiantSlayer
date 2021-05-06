@@ -446,6 +446,18 @@ void PacketProcessor::InitObstacle()
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC5);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC5]);
 	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject(); 
+	pObject->Rotate({ 0,1,0 }, 90);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::WALL_1]);
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->Rotate({ 0,1,0 }, 90);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::WALL_2]);
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
+	m_Objects.push_back(std::move(pObject));
 ////////////////////////////////////////////////////////////////////////////////
 
 // Sign-------------------------------------------------------------------------
@@ -630,8 +642,8 @@ void PacketProcessor::BuildBlockingRegionOnMap()
 
 	// Desrt to DryDesrt and Rock 왼쪽 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 16000 * 0.5f)));
-	pObject->SetPosition({ 13800, -2000, 8400 + 3600 });
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 12800 * 0.5f)));
+	pObject->SetPosition({ 13800, -2000, 7200 + 6400 });
 	m_Objects.push_back(std::move(pObject));
 
 	// boss 지역 중간 벽
