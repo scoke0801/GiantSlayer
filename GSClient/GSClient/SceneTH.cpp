@@ -198,7 +198,9 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetMesh(golemMesh);
 	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
 
-	FbxLoader(m_pfbxManager, "resources/Fbx/human.fbx");
+	//FbxLoader(m_pfbxManager, "resources/Fbx/human.fbx");
+
+	CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
 
 	/*CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
 	pfbxTestObject->SetAnimationStack(0);

@@ -169,6 +169,10 @@ CFbxObject::CFbxObject()
 
 CFbxObject::CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName)
 {
+	LoadFile();
+	m_time = 0;
+
+
 	/*LoadScene(pstrFbxFileName, pfbxSdkManager);
 	
 	if (m_pfbxScene == NULL)
@@ -199,56 +203,41 @@ CFbxObject::~CFbxObject()
 	if (m_pAnimationController) delete m_pAnimationController;
 }
 
-void CFbxObject::LoadScene(char* pstrFbxFileName, FbxManager* pfbxSdkManager)
+void CFbxObject::LoadFile()
 {
-	int nSDKMajor, nSDKMinor, nSDKRevision;
-	FbxManager::GetFileFormatVersion(nSDKMajor, nSDKMinor, nSDKRevision);
+	ifstream file;
+	file.open("FbxExportedFile.bin", ios::in | ios::binary);
+	string temp;
 
-	FbxIOSettings* pfbxIOSettings = pfbxSdkManager->GetIOSettings();
-	FbxImporter* pfbxImporter = FbxImporter::Create(pfbxSdkManager, " ");
-	bool bImportStatus = pfbxImporter->Initialize(pstrFbxFileName, -1, pfbxIOSettings);
+	int numVertex, numPolygon, numBone;
 
-	int nFileFormatMajor, nFileFormatMinor, nFileFormatRevision;
-	pfbxImporter->GetFileVersion(nFileFormatMajor, nFileFormatMinor, nFileFormatRevision);
+	file >> temp >> numVertex;
+	file >> temp >> numPolygon;
+	file >> temp >> numBone;
+	file >> temp >> temp;
+	cout << "파일 로드: " << numVertex << " " << numPolygon << " " << numBone << endl;
 
-	m_pfbxScene = FbxScene::Create(pfbxSdkManager, " ");
-	bool bStatus = pfbxImporter->Import(m_pfbxScene);
+	for (int i = 0; i < numVertex; i++) {
+		Vertex tempVertex;
 
-	FbxGeometryConverter fbxGeomConverter(pfbxSdkManager);
-	fbxGeomConverter.Triangulate(m_pfbxScene, true);
+		file >> tempVertex.pos.x >> tempVertex.pos.y >> tempVertex.pos.z >>
+				tempVertex.uv.x >> tempVertex.uv.y >>
+				tempVertex.normal.x >> tempVertex.normal.y >> tempVertex.normal.z;
+		file >> tempVertex.indices[0] >> tempVertex.indices[1] >> tempVertex.indices[2] >> tempVertex.indices[3] >>
+				tempVertex.weights.x >> tempVertex.weights.y >> tempVertex.weights.z >> temp;
 
-	FbxSystemUnit fbxSceneSystemUnit = m_pfbxScene->GetGlobalSettings().GetSystemUnit();
-	if (fbxSceneSystemUnit.GetScaleFactor() != 1.0) FbxSystemUnit::cm.ConvertScene(m_pfbxScene);
-
-	pfbxImporter->Destroy();
-}
-
-void CFbxObject::LoadSkeletonHierarchy(FbxNode* pNode)
-{
-	for (int i = 0; i < pNode->GetChildCount(); i++)
-	{
-		FbxNode* curNode = pNode->GetChild(i);
-		LoadSkeletonRecursively(curNode, 0, 0, -1);
+		vertices.push_back(tempVertex);
+		//cout << tempVertex.pos.x << " " << tempVertex.uv.x << " " << tempVertex.weights.y << endl;
 	}
-}
+	file >> temp >> temp;
 
-void CFbxObject::LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex, int inParentIndex)
-{
-	/*FbxNodeAttribute* pfbxNodeAttribute = pNode->GetNodeAttribute();
-
-	if ((pfbxNodeAttribute != NULL) &&
-		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton))
-	{
-		Joint currJoint;
-		currJoint.parentIndex = inParentIndex;
-		currJoint.name = pNode->GetName();
-		mSkeleton.push_back(currJoint);
+	for (int i = 0; i < numPolygon*3; i++) {
+		int tempInt;
+		file >> tempInt;
+		indices.push_back(tempInt);
 	}
 
-	for (int i = 0; i < pNode->GetChildCount(); i++)
-	{
-		LoadSkeletonRecursively(pNode->GetChild(i), inDepth + 1, mSkeleton.size(), myIndex);
-	}*/
+	file.close();
 }
 
 void CFbxObject::LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pNode)
@@ -536,11 +525,11 @@ void CFbxObject::Update(double fTimeElapsed)
 
 	//cout << fTimeElapsed << endl;
 
-	m_time++;
+	/*m_time++;
 	if (m_time > 4) {
 		Animate(fTimeElapsed*4);
 		m_time = 0;
-	}
+	}*/
 
 	/*if (m_time > 40) {
 		m_time = 0;

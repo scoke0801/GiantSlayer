@@ -30,6 +30,16 @@ public:
 	void SetPosition(int nAnimationStack, float fPosition);
 };
 
+struct Vertex
+{
+	XMFLOAT3 pos;
+	XMFLOAT2 uv;
+	XMFLOAT3 normal;
+
+	int indices[4];
+	XMFLOAT3 weights;
+};
+
 class CFbxObject : public CGameObject
 {
 public:
@@ -39,14 +49,16 @@ public:
 	virtual ~CFbxObject();
 
 public:
+	vector<Vertex> vertices;
+	vector<int> indices;
+
 	int m_time;
 
 public:
-	void LoadScene(char* pstrFbxFileName, FbxManager* pfbxSdkManager);
+	//void LoadFile(char* pstrFbxFileName);
+	void LoadFile();
 	void LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pNode);
-	void LoadSkeletonHierarchy(FbxNode* pNode);
-	void LoadSkeletonRecursively(FbxNode* pNode, int inDepth, int myIndex, int inParentIndex);
 
 	void AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime);
 	void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, FbxTime& fbxCurrentTime, FbxAMatrix& fbxmtxWorld);

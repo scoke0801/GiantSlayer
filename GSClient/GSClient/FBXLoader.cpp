@@ -73,6 +73,8 @@ FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName)
 
 	ExploreFbxHierarchy(mFbxScene->GetRootNode());
 
+	Optimize();
+
 	SaveAsFile();
 
 	cout << FileName << " ||| [SKT]:" << mSkeleton.size() << " [PG]:" << triangles.size() << " [VT]:" << vertices.size() << endl;
@@ -276,6 +278,38 @@ void FbxLoader::LoadMesh(FbxNode* pNode)
 	cpoints.clear();
 }
 
+int SearchVertex(const FbxVertex& storage, const vector<FbxVertex>& find)
+{
+	for (int i = 0; i < find.size(); i++) {
+		if (storage == find[i]) return i;
+	}
+
+	return -1;
+}
+
+void FbxLoader::Optimize()
+{
+	vector<FbxVertex> tempVertex;
+
+	for (int i = 0; i < triangles.size(); i++) {
+		for (int j = 0; j < 3; j++) {
+			if (SearchVertex(vertices[i * 3 + j], tempVertex) == -1) {
+				tempVertex.push_back(vertices[i * 3 + j]);
+			}
+		}
+	}
+
+	for (int i = 0; i < triangles.size(); i++) {
+		for (int j = 0; j < 3; j++) {
+			triangles[i].indices[j] = SearchVertex(vertices[i * 3 + j], tempVertex);
+		}
+	}
+
+	vertices.clear();
+	vertices = tempVertex;
+	tempVertex.clear();
+}
+
 void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 {
 	FbxNodeAttribute* pfbxNodeAttribute = pNode->GetNodeAttribute();
@@ -323,6 +357,7 @@ void FbxLoader::SaveAsFile()
 	for (int i = 0; i < triangles.size(); i++) {
 		file << triangles[i].indices[0] << " " << triangles[i].indices[1] << " " << triangles[i].indices[2] << endl;
 	}
+	file << endl;
 
 	if (hasAnimation == true) {
 		file << "[Bone]" << endl;

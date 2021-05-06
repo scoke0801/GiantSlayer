@@ -65,9 +65,32 @@ struct FbxVertex
 
 	vector<BlendingInfo> blendInfo;
 
-	void SortBlendingInfoByWeight()
-	{
+	void SortBlendingInfoByWeight() {
 		std::sort(blendInfo.begin(), blendInfo.end());
+	}
+
+	bool operator==(const FbxVertex& rhs) const {
+		bool isSame = true;
+
+		if (!(blendInfo.empty() && rhs.blendInfo.empty())) {
+			for (int i = 0; i < 4; i++) {
+				if (blendInfo[i].index != rhs.blendInfo[i].index || 
+					abs(blendInfo[i].weight - rhs.blendInfo[i].weight) > 0.001)
+				{
+					isSame = false;
+					break;
+				}
+			}
+		}
+
+		XMFLOAT3 vector3Epsilon = { 0.00001f, 0.00001f, 0.00001f };
+		XMFLOAT2 vector2Epsilon = { 0.00001f, 0.00001f };
+
+		bool posSame = (XMVector3NearEqual(XMLoadFloat3(&pos), XMLoadFloat3(&rhs.pos), XMLoadFloat3(&vector3Epsilon)) == TRUE);
+		bool uvSame = (XMVector2NearEqual(XMLoadFloat2(&uv), XMLoadFloat2(&rhs.uv), XMLoadFloat2(&vector2Epsilon)) == TRUE);
+		bool normalSame = (XMVector3NearEqual(XMLoadFloat3(&normal), XMLoadFloat3(&rhs.normal), XMLoadFloat3(&vector3Epsilon)) == TRUE);
+	
+		return isSame && posSame && uvSame && normalSame;
 	}
 };
 
@@ -110,6 +133,8 @@ public:
 
 	void LoadAnimation(FbxNode* pNode);
 	void LoadMesh(FbxNode* pNode);
+
+	void Optimize();
 
 	void ExploreFbxHierarchy(FbxNode* pNode);
 	void SaveAsFile();
