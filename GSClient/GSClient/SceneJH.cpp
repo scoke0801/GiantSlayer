@@ -952,7 +952,7 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		{
 			float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
 			float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
-
+			 
 			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_LMOVE;
 			 
 			m_MousePositions.emplace_back(POINTF{ dx, dy });  
@@ -978,6 +978,7 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 			//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
 			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
 
+			cout << "마우스 이동 dx : " << dx << "\n";
 			if (m_Player->IsMoving())
 			{
 				m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
@@ -995,6 +996,8 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		// Make each pixel correspond to 0.005 unit in the scene.
 		float dx = static_cast<float>(x - m_LastMousePos.x);
 		float dy = static_cast<float>(y - m_LastMousePos.y);
+
+		///cout << "offset : " << dy << "\n";
 
 		m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, dy));
 	}
@@ -1987,10 +1990,11 @@ void CSceneJH::EnterNewSector(int sectorNum)
 	m_Objects.push_back(std::move(obj));
 	EnterNewSector(sectorNum - 1); 
 }
-
+ 
 void CSceneJH::SendMouseInputPacket()
-{
+{  
 	P_C2S_MOUSE_INPUT p_mouseInput;
+
 	p_mouseInput.size = sizeof(p_mouseInput);
 	p_mouseInput.type = PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT;
 	p_mouseInput.id = CFramework::GetInstance().GetPlayerId();
@@ -2005,6 +2009,8 @@ void CSceneJH::SendMouseInputPacket()
 	int retVal = 0;
 	SendPacket(CFramework::GetInstance().GetSocket(),
 		reinterpret_cast<char*>(&p_mouseInput), p_mouseInput.size, retVal);
+
+	cout << "마우스 입력 전송 크기 : " << m_MousePositions.size() << "\n";
 	m_MousePositions.clear();
 }
 
@@ -2129,32 +2135,35 @@ void CSceneJH::RecvMouseProcessPacket()
 	// 플레이어 추가 혹은 삭제 패킷 수신
 	if (type == PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT) {
 		P_S2C_PROCESS_MOUSE p_mouseProcess = *reinterpret_cast<P_S2C_PROCESS_MOUSE*>(&buffer);
-		if (p_mouseProcess.caemraOffset != 0) {
-			cout << "offset : " << p_mouseProcess.caemraOffset << "\n";
-			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, p_mouseProcess.caemraOffset * 0.01f));
+		if (p_mouseProcess.cameraOffset != 0) {
+			float offset = IntToFloat(p_mouseProcess.cameraOffset);
+			cout << "offset : " << offset << "\n";
+			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset * 3));
 		}
 		if (p_mouseProcess.cameraRotateX != 0) {
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX * 0.075f);
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX * 75);
 		}
 
 		if (p_mouseProcess.cameraRotateY != 0) {
-			cout << "cameraRotateY : " << p_mouseProcess.cameraRotateY << "\n";
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), p_mouseProcess.cameraRotateY * 0.075f);
+			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY);
+			//cout << "cameraRotateY : " << rotateY << "\n";
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), rotateY * 75);
 		}
 
 		if (p_mouseProcess.cameraRotateZ != 0) { 
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ * 0.075f);
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ * 75);
 		}
 		if (p_mouseProcess.playerRotateX != 0) {
-			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX * 0.015f);
+			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX * 150);
 		} 
 		if (p_mouseProcess.playerRotateY != 0) {
-			cout << "playerRotateY : " << p_mouseProcess.playerRotateY << "\n";
-			m_Player->Rotate(XMFLOAT3(0, 1, 0), p_mouseProcess.playerRotateY * 0.015f);
-			m_MinimapArrow->Rotate(-p_mouseProcess.playerRotateY * 150);
+			float rotateY = IntToFloat(p_mouseProcess.playerRotateY);
+			//cout << "playerRotateY : " << rotateY << "\n";
+			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY * 150);
+			m_MinimapArrow->Rotate(-rotateY * 150);
 		} 
 		if (p_mouseProcess.playerRotateZ != 0) {
-			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ * 0.015f);
+			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ * 150);
 		}
 	}
 }

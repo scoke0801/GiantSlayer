@@ -85,27 +85,33 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 		ZeroMemory(&p_mouseProcess, sizeof(P_S2C_PROCESS_MOUSE));
 		p_mouseProcess.size = sizeof(P_S2C_PROCESS_MOUSE);
 		p_mouseProcess.type = PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT;
-		//p_mouseProcess.playerRotateX = p_mouseProcess.playerRotateX = p_mouseProcess.playerRotateZ = 0;
-		//p_mouseProcess.cameraRotateX = p_mouseProcess.cameraRotateX = p_mouseProcess.cameraRotateZ = 0;
+		//p_mouseProcess.playerRotateX = p_mouseProcess.playerRotateY = p_mouseProcess.playerRotateZ = 0;
+		//p_mouseProcess.cameraRotateX = p_mouseProcess.cameraRotateY = p_mouseProcess.cameraRotateZ = 0;
 		//p_mouseProcess.caemraOffset = 0;
-
+		float playerRotateY = 0.0f;
+		float cameraRotateY = 0.0f;
+		float cameraOffset = 0.0f;
 		if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_LMOVE) {
-			for (int i = 0; i < p_mouse.inputNum; ++i) {
+			for (int i = 0; i < p_mouse.inputNum; ++i) { 
+				float dx = IntToFloat(p_mouse.xInput[i]);
 
-				m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), p_mouse.xInput[i] * 0.075f);
-				p_mouseProcess.cameraRotateY += p_mouse.xInput[i];
+				m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+				playerRotateY += dx;
 				if (m_Players[p_mouse.id]->IsMoving())
 				{
-					p_mouseProcess.playerRotateY += p_mouse.xInput[i];
-					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), p_mouse.xInput[i] * 0.015f);
+					p_mouseProcess.playerRotateY += dx;
+					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
 				}
 			}
+			p_mouseProcess.playerRotateY = FloatToInt(playerRotateY);
 		}
 		else if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_RMOVE) {
 			for (int i = 0; i < p_mouse.inputNum; ++i) {
-				p_mouseProcess.caemraOffset += p_mouse.yInput[i];
-				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, p_mouse.yInput[i] * 0.01f));
+				float offset = IntToFloat(p_mouse.yInput[i]);
+				cameraOffset += offset;
+				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset));
 			}
+			p_mouseProcess.cameraOffset = FloatToInt(cameraOffset);
 		}
 		SendPacket(socket, reinterpret_cast<char*>(&p_mouseProcess), p_mouseProcess.size, retval);
 	}

@@ -253,11 +253,11 @@ struct P_S2C_PROCESS_KEYBOARD {
 
 struct P_S2C_PROCESS_MOUSE {
 	BYTE size;
-	PACKET_PROTOCOL type;
+	PACKET_PROTOCOL type; 
 
-	short playerRotateX, playerRotateY, playerRotateZ;
-	short cameraRotateX, cameraRotateY, cameraRotateZ;
-	short caemraOffset;
+	int playerRotateX, playerRotateY, playerRotateZ;
+	int cameraRotateX, cameraRotateY, cameraRotateZ;
+	int cameraOffset;
 };
 
 struct P_S2C_UPDATE_SYNC {
