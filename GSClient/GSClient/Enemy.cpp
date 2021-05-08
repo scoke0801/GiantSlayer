@@ -68,10 +68,23 @@ void CEnemy::FindNextPosition()
 	m_ToMovePosition.y = m_xmf3Position.y;
 	m_ToMovePosition.z = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.z * 2)) + m_xmf3ActivityScopeCenter.z - m_xmf3ActivityScope.z;
 
-	cout << "목표위치 설정 ";
+	//cout << "목표위치 설정 ";
 	DisplayVector3(m_ToMovePosition);
 	m_xmf3Velocity = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
 	m_xmf3Velocity = Vector3::Normalize(m_xmf3Velocity);
+
+	XMFLOAT3 lookAt = Vector3::Normalize(GetLook()); 
+
+	XMFLOAT3 cross = Vector3::CrossProduct(lookAt, m_xmf3Velocity);
+	float dot = Vector3::DotProduct(lookAt, m_xmf3Velocity);
+
+	float angle = atan2(Vector3::Length(cross), dot);
+
+	float test = Vector3::DotProduct({ 0,1,0 }, cross);
+	if (test < 0.0) angle = -angle; 
+
+	//cout << "회전 각: " << angle << "\n";
+	Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees( angle) ));
 }
 
 //////////////////////////////////////////////////////////////////////////

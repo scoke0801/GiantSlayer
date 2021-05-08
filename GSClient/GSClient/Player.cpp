@@ -143,7 +143,7 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	//float angle = atan2(det, dot);
 //	cout << "°¢µµ : " << XMConvertToDegrees( angle) << "\n";
 	
-	Rotate(XMFLOAT3(0, 1, 0), (angle)); 
+	Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees(angle)));
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;
