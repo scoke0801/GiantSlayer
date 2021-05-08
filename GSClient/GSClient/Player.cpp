@@ -32,29 +32,6 @@ void CPlayer::Update(float fTimeElapsed)
 	float fDeceleration = (Friction * fTimeElapsed); 
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-
-/////////////////////////////////////////////////////////////////////
-#pragma region For Hp_Sp UI Testing 
-	//if (TestHPDown == true) {
-	//	m_HP -= 1;
-	//	if (m_HP <= 0) TestHPDown = false;
-	//}
-	//else if(TestHPDown == false)
-	//{
-	//	m_HP += 1;
-	//	if (m_HP >= 100) TestHPDown = true;
-	//} 
-	//if (TestSPDown == true)
-	//{
-	//	m_SP -= 1;
-	//	if (m_SP <= 0) TestSPDown = false;
-	//}
-	//else if (TestSPDown == false)
-	//{
-	//	m_SP += 1;
-	//	if (m_SP >= 100) TestSPDown = true;
-	//}
-#pragma endregion
 }
 
 void CPlayer::UpdateCamera()

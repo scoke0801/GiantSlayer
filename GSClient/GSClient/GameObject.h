@@ -249,6 +249,8 @@ public:
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle); 
+
+	void Update(float timeElapsed);
 };
 
 class CSkyBoxSphere : public CSkyBox

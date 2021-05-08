@@ -23,6 +23,18 @@ enum class FBX_MESH_TYPE : UINT {
 	Boss,
 	COUNT
 };
+
+// Layer에서 플레이어는 제외하고 별도로 관리
+enum class OBJECT_LAYER : int{
+	Skybox,
+	TerrainWater,
+	Puzzle,
+	Obstacle,
+	Enemy, 
+	Arrow,
+	Billboard, 
+	Count,
+};
 class CSceneJH : public CScene
 {
 private:
@@ -31,8 +43,8 @@ private:
 private:
 	array<CMeshFbx*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
 
-	vector<CGameObject*>		m_Objects; 
-	vector<CGameObject*>		m_BillboardObjects; 
+	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
+	 
 	CParticle*					m_Particles;
 
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성

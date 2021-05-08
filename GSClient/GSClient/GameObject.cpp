@@ -478,6 +478,11 @@ void CSkyBox::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 		m_ppObjects[i]->Rotate(pxmf3Axis, fAngle);
 }
 
+void CSkyBox::Update(float timeElapsed)
+{ 
+	Rotate(XMFLOAT3(0, 1, 0), 0.3 * timeElapsed);
+}
+
 CSkyBoxSphere::CSkyBoxSphere(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	CShader* pShader,
