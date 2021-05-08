@@ -18,6 +18,15 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	if (false == m_IsCanAttack) {
+		m_AttackWaitingTime -= fTimeElapsed;
+	
+		if (m_AttackWaitingTime < 0.0f){
+			m_AttackWaitingTime = 0.0f;
+			m_IsCanAttack = true;
+		}
+	}
+	
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? 360.0f : 50.0f;
@@ -129,9 +138,3 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
 }
-
-bool CPlayer::IsCanAttack() const
-{
-	return false;
-}
- 

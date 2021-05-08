@@ -24,7 +24,7 @@ enum class FBX_MESH_TYPE : UINT {
 	COUNT
 };
 
-// Layer에서 플레이어는 제외하고 별도로 관리
+// 편의를 위해 Layer에서 몇 가지 객체 유형은 제외하고 별도로 관리
 enum class OBJECT_LAYER : int{
 	Skybox,
 	TerrainWater,
@@ -35,6 +35,7 @@ enum class OBJECT_LAYER : int{
 	Billboard, 
 	Count,
 };
+
 class CSceneJH : public CScene
 {
 private:
@@ -167,6 +168,7 @@ private:
 	void BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice); 
@@ -185,6 +187,8 @@ private:
 	void BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void EnterNewSector(int sectorNum);
+
+	void ShotArrow();
 
 private:
 	void SendMouseInputPacket();

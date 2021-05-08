@@ -208,7 +208,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildSigns(pd3dDevice, pd3dCommandList);
 	BuildMirror(pd3dDevice, pd3dCommandList); 
 	BuildPlayers(pd3dDevice, pd3dCommandList); 
+
 	BuildParticles(pd3dDevice, pd3dCommandList);
+	BuildArrows(pd3dDevice, pd3dCommandList);
 
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
@@ -249,15 +251,15 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
 		"Box","Wood", "WoodSignBoard",
 		"GrassWall", "SandWall","RockyWall",
-"Door",
-"HP_SP", "Minimap", "WeaponUI",
-"HP_SP_PER",
-"Flower_Red", "Flower_White", "Grass_1", "Grass_2", "Tree", "NoLeafTree", "Leaves", "Moss_Rock",
-"PuzzleBoard",
-"HelpText",
-"Dry_Tree", "Stump", "Dead_Tree",
-"Desert_Rock",
-"TerrainWater"
+		"Door",
+		"HP_SP", "Minimap", "WeaponUI",
+		"HP_SP_PER",
+		"Flower_Red", "Flower_White", "Grass_1", "Grass_2", "Tree", "NoLeafTree", "Leaves", "Moss_Rock",
+		"PuzzleBoard",
+		"HelpText",
+		"Dry_Tree", "Stump", "Dead_Tree",
+		"Desert_Rock",
+		"TerrainWater"
 	};
 
 	const wchar_t* address[] =
@@ -901,7 +903,11 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_J)
 	{
-		
+		if (m_Player->IsCanAttack()) {
+			m_Player->SetCanAttack(false);
+			m_Player->IncreaseAttackWaitingTime(1.5f);
+			ShotArrow();
+		}
 	}
 	if (keyInput.KEY_K)
 	{
@@ -2027,7 +2033,7 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 void CSceneJH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_Particles = new CParticle();
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 10; ++i) {
 		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::ArrowParticle);
 		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 	}
@@ -2042,6 +2048,21 @@ void CSceneJH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	//if (-1 != idx) {
 	//	m_Particles->UseParticle(idx, XMFLOAT3(100, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 	//}
+}
+void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");
+	for (int i = 0; i < 10; ++i) {
+		CArrow* pArrow = new CArrow();
+		pArrow->SetMesh(fbxMesh);
+		pArrow->SetPosition({ 500.0f,  100.0f, 1500.0f });
+		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
+		pArrow->SetTextureIndex(0x20);
+		pArrow->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		pArrow->Scale(15.0f, 15.0f, 15.0f);
+
+		m_ObjectLayers[(int)OBJECT_LAYER::Arrow].push_back(pArrow);
+	}
 }
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -2093,6 +2114,25 @@ void CSceneJH::EnterNewSector(int sectorNum)
 	 
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(obj);
 	EnterNewSector(sectorNum - 1); 
+}
+
+void CSceneJH::ShotArrow()
+{
+	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Arrow]) {
+		CArrow* pArrow = reinterpret_cast<CArrow*>(pObj);
+		if (pArrow->IsCanUse()) {
+			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
+			if (-1 != idx) {
+				cout << "파티클 생성 " << idx << " \n";
+				pArrow->SetUseable(false);
+				pArrow->SetPosition(m_Player->GetPosition());
+
+				m_Particles->UseParticle(idx, Vector3::Add(XMFLOAT3{ pArrow->GetPosition() }, {0,150,0}), XMFLOAT3(0.0f, 0.0f, -1.0f));
+				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
+			}
+			break;
+		}
+	} 
 }
  
 void CSceneJH::SendMouseInputPacket()
