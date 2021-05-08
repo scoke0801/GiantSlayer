@@ -38,7 +38,7 @@
 
 #if defined(SHOW_CAPTIONFPS)
 	#define MAX_UPDATE_FPS 1.0f / 5.0f
-#endif
+#endif 
 
 #define SHOW_CAPTIONFPS
 //-------------------------------------------------------------------
@@ -110,7 +110,13 @@ enum class PulledModel : int { Center = 0, Left = 1, Right, Top, Bottom };
 enum class PARTICLE_TYPE : UINT {
 	HitParticleTex = 1,	// 피격시 사용할 파티클
 	ArrowParticle,	// 화살 뒤에 사용할 파티클
+	RadialParitcle, // 전방향으로 퍼지는 파티클
+	StraightParticle, // 직선으로 퍼지는 파티클
 };
 constexpr float ARROW_PARTICLE_LIFE_TIME = 10.0f;
 
 constexpr float HIT_PARTICLE_LIFE_TIME = 10.0f;
+
+constexpr float RADIAL_PARTICLE_LIFE_TIME = 10.0f;
+
+constexpr float STRAIGHT_PARTICLE_LIFE_TIME = 10.0f;

@@ -59,6 +59,8 @@ private:
 	CCamera*					m_CurrentCamera = nullptr;
 	CCamera*					m_MinimapCamera = nullptr;
 	CCamera*					m_MirrorCamera = nullptr;
+
+	short						m_DoorIdx = 0;
 private:
 	POINT						m_LastMousePos;
 

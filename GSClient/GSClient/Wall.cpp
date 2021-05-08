@@ -30,6 +30,8 @@ CDoor::CDoor(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 	m_Type = OBJ_TYPE::Obstacle;
 	SetMesh(pCubeMeshTex);
 	if (!m_IsLeft) Rotate(XMFLOAT3(0, 1, 0), 180.0);
+	m_IsOnAnimating = false; 
+	m_IsOnOpening = false;
 }
 
 CDoor::~CDoor()
@@ -38,38 +40,63 @@ CDoor::~CDoor()
 
 void CDoor::Update(float fTimeElapsed)
 { 
+	if (false == m_IsOnAnimating) {
+		return;
+	}
 	if (m_IsLeft)
 	{
-		float rotateAngle = 50;
-		if (!m_IsOpening) rotateAngle *= -1;
+		float rotateAngle = -50;
+		if (!m_IsOnOpening) rotateAngle *= -1;
 		Rotate(XMFLOAT3(0, 1, 0), rotateAngle * fTimeElapsed);
 
 		m_fAngle += rotateAngle * fTimeElapsed;
-		if (m_fAngle > 89.0f)
+		if (m_fAngle > 0.0f)
 		{
-			m_IsOpening = false;
+			m_IsOnOpening = false;
+			m_IsOnAnimating = false; 
 		}
 		else if (m_fAngle < -89.0f)
-		{
-			m_IsOpening = true;
+		{ 
+			m_IsOnOpening = true;
+			m_IsOnAnimating = false; 
 		}
 	}
 	else
 	{
-		float rotateAngle = -50;
-		if (!m_IsOpening) rotateAngle *= -1;
+		float rotateAngle = 50;
+		if (!m_IsOnOpening) rotateAngle *= -1;
 		Rotate(XMFLOAT3(0, 1, 0), rotateAngle * fTimeElapsed);
 
 		m_fAngle += rotateAngle * fTimeElapsed;
 		if (m_fAngle > 89.0f)
-		{
-			m_IsOpening = true;
+		{ 
+			m_IsOnOpening = true;
+			m_IsOnAnimating = false;
 		}
-		else if (m_fAngle < -89.0f)
+		else if (m_fAngle < 0.0f)
 		{
-			m_IsOpening = false;
+			m_IsOnOpening = false;
+			m_IsOnAnimating = false;
 		}
 	}
+}
+
+void CDoor::Open()
+{
+	if (m_IsOnOpening) {
+		return;
+	}
+	m_IsOnAnimating = true;
+	m_IsOnOpening = true;
+}
+
+void CDoor::Close()
+{
+	if (false == m_IsOnOpening) {
+		return;
+	}
+	m_IsOnAnimating = true;
+	m_IsOnOpening = false;
 }
  
 CDoorWall::CDoorWall(ID3D12Device* pd3dDevice, 
@@ -159,8 +186,10 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	m_LeftDoor->SetObjectName(OBJ_NAME::Wall);
 	m_LeftDoor->SetTextureIndex(0x10);
 	m_LeftDoor->Rotate({ 0,1,0 }, 90);
-	m_LeftDoor->Rotate({ 0,1,0 }, 180);
-	m_LeftDoor->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Left, fWidthRatio, height, depth * 0.2f, XMFLOAT3{ 0,0,0 });
+	m_LeftDoor->Rotate({ 0,1,0 }, 180); 
+	float createdHeight = m_LeftDoor->GetHeight();
+ 	cout << "³ôÀÌ : " << createdHeight << "\n";
+	m_LeftDoor->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Left, fWidthRatio, createdHeight, depth * 0.2f, XMFLOAT3{ 0,0,0 });
 	m_LeftDoor->AddColider(new ColliderBox(XMFLOAT3(fWidthRatio * 0.5f, 0.0f, 0.0f),
 		XMFLOAT3{ fWidthRatio * 0.5f, height * 0.5f, depth * 0.2f * 0.5f }));
 	m_LeftDoor->SetPosition({ depth * 0.5f,  height * 0.5f,  fWidthRatio * 4 });
@@ -171,7 +200,8 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	m_RightDoor->SetTextureIndex(0x10);
 	m_RightDoor->Rotate({ 0,1,0 }, 90); 
 	m_RightDoor->Rotate({ 0,1,0 }, 180); 
-	m_RightDoor->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Right, fWidthRatio, height, depth * 0.2f, XMFLOAT3{ 0,0,0 });
+	createdHeight = m_LeftDoor->GetHeight();
+	m_RightDoor->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Left, fWidthRatio, createdHeight, depth * 0.2f, XMFLOAT3{ 0,0,0 });
 	m_RightDoor->AddColider(new ColliderBox(XMFLOAT3(fWidthRatio * 0.5f, 0.0f, 0.0f),
 		XMFLOAT3{ fWidthRatio * 0.5f, height * 0.5f, depth * 0.2f * 0.5f }));
 
@@ -252,4 +282,16 @@ void CDoorWall::RotateAll(XMFLOAT3 xmf3Axis, float angle)
 	{
 		pWall->Rotate(xmf3Axis, angle);
 	}
+}
+
+void CDoorWall::OpenDoor()
+{
+	m_LeftDoor->Open();
+	m_RightDoor->Open();
+}
+
+void CDoorWall::CloserDoor()
+{
+	m_LeftDoor->Close();
+	m_RightDoor->Close();
 }

@@ -893,9 +893,21 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_U)
 	{
+		//CDoorWall* p = reinterpret_cast<CDoorWall*>(m_Objects[m_DoorIdx]);
+		//p->OpenDoor(); 
+		for (int i = 0; i < 5; ++i) {
+			CDoorWall* p = reinterpret_cast<CDoorWall*>(m_Objects[m_DoorIdx + i]);
+			p->OpenDoor();
+		}
 	}
 	if (keyInput.KEY_I)
 	{
+		for (int i = 0; i < 5; ++i) {
+			CDoorWall* p = reinterpret_cast<CDoorWall*>(m_Objects[m_DoorIdx + i]);
+			p->CloserDoor();
+		}
+		//CDoorWall* p = reinterpret_cast<CDoorWall*>(m_Objects[m_DoorIdx]);
+		//p->CloserDoor();
 	}
 	if (keyInput.KEY_O)
 	{
@@ -1151,6 +1163,7 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 {
 	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 0,0, 7500 });
+	m_DoorIdx = m_Objects.size();
 	m_Objects.push_back(pDoorWall);
 
 	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 3300, 1000, 500, pShader);
@@ -1162,6 +1175,16 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pDoorWall->SetTextureIndexes(0x04);
 	//pDoorWall->RotateAll({ 0,1,0 }, 90);
 	pDoorWall->SetPosition({ 13500, -3500, 0 });
+	m_Objects.push_back(pDoorWall);
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
+	pDoorWall->SetPosition({ 14000,-4500, 8000 });
+	pDoorWall->SetTextureIndexes(0x08);
+	m_Objects.push_back(pDoorWall);
+
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5800, 4500, 800, pShader);
+	pDoorWall->SetPosition({ 14000, -7050, 13650 });
+	pDoorWall->SetTextureIndexes(0x08);
 	m_Objects.push_back(pDoorWall);
 
 	CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, 1500, 2500, 500); 
@@ -1181,16 +1204,6 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 1500, 2500, 500, XMFLOAT3{ 0,0,0 });
 	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
 	m_Objects.push_back(pWall);
-
-	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
-	pDoorWall->SetPosition({ 14000,-4500, 8000 });
-	pDoorWall->SetTextureIndexes(0x08);
-	m_Objects.push_back(pDoorWall);
-
-	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5800, 4500, 800, pShader);
-	pDoorWall->SetPosition({ 14000, -7050, 13650 });
-	pDoorWall->SetTextureIndexes(0x08);
-	m_Objects.push_back(pDoorWall);
 }
 
 void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1319,13 +1332,13 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	//pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
 	//pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
 	//m_Objects.push_back(std::move(pObject));
+	//CMeshFbx* enemyMesh_1 = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager,
+	//	"resources/Fbx/Enemy_t1.fbx", true);
 	CMeshFbx* enemyMesh_1 = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager,
-		"resources/Fbx/Enemy_t1.fbx", true);
-	//CMeshFbx* enemyMesh_2 = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager,
-	//	"resources/Fbx/Enemy_t2.fbx", true);
+		"resources/Fbx/Enemy_t2.fbx", true);
 	CEnemy* pEnemy = new CEnemy();
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 	pEnemy->Scale(125.0f, 125.0f, 125.0f);
 	pEnemy->SetMesh(enemyMesh_1);
 	pEnemy->SetTextureIndex(0x200); 
@@ -1336,7 +1349,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	pEnemy = new CEnemy();
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 	pEnemy->Scale(125.0f, 125.0f, 125.0f);
 	pEnemy->SetMesh(enemyMesh_1);
 	pEnemy->SetTextureIndex(0x200);
@@ -1347,7 +1360,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	 
 	pEnemy = new CEnemy();
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 	pEnemy->Scale(125.0f, 125.0f, 125.0f);
 	pEnemy->SetMesh(enemyMesh_1);
 	pEnemy->SetTextureIndex(0x200);
@@ -1358,7 +1371,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	pEnemy = new CEnemy();
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 	pEnemy->Scale(125.0f, 125.0f, 125.0f);
 	pEnemy->SetMesh(enemyMesh_1);
 	pEnemy->SetTextureIndex(0x200);
@@ -1369,7 +1382,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	pEnemy = new CEnemy();
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 	pEnemy->Scale(125.0f, 125.0f, 125.0f);
 	pEnemy->SetMesh(enemyMesh_1);
 	pEnemy->SetTextureIndex(0x200);
@@ -2026,11 +2039,13 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 void CSceneJH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_Particles = new CParticle();
-	for (int i = 0; i < 20; ++i) {
+	for (int i = 0; i < 5; ++i) {
 		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::ArrowParticle);
 		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 	}
-	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::HitParticleTex);
+	//m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::HitParticleTex);
+	  
+	 
 	//int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::HitParticleTex);
 	//if (-1 != idx) {
 	//	m_Particles->UseParticle(idx, XMFLOAT3(0, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
