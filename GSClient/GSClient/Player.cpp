@@ -7,8 +7,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 {
 	m_Type = OBJ_TYPE::Player;
 
-	m_HP = 50;
-	m_SP = 35;
+	m_HP = 100;
+	m_SP = 100;
 }
 
 CPlayer::~CPlayer()
@@ -35,25 +35,25 @@ void CPlayer::Update(float fTimeElapsed)
 
 /////////////////////////////////////////////////////////////////////
 #pragma region For Hp_Sp UI Testing 
-	if (TestHPDown == true) {
-		m_HP -= 1;
-		if (m_HP <= 0) TestHPDown = false;
-	}
-	else if(TestHPDown == false)
-	{
-		m_HP += 1;
-		if (m_HP >= 100) TestHPDown = true;
-	} 
-	if (TestSPDown == true)
-	{
-		m_SP -= 1;
-		if (m_SP <= 0) TestSPDown = false;
-	}
-	else if (TestSPDown == false)
-	{
-		m_SP += 1;
-		if (m_SP >= 100) TestSPDown = true;
-	}
+	//if (TestHPDown == true) {
+	//	m_HP -= 1;
+	//	if (m_HP <= 0) TestHPDown = false;
+	//}
+	//else if(TestHPDown == false)
+	//{
+	//	m_HP += 1;
+	//	if (m_HP >= 100) TestHPDown = true;
+	//} 
+	//if (TestSPDown == true)
+	//{
+	//	m_SP -= 1;
+	//	if (m_SP <= 0) TestSPDown = false;
+	//}
+	//else if (TestSPDown == false)
+	//{
+	//	m_SP += 1;
+	//	if (m_SP >= 100) TestSPDown = true;
+	//}
 #pragma endregion
 }
 
@@ -143,7 +143,7 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	//float angle = atan2(det, dot);
 //	cout << "°¢µµ : " << XMConvertToDegrees( angle) << "\n";
 	
-	Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees(angle)));
+	Rotate(XMFLOAT3(0, 1, 0), (angle)); 
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;
@@ -151,5 +151,10 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	if (m_xmf3Velocity.x < -speed) m_xmf3Velocity.x = -speed;
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
+}
+
+bool CPlayer::IsCanAttack() const
+{
+	return false;
 }
  

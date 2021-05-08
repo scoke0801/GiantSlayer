@@ -19,15 +19,7 @@ enum class PlayerWeaponType
 class CTerrain;
 
 class CPlayer : public CGameObject
-{   
-private:
-	// 
-	// testing, 지워야 함 
-	//
-	bool TestHPDown = false;
-	bool TestSPDown = false;
-
-
+{    
 private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
 	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
@@ -52,4 +44,5 @@ public:
 	void SetWeapon(PlayerWeaponType weaponID) { m_WeaponType = weaponID; }
 	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; } 
 
+	bool IsCanAttack() const;
 };
