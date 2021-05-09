@@ -21,10 +21,8 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 
 	CreateMirrorShader(pd3dDevice, pd3dGraphicsRootSignature);
 
-
 	CreateUiShader(pd3dDevice, pd3dGraphicsRootSignature);
 
-	
 	CreateMinmapShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateSkyboxShader(pd3dDevice, pd3dGraphicsRootSignature);

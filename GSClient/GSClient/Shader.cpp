@@ -366,7 +366,7 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, 
 	bool isCullModeOn, bool isBlendOn) 
 {
-	m_nPipelineStates = 3;
+	m_nPipelineStates = 2;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
@@ -416,15 +416,15 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
 		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[1]);
 
-	d3dPipelineStateDesc.InputLayout = CreateShadowInputLayout();
-	d3dPipelineStateDesc.VS = CreateShadowVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSStandardShadow");
-	d3dPipelineStateDesc.PS = CreateShadowPixelShader(L"Shaders\\ShaderYJ.hlsl", "PSStandardShadow");
-	d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
-	d3dPipelineStateDesc.NumRenderTargets = 0;
-	::memset(d3dPipelineStateDesc.RTVFormats, DXGI_FORMAT_UNKNOWN, sizeof(DXGI_FORMAT) * 8);
+	//d3dPipelineStateDesc.InputLayout = CreateShadowInputLayout();
+	//d3dPipelineStateDesc.VS = CreateShadowVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSStandardShadow");
+	//d3dPipelineStateDesc.PS = CreateShadowPixelShader(L"Shaders\\ShaderYJ.hlsl", "PSStandardShadow");
+	//d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
+	//d3dPipelineStateDesc.NumRenderTargets = 0;
+	//::memset(d3dPipelineStateDesc.RTVFormats, DXGI_FORMAT_UNKNOWN, sizeof(DXGI_FORMAT) * 8);
 
-	hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
-		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[2]);
+	//hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+	//	__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[2]);
 
 
 
