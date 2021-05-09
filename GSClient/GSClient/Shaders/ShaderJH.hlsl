@@ -22,10 +22,13 @@ cbuffer cbCameraInfo : register(b2)
 	matrix	gmtxView : packoffset(c0);
 	matrix	gmtxProjection : packoffset(c4);
 	float3	gvCameraPosition : packoffset(c8);
+	matrix gmtxViewProjection : packoffset(c12);
+	matrix gmtxShadowTransform : packoffset(c16);
 };
 
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
+SamplerComparisonState gscsShadow : register(s2); // ±×¸²ÀÚ
 
 Texture2D gtxtForest	   : register(t0);
 Texture2D gtxtDryForest	   : register(t1);
@@ -69,7 +72,7 @@ Texture2D gtxtDry_Tree	   : register(t33);
 Texture2D gtxtStump		   : register(t34);
 Texture2D gtxtDead_Tree	   : register(t35);
 Texture2D gtxtDesert_Rock  : register(t36);
-Texture2D gtxtWater  : register(t37);
+Texture2D gtxtWater			: register(t37);
 
 Texture2D gtxtMap          : register(t38);
 Texture2D gtxtMirror       : register(t39);

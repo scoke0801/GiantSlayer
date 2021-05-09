@@ -7,6 +7,8 @@ enum class ShaderHandlerUser
 	JH,
 };
 class CShader;
+class CTerrain;
+
 class CShaderHandler
 {
 private:
@@ -41,9 +43,9 @@ public:
 
 		string resultText = "지정되지 않은 셰이더 호출!";
 		resultText += (" " + id);
-		assert(!resultText.c_str());
-		return nullptr;
-	}
+		assert(!resultText.c_str()); 
+		return nullptr; 
+	} 
 public:
 	void CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
@@ -61,6 +63,8 @@ public:
 	void CreatePlayerShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	void CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	void CreateShadowShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	void CreateBillboardShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	void CreateMinmapShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);

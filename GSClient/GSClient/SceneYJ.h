@@ -1,5 +1,6 @@
 #pragma once
 #include "Scene.h"
+#include "ShadowMap.h"
 
 class CShader;
 class CGameObject;
@@ -8,6 +9,7 @@ class CPlayer;
 class UI;
 class HelpTextUI;
 class CTerrain;
+class CLightCamera;
 
 class CSceneYJ : public CScene
 {
@@ -17,7 +19,7 @@ private:
 protected:
 	vector<CGameObject*>		m_Objects;
 	CGameObject*				m_Mirror;
-
+	
 	CPlayer* m_Player = nullptr;
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
@@ -28,6 +30,8 @@ protected:
 	CSkyBox* m_Skybox;
 	CTerrain* m_Terrain;
 
+	std::unique_ptr<ShadowMap> mShadowMap;
+
 	vector<CGameObject*>		m_BillboardObjects;
 
 	ID3D12RootSignature*		m_pd3dGraphicsRootSignature = NULL;
@@ -36,19 +40,26 @@ protected:
 	CCamera*					m_CurrentCamera = nullptr;
 	CCamera*					m_MinimapCamera = nullptr;
 	CCamera*					m_MirrorCamera = nullptr;
+	CCamera*					m_ShadowCamera = nullptr;
 
+	CLightCamera*				m_pLightCamera = nullptr;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE				m_d3dDsvShadowMapCPUHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE				m_d3dSrvShadowMapGPUHandle;
 
-	ID3D12DescriptorHeap					* m_pd3dDsvDescriptorHeap;
+	
 	D3D12_CPU_DESCRIPTOR_HANDLE				m_d3dDsvCPUDesciptorStartHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE				m_d3dDsvGPUDesciptorStartHandle;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE srvCpuStart;
+	D3D12_GPU_DESCRIPTOR_HANDLE srvGpuStart;
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuStart;
 	
 private:
 	POINT						m_LastMousePos;
 
 	ID3D12DescriptorHeap* m_pd3dSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap* m_pd3dDsvDescriptorHeap = nullptr;
 
 private:	// about Meterail
 	MATERIALS* m_pMaterials = NULL;
@@ -103,10 +114,11 @@ public:
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawPlayer_Shadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
-	virtual void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
+	virtual void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
 	virtual void Communicate(SOCKET& sock) override;
@@ -125,11 +137,6 @@ public:
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
 
-public:
-	void CreateDepthStencilView(ID3D12Device* pd3dDevice, ID3D12Resource* pd3dResource, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dSaveCPUHandle);
-	void CreateDsvDescriptorHeaps(ID3D12Device* pd3dDevice);
-
-
 private: 
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
@@ -138,10 +145,10 @@ private:
 	void BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-
+	
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);
-	void BuildShadowMapResource(ID3D12Device* pd3dDevice);
+
 
 private:
 	void BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
