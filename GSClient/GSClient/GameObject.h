@@ -119,9 +119,11 @@ public:
 	virtual void Update(float fTimeElapsed);
 
 	virtual void OnPrepareRender();
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	void DrawForBoundingObj(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera); 
 
+	void DrawForBoundingObj(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+ 
+	virtual void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera); 
 public:
 	virtual void Move(XMFLOAT3 shift);
 	void Move();

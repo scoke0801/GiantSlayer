@@ -938,6 +938,15 @@ void CSceneJH::ProcessInput()
 	{
 		gbWireframeOn = false;
 	}
+	if (keyInput.KEY_T)
+	{
+		gbShadowOn = true;
+	}
+	if (keyInput.KEY_Y)
+	{
+		gbShadowOn = false;
+	}
+
 	//DisplayVector3(m_CurrentCamera->GetPosition3f());
 
 	m_CurrentCamera->UpdateViewMatrix();

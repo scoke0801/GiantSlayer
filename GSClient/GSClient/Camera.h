@@ -15,7 +15,7 @@ class CPlayer;
 
 class CCamera
 {
-private:
+protected:
 	// Camera coordinate system with coordinates relative to world space.
 	DirectX::XMFLOAT3			m_xmf3Position = { 0.0f, 0.0f, 0.0f };
 	DirectX::XMFLOAT3			m_xmf3Right = { 1.0f, 0.0f, 0.0f };
@@ -78,6 +78,7 @@ public:
 	DirectX::XMFLOAT3 GetPosition3f()const;
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const DirectX::XMFLOAT3& v);
+	void GenerateViewMatrix();
 
 	// Get camera basis vectors.
 	DirectX::XMVECTOR GetRight()const;
@@ -107,6 +108,10 @@ public:
 	// Set frustum.
 	void SetLens(float fovY, float aspect, float zn, float zf);
 	void SetLens(float fovY, float witdh, float height, float zn, float zf);
+
+	void SetRight(XMFLOAT3 xmf3Vector) { m_xmf3Right = xmf3Vector; }
+	void SetUp(XMFLOAT3 xmf3Vector) { m_xmf3Up = xmf3Vector; }
+	void SetLook(XMFLOAT3 xmf3Vector) { m_xmf3Look = xmf3Vector; }
 
 	// Define camera space via LookAt parameters.
 	void LookAt(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR target, DirectX::FXMVECTOR worldUp);
@@ -163,3 +168,4 @@ public:
 	XMFLOAT3 CalcTargetUp();
 	XMFLOAT3 CalcTargetLook();
 };
+

@@ -91,6 +91,7 @@ void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
 	xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
 	xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
+
 	
 	XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
 
@@ -109,6 +110,8 @@ void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
 		LookAt(xmf3LookAt, m_TargetPlayer->GetUp());
 	}
+	//m_xmf4x4ViewProjection = Matrix4x4::Multiply(xmf4x4Rotate, m_xmf4x4Proj);
+
 }
 
 void CCamera::UpdateLights(float elapsedTime)
@@ -143,6 +146,31 @@ void CCamera::SetPosition(const XMFLOAT3& v)
 {
 	m_xmf3Position = v;
 	m_ViewDirty = true;
+}
+
+void CCamera::GenerateViewMatrix()
+{
+	//카메라의 z-축을 기준으로 카메라의 좌표축들이 직교하도록 카메라 변환 행렬을 갱신한다. 
+	//카메라의 z-축 벡터를 정규화한다. 
+	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
+
+	//카메라의 z-축과 y-축에 수직인 벡터를 x-축으로 설정한다. 
+	m_xmf3Right = Vector3::CrossProduct(m_xmf3Up, m_xmf3Look, true);
+
+	//카메라의 z-축과 x-축에 수직인 벡터를 y-축으로 설정한다. 
+	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
+
+	m_xmf4x4View._11 = m_xmf3Right.x; m_xmf4x4View._12 = m_xmf3Up.x; m_xmf4x4View._13 = m_xmf3Look.x;
+	m_xmf4x4View._21 = m_xmf3Right.y; m_xmf4x4View._22 = m_xmf3Up.y; m_xmf4x4View._23 = m_xmf3Look.y;
+	m_xmf4x4View._31 = m_xmf3Right.z; m_xmf4x4View._32 = m_xmf3Up.z; m_xmf4x4View._33 = m_xmf3Look.z;
+
+	XMFLOAT3 xmf3Position = m_xmf3Position;
+
+	m_xmf4x4View._41 = -Vector3::DotProduct(xmf3Position, m_xmf3Right);
+	m_xmf4x4View._42 = -Vector3::DotProduct(xmf3Position, m_xmf3Up);
+	m_xmf4x4View._43 = -Vector3::DotProduct(xmf3Position, m_xmf3Look);
+
+	m_xmf4x4ViewProjection = Matrix4x4::Multiply(m_xmf4x4View, m_xmf4x4Proj);
 }
 
 XMVECTOR CCamera::GetRight()const
@@ -511,7 +539,7 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, 
 	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4ViewProjection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewProjection)));
 	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4ShadowTransform, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4ShadowTransform)));
 
-
+	
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(rootParameterIndex, d3dGpuVirtualAddress);
 }

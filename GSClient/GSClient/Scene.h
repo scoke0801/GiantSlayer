@@ -36,11 +36,12 @@ public:
 	virtual void Update(float elapsedTime) {}
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void DrawPlayer_Shadow(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) {}
 	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) {}
-	virtual void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) {}
+	virtual void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) {}
 
 public:
 	// about Keyboard process
