@@ -52,6 +52,9 @@ using namespace rapidjson;
 
 #define EPSILON					1.0e-10f
 
+extern float GetDetailHeight(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], 
+	float xPosition, float zPosition);
+
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
 inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }

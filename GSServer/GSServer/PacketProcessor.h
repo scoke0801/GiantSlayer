@@ -79,4 +79,3 @@ private:
 private:
 	unordered_map<OBJECT_ID, XMFLOAT3> m_ObjectPositions;
 };
-

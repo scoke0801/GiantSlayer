@@ -38,14 +38,24 @@ void CPlayer::UpdateCamera()
 	}
 }
 
+void CPlayer::FixCameraByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1])
+{
+	XMFLOAT3 xmf3CameraPosition = m_Camera->GetPosition3f();
+	  
+	float offsetHeight = m_Camera->GetOffset().y;
+	//float fHeight = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + 5.0f;	 
+	float fHeight = GetDetailHeight(heightsMap, xmf3CameraPosition.x, xmf3CameraPosition.z);
+	if (xmf3CameraPosition.y <= fHeight)
+	{
+		xmf3CameraPosition.y = fHeight;
+		m_Camera->SetPosition(xmf3CameraPosition);
+		m_Camera->LookAt(m_xmf3Position, GetUp());
+	}
+}
+
 void CPlayer::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1])
 {
-	int x = m_xmf3Position.x / 200.0f;
-	int z = m_xmf3Position.z / 200.0f;
-
-	m_xmf3Position.y = heightsMap[z][x]; 
-
-	m_xmf4x4World._42 = m_xmf3Position.y;
+	m_xmf3Position.y = GetDetailHeight(heightsMap, m_xmf3Position.x, m_xmf3Position.z);
 }
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)

@@ -8,8 +8,10 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 	char buffer[BUFSIZE + 1] = {}; 
 	int count = 0;
 	int retval = 0;
-	RecvPacket(socket, buffer, retval); 
-
+	bool packetRecvResult = RecvPacket(socket, buffer, retval); 
+	if (false == packetRecvResult) {
+		return false;
+	}
 	// buffer[0]의 값은 packet protocol size
 	// buffer[1]의 값은 packet protocol type
 	PACKET_PROTOCOL type = (PACKET_PROTOCOL)buffer[1];
