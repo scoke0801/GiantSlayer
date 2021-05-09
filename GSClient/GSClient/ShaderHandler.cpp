@@ -15,11 +15,7 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 
 	CreatePlayerShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature);
-
-	/*for (auto& shader : m_Data)
-	{
-		shader.second->
-	}*/
+	CreateShadowShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateBillboardShader(pd3dDevice, pd3dGraphicsRootSignature);
 
@@ -75,7 +71,8 @@ void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignatu
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pFBXShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("FBX", pFBXShader);
-	 
+
+
 	pFBXFeatureShaderLeft->CreateInputLayout(ShaderTypes::Textured);
 	pFBXFeatureShaderLeft->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pFBXFeatureShaderLeft->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -123,7 +120,25 @@ void CShaderHandler::CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignatur
 
 void CShaderHandler::CreateShadowShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
+	CShader* pShadowShader = new CShader();
+	if (m_UserID == ShaderHandlerUser::JH) {
+		pShadowShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSStandardShadow");
+		pShadowShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSStandardShadow");
+	}
+	else if (m_UserID == ShaderHandlerUser::YJ) {
+		pShadowShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSStandardShadow");
+		pShadowShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSStandardShadow");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pShadowShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSStandardShadow");
+		pShadowShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandardShadow");
+	}
+	pShadowShader->CreateInputLayout(ShaderTypes::Shadow);
+	pShadowShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
+	m_Data.emplace("Shadow", pShadowShader);
 }
+
+
 
 void CShaderHandler::CreatePlayerShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {

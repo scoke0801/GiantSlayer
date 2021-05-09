@@ -9,6 +9,7 @@ class CPlayer;
 class UI;
 class HelpTextUI;
 class CTerrain;
+class CLightCamera;
 
 class CSceneYJ : public CScene
 {
@@ -18,7 +19,7 @@ private:
 protected:
 	vector<CGameObject*>		m_Objects;
 	CGameObject*				m_Mirror;
-
+	
 	CPlayer* m_Player = nullptr;
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
@@ -40,6 +41,8 @@ protected:
 	CCamera*					m_MinimapCamera = nullptr;
 	CCamera*					m_MirrorCamera = nullptr;
 	CCamera*					m_ShadowCamera = nullptr;
+
+	CLightCamera*				m_pLightCamera = nullptr;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE				m_d3dDsvShadowMapCPUHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE				m_d3dSrvShadowMapGPUHandle;
@@ -114,7 +117,7 @@ public:
 	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
-	virtual void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
+	virtual void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
 	virtual void Communicate(SOCKET& sock) override;
@@ -133,11 +136,6 @@ public:
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
 
-public:
-	//void CreateDepthStencilView(ID3D12Device* pd3dDevice, ID3D12Resource* pd3dResource, D3D12_CPU_DESCRIPTOR_HANDLE* pd3dSaveCPUHandle);
-	
-
-
 private: 
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
@@ -146,7 +144,7 @@ private:
 	void BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-
+	
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);
 

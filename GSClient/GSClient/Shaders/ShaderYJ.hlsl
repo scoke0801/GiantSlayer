@@ -21,9 +21,10 @@ cbuffer cbCameraInfo : register(b2)
 	matrix	gmtxView : packoffset(c0);
 	matrix	gmtxProjection : packoffset(c4);
 	float3	gvCameraPosition : packoffset(c8);
-    matrix  gmtxViewProjection : packoffset(c12);
-    matrix  gmtxShadowTransform : packoffset(c16);
+    matrix gmtxViewProjection : packoffset(c12);
+    matrix gmtxShadowTransform : packoffset(c16);
 };
+
 
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
@@ -724,9 +725,7 @@ float CalcShadowFactor(float4 f4ShadowPos)
         percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
     }
 
-    float fFactor = max(percentLit / 9.0f, 0.5f);
-
-    return fFactor;
+    return saturate(percentLit / 9.0f) - 0.5f;
 }
 
 
@@ -793,8 +792,11 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
     shadowFactor = CalcShadowFactor(input.shadowPosH);
 	
+ 
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID,shadowFactor);
+	
+
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID , shadowFactor);
 
 	return(cColor * cIllumination);
 }
@@ -826,10 +828,11 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	{
 		cColor = gtxtDoor.Sample(gssWrap, input.uv);
 	}
-
+    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+    shadowFactor = CalcShadowFactor(input.shadowPosH);
 	
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+    float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
 }
@@ -857,9 +860,11 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	{
 		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
-
+    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+    shadowFactor = CalcShadowFactor(input.shadowPosH);
+	
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+    float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
 }
@@ -885,8 +890,10 @@ float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	{
 		cColor = gtxtPuzzleBoard.Sample(gssClamp, uvw);
 	}
+    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+    shadowFactor = CalcShadowFactor(input.shadowPosH);
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+    float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
 }
@@ -903,8 +910,10 @@ float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primitiv
 	{
 		cColor = gtxtWoodSignBoard.Sample(gssClamp, uvw);
 	}
+    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+    shadowFactor = CalcShadowFactor(input.shadowPosH);
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+    float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
 } 
@@ -921,9 +930,10 @@ float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
         cColor = cColor = gtxtShadowMap.Sample(gssWrap, input.uv);
     }
     return cColor;
-	
+    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+    shadowFactor = CalcShadowFactor(input.shadowPosH);
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+    float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
 }
@@ -965,10 +975,41 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
    
 	input.normalW = normalize(input.normalW);
     //float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
-	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID,shadowFactor);
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
 }
 
 // 그림자 계산
+
+struct VS_STANDARD_SHADOW_INPUT
+{
+    float3 position : POSITION;
+    float2 uv : TEXCOORD;
+};
+
+struct VS_STANDARD_SHADOW_OUTPUT
+{
+    float4 position : SV_POSITION;
+    float2 uv : TEXCOORD;
+};
+
+VS_STANDARD_SHADOW_OUTPUT VSStandardShadow(VS_STANDARD_SHADOW_INPUT input)
+{
+    VS_STANDARD_SHADOW_OUTPUT output;
+
+    output.position = mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxViewProjection);
+    output.uv = input.uv;
+
+    return (output);
+}
+
+void PSStandardShadow(VS_STANDARD_SHADOW_OUTPUT input)
+{
+    float4 f4AlbedoColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
+    if (gnTexturesMask & 0x01)
+        f4AlbedoColor = gtxtShadowMap.Sample(gssWrap, input.uv);
+
+    clip(f4AlbedoColor.a - 0.1f);
+}
 

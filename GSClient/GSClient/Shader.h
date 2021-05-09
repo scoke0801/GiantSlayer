@@ -11,6 +11,7 @@ enum class ShaderTypes
 	Textured,
 	Billboard,
 	Terrain,
+	Shadow,
 	Count
 };
 
@@ -64,6 +65,13 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreateDomainShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE CreateHullShader(ID3DBlob** ppd3dShaderBlob);
 
+	virtual D3D12_SHADER_BYTECODE CreateShadowVertexShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+	virtual D3D12_SHADER_BYTECODE CreateShadowPixelShader(WCHAR* pszFileName, LPCSTR pszShaderName);
+	virtual D3D12_INPUT_LAYOUT_DESC CreateShadowInputLayout();
+	virtual D3D12_RASTERIZER_DESC CreateShadowRasterizerState();
+	
+
+
 	// Å×¼¿ Ãß°¡
 	D3D12_SHADER_BYTECODE CreateDomainShader(WCHAR* pszFileName, LPCSTR pszShaderName);
 	D3D12_SHADER_BYTECODE CreateHullShader(WCHAR* pszFileName, LPCSTR pszShaderName);
@@ -81,6 +89,7 @@ public:
 
 	void CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, bool isLeftSide = true);
 	void CreateUIShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	void CreateShadowShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	virtual void CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	 
@@ -92,9 +101,11 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void OnPrepareShadowRender(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void RenderBoundary(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void Render_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 }; 
 
 ///////////////////////////////////////////////////////////////////////////////////////
