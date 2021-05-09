@@ -178,10 +178,10 @@ void CSceneJH::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	auto start_t = chrono::high_resolution_clock::now();
-	m_pfbxManager = FbxManager::Create();
+	/*m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
-	m_pfbxManager->SetIOSettings(m_pfbxIOs);
+	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		m_ObjectLayers[i].reserve(50); 
@@ -197,8 +197,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
 	BuildMapSector1(pd3dDevice, pd3dCommandList);
-	//BuildMapSector2(pd3dDevice, pd3dCommandList);
-	//BuildMapSector3(pd3dDevice, pd3dCommandList);
+	BuildMapSector2(pd3dDevice, pd3dCommandList);
+	BuildMapSector3(pd3dDevice, pd3dCommandList);
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList);
 
@@ -1352,10 +1352,9 @@ void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 }
 
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
+{ 
 	CGameObject* pObject = new CGameObject();
-	pObject->SetMesh(fbxMesh);
+	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss]);
 	pObject->SetPosition({ 16800,  -6070, 16500 });
 	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
@@ -1363,16 +1362,13 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->Scale(35, 35, 35); 
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pObject); 
-	//CMeshFbx* enemyMesh_1 = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager,
-	//	"resources/Fbx/Enemy_t1.fbx", true);
-	CMeshFbx* enemyMesh_1 = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager,
-		"resources/Fbx/Enemy_t2.fbx", true);
+	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pObject);  
+
 	CEnemy* pEnemy = new CEnemy();
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 	pEnemy->Scale(125.0f, 125.0f, 125.0f);
-	pEnemy->SetMesh(enemyMesh_1);
+	pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
 	pEnemy->SetTextureIndex(0x200); 
 	pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f }); 
 	pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f } );
@@ -1383,7 +1379,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 	pEnemy->Scale(125.0f, 125.0f, 125.0f);
-	pEnemy->SetMesh(enemyMesh_1);
+	pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
 	pEnemy->SetTextureIndex(0x200);
 	pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });	
 	pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f } );
@@ -1394,7 +1390,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 	pEnemy->Scale(125.0f, 125.0f, 125.0f);
-	pEnemy->SetMesh(enemyMesh_1);
+	pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
 	pEnemy->SetTextureIndex(0x200);
 	pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
 	pEnemy->SetActivityScope({ 1300, 0, 1450 },{ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f } );
@@ -1405,7 +1401,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 	pEnemy->Scale(125.0f, 125.0f, 125.0f);
-	pEnemy->SetMesh(enemyMesh_1);
+	pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
 	pEnemy->SetTextureIndex(0x200);
 	pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
 	pEnemy->SetActivityScope({ 1400, 0, 1200 },{ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f } );
@@ -1416,20 +1412,12 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 	pEnemy->Scale(125.0f, 125.0f, 125.0f);
-	pEnemy->SetMesh(enemyMesh_1);
+	pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
 	pEnemy->SetTextureIndex(0x200);
 	pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
 	pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
 	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-	//pObject = new CGameObject();
-	//pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	////pObject->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	//pObject->Scale(75.0f, 75.0f, 75.0f);
-	//pObject->SetMesh(enemyMesh_2);
-	//pObject->SetTextureIndex(0x200);
-	//pObject->SetPosition({ 500.0f, m_Terrain->GetDetailHeight(500.0f, 2500.0f), 2500.0f });
-	//m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
+	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
 }
 
 void CSceneJH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1662,15 +1650,13 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
 	}
 #pragma endregion 
-
-	CMeshFbx* fbx_bush_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
-
+	 
 	CGameObject* pObject;
 	for (int i = 0; i < 2; i++)
 	{
 		pObject = new CGameObject();
 		pObject->Rotate({ 1,0,0 }, 90);
-		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->SetPosition({ 1000.0f + i * 1000.0f, 100, 850 });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
@@ -1682,7 +1668,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		pObject = new CGameObject();
 		pObject->Rotate({ 1,0,0 }, 90);
-		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->SetPosition({ 1200.0f + i * 1000.0f, 0, 3150 });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
@@ -1693,7 +1679,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	for (int i = 0; i < 2; i++)
 	{
 		pObject = new CGameObject();
-		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->Rotate({ 0,0,1 }, 90);
 		pObject->SetPosition({ 500.0f + i * 2700.0f, 0, 2150 });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
@@ -1705,7 +1691,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	for (int i = 0; i < 5; i++)
 	{
 		pObject = new CGameObject();
-		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->Rotate({ 0,0,1 }, 90);
 		pObject->SetPosition({ 2600.0f, 0, 4650 + 500.0f * i });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
@@ -1717,7 +1703,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	for (int i = 0; i < 5; i++)
 	{
 		pObject = new CGameObject();
-		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->Rotate({ 0,0,1 }, 90);
 		pObject->SetPosition({ 2600.0f, -200.0f, 4650 + 500.0f * i });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
@@ -1751,7 +1737,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			x_bush -= 2000.0f;
 		}
 		pObject = new CGameObject();
-		pObject->SetMesh(fbx_bush_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->Rotate({ 0,0,1 }, 90);
 
 		pObject->SetPosition({ x_bush + 300 * i, 0, z_bush + 700.0f * i });
@@ -1763,7 +1749,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	}
 
 	pObject = new CGameObject();
-	pObject->SetMesh(fbx_bush_Mesh);
+	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 	pObject->SetPosition({ 2500.0f, 100, 250 });
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	pObject->SetTextureIndex(0x01);
@@ -1773,14 +1759,13 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CMeshFbx* fbx_Rock_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/rock.fbx", true);
 	CGameObject* pObject;
 
 	for (int i = 0; i < 2; i++)
 	{
 		pObject = new CGameObject();
 
-		pObject->SetMesh(fbx_Rock_Mesh); 
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock]); 
 		float x = 500.0f + i * 1000.0f;
 		float z = 19500 - 500.0f * i;
 		float y = m_Terrain->GetDetailHeight(x, z);
@@ -1792,16 +1777,13 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 5, 7, 3, { 0,0,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	} 
-	CMeshFbx* fbx_Dry_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
-	CMeshFbx* fbx_Stump_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
-	CMeshFbx* fbx_Dead_Tree_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
-
+ 
 	float x_Tree, z_Tree;
 
 	for (int i = 0; i < 1; i++)
 	{
 		pObject = new CGameObject();
-		pObject->SetMesh(fbx_Dry_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01]);
 
 		x_Tree = 900 + 6200 * i;
 		z_Tree = 18800;
@@ -1816,7 +1798,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	}
 
 	pObject = new CGameObject();
-	pObject->SetMesh(fbx_Dry_Mesh);
+	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01]);
 
 	x_Tree = 900 + 6400;
 	z_Tree = 19300;
@@ -1832,7 +1814,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	for (int i = 0; i < 2; i++)
 	{
 		pObject = new CGameObject();
-		pObject->SetMesh(fbx_Dry_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01]);
 
 		x_Tree = 200 + 3000 * i;
 		z_Tree = 17000;
@@ -1847,7 +1829,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	}
 
 	pObject = new CGameObject();
-	pObject->SetMesh(fbx_Stump_Mesh);
+	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump]);
 
 	x_Tree = 200;
 	z_Tree = 18000;
@@ -1863,7 +1845,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 ///////////////////////////////////////////////////////////////////////////////////
 
 	pObject = new CGameObject();
-	pObject->SetMesh(fbx_Dead_Tree_Mesh);
+	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01]);
 
 	x_Tree = 3700;
 	z_Tree = 19000;
@@ -1878,7 +1860,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	for (int i = 0; i < 2; i++)
 	{
 		pObject = new CGameObject();
-		pObject->SetMesh(fbx_Dead_Tree_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01]);
 
 		x_Tree = 1500 + 5000 * i;
 		z_Tree = 17500;
@@ -1894,8 +1876,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 }
 
 void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	CMeshFbx* fbx_Desert_Rock_Mesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true);
+{ 
 	CGameObject* pObject;
 
 	float x_Pos, z_Pos;
@@ -1904,7 +1885,7 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		pObject = new CGameObject();
 
-		pObject->SetMesh(fbx_Desert_Rock_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock]);
 
 		x_Pos = 11000.0f + 300.0f * i;
 		z_Pos = 18500.0f;
@@ -1946,7 +1927,7 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		pObject = new CGameObject();
 
-		pObject->SetMesh(fbx_Desert_Rock_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock]);
 
 		x_Pos = 11000.0f;
 		z_Pos = 19000 - 2000.0f * i;
@@ -2000,7 +1981,7 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		pObject = new CGameObject();
 
-		pObject->SetMesh(fbx_Desert_Rock_Mesh);
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock]);
 
 		x_Pos = 11000.0f + 100 * i;
 		z_Pos = 19000 - 2000.0f * i;
@@ -2029,25 +2010,25 @@ void CSceneJH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 } 
 
 void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	return;
-	//m_pfbxManager = FbxManager::Create();
-	//m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
-	//m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
-	//m_pfbxManager->SetIOSettings(m_pfbxIOs);
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Human];  
+{ 
+	m_pfbxManager = FbxManager::Create();
+	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
+	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
+	m_pfbxManager->SetIOSettings(m_pfbxIOs);
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Human];  
 	std::thread t1([this, pd3dDevice, pd3dCommandList]() {
 		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
 		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/rock.fbx", true);
+		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Golem.fbx");
 	});
 	std::thread t2([this, pd3dDevice, pd3dCommandList]() {
 		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
-		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
-	
+		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);  
 	});
 	std::thread t3([this, pd3dDevice, pd3dCommandList]() {
 		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
 		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true);
+		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/Enemy_t2.fbx", true);
 	}); 
 	std::thread t4([this, pd3dDevice, pd3dCommandList]() {
 		this->m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CMeshFbx(pd3dDevice, pd3dCommandList, this->m_pfbxManager, "resources/Fbx/babymos.fbx", true);
@@ -2089,24 +2070,21 @@ void CSceneJH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 }
 void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");
 	for (int i = 0; i < 10; ++i) {
 		CArrow* pArrow = new CArrow();
-		pArrow->SetMesh(fbxMesh);
+		pArrow->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow]);
 		pArrow->SetPosition({ 500.0f,  100.0f, 1500.0f });
 		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
 		pArrow->SetTextureIndex(0x20);
 		pArrow->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		pArrow->Scale(15.0f, 15.0f, 15.0f);
+		pArrow->Scale(25.0f, 25.0f, 25.0f);
 
 		m_ObjectLayers[(int)OBJECT_LAYER::Arrow].push_back(pArrow);
 	}
 }
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	CMeshFbx* fbxMesh;
-
-	fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
+{ 
+	 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
 
@@ -2120,7 +2098,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_Players[0]->SetCamera(m_Cameras[0]);
 	m_Players[0]->SetTextureIndex(0x200);
-	m_Players[0]->SetMesh(fbxMesh); 
+	m_Players[0]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player]);
 	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 5, XMFLOAT3{ 0,0,0 });
 
 	m_Players[0]->SetDrawable(true); 
@@ -2135,7 +2113,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_Players[i]->SetObjectName(OBJ_NAME::Player);
 
 		m_Players[i]->SetTextureIndex(0x200);
-		m_Players[i]->SetMesh(fbxMesh);
+		m_Players[i]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player]);
 		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 5, XMFLOAT3{0,0,0});
 		m_Players[i]->SetDrawable(false); 
 

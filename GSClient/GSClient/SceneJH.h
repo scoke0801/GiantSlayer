@@ -21,6 +21,9 @@ enum class FBX_MESH_TYPE : UINT {
 	Stump,
 	Bush_1,
 	Boss,
+	Player,
+	Enemy_01,
+	Enemy_02,
 	COUNT
 };
 
