@@ -64,6 +64,8 @@ struct GameInputs
 	bool KEY_J = false;
 	bool KEY_K = false;
 	bool KEY_L = false;
+	bool KEY_T = false;
+	bool KEY_Y = false;
 };
 enum class CommandType
 {

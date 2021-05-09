@@ -693,7 +693,7 @@ VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
     output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
-
+    //output.shadowPosH = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxShadowTransform);
 
 	return(output);
 }
@@ -725,7 +725,7 @@ float CalcShadowFactor(float4 f4ShadowPos)
         percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
     }
 
-    return saturate(percentLit / 9.0f) - 0.5f;
+    return percentLit / 9.0f;
 }
 
 
@@ -772,17 +772,17 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
 		
 		
-        //float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-        //float FogStart = 10000.0f;
-        //float FogRange = 20000.0f;
+        float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+        float FogStart = 10000.0f;
+        float FogRange = 20000.0f;
 	
-        //float3 toEyeW = gvCameraPosition + input.position.xyz;
-        //float distToEye = length(toEyeW);
-        //toEyeW /= distToEye; // normalize
+        float3 toEyeW = gvCameraPosition + input.position.xyz;
+        float distToEye = length(toEyeW);
+        toEyeW /= distToEye; // normalize
 	
-        //float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+        float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
 		
-        //cColor = lerp(cColor, FogColor, 1 - fogAmount);
+        cColor = lerp(cColor, FogColor, 1 - fogAmount);
     }
 	if (gnTexturesMask & 0x100)
 	{
@@ -976,7 +976,8 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	input.normalW = normalize(input.normalW);
     //float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
-
+	
+	
 	return(cColor * cIllumination);
 }
 
@@ -996,9 +997,11 @@ struct VS_STANDARD_SHADOW_OUTPUT
 
 VS_STANDARD_SHADOW_OUTPUT VSStandardShadow(VS_STANDARD_SHADOW_INPUT input)
 {
-    VS_STANDARD_SHADOW_OUTPUT output;
+    VS_STANDARD_SHADOW_OUTPUT output = (VS_STANDARD_SHADOW_OUTPUT)0.0f;
 
-    output.position = mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxViewProjection);
+    float4 posW = mul(float4(input.position, 1.0f), gmtxWorld);
+
+    output.position = mul(posW,gmtxViewProjection);
     output.uv = input.uv;
 
     return (output);
@@ -1006,9 +1009,10 @@ VS_STANDARD_SHADOW_OUTPUT VSStandardShadow(VS_STANDARD_SHADOW_INPUT input)
 
 void PSStandardShadow(VS_STANDARD_SHADOW_OUTPUT input)
 {
-    float4 f4AlbedoColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
-    if (gnTexturesMask & 0x01)
-        f4AlbedoColor = gtxtShadowMap.Sample(gssWrap, input.uv);
+    float4 f4AlbedoColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	
+
+	f4AlbedoColor = gtxtBox.Sample(gssWrap, input.uv);
 
     clip(f4AlbedoColor.a - 0.1f);
 }

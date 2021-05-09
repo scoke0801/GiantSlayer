@@ -114,6 +114,7 @@ public:
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawPlayer_Shadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;

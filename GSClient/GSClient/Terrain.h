@@ -24,7 +24,7 @@ public:
 
 public:
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
+	
 public:
 	// x,z위치의 지형 높이를 반환하는 함수이다.
 	// 오브젝트가 지형 위에 위치하도록 하기 위해 필요한 함수.  

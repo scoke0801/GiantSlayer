@@ -34,6 +34,11 @@ CD3DX12_GPU_DESCRIPTOR_HANDLE ShadowMap::Srv()const
 	return mhGpuSrv;
 }
 
+CD3DX12_CPU_DESCRIPTOR_HANDLE ShadowMap::Srv_c()const
+{
+	return mhCpuSrv;
+}
+
 CD3DX12_CPU_DESCRIPTOR_HANDLE ShadowMap::Dsv()const
 {
 	return mhCpuDsv;
@@ -78,7 +83,6 @@ void ShadowMap::OnResize(UINT newWidth, UINT newHeight)
 
 void ShadowMap::BuildDescriptors()
 {
-	
 	// Create DSV to resource so we can render to the shadow map.
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
 	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;

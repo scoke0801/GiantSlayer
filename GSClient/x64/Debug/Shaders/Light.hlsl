@@ -182,8 +182,8 @@ float4 Lighting_Shadow(float3 vPosition, float3 vNormal, uint nMaterialID, float
     float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
     for (int i = 0; i < MAX_LIGHTS; i++)
     {
-        //if (gLights[i].m_bEnable)
-        //{
+        if (gLights[i].m_bEnable)
+        {
             if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
             {
                 cColor += f3ShadowFactor[i] * DirectionalLight(i, vNormal, vToCamera, nMaterialID);
@@ -196,7 +196,7 @@ float4 Lighting_Shadow(float3 vPosition, float3 vNormal, uint nMaterialID, float
             {
                 cColor += SpotLight(i, vPosition, vNormal, vToCamera, nMaterialID);
             }
-        //}
+        }
     }
     cColor += (gcGlobalAmbientLight * gMaterials[nMaterialID].m_cAmbient);
     cColor.a = gMaterials[nMaterialID].m_cDiffuse.a;

@@ -104,13 +104,10 @@ void CSceneYJ::BuildCamera(ID3D12Device* pd3dDevice,
 	m_Cameras[5]->SetScissorRect(0, 0, width, height);
 	
 
-	
 	m_ShadowCamera = m_Cameras[4];
 	m_MirrorCamera = m_Cameras[3];
 	m_CurrentCamera = m_Cameras[5];
 	m_MinimapCamera = m_Cameras[1];
-
-	
 }
 
 void CSceneYJ::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -149,16 +146,9 @@ void CSceneYJ::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
 
-	//m_pLights->m_pLights[0].m_bEnable = true;
-	//m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	//m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	//m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	//m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	//m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
-
 	m_pLights->m_pLights[1].m_bEnable = false;
 	m_pLights->m_pLights[1].m_nType = POINT_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 50.0f;
+	m_pLights->m_pLights[1].m_fRange = 500.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -348,27 +338,26 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pd3dDevice->CreateShaderResourceView(m_pd3dMirrorTex, &srvDesc, hDescriptor);
 
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc.Texture2D.PlaneSlice = 0;
 	pd3dDevice->CreateShaderResourceView(mShadowMap->Resource(), &srvDesc, hDescriptor);
 
+	/*D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.Texture2D.MipSlice = 0;
+	pd3dDevice->CreateDepthStencilView(mShadowMap->Resource(), &dsvDesc, CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize));*/
 
 	mShadowMap->BuildDescriptors(
 		CD3DX12_CPU_DESCRIPTOR_HANDLE(srvCpuStart, m_Textures.size() + 3, gnCbvSrvDescriptorIncrementSize),
 		CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 3, gnCbvSrvDescriptorIncrementSize),
 		CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize));
-
-
-	// ±×¸²ÀÚ
-	/*hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-	pd3dDevice->CreateShaderResourceView(mShadowMap->Resource(), &srvDesc, hDescriptor);
-
-	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
-	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	dsvDesc.Texture2D.MipSlice = 0;
-	pd3dDevice->CreateDepthStencilView(mShadowMap->Resource(), &dsvDesc, dsvCpuStart);*/
 
 }
 
@@ -459,7 +448,7 @@ void CSceneYJ::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	//m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Player->Draw_Shadow(pd3dCommandList, m_CurrentCamera);
-	//m_Player->Draw(pd3dCommandList, m_CurrentCamera);
+	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
 	
 	m_Mirror->Draw(pd3dCommandList, m_CurrentCamera);
 	
@@ -469,10 +458,10 @@ void CSceneYJ::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}*/
 
-	/*for (auto pObject : m_Objects)
+	for (auto pObject : m_Objects)
 	{
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
-	}*/
+	}
 }
 
 void CSceneYJ::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -495,11 +484,17 @@ void CSceneYJ::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CSceneYJ::DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	
 	if (m_Player)
 	{
-		
 		m_Player->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+}
+
+void CSceneYJ::DrawPlayer_Shadow(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	if (m_Player)
+	{
+		m_Player->Draw_Shadow(pd3dCommandList, m_CurrentCamera);
 	}
 }
 
@@ -636,6 +631,14 @@ void CSceneYJ::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 void CSceneYJ::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+	pd3dCommandList->RSSetViewports(1, &mShadowMap->Viewport());
+	pd3dCommandList->RSSetScissorRects(1, &mShadowMap->ScissorRect());
+
+	if (m_CurrentCamera)
+	{
+		m_CurrentCamera->GenerateViewMatrix();
+		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
+	}
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mShadowMap->Resource(),
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
@@ -644,17 +647,17 @@ void CSceneYJ::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	pd3dCommandList->OMSetRenderTargets(0, nullptr, false, &mShadowMap->Dsv());
 
-	if (m_CurrentCamera)
-	{
-		m_CurrentCamera->GenerateViewMatrix();
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
-		pd3dCommandList->RSSetViewports(1, &mShadowMap->Viewport());
-		pd3dCommandList->RSSetScissorRects(1, &mShadowMap->ScissorRect());
-	}
+	
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
+	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Player->Draw_Shadow(pd3dCommandList, m_CurrentCamera);
+
+	for (auto pObject : m_Objects)
+	{
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mShadowMap->Resource(),
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
@@ -781,9 +784,11 @@ void CSceneYJ::ProcessInput()
 	}
 	if (keyInput.KEY_K)
 	{
+		gbShadowOn = true;
 	}
 	if (keyInput.KEY_L)
 	{
+		gbShadowOn = false;
 	}
 	//DisplayVector3(m_CurrentCamera->GetPosition3f());
 	
@@ -1148,7 +1153,7 @@ void CSceneYJ::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 {
 	m_Mirror = new CGameObject();
 
-	CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
+	CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 20000.0f, 20000.0f, 1.0f);
 
 	m_MirrorCamera->SetPosition({ 17000, -3000, 210 });
 

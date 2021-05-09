@@ -148,6 +148,8 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 			pBoundingMesh->Render(pd3dCommandList);
 		}
 	}
+
+	
 }
 void CGameObject::Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {

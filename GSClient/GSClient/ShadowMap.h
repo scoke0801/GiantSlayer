@@ -13,6 +13,7 @@ public:
 	UINT Height()const;
 	ID3D12Resource* Resource();
 	CD3DX12_GPU_DESCRIPTOR_HANDLE Srv()const;
+	CD3DX12_CPU_DESCRIPTOR_HANDLE Srv_c()const;
 	CD3DX12_CPU_DESCRIPTOR_HANDLE Dsv()const;
 
 	D3D12_VIEWPORT Viewport()const;
