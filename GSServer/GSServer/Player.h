@@ -31,6 +31,7 @@ public:
 
 public:
 	virtual void SetVelocity(OBJ_DIRECTION direction) override;
+	virtual void SetVelocity(const XMFLOAT3& dir) override;
 
 	bool IsMoving() const { return Vector3::Length(m_xmf3Velocity) > 0.01f; }
 
@@ -42,4 +43,7 @@ public:
 
 	void SetExistence(bool existence) { m_isExist = existence; };
 	bool IsExist() const { return m_isExist; }
+	 
+	void SetCamera(CCamera* camera) { m_Camera = camera; }
+	CCamera* GetCamera() const { return m_Camera; }
 };

@@ -86,10 +86,7 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 		P_S2C_PROCESS_MOUSE p_mouseProcess;
 		ZeroMemory(&p_mouseProcess, sizeof(P_S2C_PROCESS_MOUSE));
 		p_mouseProcess.size = sizeof(P_S2C_PROCESS_MOUSE);
-		p_mouseProcess.type = PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT;
-		//p_mouseProcess.playerRotateX = p_mouseProcess.playerRotateY = p_mouseProcess.playerRotateZ = 0;
-		//p_mouseProcess.cameraRotateX = p_mouseProcess.cameraRotateY = p_mouseProcess.cameraRotateZ = 0;
-		//p_mouseProcess.caemraOffset = 0;
+		p_mouseProcess.type = PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT; 
 		float playerRotateY = 0.0f;
 		float cameraRotateY = 0.0f;
 		float cameraOffset = 0.0f;
@@ -101,7 +98,7 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 				playerRotateY += dx;
 				if (m_Players[p_mouse.id]->IsMoving())
 				{
-					p_mouseProcess.playerRotateY += dx;
+					//p_mouseProcess.playerRotateY += dx;
 					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
 				}
 			}
@@ -124,23 +121,26 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 			*reinterpret_cast<P_C2S_KEYBOARD_INPUT*>(buffer);
 		
 		XMFLOAT3 pos = m_Players[p_keyboard.id]->GetPosition();
-
-		//m_Players[p_keyboard.id]->Update();
-
-		// update player using key...
+		XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
+		float distance = PLAYER_RUN_VELOCITY; 
+		 
 		switch (p_keyboard.keyInput)
 		{
 		case VK_W:
-			m_Players[p_keyboard.id]->SetVelocity(OBJ_DIRECTION::Front);
+			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
+				m_Players[p_keyboard.id]->GetLook(), distance));
 			break;
 		case VK_S:
-			m_Players[p_keyboard.id]->SetVelocity(OBJ_DIRECTION::Back);
+			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
+				m_Players[p_keyboard.id]->GetLook(), -distance));
 			break; 
 		case VK_A:
-			m_Players[p_keyboard.id]->SetVelocity(OBJ_DIRECTION::Left);
+			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
+				m_Players[p_keyboard.id]->GetRight(), -distance));
 			break;
 		case VK_D:
-			m_Players[p_keyboard.id]->SetVelocity(OBJ_DIRECTION::Right);
+			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
+				m_Players[p_keyboard.id]->GetRight(), distance));
 			break;
 		}
 
@@ -252,8 +252,9 @@ void PacketProcessor::Update(float elapsedTime)
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		if (m_Players[i]->IsExist()) {
 			m_Players[i]->Update(elapsedTime);
-			m_Players[i]->FixPositionByTerrain(m_Heights);
 			m_Players[i]->UpdateColliders();
+			m_Players[i]->FixPositionByTerrain(m_Heights);
+			m_Players[i]->FixCameraByTerrain(m_Heights);
 		}
 	}
 
@@ -304,6 +305,7 @@ void PacketProcessor::InitCameras()
 		m_Cameras[i]->Pitch(XMConvertToRadians(15));
 		m_Cameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));	
 		m_Cameras[i]->SetTarget(m_Players[i]);
+		m_Players[i]->SetCamera(m_Cameras[i]);
 	}
 }
 

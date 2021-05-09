@@ -947,10 +947,7 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_Y)
 	{
 		gbShadowOn = false;
-	}
-
-	//DisplayVector3(m_CurrentCamera->GetPosition3f());
-
+	} 
 	m_CurrentCamera->UpdateViewMatrix();
 }
 
@@ -2326,32 +2323,32 @@ void CSceneJH::RecvMouseProcessPacket()
 		if (p_mouseProcess.cameraOffset != 0) {
 			float offset = IntToFloat(p_mouseProcess.cameraOffset);
 			cout << "offset : " << offset << "\n";
-			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset * 3));
+			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
 		}
 		if (p_mouseProcess.cameraRotateX != 0) {
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX * 75);
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX);
 		}
 
 		if (p_mouseProcess.cameraRotateY != 0) {
 			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY);
 			//cout << "cameraRotateY : " << rotateY << "\n";
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), rotateY * 75);
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), rotateY);
 		}
 
 		if (p_mouseProcess.cameraRotateZ != 0) { 
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ * 75);
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ);
 		}
 		if (p_mouseProcess.playerRotateX != 0) {
-			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX * 150);
+			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX);
 		} 
 		if (p_mouseProcess.playerRotateY != 0) {
 			float rotateY = IntToFloat(p_mouseProcess.playerRotateY);
 			//cout << "playerRotateY : " << rotateY << "\n";
-			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY * 150);
-			m_MinimapArrow->Rotate(-rotateY * 150);
+			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY );
+			m_MinimapArrow->Rotate(-rotateY );
 		} 
 		if (p_mouseProcess.playerRotateZ != 0) {
-			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ * 150);
+			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ);
 		}
 	}
 }

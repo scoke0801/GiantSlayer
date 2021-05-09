@@ -132,7 +132,6 @@ public:
 
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 
-
 	void Scale(float x, float y, float z, bool setSize = true);
 
 public:

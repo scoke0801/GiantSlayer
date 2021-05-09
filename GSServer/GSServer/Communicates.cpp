@@ -118,11 +118,11 @@ DWORD __stdcall MainServerThread(LPVOID arg)
 		static std::chrono::duration<double> timeElapsed;
 
 		timeElapsed = std::chrono::system_clock::now() - currentTime;
-		currentTime = std::chrono::system_clock::now();
-		//cout << "TimeElapsed: " << timeElapsed.count() << " \n";
-		if (false == PacketProcessor::GetInstance()->ProcessGameScene(client_sock))
+		currentTime = std::chrono::system_clock::now(); 
+		if (false == PacketProcessor::GetInstance()->ProcessGameScene(client_sock)) {
+			// 접속 종료
 			break;
-
+		}
 		PacketProcessor::GetInstance()->UpdateLoop();
 	}
 
