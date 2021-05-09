@@ -803,35 +803,44 @@ void CSceneJH::ProcessInput()
 
 	float cameraSpeed = m_CurrentCamera->GetSpeed();
 	XMFLOAT3 velocity = m_Player->GetVelocity();
-	XMFLOAT3 temp = m_CurrentCamera->GetRight3f();
 
-	temp = Vector3::Multifly(temp, -1.0f);
+	XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
+	float distance = PLAYER_RUN_VELOCITY;
+
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
-	{
-		if (m_isPlayerSelected)
-			m_Player->SetVelocity(m_CurrentCamera->GetLook3f());
+	{ 
+		if (m_isPlayerSelected) {
+			m_Player->RotateToSetDirection(PLAYER_DIRECTION::Front);
+			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));
+		}
 		else
 			m_CurrentCamera->Walk(cameraSpeed);
 	}
 	if (keyInput.KEY_A)
 	{
-		if (m_isPlayerSelected)
-			m_Player->SetVelocity(Vector3::Multifly(m_CurrentCamera->GetRight3f(), -1.0f));
+		if (m_isPlayerSelected) {
+			m_Player->RotateToSetDirection(PLAYER_DIRECTION::Left);
+			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetRight3f(), -distance));
+		}
 		else
 			m_CurrentCamera->Strafe(-cameraSpeed);
 	}
 	if (keyInput.KEY_S)
 	{
-		if (m_isPlayerSelected)
-			m_Player->SetVelocity(Vector3::Multifly(m_CurrentCamera->GetLook3f(), -1.0f));
+		if (m_isPlayerSelected) {
+			m_Player->RotateToSetDirection(PLAYER_DIRECTION::Back);
+			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), -distance));
+		}
 		else
 			m_CurrentCamera->Walk(-cameraSpeed);
 	}
 	if (keyInput.KEY_D)
 	{
-		if (m_isPlayerSelected)
-			m_Player->SetVelocity(m_CurrentCamera->GetRight3f());
+		if (m_isPlayerSelected) {
+			m_Player->RotateToSetDirection(PLAYER_DIRECTION::Right);
+			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetRight3f(), distance));
+		}
 		else
 			m_CurrentCamera->Strafe(cameraSpeed);
 	}

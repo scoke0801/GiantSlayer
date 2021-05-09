@@ -103,33 +103,18 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	if (m_xmf3Velocity.x < -speed) m_xmf3Velocity.x = -speed;
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
-}
-
+} 
 void CPlayer::SetVelocity(XMFLOAT3 dir)
 {
 	dir.y = 0;
-	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);
+	XMFLOAT3 normalizedDir = Vector3::Normalize(dir); 
+	    
+	XMFLOAT3 targetPosition = Vector3::Multifly(normalizedDir, 150000.0f);
+	LookAt(m_xmf3Position, targetPosition, XMFLOAT3{ 0,1,0 }); 
 
-	//DisplayVector3(dir);
-
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY)); 
-	XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook());
-	//float angle = Vector3::GetAngle(normalizedDir, playerLookAt);
-	  
-	XMFLOAT3 cross = Vector3::CrossProduct(playerLookAt, dir);
-	float dot = Vector3::DotProduct(playerLookAt, dir);
-
-	float angle = atan2(Vector3::Length(cross), dot);
-
-	float test = Vector3::DotProduct({0,1,0}, cross);
-	if (test < 0.0) angle = -angle; 
-	  
-	//float dot = Vector3::DotProduct(playerLookAt, dir);
-	//float det = playerLookAt.x * dir.y - playerLookAt.y * dir.x;
-	//float angle = atan2(det, dot);
-//	cout << "°¢µµ : " << XMConvertToDegrees( angle) << "\n";
-	
-	Rotate(XMFLOAT3(0, 1, 0), (angle)); 
+	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity,
+		Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY));
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;
@@ -137,4 +122,62 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	if (m_xmf3Velocity.x < -speed) m_xmf3Velocity.x = -speed;
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
+}
+
+void CPlayer::RotateToSetDirection(PLAYER_DIRECTION dir)
+{
+	return;
+	if (dir == m_DirectionForRotate) {
+		return;
+	}
+	float angle = 0.0f;
+	switch (dir)
+	{
+	case PLAYER_DIRECTION::Front:
+		if (PLAYER_DIRECTION::Back == m_DirectionForRotate) {
+			angle = 180.0f;
+		}
+		else if (PLAYER_DIRECTION::Left == m_DirectionForRotate) {
+			angle = 90.0f;
+		} 
+		else if (PLAYER_DIRECTION::Right == m_DirectionForRotate) {
+			angle = -90.0f;
+		}
+		break;
+	case PLAYER_DIRECTION::Back:
+		if (PLAYER_DIRECTION::Front == m_DirectionForRotate) {
+			angle = 180.0f;
+		}
+		else if (PLAYER_DIRECTION::Left == m_DirectionForRotate) {
+			angle = -90.0f;
+		}
+		else if (PLAYER_DIRECTION::Right == m_DirectionForRotate) {
+			angle = 90.0f;
+		} 
+		break;
+	case PLAYER_DIRECTION::Left:
+		if (PLAYER_DIRECTION::Front == m_DirectionForRotate) {
+			angle = -90.0f;
+		}
+		else if (PLAYER_DIRECTION::Back == m_DirectionForRotate) {
+			angle = 90.0f;
+		}
+		else if (PLAYER_DIRECTION::Right == m_DirectionForRotate) {
+			angle = 180.0f;
+		} 
+		break;
+	case PLAYER_DIRECTION::Right:
+		if (PLAYER_DIRECTION::Front == m_DirectionForRotate) {
+			angle = 90.0f;
+		}
+		else if (PLAYER_DIRECTION::Back == m_DirectionForRotate) {
+			angle = -90.0f;
+		}
+		else if (PLAYER_DIRECTION::Left == m_DirectionForRotate) {
+			angle = 180.0f;
+		}
+		break; 
+	}
+	Rotate(XMFLOAT3(0,1,0),angle);
+	m_DirectionForRotate = dir;
 }
