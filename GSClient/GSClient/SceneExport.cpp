@@ -196,7 +196,7 @@ void CSceneExport::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x200);
 	m_Player->SetMesh(golemMesh);
-	m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
+	//m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
 }
 
 void CSceneExport::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

@@ -100,34 +100,6 @@ struct TrianglePG
 	}
 };
 
-struct Vertex
-{
-	XMFLOAT3 pos;
-	XMFLOAT2 uv;
-	XMFLOAT3 normal;
-
-	int indices[4];
-	XMFLOAT4 weights;
-};
-
-struct CKeyFrame
-{
-	float time;
-
-	XMFLOAT3 translation;
-	XMFLOAT3 scale;
-	XMFLOAT4 rotationquat;
-};
-
-struct Bone
-{
-	string name;
-	int parentIndex;
-	XMFLOAT4X4 offset;
-
-	vector<CKeyFrame> animations;
-};
-
 class FbxLoader
 {
 private:
@@ -139,6 +111,7 @@ private:
 	int numCP, numPG, numDF;
 	bool hasAnimation = true;
 	string animName;
+	int animLength;
 
 	unordered_map<int, ControlPoint> cpoints;
 	vector<TrianglePG> triangles;

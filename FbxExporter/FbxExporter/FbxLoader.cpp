@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "FbxLoader.h"
-#include "Mesh.h"
 
 FbxAMatrix GeometricOffsetTransform(FbxNode* pfbxNode)
 {
@@ -221,9 +220,6 @@ void FbxLoader::LoadAnimation(FbxNode* pNode)
 			//=========================================
 
 			FbxAnimStack* pCurrAnimStack = mFbxScene->GetSrcObject<FbxAnimStack>(0);
-			FbxString animStackName = pCurrAnimStack->GetName();
-			animName = animStackName.Buffer();
-
 			FbxAnimEvaluator* pSceneEvaluator = mFbxScene->GetAnimationEvaluator();
 
 			for (FbxLongLong k = 0; k < 100; k++) {
@@ -428,8 +424,9 @@ void FbxLoader::SaveAsFile()
 
 		file << "[Animation]" << endl;
 		file << "Name " << animName << endl;
+		file << "Length " << animLength << endl;
 		for (int i = 0; i < mSkeleton.size(); i++) {
-			file << i << " " << mSkeleton[i].name << " " << mSkeleton[i].mAnimation.size() << endl;
+			file << i << " " << mSkeleton[i].name << endl;
 			
 			for (int j = 0; j < mSkeleton[i].mAnimation.size(); j++) {
 				file << mSkeleton[i].mAnimation[j].frameTime << " ";

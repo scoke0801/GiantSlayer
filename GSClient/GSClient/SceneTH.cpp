@@ -182,6 +182,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildMirror(pd3dDevice, pd3dCommandList);
 
 	CMeshFbx* golemMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
+	CFixedMesh* human = new CFixedMesh(pd3dDevice, pd3dCommandList, "resources/FbxExported/FbxHuman.bin");
 
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 
@@ -191,24 +192,37 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	m_Player->Scale(50, 50, 50);
 	m_Player->SetObjectName(OBJ_NAME::Player);
-	m_Player->SetPosition({ 750,  1500, 1850 });
+	m_Player->SetPosition({ 550.0f,   230.0f,  1850.0f });
 
 	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x200);
 	m_Player->SetMesh(golemMesh);
-	m_Player->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 10, XMFLOAT3{ 0,0,0 });
-
-	//FbxLoader(m_pfbxManager, "resources/Fbx/human.fbx");
-
-	CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
-
-	/*CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
-	pfbxTestObject->SetAnimationStack(0);
-	pfbxTestObject->m_pAnimationController->SetPosition(0, 0.0f);
-	pfbxTestObject->SetPosition({ 100,  150, 100 });
-	m_Objects.push_back(std::move(pfbxTestObject));*/
-
+	m_Player->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 5, XMFLOAT3{ 0,0,0 });
+	m_Player->SetDrawable(true);
+	m_Player->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 2.5f)));
 	m_MinimapCamera->SetTarget(m_Player);
+
+	//FbxLoader(m_pfbxManager, "resources/Fbx/angrybot.fbx");
+
+	CGameObject* testObject0 = new CGameObject();
+	testObject0->SetMesh(human);
+	testObject0->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	testObject0->SetPosition({ 100,  150, 1000 });
+	testObject0->SetTextureIndex(0x200);
+	m_Objects.push_back(std::move(testObject0));
+
+	CGameObject* testObject1 = new CGameObject();
+	testObject1->SetMesh(human);
+	testObject1->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	testObject1->SetPosition({ 100,  300, 1000 });
+	testObject1->SetTextureIndex(0x200);
+	m_Objects.push_back(std::move(testObject1));
+
+	CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, 
+		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/FbxHuman.bin");
+	pfbxTestObject->SetPosition({ 100,  150, 100 });
+	pfbxTestObject->SetTextureIndex(0x200);
+	m_Objects.push_back(std::move(pfbxTestObject));
 }
 
 void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -820,7 +834,7 @@ ID3D12RootSignature* CSceneTH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[7];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[9];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 18; // GameData
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
@@ -856,6 +870,16 @@ ID3D12RootSignature* CSceneTH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	pd3dRootParameters[6].Descriptor.ShaderRegister = 5; //Fog
 	pd3dRootParameters[6].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[7].Descriptor.ShaderRegister = 6; //BoneOffsets
+	pd3dRootParameters[7].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[8].Descriptor.ShaderRegister = 7; //BoneTransforms
+	pd3dRootParameters[8].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags
 		= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;

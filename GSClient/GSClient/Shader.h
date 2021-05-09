@@ -11,6 +11,7 @@ enum class ShaderTypes
 	Textured,
 	Billboard,
 	Terrain,
+	FbxAnimated,
 	Count
 };
 

@@ -648,7 +648,6 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	return (cColor * cIllumination);
 }
 
-
 struct VS_TEXTURED_LIGHTING_INPUT
 {
 	float3 position : POSITION;
@@ -907,3 +906,133 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	return(cColor * cIllumination);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
+cbuffer cbBoneOffsets : register(b6)
+{
+	float4x4 gpmtxBoneOffsets[100];
+};
+
+cbuffer cbBoneTransforms : register(b7)
+{
+	float4x4 gpmtxBoneTransforms[100];
+};
+
+struct VS_FBX_ANIMATED_INPUT
+{
+	float3 position : POSITION;
+	float2 uv : TEXCOORD;
+	float3 normal : NORMAL;
+	uint4 indices : BONEINDEX;
+	float4 weights : BONEWEIGHT;
+};
+
+struct VS_FBX_ANIMATED_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
+	float3 normalW : NORMAL;
+	float2 uv : TEXCOORD;
+};
+
+VS_FBX_ANIMATED_OUTPUT VSFbxAnimated(VS_FBX_ANIMATED_INPUT input)
+{
+	VS_FBX_ANIMATED_OUTPUT output;
+
+	/*float3 tempPos = float3(0.0f, 0.0f, 0.0f);
+	float3 tempNormal = float3(0.0f, 0.0f, 0.0f);
+
+	for (int i = 0; i < 4; i++)
+	{
+		tempPos += input.weights[i] * mul(float4(input.position, 1.0f), gpmtxBoneTransforms[input.indices[i]]).xyz;
+		tempNormal += input.weights[i] * mul(input.normal, (float3x3)gpmtxBoneTransforms[input.indices[i]]);
+	}
+
+	float4 tempPosW = mul(float4(tempPos, 1.0f), gmtxWorld);
+
+	output.positionW = tempPosW.xyz;
+	output.normalW = mul(tempNormal, (float3x3)gmtxWorld);
+	output.position = mul(tempPosW, gmtxProjection);
+	output.uv = input.uv;*/
+
+	output.positionW = float3(0.0f, 0.0f, 0.0f);
+	output.normalW = float3(0.0f, 0.0f, 0.0f);
+
+	for (int i = 0; i < 4; i++) {
+		output.positionW += input.weights[i] * mul(float4(input.position, 1.0f), gpmtxBoneTransforms[input.indices[i]]).xyz;
+		output.normalW += input.weights[i] * mul(input.normal, (float3x3)gpmtxBoneTransforms[input.indices[i]]);
+	}
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	return(output);
+}
+
+float4 PSFbxAnimated(VS_FBX_ANIMATED_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor;// = gtxtBox.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtForest.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gSkyBox_Front.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gSkyBox_Back.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gSkyBox_Right.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x10)
+	{
+		cColor = gSkyBox_Left.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x20)
+	{
+		cColor = gSkyBox_Top.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x40)
+	{
+		cColor = gSkyBox_Bottom.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x80)
+	{
+		cColor = gtxtBox.Sample(gssWrap, input.uv);
+
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
+	}
+	if (gnTexturesMask & 0x100)
+	{
+		cColor = gtxtWood.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x200)
+	{
+		cColor = gtxtBox.Sample(gssWrap, input.uv);
+	}
+
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return(cColor * cIllumination);
+}
