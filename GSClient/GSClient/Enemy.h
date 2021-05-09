@@ -43,8 +43,7 @@ public:
 	void SetActivityScope(const XMFLOAT3& xmf3ActivityScope, const XMFLOAT3& xmf3Center);
 	XMFLOAT3 GetActivityScope() const { return m_xmf3ActivityScope; } 
 
-	void ConnectPlayer(CPlayer** pPlayers, int playerCount);
-
+	void ConnectPlayer(CPlayer** pPlayers, int playerCount); 
 private:
 	void FindNextPosition();
 };

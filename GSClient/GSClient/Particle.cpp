@@ -87,11 +87,11 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 }
 
 void CParticle::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
+{ 
 	for (auto particle : m_ParticleObjs) {
-		if (particle->IsCanUse()) {
+		if (particle->IsCanUse()) { 
 			particle->Draw(pd3dCommandList, pCamera);
-		}
+		} 
 	}
 }
 

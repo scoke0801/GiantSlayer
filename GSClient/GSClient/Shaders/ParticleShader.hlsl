@@ -115,8 +115,7 @@ VS_PARTICLE_OUT VSArrowParticle(VS_PARTICLE_IN input)
 	float lifeTime = input.time.y;
 
 	float newTime = (gfTime - emitTime);  
-	if (newTime > lifeTime)
-		newTime = -1.0f;
+	newTime = fmod(newTime, lifeTime);
 	if (newTime > 0.0f) 
 	{ 
 		float t = newTime;
@@ -150,7 +149,7 @@ VS_PARTICLE_OUT VSArrowParticle(VS_PARTICLE_IN input)
 	}
 	float intensity = 1 - (newTime / lifeTime);
 	outRes.color = input.color;
-	outRes.color.a = intensity;
+	//outRes.color.a = intensity;
 	outRes.time = input.time;
 	return outRes;
 }

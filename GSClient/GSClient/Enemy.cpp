@@ -1,13 +1,14 @@
 #include "stdafx.h"
 #include "Enemy.h"
 #include "Player.h"
-
+#include "Terrain.h"
 CEnemy::CEnemy()
 {
 	m_Type = OBJ_TYPE::Enemy;
 	m_Sight = 20.f;
 	m_Statemachine = new CStateMachine<CEnemy>(this);
-	m_Statemachine->SetCurrentState(Wandering::Instance()); 
+	m_Statemachine->SetCurrentState(Wandering::Instance());
+	m_YPositionCorrection = 150.0f;
 }
   
 CEnemy::~CEnemy()
@@ -60,7 +61,7 @@ void CEnemy::ConnectPlayer(CPlayer** pPlayers, int playerCount)
 		m_ConnectedPlayers.push_back( pPlayers[i] );
 	}
 }
-
+ 
 void CEnemy::FindNextPosition()
 {
 	m_xmf3ActivityScope;

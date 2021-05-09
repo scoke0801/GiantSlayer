@@ -37,7 +37,7 @@ void CArrow::Update(float fTimeElapsed)
 		if (m_ElapsedTime > ARROW_LIFE_TIME) {
 			m_ElapsedTime = 0.0f;
 			m_IsCanUse = true;
-			m_ConnectedParticle = nullptr;
+			//m_ConnectedParticle = nullptr;
 		}
 	}
 	else return; 

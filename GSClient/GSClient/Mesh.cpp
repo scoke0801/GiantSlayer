@@ -1965,8 +1965,8 @@ void CArrowParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			GetRandomValue(1.0f, 0.7f, 0.7f), 0.3f, 1.0f);
 		XMFLOAT3 speed = GetRandomVector3(200.0f, -400.0f, -200.0f); 
 		speed.z = perSpeed * (count - i);
-		XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f));
-		 
+
+		XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f)); 
 		// 매개변수 방정식 값, 원 크기, 원 주기
 		XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(10.0f, 0.0f, 0.0f), perSize * (count - i), GetRandomValue(2.0f, 0.0f, 0.0f)); 
 		// v0 

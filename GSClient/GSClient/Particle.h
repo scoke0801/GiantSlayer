@@ -55,12 +55,4 @@ public:
 	void UseParticle(int idx);
 
 	ParticleObject* GetParticleObj(int idx) { return m_ParticleObjs[idx]; }
-};
-
-// 사용할지는 아직 고민.. 
-// 필요하다면 정의하자 
-// 아니면 삭제하자
-class CParticleHandler {
-
-};
-
+}; 

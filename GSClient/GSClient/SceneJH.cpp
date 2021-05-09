@@ -351,15 +351,18 @@ void CSceneJH::ReleaseObjects()
 
 void CSceneJH::Update(float elapsedTime)
 {
+	ProcessInput();
+
 	for (int i = 0; i < m_ObjectLayers.size(); ++i){
 		for (auto pObject : m_ObjectLayers[i]) {
 			pObject->Update(elapsedTime);
+			pObject->UpdateColliders();
 		}
 	} 
-	ProcessInput();
-	
-	m_Particles->Update(elapsedTime);
-	//m_Skybox->Update(elapsedTime);
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) { 
+		pEnemy->FixPositionByTerrain(m_Terrain);
+	}
+	m_Particles->Update(elapsedTime); 
 
 	m_HelpTextUI->Update(elapsedTime);
 
@@ -369,14 +372,26 @@ void CSceneJH::Update(float elapsedTime)
 		player->UpdateColliders();
 		player->FixPositionByTerrain(m_Terrain);	
 	}
-	//for (auto pObject : m_Objects) {
-	//	//if (m_Player->CollisionCheck(pObject)) {
-	//	if (pObject->CollisionCheck(m_Player)) {
-	//		m_Player->FixCollision();
-	//		cout << "충돌 - ";
-	//		DisplayVector3(m_Player->GetPosition());
-	//	} 
-	//}
+	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+		if (pObstacle->CollisionCheck(m_Player)) {
+			m_Player->FixCollision();
+			cout << "충돌 : 플레이어 - 장애물";
+		}
+	}
+
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
+		if (pEnemy->CollisionCheck(m_Player)) {
+			m_Player->FixCollision();
+			cout << "충돌 : 플레이어 - 적";
+		}
+	}
+
+	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
+		if (pPuzzle->CollisionCheck(m_Player)) {
+			m_Player->FixCollision();
+			cout << "충돌 : 플레이어 - 퍼즐";
+		}
+	} 
 	 
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
@@ -2118,20 +2133,22 @@ void CSceneJH::EnterNewSector(int sectorNum)
 
 void CSceneJH::ShotArrow()
 {
+	int i = 0;
 	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Arrow]) {
 		CArrow* pArrow = reinterpret_cast<CArrow*>(pObj);
 		if (pArrow->IsCanUse()) {
 			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
 			if (-1 != idx) {
-				cout << "파티클 생성 " << idx << " \n";
+				cout << "파티클 인덱스 " << idx << " 화살 인덱스 : " << i << " \n";
 				pArrow->SetUseable(false);
-				pArrow->SetPosition(m_Player->GetPosition());
+				pArrow->SetPosition(Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 }));
 
-				m_Particles->UseParticle(idx, Vector3::Add(XMFLOAT3{ pArrow->GetPosition() }, {0,150,0}), XMFLOAT3(0.0f, 0.0f, -1.0f));
+				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
 			}
 			break;
 		}
+		++i;
 	} 
 }
  
@@ -2194,8 +2211,9 @@ void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 9600, 800, 100, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(9600 * 0.5f, 800 * 0.5f, 100 * 0.5f)));
-	pObject->SetPosition({ 4800,-1000, 15900 });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	pObject->SetPosition({ 4800,-1000, 15900 }); 
+	m_BlockingPlateToPreviousSector[0] = (std::move(pObject));
+	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 // Forest to Desert 왼쪽 벽
 	pObject = new CGameObject();
