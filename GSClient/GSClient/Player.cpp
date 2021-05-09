@@ -48,7 +48,31 @@ void CPlayer::UpdateCamera()
 	if (m_Camera != nullptr) {
 		m_Camera->Update(m_xmf3Position);
 		m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
-		m_Camera->UpdateViewMatrix();
+		m_Camera->UpdateViewMatrix(); 
+	}
+}
+
+void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
+{
+	XMFLOAT3 xmf3CameraPosition = m_Camera->GetPosition3f();
+
+	/*
+	높이 맵에서 카메라의 현재 위치 (x, z)에 대한 지형의 높이(y 값)를 구한다.
+	이 값이 카메라의 위치 벡터의 y-값 보다 크면 카메라가 지형의 아래에 있게 된다. 
+	이렇게 되면 다음 그림의 왼쪽과 같이
+	지형이 그려지지 않는 경우가 발생한다(카메라가 지형 안에 있으므로 삼각형의 와인딩 순서가 바뀐다).
+	이러한 경우가 발생하지 않도록 카메라의 위치 벡터의 y-값의 최소값은 (지형의 높이 + 5)로 설정한다. 
+	카메라의 위치 벡터의 y-값의 최소값은 지형의 모든 위치에서
+	카메라가 지형 아래에 위치하지 않도록 설정해야 한다.*/
+
+	float offsetHeight = m_Camera->GetOffset().y;
+	//float fHeight = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + 5.0f;	
+	float fHeight = pTerrain->GetDetailHeight(xmf3CameraPosition.x, xmf3CameraPosition.z) + 5.0f;
+	if (xmf3CameraPosition.y <= fHeight)
+	{
+		xmf3CameraPosition.y = fHeight;
+		m_Camera->SetPosition(xmf3CameraPosition); 
+		m_Camera->LookAt(m_xmf3Position, GetUp());
 	}
 }
 
@@ -123,61 +147,4 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
 }
-
-void CPlayer::RotateToSetDirection(PLAYER_DIRECTION dir)
-{
-	return;
-	if (dir == m_DirectionForRotate) {
-		return;
-	}
-	float angle = 0.0f;
-	switch (dir)
-	{
-	case PLAYER_DIRECTION::Front:
-		if (PLAYER_DIRECTION::Back == m_DirectionForRotate) {
-			angle = 180.0f;
-		}
-		else if (PLAYER_DIRECTION::Left == m_DirectionForRotate) {
-			angle = 90.0f;
-		} 
-		else if (PLAYER_DIRECTION::Right == m_DirectionForRotate) {
-			angle = -90.0f;
-		}
-		break;
-	case PLAYER_DIRECTION::Back:
-		if (PLAYER_DIRECTION::Front == m_DirectionForRotate) {
-			angle = 180.0f;
-		}
-		else if (PLAYER_DIRECTION::Left == m_DirectionForRotate) {
-			angle = -90.0f;
-		}
-		else if (PLAYER_DIRECTION::Right == m_DirectionForRotate) {
-			angle = 90.0f;
-		} 
-		break;
-	case PLAYER_DIRECTION::Left:
-		if (PLAYER_DIRECTION::Front == m_DirectionForRotate) {
-			angle = -90.0f;
-		}
-		else if (PLAYER_DIRECTION::Back == m_DirectionForRotate) {
-			angle = 90.0f;
-		}
-		else if (PLAYER_DIRECTION::Right == m_DirectionForRotate) {
-			angle = 180.0f;
-		} 
-		break;
-	case PLAYER_DIRECTION::Right:
-		if (PLAYER_DIRECTION::Front == m_DirectionForRotate) {
-			angle = 90.0f;
-		}
-		else if (PLAYER_DIRECTION::Back == m_DirectionForRotate) {
-			angle = -90.0f;
-		}
-		else if (PLAYER_DIRECTION::Left == m_DirectionForRotate) {
-			angle = 180.0f;
-		}
-		break; 
-	}
-	Rotate(XMFLOAT3(0,1,0),angle);
-	m_DirectionForRotate = dir;
-}
+ 

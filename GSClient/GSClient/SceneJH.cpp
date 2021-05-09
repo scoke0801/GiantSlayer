@@ -370,7 +370,8 @@ void CSceneJH::Update(float elapsedTime)
 		if (!player->IsDrawable()) continue;
 		player->Update(elapsedTime);
 		player->UpdateColliders();
-		player->FixPositionByTerrain(m_Terrain);	
+		player->FixPositionByTerrain(m_Terrain);
+		player->FixCameraByTerrain(m_Terrain);
 	}
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
@@ -810,8 +811,7 @@ void CSceneJH::ProcessInput()
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{ 
-		if (m_isPlayerSelected) {
-			m_Player->RotateToSetDirection(PLAYER_DIRECTION::Front);
+		if (m_isPlayerSelected) { 
 			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));
 		}
 		else
@@ -819,8 +819,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_A)
 	{
-		if (m_isPlayerSelected) {
-			m_Player->RotateToSetDirection(PLAYER_DIRECTION::Left);
+		if (m_isPlayerSelected) { 
 			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetRight3f(), -distance));
 		}
 		else
@@ -828,8 +827,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_S)
 	{
-		if (m_isPlayerSelected) {
-			m_Player->RotateToSetDirection(PLAYER_DIRECTION::Back);
+		if (m_isPlayerSelected) { 
 			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), -distance));
 		}
 		else
@@ -837,8 +835,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_D)
 	{
-		if (m_isPlayerSelected) {
-			m_Player->RotateToSetDirection(PLAYER_DIRECTION::Right);
+		if (m_isPlayerSelected) { 
 			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetRight3f(), distance));
 		}
 		else
