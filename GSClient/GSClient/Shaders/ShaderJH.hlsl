@@ -10,9 +10,10 @@ cbuffer cbGameOBJInfo : register(b0)
 //게임 씬의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbSceneFrameData : register(b1)
 {
-	uint	gnHP : packoffset(c0.x);
-	uint	gnSP : packoffset(c0.y);
-	uint	gnWeapon : packoffset(c0.z);
+	uint	gnHP : packoffset(c0.r);
+	uint	gnSP: packoffset(c0.g);
+	uint	gnWeapon: packoffset(c0.b);
+	float   gfTime : packoffset(c0.a);
 };
 
 //카메라의 정보를 위한 상수 버퍼를 선언한다. 
@@ -21,10 +22,13 @@ cbuffer cbCameraInfo : register(b2)
 	matrix	gmtxView : packoffset(c0);
 	matrix	gmtxProjection : packoffset(c4);
 	float3	gvCameraPosition : packoffset(c8);
+	matrix gmtxViewProjection : packoffset(c12);
+	matrix gmtxShadowTransform : packoffset(c16);
 };
 
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
+SamplerComparisonState gscsShadow : register(s2); // 그림자
 
 Texture2D gtxtForest	   : register(t0);
 Texture2D gtxtDryForest	   : register(t1);
@@ -68,9 +72,10 @@ Texture2D gtxtDry_Tree	   : register(t33);
 Texture2D gtxtStump		   : register(t34);
 Texture2D gtxtDead_Tree	   : register(t35);
 Texture2D gtxtDesert_Rock  : register(t36);
+Texture2D gtxtWater			: register(t37);
 
-Texture2D gtxtMap          : register(t37);
-Texture2D gtxtMirror       : register(t38);
+Texture2D gtxtMap          : register(t38);
+Texture2D gtxtMirror       : register(t39);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -580,6 +585,8 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	return(output);
 }
 
+
+
 // PS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -651,7 +658,50 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	return (cColor * cIllumination);
 }
 
+static matrix<float, 3, 3> sf3x3TextureAnimation = { 
+	{ 0.0f, -1.0f, 0.0f },
+	{ 1.0f, 0.0f, 0.0f }, 
+	{ 0.0f, 0.0f, 0.0f }
+};
+struct VS_WATER_INPUT
+{
+	float3 position : POSITION;
+	float2 uv : TEXCOORD0;
+};
 
+struct VS_WATER_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD0;
+};
+
+VS_WATER_OUTPUT VSTerrainWater(VS_WATER_INPUT input)
+{
+	VS_WATER_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	return(output);
+}
+
+float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
+{
+	float2 uv = input.uv;
+	sf3x3TextureAnimation._m21 = gfTime * 0.016f;
+	uv = mul(float3(input.uv, 1.0f), sf3x3TextureAnimation).xy;
+
+	float4 cBaseTexColor = gtxtWater.Sample(gssWrap, uv);
+	//float4 cDetail0TexColor = gtxtWaterDetail0Texture.Sample(gssWrap, input.uv * 20.0f);
+	//float4 cDetail1TexColor = gtxtWaterDetail1Texture.Sample(gssWrap, input.uv * 20.0f);
+
+	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	cColor = cBaseTexColor; 
+	cColor.a = 0.6f;
+	//cColor = lerp(cBaseTexColor * cDetail0TexColor, cDetail1TexColor.r * 0.5f, 0.35f);
+	//cColor = cBaseTexColor * cDetail0TexColor;
+	return(cColor);
+}
 struct VS_TEXTURED_LIGHTING_INPUT
 {
 	float3 position : POSITION;
@@ -666,6 +716,7 @@ struct VS_TEXTURED_LIGHTING_OUTPUT
 	float3 normalW : NORMAL;
 	float2 uv : TEXCOORD;
 };
+
 
 VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
 {

@@ -328,7 +328,7 @@ void CSceneTH::ReleaseObjects()
 	m_Objects.clear();
 }
 
-void CSceneTH::Update(double elapsedTime)
+void CSceneTH::Update(float elapsedTime)
 {
 	ProcessInput();
 

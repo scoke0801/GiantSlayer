@@ -27,7 +27,7 @@
 #include <chrono>
 #include <cassert>
 #include <algorithm>
-
+#include <thread>
 #include <map>
 #include <unordered_map>
 #pragma comment(lib, "ws2_32")
@@ -78,6 +78,7 @@ extern bool gbTerrainTessellationWireframe;
 extern bool gbBlurOn;
 extern bool gbBoundaryOn;
 extern bool gbWireframeOn;
+extern bool gbShadowOn;
 extern const int gNumFrameResources;
 
 extern void SynchronizeResourceTransition(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dResource, D3D12_RESOURCE_STATES d3dStateBefore, D3D12_RESOURCE_STATES d3dStateAfter);
@@ -98,7 +99,14 @@ extern D3D12_BLEND_DESC CreateDefaultBlendDesc();
 extern D3D12_DEPTH_STENCIL_DESC CreateDefaultDepthStencilDesc();
 
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
- 
+
+extern float GetRandomValue(float scale, float min, float correctionValue);
+
+extern XMFLOAT4 GetRandomVector4(float scale, float min, float correctionValue);
+extern XMFLOAT3 GetRandomVector3(float scale, float min, float correctionValue);
+extern XMFLOAT2 GetRandomVector2(float scale, float min, float correctionValue);
+extern float Wrap(float data, float min, float max);
+
 #define EPSILON					1.0e-10f
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }

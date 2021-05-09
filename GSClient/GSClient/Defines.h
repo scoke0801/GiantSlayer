@@ -38,7 +38,7 @@
 
 #if defined(SHOW_CAPTIONFPS)
 	#define MAX_UPDATE_FPS 1.0f / 5.0f
-#endif
+#endif 
 
 #define SHOW_CAPTIONFPS
 //-------------------------------------------------------------------
@@ -100,7 +100,23 @@ struct CB_GAMESCENE_FRAME_DATA
 {
 	UINT m_PlayerHP = 0;
 	UINT m_PlayerSP = 0;
-	UINT m_PlayerWeapon = 0x01; 
+	UINT m_PlayerWeapon = 0x01;
+	float m_Time;
 };
 
 enum class PulledModel : int { Center = 0, Left = 1, Right, Top, Bottom };
+
+// 객체 공격 피격 시점 등에서 사용할 파티클 시스템을 정의합니다.
+enum class PARTICLE_TYPE : UINT {
+	HitParticleTex = 1,	// 피격시 사용할 파티클
+	ArrowParticle,	// 화살 뒤에 사용할 파티클
+	RadialParitcle, // 전방향으로 퍼지는 파티클
+	StraightParticle, // 직선으로 퍼지는 파티클
+};
+constexpr float ARROW_PARTICLE_LIFE_TIME = 10.0f;
+
+constexpr float HIT_PARTICLE_LIFE_TIME = 10.0f;
+
+constexpr float RADIAL_PARTICLE_LIFE_TIME = 10.0f;
+
+constexpr float STRAIGHT_PARTICLE_LIFE_TIME = 10.0f;

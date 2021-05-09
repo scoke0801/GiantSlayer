@@ -23,7 +23,7 @@ CTitleScene::~CTitleScene()
 { 
 }
 
-void CTitleScene::Update(double elapsedTime)
+void CTitleScene::Update(float elapsedTime)
 {
 	ProcessInput();
 

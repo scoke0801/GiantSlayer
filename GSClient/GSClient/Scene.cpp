@@ -27,7 +27,7 @@ CNullScene::~CNullScene()
 
 }
 
-void CNullScene::Update(double elapsedTime)
+void CNullScene::Update(float elapsedTime)
 { 
 	ProcessInput(); 
 }

@@ -15,9 +15,11 @@ private:
     bool m_IsLeft;
 
     float m_fAngle = 0.0f;
-    float m_IsOpening = true;
 
-    float m_Height;
+    float m_Height; 
+
+    bool m_IsOnOpening = false;
+    bool m_IsOnAnimating = false;
 public:
     CDoor(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
         float width, float height, float depth, bool isLeft = true);
@@ -27,6 +29,9 @@ public:
     virtual void Update(float fTimeElapsed);
 
     float GetHeight() const { return m_Height; }
+
+    void Open();
+    void Close();
 };
  
 class CDoorWall : public CGameObject
@@ -59,4 +64,7 @@ public:
     void SetTextureIndexes(int idx);
 
     void RotateAll(XMFLOAT3 xmf3Axis, float angle);
+
+    void OpenDoor();
+    void CloserDoor();
 };

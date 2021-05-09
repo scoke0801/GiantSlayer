@@ -7,8 +7,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 {
 	m_Type = OBJ_TYPE::Player;
 
-	m_HP = 50;
-	m_SP = 35;
+	m_HP = 100;
+	m_SP = 100;
 }
 
 CPlayer::~CPlayer()
@@ -18,6 +18,15 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	if (false == m_IsCanAttack) {
+		m_AttackWaitingTime -= fTimeElapsed;
+	
+		if (m_AttackWaitingTime < 0.0f){
+			m_AttackWaitingTime = 0.0f;
+			m_IsCanAttack = true;
+		}
+	}
+	
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? 360.0f : 50.0f;
@@ -32,29 +41,6 @@ void CPlayer::Update(float fTimeElapsed)
 	float fDeceleration = (Friction * fTimeElapsed); 
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-
-/////////////////////////////////////////////////////////////////////
-#pragma region For Hp_Sp UI Testing 
-	if (TestHPDown == true) {
-		m_HP -= 1;
-		if (m_HP <= 0) TestHPDown = false;
-	}
-	else if(TestHPDown == false)
-	{
-		m_HP += 1;
-		if (m_HP >= 100) TestHPDown = true;
-	} 
-	if (TestSPDown == true)
-	{
-		m_SP -= 1;
-		if (m_SP <= 0) TestSPDown = false;
-	}
-	else if (TestSPDown == false)
-	{
-		m_SP += 1;
-		if (m_SP >= 100) TestSPDown = true;
-	}
-#pragma endregion
 }
 
 void CPlayer::UpdateCamera()
@@ -62,7 +48,31 @@ void CPlayer::UpdateCamera()
 	if (m_Camera != nullptr) {
 		m_Camera->Update(m_xmf3Position);
 		m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
-		m_Camera->UpdateViewMatrix();
+		m_Camera->UpdateViewMatrix(); 
+	}
+}
+
+void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
+{
+	XMFLOAT3 xmf3CameraPosition = m_Camera->GetPosition3f();
+
+	/*
+	높이 맵에서 카메라의 현재 위치 (x, z)에 대한 지형의 높이(y 값)를 구한다.
+	이 값이 카메라의 위치 벡터의 y-값 보다 크면 카메라가 지형의 아래에 있게 된다. 
+	이렇게 되면 다음 그림의 왼쪽과 같이
+	지형이 그려지지 않는 경우가 발생한다(카메라가 지형 안에 있으므로 삼각형의 와인딩 순서가 바뀐다).
+	이러한 경우가 발생하지 않도록 카메라의 위치 벡터의 y-값의 최소값은 (지형의 높이 + 5)로 설정한다. 
+	카메라의 위치 벡터의 y-값의 최소값은 지형의 모든 위치에서
+	카메라가 지형 아래에 위치하지 않도록 설정해야 한다.*/
+
+	float offsetHeight = m_Camera->GetOffset().y;
+	//float fHeight = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + 5.0f;	
+	float fHeight = pTerrain->GetDetailHeight(xmf3CameraPosition.x, xmf3CameraPosition.z) + 5.0f;
+	if (xmf3CameraPosition.y <= fHeight)
+	{
+		xmf3CameraPosition.y = fHeight;
+		m_Camera->SetPosition(xmf3CameraPosition); 
+		m_Camera->LookAt(m_xmf3Position, GetUp());
 	}
 }
 
@@ -117,33 +127,18 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 	if (m_xmf3Velocity.x < -speed) m_xmf3Velocity.x = -speed;
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
-}
-
+} 
 void CPlayer::SetVelocity(XMFLOAT3 dir)
 {
 	dir.y = 0;
-	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);
+	XMFLOAT3 normalizedDir = Vector3::Normalize(dir); 
+	    
+	XMFLOAT3 targetPosition = Vector3::Multifly(normalizedDir, 150000.0f);
+	LookAt(m_xmf3Position, targetPosition, XMFLOAT3{ 0,1,0 }); 
 
-	//DisplayVector3(dir);
-
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY)); 
-	XMFLOAT3 playerLookAt = Vector3::Normalize(GetLook());
-	//float angle = Vector3::GetAngle(normalizedDir, playerLookAt);
-	  
-	XMFLOAT3 cross = Vector3::CrossProduct(playerLookAt, dir);
-	float dot = Vector3::DotProduct(playerLookAt, dir);
-
-	float angle = atan2(Vector3::Length(cross), dot);
-
-	float test = Vector3::DotProduct({0,1,0}, cross);
-	if (test < 0.0) angle = -angle; 
-	  
-	//float dot = Vector3::DotProduct(playerLookAt, dir);
-	//float det = playerLookAt.x * dir.y - playerLookAt.y * dir.x;
-	//float angle = atan2(det, dot);
-//	cout << "각도 : " << XMConvertToDegrees( angle) << "\n";
-	
-	Rotate(XMFLOAT3(0, 1, 0), (angle)); 
+	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity,
+		Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY));
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;

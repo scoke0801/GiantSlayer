@@ -108,6 +108,36 @@ public:
 	~CBillboardVertex() { }
 };
 
+class CParticleVertex : public CVertex
+{
+public:
+	XMFLOAT4						m_xmf4Diffuse; // 색상
+	XMFLOAT3						m_xmf3Speed;   // 속도
+	XMFLOAT2						m_xmf2Time;   // x: emitTime, y: lifeTime 
+	XMFLOAT3						m_xmf2RandomValue;
+
+public:
+	CParticleVertex() {}
+	CParticleVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& xmf4Diffuse, const XMFLOAT2& xmf2Time);
+	~CParticleVertex() { }
+};
+
+class CParticleTextureVertex : public CVertex
+{
+public:	
+	XMFLOAT3						m_xmf3Speed;   // 속도
+	XMFLOAT2						m_xmf2Time;   // x: emitTime, y: lifeTime 
+	XMFLOAT3						m_xmf2RandomValue;
+	XMFLOAT2						m_xmf2TexCoord;
+	UINT							m_nTexture;
+
+public:
+	CParticleTextureVertex() {}
+	CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT2& xmf2Time,
+ UINT textureCode);
+	~CParticleTextureVertex() { } 
+};
+
 //////////////////////////////////////////////////////////////////////////////
 //
 
@@ -199,6 +229,53 @@ public:
 		float uvXEnd, float uvYEnd,
 		float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
 	virtual ~CPlaneMeshTextured();
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//
+class CArrowParticleMesh : public CMesh
+{
+private:
+	CParticleVertex*	m_Vertices;
+	int					m_CurrentVertexIndex = 0;
+
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CArrowParticleMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList, 
+		int particleCount); 
+
+	virtual ~CArrowParticleMesh();
+
+public:
+	void CreateMeshes(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList, int count);
+
+	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	 
+};
+
+class CTexParticleMesh : public CMesh
+{
+private:
+	CParticleTextureVertex * m_Vertices;
+	int					m_CurrentVertexIndex = 0;
+
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CTexParticleMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		int particleCount);
+
+	virtual ~CTexParticleMesh();
+
+public: 
+	void CreateMeshes(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		int count, PARTICLE_TYPE type);
+
+	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
 };
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -469,27 +546,15 @@ public:
 public:
 	// 벽 생성	 
 	void CreateWallMesh(ID3D12Device* pd3dDevice,
- ID3D12GraphicsCommandList* pd3dCommandList,
-
-		const XMFLOAT3& shift, BYTE textureInfo,
-
+		ID3D12GraphicsCommandList* pd3dCommandList, 
+		const XMFLOAT3& shift, BYTE textureInfo, 
 		int heights[25],
-		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], int xNomalPos, int zNormalPos);
-	// 벽 생성	 
-	//void CreateWallMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	//	const XMFLOAT3& shift,
-	//	bool xZero, bool zZero,
-	//	int* heights,
-	//	XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
-	//	int xNomalPos, int zNormalPos);
+		XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], int xNomalPos, int zNormalPos); 
 
 	void CreateGridMesh(ID3D12Device* pd3dDevice,
- ID3D12GraphicsCommandList* pd3dCommandList,
-
-		const XMFLOAT3& shift, BYTE textureInfo,
- int x_Index,
-
-		int z_Index,
+		ID3D12GraphicsCommandList* pd3dCommandList, 
+		const XMFLOAT3& shift, BYTE textureInfo, 
+		int x_Index, int z_Index,
 		int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 
 	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

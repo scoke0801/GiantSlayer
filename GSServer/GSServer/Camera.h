@@ -25,6 +25,10 @@ private:
 
 	bool				m_ViewDirty = true;
 
+	// Cache View/Proj matrices.
+	DirectX::XMFLOAT4X4			m_xmf4x4View;
+	DirectX::XMFLOAT4X4			m_xmf4x4Proj;
+
 private:
 	CPlayer*			m_TargetPlayer = nullptr; 
 	XMFLOAT4X4			m_TargetTransform;
@@ -41,6 +45,7 @@ public:
 public:
 	// for Update Loop
 	void Update(float elapsedTime);
+	void Update(const XMFLOAT3& xmf3LookAt);
 	void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 
 public:
@@ -48,6 +53,10 @@ public:
 	void LookAt(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR target, DirectX::FXMVECTOR worldUp);
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 	void LookAt(const XMFLOAT3& lookAt, const XMFLOAT3& up);
+
+	// Set frustum.
+	void SetLens(float fovY, float aspect, float zn, float zf);
+	void SetLens(float fovY, float witdh, float height, float zn, float zf);
 
 public:
 	// Strafe/Walk the camera a distance d.
@@ -85,6 +94,10 @@ public:
 	float GetSpeed() const { return m_Speed; }
 	void SetSpeed(float speed) { m_Speed = speed; }
 
+	void SetOffset(XMFLOAT3 offset);
+	XMFLOAT3 GetOffset() const { return m_xmf3Offset; }
+
+	void MoveOffset(XMFLOAT3 shift);
 private: 
 	XMFLOAT3 CalcTargetRight()  { return XMFLOAT3(m_TargetTransform._11, m_TargetTransform._12, m_TargetTransform._13); }
 	XMFLOAT3 CalcTargetUp() { return XMFLOAT3(m_TargetTransform._21, m_TargetTransform._22, m_TargetTransform._23); }

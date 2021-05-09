@@ -6,7 +6,8 @@
 
 class CShader;
 class CCamera;
- 
+class CTerrain;
+
 #define OBJECT_MAX_VELOCITY 120.0f 
 #define PLAYER_RUN_VELOCITY 250.0f * 4
 #define PLAYER_WALK_VELOCITY 80.0f  
@@ -89,6 +90,7 @@ protected:	// 按眉 包访 加己 函荐
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
 	bool				m_isCollidable = true;
 
+	float				m_YPositionCorrection = 0.0f;
 public:
 	FbxScene*				m_pfbxScene = NULL;
 
@@ -115,9 +117,11 @@ public:
 	virtual void Update(float fTimeElapsed);
 
 	virtual void OnPrepareRender();
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	void DrawForBoundingObj(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera); 
 
+	void DrawForBoundingObj(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+ 
+	virtual void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera); 
 public:
 	virtual void Move(XMFLOAT3 shift);
 	void Move();
@@ -145,6 +149,7 @@ public:
 	vector<Collider*>& GetColliders() { return m_Colliders; }
 	vector<Collider*>& GetAABB() { return m_AABB; }
 
+	void FixPositionByTerrain(CTerrain* pTerrain);
 public:
 	// about bounding box 
 	void BuildBoundigBoxMesh(ID3D12Device* pd3dDevice,
@@ -162,10 +167,7 @@ public:
 		ID3D12GraphicsCommandList* pd3dCommandList,
 		PulledModel pulledModel,
 		float fWidth, float fHeight, float fDepth,
-		const XMFLOAT3& shift);
-
-	void MoveBoundingMesh(int index, const XMFLOAT3& shift);
-
+		const XMFLOAT3& shift); 
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
 	string GetObjectName() const { return ConvertToObjectName(m_Name); }
@@ -247,6 +249,8 @@ public:
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle); 
+
+	void Update(float timeElapsed);
 };
 
 class CSkyBoxSphere : public CSkyBox

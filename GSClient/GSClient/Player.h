@@ -19,19 +19,16 @@ enum class PlayerWeaponType
 class CTerrain;
 
 class CPlayer : public CGameObject
-{   
-private:
-	// 
-	// testing, 지워야 함 
-	//
-	bool TestHPDown = false;
-	bool TestSPDown = false;
-
-
+{    
 private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
 	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
-	 
+
+
+private:
+	float m_AttackWaitingTime = 0.0f;
+	bool m_IsCanAttack = true;
+
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	~CPlayer();	
@@ -40,6 +37,7 @@ public:
 	void Update(float fTimeElapsed) override;
 
 	void UpdateCamera();
+	void FixCameraByTerrain(CTerrain* pTerrain);
 
 	void FixPositionByTerrain(CTerrain* pTerrain);
 	 
@@ -52,4 +50,7 @@ public:
 	void SetWeapon(PlayerWeaponType weaponID) { m_WeaponType = weaponID; }
 	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; } 
 
+	void SetCanAttack(bool info) { m_IsCanAttack = info; }
+	bool IsCanAttack() const { return m_IsCanAttack; }
+	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
 };

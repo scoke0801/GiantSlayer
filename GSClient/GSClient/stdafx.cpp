@@ -13,6 +13,7 @@ bool gbTerrainTessellationWireframe = false;
 bool gbBlurOn = false;
 bool gbBoundaryOn = false;
 bool gbWireframeOn = false;
+bool gbShadowOn = false;
 
 UINT gnRtvDescriptorIncrementSize = 0;
 UINT gnDsvDescriptorIncrementSize = 0;
@@ -381,6 +382,35 @@ D3D12_DEPTH_STENCIL_DESC CreateDefaultDepthStencilDesc()
 	d3dDepthStencilDesc.FrontFace = defaultStencilOp;
 	d3dDepthStencilDesc.BackFace = defaultStencilOp;
 	return d3dDepthStencilDesc;
+}
+
+float GetRandomValue(float scale, float min, float correctionValue)
+{
+	float t = (rand() / (float)RAND_MAX) * scale + correctionValue;
+	return Wrap(t, min, scale);
+}
+
+XMFLOAT4 GetRandomVector4(float scale, float min, float correctionValue)
+{
+	return XMFLOAT4(GetRandomValue(scale, min, correctionValue), GetRandomValue(scale, min, correctionValue),
+		GetRandomValue(scale, min, correctionValue), GetRandomValue(scale, min, correctionValue));
+}
+
+XMFLOAT3 GetRandomVector3(float scale, float min, float correctionValue)
+{
+	return XMFLOAT3(GetRandomValue(scale, min, correctionValue), GetRandomValue(scale, min, correctionValue),
+		GetRandomValue(scale, min, correctionValue));
+}
+
+XMFLOAT2 GetRandomVector2(float scale, float min, float correctionValue)
+{
+	return XMFLOAT2(GetRandomValue(scale, min, correctionValue), GetRandomValue(scale, min, correctionValue));
+}
+
+float Wrap(float data, float min, float max)
+{
+	const float newData = fmod(data - min, max - min);
+	return (newData >= 0) ? (newData + min) : (newData + max);
 }
 
 

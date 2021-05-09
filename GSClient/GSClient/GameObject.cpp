@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "Terrain.h"
 
 string ConvertToObjectName(const OBJ_NAME& name)
 {
@@ -55,8 +56,13 @@ void CGameObject::SetMesh(CMesh* pMesh)
 	m_pMesh = pMesh;
 
 	if (m_pMesh) m_pMesh->AddRef();
+}  
+void CGameObject::FixPositionByTerrain(CTerrain* pTerrain)
+{
+	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_YPositionCorrection;
+	SetPosition(m_xmf3Position);
 }
-void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float fWidth, float fHeight, float fDepth,
 	const XMFLOAT3& shift)
 {
@@ -170,6 +176,21 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 			pBoundingMesh->Render(pd3dCommandList);
 		}
 	}
+
+	
+}
+void CGameObject::Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	OnPrepareRender();
+
+	if (m_pShader)
+	{
+		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
+		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
+		m_pShader->Render_Shadow(pd3dCommandList, pCamera);
+	}
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
+
 }
 
 void CGameObject::DrawForBoundingObj(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -476,6 +497,11 @@ void CSkyBox::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 {
 	for (int i = 0; i < m_nObjects; ++i)
 		m_ppObjects[i]->Rotate(pxmf3Axis, fAngle);
+}
+
+void CSkyBox::Update(float timeElapsed)
+{ 
+	Rotate(XMFLOAT3(0, 1, 0), 0.3 * timeElapsed);
 }
 
 CSkyBoxSphere::CSkyBoxSphere(ID3D12Device* pd3dDevice,
