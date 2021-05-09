@@ -1,6 +1,115 @@
 #include "stdafx.h"
 #include "MapObjects.h"
 
+
+CBridge::CBridge(OBJECT_ID id)
+{
+	CGameObject* pObject;// = new CGameObject();
+	for (int i = 0; i < 10; i += 5) {
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i),
+			XMFLOAT3(1000 * 0.5f, 1 * 0.5f, 500 * 0.5f)));
+		m_Plates.emplace_back(std::move(pObject));
+	}
+
+	pObject = new CGameObject();
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 250.0f + 12.5f, 0.0f),
+		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f)));
+	m_Objects.emplace_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(500.0f, 250.0f + 12.5f, 0.0f),
+		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f)));
+	m_Objects.emplace_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 250.0f + 137.5f, 0.0f),
+		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f)));
+	m_Objects.emplace_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(500.0f, 250.0f + 137.5f, 0.0f),
+		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f))); 
+	m_Objects.emplace_back(std::move(pObject));
+
+	for (int i = 0; i < 5; ++i)
+	{
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
+			XMFLOAT3(50 * 0.5f, 100 * 0.5f, 50 * 0.5f))); 
+		m_Objects.emplace_back(std::move(pObject));
+
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
+			XMFLOAT3(50 * 0.5f, 100 * 0.5f, 50 * 0.5f)));
+		m_Objects.emplace_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 250.0f - 25.0f, -350.0f + 350.0f * i),
+			XMFLOAT3(1050.0f * 0.5f, 50.0f * 0.5f, 150.0f * 0.5f)));
+		m_Objects.emplace_back(std::move(pObject));
+
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, -350.0f + 350.0f * i),
+			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
+		m_Objects.emplace_back(std::move(pObject));
+		 
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
+			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
+		m_Objects.emplace_back(std::move(pObject));
+
+		pObject = new CGameObject();
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
+			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
+		m_Objects.emplace_back(std::move(pObject));
+	}
+}
+
+void CBridge::SetPosition(XMFLOAT3 pos)
+{
+	for (auto pObj : m_Objects) {
+		pObj->SetPosition(pos);
+	}
+	for (auto pPlate : m_Plates) {
+		pPlate->SetPosition(pos);
+	}
+}
+
+void CBridge::Rotate(const XMFLOAT3& axis, float angle)
+{
+	for (auto pObj : m_Objects) {
+		pObj->Rotate(axis, angle);
+	}
+	for (auto pPlate : m_Plates) {
+		pPlate->Rotate(axis, angle);
+	}
+}
+
+bool CBridge::CollisionCheck(const BoundingBox& aabb)
+{ 
+	for (auto pObj : m_Objects) {
+		if (pObj->CollisionCheck(aabb)) return true;
+	}
+	for (auto pPlate : m_Plates) {
+		if (pPlate->CollisionCheck(aabb)) return true;
+	}
+	return false;
+}
+
+void CBridge::UpdateColliders()
+{
+	for (auto pObj : m_Objects) {
+		pObj->UpdateColliders();
+	}
+	for (auto pPlate : m_Plates) {
+		pPlate->UpdateColliders();
+	} 
+}
+
 CSign::CSign(OBJECT_ID id)
 {
 	m_Pillar = new CGameObject(); 
@@ -227,4 +336,141 @@ void CDoorWall::UpdateColliders()
 	for (auto pWall : m_Walls) {
 		pWall->UpdateColliders();
 	}
+}
+
+CPuzzle::CPuzzle(OBJECT_ID id)
+{
+	for (int i = 1; i <= 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{ 
+			CGameObject* pObject = new CGameObject();
+			pObject->SetPosition(XMFLOAT3(500.0f * i + 300.0f, 250.0f, 150.0f + 410.0f + 500.0f * j));
+			pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 300 * 0.5f, 20 * 0.5f, 50 * 0.5f }));
+			m_Objects.emplace_back(std::move(pObject));
+
+			pObject = new CGameObject();
+			pObject->SetPosition(XMFLOAT3(500.0f * i + 300.0f, 250.0f, -150.0f + 410.0f + 500.0f * j));
+			pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 300 * 0.5f, 20 * 0.5f, 50 * 0.5f }));
+			m_Objects.emplace_back(std::move(pObject));
+			
+			pObject = new CGameObject();
+			pObject->SetPosition(XMFLOAT3(175.0f + 500.0f * i + 300.0f, 250.0f, 0.0f + 410.0f + 500.0f * j));
+			pObject->Rotate(XMFLOAT3(0, 1, 0), 90);
+			pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 350 * 0.5f, 20 * 0.5f, 50 * 0.5f }));
+			m_Objects.emplace_back(std::move(pObject));
+			
+			pObject = new CGameObject();
+			pObject->SetPosition(XMFLOAT3(-175.f + 500.0f * i + 300.0f, 250.0f, 0.0f + 410.0f + 500.0f * j));
+			pObject->Rotate(XMFLOAT3(0, 1, 0), 90);
+			pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 350 * 0.5f, 20 * 0.5f, 50 * 0.5f }));
+			m_Objects.emplace_back(std::move(pObject));
+		}
+	}
+}
+
+CPuzzle::~CPuzzle()
+{
+}
+
+void CPuzzle::SetPosition(XMFLOAT3 pos)
+{
+	for (auto pObj : m_Objects)
+	{
+		pObj->Move(pos);
+	}
+}
+
+bool CPuzzle::CollisionCheck(const BoundingBox& aabb)
+{
+	for (auto pObj : m_Objects) {
+		if (pObj->CollisionCheck(aabb)) return true;
+	}
+	return false;
+}
+
+void CPuzzle::UpdateColliders()
+{
+	for (auto pObj : m_Objects) {
+		pObj->UpdateColliders();
+	}
+}
+
+CPlate::CPlate(OBJECT_ID id)
+{
+	CGameObject* pObject = new CGameObject();
+	pObject->SetPosition({ 1250.0f, 120.f, 900.0f });
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 2500 * 0.5f, 240 * 0.5f, 1800 * 0.5f }));
+	m_Objects.emplace_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetPosition(XMFLOAT3(1250.0f, 40.0f, -150.0f));
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 300 * 0.5f }));
+	m_Objects.emplace_back(std::move(pObject)); 
+
+	pObject = new CGameObject();
+	pObject->SetPosition(XMFLOAT3(1250.0f, 40.0f, 150.0f + 1800.0f));
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 300 * 0.5f }));
+	m_Objects.emplace_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetPosition(XMFLOAT3(1250.0f, 120.0f, -100.0f));
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 200 * 0.5f }));
+	m_Objects.emplace_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetPosition(XMFLOAT3(1250.0f, 120.0f, 100.0f + 1800.0f));
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 200 * 0.5f }));
+	m_Objects.emplace_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f, -50.0f));
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 100 * 0.5f }));
+	m_Objects.emplace_back(std::move(pObject));
+	 
+	pObject = new CGameObject();
+	pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f, 50.0f + 1800.0f));
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 100 * 0.5f }));
+	m_Objects.emplace_back(std::move(pObject)); 
+}
+
+CPlate::~CPlate()
+{
+}
+
+void CPlate::SetPosition(XMFLOAT3 pos)
+{
+	for (auto obj : m_Objects) {
+		obj->Move(pos);
+	}
+}
+
+void CPlate::Rotate(const XMFLOAT3& axis, float angle)
+{
+	for (auto obj : m_Objects) {
+		obj->Rotate(axis, angle);
+	}
+}
+
+bool CPlate::CollisionCheck(const BoundingBox& aabb)
+{
+	for (auto pObj : m_Objects) {
+		if (pObj->CollisionCheck(aabb)) return true;
+	}
+	return false;
+}
+
+void CPlate::UpdateColliders()
+{
+	for (auto pObj : m_Objects) {
+		pObj->UpdateColliders();
+	}
+}
+
+CPuzzleBox::CPuzzleBox(OBJECT_ID id)
+{
+}
+
+CPuzzleBox::~CPuzzleBox()
+{
 }

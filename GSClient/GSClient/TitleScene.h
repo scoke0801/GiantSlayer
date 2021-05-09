@@ -63,7 +63,7 @@ public:
 	CTitleScene();
 	~CTitleScene();
 
-	virtual void Update(double elapsedTime) override; 
+	virtual void Update(float elapsedTime) override;
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override; 
 
 public:

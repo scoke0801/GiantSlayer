@@ -17,12 +17,15 @@ private:
 	string	m_Name;
 	bool	m_isExist = false;
 
+	CCamera* m_Camera = nullptr;
 public:
 	CPlayer();
 	~CPlayer();	
 	
 public:
 	void Update(float fTimeElapsed) override;
+	void UpdateCamera();
+	void FixCameraByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 
 	void FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 

@@ -11,7 +11,11 @@ constexpr int BUFSIZE = 4096;
 constexpr int F_TO_I = 10000;
 constexpr int I_TO_F = F_TO_I;
 
-constexpr int MAX_MOUSE_INPUT = 10;
+constexpr int MAX_MOUSE_INPUT = 30;
+
+constexpr float ARROW_LIFE_TIME = 10.0f;
+constexpr float ARROW_SPEED = 165.0f * 3.5f;
+
 // x,y,z 크기를 short로 보내면 맵 크기 20000에서 
 // int, float 형 변환 계산하기에 크기가 작아서 int형으로 사용
 inline int FloatToInt(float num)
@@ -34,15 +38,51 @@ enum class OBJECT_ID : USHORT {
 	SIGN_SCROLL = 15,
 	SIGN_PUZZLE,
 	SIGN_MEDUSA,
-	SIGN_BOSS,
+	SIGN_BOSS,  
 
 	DOOR_WALL_SEC1 = 20,
 	DOOR_WALL_SEC2,
 	DOOR_WALL_SEC3,
 	DOOR_WALL_SEC4,
 	DOOR_WALL_SEC5,
-	 
-	MONSTER_MELEE_1 = 30,
+	WALL_1,
+	WALL_2,
+
+	PUZZLE_1,
+	PUZZLE_1_PLATE,
+	PUZZLE_2,
+
+	DRY_FOREST_ROCK_1 = 30,
+	DRY_FOREST_ROCK_2,
+
+	DRY_FOREST_DRY_TREE_1,
+	DRY_FOREST_DRT_TREE_2,
+	DRY_FOREST_DRY_TREE_3,
+	DRY_FOREST_DRT_TREE_4,
+
+	DRY_FOREST_STUMP_1,
+
+	DRY_FOREST_DEAD_TREE_1,
+	DRY_FOREST_DEAD_TREE_2,
+	DRY_FOREST_DEAD_TREE_3,
+
+	DESERT_ROCK_1,
+	DESERT_ROCK_2,
+	DESERT_ROCK_3,
+	DESERT_ROCK_4,
+	DESERT_ROCK_5,
+	DESERT_ROCK_6,
+	DESERT_ROCK_7,
+	DESERT_ROCK_8,
+	DESERT_ROCK_9,
+	DESERT_ROCK_10,
+	DESERT_ROCK_11,
+	DESERT_ROCK_12,
+	DESERT_ROCK_13,
+	DESERT_ROCK_14,
+	DESERT_ROCK_15,
+
+	MONSTER_MELEE_1 = 100,
 	MONSTER_MELEE_2,
 	MONSTER_MELEE_3,
 	MONSTER_MELEE_4,
@@ -53,7 +93,7 @@ enum class OBJECT_ID : USHORT {
 	MONSTER_MELEE_9,
 	MONSTER_MELEE_10,
 
-	MONSTER_RANGE_1	= 70,	
+	MONSTER_RANGE_1	= 120,	
 	MONSTER_RANGE_2,
 	MONSTER_RANGE_3,
 	MONSTER_RANGE_4,
@@ -64,7 +104,18 @@ enum class OBJECT_ID : USHORT {
 	MONSTER_RANGE_9,
 	MONSTER_RANGE_10,
 
-	BOSS = 100
+	BOSS = 200, 
+
+	PUZZLE_BOX_1 = 1000,
+	PUZZLE_BOX_2,
+	PUZZLE_BOX_3,
+	PUZZLE_BOX_4,
+	PUZZLE_BOX_5,
+	PUZZLE_BOX_6,
+	PUZZLE_BOX_7,
+	PUZZLE_BOX_8,
+	PUZZLE_BOX_9,
+	PUZZLE_BOX_10,
 };
 
 enum class GAME_STATE : short {
@@ -150,10 +201,11 @@ struct P_C2S_KEYBOARD_INPUT {
 struct P_C2S_MOUSE_INPUT {
 	BYTE size; 
 	PACKET_PROTOCOL type;
-	MOUSE_INPUT_TYPE InputType;
+	short id;
+	MOUSE_INPUT_TYPE InputType; 
 	short inputNum;
-	int xInput[MAX_MOUSE_INPUT];
-	int yInput[MAX_MOUSE_INPUT];
+	short xInput[MAX_MOUSE_INPUT];
+	short yInput[MAX_MOUSE_INPUT];
 }; 
 
 struct P_C2S_UPDATE_SYNC_REQUEST {
@@ -203,12 +255,11 @@ struct P_S2C_PROCESS_KEYBOARD {
 
 struct P_S2C_PROCESS_MOUSE {
 	BYTE size;
-	PACKET_PROTOCOL type;
+	PACKET_PROTOCOL type; 
 
-	int posX, posY, posZ;
-
-	ROTATION_AXIS axis;
-	short angle;
+	int playerRotateX, playerRotateY, playerRotateZ;
+	int cameraRotateX, cameraRotateY, cameraRotateZ;
+	int cameraOffset;
 };
 
 struct P_S2C_UPDATE_SYNC {

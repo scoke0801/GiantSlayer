@@ -22,6 +22,9 @@
     <FxCompile Include="Shaders\ShaderTH.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\ParticleShader.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader12.cpp">
@@ -58,7 +61,7 @@
       <Filter>Handler</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
-      <Filter>GameObject\Mesh</Filter>
+      <Filter>Mesh</Filter>
     </ClCompile>
     <ClCompile Include="SceneJH.cpp">
       <Filter>Scene</Filter>
@@ -82,7 +85,7 @@
       <Filter>GameObject\Texture</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
-      <Filter>GameObject\Shader</Filter>
+      <Filter>Shader</Filter>
     </ClCompile>
     <ClCompile Include="SceneTH.cpp">
       <Filter>Scene</Filter>
@@ -125,10 +128,10 @@
     </ClCompile>
     <ClCompile Include="ShaderHandler.cpp">
       <Filter>Handler</Filter>
-    </ClCompile> 
+    </ClCompile>
     <ClCompile Include="Colider.cpp">
       <Filter>GameObject\Colider</Filter>
-    </ClCompile> 
+    </ClCompile>
     <ClCompile Include="FbxLoader.cpp">
       <Filter>FBXLoader</Filter>
     </ClCompile>
@@ -136,7 +139,16 @@
       <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="SceneExport.cpp">
-      <Filter>Scene</Filter> 
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="Effect.cpp">
+      <Filter>Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Arrow.cpp">
+      <Filter>GameObject\Arrow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -180,7 +192,7 @@
       <Filter>Handler</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
-      <Filter>GameObject\Mesh</Filter>
+      <Filter>Mesh</Filter>
     </ClInclude>
     <ClInclude Include="SceneJH.h">
       <Filter>Scene</Filter>
@@ -210,7 +222,7 @@
       <Filter>GameObject\Texture</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
-      <Filter>GameObject\Shader</Filter>
+      <Filter>Shader</Filter>
     </ClInclude>
     <ClInclude Include="SceneTH.h">
       <Filter>Scene</Filter>
@@ -261,10 +273,10 @@
     </ClInclude>
     <ClInclude Include="..\..\GSServer\GSServer\protocol.h">
       <Filter>Communicate</Filter>
-    </ClInclude> 
+    </ClInclude>
     <ClInclude Include="Colider.h">
       <Filter>GameObject\Colider</Filter>
-    </ClInclude> 
+    </ClInclude>
     <ClInclude Include="Font.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="FbxLoader.h">
@@ -274,7 +286,16 @@
       <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="SceneExport.h">
-      <Filter>Scene</Filter> 
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Effect.h">
+      <Filter>Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Arrow.h">
+      <Filter>GameObject\Arrow</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -313,9 +334,6 @@
     <Filter Include="Main">
       <UniqueIdentifier>{303e1e2f-5a51-4d5c-8d4e-88cec2d96c05}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameObject\Mesh">
-      <UniqueIdentifier>{bd48eed7-ce34-411c-a356-d5a13f0e4a3f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="HLSL">
       <UniqueIdentifier>{32e8318b-e8f6-4bf9-8127-b27799480662}</UniqueIdentifier>
     </Filter>
@@ -336,9 +354,6 @@
     </Filter>
     <Filter Include="GameObject\Texture">
       <UniqueIdentifier>{2246ee66-e90c-4029-a56a-fb1013378e75}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="GameObject\Shader">
-      <UniqueIdentifier>{04f39449-42c1-42ab-bb97-94aa7f89a159}</UniqueIdentifier>
     </Filter>
     <Filter Include="GameObject\UI">
       <UniqueIdentifier>{957b4eb7-391b-4bc8-9c0d-74a018cb3ce4}</UniqueIdentifier>
@@ -375,6 +390,21 @@
     </Filter>
     <Filter Include="GameObject\Colider">
       <UniqueIdentifier>{627dc5b6-b871-4132-9396-60fd010d0a67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Effect">
+      <UniqueIdentifier>{66241987-1d2f-4330-a08f-89eb07f982fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Particle">
+      <UniqueIdentifier>{012e084c-2827-4fd4-894f-bcdad6052e8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mesh">
+      <UniqueIdentifier>{bd48eed7-ce34-411c-a356-d5a13f0e4a3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{04f39449-42c1-42ab-bb97-94aa7f89a159}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Arrow">
+      <UniqueIdentifier>{13df2e8a-dd14-4fee-86b7-3f08fd19b807}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

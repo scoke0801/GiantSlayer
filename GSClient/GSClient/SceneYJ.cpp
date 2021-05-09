@@ -306,7 +306,7 @@ void CSceneYJ::ReleaseObjects()
 	m_Objects.clear();
 }
 
-void CSceneYJ::Update(double elapsedTime)
+void CSceneYJ::Update(float elapsedTime)
 {
 	ProcessInput();
 
@@ -1502,10 +1502,10 @@ void CSceneYJ::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	pObject = new CGameObject();
 	pObject->SetMesh(fbx_bush_Mesh);
-	pObject->SetPosition({ 2500.0f, 100, 250 });
+	pObject->SetPosition({ 2500.0f, 100.0f, 250.0f });
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	pObject->SetTextureIndex(0x01);
-	pObject->Scale(50, 50, 50);
+	pObject->Scale(50.0f, 50.0f, 50.0f);
 	m_Objects.push_back(std::move(pObject));
 }
 
@@ -1522,7 +1522,7 @@ void CSceneYJ::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->SetPosition({ 500.0f + i * 1000.0f, -1000, 19500 - 500.0f * i });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
 		pObject->SetTextureIndex(0x02);
-		pObject->Scale(50, 50, 50);
+		pObject->Scale(50.0f, 50.0f, 50.0f);
 		m_Objects.push_back(std::move(pObject));
 	}
 
@@ -1539,8 +1539,8 @@ void CSceneYJ::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 		x_Tree = 900+6200*i;
 		z_Tree = 18800;
-		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
-		pObject->Rotate({ 0,1,0 }, 60 + 30 * i);
+		pObject->Scale(0.5f + 0.5f * i, 0.5f, 0.5f + 0.5f * i);
+		pObject->Rotate({ 0,1,0 }, 60.0f + 30.0f * i);
 		pObject->SetPosition({ x_Tree , m_Terrain->GetHeight(x_Tree,z_Tree) , z_Tree });
 
 		pObject->SetTextureIndex(0x04);

@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Shader.h"
 #include "Camera.h"
+#include "Terrain.h"
 
 string ConvertToObjectName(const OBJ_NAME& name)
 {
@@ -56,7 +57,12 @@ void CGameObject::SetMesh(CMesh* pMesh)
 
 	if (m_pMesh) m_pMesh->AddRef();
 }  
-void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+void CGameObject::FixPositionByTerrain(CTerrain* pTerrain)
+{
+	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_YPositionCorrection;
+	SetPosition(m_xmf3Position);
+}
+void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float fWidth, float fHeight, float fDepth,
 	const XMFLOAT3& shift)
 {
@@ -476,6 +482,11 @@ void CSkyBox::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 {
 	for (int i = 0; i < m_nObjects; ++i)
 		m_ppObjects[i]->Rotate(pxmf3Axis, fAngle);
+}
+
+void CSkyBox::Update(float timeElapsed)
+{ 
+	Rotate(XMFLOAT3(0, 1, 0), 0.3 * timeElapsed);
 }
 
 CSkyBoxSphere::CSkyBoxSphere(ID3D12Device* pd3dDevice,

@@ -566,7 +566,6 @@ DWORD __stdcall ClientMain(LPVOID arg)
 		std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();
 
 		double updateElapsed = m_FPSTimer.GetElapsedTime(lastUpdateTime);
-
 		if (updateElapsed > MAX_UPDATE_FPS)
 			m_FPSTimer.UpdateCurrentTime();
 		else

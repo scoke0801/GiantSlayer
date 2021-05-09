@@ -8,8 +8,10 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 	char buffer[BUFSIZE + 1] = {}; 
 	int count = 0;
 	int retval = 0;
-	RecvPacket(socket, buffer, retval); 
-
+	bool packetRecvResult = RecvPacket(socket, buffer, retval); 
+	if (false == packetRecvResult) {
+		return false;
+	}
 	// buffer[0]의 값은 packet protocol size
 	// buffer[1]의 값은 packet protocol type
 	PACKET_PROTOCOL type = (PACKET_PROTOCOL)buffer[1];
@@ -71,8 +73,49 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 	}
 	return true;
 	case PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT: 
-	{
+	{ 
+		P_C2S_MOUSE_INPUT p_mouse = *reinterpret_cast<P_C2S_MOUSE_INPUT*>(buffer);
+		
+		BYTE size;
+		PACKET_PROTOCOL type;
+		MOUSE_INPUT_TYPE InputType;
+		short inputNum;
+		int xInput[MAX_MOUSE_INPUT];
+		int yInput[MAX_MOUSE_INPUT];
 
+		P_S2C_PROCESS_MOUSE p_mouseProcess;
+		ZeroMemory(&p_mouseProcess, sizeof(P_S2C_PROCESS_MOUSE));
+		p_mouseProcess.size = sizeof(P_S2C_PROCESS_MOUSE);
+		p_mouseProcess.type = PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT;
+		//p_mouseProcess.playerRotateX = p_mouseProcess.playerRotateY = p_mouseProcess.playerRotateZ = 0;
+		//p_mouseProcess.cameraRotateX = p_mouseProcess.cameraRotateY = p_mouseProcess.cameraRotateZ = 0;
+		//p_mouseProcess.caemraOffset = 0;
+		float playerRotateY = 0.0f;
+		float cameraRotateY = 0.0f;
+		float cameraOffset = 0.0f;
+		if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_LMOVE) {
+			for (int i = 0; i < p_mouse.inputNum; ++i) { 
+				float dx = IntToFloat(p_mouse.xInput[i]);
+
+				m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+				playerRotateY += dx;
+				if (m_Players[p_mouse.id]->IsMoving())
+				{
+					p_mouseProcess.playerRotateY += dx;
+					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
+				}
+			}
+			p_mouseProcess.playerRotateY = FloatToInt(playerRotateY);
+		}
+		else if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_RMOVE) {
+			for (int i = 0; i < p_mouse.inputNum; ++i) {
+				float offset = IntToFloat(p_mouse.yInput[i]);
+				cameraOffset += offset;
+				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset));
+			}
+			p_mouseProcess.cameraOffset = FloatToInt(cameraOffset);
+		}
+		SendPacket(socket, reinterpret_cast<char*>(&p_mouseProcess), p_mouseProcess.size, retval);
 	}
 	return true;
 	case PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT:
@@ -194,6 +237,7 @@ void PacketProcessor::InitAll()
 	ReadObstaclesPosition();
 
 	InitPlayers(); 
+	InitCameras();
 	InitMonsters();
 	InitObstacle();
 }
@@ -241,7 +285,25 @@ void PacketProcessor::InitPlayers()
 		m_Players[i]->Scale(50, 50, 50);
 		m_Players[i]->SetPosition(positions[i]);
 		m_Players[i]->SetExistence(false); 
-		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 5)));
+		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.0f, 5.0f, 2.5f)));
+	}
+}
+
+void PacketProcessor::InitCameras()
+{
+	int nCameras = MAX_PLAYER; 
+	const float PI = 3.141592; 
+	FRAME_BUFFER_WIDTH;
+	for (int i = 0; i < nCameras; ++i)
+	{
+		CCamera* pCamera = new CCamera;
+		pCamera->SetLens(0.25f * PI, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 1.0f, 60000.0f);
+		m_Cameras[i] = pCamera;
+
+		m_Cameras[i]->SetPosition(m_Players[i]->GetPosition());
+		m_Cameras[i]->Pitch(XMConvertToRadians(15));
+		m_Cameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));	
+		m_Cameras[i]->SetTarget(m_Players[i]);
 	}
 }
 
@@ -259,12 +321,11 @@ void PacketProcessor::ReadObstaclesPosition()
 	d.ParseStream(is);	//==d.Parse(is);
 	fclose(fp);
 
-	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_1,
-		GetPosition("BRIDEGE_SEC2_SEC3_1", d));
-	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_2,
-		GetPosition("BRIDEGE_SEC2_SEC3_2", d));
-	m_ObjectPositions.emplace(OBJECT_ID::BRIDEGE_SEC2_SEC3_3,
-		GetPosition("BRIDEGE_SEC2_SEC3_3", d));
+	for (int i = 0; i < 3; ++i) {
+		string str = "BRIDEGE_SEC2_SEC3_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::BRIDEGE_SEC2_SEC3_1 + i),
+			GetPosition(str, d));
+	} 
 
 	m_ObjectPositions.emplace(OBJECT_ID::SIGN_SCROLL,
 		GetPosition("SIGN_SCROLL", d));
@@ -273,18 +334,48 @@ void PacketProcessor::ReadObstaclesPosition()
 	m_ObjectPositions.emplace(OBJECT_ID::SIGN_MEDUSA,
 		GetPosition("SIGN_MEDUSA", d)); 
 	m_ObjectPositions.emplace(OBJECT_ID::SIGN_BOSS,
-		GetPosition("SIGN_BOSS", d));
+		GetPosition("SIGN_BOSS", d)); 
 
-	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC1,
-		GetPosition("DOOR_WALL_SEC1", d));
-	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC2,
-		GetPosition("DOOR_WALL_SEC2", d));
-	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC3,
-		GetPosition("DOOR_WALL_SEC3", d));
-	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC4,
-		GetPosition("DOOR_WALL_SEC4", d));
-	m_ObjectPositions.emplace(OBJECT_ID::DOOR_WALL_SEC5,
-		GetPosition("DOOR_WALL_SEC5", d));
+	for (int i = 0; i < 2; ++i) {
+		string str = "PUZZLE_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::PUZZLE_1 + i),
+			GetPosition(str, d));
+	}
+
+	for (int i = 0; i < 5; ++i) {
+		string str = "DOOR_WALL_SEC" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DOOR_WALL_SEC1 + i),
+			GetPosition(str, d));
+	}  
+	m_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_ROCK_1,
+		GetPosition("DRY_FOREST_ROCK_1", d));
+	m_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_ROCK_2,
+		GetPosition("DRY_FOREST_ROCK_2", d));
+
+	for (int i = 0; i < 4; ++i) {
+		string str = "DRY_FOREST_DRY_TREE_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DRY_FOREST_DRY_TREE_1 + i),
+			GetPosition(str, d));
+	}
+	m_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_STUMP_1,
+		GetPosition("DRY_FOREST_STUMP_1", d));
+
+	for (int i = 0; i < 3; ++i) {
+		string str = "DRY_FOREST_DEAD_TREE_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_1 + i),
+			GetPosition(str, d));
+	}
+	for (int i = 0; i < 15; ++i) {
+		string str = "DESERT_ROCK_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DESERT_ROCK_1 + i),
+			GetPosition(str, d));
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		string str = "PUZZLE_BOX_" + to_string(i + 1);
+		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::PUZZLE_BOX_1 + i),
+			GetPosition(str, d));
+	}
 }
 
 XMFLOAT3 PacketProcessor::GetPosition(const string& name, const Document& document)
@@ -300,20 +391,41 @@ XMFLOAT3 PacketProcessor::GetPosition(const string& name, const Document& docume
 void PacketProcessor::InitObstacle()
 {
 // Bridge --------------------------------------------------------------------
-	CGameObject* pObject; /*= new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
+	CGameObject* pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_1]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
+	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_2]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	m_Objects.push_back(std::move(pObject));
 
-	pObject = new CObjCollector(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
+	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
 	pObject->Rotate({ 0, 1, 0 }, 90); 
-	m_Objects.push_back(std::move(pObject));*/
+	m_Objects.push_back(std::move(pObject));
+///////////////////////////////////////////////////////////////////////////////// 
+
+// PUZZLE----------------------------------------------------------------------
+	pObject = new CPuzzle(OBJECT_ID::PUZZLE_1);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::PUZZLE_1]); 
+	m_Objects.push_back(std::move(pObject));
+
+	XMFLOAT3 tempPos = m_ObjectPositions[OBJECT_ID::PUZZLE_1];
+	tempPos.x += 100;
+	pObject = new CPlate(OBJECT_ID::PUZZLE_1_PLATE);
+	pObject->SetPosition(tempPos);
+	m_Objects.push_back(std::move(pObject));
+
+	for (int i = 0; i < 10; ++i) {
+		pObject = new CPuzzleBox((OBJECT_ID)((int)OBJECT_ID::PUZZLE_BOX_1 + i));
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::PUZZLE_BOX_1 + i)]);
+		m_Objects.push_back(std::move(pObject));
+	}
+	//pObject = new CPuzzle(OBJECT_ID::PUZZLE_2);
+	//pObject->SetPosition(m_ObjectPositions[OBJECT_ID::PUZZLE_2]);
+	//m_Objects.push_back(std::move(pObject));
 /////////////////////////////////////////////////////////////////////////////////
 
 // DoorWall----------------------------------------------------------------------
@@ -336,6 +448,18 @@ void PacketProcessor::InitObstacle()
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC5);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC5]);
 	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject(); 
+	pObject->Rotate({ 0,1,0 }, 90);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::WALL_1]);
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();
+	pObject->Rotate({ 0,1,0 }, 90);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::WALL_2]);
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
+	m_Objects.push_back(std::move(pObject));
 ////////////////////////////////////////////////////////////////////////////////
 
 // Sign-------------------------------------------------------------------------
@@ -356,6 +480,105 @@ void PacketProcessor::InitObstacle()
 	//pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BOSS]);
 	//m_Objects.push_back(std::move(pObject));
 ////////////////////////////////////////////////////////////////////////////////
+// FBX Models
+//
+	for (int i = 0; i < 2; ++i) {
+		pObject = new CGameObject();
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_ROCK_1 + i)]);
+		pObject->Scale(50, 50, 50);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5 * 0.5f, 7 * 0.5f, 3 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	} 
+
+	for (int i = 0; i < 2; ++i) {
+		pObject = new CGameObject(); 
+		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
+		pObject->Rotate({ 0,1,0 }, 60 + 30 * i);
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_1 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+	for (int i = 0; i < 2; ++i) {
+		pObject = new CGameObject();
+		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
+		pObject->Rotate({ 0,1,0 }, 0 + 15 * i);
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_3 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	pObject = new CGameObject();
+	pObject->Scale(20.0f, 20.0f, 20.0f);
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DRY_FOREST_STUMP_1]);
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(15 *0.5f, 10 * 0.5f, 15 * 0.5f)));
+	m_Objects.push_back(std::move(pObject));
+
+	pObject = new CGameObject();	
+	pObject->Scale(150.0f, 150.0f, 150.0f);
+	pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_1)]);
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
+	m_Objects.push_back(std::move(pObject));
+
+	for (int i = 0; i < 2; ++i) {
+		pObject = new CGameObject(); 
+		pObject->Scale(150.0f + 50 * i, 150.0f + 50 * i, 150.0f + 50 * i);
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_2 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 5; ++i) {
+		if (i == 0){
+			pObject->Scale(4.0f, 4.0f, 4.0f);
+		}
+		else if (i == 1){
+			pObject->Rotate({ 0,1,0 }, 90);
+			pObject->Scale(2.0f, 2.0f, 2.0f);
+		}
+		else if (i == 4){
+			pObject->Scale(1.0f, 1.0f, 1.0f);
+		}
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+
+		pObject = new CGameObject();
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_1 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600*0.5f, 250 * 0.5f, 600 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 6; ++i) {
+		if (i == 0) {
+			pObject->Scale(3.0f, 3.0f, 3.0f);
+		}
+		else if (i == 3) { 
+			pObject->Rotate({ 0,1,0 }, 270);
+			pObject->Scale(3.0f, 3.0f, 3.0f); 
+		}
+		else if (i == 1) { 
+			pObject->Rotate({ 0,1,0 }, 90);
+			pObject->Scale(1.5f, 1.5f, 1.5f);
+		}
+		else if (i == 5) { 
+			pObject->Rotate({ 0,1,0 }, 135);
+			pObject->Scale(1.5f, 1.5f, 1.5f);
+		} 
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+
+		pObject = new CGameObject();
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_6 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+
+	for (int i = 0; i < 4; ++i) {
+		pObject->Scale(0.5f, 0.5f, 0.5f);
+
+		pObject = new CGameObject();
+		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_12 + i)]);
+		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
+		m_Objects.push_back(std::move(pObject));
+	}
+	int stop = 3;
 }
 
 void PacketProcessor::InitTerrainHeightMap()
@@ -421,8 +644,8 @@ void PacketProcessor::BuildBlockingRegionOnMap()
 
 	// Desrt to DryDesrt and Rock 왼쪽 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 16000 * 0.5f)));
-	pObject->SetPosition({ 13800, -2000, 8400 + 3600 });
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 12800 * 0.5f)));
+	pObject->SetPosition({ 13800, -2000, 7200 + 6400 });
 	m_Objects.push_back(std::move(pObject));
 
 	// boss 지역 중간 벽

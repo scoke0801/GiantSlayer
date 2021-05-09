@@ -343,7 +343,7 @@ void CGameScene::ReleaseObjects()
 	}
 }
 
-void CGameScene::Update(double elapsedTime)
+void CGameScene::Update(float elapsedTime)
 {
 	ProcessInput();
 

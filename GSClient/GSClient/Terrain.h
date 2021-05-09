@@ -53,3 +53,31 @@ private:
 	XMFLOAT3 GetHeightMapNormal(int x, int z);
 };
 
+
+class CTerrainWater : public CGameObject
+{
+public:
+	CTerrainWater(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+		ID3D12RootSignature* pd3dGraphicsRootSignature, float fWidth, float fLength);
+	virtual ~CTerrainWater();
+
+public:
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void ReleaseShaderVariables();
+
+	//void Animate(float fTimeElapsed) override;
+
+	//void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
+
+public:
+	XMFLOAT4X4					m_xmf4x4Texture;
+
+private:
+	int							m_nWidth;
+	int							m_nLength;
+
+	XMFLOAT3					m_xmf3Scale;
+
+	XMFLOAT4X4					m_xmf4x4WaterAnimation;
+};

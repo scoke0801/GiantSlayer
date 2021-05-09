@@ -17,6 +17,39 @@ void CCamera::Update(float elapsedTime)
 	}
 }
 
+void CCamera::Update(const XMFLOAT3& xmf3LookAt)
+{
+	if (m_TargetPlayer == nullptr) return;
+
+	XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
+
+	XMFLOAT3 xmf3Right = CalcTargetRight();
+	XMFLOAT3 xmf3Up = CalcTargetUp();
+	XMFLOAT3 xmf3Look = CalcTargetLook();
+
+	xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
+	xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
+	xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
+
+	XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
+
+	XMFLOAT3 xmf3Position = Vector3::Add(m_TargetPlayer->GetPosition(), xmf3Offset);
+	XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
+	float fLength = Vector3::Length(xmf3Direction);
+	xmf3Direction = Vector3::Normalize(xmf3Direction);
+
+	//float fTimeLagScale = (m_fTimeLag) ? fTimeElapsed * (1.0f / m_fTimeLag) : 1.0f;
+	float fTimeLagScale = 1.0f;
+	float fDistance = fLength * fTimeLagScale;
+	if (fDistance > fLength) fDistance = fLength;
+	if (fLength < 0.01f) fDistance = fLength;
+	if (fDistance > 0)
+	{
+		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
+		LookAt(xmf3LookAt, m_TargetPlayer->GetUp());
+	}
+}
+
 void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
 	if (m_TargetPlayer == nullptr) return;
@@ -81,6 +114,36 @@ void CCamera::LookAt(const XMFLOAT3& lookAt, const XMFLOAT3& up)
 	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
 	m_xmf3Up = XMFLOAT3(mtxLookAt._12, mtxLookAt._22, mtxLookAt._32);
 	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
+}
+
+void CCamera::SetLens(float fovY, float aspect, float zn, float zf)
+{
+	// cache properties
+	m_FovY = fovY;
+	m_Aspect = aspect;
+	m_NearZ = zn;
+	m_FarZ = zf;
+
+	m_NearWindowHeight = 2.0f * m_NearZ * tanf(0.5f * m_FovY);
+	m_FarWindowHeight = 2.0f * m_FarZ * tanf(0.5f * m_FovY);
+
+	XMMATRIX P = XMMatrixPerspectiveFovLH(m_FovY, m_Aspect, m_NearZ, m_FarZ);
+	XMStoreFloat4x4(&m_xmf4x4Proj, P);
+}
+
+void CCamera::SetLens(float fovY, float width, float height, float zn, float zf)
+{
+	// cache properties
+	m_FovY = fovY;
+	m_Aspect = width / height;
+	m_NearZ = zn;
+	m_FarZ = zf;
+
+	m_NearWindowHeight = 2.0f * m_NearZ * tanf(0.5f * m_FovY);
+	m_FarWindowHeight = 2.0f * m_FarZ * tanf(0.5f * m_FovY);
+
+	XMMATRIX P = XMMatrixPerspectiveFovLH(m_FovY, m_Aspect, m_NearZ, m_FarZ);
+	XMStoreFloat4x4(&m_xmf4x4Proj, P);
 }
 
 void CCamera::Strafe(float d)
@@ -188,4 +251,14 @@ void CCamera::SetTarget(CPlayer* target)
 {
 	m_TargetPlayer = target;
 	m_TargetTransform = m_TargetPlayer->GetWorldTransform();
+}
+
+void CCamera::SetOffset(XMFLOAT3 offset)
+{
+	m_xmf3Offset = offset;
+}
+
+void CCamera::MoveOffset(XMFLOAT3 shift)
+{
+	m_xmf3Offset = Vector3::Add(m_xmf3Offset, shift);
 }

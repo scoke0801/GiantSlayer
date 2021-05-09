@@ -24,6 +24,9 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 
 	CreateSkyboxShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature); 
+	CreateTerrainWaterShader(pd3dDevice, pd3dGraphicsRootSignature);
+
+	CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
 }
 
 void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -75,7 +78,7 @@ void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignatu
 	pFBXFeatureShaderRight->CreateInputLayout(ShaderTypes::Textured);
 	pFBXFeatureShaderRight->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
 	pFBXFeatureShaderRight->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
-	m_Data.emplace("FBXFeatureRight", pFBXFeatureShaderRight);
+	m_Data.emplace("FBXFeatureRight", pFBXFeatureShaderRight); 
 }
 
 void CShaderHandler::CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -197,6 +200,39 @@ void CShaderHandler::CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
 	pTerrainShader->CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature); 
 	m_Data.emplace("Terrain", pTerrainShader);
+}
+
+void CShaderHandler::CreateTerrainWaterShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CShader* pTerrainWaterShader = new CShader();
+	if (m_UserID == ShaderHandlerUser::JH) {
+		pTerrainWaterShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTerrainWater");
+		pTerrainWaterShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTerrainWater"); 
+	}
+	
+	pTerrainWaterShader->CreateInputLayout(ShaderTypes::TerrainWater);
+	pTerrainWaterShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
+		false, true);
+	m_Data.emplace("TerrainWater", pTerrainWaterShader);
+}
+
+void CShaderHandler::CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CShader* pParticleShader = new CShader();
+	pParticleShader->CreateVertexShader(L"Shaders\\ParticleShader.hlsl", "VSArrowParticle");
+	pParticleShader->CreatePixelShader(L"Shaders\\ParticleShader.hlsl", "PSParticle");
+
+	pParticleShader->CreateInputLayout(ShaderTypes::Particle);
+	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("ArrowParticle", pParticleShader);
+
+	pParticleShader = new CShader();
+	pParticleShader->CreateVertexShader(L"Shaders\\ParticleShader.hlsl", "VSTexParticle");
+	pParticleShader->CreatePixelShader(L"Shaders\\ParticleShader.hlsl", "PSTexParticle");
+
+	pParticleShader->CreateInputLayout(ShaderTypes::TexParticle);
+	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("TexParticle", pParticleShader);
 }
 
 void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
