@@ -28,19 +28,31 @@ void CPlayer::Update(float fTimeElapsed)
 	}
 	
 	static float MaxVelocityXZ = 120.0f;
-	static float MaxVelocityY = 120.0f;
+	static float MaxVelocityY = 6000.0f;
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? 360.0f : 50.0f;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
-	Move(vel); 
+	m_xmf3Velocity.x = m_xmf3Velocity.x * fTimeElapsed;
+	m_xmf3Velocity.z = m_xmf3Velocity.z * fTimeElapsed;
+	m_xmf3Velocity.y = m_xmf3Velocity.y * fTimeElapsed + -9.8f * fTimeElapsed * fTimeElapsed * 0.5f;
+	if (m_xmf3Velocity.y < -0.0f) {
+		m_isOnGround = true;
+	}
+	else {
+		cout << m_xmf3Velocity.y << "\n";
+	} 
+
+	Move(m_xmf3Velocity);
 	
 	UpdateCamera(); 
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 
-	if (fDeceleration > fLength) fDeceleration = fLength;
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	if (fDeceleration > fLength) fDeceleration = fLength; 
+	m_xmf3Velocity.x = m_xmf3Velocity.x + fDeceleration;
+	m_xmf3Velocity.z = m_xmf3Velocity.z + fDeceleration;
+	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 }
 
 void CPlayer::UpdateCamera()
@@ -78,8 +90,10 @@ void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
 
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
-	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z);
-} 
+	if (m_isOnGround) {
+		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z);
+	}
+}
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 { 	
@@ -136,15 +150,26 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	XMFLOAT3 targetPosition = Vector3::Multifly(normalizedDir, 150000.0f);
 	LookAt(m_xmf3Position, targetPosition, XMFLOAT3{ 0,1,0 }); 
 
-	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity,
-		Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY));
+	m_xmf3Velocity = XMFLOAT3(0.0f, m_xmf3Velocity.y, 0.0f);
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY));
+
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
+
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;
 	if (m_xmf3Velocity.z > speed) m_xmf3Velocity.z = speed;
 	if (m_xmf3Velocity.x < -speed) m_xmf3Velocity.x = -speed;
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
+}
+
+void CPlayer::Jump()
+{
+	if (false == m_isOnGround) {
+		return;
+	}
+	// 일반 사람의 점프 높이는 대략 30 ~ 40cm
+	m_xmf3Velocity.y += 6000.0;
+	m_isOnGround = false;
 }
  

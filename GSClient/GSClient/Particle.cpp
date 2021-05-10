@@ -21,8 +21,7 @@ void ParticleObject::Update(float fTimeElapsed)
 			m_elapsedTime = 0.0f;
 			SetParticleParameter(0, -1.0f);
 		}
-		else {
-			cout << "파티클 시간 : \n" << m_elapsedTime << "\n";
+		else { 
 			SetParticleParameter(0, m_elapsedTime);
 		}
 	}

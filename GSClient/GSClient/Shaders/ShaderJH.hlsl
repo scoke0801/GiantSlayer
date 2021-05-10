@@ -686,8 +686,8 @@ struct VS_WATER_OUTPUT
 
 VS_WATER_OUTPUT VSTerrainWater(VS_WATER_INPUT input)
 {
-	VS_WATER_OUTPUT output;
-
+	VS_WATER_OUTPUT output; 
+	 
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 

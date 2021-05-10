@@ -27,8 +27,7 @@ void CInputHandler::ProcessInput()
 	if (GetAsyncKeyState(VK_A) & 0x8000)		m_Inputs.KEY_A = true;
 	if (GetAsyncKeyState(VK_S) & 0x8000)		m_Inputs.KEY_S = true;
 	if (GetAsyncKeyState(VK_D) & 0x8000)		m_Inputs.KEY_D = true; 
-	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-		m_Inputs.KEY_SPACE = true;
+	if (GetAsyncKeyState(VK_SPACE) & 0x8000)	m_Inputs.KEY_SPACE = true;
 	 
 #pragma region for Debuging Keys	
 	if (GetAsyncKeyState(VK_F1) & 0x8000)		m_Inputs.KEY_F1 = true;

@@ -40,8 +40,7 @@ void CArrow::Update(float fTimeElapsed)
 			//m_ConnectedParticle = nullptr;
 		}
 	}
-	else return; 
-
+	else return;  
 }
 
 void CArrow::SetTargetPosition(const XMFLOAT3& targetPos)
