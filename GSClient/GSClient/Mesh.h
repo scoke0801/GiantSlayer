@@ -1,4 +1,5 @@
-#pragma once 
+#pragma once
+#include "FbxLoader.h"
 
 //정점을 표현하기 위한 클래스를 선언한다. 
 class CVertex
@@ -153,6 +154,7 @@ protected:
 	UINT m_nStride = 0;
 	UINT m_nOffset = 0;
 	UINT m_nPolygons = 0;
+	UINT m_nBones = 0;
 
 	CMesh** m_ppMeshes = NULL;
 	int m_Meshes = 0;
@@ -160,15 +162,14 @@ protected:
 	BoundingBox m_bBox;
 
 protected:
+	D3D12_PRIMITIVE_TOPOLOGY m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
 	ID3D12Resource* m_pd3dVertexBuffer = NULL;
 	ID3D12Resource* m_pd3dVertexUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW m_d3dVertexBufferView;
 
 	ID3D12Resource* m_pd3dIndexBuffer = NULL;
 	ID3D12Resource* m_pd3dIndexUploadBuffer = NULL;
-
-	D3D12_VERTEX_BUFFER_VIEW m_d3dVertexBufferView;
-	D3D12_PRIMITIVE_TOPOLOGY m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
 	D3D12_INDEX_BUFFER_VIEW m_d3dIndexBufferView;
 
 public:
@@ -390,23 +391,77 @@ typedef struct CMeshinfo
 	int vertics;
 };
 
+class CFixedMesh : public CMesh
+{
+public:
+	int nVertices = 0;
+	int nPolygons = 0;
+	int nBones = 0;
+
+	int nAnimLength;
+	bool hasAnimation;
+
+	string animName;
+	vector<Vertex> vertices;
+	vector<int> indices;
+	vector<Bone> skeleton;
+
+	CFixedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		char* pstrFbxFileName);
+	virtual ~CFixedMesh();
+
+	void LoadFile(char* pstrFbxFileName);
+};
+
+/*
+vector<Vertex> vertices;
+	vector<int> indices;
+	vector<Bone> skeleton;
+*/
+
+class CAnimatedMesh : public CMesh
+{
+protected:
+	ID3D12Resource* m_pd3dPositionBuffer = NULL;
+	ID3D12Resource* m_pd3dPositionUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dPositionBufferView;
+
+	ID3D12Resource* m_pd3dTextureCoord0Buffer = NULL;
+	ID3D12Resource* m_pd3dTextureCoord0UploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dTextureCoord0BufferView;
+
+	ID3D12Resource* m_pd3dNormalBuffer = NULL;
+	ID3D12Resource* m_pd3dNormalUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dNormalBufferView;
+
+	ID3D12Resource* m_pd3dBoneIndexBuffer = NULL;
+	ID3D12Resource* m_pd3dBoneIndexUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dBoneIndexBufferView;
+
+	ID3D12Resource* m_pd3dBoneWeightBuffer = NULL;
+	ID3D12Resource* m_pd3dBoneWeightUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dBoneWeightBufferView;
+
+	vector<Vertex> temp;
+public:
+	int nBones = 0;
+
+	CAnimatedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+		vector<Vertex> vertices, vector<int> indices, vector<Bone> skeletons);
+	virtual ~CAnimatedMesh();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) override;
+};
+
 class CMeshFbx : public CMesh
 {
 public:
 	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FbxManager* pfbxSdkManager, char* pstrFbxFileName,
 		bool rotateFlag = false);
-	CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int* pnIndices, vector<CTexturedVertex> vertics);
 	virtual ~CMeshFbx();
 
 public:
 	void LoadMesh(FbxNode* node, CMeshinfo* info, bool rotateFlag = false);
-};
-
-class CMeshFbxTextured : public CMesh
-{
-public:
-	CMeshFbxTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices);
-	virtual ~CMeshFbxTextured();
 };
 
 //////////////////////////////////////////////////////////////////////////////

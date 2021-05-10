@@ -197,15 +197,6 @@ void CSceneExport::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_Player->SetTextureIndex(0x200);
 	m_Player->SetMesh(golemMesh);
 	//m_Player->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 10, 10, 10);
-
-	//FbxLoader* testexport = new FbxLoader(m_pfbxManager, "resources/Fbx/testtree.fbx");
-
-	CFbxObjectFileLoadVer* testloaded = new CFbxObjectFileLoadVer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "FbxExportedFile.bin");
-	//testloaded->SetAnimationStack(0);
-	//testloaded->m_pAnimationController->SetPosition(0, 0.0f);
-	//testloaded->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	testloaded->SetPosition({ 100,  150, 100 });
-	m_Objects.push_back(std::move(testloaded));
 }
 
 void CSceneExport::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

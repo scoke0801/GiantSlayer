@@ -103,6 +103,7 @@ CTerrain::~CTerrain()
 
 void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	//return;
 	for (auto pObj : m_Objects)
 	{
 		pObj->Draw(pd3dCommandList, pCamera);

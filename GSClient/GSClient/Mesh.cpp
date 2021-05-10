@@ -953,6 +953,177 @@ FbxScene* LoadFbxSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	return(pfbxScene);
 }
 
+CFixedMesh::CFixedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	char* pstrFbxFileName) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	LoadFile(pstrFbxFileName);
+
+	// Vertices
+	vector<CTexturedVertex> tempVertex;
+
+	for (int i = 0; i < vertices.size(); i++) {
+		CTexturedVertex tempVert;
+		tempVert.m_xmf3Position = vertices[i].pos;
+		tempVert.m_xmf2TexCoord = vertices[i].uv;
+		tempVert.m_xmf3Normal = vertices[i].normal;
+		tempVertex.push_back(tempVert);
+	}
+
+	m_nVertices = tempVertex.size();
+	m_nStride = sizeof(CTexturedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, tempVertex.data(),
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	// Indices
+	m_nIndices = indices.size();
+
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, indices.data(),
+		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+}
+
+CFixedMesh::~CFixedMesh()
+{
+
+}
+
+void CFixedMesh::LoadFile(char* pstrFbxFileName)
+{
+	ifstream file;
+	file.open(pstrFbxFileName, ios::in | ios::binary);
+	string temp;
+
+	file >> temp >> nVertices;
+	file >> temp >> nPolygons;
+	file >> temp >> nBones;
+	file >> temp;
+
+	cout << "파일 로드: " << nVertices << " " << nPolygons << " " << endl;
+
+	for (int i = 0; i < nVertices; i++) {
+		Vertex tempVertex;
+
+		file >> tempVertex.pos.x >> tempVertex.pos.y >> tempVertex.pos.z >>
+			tempVertex.uv.x >> tempVertex.uv.y >>
+			tempVertex.normal.x >> tempVertex.normal.y >> tempVertex.normal.z;
+		file >> tempVertex.indices[0] >> tempVertex.indices[1] >> tempVertex.indices[2] >> tempVertex.indices[3] >>
+			tempVertex.weights.x >> tempVertex.weights.y >> tempVertex.weights.z >> temp;
+
+		vertices.push_back(tempVertex);
+	}
+	file >> temp;
+
+	for (int i = 0; i < (nPolygons * 3); i++) {
+		int tempInt;
+		file >> tempInt;
+		indices.push_back(tempInt);
+	}
+
+	file.close();
+}
+
+CAnimatedMesh::CAnimatedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	vector<Vertex> vertices, vector<int> indices, vector<Bone> skeletons) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = vertices.size();
+	m_nBones = skeletons.size();
+	m_nIndices = indices.size();
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	XMFLOAT3* pos = new XMFLOAT3[m_nVertices];
+	XMFLOAT2* uv = new XMFLOAT2[m_nVertices];
+	XMFLOAT3* normal = new XMFLOAT3[m_nVertices];
+	XMUINT4* tempInt4 = new XMUINT4[m_nVertices];
+	XMFLOAT4* tempXMF4 = new XMFLOAT4[m_nVertices];
+
+	for (int i = 0; i < m_nVertices; i++) {
+		pos[i] = vertices[i].pos;
+		uv[i] = vertices[i].uv;
+		normal[i] = vertices[i].normal;
+		tempXMF4[i] = vertices[i].weights;
+	
+		tempInt4[i].x = vertices[i].indices[0];
+		tempInt4[i].y = vertices[i].indices[1];
+		tempInt4[i].z = vertices[i].indices[2];
+		tempInt4[i].w = vertices[i].indices[3];
+	}
+
+	// Pos
+	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pos,
+		sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+	m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
+	m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+	
+	// Uv
+	m_pd3dTextureCoord0Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, uv,
+		sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+	m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
+	m_d3dTextureCoord0BufferView.StrideInBytes = sizeof(XMFLOAT2);
+	m_d3dTextureCoord0BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+	
+	// Normal
+	m_pd3dNormalBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, normal,
+		sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+	m_d3dNormalBufferView.BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
+	m_d3dNormalBufferView.StrideInBytes = sizeof(XMFLOAT3);
+	m_d3dNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+	// Indices
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, indices.data(),
+		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+
+	// BoneIndex
+	m_pd3dBoneIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, tempInt4,
+		m_nVertices * sizeof(XMUINT4), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dBoneIndexUploadBuffer);
+	m_d3dBoneIndexBufferView.BufferLocation = m_pd3dBoneIndexBuffer->GetGPUVirtualAddress();
+	m_d3dBoneIndexBufferView.StrideInBytes = sizeof(XMUINT4);
+	m_d3dBoneIndexBufferView.SizeInBytes = sizeof(XMUINT4) * m_nVertices;
+	
+	// BoneWeight
+	m_pd3dBoneWeightBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, tempXMF4,
+		sizeof(XMFLOAT4) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dBoneWeightUploadBuffer);
+	m_d3dBoneWeightBufferView.BufferLocation = m_pd3dBoneWeightBuffer->GetGPUVirtualAddress();
+	m_d3dBoneWeightBufferView.StrideInBytes = sizeof(XMFLOAT4);
+	m_d3dBoneWeightBufferView.SizeInBytes = sizeof(XMFLOAT4) * m_nVertices;
+}
+
+CAnimatedMesh::~CAnimatedMesh()
+{
+
+}
+
+void CAnimatedMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+
+	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[5] = { m_d3dPositionBufferView, m_d3dTextureCoord0BufferView, m_d3dNormalBufferView, m_d3dBoneIndexBufferView, m_d3dBoneWeightBufferView };
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 5, pVertexBufferViews);
+
+	if (m_pd3dIndexBuffer)
+	{
+		pd3dCommandList->IASetIndexBuffer(&m_d3dIndexBufferView);
+		pd3dCommandList->DrawIndexedInstanced(m_nIndices, 1, 0, 0, 0);
+	}
+	else
+	{
+		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+	}
+
+}
+
 CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	FbxManager* pfbxSdkManager, char* pstrFbxFileName,
 	bool rotateFlag)
@@ -994,62 +1165,10 @@ CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 }
 
-CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int* pnIndices, vector<CTexturedVertex> vertics) : CMesh(pd3dDevice, pd3dCommandList)
-{
-	/*
-	m_nVertices = nVertices;
-	m_nStride = sizeof(CTexturedVertex);
-	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, 
-		m_nStride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dIndexUploadBuffer);
-
-	m_pd3dVertexBuffer->Map(0, NULL, (void**)&m_pxmf4MappedPositions);
-
-	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-	m_d3dVertexBufferView.StrideInBytes = m_nStride;
-	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
-
-	원본 백업
-	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices,
-		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,
-		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
-
-	*/
-
-
-	m_nVertices = vertics.size();
-	m_nStride = sizeof(CTexturedVertex);
-	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	CTexturedVertex* pVertices = new CTexturedVertex[m_nVertices];
-	copy(vertics.begin(), vertics.end(), pVertices);
-
-	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL,
-		m_nStride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dIndexUploadBuffer);
-
-	m_pd3dVertexBuffer->Map(0, NULL, (void**)&m_pxmf4MappedPositions);
-
-	//정점 버퍼 뷰를 생성한다. 
-	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-	m_d3dVertexBufferView.StrideInBytes = m_nStride;
-	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
-
-	m_nIndices = vertics.size();
-
-	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices,
-		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
-
-	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
-	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
-}
-
 CMeshFbx::~CMeshFbx()
 {
 
 }
-
 
 void CMeshFbx::LoadMesh(FbxNode* node, CMeshinfo* info, bool rotateFlag)
 {
@@ -1120,37 +1239,6 @@ void CMeshFbx::LoadMesh(FbxNode* node, CMeshinfo* info, bool rotateFlag)
 		LoadMesh(node->GetChild(i), info, rotateFlag);
 }
 
-CMeshFbxTextured::CMeshFbxTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices) : CMesh(pd3dDevice, pd3dCommandList)
-{
-	m_nVertices = nVertices;
-	m_nStride = sizeof(CTexturedVertex);
-	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, 
-		m_nStride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dIndexUploadBuffer);
-
-	m_pd3dVertexBuffer->Map(0, NULL, (void**)&m_pxmf4MappedPositions);
-
-	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
-	m_d3dVertexBufferView.StrideInBytes = m_nStride;
-	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
-
-	m_nIndices = nIndices;
-
-	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices, 
-		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
-
-	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
-	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
-	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
-}
-
-
-CMeshFbxTextured::~CMeshFbxTextured()
-{
-	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
-	if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
-}
 #pragma endregion
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -170,7 +170,6 @@
     <ClInclude Include="Colider.h" />
     <ClInclude Include="FbxLoader.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="FbxObject.h" />
     <ClInclude Include="Communicates.h" />
@@ -227,7 +226,6 @@
     <ClCompile Include="Colider.cpp" />
     <ClCompile Include="FbxLoader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="FbxObject.cpp" />
     <ClCompile Include="Communicates.cpp" />

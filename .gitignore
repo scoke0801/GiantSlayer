@@ -1,5 +1,6 @@
 /.vs
 /vs
+/FbxExporter/.vs
 /GSClient/.vs
 /GSServer/.vs
 /.Debug
@@ -28,3 +29,5 @@
 **/libfbxsdk-md.lib
 /GSClient/x64/Debug/Resources
 /GSClient/x64/Debug/Shaders
+/FbxExporter/lib/libfbxsdk-md.lib
+/FbxExporter/Debug/Resources
