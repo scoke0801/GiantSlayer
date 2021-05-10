@@ -11,11 +11,19 @@ ParticleObject::~ParticleObject()
 
 void ParticleObject::Update(float fTimeElapsed)
 {
+	if (false == m_IsCanUse) {
+		return;
+	}
 	m_elapsedTime += fTimeElapsed;
 	if (m_Type == PARTICLE_TYPE::ArrowParticle) {
 		if (m_elapsedTime > ARROW_PARTICLE_LIFE_TIME) {
 			m_IsCanUse = false; 
 			m_elapsedTime = 0.0f;
+			SetParticleParameter(0, -1.0f);
+		}
+		else {
+			cout << "파티클 시간 : \n" << m_elapsedTime << "\n";
+			SetParticleParameter(0, m_elapsedTime);
 		}
 	}
 	else if (m_Type == PARTICLE_TYPE::HitParticleTex) {
@@ -43,6 +51,9 @@ void ParticleObject::SetDirecionVector(const XMFLOAT3& direction)
 
 void ParticleObject::SetParticleParameter(int idx, float parameter)
 {
+	if (idx == 0) {
+		m_xmf4x4World._31 = parameter;
+	}
 	if (idx == 3) { // 
 		m_xmf4x4World._14 = parameter;
 	}
@@ -130,6 +141,7 @@ void CParticle::UseParticle(int idx, const XMFLOAT3& pos, const XMFLOAT3& dir)
 	m_ParticleObjs[idx]->SetPosition(pos); 
 	m_ParticleObjs[idx]->SetDirecionVector(dir); 
 	m_ParticleObjs[idx]->SetUseable(true);
+	m_ParticleObjs[idx]->SetParticleParameter(0, 1.0f);
 }
 
 void CParticle::UseParticle(int idx)
