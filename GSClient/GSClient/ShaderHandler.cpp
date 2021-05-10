@@ -5,6 +5,7 @@
 void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	CreateFBXShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateFBXAnimatedShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateBasicObjectShader(pd3dDevice,pd3dGraphicsRootSignature);
 
 	CreateDoorWallShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -84,6 +85,24 @@ void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignatu
 	pFBXFeatureShaderRight->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
 	pFBXFeatureShaderRight->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("FBXFeatureRight", pFBXFeatureShaderRight); 
+}
+
+void CShaderHandler::CreateFBXAnimatedShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CShader* pFBXShader = new CShader();
+	CShader* pFBXFeatureShaderLeft = new CShader();
+	CShader* pFBXFeatureShaderRight = new CShader();
+
+	//if (m_UserID == ShaderHandlerUser::TH) 
+	{
+		pFBXShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSFbxAnimated");
+		pFBXShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFbxAnimated");
+	}
+
+	pFBXShader->CreateInputLayout(ShaderTypes::FbxAnimated);
+	pFBXShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pFBXShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("FbxAnimated", pFBXShader);
 }
 
 void CShaderHandler::CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)

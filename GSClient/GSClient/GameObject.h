@@ -2,7 +2,6 @@
 
 #include "Mesh.h" 
 #include "Colider.h"  
-//#include "FbxSceneContext.h"
 #include "FbxLoader.h" 
 
 class CShader;
@@ -48,16 +47,16 @@ struct GAMEOBJECT_INFO
 	UINT							m_nTextureIndex;
 };
 
-class CAnimationController;
-
 class CGameObject
 {
 private:
 	int					m_nReferences = 0;
 
 	bool				m_isDrawbale = true;
-protected:	// 좌표 관련 변수
+public:
 	XMFLOAT4X4			m_xmf4x4World;
+
+protected:	// 좌표 관련 변수
 
 	// frame update loop, update 갱신 후의 좌표
 	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
@@ -94,7 +93,6 @@ protected:	// 객체 관련 속성 변수
 	float				m_YPositionCorrection = 0.0f;
 public:
 	FbxScene*				m_pfbxScene = NULL;
-	CAnimationController*	m_pAnimationController = NULL;
 
 private:	// GPU 전달 데이터
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
@@ -110,10 +108,10 @@ public:
 
 	virtual void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 
-	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	void ReleaseShaderVariables();
-	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	void ReleaseUploadBuffers();
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseUploadBuffers();
 public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
