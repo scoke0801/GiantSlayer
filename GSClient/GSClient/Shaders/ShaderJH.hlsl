@@ -25,6 +25,15 @@ cbuffer cbCameraInfo : register(b2)
 	matrix gmtxViewProjection : packoffset(c12);
 	matrix gmtxShadowTransform : packoffset(c16);
 };
+cbuffer cbBoneOffsets : register(b6)
+{
+	float4x4 gpmtxBoneOffsets[100];
+};
+
+cbuffer cbBoneTransforms : register(b7)
+{
+	float4x4 gpmtxBoneTransforms[100];
+};
 
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);

@@ -397,13 +397,16 @@ void FbxLoader::SaveAsFile()
 	for (int i = 0; i < vertices.size(); i++) {
 		// pos + uv + normal
 		file << vertices[i].pos.x << " " << vertices[i].pos.y << " " << vertices[i].pos.z << " " <<
-				vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
-				vertices[i].normal.x << " " << vertices[i].normal.y << " " << vertices[i].normal.z << endl;
+			vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
+			vertices[i].normal.x << " " << vertices[i].normal.y << " " << vertices[i].normal.z << endl;
 		// bindex 1~4 + bweight 1~4
-		file << vertices[i].blendInfo[0].index << " " << vertices[i].blendInfo[1].index << " " <<
+		if (vertices[i].blendInfo.size() > 0)
+		{
+			file << vertices[i].blendInfo[0].index << " " << vertices[i].blendInfo[1].index << " " <<
 				vertices[i].blendInfo[2].index << " " << vertices[i].blendInfo[3].index << " " <<
 				vertices[i].blendInfo[0].weight << " " << vertices[i].blendInfo[1].weight << " " <<
 				vertices[i].blendInfo[2].weight << " " << vertices[i].blendInfo[3].weight << endl;
+		}
 	}
 	file << endl;
 
