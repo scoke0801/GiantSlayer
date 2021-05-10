@@ -939,31 +939,36 @@ VS_FBX_ANIMATED_OUTPUT VSFbxAnimated(VS_FBX_ANIMATED_INPUT input)
 {
 	VS_FBX_ANIMATED_OUTPUT output;
 
-	/*float3 tempPos = float3(0.0f, 0.0f, 0.0f);
+	float weights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	weights[0] = input.weights.x;
+	weights[1] = input.weights.y;
+	weights[2] = input.weights.z;
+	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
+
+	float3 tempPos = float3(0.0f, 0.0f, 0.0f);
 	float3 tempNormal = float3(0.0f, 0.0f, 0.0f);
 
 	for (int i = 0; i < 4; i++)
 	{
-		tempPos += input.weights[i] * mul(float4(input.position, 1.0f), gpmtxBoneTransforms[input.indices[i]]).xyz;
-		tempNormal += input.weights[i] * mul(input.normal, (float3x3)gpmtxBoneTransforms[input.indices[i]]);
+		tempPos += weights[i] * mul(float4(input.position, 1.0f), gpmtxBoneTransforms[input.indices[i]]).xyz;
+		tempNormal += weights[i] * mul(input.normal, (float3x3)gpmtxBoneTransforms[input.indices[i]]);
 	}
 
 	float4 tempPosW = mul(float4(tempPos, 1.0f), gmtxWorld);
 
+	output.position = mul(mul(float4(tempPos, 1.0f), gmtxView), gmtxProjection);
 	output.positionW = tempPosW.xyz;
 	output.normalW = mul(tempNormal, (float3x3)gmtxWorld);
-	output.position = mul(tempPosW, gmtxProjection);
-	output.uv = input.uv;*/
+	output.uv = input.uv;
 
-	output.positionW = float3(0.0f, 0.0f, 0.0f);
-	output.normalW = float3(0.0f, 0.0f, 0.0f);
+	//gpmtxBoneTransforms, gmtxWorld, gmtxView
 
-	for (int i = 0; i < 4; i++) {
-		output.positionW += input.weights[i] * mul(float4(input.position, 1.0f), gpmtxBoneTransforms[input.indices[i]]).xyz;
-		output.normalW += input.weights[i] * mul(input.normal, (float3x3)gpmtxBoneTransforms[input.indices[i]]);
-	}
+	/*
+	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
+	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxWorld);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
+	*/
 
 	return(output);
 }

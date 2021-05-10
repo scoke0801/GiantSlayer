@@ -17,13 +17,12 @@ public:
 	vector<Vertex> vertices;
 	vector<int> indices;
 	vector<Bone> skeleton;
-	XMFLOAT4X4* finTransform;
 
 	XMFLOAT4X4* m_pxmf4x4BindPoseBoneOffsets = NULL;
 	ID3D12Resource* m_pd3dcbBoneOffsets = NULL;
 	XMFLOAT4X4* m_pcbxmf4x4BoneOffsets = NULL;
 
-	XMFLOAT4X4* m_pxmf4x4BoneTransforms = NULL;
+	XMFLOAT4X4* finTransform;
 	ID3D12Resource* m_pd3dcbBoneTransforms = NULL;
 	XMFLOAT4X4* m_pcbxmf4x4BoneTransforms = NULL;
 
