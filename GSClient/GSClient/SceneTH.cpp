@@ -202,7 +202,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 2.5f)));
 	m_MinimapCamera->SetTarget(m_Player);
 
-	//FbxLoader(m_pfbxManager, "resources/Fbx/angrybot.fbx");
+	//FbxLoader(m_pfbxManager, "resources/Fbx/ATest.fbx");
 
 	CGameObject* testObject0 = new CGameObject();
 	testObject0->SetMesh(human);

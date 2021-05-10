@@ -24,7 +24,7 @@ CFbxObject::CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	cout << indices.size() << " " << vertices.size() << " " << skeleton.size() << endl;
 
-	//CFixedMesh* tempMesh = new CFixedMesh(pd3dDevice, pd3dCommandList, vertices, indices, skeleton);
+	//CFixedMesh* tempMesh = new CFixedMesh(pd3dDevice, pd3dCommandList, pstrFbxFileName);
 	CAnimatedMesh* tempMesh = new CAnimatedMesh(pd3dDevice, pd3dCommandList, vertices, indices, skeleton);
 
 	SetMesh(tempMesh);
@@ -125,7 +125,7 @@ void CFbxObject::LoadFile(char* pstrFbxFileName)
 		}
 	}
 
-	//cout << skeleton[skeleton.size()-1].animations[0].translation.x << endl;
+	cout << skeleton[skeleton.size()-1].animations[0].translation.x << endl;
 	file.close();
 }
 
@@ -206,6 +206,8 @@ void CFbxObject::Animate(float fTimeElapsed)
 		XMMATRIX finalTransform = XMMatrixMultiply(offset, toRoot);
 		XMStoreFloat4x4(&finTransform[i], XMMatrixTranspose(finalTransform));
 	}
+
+	cout << finTransform[5]._11 << endl;
 }
 
 void CFbxObject::Update(float fTimeElapsed)

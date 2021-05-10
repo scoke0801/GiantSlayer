@@ -1045,7 +1045,7 @@ CAnimatedMesh::CAnimatedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	XMUINT4* tempInt4 = new XMUINT4[m_nVertices];
 	XMFLOAT4* tempXMF4 = new XMFLOAT4[m_nVertices];
 
-	for (int i = 0; i < vertices.size(); i++) {
+	for (int i = 0; i < m_nVertices; i++) {
 		pos[i] = vertices[i].pos;
 		uv[i] = vertices[i].uv;
 		normal[i] = vertices[i].normal;
