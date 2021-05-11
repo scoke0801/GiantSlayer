@@ -150,9 +150,6 @@
     <ClCompile Include="Arrow.cpp">
       <Filter>GameObject\Arrow</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowMap.cpp">
-      <Filter>ShadowMap</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -290,7 +287,7 @@
     </ClInclude>
     <ClInclude Include="SceneExport.h">
       <Filter>Scene</Filter>
-    </ClInclude> 
+    </ClInclude>
     <ClInclude Include="Particle.h">
       <Filter>Particle</Filter>
     </ClInclude>
@@ -299,9 +296,6 @@
     </ClInclude>
     <ClInclude Include="Arrow.h">
       <Filter>GameObject\Arrow</Filter>
-    </ClInclude>
-    <ClInclude Include="ShadowMap.h">
-      <Filter>ShadowMap</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -411,9 +405,6 @@
     </Filter>
     <Filter Include="GameObject\Arrow">
       <UniqueIdentifier>{13df2e8a-dd14-4fee-86b7-3f08fd19b807}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ShadowMap">
-      <UniqueIdentifier>{008c7dca-7f60-44a4-a2d5-5fb6af01e29c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
