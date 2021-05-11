@@ -16,7 +16,8 @@ constexpr int MAX_MOUSE_INPUT = 30;
 constexpr float ARROW_LIFE_TIME = 10.0f;
 constexpr float ARROW_SPEED = 165.0f * 3.5f * 4.0f;
 
-constexpr float PLAYER_JUMP_HEIGHT = 165.0 * 1.5f;
+constexpr float PLAYER_JUMP_HEIGHT = 165.0 * 1.75f;
+constexpr float TO_JUMP_TIME = 1.0f;
 
 enum class COLLISION_HANDLE_TYPE {
 	NotCollide,

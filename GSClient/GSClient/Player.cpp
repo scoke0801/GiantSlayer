@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "Terrain.h"
 
+
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_Type = OBJ_TYPE::Player;
@@ -32,27 +33,31 @@ void CPlayer::Update(float fTimeElapsed)
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? 360.0f : 50.0f;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
+	 
+	Move(vel);
 
-	m_xmf3Velocity.x = m_xmf3Velocity.x * fTimeElapsed;
-	m_xmf3Velocity.z = m_xmf3Velocity.z * fTimeElapsed;
-	m_xmf3Velocity.y = m_xmf3Velocity.y * fTimeElapsed + -9.8f * fTimeElapsed * fTimeElapsed * 0.5f;
-	if (m_xmf3Velocity.y < -0.0f) {
-		m_isOnGround = true;
+	if (false == m_isOnGround) {
+		float y;
+		if (m_JumpTime > 0.5f) {
+			y = -PLAYER_JUMP_HEIGHT * fTimeElapsed;
+		}
+		else {
+			y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
+		}
+		Move({ 0,y,0 });
+		m_JumpTime += fTimeElapsed;
+		if (m_JumpTime > TO_JUMP_TIME) {
+			m_JumpTime = 0.0f;
+			m_isOnGround = true;
+		}
 	}
-	else {
-		cout << m_xmf3Velocity.y << "\n";
-	} 
 
-	Move(m_xmf3Velocity);
-	
 	UpdateCamera(); 
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 
 	if (fDeceleration > fLength) fDeceleration = fLength; 
-	m_xmf3Velocity.x = m_xmf3Velocity.x + fDeceleration;
-	m_xmf3Velocity.z = m_xmf3Velocity.z + fDeceleration;
-	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 }
 
 void CPlayer::UpdateCamera()
@@ -168,8 +173,8 @@ void CPlayer::Jump()
 	if (false == m_isOnGround) {
 		return;
 	}
-	// 일반 사람의 점프 높이는 대략 30 ~ 40cm
-	m_xmf3Velocity.y += 6000.0;
+	// 일반 사람의 점프 높이는 대략 30 ~ 40cm 
 	m_isOnGround = false;
+	m_JumpTime = 0.0f;
 }
  

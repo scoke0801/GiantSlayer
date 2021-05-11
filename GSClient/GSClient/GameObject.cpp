@@ -59,7 +59,7 @@ void CGameObject::SetMesh(CMesh* pMesh)
 }  
 void CGameObject::FixPositionByTerrain(CTerrain* pTerrain)
 {
-	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_YPositionCorrection;
+	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_HeightFromTerrain;
 	SetPosition(m_xmf3Position);
 }
 void CGameObject::BuildBoundigBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,

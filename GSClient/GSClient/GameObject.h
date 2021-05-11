@@ -66,6 +66,7 @@ protected:	// 좌표 관련 변수
 	XMFLOAT3			m_xmf3Velocity = XMFLOAT3{ 0,0,0 };
 	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
 	 
+	float				m_HeightFromTerrain = 0.0f;
 protected:// 충돌처리 관련 변수
 	vector<Collider*>	m_Colliders;
 	vector<Collider*>	m_AABB; 
@@ -90,7 +91,6 @@ protected:	// 객체 관련 속성 변수
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
 	bool				m_isCollidable = true;
 
-	float				m_YPositionCorrection = 0.0f;
 public:
 	FbxScene*				m_pfbxScene = NULL;
 
@@ -203,7 +203,10 @@ public:
 	 
 	void SetDrawable(bool drawable) { m_isDrawbale = drawable; }
 	bool IsDrawable() const { return m_isDrawbale; }
-	 
+
+	void SetHegithFromTerrain(float height) { m_HeightFromTerrain = height; }
+	float GetHeightFromTerrain() const { return m_HeightFromTerrain; }
+
 public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;

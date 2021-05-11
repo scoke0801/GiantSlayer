@@ -25,6 +25,7 @@ private:
 	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
 
 	bool m_isOnGround = true;
+	float m_JumpTime = 0.0f;
 
 private:
 	float m_AttackWaitingTime = 0.0f;

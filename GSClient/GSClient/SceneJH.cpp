@@ -1384,7 +1384,14 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->SetTextureIndex(0x80);
 	pObject->Scale(35, 35, 35); 
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
+	pObject->SetHegithFromTerrain(300.0f);
+
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,-10,20 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, -10, 20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
+	 
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,-10,-20 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, -10, -20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pObject);  
 
 	CEnemy* pEnemy = new CEnemy();
