@@ -130,6 +130,7 @@ public:
 	XMFLOAT3 GetOffset() const { return m_xmf3Offset; }
 
 	void MoveOffset(XMFLOAT3 shift);
+	void GenerateOrthogonalMatrix(float fWidth, float fHeight, float fNear, float fFar);
 public:
 	// Strafe/Walk the camera a distance d.
 	void Strafe(float d);

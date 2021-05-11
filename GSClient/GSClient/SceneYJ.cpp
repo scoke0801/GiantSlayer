@@ -127,7 +127,8 @@ void CSceneYJ::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLightCamera = new CLightCamera();
 
 	m_pLightCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pLightCamera->SetLens(0.25f * PI, nWidth, nHeight, 1.0f, lensize);
+	m_pLightCamera->SetLens(0.25f * PI, nWidth, nHeight, 1.0f, 60000);
+	//m_pLightCamera->GenerateOrthogonalMatrix(nWidth * 0.5f, nHeight * 0.5f, 0.0f, 50000.0f);
 	m_pLightCamera->SetRight(xmf3Right);
 	m_pLightCamera->SetUp(xmf3Up);
 	m_pLightCamera->SetLook(xmf3Look);
@@ -401,8 +402,6 @@ void CSceneYJ::ReleaseObjects()
 	m_Objects.clear();
 }
 
-
-
 void CSceneYJ::Update(float elapsedTime)
 {
 	ProcessInput();
@@ -434,18 +433,17 @@ void CSceneYJ::Update(float elapsedTime)
 
 	if (m_pLightCamera)
 	{
-		
-		//LightPos = m_Player->GetPosition();
-		//LightPos.y = 2200.0f;
-		//LightPos.z -= 100.0f;
+		LightPos = m_Player->GetPosition();
+		LightPos.y = 3000.0f;
+		LightPos.z += 10000.0f;
+
+		m_pLightCamera->LookAt({ LightPos },
+			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
+			m_Player->GetUp());
 
 		/*m_pLightCamera->LookAt(LightPos,
-			m_Player->GetPosition(),
+			{ 20000.0f,0.0f,20000.0f },
 			m_Player->GetUp());*/
-
-		m_pLightCamera->LookAt(LightPos,
-			{ -10000.0f,0.0f,0.0f },
-			m_Player->GetUp());
 
 		m_pLightCamera->UpdateViewMatrix();
 	}
@@ -711,11 +709,11 @@ void CSceneYJ::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
 
-	/*if (m_CurrentCamera)
-	{
-		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER__CAMERA);
-	}*/
+	//if (m_CurrentCamera)
+	//{
+	//	m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	//	//m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER__CAMERA);
+	//}
 	
 }
 
@@ -819,8 +817,6 @@ void CSceneYJ::ProcessInput()
 		cout << LightPos.z << endl;
 	}
 
-
-
 	if (keyInput.KEY_F3)
 	{
 		//m_Player->SetPosition({ 10500,  -2000, 17500 });
@@ -844,9 +840,13 @@ void CSceneYJ::ProcessInput()
 
 	if (keyInput.KEY_U)
 	{
+		LightPos.x += 10.0f;
+		cout << LightPos.x << endl;
 	}
 	if (keyInput.KEY_I)
 	{
+		LightPos.x -= 10.0f;
+		cout << LightPos.x << endl;
 	}
 	if (keyInput.KEY_O)
 	{

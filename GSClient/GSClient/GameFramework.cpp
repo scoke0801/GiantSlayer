@@ -415,7 +415,7 @@ void CFramework::Draw()
 
 	m_CurrentScene->Draw(m_pd3dCommandList);
 
-
+	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	m_CurrentScene->DrawShadow(m_pd3dCommandList);
 	 
 	//m_CurrentScene->DrawPlayer(m_pd3dCommandList);

@@ -349,6 +349,12 @@ namespace Matrix4x4
 			XMLoadFloat3(&xmf3LookAtPosition), XMLoadFloat3(&xmf3UpDirection)));
 		return(xmmtx4x4Result);
 	}
+	inline XMFLOAT4X4 OrthogonalFovLH(float fWidth, float fHeight, float fNear, float fFar)
+	{
+		XMFLOAT4X4 xmmtx4x4Result;
+		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixOrthographicLH(fWidth, fHeight, fNear, fFar));
+		return(xmmtx4x4Result);
+	}
 }
 
 /*정점의 색상을 무작위로(Random) 설정하기 위해 사용한다. 각 정점의 색상은 난수(Random Number)를 생성하여

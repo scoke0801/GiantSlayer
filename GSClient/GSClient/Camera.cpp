@@ -572,6 +572,11 @@ XMFLOAT3 CCamera::CalcTargetLook()
 	return XMFLOAT3(m_TargetTransform._31, m_TargetTransform._32, m_TargetTransform._33);
 }
 
+void CCamera::GenerateOrthogonalMatrix(float fWidth, float fHeight, float fNear, float fFar)
+{
+	m_xmf4x4Proj = Matrix4x4::OrthogonalFovLH(fWidth, fHeight, fNear, fFar);
+}
+
 
 CLightCamera::CLightCamera() : CCamera()
 {
