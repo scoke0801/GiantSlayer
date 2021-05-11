@@ -450,10 +450,11 @@ void CFramework::Draw()
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
 	m_CurrentScene->Draw(m_pd3dCommandList);
-
+	 
 	m_CurrentScene->DrawUI(m_pd3dCommandList);
 
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+ 
 
 	m_CurrentScene->DrawShadow(m_pd3dCommandList);
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
