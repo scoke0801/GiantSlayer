@@ -3,13 +3,42 @@
 #include "Shader.h"
 #include "Terrain.h"
 
-
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_Type = OBJ_TYPE::Player;
 
 	m_HP = 100;
 	m_SP = 100;
+}
+
+CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName)
+{
+	LoadFile(pstrFbxFileName);
+
+	finTransform = new XMFLOAT4X4[100];
+
+	cout << indices.size() << " " << vertices.size() << " " << skeleton.size() << endl;
+
+	//CFixedMesh* tempMesh = new CFixedMesh(pd3dDevice, pd3dCommandList, pstrFbxFileName);
+	CAnimatedMesh* tempMesh = new CAnimatedMesh(pd3dDevice, pd3dCommandList, vertices, indices, skeleton);
+
+	SetMesh(tempMesh);
+	//SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	SetShader(CShaderHandler::GetInstance().GetData("FbxAnimated"));
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	m_time = 0;
+	t = 0;
+	endTime = 0;
+	for (int i = 0; i < skeleton.size(); i++) {
+		float t = animations[curAnim].bone[i].animFrame.back().frameTime;
+		if (t > endTime)
+			endTime = t;
+	}
+
+	cout << endTime << endl;
 }
 
 CPlayer::~CPlayer()
@@ -58,6 +87,8 @@ void CPlayer::Update(float fTimeElapsed)
 	float fDeceleration = (Friction * fTimeElapsed); 
 	if (fDeceleration > fLength) fDeceleration = fLength; 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	 
+	Animate(fTimeElapsed);
 }
 
 void CPlayer::UpdateCamera()
@@ -150,10 +181,10 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 void CPlayer::SetVelocity(XMFLOAT3 dir)
 {
 	dir.y = 0;
-	XMFLOAT3 normalizedDir = Vector3::Normalize(dir); 
-	    
+	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);  
 	XMFLOAT3 targetPosition = Vector3::Multifly(normalizedDir, 150000.0f);
 	LookAt(m_xmf3Position, targetPosition, XMFLOAT3{ 0,1,0 }); 
+	Rotate({ 0,1,0 }, 180.0f);
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, m_xmf3Velocity.y, 0.0f);
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY));

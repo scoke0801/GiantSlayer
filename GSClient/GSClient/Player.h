@@ -3,6 +3,8 @@
 #include "Camera.h"
 #include "stdafx.h"
 
+#include "FBXLoader.h"
+#include "FbxObject.h"
 enum class PlayerMoveType
 {
 	None = 0,
@@ -16,9 +18,9 @@ enum class PlayerWeaponType
 	Bow = 0x02
 };
 
-class CTerrain;
+class CTerrain; 
 
-class CPlayer : public CGameObject
+class CPlayer : public CFbxObject
 {    
 private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
@@ -33,6 +35,9 @@ private:
 
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
+
 	~CPlayer();	
 	
 public:
