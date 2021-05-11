@@ -67,7 +67,9 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::JH);
 	CShaderHandler::GetInstance().CreateAllShaders(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	BuildMaterials(pd3dDevice, pd3dCommandList);
+	BuildMaterials(pd3dDevice, pd3dCommandList); 
+	CreateLightCamera(pd3dDevice, pd3dCommandList, width, height);
+
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
 	BuildLights(pd3dDevice, pd3dCommandList);
 	BuildSceneFrameData(pd3dDevice, pd3dCommandList);
@@ -444,6 +446,24 @@ void CSceneJH::Update(float elapsedTime)
 	{
 		m_MirrorCamera->UpdateViewMatrix();
 	}
+
+	if (m_pLightCamera)
+	{
+		LightPos = m_Player->GetPosition();
+		LightPos.y = 3000.0f;
+		LightPos.z += 10000.0f;
+
+		m_pLightCamera->LookAt({ LightPos },
+			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
+			m_Player->GetUp());
+
+		/*m_pLightCamera->LookAt(LightPos,
+			{ 20000.0f,0.0f,20000.0f },
+			m_Player->GetUp());*/
+
+		m_pLightCamera->UpdateViewMatrix();
+	}
+
 	if (m_MinimapCamera)
 	{
 		XMFLOAT3 pos = m_Player->GetPosition();
@@ -503,7 +523,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		//if (i == (int)OBJECT_LAYER::Enemy) {
 		//	continue;
 		//}
-		for (auto pObject : m_ObjectLayers[i]) {
+		for (auto pObject : m_ObjectLayers[i]) { 
 			pObject->Draw(pd3dCommandList, m_CurrentCamera);
 		}
 	} 
@@ -612,23 +632,24 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 		m_MirrorCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 
-	//ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
-	//pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	//
-	//D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dBasicSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	//pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
-	//
-	//m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
-	//m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
-	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
-	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
-	//
-	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
-	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
-	//
-	//::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
-	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
+	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
+
+	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
+	m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
+
+	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
+
 
 	m_Skybox->Draw(pd3dCommandList, m_MirrorCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
@@ -660,10 +681,6 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 	}
 }
 
-void CSceneJH::DrawPlayer_Shadow(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-}
-
 void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
@@ -683,13 +700,13 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	pd3dCommandList->OMSetRenderTargets(0, NULL, FALSE, &m_d3dDsvShadowMapCPUHandle);
 
-	//m_Player->Draw(pd3dCommandList, m_pLightCamera);
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) { 
+		for (auto pObject : m_ObjectLayers[i]) {
+			pObject->Draw_Shadow(pd3dCommandList, m_CurrentCamera); 
+		}
+	}
 	m_Player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
-
-	/*for (auto pObject : m_Objects)
-	{
-		pObject->Draw(pd3dCommandList, m_pLightCamera);
-	}*/
+	 
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));

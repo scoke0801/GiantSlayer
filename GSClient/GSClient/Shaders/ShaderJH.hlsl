@@ -796,6 +796,7 @@ struct VS_TEXTURED_LIGHTING_OUTPUT
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
 	float2 uv : TEXCOORD;
+	float4 shadowPosH : SHADOWPOS;
 };
 
 
@@ -807,6 +808,7 @@ VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
 	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxWorld);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
+	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
 
 	return(output);
 }
@@ -873,9 +875,11 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	{
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
 	}
+	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
 }
@@ -910,9 +914,12 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	if (gnTexturesMask & 0x20)
 	{
 		cColor = gtxtDoor.Sample(gssWrap, input.uv);
-	}
+	} 
+	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
+
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
 }
@@ -940,9 +947,11 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	{
 		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
+	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);	 
 }
@@ -967,9 +976,12 @@ float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	if (gnTexturesMask & 0x08)
 	{
 		cColor = gtxtPuzzleBoard.Sample(gssClamp, uvw);
-	}
+	} 
+	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
+
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);	
 }
@@ -985,9 +997,12 @@ float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primitiv
 	if (gnTexturesMask & 0x02)
 	{
 		cColor = gtxtWoodSignBoard.Sample(gssClamp, uvw);
-	}
+	} 
+	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
+
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
 }
@@ -1036,16 +1051,16 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	{
 		cColor = gtxtDesert_Rock.Sample(gssWrap, input.uv);
 	} 
+	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	shadowFactor = CalcShadowFactor(input.shadowPosH);
+
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+	 float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
 }
-
-
-
-// 그림자 계산
-
+  
+// 그림자 계산 
 struct VS_STANDARD_SHADOW_INPUT
 {
 	float3 position : POSITION;
@@ -1073,8 +1088,7 @@ VS_STANDARD_SHADOW_OUTPUT VSStandardShadow(VS_STANDARD_SHADOW_INPUT input)
 void PSStandardShadow(VS_STANDARD_SHADOW_OUTPUT input)
 {
 	float4 f4AlbedoColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
-
-
+	 
 	f4AlbedoColor = gtxtBox.Sample(gssWrap, input.uv);
 
 	clip(f4AlbedoColor.a - 0.1f);

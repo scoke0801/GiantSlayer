@@ -151,7 +151,6 @@ public:
 	void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 	void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
-	void DrawPlayer_Shadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
