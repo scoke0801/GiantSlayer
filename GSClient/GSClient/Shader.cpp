@@ -680,7 +680,7 @@ void CShader::CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	//파이프라인에 그래픽스 상태 객체를 설정한다.	
-	if (gbWireframeOn && m_nPipelineStates >= 3) {
+	if (gbWireframeOn && m_nPipelineStates >= 2) {
 		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1]);
 	}
 	else {

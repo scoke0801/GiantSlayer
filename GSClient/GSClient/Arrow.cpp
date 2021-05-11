@@ -40,8 +40,7 @@ void CArrow::Update(float fTimeElapsed)
 			//m_ConnectedParticle = nullptr;
 		}
 	}
-	else return; 
-
+	else return;  
 }
 
 void CArrow::SetTargetPosition(const XMFLOAT3& targetPos)
@@ -50,4 +49,12 @@ void CArrow::SetTargetPosition(const XMFLOAT3& targetPos)
 
 	m_xmf3TargetPosition = targetPos;  
 	m_xmf3Velocity = dirVector; 
+}
+
+void CArrow::SetTargetVector(const XMFLOAT3& playerLookAt)
+{
+	XMFLOAT3 dirVector = Vector3::Normalize(playerLookAt);
+	XMFLOAT3 targetPos = Vector3::Multifly(dirVector, 150000);
+	m_xmf3Velocity = dirVector;
+	LookAt(m_xmf3Position, targetPos, XMFLOAT3(0, 1, 0));
 }

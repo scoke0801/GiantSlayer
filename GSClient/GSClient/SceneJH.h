@@ -22,6 +22,9 @@ enum class FBX_MESH_TYPE : UINT {
 	Stump,
 	Bush_1,
 	Boss,
+	Player,
+	Enemy_01,
+	Enemy_02,
 	COUNT
 };
 
@@ -43,7 +46,8 @@ private:
 	bool						m_isPlayerSelected = true;
 
 private:
-	array<CMeshFbx*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
+	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
+	array<CMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
 
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
 	 

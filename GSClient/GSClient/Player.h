@@ -24,6 +24,8 @@ private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
 	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
 
+	bool m_isOnGround = true;
+	float m_JumpTime = 0.0f;
 
 private:
 	float m_AttackWaitingTime = 0.0f;
@@ -53,4 +55,6 @@ public:
 	void SetCanAttack(bool info) { m_IsCanAttack = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
+
+	void Jump();
 };

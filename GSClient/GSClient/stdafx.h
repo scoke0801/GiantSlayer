@@ -37,7 +37,7 @@
 #include <array>
 #include <cstdint>
 #include <sstream>
-
+#include <mutex>
 #define KFBX_DLLINFO
 #include <fbxsdk.h>
 

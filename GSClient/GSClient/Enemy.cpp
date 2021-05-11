@@ -8,7 +8,7 @@ CEnemy::CEnemy()
 	m_Sight = 20.f;
 	m_Statemachine = new CStateMachine<CEnemy>(this);
 	m_Statemachine->SetCurrentState(Wandering::Instance());
-	m_YPositionCorrection = 150.0f;
+	m_HeightFromTerrain = 150.0f;
 }
   
 CEnemy::~CEnemy()

@@ -29,6 +29,15 @@ cbuffer cbLightCameraInfo : register(b3)
 	matrix gmtxViewProjection : packoffset(c0);
 	matrix gmtxShadowTransform : packoffset(c4);
 };
+cbuffer cbBoneOffsets : register(b6)
+{
+	float4x4 gpmtxBoneOffsets[100];
+};
+
+cbuffer cbBoneTransforms : register(b7)
+{
+	float4x4 gpmtxBoneTransforms[100];
+};
 
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
@@ -749,8 +758,8 @@ struct VS_WATER_OUTPUT
 
 VS_WATER_OUTPUT VSTerrainWater(VS_WATER_INPUT input)
 {
-	VS_WATER_OUTPUT output;
-
+	VS_WATER_OUTPUT output; 
+	 
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 

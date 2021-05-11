@@ -285,6 +285,7 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_Heights[0][j] + 700, m_Heights[0][j + 1] + 700 , m_Heights[0][j + 2] + 700 , m_Heights[0][j + 3] + 700 , m_Heights[0][j + 4] + 700,
 		m_Heights[0][j] + 500, m_Heights[0][j + 1] + 500 , m_Heights[0][j + 2] + 500 , m_Heights[0][j + 3] + 500 , m_Heights[0][j + 4] + 500,
 		m_Heights[0][j] + 200, m_Heights[0][j + 1] + 200 , m_Heights[0][j + 2] + 200 , m_Heights[0][j + 3] + 200 , m_Heights[0][j + 4] + 200 };
+ 
 
 		m_BindTerrainMesh->CreateWallMesh(pd3dDevice, pd3dCommandList, 
 			{ 1.0f * j , 0.0f, -4.0f }, 
@@ -298,7 +299,7 @@ void CTerrain::BuildFrontWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		textureInfo = 0x01;
 
 		int heightsTemp[25] = {
-				m_Heights[0][0],		  m_Heights[0][1],		    m_Heights[0][2],		  m_Heights[0][3],		    m_Heights[0][4],
+				m_Heights[0][0],		 m_Heights[0][1],		    m_Heights[0][2],		  m_Heights[0][3],		    m_Heights[0][4],
 				m_Heights[0][0] + 700, m_Heights[0][1] + 700, m_Heights[0][2] + 700, m_Heights[0][3] + 700, m_Heights[0][4] + 700,
 				m_Heights[0][0] + 700, m_Heights[0][1] + 700, m_Heights[0][2] + 700, m_Heights[0][3] + 700, m_Heights[0][4] + 700,
 				m_Heights[0][0] + 500, m_Heights[0][1] + 500, m_Heights[0][2] + 500, m_Heights[0][3] + 500, m_Heights[0][4] + 500,
