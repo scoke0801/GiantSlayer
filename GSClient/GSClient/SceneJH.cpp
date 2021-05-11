@@ -16,12 +16,20 @@
 #include "Arrow.h"
 #include "Enemy.h"
 
-#define ROOT_PARAMETER_OBJECT			0
-#define ROOT_PARAMETER_SCENE_FRAME_DATA 1
-#define ROOT_PARAMETER_CAMERA			2
-#define ROOT_PARAMETER_MATERIAL			3
-#define ROOT_PARAMETER_LIGHT			4
-#define ROOT_PARAMETER_TEXTURE			5
+#define ROOT_PARAMETER_OBJECT				0
+#define ROOT_PARAMETER_SCENE_FRAME_DATA		1
+#define ROOT_PARAMETER_CAMERA				2
+#define ROOT_PARAMETER_LIGHT_CAMERA			3
+#define ROOT_PARAMETER_MATERIAL				4
+#define ROOT_PARAMETER_LIGHT				5
+#define ROOT_PARAMETER_TEXTURE				6
+
+
+D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor;
+D3D12_GPU_DESCRIPTOR_HANDLE srvGpuStart;
+D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuStart;
+XMFLOAT3 LightPos;
+float lensize = 60000.0f;
 
 CSceneJH::CSceneJH()
 {
@@ -49,7 +57,8 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 {   
 	BuildMirrorResource(pd3dDevice);
 	BuildMinimapResource(pd3dDevice);
-	
+	BuildShadowResource(pd3dDevice);
+
 	LoadTextures(pd3dDevice, pd3dCommandList);
 	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
 
@@ -295,14 +304,24 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-
-	srvHeapDesc.NumDescriptors = m_Textures.size() + 2;
+	srvHeapDesc.NumDescriptors = m_Textures.size() + 3;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dBasicSrvDescriptorHeap));
+	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
+
+	// Add +1 DSV for shadow map.
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
+	dsvHeapDesc.NumDescriptors = 2;
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	dsvHeapDesc.NodeMask = 0;
+	pd3dDevice->CreateDescriptorHeap(
+		&dsvHeapDesc, IID_PPV_ARGS(&m_pd3dDsvDescriptorHeap));
 
 	// Fill out the heap with actual descriptors. 
-	D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor = m_pd3dBasicSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	hDescriptor = m_pd3dSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	srvGpuStart = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	dsvCpuStart = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 	const char* keyNames[] =
 	{
@@ -343,6 +362,28 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = m_pd3dMirrorTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(m_pd3dMirrorTex, &srvDesc, hDescriptor);
+
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	srvDesc.Texture2D.PlaneSlice = 0;
+	pd3dDevice->CreateShaderResourceView(m_pd3dShadowMap, &srvDesc, hDescriptor);
+
+	// 그림자 깊이값
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.Texture2D.MipSlice = 0;
+
+	pd3dDevice->CreateDepthStencilView(m_pd3dShadowMap, &dsvDesc, CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize));
+
+	m_d3dDsvShadowMapCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize);
+	m_d3dSrvShadowMapGPUHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 3, gnCbvSrvDescriptorIncrementSize);
 }
 
 void CSceneJH::ReleaseObjects()
@@ -505,10 +546,10 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 		m_MinimapCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
-	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dBasicSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
 
 	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
@@ -613,6 +654,47 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
+}
+
+void CSceneJH::DrawPlayer_Shadow(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+
+	if (m_pLightCamera)
+	{
+		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		m_pLightCamera->GenerateViewMatrix();
+		m_pLightCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_LIGHT_CAMERA);
+		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
+	}
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+
+	pd3dCommandList->ClearDepthStencilView(m_d3dDsvShadowMapCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+	pd3dCommandList->OMSetRenderTargets(0, NULL, FALSE, &m_d3dDsvShadowMapCPUHandle);
+
+	//m_Player->Draw(pd3dCommandList, m_pLightCamera);
+	m_Player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
+
+	/*for (auto pObject : m_Objects)
+	{
+		pObject->Draw(pd3dCommandList, m_pLightCamera);
+	}*/
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
+
+	/*if (m_CurrentCamera)
+	{
+		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER__CAMERA);
+	}*/
 }
 
 void CSceneJH::Communicate(SOCKET& sock)
@@ -1055,14 +1137,14 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	// Ground
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size() + 2;
+	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size() + 3;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[6];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[9];
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 18; // GameData
 	pd3dRootParameters[0].Constants.ShaderRegister = 0;
@@ -1080,7 +1162,7 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[3].Descriptor.ShaderRegister = 3; //Material
+	pd3dRootParameters[3].Descriptor.ShaderRegister = 3; //Light Camera
 	pd3dRootParameters[3].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
@@ -1089,11 +1171,26 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	pd3dRootParameters[4].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[5].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
-	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	 
+	pd3dRootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[5].Descriptor.ShaderRegister = 5; //Material
+	pd3dRootParameters[5].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[6].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
+	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	
+	pd3dRootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[7].Descriptor.ShaderRegister = 6; //BoneOffsets
+	pd3dRootParameters[7].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[8].Descriptor.ShaderRegister = 7; //BoneTransforms
+	pd3dRootParameters[8].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags
 		= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
@@ -2069,6 +2166,69 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true);
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");
+}
+
+void CSceneJH::BuildShadowResource(ID3D12Device* pd3dDevice)
+{
+	D3D12_HEAP_PROPERTIES d3dHeapPropertiesDesc;
+	::ZeroMemory(&d3dHeapPropertiesDesc, sizeof(D3D12_HEAP_PROPERTIES));
+	d3dHeapPropertiesDesc.Type = D3D12_HEAP_TYPE_DEFAULT;
+	d3dHeapPropertiesDesc.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	d3dHeapPropertiesDesc.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	d3dHeapPropertiesDesc.CreationNodeMask = 1;
+	d3dHeapPropertiesDesc.VisibleNodeMask = 1;
+
+	D3D12_RESOURCE_DESC d3dResourceDesc;
+	ZeroMemory(&d3dResourceDesc, sizeof(D3D12_RESOURCE_DESC));
+
+	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	d3dResourceDesc.Alignment = 0;
+	d3dResourceDesc.Width = FRAME_BUFFER_WIDTH;
+	d3dResourceDesc.Height = FRAME_BUFFER_HEIGHT;
+	d3dResourceDesc.DepthOrArraySize = 1;
+	d3dResourceDesc.MipLevels = 1;
+	d3dResourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dResourceDesc.SampleDesc.Count = 1;
+	d3dResourceDesc.SampleDesc.Quality = 0;
+	d3dResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	d3dResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+	D3D12_CLEAR_VALUE d3dClear;
+	d3dClear.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dClear.DepthStencil.Depth = 1.0f;
+	d3dClear.DepthStencil.Stencil = 0;
+
+	pd3dDevice->CreateCommittedResource(&d3dHeapPropertiesDesc,
+		D3D12_HEAP_FLAG_NONE,
+		&d3dResourceDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		&d3dClear,
+		__uuidof(ID3D12Resource),
+		(void**)&m_pd3dShadowMap
+	);
+}
+
+void CSceneJH::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nHeight)
+{
+	XMFLOAT3 xmf3Look = XMFLOAT3(1.0f, -1.0f, 0.0f);
+
+	XMFLOAT3 xmf3Right = XMFLOAT3(0.0f, 0.0f, -1.0f);
+
+	XMFLOAT3 xmf3Up = Vector3::CrossProduct(xmf3Look, xmf3Right, true);
+
+	m_pLightCamera = new CLightCamera();
+
+	m_pLightCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pLightCamera->SetLens(0.25f * PI, nWidth, nHeight, 1.0f, lensize);
+	m_pLightCamera->SetRight(xmf3Right);
+	m_pLightCamera->SetUp(xmf3Up);
+	m_pLightCamera->SetLook(xmf3Look);
+	//m_pLightCamera->SetPosition(XMFLOAT3(10000.0f, 1300.0f, 0.0f));
+	m_pLightCamera->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	m_pLightCamera->SetViewport(0, 0, nWidth, nHeight, 0.0f, 1.0f);
+	m_pLightCamera->SetScissorRect(0, 0, nWidth, nHeight);
+	 
+	m_pLightCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CSceneJH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

@@ -199,9 +199,7 @@ float4 PSBasic(VS_COLOR_OUTPUT input) : SV_TARGET
 }
 //////////////////////////////////////////////////////////////////////
 //
-
-
-
+  
 VS_TEXTURE_OUT VSTextured(VS_TEXTURE_IN input)
 {
 	VS_TEXTURE_OUT outRes;

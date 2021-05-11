@@ -361,8 +361,7 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 		pd3dDevice->CreateShaderResourceView(texResource, &srvDesc, hDescriptor);
 	}
-
-
+	 
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = m_pd3dMinimapTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(m_pd3dMinimapTex, &srvDesc, hDescriptor);
@@ -683,7 +682,6 @@ void CSceneYJ::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 void CSceneYJ::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-
 
 	if (m_pLightCamera)
 	{

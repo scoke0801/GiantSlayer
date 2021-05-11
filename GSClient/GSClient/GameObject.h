@@ -112,6 +112,7 @@ public:
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseUploadBuffers();
+
 public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
@@ -122,6 +123,8 @@ public:
 	void DrawForBoundingObj(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
  
 	virtual void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera); 
+
+
 public:
 	virtual void Move(XMFLOAT3 shift);
 	void Move();

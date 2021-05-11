@@ -22,8 +22,12 @@ cbuffer cbCameraInfo : register(b2)
 	matrix	gmtxView : packoffset(c0);
 	matrix	gmtxProjection : packoffset(c4);
 	float3	gvCameraPosition : packoffset(c8);
-	matrix gmtxViewProjection : packoffset(c12);
-	matrix gmtxShadowTransform : packoffset(c16);
+};
+
+cbuffer cbLightCameraInfo : register(b3)
+{
+	matrix gmtxViewProjection : packoffset(c0);
+	matrix gmtxShadowTransform : packoffset(c4);
 };
 
 SamplerState gssWrap : register(s0);
@@ -76,7 +80,65 @@ Texture2D gtxtWater			: register(t37);
 
 Texture2D gtxtMap          : register(t38);
 Texture2D gtxtMirror       : register(t39);
+Texture2D gtxtShadowMap		: register(t40);
 
+float CalcShadowFactor(float4 f4ShadowPos)
+{
+	f4ShadowPos.xyz /= f4ShadowPos.w;
+
+	float fDepth = f4ShadowPos.z;
+
+	uint nWidth, nHeight, nMips;
+	gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
+
+	float dx = 1.0f / (float)nWidth;
+
+	float percentLit = 0.0f;
+
+	const float2 offsets[9] =
+	{
+		float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
+		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
+	};
+
+	[unroll]
+	for (int i = 0; i < 9; i++)
+	{
+		percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
+	}
+
+	return (percentLit / 9.0f) + 0.3f;
+}
+
+float CalcShadowFactor_t(float4 f4ShadowPos)
+{
+	f4ShadowPos.xyz /= f4ShadowPos.w;
+
+	float fDepth = f4ShadowPos.z;
+
+	uint nWidth, nHeight, nMips;
+	gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
+
+	float dx = 1.0f / (float)nWidth;
+
+	float percentLit = 0.0f;
+
+	const float2 offsets[9] =
+	{
+		float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
+		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
+	};
+
+	[unroll]
+	for (int i = 0; i < 9; i++)
+	{
+		percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
+	}
+
+	return (percentLit / 9.0f) + 0.4f;
+}
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
 {
@@ -424,8 +486,7 @@ struct VS_TERRAIN_TESSELLATION_OUTPUT
 	float2 uv0 : TEXCOORD0;
 	float3 normalW : NORMAL;	
 	uint texIndex : TEXTURE;
-	//float3 tangentW : TANGENT;
-	//float3 bitangentW : BITANGENT;
+	float4 shadowPosH : SHADOWPOS;
 };
 
 VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
@@ -437,6 +498,8 @@ VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
 	output.normalW = mul(input.normal, (float3x3) gmtxWorld); 
 	output.uv0 = input.uv0;
 	output.texIndex = input.texIndex;
+	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+
 	return (output);
 }
 
@@ -453,6 +516,7 @@ struct HS_TERRAIN_TESSELLATION_OUTPUT
 	float2 uv0 : TEXCOORD0;
 	float3 normalW : NORMAL;	
 	uint texIndex : TEXTURE;
+	float4 shadowPosH : SHADOWPOS;
 };
 
 struct DS_TERRAIN_TESSELLATION_OUTPUT
@@ -467,6 +531,8 @@ struct DS_TERRAIN_TESSELLATION_OUTPUT
 	float4 tessellation : TEXCOORD2;	
 	
 	uint texIndex : TEXTURE;
+
+	float4 shadowPosH : SHADOWPOS;
 };
 
 void BernsteinCoeffcient5x5(float t, out float fBernstein[5])
@@ -525,7 +591,9 @@ HS_TERRAIN_TESSELLATION_OUTPUT HSTerrainTessellation(InputPatch<VS_TERRAIN_TESSE
 	output.normalW = mul(input[i].normalW, (float3x3) gmtxWorld);
 	output.positionW = (float3) mul(float4(input[i].position, 1.0f), gmtxWorld);
 	output.uv0 = input[i].uv0;
-	output.texIndex = input[i].texIndex;
+	output.texIndex = input[i].texIndex; 
+	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+
 	return(output);
 }
 
@@ -577,6 +645,7 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	{
 		output.normalW = (float3)(mul(float4(normal, 1.0f),gmtxWorld));
 		output.positionW = (float3)mul(float4(position, 1.0f), gmtxWorld);
+		output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
 	}
 
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
@@ -652,9 +721,12 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		 
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
+	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
+
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
-	  
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
+
 	return (cColor * cIllumination);
 }
 
@@ -959,5 +1031,43 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
 	return(cColor * cIllumination);
+}
+
+
+
+// 그림자 계산
+
+struct VS_STANDARD_SHADOW_INPUT
+{
+	float3 position : POSITION;
+	float2 uv : TEXCOORD;
+};
+
+struct VS_STANDARD_SHADOW_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD;
+};
+
+VS_STANDARD_SHADOW_OUTPUT VSStandardShadow(VS_STANDARD_SHADOW_INPUT input)
+{
+	VS_STANDARD_SHADOW_OUTPUT output = (VS_STANDARD_SHADOW_OUTPUT)0.0f;
+
+	float4 posW = mul(float4(input.position, 1.0f), gmtxWorld);
+
+	output.position = mul(posW, gmtxViewProjection);
+	output.uv = input.uv;
+
+	return (output);
+}
+
+void PSStandardShadow(VS_STANDARD_SHADOW_OUTPUT input)
+{
+	float4 f4AlbedoColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
+
+
+	f4AlbedoColor = gtxtBox.Sample(gssWrap, input.uv);
+
+	clip(f4AlbedoColor.a - 0.1f);
 }
 
