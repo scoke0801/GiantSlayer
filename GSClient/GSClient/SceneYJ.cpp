@@ -26,6 +26,8 @@
 D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor;
 D3D12_GPU_DESCRIPTOR_HANDLE srvGpuStart;
 D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuStart;
+XMFLOAT3 LightPos;
+float lensize=60000.0f;
 
 CSceneYJ::CSceneYJ()
 {
@@ -125,14 +127,13 @@ void CSceneYJ::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLightCamera = new CLightCamera();
 
 	m_pLightCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pLightCamera->SetLens(0.25f * PI, nWidth, nHeight, 1.0f, 60000.0f);
+	m_pLightCamera->SetLens(0.25f * PI, nWidth, nHeight, 1.0f, lensize);
 	m_pLightCamera->SetRight(xmf3Right);
 	m_pLightCamera->SetUp(xmf3Up);
 	m_pLightCamera->SetLook(xmf3Look);
 	//m_pLightCamera->SetPosition(XMFLOAT3(10000.0f, 1300.0f, 0.0f));
 	m_pLightCamera->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pLightCamera->SetViewport(0, 0, nWidth, nHeight, 0.0f, 1.0f);
-
 	m_pLightCamera->SetScissorRect(0, 0, nWidth, nHeight);
 
 	
@@ -251,10 +252,13 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//m_Player->SetPosition({ 750,  230, 1850 });
 	m_Player->SetPosition({ 0, 0, 0 });
 	m_Player->SetCamera(m_Cameras[0]);
+	
 	//m_Player->SetCamera(light_cam)
 	m_Player->SetTextureIndex(0x80);
 	m_Player->SetMesh(fbxMesh);
 	m_Player->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 10, 10, 10, XMFLOAT3{ 0,0,0 });
+
+	LightPos = m_Player->GetPosition();
 
 	m_MinimapCamera->SetTarget(m_Player);
 	
@@ -397,6 +401,8 @@ void CSceneYJ::ReleaseObjects()
 	m_Objects.clear();
 }
 
+
+
 void CSceneYJ::Update(float elapsedTime)
 {
 	ProcessInput();
@@ -418,9 +424,7 @@ void CSceneYJ::Update(float elapsedTime)
 	m_Player->Update(elapsedTime);
 	
 	
-	
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
-
 
 
 	if (m_MirrorCamera)
@@ -431,12 +435,16 @@ void CSceneYJ::Update(float elapsedTime)
 	if (m_pLightCamera)
 	{
 		
-		XMFLOAT3 pos = m_Player->GetPosition();
-		pos.y = 1650.0f;
-		pos.z -= 10.0f;
+		//LightPos = m_Player->GetPosition();
+		//LightPos.y = 2200.0f;
+		//LightPos.z -= 100.0f;
 
-		m_pLightCamera->LookAt(pos,
+		/*m_pLightCamera->LookAt(LightPos,
 			m_Player->GetPosition(),
+			m_Player->GetUp());*/
+
+		m_pLightCamera->LookAt(LightPos,
+			{ -10000.0f,0.0f,0.0f },
 			m_Player->GetUp());
 
 		m_pLightCamera->UpdateViewMatrix();
@@ -692,12 +700,13 @@ void CSceneYJ::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	pd3dCommandList->OMSetRenderTargets(0, NULL, FALSE, &m_d3dDsvShadowMapCPUHandle);
 
+	//m_Player->Draw(pd3dCommandList, m_pLightCamera);
 	m_Player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
 
-	for (auto pObject : m_Objects)
+	/*for (auto pObject : m_Objects)
 	{
 		pObject->Draw(pd3dCommandList, m_pLightCamera);
-	}
+	}*/
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
@@ -785,32 +794,54 @@ void CSceneYJ::ProcessInput()
 	////////////////////////////////////////////////////////// 
 	if (keyInput.KEY_ADD)
 	{
-		m_CurrentCamera->SetSpeed(min(cameraSpeed + 1.0f, 15.0f));
+		//m_CurrentCamera->SetSpeed(min(cameraSpeed + 1.0f, 15.0f));
+		LightPos.y += 10.0f;
+		cout << LightPos.y<<endl;
 	}
 	if (keyInput.KEY_SUBTRACT)
 	{
-		m_CurrentCamera->SetSpeed(max(cameraSpeed - 1.0f, 1.0f));
+		//m_CurrentCamera->SetSpeed(max(cameraSpeed - 1.0f, 1.0f));
+		LightPos.y -= 10.0f;
+		cout << LightPos.y<<endl;
 	}
+
+
 	if (keyInput.KEY_F1)
 	{
-		m_Player->SetPosition({ 2500,  0, 2500 });
+		//m_Player->SetPosition({ 2500,  0, 2500 });
+		LightPos.z += 10.0f;
+		cout << LightPos.z << endl;
 	}
 	if (keyInput.KEY_F2)
 	{
-		m_Player->SetPosition({ 2500,  -1000, 17500 });
+		//m_Player->SetPosition({ 2500,  -1000, 17500 });
+		LightPos.z -= 10.0f;
+		cout << LightPos.z << endl;
 	}
+
+
+
 	if (keyInput.KEY_F3)
 	{
-		m_Player->SetPosition({ 10500,  -2000, 17500 });
+		//m_Player->SetPosition({ 10500,  -2000, 17500 });
+
+		lensize += 10.0f;
+		m_pLightCamera->SetLens(0.25f * PI, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 1.0f, lensize);
+		cout << lensize << endl;
 	}
 	if (keyInput.KEY_F4)
 	{
-		m_Player->SetPosition({ 12500,  -3000, 2500 });
+		//m_Player->SetPosition({ 12500,  -3000, 2500 });
+
+		lensize -= 10.0f;
+		m_pLightCamera->SetLens(0.25f * PI, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 1.0f, lensize);
+		cout << lensize << endl;
 	}
 	if (keyInput.KEY_F5)
 	{
 		m_Player->SetPosition({ 17500,  -6000, 17500 });
 	}
+
 	if (keyInput.KEY_U)
 	{
 	}

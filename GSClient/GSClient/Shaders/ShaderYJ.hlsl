@@ -84,6 +84,64 @@ Texture2D gtxtMap          : register(t37);
 Texture2D gtxtMirror       : register(t38);
 Texture2D gtxtShadowMap		: register(t39);
  
+float CalcShadowFactor(float4 f4ShadowPos)
+{
+    f4ShadowPos.xyz /= f4ShadowPos.w;
+
+    float fDepth = f4ShadowPos.z;
+
+    uint nWidth, nHeight, nMips;
+    gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
+
+    float dx = 1.0f / (float) nWidth;
+
+    float percentLit = 0.0f;
+
+    const float2 offsets[9] =
+    {
+        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
+		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
+    };
+
+	[unroll]
+    for (int i = 0; i < 9; i++)
+    {
+        percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
+    }
+
+    return (percentLit / 9.0f) + 0.3f;
+}
+
+float CalcShadowFactor_t(float4 f4ShadowPos)
+{
+    f4ShadowPos.xyz /= f4ShadowPos.w;
+
+    float fDepth = f4ShadowPos.z;
+
+    uint nWidth, nHeight, nMips;
+    gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
+
+    float dx = 1.0f / (float) nWidth;
+
+    float percentLit = 0.0f;
+
+    const float2 offsets[9] =
+    {
+        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
+		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
+    };
+
+	[unroll]
+    for (int i = 0; i < 9; i++)
+    {
+        percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
+    }
+
+    return (percentLit / 9.0f) + 0.4f;
+}
+
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
 {
@@ -607,34 +665,7 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-float CalcShadowFactor(float4 f4ShadowPos)
-{
-    f4ShadowPos.xyz /= f4ShadowPos.w;
 
-    float fDepth = f4ShadowPos.z;
-
-    uint nWidth, nHeight, nMips;
-    gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
-
-    float dx = 1.0f / (float) nWidth;
-
-    float percentLit = 0.0f;
-
-    const float2 offsets[9] =
-    {
-        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
-		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
-		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
-    };
-
-	[unroll]
-    for (int i = 0; i < 9; i++)
-    {
-        percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
-    }
-
-    return (percentLit / 9.0f) + 0.3f;
-}
 
 #include "Light.hlsl"
 
@@ -698,7 +729,7 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-    shadowFactor = CalcShadowFactor(input.shadowPosH);
+    shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 	
 	input.normalW = normalize(input.normalW);
     float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID,shadowFactor);
