@@ -21,8 +21,12 @@ cbuffer cbCameraInfo : register(b2)
 	matrix	gmtxView : packoffset(c0);
 	matrix	gmtxProjection : packoffset(c4);
 	float3	gvCameraPosition : packoffset(c8);
-    matrix gmtxViewProjection : packoffset(c12);
-    matrix gmtxShadowTransform : packoffset(c16);
+};
+
+cbuffer cbLightCameraInfo : register(b3)
+{
+    matrix gmtxViewProjection : packoffset(c0);
+    matrix gmtxShadowTransform : packoffset(c4);
 };
 
 
@@ -411,41 +415,39 @@ float4 PSMinimap(VS_MOUT input) : SV_TARGET
 //////////////////////////////////////////////////////
 //
 
-
-
 struct VS_TERRAIN_INPUT
 {
 	float3 position : POSITION;
 	float2 uv0 : TEXCOORD0;
-    float3 normal : NORMAL;
-    //float3 tangent : TANGENT;
-    //float3 bitangent : BITANGENT;
+	float3 normal : NORMAL;
+	uint texIndex : TEXTURE;
+	//float3 tangent : TANGENT;
+	//float3 bitangent : BITANGENT;
 };
 
 ///////////////////////////////////////////
 // VS
 struct VS_TERRAIN_TESSELLATION_OUTPUT
 {
-    float3 position : POSITION;
-    float3 positionW : POSITION1;
-    float2 uv0 : TEXCOORD0;
-    float3 normalW : NORMAL;
-    //float3 tangentW : TANGENT;
-    //float3 bitangentW : BITANGENT;
+	float3 position : POSITION;
+	float3 positionW : POSITION1;
+	float2 uv0 : TEXCOORD0;
+	float3 normalW : NORMAL;
+	uint texIndex : TEXTURE;
+	//float3 tangentW : TANGENT;
+	//float3 bitangentW : BITANGENT;
 };
 
 VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
 {
-    VS_TERRAIN_TESSELLATION_OUTPUT output;
+	VS_TERRAIN_TESSELLATION_OUTPUT output;
 
-    output.position = input.position;
-    output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
-    output.normalW = mul(input.normal, (float3x3) gmtxWorld);
-    //output.tangentW = (float3) mul(float4(input.tangent, 1.0f), gmtxWorld);
-    //output.bitangentW = (float3) mul(float4(input.bitangent, 1.0f), gmtxWorld);
-    output.uv0 = input.uv0;
-	
-    return (output);
+	output.position = input.position;
+	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
+	output.normalW = mul(input.normal, (float3x3) gmtxWorld);
+	output.uv0 = input.uv0;
+	output.texIndex = input.texIndex;
+	return (output);
 }
 
 struct HS_TERRAIN_TESSELLATION_CONSTANT
@@ -457,21 +459,24 @@ struct HS_TERRAIN_TESSELLATION_CONSTANT
 struct HS_TERRAIN_TESSELLATION_OUTPUT
 {
 	float3 position : POSITION;
-    float3 positionW : POSITION1;
+	float3 positionW : POSITION1;
 	float2 uv0 : TEXCOORD0;
-    float3 normalW : NORMAL;
+	float3 normalW : NORMAL;
+	uint texIndex : TEXTURE;
 };
 
 struct DS_TERRAIN_TESSELLATION_OUTPUT
 {
 	float4 position : SV_POSITION;
-    float3 positionW : POSITION;
-	
+	float3 positionW : POSITION;
+
 	float2 uv0 : TEXCOORD0;
 
-    float3 normalW : NORMAL;
-	
+	float3 normalW : NORMAL;
+
 	float4 tessellation : TEXCOORD2;
+
+	uint texIndex : TEXTURE;
 };
 
 void BernsteinCoeffcient5x5(float t, out float fBernstein[5])
@@ -495,7 +500,6 @@ float3 CubicBezierSum5x5(OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch, 
 
 	return(f3Sum);
 }
-
 float3 CubicBezierNormalSum5x5(OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch, float uB[5], float vB[5])
 {
 	float3 f3Sum = float3(0.0f, 0.0f, 0.0f);
@@ -507,6 +511,7 @@ float3 CubicBezierNormalSum5x5(OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> p
 
 	return(f3Sum);
 }
+
 float CalculateTessFactor(float3 f3Position)
 {
 	float fDistToCamera = distance(f3Position, gvCameraPosition);
@@ -527,10 +532,10 @@ HS_TERRAIN_TESSELLATION_OUTPUT HSTerrainTessellation(InputPatch<VS_TERRAIN_TESSE
 	HS_TERRAIN_TESSELLATION_OUTPUT output;
 
 	output.position = input[i].position;
-    output.normalW = mul(input[i].normalW, (float3x3) gmtxWorld);
-    output.positionW = (float3) mul(float4(input[i].position, 1.0f), gmtxWorld);
+	output.normalW = mul(input[i].normalW, (float3x3) gmtxWorld);
+	output.positionW = (float3) mul(float4(input[i].position, 1.0f), gmtxWorld);
 	output.uv0 = input[i].uv0;
-
+	output.texIndex = input[i].texIndex;
 	return(output);
 }
 
@@ -551,7 +556,6 @@ HS_TERRAIN_TESSELLATION_CONSTANT HSTerrainTessellationConstant(InputPatch<VS_TER
 	float3 f3Sum = float3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < 25; i++)
 		f3Sum += input[i].positionW;
-	
 
 	float3 f3Center = f3Sum / 25.0f;
 	output.fTessInsides[0] = output.fTessInsides[1] = CalculateTessFactor(f3Center);
@@ -561,7 +565,10 @@ HS_TERRAIN_TESSELLATION_CONSTANT HSTerrainTessellationConstant(InputPatch<VS_TER
 
 // DS
 [domain("quad")]
-DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CONSTANT patchConstant, float2 uv : SV_DomainLocation, OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch)
+DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
+	HS_TERRAIN_TESSELLATION_CONSTANT patchConstant,
+	float2 uv : SV_DomainLocation,
+	OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch)
 {
 	DS_TERRAIN_TESSELLATION_OUTPUT output = (DS_TERRAIN_TESSELLATION_OUTPUT)0;
 
@@ -571,24 +578,24 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 
 	output.uv0 = lerp(lerp(patch[0].uv0, patch[4].uv0, uv.x), lerp(patch[20].uv0, patch[24].uv0, uv.x), uv.y);
 
-	float3 position = CubicBezierSum5x5(patch, uB, vB);	
+	float3 position = CubicBezierSum5x5(patch, uB, vB);
 	float3 normal = CubicBezierNormalSum5x5(patch, uB, vB);
 	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
 	output.position = mul(float4(position, 1.0f), mtxWorldViewProjection);
-	
-    for (int i = 0; i < 25; i++)
-    {
+
+	for (int i = 0; i < 25; i++)
+	{
 		output.normalW = (float3)(mul(float4(normal, 1.0f), gmtxWorld));
-        output.positionW = (float3) mul(float4(position, 1.0f), gmtxWorld);
-    }
+		output.positionW = (float3)mul(float4(position, 1.0f), gmtxWorld);
+	}
 
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
+	output.texIndex = patch[0].texIndex;
 
 	return(output);
 }
 
-// PS
-
+// PS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
@@ -596,49 +603,48 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(HS_TERRAIN_TESSELLATION_CON
 
 struct VS_LIGHT_OUT
 {
-    float4 PosH : SV_POSITION;
-    float3 PosW : POSITION;
-    float2 uv : TEXCOORD;
-    float3 Normal : NORMAL;
+	float4 PosH : SV_POSITION;
+	float3 PosW : POSITION;
+	float2 uv : TEXCOORD;
+	float3 Normal : NORMAL;
 };
 
 float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 {
-    float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    if (gnTexturesMask & 0x01)
-    {
-        cColor = gtxtForest.Sample(gssWrap, input.uv0);
-    }
-    if (gnTexturesMask & 0x02)
-    {
-        cColor = gtxtDryForest.Sample(gssWrap, input.uv0);
-    }
-    if (gnTexturesMask & 0x04)
-    {
-        cColor = gtxtDesert.Sample(gssWrap, input.uv0);
-    }
-    if (gnTexturesMask & 0x08)
-    {
-        cColor = gtxtDryDesert.Sample(gssWrap, input.uv0);
-    }
-    if (gnTexturesMask & 0x10)
-    {
-        cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0);
-        float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-        float FogStart = 10000.0f;
-        float FogRange = 20000.0f;
-	
-        float3 toEyeW = gvCameraPosition + input.position.xyz;
-        float distToEye = length(toEyeW);
-        toEyeW /= distToEye; // normalize
-		
-        float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
-        
-        
-        cColor = lerp(cColor, FogColor, 1 - fogAmount);
-    } 
-	if (gnTexturesMask & 0x20)
+	if (input.texIndex & 0x01)
+	{
+		cColor = gtxtForest.Sample(gssWrap, input.uv0);
+	}
+	if (input.texIndex & 0x02)
+	{
+		cColor = gtxtDryForest.Sample(gssWrap, input.uv0);
+	}
+	if (input.texIndex & 0x04)
+	{
+		cColor = gtxtDesert.Sample(gssWrap, input.uv0);
+	}
+	if (input.texIndex & 0x08)
+	{
+		cColor = gtxtDryDesert.Sample(gssWrap, input.uv0);
+	}
+	if (input.texIndex & 0x10)
+	{
+		cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0);
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
+	}
+	if (input.texIndex & 0x20)
 	{
 		cColor = gtxtBossWall.Sample(gssWrap, input.uv0);
 
@@ -652,20 +658,18 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 
 		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
 
-
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
-
-    input.normalW = normalize(input.normalW);
-    float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 
 	//else
 	//{
 	//	cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
 	//}
-
-    return (cColor * cIllumination);
+	return (cColor * cIllumination); 
 }
+
 
 
 struct VS_TEXTURED_LIGHTING_INPUT
@@ -725,7 +729,7 @@ float CalcShadowFactor(float4 f4ShadowPos)
         percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
     }
 
-    return percentLit / 9.0f;
+    return (percentLit / 9.0f)+0.3f;
 }
 
 
@@ -772,17 +776,17 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
 		
 		
-        float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-        float FogStart = 10000.0f;
-        float FogRange = 20000.0f;
+        //float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+        //float FogStart = 10000.0f;
+        //float FogRange = 20000.0f;
 	
-        float3 toEyeW = gvCameraPosition + input.position.xyz;
-        float distToEye = length(toEyeW);
-        toEyeW /= distToEye; // normalize
+        //float3 toEyeW = gvCameraPosition + input.position.xyz;
+        //float distToEye = length(toEyeW);
+        //toEyeW /= distToEye; // normalize
 	
-        float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+        //float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
 		
-        cColor = lerp(cColor, FogColor, 1 - fogAmount);
+        //cColor = lerp(cColor, FogColor, 1 - fogAmount);
     }
 	if (gnTexturesMask & 0x100)
 	{

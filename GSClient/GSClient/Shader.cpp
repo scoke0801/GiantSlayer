@@ -477,19 +477,19 @@ void CShader::CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 		d3dPipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
 	}
 	d3dPipelineStateDesc.BlendState = CreateBlendState(); 
-	D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
-	transparencyBlendDesc.BlendEnable = true;
-	transparencyBlendDesc.LogicOpEnable = false;
-	transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
-	transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
-	transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
-	transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
-	transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
-	transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL; 
-	d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = TRUE;
-	d3dPipelineStateDesc.BlendState.RenderTarget[0] = transparencyBlendDesc; 
+	//D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
+	//transparencyBlendDesc.BlendEnable = true;
+	//transparencyBlendDesc.LogicOpEnable = false;
+	//transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	//transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	//transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+	//transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	//transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+	//transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	//transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+	//transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL; 
+	//d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = TRUE;
+	//d3dPipelineStateDesc.BlendState.RenderTarget[0] = transparencyBlendDesc; 
 
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
 	d3dPipelineStateDesc.InputLayout = m_d3dInputLayoutDesc;

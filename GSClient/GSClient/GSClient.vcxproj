@@ -201,7 +201,6 @@
     <ClInclude Include="SceneYJ.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SceneJH.h" />
-    <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="Sign.h" />
     <ClInclude Include="Sound.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -232,7 +231,6 @@
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="SceneExport.cpp" />
     <ClCompile Include="ShaderHandler.cpp" />
-    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="Sign.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Enemy.cpp" />
