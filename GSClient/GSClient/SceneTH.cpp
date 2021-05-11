@@ -183,7 +183,6 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	CMeshFbx* golemMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
 	CFixedMesh* human = new CFixedMesh(pd3dDevice, pd3dCommandList, "resources/FbxExported/FbxHuman.bin");
-	CFixedMesh* laptop = new CFixedMesh(pd3dDevice, pd3dCommandList, "resources/FbxExported/FbxLaptop.bin");
 
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 
@@ -206,15 +205,15 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//FbxLoader(m_pfbxManager, "resources/Fbx/human.fbx", true);
 
 	CGameObject* testObject0 = new CGameObject();
-	testObject0->SetMesh(laptop);
+	testObject0->SetMesh(human);
 	testObject0->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	testObject0->SetPosition({ 100,  150, 1000 });
-	testObject0->Scale(50, 50, 50);
+	testObject0->Scale(1, 1, 1);
 	testObject0->SetTextureIndex(0x200);
 	m_Objects.push_back(std::move(testObject0));
 
 	CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, 
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/Fbxsoldier.bin");
+		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
 	pfbxTestObject->SetPosition({ 100,  150, 100 });
 	pfbxTestObject->Scale(3, 3, 3);
 	pfbxTestObject->SetTextureIndex(0x200);
