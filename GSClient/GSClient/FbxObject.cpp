@@ -214,12 +214,10 @@ void CFbxObject::Animate(float fTimeElapsed)
 		XMStoreFloat4x4(&finTransform[i], XMMatrixTranspose(finalTransform));
 	}
 
-	cout << finTransform[nBones - 1]._11 << " " << finTransform[nBones - 1]._12 << " " << finTransform[nBones - 1]._13 << " " << finTransform[nBones - 1]._14 << " " <<
+	/*cout << finTransform[nBones - 1]._11 << " " << finTransform[nBones - 1]._12 << " " << finTransform[nBones - 1]._13 << " " << finTransform[nBones - 1]._14 << " " <<
 		finTransform[nBones - 1]._21 << " " << finTransform[nBones - 1]._22 << " " << finTransform[nBones - 1]._23 << " " << finTransform[nBones - 1]._24 << " " <<
 		finTransform[nBones - 1]._31 << " " << finTransform[nBones - 1]._32 << " " << finTransform[nBones - 1]._33 << " " << finTransform[nBones - 1]._34 << " " <<
-		finTransform[nBones - 1]._41 << " " << finTransform[nBones - 1]._42 << " " << finTransform[nBones - 1]._43 << " " << finTransform[nBones - 1]._44 << endl;
-
-	//cout << finTransform[5]._11 << endl;
+		finTransform[nBones - 1]._41 << " " << finTransform[nBones - 1]._42 << " " << finTransform[nBones - 1]._43 << " " << finTransform[nBones - 1]._44 << endl;*/
 }
 
 void CFbxObject::Update(float fTimeElapsed)

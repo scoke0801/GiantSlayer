@@ -507,7 +507,6 @@ void FbxLoader::SaveAsFile()
 				for (int k = 0; k < animations[i].bone[j].animFrame.size(); k++) {
 					Keyframe tempKey = animations[i].bone[j].animFrame[k];
 					file << tempKey.frameTime << " ";
-					cout << tempKey.translation.x << " " << tempKey.translation.y << " " << tempKey.translation.z << endl;
 					file << tempKey.translation.x << " " << tempKey.translation.y << " " << tempKey.translation.z << " " <<
 							tempKey.scale.x << " " << tempKey.scale.y << " " << tempKey.scale.z << " " <<
 							tempKey.rotationquat.x << " " << tempKey.rotationquat.y << " " << tempKey.rotationquat.z << " " << tempKey.rotationquat.w << endl;
