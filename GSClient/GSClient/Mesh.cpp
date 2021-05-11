@@ -1012,9 +1012,14 @@ void CFixedMesh::LoadFile(char* pstrFbxFileName)
 	for (int i = 0; i < nVertices; i++) {
 		Vertex tempVertex;
 
+		file >> tempVertex.pos.x >> tempVertex.pos.z >> tempVertex.pos.y >>
+			tempVertex.uv.x >> tempVertex.uv.y >>
+			tempVertex.normal.x >> tempVertex.normal.z >> tempVertex.normal.y;
+		/*
 		file >> tempVertex.pos.x >> tempVertex.pos.y >> tempVertex.pos.z >>
 			tempVertex.uv.x >> tempVertex.uv.y >>
 			tempVertex.normal.x >> tempVertex.normal.y >> tempVertex.normal.z;
+		*/
 		file >> tempVertex.indices[0] >> tempVertex.indices[1] >> tempVertex.indices[2] >> tempVertex.indices[3] >>
 			tempVertex.weights.x >> tempVertex.weights.y >> tempVertex.weights.z >> temp;
 
@@ -1042,19 +1047,22 @@ CAnimatedMesh::CAnimatedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	XMFLOAT3* pos = new XMFLOAT3[m_nVertices];
 	XMFLOAT2* uv = new XMFLOAT2[m_nVertices];
 	XMFLOAT3* normal = new XMFLOAT3[m_nVertices];
-	XMUINT4* tempInt4 = new XMUINT4[m_nVertices];
-	XMFLOAT4* tempXMF4 = new XMFLOAT4[m_nVertices];
+	XMFLOAT3* boneWeights = new XMFLOAT3[m_nVertices];
+	XMUINT4* boneIndices = new XMUINT4[m_nVertices];
 
 	for (int i = 0; i < m_nVertices; i++) {
 		pos[i] = vertices[i].pos;
 		uv[i] = vertices[i].uv;
 		normal[i] = vertices[i].normal;
-		tempXMF4[i] = vertices[i].weights;
+		boneWeights[i] = vertices[i].weights;
 	
-		tempInt4[i].x = vertices[i].indices[0];
-		tempInt4[i].y = vertices[i].indices[1];
-		tempInt4[i].z = vertices[i].indices[2];
-		tempInt4[i].w = vertices[i].indices[3];
+		boneIndices[i].x = vertices[i].indices[0];
+		boneIndices[i].y = vertices[i].indices[1];
+		boneIndices[i].z = vertices[i].indices[2];
+		boneIndices[i].w = vertices[i].indices[3];
+
+		/*cout << boneWeights[i].x << " " << boneWeights[i].y << " " << boneWeights[i].z << " " <<
+			boneIndices[i].x << " " << boneIndices[i].y << " " << boneIndices[i].z << " " << boneIndices[i].w << endl;*/
 	}
 
 	// Pos
@@ -1078,26 +1086,26 @@ CAnimatedMesh::CAnimatedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_d3dNormalBufferView.StrideInBytes = sizeof(XMFLOAT3);
 	m_d3dNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 
+	// BoneWeight
+	m_pd3dBoneWeightBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, boneWeights,
+		sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dBoneWeightUploadBuffer);
+	m_d3dBoneWeightBufferView.BufferLocation = m_pd3dBoneWeightBuffer->GetGPUVirtualAddress();
+	m_d3dBoneWeightBufferView.StrideInBytes = sizeof(XMFLOAT3);
+	m_d3dBoneWeightBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+	// BoneIndex
+	m_pd3dBoneIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, boneIndices,
+		m_nVertices * sizeof(XMUINT4), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dBoneIndexUploadBuffer);
+	m_d3dBoneIndexBufferView.BufferLocation = m_pd3dBoneIndexBuffer->GetGPUVirtualAddress();
+	m_d3dBoneIndexBufferView.StrideInBytes = sizeof(XMUINT4);
+	m_d3dBoneIndexBufferView.SizeInBytes = sizeof(XMUINT4) * m_nVertices;
+
 	// Indices
 	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, indices.data(),
 		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
 	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
-
-	// BoneIndex
-	m_pd3dBoneIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, tempInt4,
-		m_nVertices * sizeof(XMUINT4), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dBoneIndexUploadBuffer);
-	m_d3dBoneIndexBufferView.BufferLocation = m_pd3dBoneIndexBuffer->GetGPUVirtualAddress();
-	m_d3dBoneIndexBufferView.StrideInBytes = sizeof(XMUINT4);
-	m_d3dBoneIndexBufferView.SizeInBytes = sizeof(XMUINT4) * m_nVertices;
-	
-	// BoneWeight
-	m_pd3dBoneWeightBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, tempXMF4,
-		sizeof(XMFLOAT4) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dBoneWeightUploadBuffer);
-	m_d3dBoneWeightBufferView.BufferLocation = m_pd3dBoneWeightBuffer->GetGPUVirtualAddress();
-	m_d3dBoneWeightBufferView.StrideInBytes = sizeof(XMFLOAT4);
-	m_d3dBoneWeightBufferView.SizeInBytes = sizeof(XMFLOAT4) * m_nVertices;
 }
 
 CAnimatedMesh::~CAnimatedMesh()
@@ -1109,7 +1117,7 @@ void CAnimatedMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 
-	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[5] = { m_d3dPositionBufferView, m_d3dTextureCoord0BufferView, m_d3dNormalBufferView, m_d3dBoneIndexBufferView, m_d3dBoneWeightBufferView };
+	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[5] = { m_d3dPositionBufferView, m_d3dTextureCoord0BufferView, m_d3dNormalBufferView, m_d3dBoneWeightBufferView, m_d3dBoneIndexBufferView };
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 5, pVertexBufferViews);
 
 	if (m_pd3dIndexBuffer)

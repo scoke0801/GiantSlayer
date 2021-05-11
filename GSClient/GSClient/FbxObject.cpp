@@ -37,7 +37,7 @@ CFbxObject::CFbxObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	t = 0;
 	endTime = 0;
 	for (int i = 0; i < skeleton.size(); i++) {
-		float t = skeleton[i].animations.back().time;
+		float t = animations[curAnim].bone[i].animFrame.back().frameTime;
 		if (t > endTime)
 			endTime = t;
 	}
@@ -67,16 +67,17 @@ void CFbxObject::LoadFile(char* pstrFbxFileName)
 	file >> temp >> nBones;
 	file >> temp;
 
-	m_pxmf4x4BindPoseBoneOffsets = new XMFLOAT4X4[nBones];
-
 	cout << "파일 로드: " << nVertices << " " << nPolygons << " " << nBones << endl;
 
 	for (int i = 0; i < nVertices; i++) {
 		Vertex tempVertex;
 
-		file >> tempVertex.pos.x >> tempVertex.pos.y >> tempVertex.pos.z >>
+		/*file >> tempVertex.pos.x >> tempVertex.pos.z >> tempVertex.pos.y >>
 				tempVertex.uv.x >> tempVertex.uv.y >>
-				tempVertex.normal.x >> tempVertex.normal.y >> tempVertex.normal.z;
+				tempVertex.normal.x >> tempVertex.normal.z >> tempVertex.normal.y;*/
+		file >> tempVertex.pos.x >> tempVertex.pos.y >> tempVertex.pos.z >>
+			tempVertex.uv.x >> tempVertex.uv.y >>
+			tempVertex.normal.x >> tempVertex.normal.y >> tempVertex.normal.z;
 		file >> tempVertex.indices[0] >> tempVertex.indices[1] >> tempVertex.indices[2] >> tempVertex.indices[3] >>
 				tempVertex.weights.x >> tempVertex.weights.y >> tempVertex.weights.z >> temp;
 
@@ -92,6 +93,7 @@ void CFbxObject::LoadFile(char* pstrFbxFileName)
 	file >> temp;
 
 	if (nBones != 0) {
+		m_pxmf4x4BindPoseBoneOffsets = new XMFLOAT4X4[nBones];
 
 		for (int i = 0; i < nBones; i++) {
 			Bone tempBone;
@@ -108,24 +110,29 @@ void CFbxObject::LoadFile(char* pstrFbxFileName)
 		}
 		file >> temp;
 
-		file >> temp >> animName;
-		for (int i = 0; i < nBones; i++) {
-			file >> temp >> skeleton[i].name >> count;
+		file >> temp >> nAnimations;
+		animations.resize(nAnimations);
+		for (int i = 0; i < nAnimations; i++) {
+			file >> temp >> animations[i].name;
+			animations[i].bone.resize(nBones);
 
-			for (int j = 0; j < count; j++) {
-				CKeyFrame tempKey;
+			for (int j = 0; j < nBones; j++) {
+				int nKeyframe;
+				file >> temp >> nKeyframe;
+				for (int k = 0; k < nKeyframe; k++) {
+					Keyframe tempKey;
 
-				file >> tempKey.time;
-				file >> tempKey.translation.x >> tempKey.translation.y >> tempKey.translation.z >>
-					tempKey.scale.x >> tempKey.scale.y >> tempKey.scale.z >>
-					tempKey.rotationquat.x >> tempKey.rotationquat.y >> tempKey.rotationquat.z >> tempKey.rotationquat.w;
-
-				skeleton[i].animations.push_back(tempKey);
+					file >> tempKey.frameTime;
+					file >> tempKey.translation.x >> tempKey.translation.y >> tempKey.translation.z >>
+							tempKey.scale.x >> tempKey.scale.y >> tempKey.scale.z >>
+							tempKey.rotationquat.x >> tempKey.rotationquat.y >> tempKey.rotationquat.z >> tempKey.rotationquat.w;
+					animations[i].bone[j].animFrame.push_back(tempKey);
+				}
 			}
 		}
 	}
 
-	cout << skeleton[skeleton.size()-1].animations[0].translation.x << endl;
+	//cout << skeleton[skeleton.size()-1].animations[0].translation.x << endl;
 	file.close();
 }
 
@@ -140,9 +147,9 @@ void CFbxObject::Animate(float fTimeElapsed)
 
 	// Interpolate
 	for (UINT i = 0; i < nBones; i++) {
-		vector<CKeyFrame> curKF = skeleton[i].animations;
+		vector<Keyframe> curKF = animations[curAnim].bone[i].animFrame;
 
-		if (m_time <= curKF.front().time) {
+		if (m_time <= curKF.front().frameTime) {	// 시작
 			XMVECTOR S = XMLoadFloat3(&curKF.front().scale);
 			XMVECTOR P = XMLoadFloat3(&curKF.front().translation);
 			XMVECTOR Q = XMLoadFloat4(&curKF.front().rotationquat);
@@ -150,7 +157,7 @@ void CFbxObject::Animate(float fTimeElapsed)
 			XMVECTOR zero = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 			XMStoreFloat4x4(&toParentTransforms[i], XMMatrixAffineTransformation(S, zero, Q, P));
 		}
-		else if (m_time >= curKF.back().time) {
+		else if (m_time >= curKF.back().frameTime) {	// 끝
 			XMVECTOR S = XMLoadFloat3(&curKF.back().scale);
 			XMVECTOR P = XMLoadFloat3(&curKF.back().translation);
 			XMVECTOR Q = XMLoadFloat4(&curKF.back().rotationquat);
@@ -159,10 +166,10 @@ void CFbxObject::Animate(float fTimeElapsed)
 			XMStoreFloat4x4(&toParentTransforms[i], XMMatrixAffineTransformation(S, zero, Q, P));
 		}
 		else {
-			for (UINT j = 0; j < curKF.size() - 1; ++j) {
-				if (m_time >= curKF[j].time && m_time <= curKF[j + 1].time) {
-					float lerpPercent = (m_time - curKF[j].time) / (curKF[j + 1].time - curKF[j].time);
-
+			for (UINT j = 0; j < curKF.size()-1; j++) {
+				if (m_time >= curKF[j].frameTime && m_time <= curKF[j + 1].frameTime) {
+					float lerpPercent = (m_time - curKF[j].frameTime) / (curKF[j + 1].frameTime - curKF[j].frameTime);
+					// 프레임 보간
 					XMVECTOR s0 = XMLoadFloat3(&curKF[j].scale);
 					XMVECTOR s1 = XMLoadFloat3(&curKF[j + 1].scale);
 
@@ -207,7 +214,10 @@ void CFbxObject::Animate(float fTimeElapsed)
 		XMStoreFloat4x4(&finTransform[i], XMMatrixTranspose(finalTransform));
 	}
 
-	cout << finTransform[5]._11 << endl;
+	/*cout << finTransform[nBones - 1]._11 << " " << finTransform[nBones - 1]._12 << " " << finTransform[nBones - 1]._13 << " " << finTransform[nBones - 1]._14 << " " <<
+		finTransform[nBones - 1]._21 << " " << finTransform[nBones - 1]._22 << " " << finTransform[nBones - 1]._23 << " " << finTransform[nBones - 1]._24 << " " <<
+		finTransform[nBones - 1]._31 << " " << finTransform[nBones - 1]._32 << " " << finTransform[nBones - 1]._33 << " " << finTransform[nBones - 1]._34 << " " <<
+		finTransform[nBones - 1]._41 << " " << finTransform[nBones - 1]._42 << " " << finTransform[nBones - 1]._43 << " " << finTransform[nBones - 1]._44 << endl;*/
 }
 
 void CFbxObject::Update(float fTimeElapsed)

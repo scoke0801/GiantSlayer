@@ -139,6 +139,7 @@
       <AdditionalLibraryDirectories>/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;wininet.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 /force:MULTIPLE</AdditionalOptions>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

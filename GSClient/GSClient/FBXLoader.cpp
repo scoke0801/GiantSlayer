@@ -62,20 +62,53 @@ FbxLoader::FbxLoader()
 
 }
 
-FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName)
+FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName, bool hasAnim)
 {
 	mFbxManager = pfbxSdkManager;
+	hasAnimation = hasAnim;
 
 	LoadScene(FileName);
 
-	LoadSkeletonHierarchy(mFbxScene->GetRootNode());
-	if (mSkeleton.empty()) hasAnimation = false;
+	if (hasAnimation) {
+		LoadSkeletonHierarchy(mFbxScene->GetRootNode());
+		cout << "-뼈 구조 생성 완료" << endl;
+	}
 
 	ExploreFbxHierarchy(mFbxScene->GetRootNode());
+	cout << "-정점,인덱스 생성 완료" << endl;
+	
+	if (hasAnimation) {
+		// Load Animation Stacks
+		FbxArray<FbxString*> fbxAnimationStackNames;
+		mFbxScene->FillAnimStackNameArray(fbxAnimationStackNames);
 
+		nAnimation = fbxAnimationStackNames.Size();
+
+		ppAnimationStacks = new FbxAnimStack * [nAnimation];
+
+		animations.resize(nAnimation);
+		for (int i = 0; i < nAnimation; i++) {
+			FbxString* pfbxStackName = fbxAnimationStackNames[i];
+
+			FbxAnimStack* pfbxAnimationStack = mFbxScene->FindMember<FbxAnimStack>(pfbxStackName->Buffer());
+			ppAnimationStacks[i] = pfbxAnimationStack;
+			animations[i].bone.resize(mSkeleton.size());
+		}
+		FbxArrayDelete(fbxAnimationStackNames);
+
+		for (int i = 0; i < nAnimation; i++) {
+			mFbxScene->SetCurrentAnimationStack(ppAnimationStacks[i]);
+			LoadAnimations(mFbxScene->GetRootNode(), i);
+		}
+		cout << "애니메이션 정보 생성 완료" << endl;
+	}
+
+	cout << "-최적화 작업 중..." << endl;
 	Optimize();
+	cout << "-최적화 작업 완료!" << endl;
 
 	SaveAsFile();
+	cout << "-파일 추출 끝!" << endl;
 
 	cout << FileName << " ||| [SKT]:" << mSkeleton.size() << " [PG]:" << triangles.size() << " [VT]:" << vertices.size() << endl;
 }
@@ -93,8 +126,10 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
 	{
 		LoadControlPoints(pNode);
-		if (hasAnimation == true)
-			LoadAnimation(pNode);
+
+		if (hasAnimation) 
+			LoadBoneOffsets(pNode);
+
 		LoadMesh(pNode);
 	}
 
@@ -161,7 +196,6 @@ void FbxLoader::LoadControlPoints(FbxNode* pNode)
 	for (int i = 0; i < numCP; i++)
 	{
 		ControlPoint tempCP;
-		XMFLOAT3 currPosition;
 		tempCP.pos.x = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[0]);
 		tempCP.pos.y = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[1]);
 		tempCP.pos.z = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[2]);
@@ -169,7 +203,7 @@ void FbxLoader::LoadControlPoints(FbxNode* pNode)
 	}
 }
 
-void FbxLoader::LoadAnimation(FbxNode* pNode)
+void FbxLoader::LoadBoneOffsets(FbxNode* pNode)
 {
 
 	FbxMesh* pfbxMesh = pNode->GetMesh();
@@ -217,67 +251,8 @@ void FbxLoader::LoadAnimation(FbxNode* pNode)
 				tempBlendinfo.weight = currCluster->GetControlPointWeights()[k];
 				cpoints[currCluster->GetControlPointIndices()[k]].blendInfo.push_back(tempBlendinfo);
 			}
-
-			//=========================================
-
-			FbxAnimStack* pCurrAnimStack = mFbxScene->GetSrcObject<FbxAnimStack>(0);
-			FbxString animStackName = pCurrAnimStack->GetName();
-			animName = animStackName.Buffer();
-
-			FbxAnimEvaluator* pSceneEvaluator = mFbxScene->GetAnimationEvaluator();
-
-			for (FbxLongLong k = 0; k < 100; k++) {
-				FbxTime currTime;
-				currTime.SetFrame(k, FbxTime::eCustom);
-
-				Keyframe tempKey;
-				tempKey.frameTime = static_cast<float>(k) / 8.0f;
-
-				FbxAMatrix currentTransformOffset = 
-					pSceneEvaluator->GetNodeGlobalTransform(pNode, currTime) * fbxmtxGeometryOffset;
-				FbxAMatrix tempMTX = 
-					currentTransformOffset.Inverse() * pSceneEvaluator->GetNodeGlobalTransform(currCluster->GetLink(), currTime);
-			
-				tempKey.translation = { static_cast<float>(tempMTX.GetT().mData[0]), static_cast<float>(tempMTX.GetT().mData[1]), static_cast<float>(tempMTX.GetT().mData[2]) };
-				tempKey.scale = { static_cast<float>(tempMTX.GetS().mData[0]), static_cast<float>(tempMTX.GetS().mData[1]), static_cast<float>(tempMTX.GetS().mData[2]) };
-				tempKey.rotationquat = { static_cast<float>(tempMTX.GetQ().mData[0]), static_cast<float>(tempMTX.GetQ().mData[1]), static_cast<float>(tempMTX.GetQ().mData[2]), static_cast<float>(tempMTX.GetQ().mData[3]) };
-			
-				if (k != 0 && mSkeleton[jIndex].mAnimation.back() == tempKey)
-					break;
-
-				mSkeleton[jIndex].mAnimation.push_back(tempKey);
-			}
 		}//Cluster End
 	}//Deformer End
-
-	vector<Keyframe> nullKeys;
-
-	for (int i = 0; i < mSkeleton.size(); i++)
-	{
-		int KeyframeSize = mSkeleton[i].mAnimation.size();
-		if (KeyframeSize != 0)
-		{
-			for (int j = 0; j < KeyframeSize; j++) // 60 frames
-			{
-				Keyframe tempKey;
-
-				tempKey.frameTime = static_cast<float>(j / 24.0f);
-				tempKey.translation = { 0.0f, 0.0f, 0.0f };
-				tempKey.scale = { 1.0f, 1.0f, 1.0f };
-				tempKey.rotationquat = { 0.0f, 0.0f, 0.0f, 0.0f };
-				nullKeys.push_back(tempKey);
-			}
-			break;
-		}
-	}
-
-	for (int i = 0; i < mSkeleton.size(); i++)
-	{
-		if (mSkeleton[i].mAnimation.size() != 0)
-			continue;
-
-		mSkeleton[i].mAnimation = nullKeys;
-	}
 
 	BlendingInfo nullBlendinfo;
 	nullBlendinfo.index = 0;
@@ -314,29 +289,32 @@ void FbxLoader::LoadMesh(FbxNode* pNode)
 			ControlPoint currCP = cpoints[cpIndex];
 			tempVertex.pos = currCP.pos;
 
-			// normal
-			FbxGeometryElementNormal* pnormal = pfbxMesh->GetElementNormal(0);
-			tempVertex.normal = XMFLOAT3(
-				pnormal->GetDirectArray().GetAt(cpIndex).mData[0],
-				pnormal->GetDirectArray().GetAt(cpIndex).mData[1],
-				pnormal->GetDirectArray().GetAt(cpIndex).mData[2]);
-
 			// uv
 			int uvindex = pfbxMesh->GetTextureUVIndex(i, j, FbxLayerElement::eTextureDiffuse);
 			FbxVector2 fbxUV = FbxVector2(0.0, 0.0);
 			FbxLayerElementUV* fbxLayerUV = pfbxMesh->GetLayer(0)->GetUVs();
 			fbxUV = fbxLayerUV->GetDirectArray().GetAt(uvindex);
-			tempVertex.uv = XMFLOAT2(fbxUV[0], 1.0f - fbxUV[1]);
+			tempVertex.uv.x = static_cast<float>(fbxUV.mData[0]);
+			tempVertex.uv.y = static_cast<float>(1.0f - fbxUV.mData[1]);
 
-			// blending info
-			for (int k = 0; k < currCP.blendInfo.size(); k++)
-			{
-				BlendingInfo tempBlendinfo;
-				tempBlendinfo.index = currCP.blendInfo[k].index;
-				tempBlendinfo.weight = currCP.blendInfo[k].weight;
-				tempVertex.blendInfo.push_back(tempBlendinfo);
+			// normal
+			FbxVector4 tempNormal;
+			pfbxMesh->GetPolygonVertexNormal(i, j, tempNormal);
+			tempVertex.normal.x = static_cast<float>(tempNormal.mData[0]);
+			tempVertex.normal.y = static_cast<float>(tempNormal.mData[1]);
+			tempVertex.normal.z = static_cast<float>(tempNormal.mData[2]);
+
+			if (hasAnimation) {
+				// blending info
+				for (int k = 0; k < currCP.blendInfo.size(); k++)
+				{
+					BlendingInfo tempBlendinfo;
+					tempBlendinfo.index = currCP.blendInfo[k].index;
+					tempBlendinfo.weight = currCP.blendInfo[k].weight;
+					tempVertex.blendInfo.push_back(tempBlendinfo);
+				}
+				tempVertex.SortBlendingInfoByWeight();
 			}
-			tempVertex.SortBlendingInfoByWeight();
 
 			vertices.push_back(tempVertex);
 			triangles.back().indices.push_back(vertexCounter);
@@ -345,6 +323,99 @@ void FbxLoader::LoadMesh(FbxNode* pNode)
 	}
 
 	cpoints.clear();
+}
+
+void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
+{
+	FbxNodeAttribute* pfbxNodeAttribute = pNode->GetNodeAttribute();
+
+	if ((pfbxNodeAttribute != NULL) &&
+		(pfbxNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh))
+	{
+		FbxMesh* pfbxMesh = pNode->GetMesh();
+
+		FbxAMatrix fbxmtxGeometryOffset = GeometricOffsetTransform(pfbxMesh->GetNode());
+
+		// Deformer
+		int numDF = pfbxMesh->GetDeformerCount();
+		for (int i = 0; i < numDF; i++) {
+			FbxSkin* currSkin = reinterpret_cast<FbxSkin*>(pfbxMesh->GetDeformer(i, FbxDeformer::eSkin));
+			if (!currSkin) continue;
+
+			// Cluster
+			int numCS = currSkin->GetClusterCount();
+			for (int j = 0; j < numCS; j++) {
+				FbxCluster* currCluster = currSkin->GetCluster(j);
+				string jName = currCluster->GetLink()->GetName();
+
+				int jIndex;
+				for (int k = 0; k < mSkeleton.size(); k++) {
+					if (mSkeleton[k].name == jName) {
+						jIndex = k;
+						break;
+					}
+				}
+
+				FbxAnimStack* pCurrAnimStack = ppAnimationStacks[stackNum];
+				FbxString animStackName = pCurrAnimStack->GetName();
+				animations[stackNum].name = animStackName.Buffer();
+				FbxAnimEvaluator* pSceneEvaluator = mFbxScene->GetAnimationEvaluator();
+
+				for (FbxLongLong k = 0; k < 100; k++) {
+					FbxTime currTime;
+					currTime.SetFrame(k, FbxTime::eCustom);
+
+					Keyframe tempKey;
+					tempKey.frameTime = static_cast<float>(k) / 8.0f;
+
+					FbxAMatrix currentTransformOffset =
+						pSceneEvaluator->GetNodeGlobalTransform(pNode, currTime) * fbxmtxGeometryOffset;
+					FbxAMatrix tempMTX =
+						currentTransformOffset.Inverse() * pSceneEvaluator->GetNodeGlobalTransform(currCluster->GetLink(), currTime);
+
+					tempKey.translation = { static_cast<float>(tempMTX.GetT().mData[0]), static_cast<float>(tempMTX.GetT().mData[1]), static_cast<float>(tempMTX.GetT().mData[2]) };
+					tempKey.scale = { static_cast<float>(tempMTX.GetS().mData[0]), static_cast<float>(tempMTX.GetS().mData[1]), static_cast<float>(tempMTX.GetS().mData[2]) };
+					tempKey.rotationquat = { static_cast<float>(tempMTX.GetQ().mData[0]), static_cast<float>(tempMTX.GetQ().mData[1]), static_cast<float>(tempMTX.GetQ().mData[2]), static_cast<float>(tempMTX.GetQ().mData[3]) };
+
+					if (k != 0 && animations[stackNum].bone[jIndex].animFrame.back() == tempKey)
+						break;
+					animations[stackNum].bone[jIndex].animFrame.push_back(tempKey);
+				}
+			}// Cluster End
+		}// Deformer End
+
+		vector<Keyframe> nullKeys;
+
+		for (int i = 0; i < mSkeleton.size(); i++)
+		{
+			int KeyframeSize = animations[stackNum].bone[i].animFrame.size();
+			if (KeyframeSize != 0)
+			{
+				for (int j = 0; j < KeyframeSize; j++)
+				{
+					Keyframe tempKey;
+
+					tempKey.frameTime = static_cast<float>(j / 24.0f);
+					tempKey.translation = { 0.0f, 0.0f, 0.0f };
+					tempKey.scale = { 1.0f, 1.0f, 1.0f };
+					tempKey.rotationquat = { 0.0f, 0.0f, 0.0f, 0.0f };
+					nullKeys.push_back(tempKey);
+				}
+				break;
+			}
+		}
+
+		for (int i = 0; i < mSkeleton.size(); i++)
+		{
+			if (animations[stackNum].bone[i].animFrame.size() != 0)
+				continue;
+
+			animations[stackNum].bone[i].animFrame = nullKeys;
+		}
+	}
+
+	int nChild = pNode->GetChildCount();
+	for (int i = 0; i < nChild; i++) LoadAnimations(pNode->GetChild(i), stackNum);
 }
 
 int SearchVertex(const FbxVertex& storage, const vector<FbxVertex>& find)
@@ -430,18 +501,21 @@ void FbxLoader::SaveAsFile()
 		file << endl;
 
 		file << "[Animation]" << endl;
-		file << "Name " << animName << endl;
-		for (int i = 0; i < mSkeleton.size(); i++) {
-			file << i << " " << mSkeleton[i].name << " " << mSkeleton[i].mAnimation.size() << endl;
-			
-			for (int j = 0; j < mSkeleton[i].mAnimation.size(); j++) {
-				file << mSkeleton[i].mAnimation[j].frameTime << " ";
-				file << mSkeleton[i].mAnimation[j].translation.x << " " << mSkeleton[i].mAnimation[j].translation.y << " " << mSkeleton[i].mAnimation[j].translation.z << " " <<
-						mSkeleton[i].mAnimation[j].scale.x << " " << mSkeleton[i].mAnimation[j].scale.y << " " << mSkeleton[i].mAnimation[j].scale.z << " " <<
-						mSkeleton[i].mAnimation[j].rotationquat.x << " " << mSkeleton[i].mAnimation[j].rotationquat.y << " " << mSkeleton[i].mAnimation[j].rotationquat.z << " " << mSkeleton[i].mAnimation[j].rotationquat.w << endl;
+		file << "Stack " << nAnimation << endl;
+
+		for (int i = 0; i < nAnimation; i++) {
+			file << ">AnimName " << animations[i].name << endl;
+			for (int j = 0; j < animations[i].bone.size(); j++) {
+				file << "bone" << j << " " << animations[i].bone[j].animFrame.size() << endl;
+				for (int k = 0; k < animations[i].bone[j].animFrame.size(); k++) {
+					Keyframe tempKey = animations[i].bone[j].animFrame[k];
+					file << tempKey.frameTime << " ";
+					file << tempKey.translation.x << " " << tempKey.translation.y << " " << tempKey.translation.z << " " <<
+							tempKey.scale.x << " " << tempKey.scale.y << " " << tempKey.scale.z << " " <<
+							tempKey.rotationquat.x << " " << tempKey.rotationquat.y << " " << tempKey.rotationquat.z << " " << tempKey.rotationquat.w << endl;
+				}
 			}
 		}
-		file << endl;
 	}
 	file.close();
 }

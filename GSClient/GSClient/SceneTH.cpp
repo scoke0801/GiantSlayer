@@ -202,25 +202,20 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 2.5f)));
 	m_MinimapCamera->SetTarget(m_Player);
 
-	//FbxLoader(m_pfbxManager, "resources/Fbx/ATest.fbx");
+	//FbxLoader(m_pfbxManager, "resources/Fbx/human.fbx", true);
 
 	CGameObject* testObject0 = new CGameObject();
 	testObject0->SetMesh(human);
 	testObject0->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	testObject0->SetPosition({ 100,  150, 1000 });
+	testObject0->Scale(1, 1, 1);
 	testObject0->SetTextureIndex(0x200);
 	m_Objects.push_back(std::move(testObject0));
 
-	CGameObject* testObject1 = new CGameObject();
-	testObject1->SetMesh(human);
-	testObject1->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	testObject1->SetPosition({ 100,  300, 1000 });
-	testObject1->SetTextureIndex(0x200);
-	m_Objects.push_back(std::move(testObject1));
-
 	CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, 
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/FbxHuman.bin");
+		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
 	pfbxTestObject->SetPosition({ 100,  150, 100 });
+	pfbxTestObject->Scale(3, 3, 3);
 	pfbxTestObject->SetTextureIndex(0x200);
 	m_Objects.push_back(std::move(pfbxTestObject));
 }
