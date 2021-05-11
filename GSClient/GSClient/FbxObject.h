@@ -8,6 +8,8 @@ public:
 	int nVertices = 0;
 	int nPolygons = 0;
 	int nBones = 0;
+	int nAnimations = 0;
+	int curAnim = 1;
 
 	float m_time = 0;
 	float t = 0;
@@ -17,6 +19,7 @@ public:
 	vector<Vertex> vertices;
 	vector<int> indices;
 	vector<Bone> skeleton;
+	vector<Animation> animations;
 
 	XMFLOAT4X4* m_pxmf4x4BindPoseBoneOffsets = NULL;
 	ID3D12Resource* m_pd3dcbBoneOffsets = NULL;
@@ -32,7 +35,6 @@ public:
 		ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
 	virtual ~CFbxObject();
 
-	//void LoadFile(char* pstrFbxFileName);
 	void LoadFile(char* pstrFbxFileName);
 
 	void Animate(float fTimeElapsed) override;

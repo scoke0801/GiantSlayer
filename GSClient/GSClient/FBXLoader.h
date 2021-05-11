@@ -22,12 +22,25 @@ struct Keyframe
 	}
 };
 
+struct AnimBone
+{
+	vector<Keyframe> animFrame;
+};
+
+struct Animation
+{
+	string name;
+	float startTime = 0;
+	float endTime = 0;
+
+	vector<AnimBone> bone;
+};
+
 struct Joint
 {
 	string name;
 	int parentIndex = -1;
 	XMFLOAT4X4 offset;
-	vector<Keyframe> mAnimation;
 };
 
 struct BlendingInfo
@@ -48,6 +61,10 @@ struct ControlPoint
 	ControlPoint() {
 		pos = { 0, 0, 0 };
 		blendInfo.reserve(4);
+	}
+
+	void SortBlendingWeight() {
+		sort(blendInfo.begin(), blendInfo.end());
 	}
 };
 
@@ -105,9 +122,11 @@ struct Vertex
 	XMFLOAT3 pos;
 	XMFLOAT2 uv;
 	XMFLOAT3 normal;
+	XMFLOAT3 binormal;
+	XMFLOAT3 tangent;
 
+	XMFLOAT3 weights;
 	int indices[4];
-	XMFLOAT4 weights;
 };
 
 struct CKeyFrame
@@ -131,23 +150,29 @@ struct Bone
 class FbxLoader
 {
 private:
+	// Fbx
 	FbxManager* mFbxManager;
 	FbxScene* mFbxScene;
 
-	////////////////////////////////////////////////////////
-
 	int numCP, numPG, numDF;
-	bool hasAnimation = true;
-	string animName;
+	bool hasAnimation;
 
+	// Mesh Info
 	unordered_map<int, ControlPoint> cpoints;
-	vector<TrianglePG> triangles;
-	vector<Joint> mSkeleton;
 	vector<FbxVertex> vertices;
+	vector<TrianglePG> triangles;
+
+	// Animation Info
+	int nAnimation = 0;
+	FbxAnimStack** ppAnimationStacks;;
+
+	vector<Joint> mSkeleton;
+	vector<Animation> animations;
+
 
 public:
 	FbxLoader();
-	FbxLoader(FbxManager* pfbxSdkManager, char* FileName);
+	FbxLoader(FbxManager* pfbxSdkManager, char* FileName, bool hasAnim);
 	~FbxLoader();
 
 	void ExploreFbxHierarchy(FbxNode* pNode);
@@ -159,8 +184,10 @@ public:
 
 	void LoadControlPoints(FbxNode* pNode);
 
-	void LoadAnimation(FbxNode* pNode);
+	void LoadBoneOffsets(FbxNode* pNode);
 	void LoadMesh(FbxNode* pNode);
+
+	void LoadAnimations(FbxNode* pNode, int stackNum);
 
 	void Optimize();
 
