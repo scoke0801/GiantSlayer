@@ -4,6 +4,7 @@
 CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dRootSignature, CShader* pShader)
 {
+	m_CollisionHandleType = COLLISION_HANDLE_TYPE::NotCollide;
 	m_Name = OBJ_NAME::Bridge;  
 	int idx = -1;
 // 바닥 생성
@@ -14,11 +15,11 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 			1000, 1, 500);
 		 
 		idx = AddObject(pCubeMeshTex, pShader, 0x01);
-
+		m_Objects[idx]->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
 		m_Objects[idx]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 1000, 1, 500,
 			XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i));
 		m_Objects[idx]->AddColider(new ColliderBox(XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i), 
-			XMFLOAT3(1000 * 0.5f, 1 * 0.5f, 500 * 0.5f)));
+			XMFLOAT3(1000 * 0.5f, 1 * 0.5f, 500 * 0.5f))); 
 	}
 // 난간 생성
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,	
@@ -127,19 +128,7 @@ CBridge::~CBridge()
 void CBridge::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	OnPrepareRender();
-	 
-	//if (m_pShader)
-	//{
-	//	//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
-	//	m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
-	//	m_pShader->Render(pd3dCommandList, pCamera);
-	//}
-	//for (CMesh* mesh : m_Meshes)
-	//{
-	//	mesh->Render(pd3dCommandList);
-	//}
-	//if (m_pMesh) m_pMesh->Render(pd3dCommandList);
-
+	  
 	for (CGameObject* pObject : m_Objects)
 	{
 		pObject->Draw(pd3dCommandList, pCamera);
@@ -184,10 +173,26 @@ bool CBridge::CollisionCheck(Collider* pAABB)
 	for (CGameObject* pObject : m_Objects)
 	{
 		if (pObject->CollisionCheck(pAABB)) {
+			m_CollideObject = pObject;
+			cout << "다리 중 충돌한 놈 찾음\n";
 			return true;
 		}
 	} 
 	return false;
+}
+
+bool CBridge::CollisionCheck(CGameObject* other)
+{ 
+	auto otherAABB = other->GetAABB();
+	for (int i = 0; i < otherAABB.size(); ++i) {
+		bool result = CollisionCheck(otherAABB[i]);
+		if (result) { 
+			other->FixCollision(m_CollideObject);
+			return true; 
+		}
+	}
+
+	return false; 
 }
 
 int CBridge::AddObject(CMesh* pMesh, CShader* pShader, UINT textureIndex)

@@ -31,6 +31,12 @@ enum class OBJ_NAME
 	Door = 13
 };
 
+enum class COLLISION_HANDLE_TYPE : int {
+	NotCollide = 0,
+	Stop,
+	On,
+	Attacked
+};
 enum class OBJ_DIRECTION
 {
 	Front = 0,
@@ -46,7 +52,7 @@ struct GAMEOBJECT_INFO
 	MATERIAL						m_Material;
 	UINT							m_nTextureIndex;
 };
-
+ 
 class CGameObject
 {
 private:
@@ -71,17 +77,19 @@ protected:// 충돌처리 관련 변수
 	vector<Collider*>	m_Colliders;
 	vector<Collider*>	m_AABB; 
 
+	COLLISION_HANDLE_TYPE m_CollisionHandleType = COLLISION_HANDLE_TYPE::Stop;
+	 
 protected: // 렌더링 관련 변수
-	CMesh* m_pMesh = NULL;
+	CMesh*				m_pMesh = NULL;
 	vector<CMesh*>		m_BoundingObjectMeshes;
 
-	CShader* m_pShader = NULL;
+	CShader*			m_pShader = NULL;
 
 	UINT				m_nTextureIndex = 0x00;
 
-	MATERIAL* m_Material;
+	MATERIAL*			m_Material;
 
-	CCamera* m_Camera = nullptr;
+	CCamera*			m_Camera = nullptr;
 
 protected:	// 객체 관련 속성 변수
 	int					m_HP = 0;
@@ -92,11 +100,11 @@ protected:	// 객체 관련 속성 변수
 	bool				m_isCollidable = true;
 
 public:
-	FbxScene*				m_pfbxScene = NULL;
+	FbxScene*			m_pfbxScene = NULL;
 
 private:	// GPU 전달 데이터
-	ID3D12Resource* m_pd3dcbGameObject = NULL;
-	GAMEOBJECT_INFO* m_pcbMappedGameObjInfo = NULL;
+	ID3D12Resource*		m_pd3dcbGameObject = NULL;
+	GAMEOBJECT_INFO*	m_pcbMappedGameObjInfo = NULL;
 
 public:
 	CGameObject();
@@ -141,6 +149,7 @@ public:
 	virtual bool CollisionCheck(CGameObject* other);
 
 	void FixCollision();
+	void FixCollision(CGameObject* pCollideObject);
 
 	virtual void UpdateColliders();
 
@@ -209,6 +218,9 @@ public:
 
 	void SetHegithFromTerrain(float height) { m_HeightFromTerrain = height; }
 	float GetHeightFromTerrain() const { return m_HeightFromTerrain; }
+
+	void SetCollisionHandleType(COLLISION_HANDLE_TYPE type) { m_CollisionHandleType = type; }
+	COLLISION_HANDLE_TYPE GetCollisionHandleType() const { return m_CollisionHandleType; }
 
 public:
 	DirectX::XMFLOAT3 GetRight()const;
