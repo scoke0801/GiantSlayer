@@ -878,6 +878,7 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
     shadowFactor = CalcShadowFactor(input.shadowPosH);
 	
 	input.normalW = normalize(input.normalW);
+	
     float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
@@ -892,7 +893,6 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	{
 		cColor = gtxtWood.Sample(gssClamp, uvw);
 	}
-
 	if (gnTexturesMask & 0x02)
 	{
 		cColor = gtxtBox.Sample(gssClamp, uvw);
@@ -901,7 +901,6 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	{
 		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
-
 	if (gnTexturesMask & 0x08)
 	{
 		cColor = gtxtBox.Sample(gssClamp, uvw);
@@ -938,6 +937,7 @@ float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	}
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
     shadowFactor = CalcShadowFactor(input.shadowPosH);
+	
 	input.normalW = normalize(input.normalW);
     float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
@@ -958,6 +958,7 @@ float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primitiv
 	}
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
     shadowFactor = CalcShadowFactor(input.shadowPosH);
+	
 	input.normalW = normalize(input.normalW);
     float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 

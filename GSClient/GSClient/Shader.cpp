@@ -419,6 +419,7 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	d3dPipelineStateDesc.InputLayout = CreateShadowInputLayout();
 	d3dPipelineStateDesc.VS = CreateShadowVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSStandardShadow");
 	d3dPipelineStateDesc.PS = CreateShadowPixelShader(L"Shaders\\ShaderYJ.hlsl", "PSStandardShadow");
+	
 	d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
 	d3dPipelineStateDesc.NumRenderTargets = 0;
 	::memset(d3dPipelineStateDesc.RTVFormats, DXGI_FORMAT_UNKNOWN, sizeof(DXGI_FORMAT) * 8);

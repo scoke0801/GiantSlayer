@@ -698,13 +698,12 @@ void CSceneYJ::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	pd3dCommandList->OMSetRenderTargets(0, NULL, FALSE, &m_d3dDsvShadowMapCPUHandle);
 
-	//m_Player->Draw(pd3dCommandList, m_pLightCamera);
 	m_Player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
 
-	/*for (auto pObject : m_Objects)
+	for (auto pObject : m_Objects)
 	{
-		pObject->Draw(pd3dCommandList, m_pLightCamera);
-	}*/
+		pObject->Draw_Shadow(pd3dCommandList, m_pLightCamera);
+	}
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
