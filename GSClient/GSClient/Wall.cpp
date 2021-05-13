@@ -168,7 +168,7 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	pWall->Rotate({ 0,1,0 }, 90);
 	pWall->SetPosition({ depth * 0.5f,  height * 0.5f, fWidthRatio * 2 });	
 	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth, XMFLOAT3{ 0,0,0 });
-	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fWidthRatio * 4, height, depth)));
+	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fWidthRatio * 4 * 0.5f, height * 0.5f, depth * 0.5f)));
 	m_Walls.push_back(pWall);
 
 	pWall = new CWall(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth);
@@ -178,7 +178,7 @@ CDoorWall::CDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	pWall->Rotate({ 0,1,0 }, 90);
 	pWall->SetPosition({ depth * 0.5f,  height * 0.5f, fWidthRatio * 6 + fWidthRatio * 2 });	
 	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, fWidthRatio * 4, height, depth, XMFLOAT3{ 0,0,0 });
-	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fWidthRatio * 4, height, depth)));
+	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fWidthRatio * 4 * 0.5f, height * 0.5f, depth * 0.5f)));
 	m_Walls.push_back(pWall);
 
 	m_LeftDoor = new CDoor(pd3dDevice, pd3dCommandList, fWidthRatio, height, depth * 0.2f, true);

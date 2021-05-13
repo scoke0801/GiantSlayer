@@ -995,23 +995,28 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_F1)
 	{
-		m_Player->SetPosition({ 2500,  0, 2500 });
+		m_Player->SetPosition({ 2500,  0, 2500 }); 
+		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F2)
 	{
-		m_Player->SetPosition({ 2500,  -1000, 17500 });
+		m_Player->SetPosition({ 2800,  -1000, 18000 });
+		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F3)
 	{
-		m_Player->SetPosition({ 10500,  -2000, 17500 });
+		m_Player->SetPosition({ 12500,  -2000, 15500 });
+		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F4)
 	{
 		m_Player->SetPosition({ 12500,  -3000, 2500 });
+		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F5)
 	{
-		m_Player->SetPosition({ 17500,  -6000, 17500 });
+		m_Player->SetPosition({ 17000,  -6000, 5500 });
+		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_U)
 	{ 
@@ -1507,7 +1512,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f } );
 	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-	pEnemy->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(2.25f, 1.5f, 3.25f)));
+	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
 
 	pEnemy = new CEnemy();
@@ -1520,7 +1525,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f } );
 	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-	pEnemy->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(2.25f, 1.5f, 3.25f)));
+	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 	 
 	pEnemy = new CEnemy();
@@ -1533,7 +1538,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->SetActivityScope({ 1300, 0, 1450 },{ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f } );
 	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-	pEnemy->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(2.25f, 1.5f, 3.25f)));
+	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 	pEnemy = new CEnemy();
@@ -1546,7 +1551,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->SetActivityScope({ 1400, 0, 1200 },{ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f } );
 	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-	pEnemy->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(2.25f, 1.5f, 3.25f)));
+	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 	pEnemy = new CEnemy();
@@ -1559,7 +1564,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
 	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-	pEnemy->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(2.25f, 1.5f, 3.25f)));
+	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
 }
 

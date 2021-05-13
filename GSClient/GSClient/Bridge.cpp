@@ -16,6 +16,7 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		 
 		idx = AddObject(pCubeMeshTex, pShader, 0x01);
 		m_Objects[idx]->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
+		m_Objects[idx]->SetSize({1, 251.0f ,1});
 		m_Objects[idx]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 1000, 1, 500,
 			XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i));
 		m_Objects[idx]->AddColider(new ColliderBox(XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i), 
@@ -173,8 +174,7 @@ bool CBridge::CollisionCheck(Collider* pAABB)
 	for (CGameObject* pObject : m_Objects)
 	{
 		if (pObject->CollisionCheck(pAABB)) {
-			m_CollideObject = pObject;
-			cout << "다리 중 충돌한 놈 찾음\n";
+			m_CollideObject = pObject; 
 			return true;
 		}
 	} 

@@ -38,7 +38,12 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 			endTime = t;
 	}
 
-	cout << endTime << endl;
+	cout << endTime << endl;	
+	
+	m_Type = OBJ_TYPE::Player;
+
+	m_HP = 100;
+	m_SP = 100;
 }
 
 CPlayer::~CPlayer()
