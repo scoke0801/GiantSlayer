@@ -213,24 +213,27 @@ void CPlate::UpdateColliders()
 }
 
 bool CPlate::CollisionCheck(Collider* pAABB)
-{ 
+{
+	bool res = false;
 	for (auto pObj : m_Objects) {
 		if (pObj->CollisionCheck(pAABB)) {
-			m_CollideObject = pObj;
-			return true;
+			m_CollideObject->FixCollision(pObj);
+			//return true;
+			res = true;
 		}
-	} 
-	return false;
+	}
+	return res;
 }
 
 bool CPlate::CollisionCheck(CGameObject* other)
 {
 	bool res = false;
 	auto otherAABB = other->GetAABB();
+	m_CollideObject = other;
 	for (int i = 0; i < otherAABB.size(); ++i) {
 		bool result = CollisionCheck(otherAABB[i]);
 		if (result) {
-			other->FixCollision(m_CollideObject);
+			//other->FixCollision(m_CollideObject);
 			//return true;
 			res = true;
 		}

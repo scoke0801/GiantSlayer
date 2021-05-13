@@ -8,7 +8,7 @@ constexpr int MAX_PLAYER = 5;
 constexpr int MAX_PLAYER_NAME = 200;
 constexpr int SERVERPORT = 9000;
 constexpr int BUFSIZE = 4096;
-constexpr int F_TO_I = 10000;
+constexpr int F_TO_I = 100000;
 constexpr int I_TO_F = F_TO_I;
 
 constexpr int MAX_MOUSE_INPUT = 30;
@@ -251,7 +251,7 @@ struct P_S2C_PROCESS_KEYBOARD {
 	PACKET_PROTOCOL type;
 
 	int posX, posY, posZ;
-	short rotateAngle;
+	int lookX, lookY, lookZ;
 
 	WEAPON_TYPE weaponType;
 };
@@ -276,8 +276,10 @@ struct P_S2C_UPDATE_SYNC {
 	int posY[MAX_PLAYER];
 	int posZ[MAX_PLAYER];
 
-	short angle[MAX_PLAYER];
-
+	int lookX[MAX_PLAYER];
+	int lookY[MAX_PLAYER];
+	int lookZ[MAX_PLAYER];
+	 
 	char hp[MAX_PLAYER];
 	char sp[MAX_PLAYER];
 

@@ -60,7 +60,8 @@ private:
 	CGameObject*				m_Mirror = nullptr;
 	CPlayer*					m_Player = nullptr;
 
-	int							m_CurrentPlayerNum = 0;
+	int							m_CurrentPlayerNum = 0; 
+	//vector<CPlayer*>			m_Players[MAX_PLAYER];
 	CPlayer*					m_Players[MAX_PLAYER];
 
 	vector<UI*>					m_UIs;

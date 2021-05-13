@@ -30,7 +30,6 @@ public:
 	void FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 
 public:
-	virtual void SetVelocity(OBJ_DIRECTION direction) override;
 	virtual void SetVelocity(const XMFLOAT3& dir) override;
 
 	bool IsMoving() const { return Vector3::Length(m_xmf3Velocity) > 0.01f; }

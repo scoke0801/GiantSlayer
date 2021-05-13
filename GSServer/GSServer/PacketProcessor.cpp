@@ -120,7 +120,9 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 		P_C2S_KEYBOARD_INPUT p_keyboard =
 			*reinterpret_cast<P_C2S_KEYBOARD_INPUT*>(buffer);
 		
-		XMFLOAT3 pos = m_Players[p_keyboard.id]->GetPosition();
+		XMFLOAT3 pos = m_Players[p_keyboard.id]->GetPosition(); 
+		XMFLOAT3 look = Vector3::Normalize(m_Players[p_keyboard.id]->GetLook()); 
+		DisplayVector3(look);
 		XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
 		float distance = PLAYER_RUN_VELOCITY; 
 		 
@@ -128,19 +130,19 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 		{
 		case VK_W:
 			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
-				m_Players[p_keyboard.id]->GetLook(), distance));
+				m_Cameras[p_keyboard.id]->GetLook3f(), distance)); 
 			break;
 		case VK_S:
 			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
-				m_Players[p_keyboard.id]->GetLook(), -distance));
+				m_Cameras[p_keyboard.id]->GetLook3f(), -distance));
 			break; 
 		case VK_A:
 			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
-				m_Players[p_keyboard.id]->GetRight(), -distance));
+				m_Cameras[p_keyboard.id]->GetRight3f(), -distance));
 			break;
 		case VK_D:
 			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
-				m_Players[p_keyboard.id]->GetRight(), distance));
+				m_Cameras[p_keyboard.id]->GetRight3f(), distance));
 			break;
 		}
 
@@ -152,6 +154,10 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 		p_keyboardProcess.posY = FloatToInt(pos.y);
 		p_keyboardProcess.posZ = FloatToInt(pos.z);
 
+		p_keyboardProcess.lookX = FloatToInt(look.x);
+		p_keyboardProcess.lookY = FloatToInt(look.y);
+		p_keyboardProcess.lookZ = FloatToInt(look.z);
+		
 		SendPacket(socket, reinterpret_cast<char*>(&p_keyboardProcess), p_keyboardProcess.size, retval);
 	}
 	return true;
@@ -198,9 +204,14 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 			p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId()); 
 			
 			XMFLOAT3 pos = m_Players[i]->GetPosition();
+			XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
 			p_syncUpdate.posX[i] = FloatToInt(pos.x);
 			p_syncUpdate.posY[i] = FloatToInt(pos.y);
 			p_syncUpdate.posZ[i] = FloatToInt(pos.z);
+
+			p_syncUpdate.lookX[i] = FloatToInt(look.x);
+			p_syncUpdate.lookY[i] = FloatToInt(look.y);
+			p_syncUpdate.lookZ[i] = FloatToInt(look.z);
 		}
 		SendPacket(socket, reinterpret_cast<char*>(&p_syncUpdate), sizeof(p_syncUpdate), retval);
 	}
@@ -283,10 +294,10 @@ void PacketProcessor::InitPlayers()
 	};
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer(); 
-		m_Players[i]->Scale(50, 50, 50);
+		m_Players[i]->Scale(7, 7, 7);
 		m_Players[i]->SetPosition(positions[i]);
 		m_Players[i]->SetExistence(false); 
-		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.0f, 5.0f, 2.5f)));
+		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
 	}
 }
 
@@ -303,7 +314,7 @@ void PacketProcessor::InitCameras()
 
 		m_Cameras[i]->SetPosition(m_Players[i]->GetPosition());
 		m_Cameras[i]->Pitch(XMConvertToRadians(15));
-		m_Cameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));	
+		m_Cameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));	
 		m_Cameras[i]->SetTarget(m_Players[i]);
 		m_Players[i]->SetCamera(m_Cameras[i]);
 	}

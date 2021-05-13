@@ -107,6 +107,9 @@ void CPlayer::UpdateCamera()
 
 void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
 {
+	if (m_Camera == nullptr) {
+		return;
+	}
 	XMFLOAT3 xmf3CameraPosition = m_Camera->GetPosition3f();
 
 	/*
@@ -192,7 +195,8 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	Rotate({ 0,1,0 }, 180.0f);
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, m_xmf3Velocity.y, 0.0f);
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY));
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, 
+		Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY));
 
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
 

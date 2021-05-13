@@ -530,6 +530,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		}
 	} 
 	for (auto player : m_Players) {
+		if (!player->IsDrawable()) continue;
 		player->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 }
@@ -707,9 +708,11 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 			pObject->Draw_Shadow(pd3dCommandList, m_CurrentCamera); 
 		}
 	}
-	m_Player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
+	for (auto player : m_Players) {
+		if (!player->IsDrawable()) continue;
+		player->Draw_Shadow(pd3dCommandList, m_pLightCamera); 
+	}
 	 
-
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
 
@@ -780,9 +783,11 @@ void CSceneJH::Communicate(SOCKET& sock)
 		if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
 
 		XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
+		XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
 
 		m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
 		m_Players[p_syncUpdate.id[i]]->UpdateCamera();
+		//m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 	}
 
 	if (m_MousePositions.size() > 0) {
@@ -900,11 +905,15 @@ void CSceneJH::ProcessInput()
 		XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_keyboardProcess.posX),
 			IntToFloat(p_keyboardProcess.posY), 
 			IntToFloat(p_keyboardProcess.posZ) };
+		XMFLOAT3 look = XMFLOAT3{ IntToFloat(p_keyboardProcess.lookX),
+			IntToFloat(p_keyboardProcess.lookY),
+			IntToFloat(p_keyboardProcess.lookZ) }; 
 
 		m_Players[p_keyboard.id]->SetPosition(pos);
 		m_Players[p_keyboard.id]->FixPositionByTerrain(m_Terrain);
-
-		DisplayVector3(pos, true);
+		m_Players[p_keyboard.id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), {0,1,0});
+		DisplayVector3(look);
+		//DisplayVector3(pos, true);
 		return;
 	}
 	if (m_CurrentCamera == nullptr) return;
@@ -918,8 +927,14 @@ void CSceneJH::ProcessInput()
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{ 
-		if (m_isPlayerSelected) { 
-			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));
+		if (m_isPlayerSelected) {
+			XMFLOAT3 prevLook = m_Player->GetLook();
+			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));  
+			XMFLOAT3 afterLook = m_Player->GetLook();
+
+			float angle = Vector3::Angle(Vector3::Normalize(afterLook), Vector3::Normalize(prevLook));
+			cout << " Angle : " << angle << endl; 
+			//m_MinimapArrow->Rotate(XMConvertToRadians(angle));
 		}
 		else
 			m_CurrentCamera->Walk(cameraSpeed);
@@ -927,9 +942,7 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_A)
 	{
 		if (m_isPlayerSelected) { 
-			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetRight3f(), -distance));
-
-			//m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetRight3f(), -distance));
+			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetRight3f(), -distance)); 
 		}
 		else
 			m_CurrentCamera->Strafe(-cameraSpeed);
@@ -1005,7 +1018,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_F3)
 	{
-		m_Player->SetPosition({ 12500,  -2000, 15500 });
+		m_Player->SetPosition({ 12000,  -2000, 13500 });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F4)
@@ -1112,8 +1125,7 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_RMOVE;
 
 			m_MousePositions.emplace_back(POINTF{ dx, dy });
-		}
-		return;
+		} 
 	}
 	if ((btnState & MK_LBUTTON) != 0)
 	{
@@ -1140,12 +1152,9 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 
 	if ((btnState & MK_RBUTTON) != 0)
 	{
-		// Make each pixel correspond to 0.005 unit in the scene.
 		float dx = static_cast<float>(x - m_LastMousePos.x);
 		float dy = static_cast<float>(y - m_LastMousePos.y);
-
-		///cout << "offset : " << dy << "\n";
-
+		 
 		m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, dy));
 	}
 	m_LastMousePos.x = x;
@@ -1493,7 +1502,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->Scale(35, 35, 35); 
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
-	pObject->SetHegithFromTerrain(300.0f);
+	pObject->SetHegithFromTerrain(750.0f);
 
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,-10,20 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, -10, 20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
@@ -2321,11 +2330,10 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 { 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
-
+		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin"); 
 	m_Player = m_Players[0];
 
-	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
 	m_Cameras[0]->SetTarget(m_Players[0]);
 
 	//m_Players[0]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
@@ -2343,19 +2351,20 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
 	++m_CurrentPlayerNum;
 	m_MinimapCamera->SetTarget(m_Players[0]);
-
+	 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
-		m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-		m_Players[i]->Scale(50, 50, 50);
+		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
+		//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
+		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		m_Players[i]->Scale(7, 7, 7);
+		m_Players[i]->Rotate({ 0,1,0 }, 180);
 		m_Players[i]->SetObjectName(OBJ_NAME::Player);
 
-		m_Players[i]->SetTextureIndex(0x200);
-		m_Players[i]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player]);
-		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 5, XMFLOAT3{0,0,0});
-		m_Players[i]->SetDrawable(false); 
-
-		//m_Players[i]->BuildColliders();
+		m_Players[i]->SetTextureIndex(0x400);
+		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 }); 
+		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
+		m_Players[i]->SetDrawable(false);  
 	}
 }
 

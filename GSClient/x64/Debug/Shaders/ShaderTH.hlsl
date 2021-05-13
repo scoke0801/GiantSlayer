@@ -648,7 +648,6 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	return (cColor * cIllumination);
 }
 
-
 struct VS_TEXTURED_LIGHTING_INPUT
 {
 	float3 position : POSITION;
@@ -907,3 +906,147 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	return(cColor * cIllumination);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
+cbuffer cbBoneOffsets : register(b6)
+{
+	float4x4 gpmtxBoneOffsets[100];
+};
+
+cbuffer cbBoneTransforms : register(b7)
+{
+	float4x4 gpmtxBoneTransforms[100];
+};
+
+struct VS_FBX_ANIMATED_INPUT
+{
+	float3 position : POSITION;
+	float2 uv : TEXCOORD;
+	float3 normal : NORMAL;
+	float3 weights : BONEWEIGHT;
+	uint4 indices : BONEINDEX;
+};
+
+struct VS_FBX_ANIMATED_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
+	float3 normalW : NORMAL;
+	float2 uv : TEXCOORD;
+};
+
+VS_FBX_ANIMATED_OUTPUT VSFbxAnimated(VS_FBX_ANIMATED_INPUT input)
+{
+	VS_FBX_ANIMATED_OUTPUT output = (VS_FBX_ANIMATED_OUTPUT)0.0f;
+
+	float TempWeights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	TempWeights[0] = input.weights.x;
+	TempWeights[1] = input.weights.y;
+	TempWeights[2] = input.weights.z;
+	TempWeights[3] = 1.0f - TempWeights[0] - TempWeights[1] - TempWeights[2];
+
+	float3 TempPos = float3(0.0f, 0.0f, 0.0f);
+	float3 TempNormal = float3(0.0f, 0.0f, 0.0f);
+
+	for (int i = 0; i < 4; ++i)
+	{
+		//TempPos += TempWeights[i] * mul(float4(input.position, 1.0f), gpmtxBoneTransforms[input.indices[i]]).xyz;
+		TempPos += TempWeights[i] * mul(gpmtxBoneTransforms[input.indices[i]], float4(input.position, 1.0f)).xyz;
+		TempNormal += TempWeights[i] * mul(input.normal, (float3x3)gpmtxBoneTransforms[input.indices[i]]);
+	}
+
+	input.position = TempPos;
+	input.normal = TempNormal;
+
+	float4 TempPosW = mul(float4(input.position, 1.0f), gmtxWorld);
+	output.positionW = TempPosW.xyz;
+	output.position = mul(mul(TempPosW, gmtxView), gmtxProjection);
+	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
+	output.uv = input.uv;
+
+	/*
+	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
+	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxWorld);
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	*/
+
+	return(output);
+}
+
+float4 PSFbxAnimated(VS_FBX_ANIMATED_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor;// = gtxtBox.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtForest.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gSkyBox_Front.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gSkyBox_Back.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gSkyBox_Right.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x10)
+	{
+		cColor = gSkyBox_Left.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x20)
+	{
+		cColor = gSkyBox_Top.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x40)
+	{
+		cColor = gSkyBox_Bottom.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x80)
+	{
+		cColor = gtxtBox.Sample(gssWrap, input.uv);
+
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
+	}
+	if (gnTexturesMask & 0x100)
+	{
+		cColor = gtxtWood.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x200)
+	{
+		cColor = gtxtBox.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x400)
+	{
+		cColor = gtxtRockyWall.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x800)
+	{
+		cColor = gtxtBossWall.Sample(gssWrap, input.uv);
+	}
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return(cColor * cIllumination);
+}

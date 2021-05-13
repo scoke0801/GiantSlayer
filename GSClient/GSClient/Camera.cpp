@@ -350,7 +350,7 @@ void CCamera::SetOffset(XMFLOAT3 offset)
 
 void CCamera::MoveOffset(XMFLOAT3 shift)
 {
-	m_xmf3Offset = Vector3::Add(m_xmf3Offset, shift);	
+	m_xmf3Offset = Vector3::Add(m_xmf3Offset, shift);	 
 }
 
 void CCamera::Strafe(float d)

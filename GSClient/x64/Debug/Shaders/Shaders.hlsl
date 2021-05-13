@@ -132,41 +132,6 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 
 /////////////////////////////////////////////////////////////////////////
 
-struct VS_FBX_MODEL_INPUT
-{
-	float4 position : POSITION;
-};
-
-struct VS_FBX_MODEL_OUTPUT
-{
-	float4	position : SV_POSITION;
-};
-
-VS_FBX_MODEL_OUTPUT VSFbxModel(VS_FBX_MODEL_INPUT input)
-{
-	VS_FBX_MODEL_OUTPUT output;
-
-	output.position = mul(mul(mul(input.position, gmtxWorld), gmtxView), gmtxProjection);
-
-	return(output);
-}
-
-float4 PSFbxModel(VS_FBX_MODEL_OUTPUT input) : SV_TARGET
-{
-	float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
-
-	return(cColor);
-}
-
-VS_FBX_MODEL_OUTPUT VSFbxSkinnedModel(VS_FBX_MODEL_INPUT input)
-{
-	VS_FBX_MODEL_OUTPUT output;
-
-	output.position = mul(mul(mul(input.position, gmtxWorld), gmtxView), gmtxProjection);
-
-	return(output);
-}
-
 struct VS_TERRAIN_INPUT
 {
     float3 position : POSITION;
