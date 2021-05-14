@@ -954,9 +954,10 @@ FbxScene* LoadFbxSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 }
 
 CFixedMesh::CFixedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	char* pstrFbxFileName) : CMesh(pd3dDevice, pd3dCommandList)
+	string fileName) : CMesh(pd3dDevice, pd3dCommandList)
 {
-	LoadFile(pstrFbxFileName);
+	string filePath = "resources/FbxExported/" + fileName + ".bin";
+	LoadFile(filePath);
 
 	// Vertices
 	vector<CTexturedVertex> tempVertex;
@@ -996,10 +997,10 @@ CFixedMesh::~CFixedMesh()
 
 }
 
-void CFixedMesh::LoadFile(char* pstrFbxFileName)
+void CFixedMesh::LoadFile(string fileName)
 {
 	ifstream file;
-	file.open(pstrFbxFileName, ios::in | ios::binary);
+	file.open(fileName, ios::in | ios::binary);
 	string temp;
 
 	file >> temp >> nVertices;
@@ -1012,16 +1013,14 @@ void CFixedMesh::LoadFile(char* pstrFbxFileName)
 	for (int i = 0; i < nVertices; i++) {
 		Vertex tempVertex;
 
-		file >> tempVertex.pos.x >> tempVertex.pos.z >> tempVertex.pos.y >>
-			tempVertex.uv.x >> tempVertex.uv.y >>
-			tempVertex.normal.x >> tempVertex.normal.z >> tempVertex.normal.y;
+		file >> tempVertex.pos.x >> tempVertex.pos.y >> tempVertex.pos.z >>
+				tempVertex.uv.x >> tempVertex.uv.y >>
+				tempVertex.normal.x >> tempVertex.normal.y >> tempVertex.normal.z;
 		/*
 		file >> tempVertex.pos.x >> tempVertex.pos.y >> tempVertex.pos.z >>
 			tempVertex.uv.x >> tempVertex.uv.y >>
 			tempVertex.normal.x >> tempVertex.normal.y >> tempVertex.normal.z;
 		*/
-		file >> tempVertex.indices[0] >> tempVertex.indices[1] >> tempVertex.indices[2] >> tempVertex.indices[3] >>
-			tempVertex.weights.x >> tempVertex.weights.y >> tempVertex.weights.z >> temp;
 
 		vertices.push_back(tempVertex);
 	}

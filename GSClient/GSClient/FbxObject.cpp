@@ -104,7 +104,6 @@ void CFbxObject::LoadFile(char* pstrFbxFileName)
 				tempBone.offset._31 >> tempBone.offset._32 >> tempBone.offset._33 >> tempBone.offset._34 >>
 				tempBone.offset._41 >> tempBone.offset._42 >> tempBone.offset._43 >> tempBone.offset._44;
 
-			cout << tempBone.name << " " << tempBone.parentIndex << endl;
 			skeleton.push_back(tempBone);
 			m_pxmf4x4BindPoseBoneOffsets[i] = tempBone.offset;
 		}

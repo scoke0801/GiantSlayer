@@ -62,12 +62,17 @@ FbxLoader::FbxLoader()
 
 }
 
-FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName, bool hasAnim)
+FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, string fileName, bool hasAnim, int nRotate)
 {
 	mFbxManager = pfbxSdkManager;
 	hasAnimation = hasAnim;
+	rotateNum = nRotate;
 
-	LoadScene(FileName);
+	string tempPath = "resources/Fbx/" + fileName + ".fbx";
+	char* loadPath = new char[tempPath.size()];
+	strcpy(loadPath, tempPath.c_str());
+
+	LoadScene(loadPath);
 
 	if (hasAnimation) {
 		LoadSkeletonHierarchy(mFbxScene->GetRootNode());
@@ -107,10 +112,11 @@ FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName, bool hasAnim)
 	Optimize();
 	cout << "-최적화 작업 완료!" << endl;
 
-	SaveAsFile();
+	string outPath = "resources/FbxExported/" + fileName + ".bin";
+	SaveAsFile(outPath);
 	cout << "-파일 추출 끝!" << endl;
 
-	cout << FileName << " ||| [SKT]:" << mSkeleton.size() << " [PG]:" << triangles.size() << " [VT]:" << vertices.size() << endl;
+	cout << fileName << " ||| [SKT]:" << mSkeleton.size() << " [PG]:" << triangles.size() << " [VT]:" << vertices.size() << endl;
 }
 
 FbxLoader::~FbxLoader()
@@ -453,10 +459,10 @@ void FbxLoader::Optimize()
 	//sort(triangles.begin(), triangles.end());
 }
 
-void FbxLoader::SaveAsFile()
+void FbxLoader::SaveAsFile(string filePath)
 {
 	ofstream file;
-	file.open("FbxTest.bin", ios::out | ios::binary);
+	file.open(filePath, ios::out | ios::binary);
 
 	file << "Vertex " << vertices.size() << endl;
 	file << "Triangle " << triangles.size() << endl;
@@ -467,14 +473,24 @@ void FbxLoader::SaveAsFile()
 	file << "[Vertex]" << endl;
 	for (int i = 0; i < vertices.size(); i++) {
 		// pos + uv + normal
-		file << vertices[i].pos.x << " " << vertices[i].pos.y << " " << vertices[i].pos.z << " " <<
+		if (rotateNum == 0) {
+			file << vertices[i].pos.x << " " << vertices[i].pos.y << " " << vertices[i].pos.z << " " <<
 				vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
 				vertices[i].normal.x << " " << vertices[i].normal.y << " " << vertices[i].normal.z << endl;
+		}
+		else if (rotateNum == 1) {
+			file << vertices[i].pos.x << " " << vertices[i].pos.z << " " << vertices[i].pos.y << " " <<
+				vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
+				vertices[i].normal.x << " " << vertices[i].normal.z << " " << vertices[i].normal.y << endl;
+		}
+
 		// bindex 1~4 + bweight 1~4
-		file << vertices[i].blendInfo[0].index << " " << vertices[i].blendInfo[1].index << " " <<
-				vertices[i].blendInfo[2].index << " " << vertices[i].blendInfo[3].index << " " <<
-				vertices[i].blendInfo[0].weight << " " << vertices[i].blendInfo[1].weight << " " <<
-				vertices[i].blendInfo[2].weight << " " << vertices[i].blendInfo[3].weight << endl;
+		if (hasAnimation == true) {
+			file << vertices[i].blendInfo[0].index << " " << vertices[i].blendInfo[1].index << " " <<
+					vertices[i].blendInfo[2].index << " " << vertices[i].blendInfo[3].index << " " <<
+					vertices[i].blendInfo[0].weight << " " << vertices[i].blendInfo[1].weight << " " <<
+					vertices[i].blendInfo[2].weight << " " << vertices[i].blendInfo[3].weight << endl;
+		}
 	}
 	file << endl;
 

@@ -156,6 +156,7 @@ private:
 
 	int numCP, numPG, numDF;
 	bool hasAnimation;
+	int rotateNum;
 
 	// Mesh Info
 	unordered_map<int, ControlPoint> cpoints;
@@ -172,7 +173,7 @@ private:
 
 public:
 	FbxLoader();
-	FbxLoader(FbxManager* pfbxSdkManager, char* FileName, bool hasAnim);
+	FbxLoader(FbxManager* pfbxSdkManager, string fileName, bool hasAnim, int nRotate);
 	~FbxLoader();
 
 	void ExploreFbxHierarchy(FbxNode* pNode);
@@ -191,5 +192,5 @@ public:
 
 	void Optimize();
 
-	void SaveAsFile();
+	void SaveAsFile(string filePath);
 };
