@@ -146,14 +146,6 @@ void CBridge::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 	}
 }
 
-void CBridge::Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-	for (CGameObject* pObject : m_Objects)
-	{
-		pObject->Draw_Shadow(pd3dCommandList, pCamera);
-	}
-}
-
 void CBridge::SetPosition(XMFLOAT3 pos)
 {
 	for (CGameObject* pObject : m_Objects)

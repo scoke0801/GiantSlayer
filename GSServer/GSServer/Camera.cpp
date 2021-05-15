@@ -200,11 +200,11 @@ void CCamera::RotateY(float angle)
 void CCamera::RotateAroundTarget(XMFLOAT3 pxmf3Axis, float fAngle)
 {
 	if (m_TargetPlayer == nullptr) return;
-	
+
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
 		XMConvertToRadians(fAngle));
 
-	m_TargetTransform = Matrix4x4::Multiply(mtxRotate, m_TargetTransform);  
+	m_TargetTransform = Matrix4x4::Multiply(mtxRotate, m_TargetTransform);
 }
 
 void CCamera::UpdateViewMatrix()
@@ -230,29 +230,7 @@ void CCamera::UpdateViewMatrix()
 
 	XMStoreFloat3(&m_xmf3Right, R);
 	XMStoreFloat3(&m_xmf3Up, U);
-	XMStoreFloat3(&m_xmf3Look, L);
-
-	m_xmf4x4View(0, 0) = m_xmf3Right.x;
-	m_xmf4x4View(1, 0) = m_xmf3Right.y;
-	m_xmf4x4View(2, 0) = m_xmf3Right.z;
-	m_xmf4x4View(3, 0) = x;
-
-	m_xmf4x4View(0, 1) = m_xmf3Up.x;
-	m_xmf4x4View(1, 1) = m_xmf3Up.y;
-	m_xmf4x4View(2, 1) = m_xmf3Up.z;
-	m_xmf4x4View(3, 1) = y;
-
-	m_xmf4x4View(0, 2) = m_xmf3Look.x;
-	m_xmf4x4View(1, 2) = m_xmf3Look.y;
-	m_xmf4x4View(2, 2) = m_xmf3Look.z;
-	m_xmf4x4View(3, 2) = z;
-
-	m_xmf4x4View(0, 3) = 0.0f;
-	m_xmf4x4View(1, 3) = 0.0f;
-	m_xmf4x4View(2, 3) = 0.0f;
-	m_xmf4x4View(3, 3) = 1.0f;
-
-	m_ViewDirty = false;
+	XMStoreFloat3(&m_xmf3Look, L); 
 
 	m_ViewDirty = false;
 }

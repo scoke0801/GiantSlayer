@@ -26,7 +26,9 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 
 	CreateMinmapShader(pd3dDevice, pd3dGraphicsRootSignature);
 
-	CreateSkyboxShader(pd3dDevice, pd3dGraphicsRootSignature); 
+	CreateSkyboxShader(pd3dDevice, pd3dGraphicsRootSignature);
+
+	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature); 
 	CreateTerrainWaterShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -72,7 +74,8 @@ void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignatu
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pFBXShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("FBX", pFBXShader);
-	 
+
+
 	pFBXFeatureShaderLeft->CreateInputLayout(ShaderTypes::Textured);
 	pFBXFeatureShaderLeft->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pFBXFeatureShaderLeft->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -90,8 +93,7 @@ void CShaderHandler::CreateFBXAnimatedShader(ID3D12Device* pd3dDevice, ID3D12Roo
 	CShader* pFBXFeatureShaderLeft = new CShader();
 	CShader* pFBXFeatureShaderRight = new CShader();
 
-	//if (m_UserID == ShaderHandlerUser::TH) 
-	{
+	if (m_UserID == ShaderHandlerUser::TH) {
 		pFBXShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSFbxAnimated");
 		pFBXShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFbxAnimated");
 	}

@@ -4,7 +4,8 @@
 
 #include "SceneJH.h"
 CTitleScene::CTitleScene()
-{ 
+{
+	cout << "Enter CSceneJH \n";
 	m_pd3dGraphicsRootSignature = NULL;
 	m_pd3dPipelineState = NULL;
 
@@ -75,12 +76,9 @@ void CTitleScene::ProcessInput()
 				cout << "ChangeScene to CSceneJH\n";
 				ChangeScene<CSceneJH>((void*)m_IsSingleplay);
 
-				CFramework::GetInstance().GetCurrentScene()->LoginToServer();
+				CFramework::GetInstance().GetCurrentScene()->LoginToServer();;
 			}
 		} 
-		else {
-			ChangeScene<CSceneJH>((void*)m_IsSingleplay);
-		}
 	}
 }
 

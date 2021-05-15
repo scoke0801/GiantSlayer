@@ -40,11 +40,12 @@ protected:
 	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
 	// frame update loop, update 갱신 전의 좌표
 	XMFLOAT3			m_xmf3PrevPosition = XMFLOAT3{ 0,0,0 };
-	XMFLOAT3			m_xmf3Velocity = XMFLOAT3{ 0,0,0 };
-	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
+	XMFLOAT3			m_xmf3Velocity;
 	   
 	OBJ_NAME			m_Name;
-	 
+
+	//CCamera*			m_Camera = nullptr;
+
 protected:// 충돌처리 관련 변수
 	vector<BoundingBox>	m_BoundingBox;
 	vector<BoundingBox>	m_AABB;
@@ -68,9 +69,7 @@ public:
 	virtual void Rotate(const XMFLOAT3& pxmf3Axis, float fAngle);
 	//void Rotate(float x, float y, float z); 
 
-	void Scale(float x, float y, float z, bool setSize = true);
-
-	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
+	void Scale(float x, float y, float z);
 
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
@@ -80,7 +79,7 @@ public:
 	 
 	virtual void SetPosition(XMFLOAT3 pos);
 	virtual void SetVelocity(const XMFLOAT3& vel);
-	virtual void SetVelocity(OBJ_DIRECTION direction); 
+	virtual void SetVelocity(OBJ_DIRECTION direction);
 
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetObjectName(const OBJ_NAME& name) { m_Name = name; }

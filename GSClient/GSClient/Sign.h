@@ -23,8 +23,6 @@ public:
      
 public:
     virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
-    void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
     void UpdateColliders() override;
 
     bool CollisionCheck(Collider* pCollider) override;

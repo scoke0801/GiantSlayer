@@ -15,7 +15,6 @@ public:
 
 public:
 	void SetTargetPosition(const XMFLOAT3& targetPos);
-	void SetTargetVector(const XMFLOAT3& playerLookAt);
 
 	bool IsCanUse() const { return m_IsCanUse; }
 	void SetUseable(bool data) { m_IsCanUse = data; }

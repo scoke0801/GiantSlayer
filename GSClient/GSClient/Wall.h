@@ -54,7 +54,6 @@ public:
 public:
     virtual void Update(float fTimeElapsed) override;
     virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
-    void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
     void UpdateColliders() override;
 

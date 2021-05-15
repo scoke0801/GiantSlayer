@@ -1037,14 +1037,7 @@ float4 PSFbxAnimated(VS_FBX_ANIMATED_OUTPUT input, uint nPrimitiveID : SV_Primit
 	{
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x400)
-	{
-		cColor = gtxtRockyWall.Sample(gssWrap, input.uv);
-	}
-	if (gnTexturesMask & 0x800)
-	{
-		cColor = gtxtBossWall.Sample(gssWrap, input.uv);
-	}
+
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 

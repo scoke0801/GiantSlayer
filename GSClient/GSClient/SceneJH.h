@@ -9,7 +9,6 @@ class UI;
 class HelpTextUI;
 class CTerrain;
 class CParticle;
-class CLightCamera;
 enum class FBX_MESH_TYPE : UINT {
 	DryForestRock,
 	DesertRock,
@@ -22,9 +21,6 @@ enum class FBX_MESH_TYPE : UINT {
 	Stump,
 	Bush_1,
 	Boss,
-	Player,
-	Enemy_01,
-	Enemy_02,
 	COUNT
 };
 
@@ -46,8 +42,7 @@ private:
 	bool						m_isPlayerSelected = true;
 
 private:
-	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
-	array<CMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
+	array<CMeshFbx*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
 
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
 	 
@@ -78,21 +73,13 @@ private:
 	CCamera*					m_MinimapCamera = nullptr;
 	CCamera*					m_MirrorCamera = nullptr;
 
-	CLightCamera*				m_pLightCamera = nullptr;
-
 	short						m_DoorIdx = 0;
 private:
 	POINT						m_LastMousePos;
 
-	ID3D12DescriptorHeap*		 m_pd3dSrvDescriptorHeap = nullptr;
-	ID3D12DescriptorHeap*		 m_pd3dDsvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap*		m_pd3dBasicSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap*		m_pd3dMonsterDescriptorHeap = nullptr;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dDsvShadowMapCPUHandle;
-	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvShadowMapGPUHandle;
-								 
-	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dDsvCPUDesciptorStartHandle;
-	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dDsvGPUDesciptorStartHandle;
-								   
 private:	// about Meterail
 	MATERIALS*					m_pMaterials = NULL;
 
@@ -111,9 +98,6 @@ private:	// about Minimap
 
 private:
 	ID3D12Resource*				m_pd3dMirrorTex = NULL;
-
-private:
-	ID3D12Resource*				m_pd3dShadowMap = NULL;
 
 private:	// about SceneInfo
 	ID3D12Resource*				m_pd3dcbSceneInfo = NULL;
@@ -145,13 +129,12 @@ public:
 	virtual void Update(float elapsedTime) override;
 	void AnimateObjects(float fTimeElapsed);
 
-	void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;	
-	void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
-	void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
-	void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
-	void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
-	void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
-	void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;	
+	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
+	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 
 public:
 	virtual void Communicate(SOCKET& sock) override;
@@ -193,11 +176,6 @@ private:
 	void BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-
-	// ±×¸²ÀÚ
-	void BuildShadowResource(ID3D12Device* pd3dDevice);
-
-	void CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nHeight);
 
 private:
 	void BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

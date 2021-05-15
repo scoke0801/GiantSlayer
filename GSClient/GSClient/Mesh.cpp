@@ -2041,10 +2041,10 @@ void CArrowParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 {  
 	const float PARTICLE_SIZE = 0.2f;
 
-	float goalSize = 30.0f;
+	float goalSize = 15;
 	float perSize = goalSize / count;
 
-	float goalSpeed = 30.0f;
+	float goalSpeed = ARROW_SPEED;
 	float perSpeed = goalSpeed / count;
 	for (int i = 0; i < count; ++i) {
 		XMFLOAT3 pos = GetRandomVector3(1000, 1, 50);
@@ -2058,7 +2058,7 @@ void CArrowParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 		XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f)); 
 		// 매개변수 방정식 값, 원 크기, 원 주기
-		XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(5.0f, 0.0f, 0.0f), perSize * (count - i), GetRandomValue(2.0f, 0.0f, 0.0f)); 
+		XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(10.0f, 0.0f, 0.0f), perSize * (count - i), GetRandomValue(2.0f, 0.0f, 0.0f)); 
 		// v0 
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;

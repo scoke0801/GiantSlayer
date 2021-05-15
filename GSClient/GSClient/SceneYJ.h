@@ -30,18 +30,17 @@ protected:
 	CSkyBox* m_Skybox;
 	CTerrain* m_Terrain;
 
+	std::unique_ptr<ShadowMap> mShadowMap;
+
 	vector<CGameObject*>		m_BillboardObjects;
 
 	ID3D12RootSignature*		m_pd3dGraphicsRootSignature = NULL;
 
 	CCamera**					m_Cameras;
 	CCamera*					m_CurrentCamera = nullptr;
-	CLightCamera*				m_CurrentLightCamera = nullptr;
 	CCamera*					m_MinimapCamera = nullptr;
 	CCamera*					m_MirrorCamera = nullptr;
 	CCamera*					m_ShadowCamera = nullptr;
-
-	
 
 	CLightCamera*				m_pLightCamera = nullptr;
 
@@ -83,7 +82,6 @@ private:
 
 private:
 	ID3D12Resource* m_pd3dShadowMap = NULL;
-
 
 private:	// about SceneInfo
 	ID3D12Resource* m_pd3dcbSceneInfo = NULL;
@@ -151,12 +149,7 @@ private:
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);
 
-	// ±×¸²ÀÚ
-	void BuildShadowResource(ID3D12Device* pd3dDevice);
-	
-	void CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nHeight);
-	
-	
+
 private:
 	void BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

@@ -7,6 +7,8 @@ struct VS_CB_CAMERA_INFO
 	XMFLOAT4X4 m_xmf4x4View;
 	XMFLOAT4X4 m_xmf4x4Projection;
 	XMFLOAT3   m_xmf3Position;
+	XMFLOAT4X4	m_xmf4x4ViewProjection;
+	XMFLOAT4X4	m_xmf4x4ShadowTransform;
 };
 
 class CPlayer;
@@ -130,7 +132,6 @@ public:
 	XMFLOAT3 GetOffset() const { return m_xmf3Offset; }
 
 	void MoveOffset(XMFLOAT3 shift);
-	void GenerateOrthogonalMatrix(float fWidth, float fHeight, float fNear, float fFar);
 public:
 	// Strafe/Walk the camera a distance d.
 	void Strafe(float d);
@@ -152,9 +153,9 @@ public:
 	void SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList);
 
 public:
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void ReleaseShaderVariables();
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, int rootParameterIndex = 1);
+	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void ReleaseShaderVariables();
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, int rootParameterIndex = 1);
 
 public:
 	void SetLight(LIGHT* light) { if (light) m_Lights.push_back(light); }
@@ -168,23 +169,3 @@ public:
 	XMFLOAT3 CalcTargetLook();
 };
 
-struct VS_CB_LIGHT_CAMERA_INFO
-{
-	XMFLOAT4X4	m_xmf4x4ViewProjection;
-	XMFLOAT4X4	m_xmf4x4ShadowTransform;
-};
-
-class CLightCamera : public CCamera
-{
-protected:
-	ID3D12Resource* m_pd3dcbLightCamera;
-	VS_CB_LIGHT_CAMERA_INFO* m_pcbMappedLightCamera;
-
-public:
-	CLightCamera();
-	virtual ~CLightCamera();
-
-	void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
-	void ReleaseShaderVariables() override;
-	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, int rootParameterIndex = 1) override;
-};

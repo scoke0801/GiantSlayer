@@ -10,10 +10,9 @@ cbuffer cbGameOBJInfo : register(b0)
 //게임 씬의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbSceneFrameData : register(b1)
 {
-	uint	gnHP : packoffset(c0.r);
-	uint	gnSP: packoffset(c0.g);
-	uint	gnWeapon: packoffset(c0.b);
-	float   gfTime : packoffset(c0.a);
+	uint	gnHP : packoffset(c0.x);
+	uint	gnSP : packoffset(c0.y);
+	uint	gnWeapon : packoffset(c0.z);
 };
 
 //카메라의 정보를 위한 상수 버퍼를 선언한다. 
@@ -69,10 +68,9 @@ Texture2D gtxtDry_Tree	   : register(t33);
 Texture2D gtxtStump		   : register(t34);
 Texture2D gtxtDead_Tree	   : register(t35);
 Texture2D gtxtDesert_Rock  : register(t36);
-Texture2D gtxtWater  : register(t37);
 
-Texture2D gtxtMap          : register(t38);
-Texture2D gtxtMirror       : register(t39);
+Texture2D gtxtMap          : register(t37);
+Texture2D gtxtMirror       : register(t38);
 
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -407,7 +405,6 @@ struct VS_TERRAIN_INPUT
 	float3 position : POSITION;
 	float2 uv0 : TEXCOORD0;
 	float3 normal : NORMAL;
-	uint texIndex : TEXTURE;
 	//float3 tangent : TANGENT;
 	//float3 bitangent : BITANGENT;
 };
@@ -419,8 +416,7 @@ struct VS_TERRAIN_TESSELLATION_OUTPUT
 	float3 position : POSITION;
 	float3 positionW : POSITION1;
 	float2 uv0 : TEXCOORD0;
-	float3 normalW : NORMAL;	
-	uint texIndex : TEXTURE;
+	float3 normalW : NORMAL;
 	//float3 tangentW : TANGENT;
 	//float3 bitangentW : BITANGENT;
 };
@@ -433,7 +429,7 @@ VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
 	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
 	output.normalW = mul(input.normal, (float3x3) gmtxWorld); 
 	output.uv0 = input.uv0;
-	output.texIndex = input.texIndex;
+
 	return (output);
 }
 
@@ -448,8 +444,7 @@ struct HS_TERRAIN_TESSELLATION_OUTPUT
 	float3 position : POSITION;
 	float3 positionW : POSITION1;
 	float2 uv0 : TEXCOORD0;
-	float3 normalW : NORMAL;	
-	uint texIndex : TEXTURE;
+	float3 normalW : NORMAL;
 };
 
 struct DS_TERRAIN_TESSELLATION_OUTPUT
@@ -461,9 +456,7 @@ struct DS_TERRAIN_TESSELLATION_OUTPUT
 
 	float3 normalW : NORMAL;
 
-	float4 tessellation : TEXCOORD2;	
-	
-	uint texIndex : TEXTURE;
+	float4 tessellation : TEXCOORD2;
 };
 
 void BernsteinCoeffcient5x5(float t, out float fBernstein[5])
@@ -522,7 +515,7 @@ HS_TERRAIN_TESSELLATION_OUTPUT HSTerrainTessellation(InputPatch<VS_TERRAIN_TESSE
 	output.normalW = mul(input[i].normalW, (float3x3) gmtxWorld);
 	output.positionW = (float3) mul(float4(input[i].position, 1.0f), gmtxWorld);
 	output.uv0 = input[i].uv0;
-	output.texIndex = input[i].texIndex;
+
 	return(output);
 }
 
@@ -543,7 +536,8 @@ HS_TERRAIN_TESSELLATION_CONSTANT HSTerrainTessellationConstant(InputPatch<VS_TER
 	float3 f3Sum = float3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < 25; i++)
 		f3Sum += input[i].positionW;
-	 
+
+
 	float3 f3Center = f3Sum / 25.0f;
 	output.fTessInsides[0] = output.fTessInsides[1] = CalculateTessFactor(f3Center);
 
@@ -564,7 +558,7 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	BernsteinCoeffcient5x5(uv.y, vB);
 
 	output.uv0 = lerp(lerp(patch[0].uv0, patch[4].uv0, uv.x), lerp(patch[20].uv0, patch[24].uv0, uv.x), uv.y);
-	
+
 	float3 position = CubicBezierSum5x5(patch, uB, vB);
 	float3 normal = CubicBezierNormalSum5x5(patch, uB, vB);
 	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
@@ -577,12 +571,9 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	}
 
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
-	output.texIndex = patch[0].texIndex;
 
 	return(output);
 }
-
-
 
 // PS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -599,26 +590,26 @@ struct VS_LIGHT_OUT
 };
 
 float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
-{ 
+{
 	float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	if (input.texIndex & 0x01)
+	if (gnTexturesMask & 0x01)
 	{
 		cColor = gtxtForest.Sample(gssWrap, input.uv0);
 	}
-	if (input.texIndex & 0x02)
+	if (gnTexturesMask & 0x02)
 	{
 		cColor = gtxtDryForest.Sample(gssWrap, input.uv0);
 	}
-	if (input.texIndex & 0x04)
+	if (gnTexturesMask & 0x04)
 	{
 		cColor = gtxtDesert.Sample(gssWrap, input.uv0);
 	}
-	if (input.texIndex & 0x08)
+	if (gnTexturesMask & 0x08)
 	{
 		cColor = gtxtDryDesert.Sample(gssWrap, input.uv0);
 	}
-	if (input.texIndex & 0x10)
+	if (gnTexturesMask & 0x10)
 	{
 		cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0);
 		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
@@ -630,10 +621,11 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		toEyeW /= distToEye; // normalize
 
 		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
-		 
+
+
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
-	if (input.texIndex & 0x20)
+	if (gnTexturesMask & 0x20)
 	{
 		cColor = gtxtBossWall.Sample(gssWrap, input.uv0);
 
@@ -646,7 +638,8 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		toEyeW /= distToEye; // normalize
 
 		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
-		 
+
+
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
 	input.normalW = normalize(input.normalW);
@@ -655,50 +648,7 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	return (cColor * cIllumination);
 }
 
-static matrix<float, 3, 3> sf3x3TextureAnimation = { 
-	{ 0.0f, -1.0f, 0.0f },
-	{ 1.0f, 0.0f, 0.0f }, 
-	{ 0.0f, 0.0f, 0.0f }
-};
-struct VS_WATER_INPUT
-{
-	float3 position : POSITION;
-	float2 uv : TEXCOORD0;
-};
 
-struct VS_WATER_OUTPUT
-{
-	float4 position : SV_POSITION;
-	float2 uv : TEXCOORD0;
-};
-
-VS_WATER_OUTPUT VSTerrainWater(VS_WATER_INPUT input)
-{
-	VS_WATER_OUTPUT output;
-
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
-	output.uv = input.uv;
-
-	return(output);
-}
-
-float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
-{
-	float2 uv = input.uv;
-	sf3x3TextureAnimation._m21 = gfTime * 0.016f;
-	uv = mul(float3(input.uv, 1.0f), sf3x3TextureAnimation).xy;
-
-	float4 cBaseTexColor = gtxtWater.Sample(gssWrap, uv);
-	//float4 cDetail0TexColor = gtxtWaterDetail0Texture.Sample(gssWrap, input.uv * 20.0f);
-	//float4 cDetail1TexColor = gtxtWaterDetail1Texture.Sample(gssWrap, input.uv * 20.0f);
-
-	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	cColor = cBaseTexColor; 
-	cColor.a = 0.6f;
-	//cColor = lerp(cBaseTexColor * cDetail0TexColor, cDetail1TexColor.r * 0.5f, 0.35f);
-	//cColor = cBaseTexColor * cDetail0TexColor;
-	return(cColor);
-}
 struct VS_TEXTURED_LIGHTING_INPUT
 {
 	float3 position : POSITION;
@@ -713,7 +663,6 @@ struct VS_TEXTURED_LIGHTING_OUTPUT
 	float3 normalW : NORMAL;
 	float2 uv : TEXCOORD;
 };
-
 
 VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
 {
