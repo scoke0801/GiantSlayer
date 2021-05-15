@@ -2447,7 +2447,7 @@ void CRainParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12Graph
 }
 
 
-CSandParticleMesh::CSandParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int particleCount)
+CSandWindParticleMesh::CSandWindParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int particleCount)
 	: CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = particleCount * 6;
@@ -2457,28 +2457,30 @@ CSandParticleMesh::CSandParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_nStride = sizeof(CParticleTextureVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	CreateMeshes(pd3dDevice, pd3dCommandList, particleCount, PARTICLE_TYPE::SandParticle);
+	CreateMeshes(pd3dDevice, pd3dCommandList, particleCount, PARTICLE_TYPE::SandWindParticle);
 	CreateVertexBuffer(pd3dDevice, pd3dCommandList);
 }
 
-CSandParticleMesh::~CSandParticleMesh()
+CSandWindParticleMesh::~CSandWindParticleMesh()
 {
 }
 
-void CSandParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count, PARTICLE_TYPE type)
+void CSandWindParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count, PARTICLE_TYPE type)
 {
-	const float PARTICLE_SIZE = 3.0f;
+	const float PARTICLE_SIZE = 5.0f;
 
-	UINT texIndex = 0x01;
+	UINT texIndex = 0x02;
 
 	for (int i = 0; i < count; ++i) {
 		XMFLOAT3 pos = GetRandomVector3(1000, 1, 50);
-		pos.x = float(rand() % 5000) - 3500.0f;
-		pos.y = 2000.0f;
+		pos.x = float(rand() % 2500) - 3500.0f;
+		pos.y = 0.0f;
 		pos.z = float(rand() % 2500) - 800.0f;
-		XMFLOAT4 color = XMFLOAT4(0.85f, 0.7f, 0.56f, 1.0f);
+		XMFLOAT4 color = XMFLOAT4(0.0f, 0.7f, 1.0f, 0.6f);
 
-		XMFLOAT3 speed = { 10.f,0.f,-float(rand() % 700) - 500.f };
+		XMFLOAT3 speed = { 0.f,0,-float(rand() % 700) - 500.f };
+
+		//XMFLOAT3 speed = GetRandomVector3(200.0f, -400.0f, -200.0f);
 
 		XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(RADIAL_PARTICLE_LIFE_TIME, RADIAL_PARTICLE_LIFE_TIME * 0.5f, RADIAL_PARTICLE_LIFE_TIME * 0.5f));
 
@@ -2541,7 +2543,7 @@ void CSandParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	}
 }
 
-void CSandParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSandWindParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_Vertices,
 		m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT,

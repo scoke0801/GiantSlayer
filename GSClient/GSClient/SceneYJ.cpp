@@ -2297,6 +2297,9 @@ void CSceneYJ::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// 비
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 100000, PARTICLE_TYPE::RainParticle);
 
+	// 모래바람
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 100000, PARTICLE_TYPE::SandWindParticle);
+
 	//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 	
 
@@ -2314,6 +2317,8 @@ void CSceneYJ::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	MakingFog();
 	MakingRain();
+	MakingSandWind();
+
 }
 void CSceneYJ::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -2432,15 +2437,15 @@ void CSceneYJ::MakingRain()
 	}
 }
 
-void CSceneYJ::MakingSand()
+void CSceneYJ::MakingSandWind()
 {
 	int i = 0;
 
-	int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::SandParticle);
+	int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::SandWindParticle);
 	if (-1 != idx)
 	{
 		XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
-		m_Particles->UseParticle(idx, XMFLOAT3(10000.f, 0.f, 10000.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		m_Particles->UseParticle(idx, XMFLOAT3(15000.f, -1000.f, 15000.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
 	}
 }
