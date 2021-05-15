@@ -816,6 +816,8 @@ void CSceneJH::Communicate(SOCKET& sock)
 		m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
 		m_Players[p_syncUpdate.id[i]]->UpdateCamera();
 		m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+
+		m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
 	}
 
 	if (m_MousePositions.size() > 0) {
@@ -877,6 +879,8 @@ void CSceneJH::LoginToServer()
 			m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
 			m_Players[p_syncUpdate.id[i]]->UpdateCamera();
 			m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+		
+			m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
 		}
 	}  
 }

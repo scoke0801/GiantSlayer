@@ -9,7 +9,13 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 	int count = 0;
 	int retval = 0;
 	bool packetRecvResult = RecvPacket(socket, buffer, retval); 
-	if (false == packetRecvResult) 
+	if (false == packetRecvResult) {
+		auto res = m_SocketRegister.find(socket);
+		if (m_SocketRegister.end() != res) {
+			res->second;
+			m_Players[res->second]->SetExistence(false);
+			cout << res->second << " 로 그 아 웃\n";
+		}
 		return false;
 	}
 	// buffer[0]의 값은 packet protocol size
@@ -182,13 +188,13 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 			p_addPlayer.z = FloatToInt(pos.z);
 			SendPacket(socket, reinterpret_cast<char*>(&p_addPlayer), sizeof(p_addPlayer), retval);
 		}
-		else if (clientPlayerNum > m_CurrentPlayerNum) {
-			P_S2C_DELETE_PLAYER p_deletePlayer;
-			p_deletePlayer.size = sizeof(p_deletePlayer);
-			p_deletePlayer.type = PACKET_PROTOCOL::S2C_DELETE_PLAYER;
-			p_deletePlayer.id = m_CurrentlyDeletedPlayerId;
-			SendPacket(socket, reinterpret_cast<char*>(&p_deletePlayer), p_deletePlayer.size, retval);
-		} 
+		//else if (clientPlayerNum > m_CurrentPlayerNum) {
+		//	P_S2C_DELETE_PLAYER p_deletePlayer;
+		//	p_deletePlayer.size = sizeof(p_deletePlayer);
+		//	p_deletePlayer.type = PACKET_PROTOCOL::S2C_DELETE_PLAYER;
+		//	p_deletePlayer.id = m_CurrentlyDeletedPlayerId;
+		//	SendPacket(socket, reinterpret_cast<char*>(&p_deletePlayer), p_deletePlayer.size, retval);
+		//} 
 
 		// 도어 변경 조건에 따라서
 		// 게임 엔딩 조건에 따라서 
@@ -211,7 +217,10 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 
 			p_syncUpdate.lookX[i] = FloatToInt(look.x);
 			p_syncUpdate.lookY[i] = FloatToInt(look.y);
-			p_syncUpdate.lookZ[i] = FloatToInt(look.z);
+			p_syncUpdate.lookZ[i] = FloatToInt(look.z); 
+		}
+		for (int i = 0; i < MAX_PLAYER; ++i) { 
+			p_syncUpdate.existance[i] = m_Players[i]->IsExist();
 		}
 		SendPacket(socket, reinterpret_cast<char*>(&p_syncUpdate), sizeof(p_syncUpdate), retval);
 	}

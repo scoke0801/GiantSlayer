@@ -26,6 +26,8 @@ enum class OBJECT_LAYER : int {
 class PacketProcessor
 {
 private:
+	unordered_map<SOCKET, int>	m_SocketRegister;
+
 	CRITICAL_SECTION			m_cs;
 	CPlayer*					m_Players[MAX_PLAYER];
 	CCamera*				    m_Cameras[MAX_PLAYER];
@@ -70,6 +72,8 @@ public:
 	bool ProcessGameScene(SOCKET& socket);
 
 	void UpdateLoop();
+
+	void RegistSocket(SOCKET& socket, int id) { m_SocketRegister[socket] = id; }
 
 private:
 	void Update(float elapsedTime);

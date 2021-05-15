@@ -283,6 +283,8 @@ struct P_S2C_UPDATE_SYNC {
 	char hp[MAX_PLAYER];
 	char sp[MAX_PLAYER];
 
+	bool existance[MAX_PLAYER];
+
 	WEAPON_TYPE weaponType[MAX_PLAYER];  
 };
 #pragma pack (pop)
