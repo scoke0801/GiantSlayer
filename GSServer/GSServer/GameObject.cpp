@@ -25,36 +25,36 @@ CGameObject::CGameObject()
 }
 
 CGameObject::~CGameObject()
-{ 
+{
 }
-  
+
 
 void CGameObject::Update(float fTimeElapsed)
 {
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
-	static float Friction = 50.0f;	
+	static float Friction = 50.0f;
 
 	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Gravity, fTimeElapsed, false));
 	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	float fMaxVelocityXZ =  MaxVelocityXZ * fTimeElapsed;
+	float fMaxVelocityXZ = MaxVelocityXZ * fTimeElapsed;
 	if (fLength > MaxVelocityXZ)
 	{
 		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
 		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
 	}
-	float fMaxVelocityY =  MaxVelocityY * fTimeElapsed;
+	float fMaxVelocityY = MaxVelocityY * fTimeElapsed;
 	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
 	if (fLength > MaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
 
-	Move(m_xmf3Velocity); 
+	Move(m_xmf3Velocity);
 
 	fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = ( Friction * fTimeElapsed);
+	float fDeceleration = (Friction * fTimeElapsed);
 	if (fDeceleration > fLength) fDeceleration = fLength;
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 }
-  
+
 void CGameObject::SetPosition(XMFLOAT3 pos)
 {
 	m_xmf3PrevPosition = m_xmf3Position;
@@ -73,11 +73,11 @@ void CGameObject::SetVelocity(const XMFLOAT3& vel)
 void CGameObject::SetVelocity(OBJ_DIRECTION direction)
 {
 	XMFLOAT3 look = GetLook();
-	XMFLOAT3 right = GetRight(); 
-	
+	XMFLOAT3 right = GetRight();
+
 	switch (direction)
 	{
-	case OBJ_DIRECTION::Front: 
+	case OBJ_DIRECTION::Front:
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(look, PLAYER_RUN_VELOCITY));
 		break;
 	case OBJ_DIRECTION::Back:
@@ -92,20 +92,20 @@ void CGameObject::SetVelocity(OBJ_DIRECTION direction)
 	default:
 		assert("잘못된 방향으로 이동할 수 없어요~");
 		break;
-	} 
-	
+	}
+
 }
 
 void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
-{	
-	
+{
+
 }
 
 bool CGameObject::CollisionCheck(const BoundingBox& pAABB)
 {
-	for (int i = 0; i < m_AABB.size(); ++i) { 
+	for (int i = 0; i < m_AABB.size(); ++i) {
 		bool result = m_AABB[i].Intersects(pAABB);
-		if (result) return true; 
+		if (result) return true;
 	}
 
 	return false;
@@ -135,15 +135,15 @@ void CGameObject::FixCollision()
 void CGameObject::UpdateColliders()
 {
 	for (int i = 0; i < m_BoundingBox.size(); ++i) {
-		m_BoundingBox[i].Transform(m_AABB[i], XMLoadFloat4x4(&m_xmf4x4World)); 
+		m_BoundingBox[i].Transform(m_AABB[i], XMLoadFloat4x4(&m_xmf4x4World));
 	}
 }
 
 void CGameObject::AddAABB(const BoundingBox& boundingBox)
-{ 
+{
 	m_AABB.push_back(boundingBox);
 }
-  
+
 XMFLOAT3 CGameObject::GetRight()const
 {
 	return XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13);
@@ -166,7 +166,7 @@ void CGameObject::Move(XMFLOAT3 shift)
 
 void CGameObject::Move()
 {
-	SetPosition(Vector3::Add(m_xmf3Position, m_xmf3Velocity)); 
+	SetPosition(Vector3::Add(m_xmf3Position, m_xmf3Velocity));
 }
 
 void CGameObject::Rotate(const XMFLOAT3& pxmf3Axis, float fAngle)
@@ -175,12 +175,39 @@ void CGameObject::Rotate(const XMFLOAT3& pxmf3Axis, float fAngle)
 		XMConvertToRadians(fAngle));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 }
- 
 
-void CGameObject::Scale(float x, float y, float z)
+
+void CGameObject::Scale(float x, float y, float z, bool setSize)
 {
+	if (setSize)
+	{
+		m_xmf3Size = { x,y,z };
+	}
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
 	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World);
 }
- 
- 
+
+
+void CGameObject::LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up)
+{
+	XMFLOAT3 L = Vector3::Normalize(Vector3::Subtract(target, pos));
+	XMFLOAT3 R = Vector3::Normalize(Vector3::CrossProduct(up, L));
+	XMFLOAT3 U = Vector3::CrossProduct(L, R);
+
+	float x = -(Vector3::DotProduct(pos, R));
+	float y = -(Vector3::DotProduct(pos, U));
+	float z = -(Vector3::DotProduct(pos, L));
+
+	m_xmf4x4World(0, 0) = R.x;
+	m_xmf4x4World(0, 1) = R.y;
+	m_xmf4x4World(0, 2) = R.z;
+
+	m_xmf4x4World(1, 0) = U.x;
+	m_xmf4x4World(1, 1) = U.y;
+	m_xmf4x4World(1, 2) = U.z;
+
+	m_xmf4x4World(2, 0) = L.x;
+	m_xmf4x4World(2, 1) = L.y;
+	m_xmf4x4World(2, 2) = L.z;
+	Scale(m_xmf3Size.x, m_xmf3Size.y, m_xmf3Size.z, false);
+}

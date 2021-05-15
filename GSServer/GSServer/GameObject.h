@@ -1,7 +1,7 @@
 #pragma once 
- 
+
 //class CCamera;
- 
+
 #define OBJECT_MAX_VELOCITY 120.0f
 #define PLAYER_RUN_VELOCITY 250.0f * 4
 #define PLAYER_WALK_VELOCITY 80.0f 
@@ -11,9 +11,9 @@ enum class OBJ_NAME
 	None = 0,
 	Terrain = 1,
 	Box = 2,
-	Player = 3, 
+	Player = 3,
 	SkyBox = 4,
-	Bridge = 5, 
+	Bridge = 5,
 	DoorWall = 6,
 	Sign = 7,
 };
@@ -26,13 +26,13 @@ enum class OBJ_DIRECTION
 	Right
 };
 string ConvertToObjectName(const OBJ_NAME& name);
- 
+
 
 class CGameObject
 {
 private:
 	int					m_nReferences = 0;
-	 
+
 protected:
 	XMFLOAT4X4			m_xmf4x4World;
 
@@ -40,11 +40,10 @@ protected:
 	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
 	// frame update loop, update 갱신 전의 좌표
 	XMFLOAT3			m_xmf3PrevPosition = XMFLOAT3{ 0,0,0 };
-	XMFLOAT3			m_xmf3Velocity;
-	   
-	OBJ_NAME			m_Name;
+	XMFLOAT3			m_xmf3Velocity = XMFLOAT3{ 0,0,0 };
+	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
 
-	//CCamera*			m_Camera = nullptr;
+	OBJ_NAME			m_Name;
 
 protected:// 충돌처리 관련 변수
 	vector<BoundingBox>	m_BoundingBox;
@@ -57,9 +56,9 @@ public:
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
-	  
-public: 
-	virtual void Update(float fTimeElapsed); 
+
+public:
+	virtual void Update(float fTimeElapsed);
 
 public:
 	virtual void Move(XMFLOAT3 shift);
@@ -69,14 +68,16 @@ public:
 	virtual void Rotate(const XMFLOAT3& pxmf3Axis, float fAngle);
 	//void Rotate(float x, float y, float z); 
 
-	void Scale(float x, float y, float z);
+	void Scale(float x, float y, float z, bool setSize = true);
+
+	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
 	string GetObjectName() const { return ConvertToObjectName(m_Name); }
 	XMFLOAT3 GetVelocity() const { return m_xmf3Velocity; }
 	XMFLOAT4X4 GetWorldTransform() const { return m_xmf4x4World; }
-	 
+
 	virtual void SetPosition(XMFLOAT3 pos);
 	virtual void SetVelocity(const XMFLOAT3& vel);
 	virtual void SetVelocity(OBJ_DIRECTION direction);
@@ -104,6 +105,5 @@ public:
 public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;
-	DirectX::XMFLOAT3 GetLook()const; 
+	DirectX::XMFLOAT3 GetLook()const;
 };
- 
