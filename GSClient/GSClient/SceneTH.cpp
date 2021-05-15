@@ -181,12 +181,10 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildSigns(pd3dDevice, pd3dCommandList);
 	BuildMirror(pd3dDevice, pd3dCommandList);
 
-	string fileName = "Golem";
-	FbxLoader(m_pfbxManager, fileName, false, 0);
-	FbxLoader(m_pfbxManager, fileName, false, 0);
-	FbxLoader(m_pfbxManager, fileName, false, 0);
-	FbxLoader(m_pfbxManager, fileName, false, 0);
-	FbxLoader(m_pfbxManager, fileName, false, 0);
+	string fileName = "Golem"; 
+	FbxLoader(m_pfbxManager, "Arrow", false, 0);
+
+
 	CFixedMesh* testMesh = new CFixedMesh(pd3dDevice, pd3dCommandList, fileName);
 	CFixedMesh* desertrock = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
 	CFixedMesh* deadtree = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree");
