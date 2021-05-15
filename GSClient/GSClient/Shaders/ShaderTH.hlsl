@@ -950,8 +950,8 @@ VS_FBX_ANIMATED_OUTPUT VSFbxAnimated(VS_FBX_ANIMATED_INPUT input)
 
 	for (int i = 0; i < 4; ++i)
 	{
-		//TempPos += TempWeights[i] * mul(float4(input.position, 1.0f), gpmtxBoneTransforms[input.indices[i]]).xyz;
-		TempPos += TempWeights[i] * mul(gpmtxBoneTransforms[input.indices[i]], float4(input.position, 1.0f)).xyz;
+		TempPos += TempWeights[i] * mul(float4(input.position, 1.0f), gpmtxBoneTransforms[input.indices[i]]).xyz;
+		//TempPos += TempWeights[i] * mul(gpmtxBoneTransforms[input.indices[i]], float4(input.position, 1.0f)).xyz;
 		TempNormal += TempWeights[i] * mul(input.normal, (float3x3)gpmtxBoneTransforms[input.indices[i]]);
 	}
 

@@ -9,7 +9,7 @@ public:
 	int nPolygons = 0;
 	int nBones = 0;
 	int nAnimations = 0;
-	int curAnim = 0;
+	int curAnim = 1;
 
 	float m_time = 0;
 	float t = 0;
