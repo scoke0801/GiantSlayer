@@ -68,7 +68,8 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		idx = AddObject(pCubeMeshTex, pShader, 0x04);
 		m_Objects[idx]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 50, 100, 50,
 			XMFLOAT3(-500.0f, 250.0f + 75.0f, -420.0f + 200 * i));
-		m_Objects[idx]->AddColider(new ColliderBox(XMFLOAT3(-500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
+		m_Objects[idx]->AddColider(new ColliderBox(
+			XMFLOAT3(-500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
 			XMFLOAT3(50 * 0.5f, 100 * 0.5f, 50 * 0.5f)));
 
 		pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
@@ -77,7 +78,8 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		idx = AddObject(pCubeMeshTex, pShader, 0x04);
 		m_Objects[idx]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 50, 100, 50,
 			XMFLOAT3(500.0f, 250.0f + 75.0f, -420.0f + 200 * i));
-		m_Objects[idx]->AddColider(new ColliderBox(XMFLOAT3(500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
+		m_Objects[idx]->AddColider(new ColliderBox(
+			XMFLOAT3(500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
 			XMFLOAT3(50 * 0.5f, 100 * 0.5f, 50 * 0.5f)));
 	}
 
@@ -90,7 +92,8 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		idx = AddObject(pCubeMeshTex, pShader, 0x08);
 		m_Objects[idx]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 1050.0f, 50.0f, 150.0f,
 			XMFLOAT3(0.0f, 250.0f - 25, -350 + 350 * i));
-		m_Objects[idx]->AddColider(new ColliderBox(XMFLOAT3(0.0f, 250.0f - 25.0f, -350.0f + 350.0f * i),
+		m_Objects[idx]->AddColider(new ColliderBox(
+			XMFLOAT3(0.0f, 250.0f - 25.0f, -350.0f + 350.0f * i),
 			XMFLOAT3(1050.0f * 0.5f, 50.0f * 0.5f, 150.0f * 0.5f)));
 
 		pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
@@ -99,7 +102,8 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		idx = AddObject(pCubeMeshTex, pShader, 0x08);
 		m_Objects[idx]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 50.0f, 400.0f, 50.0f,
 			XMFLOAT3(0.0f, 0.0f, -350.0f + 350.0f * i));
-		m_Objects[idx]->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, -350.0f + 350.0f * i),
+		m_Objects[idx]->AddColider(new ColliderBox(
+			XMFLOAT3(0.0f, 0.0f, -350.0f + 350.0f * i),
 			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
 
 		pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
@@ -108,7 +112,8 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		idx = AddObject(pCubeMeshTex, pShader, 0x08);
 		m_Objects[idx]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 50.0f, 400.0f, 50.0f,
 			XMFLOAT3(-500.0f, 0.0f, -350.0f + 350 * i));
-		m_Objects[idx]->AddColider(new ColliderBox(XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
+		m_Objects[idx]->AddColider(new ColliderBox(
+			XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
 			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
 
 		pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
@@ -117,7 +122,8 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		idx = AddObject(pCubeMeshTex, pShader, 0x08);
 		m_Objects[idx]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 50.0f, 400.0f, 50.0f,
 			XMFLOAT3(500.0f, 0.0f, -350.0f + 350.0f * i));
-		m_Objects[idx]->AddColider(new ColliderBox(XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
+		m_Objects[idx]->AddColider(new ColliderBox(
+			XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
 			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
 	}
 }

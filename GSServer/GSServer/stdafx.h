@@ -14,6 +14,8 @@
 #include <chrono>
 #include <cassert>
 #include <algorithm>
+#include <array>
+
 #pragma warning(disable  : 4996)    // mbstowcs unsafe###
 using namespace std;
  
