@@ -208,14 +208,14 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	testObject0->SetMesh(testMesh);
 	testObject0->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	testObject0->SetPosition({ 100,  150, 1000 });
-	testObject0->Scale(50, 50, 50);
+	testObject0->Scale(40, 40, 40);
 	testObject0->SetTextureIndex(0x200);
 	m_Objects.push_back(std::move(testObject0));
 
 	/*CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, 
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/run.bin");
+		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/idle.bin");
 	pfbxTestObject->SetPosition({ 100,  150, 100 });
-	pfbxTestObject->Scale(3, 3, 3);
+	pfbxTestObject->Scale(1, 1, 1);
 	pfbxTestObject->SetTextureIndex(0x200);
 	m_Objects.push_back(std::move(pfbxTestObject));*/
 }

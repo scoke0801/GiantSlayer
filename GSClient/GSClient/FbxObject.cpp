@@ -210,6 +210,7 @@ void CFbxObject::Animate(float fTimeElapsed)
 		XMMATRIX offset = XMLoadFloat4x4(&skeleton[i].offset);
 		XMMATRIX toRoot = XMLoadFloat4x4(&toRootTransforms[i]);
 		XMMATRIX finalTransform = XMMatrixMultiply(offset, toRoot);
+		finalTransform *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
 		XMStoreFloat4x4(&finTransform[i], XMMatrixTranspose(finalTransform));
 	}
 

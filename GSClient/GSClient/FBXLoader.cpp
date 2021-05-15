@@ -161,6 +161,46 @@ void FbxLoader::LoadScene(char* pstrFbxFileName)
 	FbxGeometryConverter fbxGeomConverter(mFbxManager);
 	fbxGeomConverter.Triangulate(mFbxScene, true);
 
+	/* ÁÂÇ¥°è
+	eMayaZUp		(UpVector = +Z, FrontVector = -Y, CoordSystem = +X (RightHanded))
+	eMayaYUp		(UpVector = +Y, FrontVector = +Z, CoordSystem = +X (RightHanded))
+	eMax			(UpVector = +Z, FrontVector = -Y, CoordSystem = +X (RightHanded))
+	eMotionBuilder	(UpVector = +Y, FrontVector = +Z, CoordSystem = +X (RightHanded))
+	eOpenGL			(UpVector = +Y, FrontVector = +Z, CoordSystem = +X (RightHanded))
+	eDirectX		(UpVector = +Y, FrontVector = +Z, CoordSystem = -X (LeftHanded))
+	eLightwave		(UpVector = +Y, FrontVector = +Z, CoordSystem = -X (LeftHanded))
+	*/
+
+	mAxisSystem = mFbxScene->GetGlobalSettings().GetAxisSystem();
+	cout << "Axis System is ";
+	if (mAxisSystem == FbxAxisSystem::eDirectX) {
+		cout << "DirectX" << endl;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eMayaZUp) {
+		cout << "MayaZUp" << endl;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eMayaYUp) {
+		cout << "MayaYUp" << endl;
+		//fbxSceneAxisSystem = FbxAxisSystem::eMax;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eMax) {
+		cout << "Max" << endl;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eOpenGL) {
+		cout << "OpenGL" << endl;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eMotionBuilder) {
+		cout << "MotionBuilder" << endl;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eLightwave) {
+		cout << "Lightwave" << endl;
+	}
+	else {
+		cout << "Unknown..." << endl;
+	}
+	//mAxisSystem = FbxAxisSystem::eDirectX;
+	//fbxSceneAxisSystem.ConvertScene(mFbxScene);
+
 	FbxSystemUnit fbxSceneSystemUnit = mFbxScene->GetGlobalSettings().GetSystemUnit();
 	if (fbxSceneSystemUnit.GetScaleFactor() != 1.0) FbxSystemUnit::cm.ConvertScene(mFbxScene);
 
@@ -205,6 +245,12 @@ void FbxLoader::LoadControlPoints(FbxNode* pNode)
 		tempCP.pos.x = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[0]);
 		tempCP.pos.y = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[1]);
 		tempCP.pos.z = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[2]);
+
+		/*if (mAxisSystem == FbxAxisSystem::eMayaYUp) {
+			tempCP.pos.x = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[0]);
+			tempCP.pos.y = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[2]);
+			tempCP.pos.z = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[1]);
+		}*/
 		cpoints[i] = tempCP;
 	}
 }
@@ -241,7 +287,13 @@ void FbxLoader::LoadBoneOffsets(FbxNode* pNode)
 			FbxAMatrix fbxTransformLinkMTX;
 			currCluster->GetTransformLinkMatrix(fbxTransformLinkMTX);
 			FbxAMatrix fbxGBindPoseInvMTX = fbxTransformLinkMTX.Inverse() * fbxTransformMTX * fbxmtxGeometryOffset;
-			
+
+			/*if (mAxisSystem == FbxAxisSystem::eMayaYUp) {
+				double tempd = fbxGBindPoseInvMTX[3][2];
+				fbxGBindPoseInvMTX[3][2] = fbxGBindPoseInvMTX[3][3];
+				fbxGBindPoseInvMTX[3][3] = tempd;
+			}*/
+
 			XMFLOAT4X4 tempXMF4X4;
 			for (int row = 0; row < 4; row++) {
 				for (int column = 0; column < 4; column++) {
@@ -342,6 +394,14 @@ void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
 
 		FbxAMatrix fbxmtxGeometryOffset = GeometricOffsetTransform(pfbxMesh->GetNode());
 
+		/*for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				cout << fbxmtxGeometryOffset[i][j] << " ";
+			}
+		}
+		cout << endl;
+		*/
+
 		// Deformer
 		int numDF = pfbxMesh->GetDeformerCount();
 		for (int i = 0; i < numDF; i++) {
@@ -382,6 +442,11 @@ void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
 					tempKey.translation = { static_cast<float>(tempMTX.GetT().mData[0]), static_cast<float>(tempMTX.GetT().mData[1]), static_cast<float>(tempMTX.GetT().mData[2]) };
 					tempKey.scale = { static_cast<float>(tempMTX.GetS().mData[0]), static_cast<float>(tempMTX.GetS().mData[1]), static_cast<float>(tempMTX.GetS().mData[2]) };
 					tempKey.rotationquat = { static_cast<float>(tempMTX.GetQ().mData[0]), static_cast<float>(tempMTX.GetQ().mData[1]), static_cast<float>(tempMTX.GetQ().mData[2]), static_cast<float>(tempMTX.GetQ().mData[3]) };
+
+					/*if (mAxisSystem == FbxAxisSystem::eMayaYUp) {
+						tempKey.translation = { static_cast<float>(tempMTX.GetT().mData[0]), static_cast<float>(tempMTX.GetT().mData[2]), static_cast<float>(tempMTX.GetT().mData[1]) };
+						tempKey.rotationquat = { static_cast<float>(tempMTX.GetQ().mData[0]), static_cast<float>(tempMTX.GetQ().mData[2]), static_cast<float>(tempMTX.GetQ().mData[1]), static_cast<float>(tempMTX.GetQ().mData[3]) };
+					}*/
 
 					if (k != 0 && animations[stackNum].bone[jIndex].animFrame.back() == tempKey)
 						break;
@@ -437,6 +502,7 @@ int SearchVertex(const FbxVertex& storage, const vector<FbxVertex>& find)
 void FbxLoader::Optimize()
 {
 	vector<FbxVertex> tempVertex;
+	tempVertex.reserve(vertices.size());
 
 	for (int i = 0; i < triangles.size(); i++) {
 		for (int j = 0; j < 3; j++) {
@@ -474,14 +540,14 @@ void FbxLoader::SaveAsFile(string filePath)
 	for (int i = 0; i < vertices.size(); i++) {
 		// pos + uv + normal
 		if (rotateNum == 0) {
-			file << vertices[i].pos.x << " " << vertices[i].pos.y << " " << vertices[i].pos.z << " " <<
+		file << vertices[i].pos.x << " " << vertices[i].pos.y << " " << vertices[i].pos.z << " " <<
 				vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
 				vertices[i].normal.x << " " << vertices[i].normal.y << " " << vertices[i].normal.z << endl;
 		}
 		else if (rotateNum == 1) {
 			file << vertices[i].pos.x << " " << vertices[i].pos.z << " " << vertices[i].pos.y << " " <<
-				vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
-				vertices[i].normal.x << " " << vertices[i].normal.z << " " << vertices[i].normal.y << endl;
+					vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
+					vertices[i].normal.x << " " << vertices[i].normal.z << " " << vertices[i].normal.y << endl;
 		}
 
 		// bindex 1~4 + bweight 1~4
@@ -497,7 +563,13 @@ void FbxLoader::SaveAsFile(string filePath)
 	// write tiangle polygon info
 	file << "[Triangle]" << endl;
 	for (int i = 0; i < triangles.size(); i++) {
-		file << triangles[i].indices[0] << " " << triangles[i].indices[1] << " " << triangles[i].indices[2] << endl;
+		if (rotateNum == 0) {
+			file << triangles[i].indices[0] << " " << triangles[i].indices[2] << " " << triangles[i].indices[1] << endl;
+
+		}
+		if (rotateNum == 1) {
+			file << triangles[i].indices[0] << " " << triangles[i].indices[1] << " " << triangles[i].indices[2] << endl;
+		}
 	}
 	file << endl;
 

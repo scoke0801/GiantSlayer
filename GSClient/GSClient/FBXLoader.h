@@ -153,6 +153,7 @@ private:
 	// Fbx
 	FbxManager* mFbxManager;
 	FbxScene* mFbxScene;
+	FbxAxisSystem mAxisSystem;
 
 	int numCP, numPG, numDF;
 	bool hasAnimation;
