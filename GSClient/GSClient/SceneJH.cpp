@@ -191,10 +191,10 @@ void CSceneJH::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	auto start_t = chrono::high_resolution_clock::now();
-	/*m_pfbxManager = FbxManager::Create();
+	m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
-	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
+	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		m_ObjectLayers[i].reserve(50); 
@@ -212,9 +212,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	BuildMapSector1(pd3dDevice, pd3dCommandList);
 	BuildMapSector2(pd3dDevice, pd3dCommandList);
-	BuildMapSector3(pd3dDevice, pd3dCommandList);
-	//BuildMapSector4(pd3dDevice, pd3dCommandList);
-	//BuildMapSector5(pd3dDevice, pd3dCommandList);
+	BuildMapSector3(pd3dDevice, pd3dCommandList); 
+	BuildMapSector4(pd3dDevice, pd3dCommandList);
+	BuildMapSector5(pd3dDevice, pd3dCommandList); 
 
 	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 	
@@ -275,7 +275,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"HelpText",
 		"Dry_Tree", "Stump", "Dead_Tree",
 		"Desert_Rock",
-		"TerrainWater"
+		"TerrainWater",
+		"Rain",
 	};
 
 	const wchar_t* address[] =
@@ -295,6 +296,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds",
 		L"resources/OBJ/Desert_Rock.dds",
 		L"resources/OBJ/Water.dds",
+		L"resources/OBJ/Rain.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -343,7 +345,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"HelpText",
 		"Dry_Tree","Stump","Dead_Tree",
 		"Desert_Rock",
-		"TerrainWater"
+		"TerrainWater",
+		"Rain",
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -685,34 +688,40 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 }
 
 void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
-	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-
-	if (m_pLightCamera)
+{
+	if (m_isPlayerSelected == true)
 	{
-		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
-		m_pLightCamera->GenerateViewMatrix();
-		m_pLightCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_LIGHT_CAMERA);
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
-	}
+		pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
-	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+		if (m_pLightCamera)
+		{
+			m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+			m_pLightCamera->GenerateViewMatrix();
+			m_pLightCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_LIGHT_CAMERA);
+			m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
+		}
 
-	pd3dCommandList->ClearDepthStencilView(m_d3dDsvShadowMapCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
+			D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
 
-	pd3dCommandList->OMSetRenderTargets(0, NULL, FALSE, &m_d3dDsvShadowMapCPUHandle);
+		pd3dCommandList->ClearDepthStencilView(m_d3dDsvShadowMapCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
-	for (int i = 0; i < m_ObjectLayers.size(); ++i) { 
-		for (auto pObject : m_ObjectLayers[i]) {
-			pObject->Draw_Shadow(pd3dCommandList, m_CurrentCamera); 
+		pd3dCommandList->OMSetRenderTargets(0, NULL, FALSE, &m_d3dDsvShadowMapCPUHandle);
+
+		for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+			for (auto pObject : m_ObjectLayers[i]) {
+				pObject->Draw_Shadow(pd3dCommandList, m_CurrentCamera);
+			}
 		}
 	}
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
-		player->Draw_Shadow(pd3dCommandList, m_pLightCamera); 
+		player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
 	}
-	 
+
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
+
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
 
@@ -722,7 +731,7 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER__CAMERA);
 	}*/
 }
-
+ 
 void CSceneJH::Communicate(SOCKET& sock)
 {
 	P_C2S_UPDATE_SYNC_REQUEST p_syncUpdateRequest;
@@ -1022,9 +1031,9 @@ void CSceneJH::ProcessInput()
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F4)
-	{
+	{ 
 		m_Player->SetPosition({ 12500,  -3000, 2500 });
-		m_Player->FixPositionByTerrain(m_Terrain);
+		m_Player->FixPositionByTerrain(m_Terrain); 
 	}
 	if (keyInput.KEY_F5)
 	{
@@ -2170,7 +2179,7 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 {
 	m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
-	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
+	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, ""); 
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 	 
 	/*m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
@@ -2182,7 +2191,7 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true); 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Enemy_t2.fbx", true);
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");  */
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");  */ 
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
@@ -2280,9 +2289,18 @@ void CSceneJH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::ArrowParticle);
 		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 	}
+	// ¾È°³
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::RadialParitcle);
+
+	// ºñ
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 100000, PARTICLE_TYPE::RainParticle);
+
+	//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+
+
 	//m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::HitParticleTex);
-	  
-	 
+
+
 	//int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::HitParticleTex);
 	//if (-1 != idx) {
 	//	m_Particles->UseParticle(idx, XMFLOAT3(0, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
@@ -2291,6 +2309,9 @@ void CSceneJH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	//if (-1 != idx) {
 	//	m_Particles->UseParticle(idx, XMFLOAT3(100, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 	//}
+
+	MakingFog();
+	MakingRain();
 }
 void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -2380,6 +2401,32 @@ void CSceneJH::ShotArrow()
 		}
 		++i;
 	} 
+}
+
+void CSceneJH::MakingFog()
+{
+	int i = 0;
+
+	int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::RadialParitcle);
+	if (-1 != idx)
+	{
+		XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
+		m_Particles->UseParticle(idx, XMFLOAT3(16800.f, -5070.f, 17500.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
+	}
+}
+
+void CSceneJH::MakingRain()
+{
+	int i = 0;
+
+	int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::RainParticle);
+	if (-1 != idx)
+	{
+		XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
+		m_Particles->UseParticle(idx, XMFLOAT3(5000.f, 0.f, 17500.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
+	}
 }
  
 void CSceneJH::SendMouseInputPacket()

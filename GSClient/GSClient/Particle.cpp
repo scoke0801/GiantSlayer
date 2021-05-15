@@ -94,6 +94,37 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->SetType(type);
 		m_ParticleObjs.push_back(std::move(pObject));
 	}
+	else if (type == PARTICLE_TYPE::RadialParitcle){
+		CFogParticleMesh* pMesh = new CFogParticleMesh(pd3dDevice, pd3dCommandList, count);
+
+		ParticleObject* pObject = new ParticleObject();
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FogParticle"));
+		pObject->SetMesh(pMesh);
+		pObject->SetType(type);
+		m_ParticleObjs.push_back(std::move(pObject));
+	}
+	else if (type == PARTICLE_TYPE::RainParticle)
+	{
+		CRainParticleMesh* pMesh = new CRainParticleMesh(pd3dDevice, pd3dCommandList, count);
+
+		ParticleObject* pObject = new ParticleObject();
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("RainParticle"));
+		pObject->SetMesh(pMesh);
+		pObject->SetType(type);
+		m_ParticleObjs.push_back(std::move(pObject));
+	}
+	else if (type == PARTICLE_TYPE::SandParticle)
+	{
+		CSandParticleMesh* pMesh = new CSandParticleMesh(pd3dDevice, pd3dCommandList, count);
+
+		ParticleObject* pObject = new ParticleObject();
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("SandParticle"));
+		pObject->SetMesh(pMesh);
+		pObject->SetType(type);
+		m_ParticleObjs.push_back(std::move(pObject));
+
+	}
+	
 }
 
 void CParticle::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

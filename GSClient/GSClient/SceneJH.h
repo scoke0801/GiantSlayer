@@ -10,35 +10,7 @@ class HelpTextUI;
 class CTerrain;
 class CParticle;
 class CLightCamera;
-enum class FBX_MESH_TYPE : UINT {
-	DryForestRock,
-	DesertRock,
-	Arrow,
-	Human,
-	DeadTree_01,
-	DeadTree_02,
-	DryTree_01,
-	DryTree_02,
-	Stump,
-	Bush_1,
-	Boss,
-	Player,
-	Enemy_01,
-	Enemy_02,
-	COUNT
-};
 
-// 편의를 위해 Layer에서 몇 가지 객체 유형은 제외하고 별도로 관리
-enum class OBJECT_LAYER : int{
-	Skybox,
-	TerrainWater,
-	Puzzle,
-	Obstacle,
-	Enemy, 
-	Arrow,
-	Billboard, 
-	Count,
-};
 
 class CSceneJH : public CScene
 {
@@ -52,6 +24,7 @@ private:
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
 	 
 	CParticle*					m_Particles;
+	
 
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
@@ -212,6 +185,9 @@ private:
 	void EnterNewSector(int sectorNum);
 
 	void ShotArrow();
+
+	void MakingFog();
+	void MakingRain();
 
 private:
 	void SendMouseInputPacket();

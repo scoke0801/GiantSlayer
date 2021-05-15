@@ -8,6 +8,37 @@
 
 #define GET_PSO(key) *m_PSOs[key].get() 
 
+enum class FBX_MESH_TYPE : UINT {
+	DryForestRock,
+	DesertRock,
+	Arrow,
+	Human,
+	DeadTree_01,
+	DeadTree_02,
+	DryTree_01,
+	DryTree_02,
+	Stump,
+	Bush_1,
+	Boss,
+	Player,
+	Enemy_01,
+	Enemy_02,
+	COUNT
+};
+
+// 편의를 위해 Layer에서 몇 가지 객체 유형은 제외하고 별도로 관리
+enum class OBJECT_LAYER : int {
+	Skybox,
+	TerrainWater,
+	Puzzle,
+	Obstacle,
+	Enemy,
+	Arrow,
+	Billboard,
+	Fog,
+	Count,
+};
+
 class CScene
 {
 protected:
