@@ -70,7 +70,7 @@ void CEnemy::FindNextPosition()
 	m_ToMovePosition.z = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.z * 2)) + m_xmf3ActivityScopeCenter.z - m_xmf3ActivityScope.z;
 
 	//cout << "목표위치 설정 ";
-	DisplayVector3(m_ToMovePosition);
+	//DisplayVector3(m_ToMovePosition);
 	m_xmf3Velocity = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
 	m_xmf3Velocity = Vector3::Normalize(m_xmf3Velocity);
 

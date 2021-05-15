@@ -132,6 +132,29 @@ void CGameObject::FixCollision()
 	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 }
 
+void CGameObject::FixCollision(CGameObject* pObject)
+{
+	COLLISION_HANDLE_TYPE otherType = pObject->GetCollisionHandleType();
+
+	if (otherType == COLLISION_HANDLE_TYPE::NotCollide) {
+		return;
+	}
+
+	if (otherType == COLLISION_HANDLE_TYPE::Stop) {
+		FixCollision();
+		//SetPosition(m_xmf3PrevPosition);
+		//m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		return;
+	}
+
+	if (otherType == COLLISION_HANDLE_TYPE::On) {
+		float y = pObject->GetPosition().y + pObject->GetSize().y + m_HeightFromTerrain;
+		SetPosition({ m_xmf3Position.x, y, m_xmf3Position.z });
+		m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		return;
+	}
+}
+
 void CGameObject::UpdateColliders()
 {
 	for (int i = 0; i < m_BoundingBox.size(); ++i) {

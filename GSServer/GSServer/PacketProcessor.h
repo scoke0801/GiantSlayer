@@ -10,6 +10,19 @@ enum class CommandType
 	Attack
 };
 
+// 편의를 위해 Layer에서 몇 가지 객체 유형은 제외하고 별도로 관리
+enum class OBJECT_LAYER : int {
+	Skybox,
+	TerrainWater,
+	Puzzle,
+	Obstacle,
+	Enemy,
+	Arrow,
+	Billboard,
+	Fog,
+	Count,
+};
+
 class PacketProcessor
 {
 private:
@@ -23,7 +36,9 @@ private:
 	int							m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 
 	vector<CGameObject*>		m_Objects;
-	
+
+	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
+
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
 	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;

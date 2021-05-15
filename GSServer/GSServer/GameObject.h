@@ -18,6 +18,13 @@ enum class OBJ_NAME
 	Sign = 7,
 };
 
+enum class COLLISION_HANDLE_TYPE : int {
+	NotCollide = 0,
+	Stop,
+	On,
+	Attacked
+};
+
 enum class OBJ_DIRECTION
 {
 	Front = 0,
@@ -45,6 +52,9 @@ protected:
 
 	OBJ_NAME			m_Name;
 
+	float				m_HeightFromTerrain = 0.0f;
+
+	COLLISION_HANDLE_TYPE m_CollisionHandleType = COLLISION_HANDLE_TYPE::Stop;
 protected:// 面倒贸府 包访 函荐
 	vector<BoundingBox>	m_BoundingBox;
 	vector<BoundingBox>	m_AABB;
@@ -90,7 +100,8 @@ public:
 	virtual bool CollisionCheck(const BoundingBox& pCollider);
 	virtual bool CollisionCheck(CGameObject* other);
 
-	void FixCollision();
+	void FixCollision(); 
+	void FixCollision(CGameObject* pCollideObject);
 
 	virtual void UpdateColliders();
 
@@ -101,6 +112,12 @@ public:
 
 	vector<BoundingBox>& GetColliders() { return m_BoundingBox; }
 	vector<BoundingBox>& GetAABB() { return m_AABB; }
+
+	void SetCollisionHandleType(COLLISION_HANDLE_TYPE type) { m_CollisionHandleType = type; }
+	COLLISION_HANDLE_TYPE GetCollisionHandleType() const { return m_CollisionHandleType; }
+	
+	void SetSize(const XMFLOAT3& size) { m_xmf3Size = size; }
+	XMFLOAT3 GetSize()const { return m_xmf3Size; }
 
 public:
 	DirectX::XMFLOAT3 GetRight()const;

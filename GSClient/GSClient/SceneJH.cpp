@@ -15,7 +15,7 @@
 #include "Particle.h"
 #include "Arrow.h"
 #include "Enemy.h"
-
+#include "Sound.h"
 #include "FbxObject.h"
 #include "FbxLoader.h"
 #define ROOT_PARAMETER_OBJECT				0
@@ -35,6 +35,12 @@ float lensize = 60000.0f;
 
 CSceneJH::CSceneJH()
 {
+	m_SoundManager = new CSoundManager();
+	//m_SoundManager->AddStream("resources/sounds/TestTitle.mp3", Sound_Name::BGM_MAIN_GAME);
+
+	m_SoundManager->AddSound("resources/sounds/ShotArrow.wav", Sound_Name::EFFECT_ARROW_SHOT);
+	//m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
+
 	cout << "Enter CSceneJH \n";
 	m_pd3dGraphicsRootSignature = NULL;
 	m_isPlayerSelected = false;
@@ -402,6 +408,7 @@ void CSceneJH::ReleaseObjects()
 
 void CSceneJH::Update(float elapsedTime)
 {
+	m_SoundManager->OnUpdate();
 	ProcessInput();
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i){
@@ -427,21 +434,21 @@ void CSceneJH::Update(float elapsedTime)
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
-			cout << "충돌 : 플레이어 - 장애물";
+			cout << "충돌 : 플레이어 - 장애물\n";
 		}
 	}
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		if (pEnemy->CollisionCheck(m_Player)) {
 			m_Player->FixCollision();
-			cout << "충돌 : 플레이어 - 적";
+			cout << "충돌 : 플레이어 - 적\n";
 		}
 	}
 
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
 		if (pPuzzle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pPuzzle);
-			cout << "충돌 : 플레이어 - 퍼즐";
+			cout << "충돌 : 플레이어 - 퍼즐\n";
 		}
 	} 
 	 
@@ -939,11 +946,7 @@ void CSceneJH::ProcessInput()
 		if (m_isPlayerSelected) {
 			XMFLOAT3 prevLook = m_Player->GetLook();
 			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));  
-			XMFLOAT3 afterLook = m_Player->GetLook();
-
-			float angle = Vector3::Angle(Vector3::Normalize(afterLook), Vector3::Normalize(prevLook));
-			cout << " Angle : " << angle << endl; 
-			//m_MinimapArrow->Rotate(XMConvertToRadians(angle));
+			XMFLOAT3 afterLook = m_Player->GetLook(); 
 		}
 		else
 			m_CurrentCamera->Walk(cameraSpeed);
@@ -2000,9 +2003,9 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	x_Tree = 200;
 	z_Tree = 18000;
 
-	pObject->Scale(20.0f, 20.0f, 20.0f);
+	pObject->Scale(20.0f, 20.0f, 20.0f); 
 	pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 100.0f, z_Tree });
-	pObject->SetTextureIndex(0x08);
+	pObject->SetTextureIndex(0x08); 
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(15 * 0.5f, 10 * 0.5f, 15 * 0.5f)));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 15, 10, 15, { 0,0,0 });
@@ -2196,12 +2199,9 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree"); 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
@@ -2354,9 +2354,9 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_MinimapCamera->SetTarget(m_Players[0]);
 	 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
-		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
-		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
-		//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
+		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
 		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 		m_Players[i]->Scale(7, 7, 7);
 		m_Players[i]->Rotate({ 0,1,0 }, 180);
@@ -2396,6 +2396,7 @@ void CSceneJH::ShotArrow()
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx,  Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()),1));
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 			}
 			break;
 		}
@@ -2448,7 +2449,7 @@ void CSceneJH::SendMouseInputPacket()
 	SendPacket(CFramework::GetInstance().GetSocket(),
 		reinterpret_cast<char*>(&p_mouseInput), p_mouseInput.size, retVal);
 
-	cout << "마우스 입력 전송 크기 : " << m_MousePositions.size() << "\n";
+	//cout << "마우스 입력 전송 크기 : " << m_MousePositions.size() << "\n";
 	m_MousePositions.clear();
 }
 
@@ -2576,7 +2577,7 @@ void CSceneJH::RecvMouseProcessPacket()
 		P_S2C_PROCESS_MOUSE p_mouseProcess = *reinterpret_cast<P_S2C_PROCESS_MOUSE*>(&buffer);
 		if (p_mouseProcess.cameraOffset != 0) {
 			float offset = IntToFloat(p_mouseProcess.cameraOffset);
-			cout << "offset : " << offset << "\n";
+			//cout << "offset : " << offset << "\n";
 			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
 		}
 		if (p_mouseProcess.cameraRotateX != 0) {

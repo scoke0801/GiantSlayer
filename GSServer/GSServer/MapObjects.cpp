@@ -7,40 +7,50 @@ CBridge::CBridge(OBJECT_ID id)
 	CGameObject* pObject;// = new CGameObject();
 	for (int i = 0; i < 10; i += 5) {
 		pObject = new CGameObject();
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i),
-			XMFLOAT3(1000 * 0.5f, 1 * 0.5f, 500 * 0.5f)));
+		pObject->AddBoundingBox(BoundingBox(
+			XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i),
+			XMFLOAT3(1000 * 0.5f, 1 * 0.5f, 500 * 0.5f))); 
+		pObject->SetSize({ 1, 251.0f ,1 });
+		pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
+
 		m_Plates.emplace_back(std::move(pObject));
 	}
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 250.0f + 12.5f, 0.0f),
+	pObject->AddBoundingBox(BoundingBox(
+		XMFLOAT3(-500.0f, 250.0f + 12.5f, 0.0f),
 		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f)));
 	m_Objects.emplace_back(std::move(pObject));
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(500.0f, 250.0f + 12.5f, 0.0f),
+	pObject->AddBoundingBox(BoundingBox(
+		XMFLOAT3(500.0f, 250.0f + 12.5f, 0.0f),
 		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f)));
 	m_Objects.emplace_back(std::move(pObject));
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 250.0f + 137.5f, 0.0f),
+	pObject->AddBoundingBox(BoundingBox(
+		XMFLOAT3(-500.0f, 250.0f + 137.5f, 0.0f),
 		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f)));
 	m_Objects.emplace_back(std::move(pObject));
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(500.0f, 250.0f + 137.5f, 0.0f),
+	pObject->AddBoundingBox(BoundingBox(
+		XMFLOAT3(500.0f, 250.0f + 137.5f, 0.0f),
 		XMFLOAT3(50 * 0.5f, 25 * 0.5f, 1000 * 0.5f))); 
 	m_Objects.emplace_back(std::move(pObject));
 
 	for (int i = 0; i < 5; ++i)
 	{
 		pObject = new CGameObject();
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
+		pObject->AddBoundingBox(BoundingBox(
+			XMFLOAT3(-500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
 			XMFLOAT3(50 * 0.5f, 100 * 0.5f, 50 * 0.5f))); 
 		m_Objects.emplace_back(std::move(pObject));
 
 		pObject = new CGameObject();
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
+		pObject->AddBoundingBox(BoundingBox(
+			XMFLOAT3(500.0f, 250.0f + 75.0f, -420.0f + 200 * i),
 			XMFLOAT3(50 * 0.5f, 100 * 0.5f, 50 * 0.5f)));
 		m_Objects.emplace_back(std::move(pObject));
 	}
@@ -48,22 +58,26 @@ CBridge::CBridge(OBJECT_ID id)
 	for (int i = 0; i < 3; ++i)
 	{
 		pObject = new CGameObject();
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 250.0f - 25.0f, -350.0f + 350.0f * i),
+		pObject->AddBoundingBox(BoundingBox(
+			XMFLOAT3(0.0f, 250.0f - 25.0f, -350.0f + 350.0f * i),
 			XMFLOAT3(1050.0f * 0.5f, 50.0f * 0.5f, 150.0f * 0.5f)));
 		m_Objects.emplace_back(std::move(pObject));
 
 		pObject = new CGameObject();
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, -350.0f + 350.0f * i),
+		pObject->AddBoundingBox(BoundingBox(
+			XMFLOAT3(0.0f, 0.0f, -350.0f + 350.0f * i),
 			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
 		m_Objects.emplace_back(std::move(pObject));
 		 
 		pObject = new CGameObject();
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
+		pObject->AddBoundingBox(BoundingBox(
+			XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
 			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
 		m_Objects.emplace_back(std::move(pObject));
 
 		pObject = new CGameObject();
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
+		pObject->AddBoundingBox(BoundingBox(
+			XMFLOAT3(-500.0f, 0.0f, -350.0f + 350.0f * i),
 			XMFLOAT3(50.0f * 0.5f, 400.0f * 0.5f, 50.0f * 0.5f)));
 		m_Objects.emplace_back(std::move(pObject));
 	}
@@ -92,11 +106,31 @@ void CBridge::Rotate(const XMFLOAT3& axis, float angle)
 bool CBridge::CollisionCheck(const BoundingBox& aabb)
 { 
 	for (auto pObj : m_Objects) {
-		if (pObj->CollisionCheck(aabb)) return true;
+		if (pObj->CollisionCheck(aabb)) {
+			m_CollideObject = pObj;
+			return true; 
+		}
 	}
 	for (auto pPlate : m_Plates) {
-		if (pPlate->CollisionCheck(aabb)) return true;
+		if (pPlate->CollisionCheck(aabb)) {
+			m_CollideObject = pPlate;
+			return true;
+		}
 	}
+	return false;
+}
+
+bool CBridge::CollisionCheck(CGameObject* other)
+{
+	auto otherAABB = other->GetAABB();
+	for (int i = 0; i < otherAABB.size(); ++i) {
+		bool result = CollisionCheck(otherAABB[i]);
+		if (result) {
+			other->FixCollision(m_CollideObject);
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -182,36 +216,43 @@ CDoor::~CDoor()
 
 void CDoor::Update(float fTimeElapsed)
 {
+	if (false == m_IsOnAnimating) {
+		return;
+	}
 	if (m_IsLeft)
 	{
-		float rotateAngle = 50;
-		if (!m_IsOpening) rotateAngle *= -1;
+		float rotateAngle = -50;
+		if (!m_IsOnOpening) rotateAngle *= -1;
 		Rotate(XMFLOAT3(0, 1, 0), rotateAngle * fTimeElapsed);
 
 		m_fAngle += rotateAngle * fTimeElapsed;
-		if (m_fAngle > 89.0f)
+		if (m_fAngle > 0.0f)
 		{
-			m_IsOpening = false;
+			m_IsOnOpening = false;
+			m_IsOnAnimating = false;
 		}
 		else if (m_fAngle < -89.0f)
 		{
-			m_IsOpening = true;
+			m_IsOnOpening = true;
+			m_IsOnAnimating = false;
 		}
 	}
 	else
 	{
-		float rotateAngle = -50;
-		if (!m_IsOpening) rotateAngle *= -1;
+		float rotateAngle = 50;
+		if (!m_IsOnOpening) rotateAngle *= -1;
 		Rotate(XMFLOAT3(0, 1, 0), rotateAngle * fTimeElapsed);
 
 		m_fAngle += rotateAngle * fTimeElapsed;
 		if (m_fAngle > 89.0f)
 		{
-			m_IsOpening = true;
+			m_IsOnOpening = true;
+			m_IsOnAnimating = false;
 		}
-		else if (m_fAngle < -89.0f)
+		else if (m_fAngle < 0.0f)
 		{
-			m_IsOpening = false;
+			m_IsOnOpening = false;
+			m_IsOnAnimating = false;
 		}
 	}
 }
@@ -455,9 +496,29 @@ void CPlate::Rotate(const XMFLOAT3& axis, float angle)
 bool CPlate::CollisionCheck(const BoundingBox& aabb)
 {
 	for (auto pObj : m_Objects) {
-		if (pObj->CollisionCheck(aabb)) return true;
+		if (pObj->CollisionCheck(aabb)) { 
+			m_CollideObject->FixCollision(pObj);
+			return true; 
+		}
 	}
 	return false;
+}
+
+bool CPlate::CollisionCheck(CGameObject* other)
+{
+	bool res = false;
+	auto otherAABB = other->GetAABB();
+	m_CollideObject = other;
+	for (int i = 0; i < otherAABB.size(); ++i) {
+		bool result = CollisionCheck(otherAABB[i]);
+		if (result) {
+			//other->FixCollision(m_CollideObject);
+			//return true;
+			res = true;
+		}
+	}
+
+	return res;
 }
 
 void CPlate::UpdateColliders()

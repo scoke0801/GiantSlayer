@@ -11,12 +11,16 @@ public:
 	void Rotate(const XMFLOAT3& axis, float angle) override;
 
 	bool CollisionCheck(const BoundingBox& aabb) override;
+	bool CollisionCheck(CGameObject* other) override;
 
 	void UpdateColliders() override;
 
 private:
 	vector<CGameObject*> m_Plates; 
-	vector<CGameObject*> m_Objects;
+	vector<CGameObject*> m_Objects; 
+
+	// 배열 멤버 중에서 충돌한 객체
+	CGameObject* m_CollideObject = nullptr;
 };
 
 class CSign : public CGameObject
@@ -36,8 +40,7 @@ private:
 	CGameObject* m_Pillar;          // 기둥
 	CGameObject* m_Board;           // 표지판
 };
-
-
+ 
 class CDoor : public CGameObject
 {
 public:
@@ -51,7 +54,9 @@ private:
 	bool m_IsLeft;
 
 	float m_fAngle = 0.0f;
-	float m_IsOpening = true;
+	float m_IsOnOpening = true;
+
+	bool m_IsOnAnimating = false;
 
 	float m_Height;
 };
@@ -83,8 +88,9 @@ private:
 class CPlate :public CGameObject
 {
 private:
-	vector<CGameObject*> m_Objects;
-	 
+	vector<CGameObject*> m_Objects; 
+	CGameObject* m_CollideObject;
+
 public:
 	CPlate(OBJECT_ID id);
 	~CPlate();
@@ -94,6 +100,8 @@ public:
 	void Rotate(const XMFLOAT3& axis, float angle) override;
 	 
 	bool CollisionCheck(const BoundingBox& aabb) override;
+
+	bool CollisionCheck(CGameObject* other) override;
 
 	void UpdateColliders() override;
 };

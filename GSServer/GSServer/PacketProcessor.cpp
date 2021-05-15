@@ -121,8 +121,6 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 			*reinterpret_cast<P_C2S_KEYBOARD_INPUT*>(buffer);
 		
 		XMFLOAT3 pos = m_Players[p_keyboard.id]->GetPosition(); 
-		XMFLOAT3 look = Vector3::Normalize(m_Players[p_keyboard.id]->GetLook()); 
-		DisplayVector3(look);
 		XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
 		float distance = PLAYER_RUN_VELOCITY; 
 		 
@@ -154,6 +152,8 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 		p_keyboardProcess.posY = FloatToInt(pos.y);
 		p_keyboardProcess.posZ = FloatToInt(pos.z);
 
+		XMFLOAT3 look = Vector3::Normalize(m_Players[p_keyboard.id]->GetLook());
+		DisplayVector3(look);
 		p_keyboardProcess.lookX = FloatToInt(look.x);
 		p_keyboardProcess.lookY = FloatToInt(look.y);
 		p_keyboardProcess.lookZ = FloatToInt(look.z);
@@ -275,7 +275,7 @@ void PacketProcessor::Update(float elapsedTime)
 			if (m_Players[i]->IsExist() == false) continue;
 
 			if (pObject->CollisionCheck(m_Players[i])) {
-				m_Players[i]->FixCollision(); 
+				m_Players[i]->FixCollision(pObject);
 				cout << "충돌발생 - [오브젝트, 플레이어 " << i << "]\n";
 			}
 		}
