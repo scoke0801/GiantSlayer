@@ -85,11 +85,12 @@ Texture2D gtxtDry_Tree	   : register(t33);
 Texture2D gtxtStump		   : register(t34);
 Texture2D gtxtDead_Tree	   : register(t35);
 Texture2D gtxtDesert_Rock  : register(t36);
-Texture2D gtxtWater			: register(t37);
+Texture2D gtxtWater		   : register(t37);
+Texture2D gtxtRain		   : register(t38);
 
-Texture2D gtxtMap          : register(t38);
-Texture2D gtxtMirror       : register(t39);
-Texture2D gtxtShadowMap		: register(t40);
+Texture2D gtxtMap		   : register(t39);
+Texture2D gtxtMirror	   : register(t40);
+Texture2D gtxtShadowMap	   : register(t41);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
