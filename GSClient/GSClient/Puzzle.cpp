@@ -69,6 +69,14 @@ void CPuzzle::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 	} 
 }
 
+void CPuzzle::Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	for (auto pObj : m_Objects)
+	{
+		pObj->Draw_Shadow(pd3dCommandList, pCamera);
+	}
+}
+
 bool CPuzzle::CollisionCheck(Collider* pAABB)
 {
 	for (auto pObj : m_Objects) {

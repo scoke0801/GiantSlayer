@@ -232,6 +232,16 @@ void CDoorWall::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	}
 }
 
+void CDoorWall::Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	m_LeftDoor->Draw_Shadow(pd3dCommandList, pCamera);
+	m_RightDoor->Draw_Shadow(pd3dCommandList, pCamera);
+	for (CWall* pWall : m_Walls)
+	{
+		pWall->Draw_Shadow(pd3dCommandList, pCamera);
+	}
+}
+
 void CDoorWall::UpdateColliders()
 {
 	m_LeftDoor->UpdateColliders();

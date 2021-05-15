@@ -37,7 +37,7 @@
 #include <array>
 #include <cstdint>
 #include <sstream>
-
+#include <mutex>
 #define KFBX_DLLINFO
 #include <fbxsdk.h>
 
@@ -347,6 +347,12 @@ namespace Matrix4x4
 		XMFLOAT4X4 xmmtx4x4Result;
 		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixLookAtLH(XMLoadFloat3(&xmf3EyePosition),
 			XMLoadFloat3(&xmf3LookAtPosition), XMLoadFloat3(&xmf3UpDirection)));
+		return(xmmtx4x4Result);
+	}
+	inline XMFLOAT4X4 OrthogonalFovLH(float fWidth, float fHeight, float fNear, float fFar)
+	{
+		XMFLOAT4X4 xmmtx4x4Result;
+		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixOrthographicLH(fWidth, fHeight, fNear, fFar));
 		return(xmmtx4x4Result);
 	}
 }

@@ -11,6 +11,36 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_SP = 100;
 }
 
+CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName)
+{
+	LoadFile(pstrFbxFileName);
+
+	finTransform = new XMFLOAT4X4[100];
+
+	cout << indices.size() << " " << vertices.size() << " " << skeleton.size() << endl;
+
+	//CFixedMesh* tempMesh = new CFixedMesh(pd3dDevice, pd3dCommandList, pstrFbxFileName);
+	CAnimatedMesh* tempMesh = new CAnimatedMesh(pd3dDevice, pd3dCommandList, vertices, indices, skeleton);
+
+	SetMesh(tempMesh);
+	//SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	SetShader(CShaderHandler::GetInstance().GetData("FbxAnimated"));
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	m_time = 0;
+	t = 0;
+	endTime = 0;
+	for (int i = 0; i < skeleton.size(); i++) {
+		float t = animations[curAnim].bone[i].animFrame.back().frameTime;
+		if (t > endTime)
+			endTime = t;
+	}
+
+	cout << endTime << endl;
+}
+
 CPlayer::~CPlayer()
 {
 
@@ -28,19 +58,37 @@ void CPlayer::Update(float fTimeElapsed)
 	}
 	
 	static float MaxVelocityXZ = 120.0f;
-	static float MaxVelocityY = 120.0f;
+	static float MaxVelocityY = 6000.0f;
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? 360.0f : 50.0f;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
+	 
+	Move(vel);
 
-	Move(vel); 
-	
+	if (false == m_isOnGround) {
+		float y;
+		if (m_JumpTime > 0.5f) {
+			y = -PLAYER_JUMP_HEIGHT * fTimeElapsed;
+		}
+		else {
+			y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
+		}
+		Move({ 0,y,0 });
+		m_JumpTime += fTimeElapsed;
+		if (m_JumpTime > TO_JUMP_TIME) {
+			m_JumpTime = 0.0f;
+			m_isOnGround = true;
+		}
+	}
+
 	UpdateCamera(); 
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 
-	if (fDeceleration > fLength) fDeceleration = fLength;
+	if (fDeceleration > fLength) fDeceleration = fLength; 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	 
+	Animate(fTimeElapsed);
 }
 
 void CPlayer::UpdateCamera()
@@ -78,8 +126,10 @@ void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
 
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
-	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z);
-} 
+	if (m_isOnGround) {
+		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z);
+	}
+}
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 { 	
@@ -131,20 +181,31 @@ void CPlayer::SetVelocity(OBJ_DIRECTION direction)
 void CPlayer::SetVelocity(XMFLOAT3 dir)
 {
 	dir.y = 0;
-	XMFLOAT3 normalizedDir = Vector3::Normalize(dir); 
-	    
+	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);  
 	XMFLOAT3 targetPosition = Vector3::Multifly(normalizedDir, 150000.0f);
 	LookAt(m_xmf3Position, targetPosition, XMFLOAT3{ 0,1,0 }); 
+	Rotate({ 0,1,0 }, 180.0f);
 
-	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity,
-		Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY));
+	m_xmf3Velocity = XMFLOAT3(0.0f, m_xmf3Velocity.y, 0.0f);
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY));
+
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
+
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;
 	if (m_xmf3Velocity.z > speed) m_xmf3Velocity.z = speed;
 	if (m_xmf3Velocity.x < -speed) m_xmf3Velocity.x = -speed;
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
+}
+
+void CPlayer::Jump()
+{
+	if (false == m_isOnGround) {
+		return;
+	}
+	// 일반 사람의 점프 높이는 대략 30 ~ 40cm 
+	m_isOnGround = false;
+	m_JumpTime = 0.0f;
 }
  

@@ -21,8 +21,12 @@ cbuffer cbCameraInfo : register(b2)
 	matrix	gmtxView : packoffset(c0);
 	matrix	gmtxProjection : packoffset(c4);
 	float3	gvCameraPosition : packoffset(c8);
-    matrix gmtxViewProjection : packoffset(c12);
-    matrix gmtxShadowTransform : packoffset(c16);
+};
+
+cbuffer cbLightCameraInfo : register(b3)
+{
+    matrix gmtxViewProjection : packoffset(c0);
+    matrix gmtxShadowTransform : packoffset(c4);
 };
 
 
@@ -80,6 +84,64 @@ Texture2D gtxtMap          : register(t37);
 Texture2D gtxtMirror       : register(t38);
 Texture2D gtxtShadowMap		: register(t39);
  
+float CalcShadowFactor(float4 f4ShadowPos)
+{
+    f4ShadowPos.xyz /= f4ShadowPos.w;
+
+    float fDepth = f4ShadowPos.z;
+
+    uint nWidth, nHeight, nMips;
+    gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
+
+    float dx = 1.0f / (float) nWidth;
+
+    float percentLit = 0.0f;
+
+    const float2 offsets[9] =
+    {
+        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
+		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
+    };
+
+	[unroll]
+    for (int i = 0; i < 9; i++)
+    {
+        percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
+    }
+
+    return (percentLit / 9.0f) + 0.3f;
+}
+
+float CalcShadowFactor_t(float4 f4ShadowPos)
+{
+    f4ShadowPos.xyz /= f4ShadowPos.w;
+
+    float fDepth = f4ShadowPos.z;
+
+    uint nWidth, nHeight, nMips;
+    gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
+
+    float dx = 1.0f / (float) nWidth;
+
+    float percentLit = 0.0f;
+
+    const float2 offsets[9] =
+    {
+        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
+		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
+    };
+
+	[unroll]
+    for (int i = 0; i < 9; i++)
+    {
+        percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
+    }
+
+    return (percentLit / 9.0f) + 0.4f;
+}
+
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
 {
@@ -137,9 +199,7 @@ float4 PSBasic(VS_COLOR_OUTPUT input) : SV_TARGET
 }
 //////////////////////////////////////////////////////////////////////
 //
-
-
-
+  
 VS_TEXTURE_OUT VSTextured(VS_TEXTURE_IN input)
 {
 	VS_TEXTURE_OUT outRes;
@@ -430,6 +490,7 @@ struct VS_TERRAIN_TESSELLATION_OUTPUT
 	float2 uv0 : TEXCOORD0;
 	float3 normalW : NORMAL;
 	uint texIndex : TEXTURE;
+    float4 shadowPosH : SHADOWPOS;
 	//float3 tangentW : TANGENT;
 	//float3 bitangentW : BITANGENT;
 };
@@ -443,6 +504,8 @@ VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
 	output.normalW = mul(input.normal, (float3x3) gmtxWorld);
 	output.uv0 = input.uv0;
 	output.texIndex = input.texIndex;
+	
+    output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
 	return (output);
 }
 
@@ -459,6 +522,7 @@ struct HS_TERRAIN_TESSELLATION_OUTPUT
 	float2 uv0 : TEXCOORD0;
 	float3 normalW : NORMAL;
 	uint texIndex : TEXTURE;
+    float4 shadowPosH : SHADOWPOS;
 };
 
 struct DS_TERRAIN_TESSELLATION_OUTPUT
@@ -473,6 +537,8 @@ struct DS_TERRAIN_TESSELLATION_OUTPUT
 	float4 tessellation : TEXCOORD2;
 
 	uint texIndex : TEXTURE;
+	
+    float4 shadowPosH : SHADOWPOS;
 };
 
 void BernsteinCoeffcient5x5(float t, out float fBernstein[5])
@@ -532,6 +598,7 @@ HS_TERRAIN_TESSELLATION_OUTPUT HSTerrainTessellation(InputPatch<VS_TERRAIN_TESSE
 	output.positionW = (float3) mul(float4(input[i].position, 1.0f), gmtxWorld);
 	output.uv0 = input[i].uv0;
 	output.texIndex = input[i].texIndex;
+    output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
 	return(output);
 }
 
@@ -583,7 +650,8 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	{
 		output.normalW = (float3)(mul(float4(normal, 1.0f), gmtxWorld));
 		output.positionW = (float3)mul(float4(position, 1.0f), gmtxWorld);
-	}
+        output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+    }
 
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
 	output.texIndex = patch[0].texIndex;
@@ -594,6 +662,8 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 // PS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+
+
 
 #include "Light.hlsl"
 
@@ -656,8 +726,11 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
+    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+    shadowFactor = CalcShadowFactor_t(input.shadowPosH);
+	
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+    float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID,shadowFactor);
 
 	//else
 	//{
@@ -699,34 +772,7 @@ VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
 }
 
 
-float CalcShadowFactor(float4 f4ShadowPos)
-{
-    f4ShadowPos.xyz /= f4ShadowPos.w;
 
-    float fDepth = f4ShadowPos.z;
-
-    uint nWidth, nHeight, nMips;
-    gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
-
-    float dx = 1.0f / (float) nWidth;
-
-    float percentLit = 0.0f;
-
-    const float2 offsets[9] =
-    {
-        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
-		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
-		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
-    };
-
-	[unroll]
-    for (int i = 0; i < 9; i++)
-    {
-        percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
-    }
-
-    return percentLit / 9.0f;
-}
 
 
 float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
@@ -772,17 +818,17 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
 		
 		
-        float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-        float FogStart = 10000.0f;
-        float FogRange = 20000.0f;
+        //float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+        //float FogStart = 10000.0f;
+        //float FogRange = 20000.0f;
 	
-        float3 toEyeW = gvCameraPosition + input.position.xyz;
-        float distToEye = length(toEyeW);
-        toEyeW /= distToEye; // normalize
+        //float3 toEyeW = gvCameraPosition + input.position.xyz;
+        //float distToEye = length(toEyeW);
+        //toEyeW /= distToEye; // normalize
 	
-        float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+        //float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
 		
-        cColor = lerp(cColor, FogColor, 1 - fogAmount);
+        //cColor = lerp(cColor, FogColor, 1 - fogAmount);
     }
 	if (gnTexturesMask & 0x100)
 	{
@@ -792,11 +838,9 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
     shadowFactor = CalcShadowFactor(input.shadowPosH);
 	
- 
 	input.normalW = normalize(input.normalW);
 	
-
-	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID , shadowFactor);
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID,shadowFactor);
 
 	return(cColor * cIllumination);
 }
