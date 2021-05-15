@@ -873,6 +873,9 @@ void CSceneJH::LogoutToServer()
 
 void CSceneJH::ProcessInput()
 {
+	if (false == m_IsFocusOn) {
+		return;
+	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 		auto keyInput = GAME_INPUT; 
@@ -1094,6 +1097,9 @@ void CSceneJH::ProcessInput()
 
 void CSceneJH::OnMouseDown(WPARAM btnState, int x, int y)
 {
+	if (false == m_IsFocusOn) {
+		return;
+	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 	}
@@ -1104,6 +1110,9 @@ void CSceneJH::OnMouseDown(WPARAM btnState, int x, int y)
 
 void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 {
+	if (false == m_IsFocusOn) {
+		return;
+	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 		if (m_MousePositions.size() > 0) {
@@ -1116,6 +1125,9 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 
 void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 {
+	if (false == m_IsFocusOn) {
+		return;
+	}
 	//
 	// 싱글플레이, 멀티 플레이 코드 분리 작업 진행 필요
 	//

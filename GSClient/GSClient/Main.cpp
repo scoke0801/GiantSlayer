@@ -185,6 +185,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_ACTIVATE:
+        if (wParam == WA_CLICKACTIVE || wParam == WA_CLICKACTIVE) { 
+            gFramework->SetFocus(true);
+        } 
+        else if (wParam == WA_INACTIVE) { 
+            gFramework->SetFocus(false);
+        } 
+        break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;

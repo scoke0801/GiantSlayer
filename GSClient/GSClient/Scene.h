@@ -56,6 +56,7 @@ protected:
 	FbxIOSettings* m_pfbxIOs = nullptr;
 	FbxImporter* m_pfbxImporter = nullptr;
 
+	bool m_IsFocusOn = true;
 	//protected:
 	//	GAME_STATE	m_GameState;
 
@@ -105,6 +106,8 @@ public:
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) { return NULL; }
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() { return NULL; } 
 
+public:
+	void SetFocus(bool focusData) { m_IsFocusOn = focusData; }
 protected:
 	template<class SceneName>
 	void ChangeScene(void* pContext = nullptr) { CFramework::GetInstance().ChangeScene<SceneName>(pContext); }

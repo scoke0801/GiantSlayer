@@ -130,6 +130,8 @@ public:	// about server
 	void SetFrameDirtyFlag(bool flag) { m_FrameDirtyFlag = flag; }
 	bool IsFrameDirty() const { return m_FrameDirtyFlag; }
 
+	void SetFocus(bool focusData) { m_CurrentScene->SetFocus(focusData); }
+
 public:	// about scene change
 	template <typename SceneName>
 	void ChangeScene(void* pContext = nullptr)
@@ -162,6 +164,7 @@ public:	// about scene change
 	CScene* GetCurrentScene() const { return m_CurrentScene; }
 
 	SOCKET& GetSocket() { return m_Sock; }
+
 };
 
 DWORD WINAPI ClientMain(LPVOID arg);
