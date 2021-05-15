@@ -167,12 +167,6 @@ namespace Vector3
 		XMFLOAT3 xmf3Result = Subtract(to, from);
 		return XMConvertToDegrees(atan2f(xmf3Result.x, xmf3Result.z));
 	}
-	inline float GetAngle(const XMFLOAT3& vStart, const XMFLOAT3& vEnd)
-	{
-		XMFLOAT3 v = Subtract(vEnd, vStart);
-
-		return XMConvertToDegrees(atan2f(v.z, v.x));
-	}
 	inline XMFLOAT3 TransformNormal(XMFLOAT3& xmf3Vector, XMMATRIX& xmmtxTransform)
 	{
 		XMFLOAT3 xmf3Result;

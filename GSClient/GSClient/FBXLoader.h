@@ -7,7 +7,7 @@ struct Keyframe
 	XMFLOAT3 translation;
 	XMFLOAT3 scale;
 	XMFLOAT4 rotationquat;
-	
+
 	bool operator == (const Keyframe& rhs) {
 		if (translation.x != rhs.translation.x || translation.y != rhs.translation.y || translation.z != rhs.translation.z)
 			return false;
@@ -86,7 +86,7 @@ struct FbxVertex
 
 		if (!(blendInfo.empty() && rhs.blendInfo.empty())) {
 			for (int i = 0; i < 4; i++) {
-				if (blendInfo[i].index != rhs.blendInfo[i].index || 
+				if (blendInfo[i].index != rhs.blendInfo[i].index ||
 					abs(blendInfo[i].weight - rhs.blendInfo[i].weight) > 0.001)
 				{
 					isSame = false;
@@ -101,7 +101,7 @@ struct FbxVertex
 		bool posSame = (XMVector3NearEqual(XMLoadFloat3(&pos), XMLoadFloat3(&rhs.pos), XMLoadFloat3(&vector3Epsilon)) == TRUE);
 		bool uvSame = (XMVector2NearEqual(XMLoadFloat2(&uv), XMLoadFloat2(&rhs.uv), XMLoadFloat2(&vector2Epsilon)) == TRUE);
 		bool normalSame = (XMVector3NearEqual(XMLoadFloat3(&normal), XMLoadFloat3(&rhs.normal), XMLoadFloat3(&vector3Epsilon)) == TRUE);
-	
+
 		return isSame && posSame && uvSame && normalSame;
 	}
 };
@@ -112,7 +112,7 @@ struct TrianglePG
 	string matName;
 	int matIndex;
 
-	bool operator<(const TrianglePG& rhs) { 
+	bool operator<(const TrianglePG& rhs) {
 		return matIndex < rhs.matIndex;
 	}
 };
@@ -153,9 +153,11 @@ private:
 	// Fbx
 	FbxManager* mFbxManager;
 	FbxScene* mFbxScene;
+	FbxAxisSystem mAxisSystem;
 
 	int numCP, numPG, numDF;
 	bool hasAnimation;
+	int rotateNum;
 
 	// Mesh Info
 	unordered_map<int, ControlPoint> cpoints;
@@ -172,7 +174,7 @@ private:
 
 public:
 	FbxLoader();
-	FbxLoader(FbxManager* pfbxSdkManager, char* FileName, bool hasAnim);
+	FbxLoader(FbxManager* pfbxSdkManager, string fileName, bool hasAnim, int nRotate);
 	~FbxLoader();
 
 	void ExploreFbxHierarchy(FbxNode* pNode);
@@ -191,5 +193,5 @@ public:
 
 	void Optimize();
 
-	void SaveAsFile();
+	void SaveAsFile(string filePath);
 };
