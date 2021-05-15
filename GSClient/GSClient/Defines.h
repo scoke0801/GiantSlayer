@@ -113,6 +113,7 @@ enum class PARTICLE_TYPE : UINT {
 	RadialParitcle, // 전방향으로 퍼지는 파티클
 	StraightParticle, // 직선으로 퍼지는 파티클
 	RainParticle,
+	SandParticle,
 };
 constexpr float ARROW_PARTICLE_LIFE_TIME = 10.0f;
 

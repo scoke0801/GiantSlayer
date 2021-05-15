@@ -276,7 +276,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Dry_Tree", "Stump", "Dead_Tree",
 		"Desert_Rock",
 		"TerrainWater",
-		"Rain"
+		"Rain",
 	};
 
 	const wchar_t* address[] =
@@ -2427,6 +2427,19 @@ void CSceneYJ::MakingRain()
 	{
 		XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
 		m_Particles->UseParticle(idx, XMFLOAT3(5000.f, 0.f, 17500.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
+	}
+}
+
+void CSceneYJ::MakingSand()
+{
+	int i = 0;
+
+	int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::SandParticle);
+	if (-1 != idx)
+	{
+		XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
+		m_Particles->UseParticle(idx, XMFLOAT3(10000.f, 0.f, 10000.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
 	}
 }
