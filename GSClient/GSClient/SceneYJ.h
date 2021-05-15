@@ -186,7 +186,7 @@ private:
 
 	void ShotArrow();
 	void MakingFog();
-
+	void MakingRain();
 
 private:
 	void SendMouseInputPacket();

@@ -275,7 +275,8 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"HelpText",
 		"Dry_Tree", "Stump", "Dead_Tree",
 		"Desert_Rock",
-		"TerrainWater"
+		"TerrainWater",
+		"Rain"
 	};
 
 	const wchar_t* address[] =
@@ -295,6 +296,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds",
 		L"resources/OBJ/Desert_Rock.dds",
 		L"resources/OBJ/Water.dds",
+		L"resources/OBJ/Rain.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -343,7 +345,8 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"HelpText",
 		"Dry_Tree","Stump","Dead_Tree",
 		"Desert_Rock",
-		"TerrainWater"
+		"TerrainWater",
+		"Rain"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -999,6 +1002,7 @@ void CSceneYJ::ProcessInput()
 	if (keyInput.KEY_F1)
 	{
 		MakingFog();
+		MakingRain();
 		//m_Player->SetPosition({ 2500,  0, 2500 });
 	}
 	if (keyInput.KEY_F2)
@@ -2293,7 +2297,7 @@ void CSceneYJ::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::RadialParitcle);
 
 	// ºñ
-	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::RainParticle);
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 100000, PARTICLE_TYPE::RainParticle);
 
 	//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 	
@@ -2410,6 +2414,19 @@ void CSceneYJ::MakingFog()
 	{
 		XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
 		m_Particles->UseParticle(idx, XMFLOAT3(16800.f, -5070.f, 17500.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
+	}
+}
+
+void CSceneYJ::MakingRain()
+{
+	int i = 0;
+
+	int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::RainParticle);
+	if (-1 != idx)
+	{
+		XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
+		m_Particles->UseParticle(idx, XMFLOAT3(5000.f, 0.f, 17500.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
 	}
 }

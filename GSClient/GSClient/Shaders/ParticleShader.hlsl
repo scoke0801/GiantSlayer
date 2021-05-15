@@ -44,9 +44,12 @@ Texture2D gtxtDry_Tree	   : register(t33);
 Texture2D gtxtStump		   : register(t34);
 Texture2D gtxtDead_Tree	   : register(t35);
 Texture2D gtxtDesert_Rock  : register(t36);
+Texture2D gtxtWater		   : register(t37);
+Texture2D gtxtRain		   : register(t38);
 
-Texture2D gtxtMap          : register(t37);
-Texture2D gtxtMirror       : register(t38);
+Texture2D gtxtMap		   : register(t39);
+Texture2D gtxtMirror	   : register(t40);
+Texture2D gtxtShadowMap	   : register(t41);
 
 //게임 객체의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbGameOBJInfo : register(b0)
@@ -208,82 +211,140 @@ VS_PARTICLE_OUT VSFogParticle(VS_PARTICLE_IN input)
     return outRes;
 }
 
+VS_TEX_PARTICLE_OUT VSRainParticle(VS_TEX_PARTICLE_IN input)
+{
+    VS_TEX_PARTICLE_OUT outRes;
+
+    float emitTime = input.time.x;
+    float lifeTime = input.time.y;
+
+    float newTime = (gfTime - emitTime);
+    newTime = fmod(newTime, lifeTime);
+  
+    if (newTime > 0.0f)
+    {
+        float t = newTime;
+        float tt = newTime * newTime;
+
+        matrix copyMat = gmtxWorld;
+        float3 newAcc = float3(0, -0.0f, 0.0f);
+        float toDegree = degrees(2 * 3.14 * input.randomValues.x);
+       
+        //float3 directionVec = float3(copyMat._21, copyMat._22, copyMat._23);
+        float speedLength = length(input.speed);
+        float3 speed = speedLength;
+
+        float3 objPos = float3(copyMat._41, copyMat._42, copyMat._43);
+        float3 position = input.position + objPos;
+         
+        position = position + t * input.speed + tt * newAcc * 0.5f;
+
+        copyMat._22 = 1.0f;
+        copyMat._21 = copyMat._23 = copyMat._24 = 0.0f;
+        copyMat._41 = position.x;
+        copyMat._42 = position.y;
+        copyMat._43 = position.z;
+
+        outRes.position = mul(mul(mul(float4(input.position, 1.0f), copyMat), gmtxView), gmtxProjection);
+    }
+    else
+        {
+            outRes.position = 0.0f;
+        }
+    
+    
+    outRes.time = input.time;
+    outRes.uv = input.uv;
+    outRes.index = input.index;
+	
+    return outRes;
+}
+
+VS_TEX_PARTICLE_OUT VSTexParticle(VS_TEX_PARTICLE_IN input)
+{
+    VS_TEX_PARTICLE_OUT outRes;
+
+    float emitTime = input.time.x;
+    float lifeTime = input.time.y;
+
+    float paraTime = gmtxWorld._31;
+	
+    if (paraTime > 0.0f)
+    {
+        float newTime = (paraTime - emitTime);
+        newTime = fmod(newTime, lifeTime);
+		//if (newTime > lifeTime) {
+		//	newTime = -1.0f;
+		//}
+        if (newTime > 0.0f)
+        {
+            float t = newTime;
+            float tt = newTime * newTime;
+
+            matrix copyMat = gmtxWorld;
+            float3 newAcc = float3(0, -0.0f, 0.0f);
+            float toDegree = degrees(2 * 3.14 * input.randomValues.x);
+            float circleSize = input.randomValues.y;
+
+            float3 directionVec = float3(copyMat._21, copyMat._22, copyMat._23);
+            float speedLength = length(input.speed);
+            float3 speed = directionVec * speedLength;
+
+            float3 objPos = float3(copyMat._41, copyMat._42, copyMat._43);
+            float3 position = input.position + objPos;
+            position.x = position.x + cos(toDegree) * circleSize;
+            position.y = position.y + sin(toDegree) * circleSize;
+            position = position + t * speed + tt * newAcc * 0.5f;
+
+            copyMat._22 = 1.0f;
+            copyMat._21 = copyMat._23 = copyMat._24 = 0.0f;
+            copyMat._41 = position.x;
+            copyMat._42 = position.y;
+            copyMat._43 = position.z;
+
+            outRes.position = mul(mul(mul(float4(input.position, 1.0f), copyMat), gmtxView), gmtxProjection);
+        }
+        else
+        {
+            outRes.position = 0.0f;
+        }
+    }
+    outRes.time = input.time;
+    outRes.uv = input.uv;
+    outRes.index = input.index;
+    return outRes;
+}
 
 float4 PSParticle(VS_PARTICLE_OUT input) : SV_TARGET
 {
 	float4 cColor = input.color;
 	
-    cColor.a = (length(input.positionW - gvCameraPosition) / 7500.0f)-0.5f;
+    //cColor.a = (length(input.positionW - gvCameraPosition) / 7500.0f)-0.5f;
     //cColor.a = 1 - lerp(cColor.a, FogColor.a, 1 - fogAmount);
-	
 	//cColor = 1.0f;
+	
 	return cColor;
 }
 
-//////////////////////////////////////////////////////////////////////
-//
-VS_TEX_PARTICLE_OUT VSTexParticle(VS_TEX_PARTICLE_IN input)
+float4 PSFogParticle(VS_PARTICLE_OUT input) : SV_TARGET
 {
-	VS_TEX_PARTICLE_OUT outRes;
-
-	float emitTime = input.time.x;
-	float lifeTime = input.time.y;
-
-	float paraTime = gmtxWorld._31;
+    float4 cColor = input.color;
 	
-	if (paraTime > 0.0f) {
-		float newTime = (paraTime - emitTime); 
-		newTime = fmod(newTime, lifeTime);
-		//if (newTime > lifeTime) {
-		//	newTime = -1.0f;
-		//}
-		if (newTime > 0.0f)
-		{
-			float t = newTime;
-			float tt = newTime * newTime;
-
-			matrix copyMat = gmtxWorld;
-			float3 newAcc = float3(0, -0.0f, 0.0f);
-			float toDegree = degrees(2 * 3.14 * input.randomValues.x);
-			float circleSize = input.randomValues.y;
-
-			float3 directionVec = float3(copyMat._21, copyMat._22, copyMat._23);
-			float speedLength = length(input.speed);
-			float3 speed = directionVec * speedLength;
-
-			float3 objPos = float3(copyMat._41, copyMat._42, copyMat._43);
-			float3 position = input.position + objPos;
-			position.x = position.x + cos(toDegree) * circleSize;
-			position.y = position.y + sin(toDegree) * circleSize;
-			position = position + t * speed + tt * newAcc * 0.5f;
-
-			copyMat._22 = 1.0f;
-			copyMat._21 = copyMat._23 = copyMat._24 = 0.0f;
-			copyMat._41 = position.x;
-			copyMat._42 = position.y;
-			copyMat._43 = position.z;
-
-			outRes.position = mul(mul(mul(float4(input.position, 1.0f), copyMat), gmtxView), gmtxProjection);
-		}
-		else {
-			outRes.position = 0.0f;
-		}
-	}
-	outRes.time = input.time;
-	outRes.uv = input.uv;
-	outRes.index = input.index;
-	return outRes;
+    cColor.a = (length(input.positionW - gvCameraPosition) / 7500.0f) - 0.5f;
+    //cColor.a = 1 - lerp(cColor.a, FogColor.a, 1 - fogAmount);
+	
+	//cColor = 1.0f;
+    return cColor;
 }
 
 float4 PSTexParticle(VS_TEX_PARTICLE_OUT input) : SV_TARGET
 {
 	float4 cColor;
 
-	if (input.index & 0x01)
-	{
-		cColor = gtxtBox.Sample(gssWrap, input.uv);
-		
-	}
-	//cColor = 1.0f;
+	
+    cColor = gtxtRain.Sample(gssWrap, input.uv);
+    
+	//cColor = gtxtBox.Sample(gssWrap, input.uv);
+	//cColor = 0.1f;
 	return cColor;
 }
