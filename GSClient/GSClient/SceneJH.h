@@ -98,6 +98,8 @@ private: // for server mouse input process
 	vector<POINTF>				m_MousePositions;
 	MOUSE_INPUT_TYPE			m_prevMouseInputType;
 
+private:
+	CSoundManager*				m_SoundManager;
 public:
 	CSceneJH();
 	~CSceneJH();

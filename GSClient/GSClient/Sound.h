@@ -1,6 +1,6 @@
 #pragma once
 
-#pragma comment (lib, "fmodex_vc.lib")
+#pragma comment (lib, "fmod64_vc.lib")
 
 #include <fmod.hpp>
 #include <fmod_errors.h>
@@ -37,9 +37,7 @@ enum class Sound_Name : int
 	, BGM_LOBBY
 	, BGM_GAME_LOSE
 	, BGM_GAME_WIN
-	, EFFECT_BOMB_SET
-	, EFFECT_BOMB_POP
-	, EFFECT_BOMB_WAVE
+	, EFFECT_ARROW_SHOT
 
 };
 
@@ -62,12 +60,13 @@ public:		//사운드 재생
 	void Stop();		//사운드 재생을 중지합니다.
 	void SetVolume(float volume);	//사운드의 크기를 조절합니다.
 public:		//기타
-	FMOD_SOUND* FindSound(Sound_Name key);	//해당 키 값이 이미 등록 되어 있는지를 찾습니다.
+	FMOD::Sound* FindSound(Sound_Name key);	//해당 키 값이 이미 등록 되어 있는지를 찾습니다.
 private:
 	float m_fVolume;	//사운드 재생할 때의 크기를 지정합니다.
 
-	FMOD_SYSTEM *  m_pSystem;
-	FMOD_CHANNEL * m_pChannel[SoundType::SOUND_COUNT];
-
-	std::map <Sound_Name, FMOD_SOUND* > m_mapSound;
+	FMOD::System*  m_pSystem;
+	FMOD::Channel* m_pChannel[SoundType::SOUND_COUNT];
+	  
+	unsigned int    version;
+	std::map <Sound_Name, FMOD::Sound* > m_mapSound;
 };

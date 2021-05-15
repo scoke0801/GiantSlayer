@@ -15,7 +15,7 @@
 #include "Particle.h"
 #include "Arrow.h"
 #include "Enemy.h"
-
+#include "Sound.h"
 #include "FbxObject.h"
 #include "FbxLoader.h"
 #define ROOT_PARAMETER_OBJECT				0
@@ -35,6 +35,12 @@ float lensize = 60000.0f;
 
 CSceneJH::CSceneJH()
 {
+	m_SoundManager = new CSoundManager();
+	//m_SoundManager->AddStream("resources/sounds/TestTitle.mp3", Sound_Name::BGM_MAIN_GAME);
+
+	m_SoundManager->AddSound("resources/sounds/ShotArrow.wav", Sound_Name::EFFECT_ARROW_SHOT);
+	//m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
+
 	cout << "Enter CSceneJH \n";
 	m_pd3dGraphicsRootSignature = NULL;
 	m_isPlayerSelected = false;
@@ -402,6 +408,7 @@ void CSceneJH::ReleaseObjects()
 
 void CSceneJH::Update(float elapsedTime)
 {
+	m_SoundManager->OnUpdate();
 	ProcessInput();
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i){
@@ -939,11 +946,7 @@ void CSceneJH::ProcessInput()
 		if (m_isPlayerSelected) {
 			XMFLOAT3 prevLook = m_Player->GetLook();
 			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));  
-			XMFLOAT3 afterLook = m_Player->GetLook();
-
-			float angle = Vector3::Angle(Vector3::Normalize(afterLook), Vector3::Normalize(prevLook));
-			cout << " Angle : " << angle << endl; 
-			//m_MinimapArrow->Rotate(XMConvertToRadians(angle));
+			XMFLOAT3 afterLook = m_Player->GetLook(); 
 		}
 		else
 			m_CurrentCamera->Walk(cameraSpeed);
@@ -2394,6 +2397,7 @@ void CSceneJH::ShotArrow()
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx,  Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()),1));
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 			}
 			break;
 		}
