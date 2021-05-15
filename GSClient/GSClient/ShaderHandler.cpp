@@ -93,7 +93,7 @@ void CShaderHandler::CreateFBXAnimatedShader(ID3D12Device* pd3dDevice, ID3D12Roo
 	CShader* pFBXFeatureShaderLeft = new CShader();
 	CShader* pFBXFeatureShaderRight = new CShader();
 
-	if (m_UserID == ShaderHandlerUser::TH) {
+	{
 		pFBXShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSFbxAnimated");
 		pFBXShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFbxAnimated");
 	}
