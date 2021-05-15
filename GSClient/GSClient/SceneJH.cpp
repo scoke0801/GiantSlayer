@@ -210,9 +210,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
-	//BuildMapSector1(pd3dDevice, pd3dCommandList);
+	BuildMapSector1(pd3dDevice, pd3dCommandList);
 	BuildMapSector2(pd3dDevice, pd3dCommandList);
-	//BuildMapSector3(pd3dDevice, pd3dCommandList); 
+	BuildMapSector3(pd3dDevice, pd3dCommandList); 
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList); 
 
@@ -2003,7 +2003,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	pObject->Scale(20.0f, 20.0f, 20.0f);
 	pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 100.0f, z_Tree });
 	pObject->SetTextureIndex(0x08);
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(15 * 0.5f, 10 * 0.5f, 15 * 0.5f)));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 15, 10, 15, { 0,0,0 });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
