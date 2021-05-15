@@ -2355,9 +2355,9 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_MinimapCamera->SetTarget(m_Players[0]);
 	 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
-		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
-		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
-		//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
+		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
 		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 		m_Players[i]->Scale(7, 7, 7);
 		m_Players[i]->Rotate({ 0,1,0 }, 180);

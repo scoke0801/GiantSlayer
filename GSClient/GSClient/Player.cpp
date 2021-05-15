@@ -19,11 +19,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	finTransform = new XMFLOAT4X4[100];
 
 	cout << indices.size() << " " << vertices.size() << " " << skeleton.size() << endl;
-
-	//CFixedMesh* tempMesh = new CFixedMesh(pd3dDevice, pd3dCommandList, pstrFbxFileName);
-	CAnimatedMesh* tempMesh = new CAnimatedMesh(pd3dDevice, pd3dCommandList, vertices, indices, skeleton);
-
-	SetMesh(tempMesh);
+	 
+	SetMesh(new CAnimatedMesh(pd3dDevice, pd3dCommandList, vertices, indices, skeleton));
 	//SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	SetShader(CShaderHandler::GetInstance().GetData("FbxAnimated"));
 
