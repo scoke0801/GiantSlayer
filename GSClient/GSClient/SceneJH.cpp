@@ -191,10 +191,10 @@ void CSceneJH::BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	auto start_t = chrono::high_resolution_clock::now();
-	/*m_pfbxManager = FbxManager::Create();
+	m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
-	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
+	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		m_ObjectLayers[i].reserve(50); 
@@ -212,9 +212,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	BuildMapSector1(pd3dDevice, pd3dCommandList);
 	BuildMapSector2(pd3dDevice, pd3dCommandList);
-	BuildMapSector3(pd3dDevice, pd3dCommandList);
-	//BuildMapSector4(pd3dDevice, pd3dCommandList);
-	//BuildMapSector5(pd3dDevice, pd3dCommandList);
+	BuildMapSector3(pd3dDevice, pd3dCommandList); 
+	BuildMapSector4(pd3dDevice, pd3dCommandList);
+	BuildMapSector5(pd3dDevice, pd3dCommandList); 
 
 	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 	
@@ -684,40 +684,43 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 }
 
 void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
-	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-
-	if (m_pLightCamera)
+{
+	if (m_isPlayerSelected == true)
 	{
-		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
-		m_pLightCamera->GenerateViewMatrix();
-		m_pLightCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_LIGHT_CAMERA);
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
-	}
+		pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
-	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
-
-	pd3dCommandList->ClearDepthStencilView(m_d3dDsvShadowMapCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
-
-	pd3dCommandList->OMSetRenderTargets(0, NULL, FALSE, &m_d3dDsvShadowMapCPUHandle);
-
-	for (int i = 0; i < m_ObjectLayers.size(); ++i) { 
-		for (auto pObject : m_ObjectLayers[i]) {
-			pObject->Draw_Shadow(pd3dCommandList, m_CurrentCamera); 
+		if (m_pLightCamera)
+		{
+			m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+			m_pLightCamera->GenerateViewMatrix();
+			m_pLightCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_LIGHT_CAMERA);
+			m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
 		}
+
+		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
+			D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+
+		pd3dCommandList->ClearDepthStencilView(m_d3dDsvShadowMapCPUHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+		pd3dCommandList->OMSetRenderTargets(0, NULL, FALSE, &m_d3dDsvShadowMapCPUHandle);
+
+		for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+			for (auto pObject : m_ObjectLayers[i]) {
+				pObject->Draw_Shadow(pd3dCommandList, m_CurrentCamera);
+			}
+		}
+		m_Player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
+
+
+		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
+			D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
+
+		/*if (m_CurrentCamera)
+		{
+			m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
+			m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER__CAMERA);
+		}*/
 	}
-	m_Player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
-	 
-
-	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
-		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
-
-	/*if (m_CurrentCamera)
-	{
-		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER__CAMERA);
-	}*/
 }
 
 void CSceneJH::Communicate(SOCKET& sock)
@@ -1007,7 +1010,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_F4)
 	{
-		m_Player->SetPosition({ 12500,  -3000, 2500 });
+		m_Player->SetPosition({ 14500,  -3000, 2500 });
 	}
 	if (keyInput.KEY_F5)
 	{
@@ -2157,19 +2160,7 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
-	m_pfbxManager->SetIOSettings(m_pfbxIOs);
-
-
-	/*m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/rock.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true); 
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Enemy_t2.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");  */
+	m_pfbxManager->SetIOSettings(m_pfbxIOs); 
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
@@ -2192,7 +2183,7 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Enemy_t2.fbx", true);
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Enemy_t2.fbx", true); 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");*/
 }
