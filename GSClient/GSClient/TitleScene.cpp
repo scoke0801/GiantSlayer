@@ -62,6 +62,9 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CTitleScene::ProcessInput()
 {
+	if (false == m_IsFocusOn) {
+		return;
+	}
 	static bool isFirst = true;
 	if (!isFirst) return;
 	auto keyInput = GAME_INPUT;
@@ -86,6 +89,9 @@ void CTitleScene::ProcessInput()
 
 void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 {
+	if (false == m_IsFocusOn) {
+		return;
+	}
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
 
@@ -109,11 +115,17 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 
 void CTitleScene::OnMouseUp(WPARAM btnState, int x, int y)
 {
+	if (false == m_IsFocusOn) {
+		return;
+	}
 	ReleaseCapture();
 }
 
 void CTitleScene::OnMouseMove(WPARAM btnState, int x, int y)
 {
+	if (false == m_IsFocusOn) {
+		return;
+	}
 	if ((btnState & MK_LBUTTON) != 0)
 	{ 
 	}

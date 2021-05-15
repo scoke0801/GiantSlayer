@@ -101,7 +101,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 		pCamera->SetScissorRect(0, 0, width, height);
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		m_Cameras[i] = pCamera;
-	}
+	} 
 	m_Cameras[0]->SetPosition({ 500,  250 + 150, 1200 });
 	m_Cameras[0]->Pitch(XMConvertToRadians(15));
 	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
@@ -113,17 +113,31 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	m_Cameras[3]->SetPosition({ 2000, 1000, 8000 });
 	//m_Cameras[3]->Pitch(XMConvertToRadians(90));
 	m_Cameras[4]->SetPosition({ 0,0,0 });
+	 
+	m_MirrorCamera = m_Cameras[3];
+	m_MinimapCamera = m_Cameras[1];
+
+	for (int i = 0; i < MAX_PLAYER; ++i) {
+		CCamera* pCamera = new CCamera;
+		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 60000.0f);
+		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
+		pCamera->SetScissorRect(0, 0, width, height);
+		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList); 
+		pCamera->SetPosition({ 500,  250 + 150, 1200 });
+		pCamera->Pitch(XMConvertToRadians(15)); 
+		pCamera->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+		m_PlayerCameras.emplace_back(std::move(pCamera));
+	}
 
 	if (CFramework::GetInstance().IsOnConntected())
 	{
-		m_CurrentCamera = m_Cameras[0];
+		int id = CFramework::GetInstance().GetPlayerId(); 
+		m_CurrentCamera = m_PlayerCameras[id];
 		m_isPlayerSelected = true;
 	}
-	else { 
+	else {
 		m_CurrentCamera = m_Cameras[2];
 	}
-	m_MirrorCamera = m_Cameras[3];
-	m_MinimapCamera = m_Cameras[1];
 }
 
 void CSceneJH::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -451,7 +465,9 @@ void CSceneJH::Update(float elapsedTime)
 			cout << "충돌 : 플레이어 - 퍼즐\n";
 		}
 	} 
-	 
+	
+	//m_PlayerCameras[CFramework::GetInstance().GetPlayerId()]->Update(elapsedTime);
+			
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
 	if (m_MirrorCamera)
@@ -468,11 +484,7 @@ void CSceneJH::Update(float elapsedTime)
 		m_pLightCamera->LookAt({ LightPos },
 			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
 			m_Player->GetUp());
-
-		/*m_pLightCamera->LookAt(LightPos,
-			{ 20000.0f,0.0f,20000.0f },
-			m_Player->GetUp());*/
-
+		 
 		m_pLightCamera->UpdateViewMatrix();
 	}
 
@@ -803,7 +815,7 @@ void CSceneJH::Communicate(SOCKET& sock)
 
 		m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
 		m_Players[p_syncUpdate.id[i]]->UpdateCamera();
-		//m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+		m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 	}
 
 	if (m_MousePositions.size() > 0) {
@@ -834,14 +846,15 @@ void CSceneJH::LoginToServer()
 		CFramework::GetInstance().SetPlayerId(p_processLogin.id);
 
 		cout << "Login id = " << p_processLogin.id << "\n";
+		 
+		m_Players[p_processLogin.id]->SetDrawable(true);
 
-		//m_Player->SetPosition(pos); 
-		
-		m_Players[p_processLogin.id]->SetPosition(pos);
-		m_Player = m_Players[p_processLogin.id]; 
-		m_Player->SetDrawable(true); 
+		m_Player = m_Players[p_processLogin.id];
+		m_CurrentCamera = m_PlayerCameras[p_processLogin.id];
+		//m_Player->SetCamera(m_CurrentCamera); 
+		//m_CurrentCamera->SetTarget(m_Player);
 
-		m_MinimapCamera->SetTarget(m_Player);
+		m_MinimapCamera->SetTarget(m_Players[p_processLogin.id]);
 		  
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
@@ -859,10 +872,11 @@ void CSceneJH::LoginToServer()
 			if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
 
 			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
-
+			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
+			 
 			m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
-
 			m_Players[p_syncUpdate.id[i]]->UpdateCamera();
+			m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 		}
 	}  
 }
@@ -904,7 +918,8 @@ void CSceneJH::ProcessInput()
 		if (keyInput.KEY_3)
 		{
 			m_isPlayerSelected = true;
-			m_CurrentCamera = m_Cameras[0];
+			m_CurrentCamera = m_Cameras[0]; 
+			m_CurrentCamera = m_PlayerCameras[0];
 		}
 		if (keyInput.KEY_4)
 		{
@@ -995,7 +1010,8 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_3)
 	{
 		m_isPlayerSelected = true;
-		m_CurrentCamera = m_Cameras[0];
+		//m_CurrentCamera = m_Cameras[0];
+		m_CurrentCamera = m_PlayerCameras[0];
 	}
 	if (keyInput.KEY_4)
 	{
@@ -2346,38 +2362,44 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin"); 
 	m_Player = m_Players[0];
 
-	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
-	m_Cameras[0]->SetTarget(m_Players[0]);
+	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
+	m_PlayerCameras[0]->SetTarget(m_Players[0]);
+	m_Players[0]->SetCamera(m_PlayerCameras[0]);
 
-	//m_Players[0]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	m_Players[0]->Scale(7, 7, 7);
 	m_Players[0]->SetObjectName(OBJ_NAME::Player);
 	m_Players[0]->Rotate({ 0,1,0 }, 180);
 	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 
-	m_Players[0]->SetCamera(m_Cameras[0]);
-	m_Players[0]->SetTextureIndex(0x400);
-	//m_Players[0]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player]);
-	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 });
+	m_Players[0]->SetDrawable(true);
+	m_Players[0]->SetTextureIndex(0x400); 
 
-	m_Players[0]->SetDrawable(true); 
+	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 });
 	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
 	++m_CurrentPlayerNum;
-	m_MinimapCamera->SetTarget(m_Players[0]);
-	 
+
+	m_MinimapCamera->SetTarget(m_Players[0]); 
+
 	for (int i = 1; i < MAX_PLAYER; ++i) {
 		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
 		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-		m_Players[i]->Scale(7, 7, 7);
-		m_Players[i]->Rotate({ 0,1,0 }, 180);
-		m_Players[i]->SetObjectName(OBJ_NAME::Player);
 
+		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
+		m_PlayerCameras[i]->SetTarget(m_Players[i]);
+		m_Players[i]->SetCamera(m_PlayerCameras[i]);
+		
+		m_Players[i]->Scale(7, 7, 7);
+		m_Players[i]->SetObjectName(OBJ_NAME::Player);
+		m_Players[i]->Rotate({ 0,1,0 }, 180);
+		m_Players[i]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+
+		m_Players[i]->SetDrawable(false);
 		m_Players[i]->SetTextureIndex(0x400);
+
 		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 }); 
 		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
-		m_Players[i]->SetDrawable(false);  
 	}
 }
 

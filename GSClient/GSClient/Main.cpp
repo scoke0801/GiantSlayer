@@ -187,9 +187,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_ACTIVATE:
         if (wParam == WA_CLICKACTIVE || wParam == WA_CLICKACTIVE) { 
+            cout << "Focus On\n";
             gFramework->SetFocus(true);
         } 
         else if (wParam == WA_INACTIVE) { 
+            cout << "Focus Out\n";
             gFramework->SetFocus(false);
         } 
         break;

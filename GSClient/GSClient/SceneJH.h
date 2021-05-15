@@ -47,6 +47,7 @@ private:
 
 	ID3D12RootSignature*		m_pd3dGraphicsRootSignature = NULL;
 
+	vector<CCamera*>			m_PlayerCameras;
 	CCamera**					m_Cameras;
 	CCamera*					m_CurrentCamera = nullptr;
 	CCamera*					m_MinimapCamera = nullptr;

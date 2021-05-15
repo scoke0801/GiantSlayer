@@ -9,7 +9,7 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 	int count = 0;
 	int retval = 0;
 	bool packetRecvResult = RecvPacket(socket, buffer, retval); 
-	if (false == packetRecvResult) {
+	if (false == packetRecvResult) 
 		return false;
 	}
 	// buffer[0]ÀÇ °ªÀº packet protocol size
