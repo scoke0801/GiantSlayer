@@ -18,6 +18,8 @@ CCamera::~CCamera()
 
 void CCamera::Update(float elapsedTime)
 {
+
+
 	if (m_isOnShake)
 	{
 		m_TimerForShake.UpdateElapsedTime();
@@ -527,18 +529,7 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, 
 	::memcpy(&m_pcbMappedCamera->m_xmf4x4Projection, &xmf4x4Projection, sizeof(XMFLOAT4X4));
 
 	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
-
-	XMFLOAT4X4 T(
-		0.5f, 0.0f, 0.0f, 0.0f,
-		0.0f, -0.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.0f, 1.0f);
-
-	XMFLOAT4X4 xmf4x4ShadowTransform = Matrix4x4::Multiply(m_xmf4x4ViewProjection, T);
-
-	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4ViewProjection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewProjection)));
-	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4ShadowTransform, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4ShadowTransform)));
-
+	 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(rootParameterIndex, d3dGpuVirtualAddress);
 }
@@ -579,4 +570,60 @@ XMFLOAT3 CCamera::CalcTargetUp()
 XMFLOAT3 CCamera::CalcTargetLook()
 {
 	return XMFLOAT3(m_TargetTransform._31, m_TargetTransform._32, m_TargetTransform._33);
+}
+
+void CCamera::GenerateOrthogonalMatrix(float fWidth, float fHeight, float fNear, float fFar)
+{
+	m_xmf4x4Proj = Matrix4x4::OrthogonalFovLH(fWidth, fHeight, fNear, fFar);
+}
+
+
+CLightCamera::CLightCamera() : CCamera()
+{
+
+}
+
+CLightCamera::~CLightCamera()
+{
+
+}
+
+void CLightCamera::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CCamera::CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	UINT ncbElementBytes = ((sizeof(VS_CB_LIGHT_CAMERA_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcbLightCamera = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbLightCamera->Map(0, NULL, (void**)&m_pcbMappedLightCamera);
+}
+
+void CLightCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, int rootParameterIndex)
+{
+	//CCamera::UpdateShaderVariables(pd3dCommandList, rootParameterIndex);
+
+	XMFLOAT4X4 T(
+		0.5f, 0.0f, 0.0f, 0.0f,
+		0.0f, -0.5f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.0f, 1.0f);
+
+	XMFLOAT4X4 xmf4x4ShadowTransform = Matrix4x4::Multiply(m_xmf4x4ViewProjection, T);
+
+	XMStoreFloat4x4(&m_pcbMappedLightCamera->m_xmf4x4ViewProjection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewProjection)));
+	XMStoreFloat4x4(&m_pcbMappedLightCamera->m_xmf4x4ShadowTransform, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4ShadowTransform)));
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbLightCamera->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(rootParameterIndex, d3dGpuVirtualAddress);
+}
+
+void CLightCamera::ReleaseShaderVariables()
+{
+	if (m_pd3dcbLightCamera)
+	{
+		m_pd3dcbLightCamera->Unmap(0, NULL);
+		m_pd3dcbLightCamera->Release();
+
+		m_pd3dcbLightCamera = NULL;
+	}
 }

@@ -954,10 +954,9 @@ FbxScene* LoadFbxSceneFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 }
 
 CFixedMesh::CFixedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-	string fileName) : CMesh(pd3dDevice, pd3dCommandList)
+	char* pstrFbxFileName) : CMesh(pd3dDevice, pd3dCommandList)
 {
-	string filePath = "resources/FbxExported/" + fileName + ".bin";
-	LoadFile(filePath);
+	LoadFile(pstrFbxFileName);
 
 	// Vertices
 	vector<CTexturedVertex> tempVertex;
@@ -997,10 +996,10 @@ CFixedMesh::~CFixedMesh()
 
 }
 
-void CFixedMesh::LoadFile(string fileName)
+void CFixedMesh::LoadFile(char* pstrFbxFileName)
 {
 	ifstream file;
-	file.open(fileName, ios::in | ios::binary);
+	file.open(pstrFbxFileName, ios::in | ios::binary);
 	string temp;
 
 	file >> temp >> nVertices;
@@ -1008,14 +1007,21 @@ void CFixedMesh::LoadFile(string fileName)
 	file >> temp >> nBones;
 	file >> temp;
 
-	cout << "[VT]:"  << nVertices << "\t[PG]:" << nPolygons << "\t[FName]:" << fileName << endl;
+	cout << "파일 로드: " << nVertices << " " << nPolygons << " " << endl;
 
 	for (int i = 0; i < nVertices; i++) {
 		Vertex tempVertex;
 
+		file >> tempVertex.pos.x >> tempVertex.pos.z >> tempVertex.pos.y >>
+			tempVertex.uv.x >> tempVertex.uv.y >>
+			tempVertex.normal.x >> tempVertex.normal.z >> tempVertex.normal.y;
+		/*
 		file >> tempVertex.pos.x >> tempVertex.pos.y >> tempVertex.pos.z >>
-				tempVertex.uv.x >> tempVertex.uv.y >>
-				tempVertex.normal.x >> tempVertex.normal.y >> tempVertex.normal.z;
+			tempVertex.uv.x >> tempVertex.uv.y >>
+			tempVertex.normal.x >> tempVertex.normal.y >> tempVertex.normal.z;
+		*/
+		file >> tempVertex.indices[0] >> tempVertex.indices[1] >> tempVertex.indices[2] >> tempVertex.indices[3] >>
+			tempVertex.weights.x >> tempVertex.weights.y >> tempVertex.weights.z >> temp;
 
 		vertices.push_back(tempVertex);
 	}
@@ -2041,10 +2047,10 @@ void CArrowParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 {  
 	const float PARTICLE_SIZE = 0.2f;
 
-	float goalSize = 15;
+	float goalSize = 30.0f;
 	float perSize = goalSize / count;
 
-	float goalSpeed = ARROW_SPEED;
+	float goalSpeed = 30.0f;
 	float perSpeed = goalSpeed / count;
 	for (int i = 0; i < count; ++i) {
 		XMFLOAT3 pos = GetRandomVector3(1000, 1, 50);
@@ -2058,7 +2064,7 @@ void CArrowParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 		XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f)); 
 		// 매개변수 방정식 값, 원 크기, 원 주기
-		XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(10.0f, 0.0f, 0.0f), perSize * (count - i), GetRandomValue(2.0f, 0.0f, 0.0f)); 
+		XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(5.0f, 0.0f, 0.0f), perSize * (count - i), GetRandomValue(2.0f, 0.0f, 0.0f)); 
 		// v0 
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;

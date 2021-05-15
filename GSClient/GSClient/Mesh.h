@@ -407,10 +407,10 @@ public:
 	vector<Bone> skeleton;
 
 	CFixedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		string fileName);
+		char* pstrFbxFileName);
 	virtual ~CFixedMesh();
 
-	void LoadFile(string fileName);
+	void LoadFile(char* pstrFbxFileName);
 };
 
 /*

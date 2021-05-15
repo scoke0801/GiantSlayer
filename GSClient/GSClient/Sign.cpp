@@ -99,6 +99,12 @@ void CSign::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 	m_Pillar->Draw(pd3dCommandList, pCamera);
 }
 
+void CSign::Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	m_Board->Draw_Shadow(pd3dCommandList, pCamera);
+	m_Pillar->Draw_Shadow(pd3dCommandList, pCamera);
+}
+
 void CSign::UpdateColliders()
 {
 	m_Board->UpdateColliders();

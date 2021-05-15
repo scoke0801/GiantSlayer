@@ -104,6 +104,7 @@ void CFbxObject::LoadFile(char* pstrFbxFileName)
 				tempBone.offset._31 >> tempBone.offset._32 >> tempBone.offset._33 >> tempBone.offset._34 >>
 				tempBone.offset._41 >> tempBone.offset._42 >> tempBone.offset._43 >> tempBone.offset._44;
 
+			cout << tempBone.name << " " << tempBone.parentIndex << endl;
 			skeleton.push_back(tempBone);
 			m_pxmf4x4BindPoseBoneOffsets[i] = tempBone.offset;
 		}
@@ -210,7 +211,6 @@ void CFbxObject::Animate(float fTimeElapsed)
 		XMMATRIX offset = XMLoadFloat4x4(&skeleton[i].offset);
 		XMMATRIX toRoot = XMLoadFloat4x4(&toRootTransforms[i]);
 		XMMATRIX finalTransform = XMMatrixMultiply(offset, toRoot);
-		finalTransform *= XMMatrixScaling(1.0f, 1.0f, 1.0f);
 		XMStoreFloat4x4(&finTransform[i], XMMatrixTranspose(finalTransform));
 	}
 

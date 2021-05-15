@@ -307,7 +307,7 @@ D3D12_RASTERIZER_DESC CShader::CreateShadowRasterizerState()
 	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
-	d3dRasterizerDesc.DepthBias = 1000;
+	d3dRasterizerDesc.DepthBias = 10.0f;
 	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
 	d3dRasterizerDesc.SlopeScaledDepthBias = 1.0f;
 	d3dRasterizerDesc.DepthClipEnable = TRUE;
@@ -381,7 +381,7 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, 
 	bool isCullModeOn, bool isBlendOn) 
 {
-	m_nPipelineStates = 2;
+	m_nPipelineStates = 3;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
@@ -431,18 +431,17 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 	hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
 		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[1]);
 
-	//d3dPipelineStateDesc.InputLayout = CreateShadowInputLayout();
-	//d3dPipelineStateDesc.VS = CreateShadowVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSStandardShadow");
-	//d3dPipelineStateDesc.PS = CreateShadowPixelShader(L"Shaders\\ShaderYJ.hlsl", "PSStandardShadow");
-	//d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
-	//d3dPipelineStateDesc.NumRenderTargets = 0;
-	//::memset(d3dPipelineStateDesc.RTVFormats, DXGI_FORMAT_UNKNOWN, sizeof(DXGI_FORMAT) * 8);
+	d3dPipelineStateDesc.InputLayout = CreateShadowInputLayout();
+	d3dPipelineStateDesc.VS = CreateShadowVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSStandardShadow");
+	d3dPipelineStateDesc.PS = CreateShadowPixelShader(L"Shaders\\ShaderYJ.hlsl", "PSStandardShadow");
+	ZeroMemory(&d3dPipelineStateDesc.GS, sizeof(d3dPipelineStateDesc.GS));
+	d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
+	d3dPipelineStateDesc.NumRenderTargets = 0;
+	::memset(d3dPipelineStateDesc.RTVFormats, DXGI_FORMAT_UNKNOWN, sizeof(DXGI_FORMAT) * 8);
 
-	//hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
-	//	__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[2]);
-
-
-
+	hres = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[2]);
+	 
 	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
 	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
 	if (m_pd3dGeometryShaderBlob) m_pd3dGeometryShaderBlob->Release();
@@ -680,7 +679,7 @@ void CShader::CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	//파이프라인에 그래픽스 상태 객체를 설정한다.	
-	if (gbWireframeOn && m_nPipelineStates >= 3) {
+	if (gbWireframeOn && m_nPipelineStates >= 2) {
 		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1]);
 	}
 	else {
