@@ -283,6 +283,15 @@ void CShaderHandler::CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 	pParticleShader->CreateInputLayout(ShaderTypes::TexParticle);
 	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("TexParticle", pParticleShader);
+
+	pParticleShader = new CShader();
+	pParticleShader->CreateVertexShader(L"Shaders\\ParticleShader.hlsl", "VSFogParticle");
+	pParticleShader->CreatePixelShader(L"Shaders\\ParticleShader.hlsl", "PSParticle");
+
+	pParticleShader->CreateInputLayout(ShaderTypes::Particle);
+	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("FogParticle", pParticleShader);
+
 }
 
 void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)

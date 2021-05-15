@@ -78,11 +78,13 @@ Texture2D gtxtDry_Tree	   : register(t33);
 Texture2D gtxtStump		   : register(t34);
 Texture2D gtxtDead_Tree	   : register(t35);
 Texture2D gtxtDesert_Rock  : register(t36);
+Texture2D gtxtWater : register(t37);
 
 
-Texture2D gtxtMap          : register(t37);
-Texture2D gtxtMirror       : register(t38);
-Texture2D gtxtShadowMap		: register(t39);
+Texture2D gtxtMap          : register(t38);
+Texture2D gtxtMirror       : register(t39);
+Texture2D gtxtShadowMap	   : register(t40);
+
  
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -739,8 +741,6 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	return (cColor * cIllumination); 
 }
 
-
-
 struct VS_TEXTURED_LIGHTING_INPUT
 {
 	float3 position : POSITION;
@@ -770,10 +770,6 @@ VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
 
 	return(output);
 }
-
-
-
-
 
 float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
@@ -818,17 +814,17 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
 		
 		
-        //float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-        //float FogStart = 10000.0f;
-        //float FogRange = 20000.0f;
+        float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+        float FogStart = 10000.0f;
+        float FogRange = 20000.0f;
 	
-        //float3 toEyeW = gvCameraPosition + input.position.xyz;
-        //float distToEye = length(toEyeW);
-        //toEyeW /= distToEye; // normalize
+        float3 toEyeW = gvCameraPosition + input.position.xyz;
+        float distToEye = length(toEyeW);
+        toEyeW /= distToEye; // normalize
 	
-        //float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+        float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
 		
-        //cColor = lerp(cColor, FogColor, 1 - fogAmount);
+        cColor = lerp(cColor, FogColor, 1 - fogAmount);
     }
 	if (gnTexturesMask & 0x100)
 	{
@@ -981,8 +977,6 @@ float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 
 	return(cColor * cIllumination);
 }
-
-
 
 
 float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
