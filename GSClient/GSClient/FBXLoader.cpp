@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "FbxLoader.h"
 #include "Mesh.h"
-
 FbxAMatrix GeometricOffsetTransform(FbxNode* pfbxNode)
 {
 	const FbxVector4 T = pfbxNode->GetGeometricTranslation(FbxNode::eSourcePivot);
@@ -62,12 +61,17 @@ FbxLoader::FbxLoader()
 
 }
 
-FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName, bool hasAnim)
+FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, string fileName, bool hasAnim, int nRotate)
 {
 	mFbxManager = pfbxSdkManager;
 	hasAnimation = hasAnim;
+	rotateNum = nRotate;
 
-	LoadScene(FileName);
+	string tempPath = "resources/Fbx/" + fileName + ".fbx";
+	char* loadPath = new char[tempPath.size()];
+	strcpy(loadPath, tempPath.c_str());
+
+	LoadScene(loadPath);
 
 	if (hasAnimation) {
 		LoadSkeletonHierarchy(mFbxScene->GetRootNode());
@@ -76,7 +80,7 @@ FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName, bool hasAnim)
 
 	ExploreFbxHierarchy(mFbxScene->GetRootNode());
 	cout << "-정점,인덱스 생성 완료" << endl;
-	
+
 	if (hasAnimation) {
 		// Load Animation Stacks
 		FbxArray<FbxString*> fbxAnimationStackNames;
@@ -107,10 +111,11 @@ FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, char* FileName, bool hasAnim)
 	Optimize();
 	cout << "-최적화 작업 완료!" << endl;
 
-	SaveAsFile();
+	string outPath = "resources/FbxExported/" + fileName + ".bin";
+	SaveAsFile(outPath);
 	cout << "-파일 추출 끝!" << endl;
 
-	cout << FileName << " ||| [SKT]:" << mSkeleton.size() << " [PG]:" << triangles.size() << " [VT]:" << vertices.size() << endl;
+	cout << fileName << " ||| [SKT]:" << mSkeleton.size() << " [PG]:" << triangles.size() << " [VT]:" << vertices.size() << endl;
 }
 
 FbxLoader::~FbxLoader()
@@ -127,7 +132,7 @@ void FbxLoader::ExploreFbxHierarchy(FbxNode* pNode)
 	{
 		LoadControlPoints(pNode);
 
-		if (hasAnimation) 
+		if (hasAnimation)
 			LoadBoneOffsets(pNode);
 
 		LoadMesh(pNode);
@@ -154,6 +159,46 @@ void FbxLoader::LoadScene(char* pstrFbxFileName)
 
 	FbxGeometryConverter fbxGeomConverter(mFbxManager);
 	fbxGeomConverter.Triangulate(mFbxScene, true);
+
+	/* 좌표계
+	eMayaZUp		(UpVector = +Z, FrontVector = -Y, CoordSystem = +X (RightHanded))
+	eMayaYUp		(UpVector = +Y, FrontVector = +Z, CoordSystem = +X (RightHanded))
+	eMax			(UpVector = +Z, FrontVector = -Y, CoordSystem = +X (RightHanded))
+	eMotionBuilder	(UpVector = +Y, FrontVector = +Z, CoordSystem = +X (RightHanded))
+	eOpenGL			(UpVector = +Y, FrontVector = +Z, CoordSystem = +X (RightHanded))
+	eDirectX		(UpVector = +Y, FrontVector = +Z, CoordSystem = -X (LeftHanded))
+	eLightwave		(UpVector = +Y, FrontVector = +Z, CoordSystem = -X (LeftHanded))
+	*/
+
+	mAxisSystem = mFbxScene->GetGlobalSettings().GetAxisSystem();
+	cout << "Axis System is ";
+	if (mAxisSystem == FbxAxisSystem::eDirectX) {
+		cout << "DirectX" << endl;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eMayaZUp) {
+		cout << "MayaZUp" << endl;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eMayaYUp) {
+		cout << "MayaYUp" << endl;
+		//fbxSceneAxisSystem = FbxAxisSystem::eMax;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eMax) {
+		cout << "Max" << endl;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eOpenGL) {
+		cout << "OpenGL" << endl;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eMotionBuilder) {
+		cout << "MotionBuilder" << endl;
+	}
+	else if (mAxisSystem == FbxAxisSystem::eLightwave) {
+		cout << "Lightwave" << endl;
+	}
+	else {
+		cout << "Unknown..." << endl;
+	}
+	//mAxisSystem = FbxAxisSystem::eDirectX;
+	//fbxSceneAxisSystem.ConvertScene(mFbxScene);
 
 	FbxSystemUnit fbxSceneSystemUnit = mFbxScene->GetGlobalSettings().GetSystemUnit();
 	if (fbxSceneSystemUnit.GetScaleFactor() != 1.0) FbxSystemUnit::cm.ConvertScene(mFbxScene);
@@ -235,7 +280,13 @@ void FbxLoader::LoadBoneOffsets(FbxNode* pNode)
 			FbxAMatrix fbxTransformLinkMTX;
 			currCluster->GetTransformLinkMatrix(fbxTransformLinkMTX);
 			FbxAMatrix fbxGBindPoseInvMTX = fbxTransformLinkMTX.Inverse() * fbxTransformMTX * fbxmtxGeometryOffset;
-			
+
+			/*if (mAxisSystem == FbxAxisSystem::eMayaYUp) {
+				double tempd = fbxGBindPoseInvMTX[3][2];
+				fbxGBindPoseInvMTX[3][2] = fbxGBindPoseInvMTX[3][3];
+				fbxGBindPoseInvMTX[3][3] = tempd;
+			}*/
+
 			XMFLOAT4X4 tempXMF4X4;
 			for (int row = 0; row < 4; row++) {
 				for (int column = 0; column < 4; column++) {
@@ -278,7 +329,7 @@ void FbxLoader::LoadMesh(FbxNode* pNode)
 	for (int i = 0; i < numPG; i++) {
 		TrianglePG tempTriangle;
 		triangles.push_back(tempTriangle);
-		
+
 		// Vertices
 		for (int j = 0; j < 3; j++) {
 			int cpIndex = pfbxMesh->GetPolygonVertex(i, j);
@@ -336,6 +387,14 @@ void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
 
 		FbxAMatrix fbxmtxGeometryOffset = GeometricOffsetTransform(pfbxMesh->GetNode());
 
+		/*for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				cout << fbxmtxGeometryOffset[i][j] << " ";
+			}
+		}
+		cout << endl;
+		*/
+
 		// Deformer
 		int numDF = pfbxMesh->GetDeformerCount();
 		for (int i = 0; i < numDF; i++) {
@@ -376,6 +435,11 @@ void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
 					tempKey.translation = { static_cast<float>(tempMTX.GetT().mData[0]), static_cast<float>(tempMTX.GetT().mData[1]), static_cast<float>(tempMTX.GetT().mData[2]) };
 					tempKey.scale = { static_cast<float>(tempMTX.GetS().mData[0]), static_cast<float>(tempMTX.GetS().mData[1]), static_cast<float>(tempMTX.GetS().mData[2]) };
 					tempKey.rotationquat = { static_cast<float>(tempMTX.GetQ().mData[0]), static_cast<float>(tempMTX.GetQ().mData[1]), static_cast<float>(tempMTX.GetQ().mData[2]), static_cast<float>(tempMTX.GetQ().mData[3]) };
+
+					/*if (mAxisSystem == FbxAxisSystem::eMayaYUp) {
+						tempKey.translation = { static_cast<float>(tempMTX.GetT().mData[0]), static_cast<float>(tempMTX.GetT().mData[2]), static_cast<float>(tempMTX.GetT().mData[1]) };
+						tempKey.rotationquat = { static_cast<float>(tempMTX.GetQ().mData[0]), static_cast<float>(tempMTX.GetQ().mData[2]), static_cast<float>(tempMTX.GetQ().mData[1]), static_cast<float>(tempMTX.GetQ().mData[3]) };
+					}*/
 
 					if (k != 0 && animations[stackNum].bone[jIndex].animFrame.back() == tempKey)
 						break;
@@ -421,7 +485,7 @@ void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
 int SearchVertex(const FbxVertex& storage, const vector<FbxVertex>& find)
 {
 	for (int i = 0; i < find.size(); i++) {
-		if (storage == find[i]) 
+		if (storage == find[i])
 			return i;
 	}
 
@@ -431,6 +495,7 @@ int SearchVertex(const FbxVertex& storage, const vector<FbxVertex>& find)
 void FbxLoader::Optimize()
 {
 	vector<FbxVertex> tempVertex;
+	tempVertex.reserve(vertices.size());
 
 	for (int i = 0; i < triangles.size(); i++) {
 		for (int j = 0; j < 3; j++) {
@@ -453,10 +518,10 @@ void FbxLoader::Optimize()
 	//sort(triangles.begin(), triangles.end());
 }
 
-void FbxLoader::SaveAsFile()
+void FbxLoader::SaveAsFile(string filePath)
 {
 	ofstream file;
-	file.open("FbxTest.bin", ios::out | ios::binary);
+	file.open(filePath, ios::out | ios::binary);
 
 	file << "Vertex " << vertices.size() << endl;
 	file << "Triangle " << triangles.size() << endl;
@@ -467,12 +532,19 @@ void FbxLoader::SaveAsFile()
 	file << "[Vertex]" << endl;
 	for (int i = 0; i < vertices.size(); i++) {
 		// pos + uv + normal
-		file << vertices[i].pos.x << " " << vertices[i].pos.y << " " << vertices[i].pos.z << " " <<
-			vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
-			vertices[i].normal.x << " " << vertices[i].normal.y << " " << vertices[i].normal.z << endl;
+		if (rotateNum == 0) {
+			file << vertices[i].pos.x << " " << vertices[i].pos.y << " " << vertices[i].pos.z << " " <<
+				vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
+				vertices[i].normal.x << " " << vertices[i].normal.y << " " << vertices[i].normal.z << endl;
+		}
+		else if (rotateNum == 1) {
+			file << vertices[i].pos.x << " " << vertices[i].pos.z << " " << vertices[i].pos.y << " " <<
+				vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
+				vertices[i].normal.x << " " << vertices[i].normal.z << " " << vertices[i].normal.y << endl;
+		}
+
 		// bindex 1~4 + bweight 1~4
-		if (vertices[i].blendInfo.size() > 0)
-		{
+		if (hasAnimation == true) {
 			file << vertices[i].blendInfo[0].index << " " << vertices[i].blendInfo[1].index << " " <<
 				vertices[i].blendInfo[2].index << " " << vertices[i].blendInfo[3].index << " " <<
 				vertices[i].blendInfo[0].weight << " " << vertices[i].blendInfo[1].weight << " " <<
@@ -484,7 +556,13 @@ void FbxLoader::SaveAsFile()
 	// write tiangle polygon info
 	file << "[Triangle]" << endl;
 	for (int i = 0; i < triangles.size(); i++) {
-		file << triangles[i].indices[0] << " " << triangles[i].indices[1] << " " << triangles[i].indices[2] << endl;
+		if (rotateNum == 0) {
+			file << triangles[i].indices[0] << " " << triangles[i].indices[2] << " " << triangles[i].indices[1] << endl;
+
+		}
+		if (rotateNum == 1) {
+			file << triangles[i].indices[0] << " " << triangles[i].indices[1] << " " << triangles[i].indices[2] << endl;
+		}
 	}
 	file << endl;
 
@@ -494,9 +572,9 @@ void FbxLoader::SaveAsFile()
 			file << i << " " << mSkeleton[i].name << " " << mSkeleton[i].parentIndex << endl;
 
 			file << mSkeleton[i].offset._11 << " " << mSkeleton[i].offset._12 << " " << mSkeleton[i].offset._13 << " " << mSkeleton[i].offset._14 << " " <<
-					mSkeleton[i].offset._21 << " " << mSkeleton[i].offset._22 << " " << mSkeleton[i].offset._23 << " " << mSkeleton[i].offset._24 << " " <<
-					mSkeleton[i].offset._31 << " " << mSkeleton[i].offset._32 << " " << mSkeleton[i].offset._33 << " " << mSkeleton[i].offset._34 << " " <<
-					mSkeleton[i].offset._41 << " " << mSkeleton[i].offset._42 << " " << mSkeleton[i].offset._43 << " " << mSkeleton[i].offset._44 << endl;
+				mSkeleton[i].offset._21 << " " << mSkeleton[i].offset._22 << " " << mSkeleton[i].offset._23 << " " << mSkeleton[i].offset._24 << " " <<
+				mSkeleton[i].offset._31 << " " << mSkeleton[i].offset._32 << " " << mSkeleton[i].offset._33 << " " << mSkeleton[i].offset._34 << " " <<
+				mSkeleton[i].offset._41 << " " << mSkeleton[i].offset._42 << " " << mSkeleton[i].offset._43 << " " << mSkeleton[i].offset._44 << endl;
 		}
 		file << endl;
 
@@ -511,8 +589,8 @@ void FbxLoader::SaveAsFile()
 					Keyframe tempKey = animations[i].bone[j].animFrame[k];
 					file << tempKey.frameTime << " ";
 					file << tempKey.translation.x << " " << tempKey.translation.y << " " << tempKey.translation.z << " " <<
-							tempKey.scale.x << " " << tempKey.scale.y << " " << tempKey.scale.z << " " <<
-							tempKey.rotationquat.x << " " << tempKey.rotationquat.y << " " << tempKey.rotationquat.z << " " << tempKey.rotationquat.w << endl;
+						tempKey.scale.x << " " << tempKey.scale.y << " " << tempKey.scale.z << " " <<
+						tempKey.rotationquat.x << " " << tempKey.rotationquat.y << " " << tempKey.rotationquat.z << " " << tempKey.rotationquat.w << endl;
 				}
 			}
 		}
