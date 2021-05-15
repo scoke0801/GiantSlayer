@@ -1001,8 +1001,6 @@ void CSceneYJ::ProcessInput()
 	}
 	if (keyInput.KEY_F1)
 	{
-		MakingFog();
-		MakingRain();
 		//m_Player->SetPosition({ 2500,  0, 2500 });
 	}
 	if (keyInput.KEY_F2)
@@ -2313,6 +2311,9 @@ void CSceneYJ::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	//if (-1 != idx) {
 	//	m_Particles->UseParticle(idx, XMFLOAT3(100, 00.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 	//}
+
+	MakingFog();
+	MakingRain();
 }
 void CSceneYJ::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
