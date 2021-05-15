@@ -1008,7 +1008,7 @@ void CFixedMesh::LoadFile(string fileName)
 	file >> temp >> nBones;
 	file >> temp;
 
-	cout << "파일 로드: " << nVertices << " " << nPolygons << " " << endl;
+	cout << "[VT]:"  << nVertices << "\t[PG]:" << nPolygons << "\t[FName]:" << fileName << endl;
 
 	for (int i = 0; i < nVertices; i++) {
 		Vertex tempVertex;
@@ -1016,11 +1016,6 @@ void CFixedMesh::LoadFile(string fileName)
 		file >> tempVertex.pos.x >> tempVertex.pos.y >> tempVertex.pos.z >>
 				tempVertex.uv.x >> tempVertex.uv.y >>
 				tempVertex.normal.x >> tempVertex.normal.y >> tempVertex.normal.z;
-		
-		/*file >> tempVertex.pos.x >> tempVertex.pos.z >> tempVertex.pos.y >>
-			tempVertex.uv.x >> tempVertex.uv.y >>
-			tempVertex.normal.x >> tempVertex.normal.z >> tempVertex.normal.y;*/
-		
 
 		vertices.push_back(tempVertex);
 	}

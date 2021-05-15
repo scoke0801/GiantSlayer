@@ -182,10 +182,11 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildMirror(pd3dDevice, pd3dCommandList);
 
 	string fileName = "Golem";
-	FbxLoader(m_pfbxManager, fileName, false, 0);
+	//FbxLoader(m_pfbxManager, fileName, false, 0);
 	CFixedMesh* testMesh = new CFixedMesh(pd3dDevice, pd3dCommandList, fileName);
-	CMeshFbx* golemMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
-
+	CFixedMesh* desertrock = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
+	CFixedMesh* deadtree = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree");
+	CFixedMesh* stump = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
 	m_Player = new CPlayer(pd3dDevice, pd3dCommandList);
 
 	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
@@ -198,7 +199,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_Player->SetCamera(m_Cameras[0]);
 	m_Player->SetTextureIndex(0x200);
-	m_Player->SetMesh(golemMesh);
+	m_Player->SetMesh(testMesh);
 	m_Player->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10, 10, 5, XMFLOAT3{ 0,0,0 });
 	m_Player->SetDrawable(true);
 	m_Player->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5, 5, 2.5f)));
@@ -211,6 +212,30 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	testObject0->Scale(40, 40, 40);
 	testObject0->SetTextureIndex(0x200);
 	m_Objects.push_back(std::move(testObject0));
+
+	CGameObject* testObject1 = new CGameObject();
+	testObject1->SetMesh(desertrock);
+	testObject1->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	testObject1->SetPosition({ 900,  150, 900 });
+	testObject1->Scale(0.5, 0.5, 0.5);
+	testObject1->SetTextureIndex(0x200);
+	m_Objects.push_back(std::move(testObject1));
+
+	CGameObject* testObject2 = new CGameObject();
+	testObject2->SetMesh(deadtree);
+	testObject2->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	testObject2->SetPosition({ 700,  650, 1200 });
+	testObject2->Scale(60, 60, 60);
+	testObject2->SetTextureIndex(0x200);
+	m_Objects.push_back(std::move(testObject2));
+
+	CGameObject* testObject3 = new CGameObject();
+	testObject3->SetMesh(stump);
+	testObject3->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	testObject3->SetPosition({ 500,  150, 1500 });
+	testObject3->Scale(10, 10, 10);
+	testObject3->SetTextureIndex(0x200);
+	m_Objects.push_back(std::move(testObject3));
 
 	/*CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, 
 		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/idle.bin");
@@ -1099,12 +1124,12 @@ void CSceneTH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
+	CFixedMesh* babymos = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
 	CGameObject* pObject = new CGameObject();
-	pObject->SetMesh(fbxMesh);
+	pObject->SetMesh(babymos);
 	pObject->SetPosition({ 16800,  -6070, 16500 });
 	pObject->SetTextureIndex(0x01);
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->SetTextureIndex(0x80);
 	pObject->Scale(35, 35, 35);
 	m_Objects.push_back(std::move(pObject));

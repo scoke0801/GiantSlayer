@@ -245,12 +245,6 @@ void FbxLoader::LoadControlPoints(FbxNode* pNode)
 		tempCP.pos.x = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[0]);
 		tempCP.pos.y = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[1]);
 		tempCP.pos.z = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[2]);
-
-		/*if (mAxisSystem == FbxAxisSystem::eMayaYUp) {
-			tempCP.pos.x = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[0]);
-			tempCP.pos.y = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[2]);
-			tempCP.pos.z = static_cast<float>(pfbxMesh->GetControlPointAt(i).mData[1]);
-		}*/
 		cpoints[i] = tempCP;
 	}
 }
