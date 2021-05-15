@@ -237,12 +237,12 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	testObject3->SetTextureIndex(0x200);
 	m_Objects.push_back(std::move(testObject3));
 
-	/*CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, 
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/idle.bin");
+	CFbxObject* pfbxTestObject = new CFbxObject(pd3dDevice, pd3dCommandList, 
+		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/FbxSoldier.bin");
 	pfbxTestObject->SetPosition({ 100,  150, 100 });
-	pfbxTestObject->Scale(1, 1, 1);
+	pfbxTestObject->Scale(5, 5, 5);
 	pfbxTestObject->SetTextureIndex(0x200);
-	m_Objects.push_back(std::move(pfbxTestObject));*/
+	m_Objects.push_back(std::move(pfbxTestObject));
 }
 
 void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
