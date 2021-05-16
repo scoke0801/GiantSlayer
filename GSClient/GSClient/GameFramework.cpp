@@ -490,9 +490,11 @@ bool CFramework::ConnectToServer()
 	SOCKADDR_IN serveraddr;
 	ZeroMemory(&serveraddr, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
-	serveraddr.sin_port = htons(SERVERPORT);
-	 
+//	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
+	serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVERIP);
+	//serveraddr.sin_port = htons(SERVERPORT);
+	serveraddr.sin_port = ntohs(SERVERPORT);
+
 	// socket()
 	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_Sock == INVALID_SOCKET)
@@ -500,11 +502,15 @@ bool CFramework::ConnectToServer()
 		m_IsServerConnected = false;
 		return false;
 	}
+
 	int opt_val = TRUE;
 	setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
+
 	retval = connect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+	 
 	if (retval == SOCKET_ERROR)
 	{
+		error_display("connect()");
 		m_IsServerConnected = false; 
 		cout << "서버 연결 실패\n";
 		return false;
