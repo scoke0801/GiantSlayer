@@ -1147,13 +1147,13 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 	if (false == m_IsFocusOn) {
 		return;
 	}
-	if (CFramework::GetInstance().IsOnConntected())
-	{
-		if (m_MousePositions.size() > 0) {
-			SendMouseInputPacket();
-			RecvMouseProcessPacket();
-		}
-	}
+	//if (CFramework::GetInstance().IsOnConntected())
+	//{
+	//	if (m_MousePositions.size() > 0) {
+	//		SendMouseInputPacket();
+	//		RecvMouseProcessPacket();
+	//	}
+	//}
 	ReleaseCapture();
 }
 
