@@ -732,15 +732,15 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 				pObject->Draw_Shadow(pd3dCommandList, m_CurrentCamera);
 			}
 		}
-	}
-	for (auto player : m_Players) {
-		if (!player->IsDrawable()) continue;
-		player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
-	}
 
-	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
-		D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
-	  
+		for (auto player : m_Players) {
+			if (!player->IsDrawable()) continue;
+			player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
+		}
+
+		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
+			D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
+	}
 	/*if (m_CurrentCamera)
 	{
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
