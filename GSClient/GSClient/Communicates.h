@@ -5,13 +5,7 @@
 #include "../../GSServer/GSServer/protocol.h"
 
 #pragma comment(lib, "ws2_32")
-#include <WinSock2.h> 
- 
-//#define SERVERIP   "127.0.0.1"		 // 루프백
-//#define SERVERIP   "192.168.35.118" + 
-//#define SERVERIP   "172.30.1.39"
-//#define SERVERIP "192.168.122.251"
-//#define SERVERIP "10.20.11.36"
+#include <WinSock2.h>  
   
 void textConvert(const char* msg, wchar_t* ret);
 
