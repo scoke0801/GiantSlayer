@@ -894,6 +894,7 @@ void CSceneJH::ProcessInput()
 	if (false == m_IsFocusOn) {
 		return;
 	}
+
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 		auto keyInput = GAME_INPUT; 
@@ -929,6 +930,22 @@ void CSceneJH::ProcessInput()
 		{
 			m_isPlayerSelected = false;
 			m_CurrentCamera = m_Cameras[2];
+		}
+		if (keyInput.KEY_O)
+		{
+			gbBoundaryOn = true;
+		}
+		if (keyInput.KEY_P)
+		{
+			gbBoundaryOn = false;
+		} 
+		if (keyInput.KEY_K)
+		{
+			gbWireframeOn = true;
+		}
+		if (keyInput.KEY_L)
+		{
+			gbWireframeOn = false;
 		}
 		if (processKey == false) return;
 		int retVal = 0;

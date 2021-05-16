@@ -260,6 +260,7 @@ void PacketProcessor::InitAll()
 	InitCameras();
 	InitMonsters();
 	InitObstacle();
+	BuildBlockingRegionOnMap();
 }
 
 void PacketProcessor::Update(float elapsedTime)
@@ -285,7 +286,7 @@ void PacketProcessor::Update(float elapsedTime)
 
 			if (pObject->CollisionCheck(m_Players[i])) {
 				m_Players[i]->FixCollision(pObject);
-				cout << "충돌발생 - [오브젝트, 플레이어 " << i << "]\n";
+				//cout << "충돌발생 - [오브젝트, 플레이어 " << i << "]\n";
 			}
 		}
 	}
@@ -631,75 +632,88 @@ void PacketProcessor::BuildBlockingRegionOnMap()
 	m_Objects.push_back(std::move(pObject));
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f)));
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f)));
 	pObject->SetPosition({ 19950,-2000,10000 });
 	m_Objects.push_back(std::move(pObject));
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 10000,-2000,00 });
 	m_Objects.push_back(std::move(pObject));
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 10000,-2000,19950 });
 	m_Objects.push_back(std::move(pObject));
 
 	// Forest to DryDesrt 아래 방향 벽  
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(9600 * 0.5f, 800 * 0.5f, 100 * 0.5f)));
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(9600 * 0.5f, 800 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 4800,-1000, 15900 });
 	m_BlockingPlateToPreviousSector[0] = (std::move(pObject));
 
 	// Forest to Desert 왼쪽 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 15200 * 0.5f)));
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 15200 * 0.5f)));
 	pObject->SetPosition({ 10000,-2000, 7600 });
 	m_Objects.push_back(std::move(pObject));
 
 	// Forest 지역 내 못가는 지형 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2000 * 0.5f, 10000 * 0.5f, 7000 * 0.5f)));
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(2000 * 0.5f, 10000 * 0.5f, 7000 * 0.5f)));
 	pObject->SetPosition({ 4000 + 1000, -2000, 11100 });
 	pObject->UpdateColliders();
 	m_Objects.push_back(std::move(pObject));
 
 	// Desrt to DryDesrt and Rock 왼쪽 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 12800 * 0.5f)));
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 12800 * 0.5f)));
 	pObject->SetPosition({ 13800, -2000, 7200 + 6400 });
 	m_Objects.push_back(std::move(pObject));
 
 	// boss 지역 중간 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
 	pObject->SetPosition({ 15200 + 400,-2000, 2800 + 8000 });
 	m_Objects.push_back(std::move(pObject));
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
 	pObject->SetPosition({ 17600 + 400,-2000, 2800 + 8000 });
 	m_Objects.push_back(std::move(pObject));
 
 	// 사막 지역 가로 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0),
+		XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 2000 + 9600,-2000, 15600 });
 	m_BlockingPlateToPreviousSector[1] = (std::move(pObject));
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 2000 + 9600,-3000, 3600 });
 	m_BlockingPlateToPreviousSector[2] = (std::move(pObject));
 
 	// 보스 지역 입구 가로 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 1200 + 13600,-2000, 8000 });
 	m_Objects.push_back(std::move(pObject));
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
+		XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 1200 + 13600 + 1600 + 2400,-2000, 8000 });
 	m_Objects.push_back(std::move(pObject));
 }

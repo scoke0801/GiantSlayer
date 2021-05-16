@@ -116,7 +116,9 @@ bool CGameObject::CollisionCheck(CGameObject* other)
 	auto otherAABB = other->GetAABB();
 	for (int i = 0; i < otherAABB.size(); ++i) {
 		bool result = CollisionCheck(otherAABB[i]);
-		if (result) return true;
+		if (result) {
+			return true;
+		}
 	}
 
 	return false;
