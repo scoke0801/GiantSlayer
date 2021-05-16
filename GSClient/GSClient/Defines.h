@@ -3,15 +3,16 @@
 #define _CRT_SECURE_NO_WARNINGS         // 최신 VC++ 컴파일 시 경고 방지
 #define _WINSOCK_DEPRECATED_NO_WARNINGS // 최신 VC++ 컴파일 시 경고 방지
 #pragma warning(disable  : 4996)    // mbstowcs unsafe###
+#define SERVER_ROOP   "127.0.0.1"		 // 루프백
 //#define SERVERIP   "127.0.0.1"		 // 루프백 
-#define SERVERIP   "211.207.24.227"// 종현 
+//#define SERVERIP   "211.207.24.227"// 종현 
 //#define SERVERIP	 "192.168.35.229"// 태훈?
 //#define SERVERIP   "192.168.0.15"  // 영진 
 //#define SERVERIP   "172.30.1.39"	 // 루프백  
 
 //#define SERVERIP   "119.207.200.191"	 // 루프백 
 //#define SERVERIP   "192.168.0.3"	 // 루프백 
-
+#define SERVERIP   "192.168.35.158"// 종현 
 #define MAX_FILE_NAME_LAN 256
 
 #define UV_TEX 100.0F
