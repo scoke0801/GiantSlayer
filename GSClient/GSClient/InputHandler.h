@@ -56,6 +56,7 @@ struct GameInputs
 
 	bool KEY_B = false;
 	bool KEY_C = false; 
+	bool KEY_R = false;
 
 	bool KEY_U = false;
 	bool KEY_I = false;

@@ -960,6 +960,7 @@ void CSceneYJ::ProcessInput()
 	{
 		m_CurrentCamera->SetShake(true, 0.5f, 5.0f);
 	}
+	
 	if (keyInput.KEY_1)
 	{
 		m_Player->SetWeapon(PlayerWeaponType::Sword);
@@ -1033,6 +1034,18 @@ void CSceneYJ::ProcessInput()
 			p->CloserDoor();
 		}
 	}
+	if (keyInput.KEY_R)
+	{
+		// 상호작용
+		for (int i = 0; i < 2; ++i)
+		{
+			for (int i = 0; i < 5; ++i) {
+				CBox* p = reinterpret_cast<CBox*>(m_ObjectLayers[(int)OBJECT_LAYER::Puzzle][m_PuzzleBoxIdx + i]);
+				p->PlayerSelecting();
+			}
+		}
+	}
+
 	if (keyInput.KEY_O)
 	{
 		gbBoundaryOn = true;
@@ -1442,6 +1455,8 @@ void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pObject->SetPosition({ 10500.0f, -2000.0f, 1500.0f + 8000.0f });
 	//m_Objects.push_back(std::move(pObject));
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
+
+	
 	for (int i = 0; i < 2; ++i)
 	{
 		for (int j = 0; j < 5; ++j)
@@ -1455,6 +1470,7 @@ void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 			m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
 		}
 	}
+	m_PuzzleBoxIdx = m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].size();
 }
 
 void CSceneYJ::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
