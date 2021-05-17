@@ -830,8 +830,11 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	if (gnTexturesMask & 0x100)
 	{
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
-    }
-	
+    } 
+	if (gnTexturesMask & 0x200)
+	{
+		cColor = gtxtBox.Sample(gssClamp, uvw);
+	}
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
     shadowFactor = CalcShadowFactor(input.shadowPosH);
 	
