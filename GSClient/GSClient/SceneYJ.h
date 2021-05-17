@@ -54,6 +54,7 @@ private:
 	CLightCamera* m_pLightCamera = nullptr;
 
 	short						m_DoorIdx = 0;
+	short						m_PuzzleBoxIdx = 0;
 private:
 	POINT						m_LastMousePos;
 
@@ -187,7 +188,7 @@ private:
 	void ShotArrow();
 	void MakingFog();
 	void MakingRain();
-	void MakingSand();
+	void MakingSandWind();
 
 private:
 	void SendMouseInputPacket();

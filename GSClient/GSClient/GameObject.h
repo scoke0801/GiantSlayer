@@ -244,6 +244,10 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
 	virtual void Animate(float fTimeElapsed) {}
+
+	void PlayerSelecting();
+
+	
 };
 
 //////////////////////////////////////////////////////////////////////////////
