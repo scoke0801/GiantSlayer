@@ -2,13 +2,15 @@
 #include "Enemy.h"
 #include "Player.h"
 #include "Terrain.h"
+#include "State.h"
+
 CEnemy::CEnemy()
 {
 	m_Type = OBJ_TYPE::Enemy;
-	m_Sight = 20.f;
-	m_Statemachine = new CStateMachine<CEnemy>(this);
-	m_Statemachine->SetCurrentState(Wandering::Instance());
-	m_HeightFromTerrain = 150.0f;
+
+	m_HeightFromTerrain = 150.0f; 
+	m_StateType == ObjectState::Idle;
+	m_State = new PatrolState(this); 
 }
   
 CEnemy::~CEnemy()
@@ -18,34 +20,53 @@ CEnemy::~CEnemy()
 
 void CEnemy::Update(float elapsedTime)
 {
-	//m_Statemachine->Update(elapsedTime);
-	if (false == m_IsOnMoving) {
-		FindNextPosition(); 
-		m_IsOnMoving = true;
-	}
-	else if(m_IsOnMoving){
-		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, 165.0f * elapsedTime)));
-		m_ToMovePosition.y = m_xmf3Position.y;
-		XMFLOAT3 gap = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
-		if (Vector3::Length(gap) < 30) {
-			SetPosition(m_ToMovePosition);
-			m_IsOnMoving = false;
-		}
+	m_State->Execute(this, elapsedTime);
+
+	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4World));
+
+	if (m_AttackDelayTime > 0.0f) {
+		m_AttackDelayTime -= elapsedTime;
 	}
 }
 
 bool CEnemy::IsEnemyInSight() // Chase State
 { 
+	if (m_AttackDelayTime > 0.0f) {
+		cout << "공격 딜레이 중!\n";
+		return false;
+	}
+	for (auto player : m_ConnectedPlayers) { 
+		if (false == player->IsDrawable()) {
+			continue;
+		}
+		// 플레이어가 객체의 활동영역 안에 있는지 확인
+		auto plAABBs = player->GetAABB();
+		bool ret = false;
+		for (auto plAABB : plAABBs) {
+			if (ret = m_ActivityRegionBox.Intersects(plAABB->GetBox())) {
+				break;
+			}
+		}
+		
+		// 추가할 코드
+		// 만약 플레이어와 몬스터의 방향이 반대라면 쳐다볼수 없어야 한다...
+
+		if (false == ret) { 
+			return false;
+		}
+
+		// 플레이어가 객체의 시야에 있는지 확인
+		for (auto plAABB : plAABBs) {
+			if (ret = m_SightAABB.Intersects(plAABB->GetBox())) {
+				// 해당 플레이어를 공격하도록 설정하자
+				cout << "공격할 대상을 찾았습니다.\n";
+				 
+				m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.5f;
+				return true;
+			}
+		}
+	}
 	return false;
-}
-
-void CEnemy::MoveRandom() // Moving State
-{ 
-}
-
-void CEnemy::TrackingTarget()
-{
-	
 }
 
 void CEnemy::SetActivityScope(const XMFLOAT3& xmf3ActivityScope, const XMFLOAT3& xmf3Center)
@@ -53,6 +74,19 @@ void CEnemy::SetActivityScope(const XMFLOAT3& xmf3ActivityScope, const XMFLOAT3&
 	m_xmf3ActivityScope = xmf3ActivityScope;
 
 	m_xmf3ActivityScopeCenter = xmf3Center;
+
+	m_ActivityRegionBox = BoundingBox(xmf3Center, {
+		xmf3ActivityScope.x * 0.5f,
+		xmf3ActivityScope.y * 0.5f,
+		xmf3ActivityScope.z * 0.5f
+	});
+}
+ 
+void CEnemy::SetSightBoundingBox(const XMFLOAT3& sight)
+{
+	m_SightBox = BoundingBox({ 0,0,0 }, { sight.x, sight.y, sight.z });
+
+	m_SightAABB = BoundingBox({ 0,0,0 }, { sight.x, sight.y, sight.z });
 }
 
 void CEnemy::ConnectPlayer(CPlayer** pPlayers, int playerCount)
@@ -60,6 +94,13 @@ void CEnemy::ConnectPlayer(CPlayer** pPlayers, int playerCount)
 	for (int i = 0; i < playerCount; ++i) {
 		m_ConnectedPlayers.push_back( pPlayers[i] );
 	}
+}
+
+void CEnemy::ChangeState(CState<CEnemy>* nextState)
+{
+	m_State->Exit(this);
+	delete m_State;
+	m_State = nextState;
 }
  
 void CEnemy::FindNextPosition()
@@ -86,6 +127,17 @@ void CEnemy::FindNextPosition()
 
 	//cout << "회전 각: " << angle << "\n";
 	Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees( angle) ));
+}
+
+void CEnemy::PatrolToNextPosition(float elapsedTime)
+{
+	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, 165.0f * elapsedTime)));
+	m_ToMovePosition.y = m_xmf3Position.y;
+	XMFLOAT3 gap = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
+	if (Vector3::Length(gap) < 30) {
+		SetPosition(m_ToMovePosition);
+		SetIsOnMoving(false);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

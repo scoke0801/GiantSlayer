@@ -52,7 +52,17 @@ struct GAMEOBJECT_INFO
 	MATERIAL						m_Material;
 	UINT							m_nTextureIndex;
 };
- 
+
+enum class ObjectState {
+	Wait,		// 상태와 상태 사이의 대기상태
+	Idle,		// 평소 상태
+	Patrol,		// 탐색 상태
+	Attack,		// 공격
+	Attacked,	// 피격
+	Die,		// 사망
+	RunAway		// 도망
+};
+
 class CGameObject
 {
 private:
@@ -98,6 +108,8 @@ protected:	// 객체 관련 속성 변수
 	OBJ_NAME			m_Name;
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
 	bool				m_isCollidable = true;
+
+	ObjectState			m_StateType = ObjectState::Idle;
 
 public:
 	FbxScene*			m_pfbxScene = NULL;

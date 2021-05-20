@@ -15,37 +15,62 @@ class CPlayer;
 class CEnemy : public CGameObject
 {
 protected:
-	CStateMachine<CEnemy>* m_Statemachine;
-	float m_Sight;
+	CState<CEnemy>*			m_State;
 
-	XMFLOAT3 m_xmf3ActivityScopeCenter;
-	XMFLOAT3 m_xmf3ActivityScope;
+	vector<CPlayer*>		m_ConnectedPlayers;
+	 						
+	USHORT					m_TargetPlayerIdx = -1; 
+	bool					m_IsOnMoving = false;
 
-	vector<CPlayer*>	m_ConnectedPlayers;
-	 					
-	USHORT				m_TargetPlayerIdx = -1; 
-	bool				m_IsOnMoving = false;
+	XMFLOAT3				m_ToMovePosition;
 
-	XMFLOAT3			m_ToMovePosition;
+	// 활동 범위
+	XMFLOAT3				m_xmf3ActivityScopeCenter;
+	XMFLOAT3				m_xmf3ActivityScope; 
+	
+	// 활동 범위 충돌체
+	BoundingBox				m_ActivityRegionBox;
+
+	// 시야 범위 충돌체
+	BoundingBox				m_SightBox;
+	BoundingBox				m_SightAABB;
+
+	float					m_AttackDelayTime = 0.0f;
+
 public:
 	CEnemy(); 
 	~CEnemy();
-	 
-	CStateMachine<CEnemy>* GetFSM()const { return m_Statemachine; }
-
+	  
 	virtual void Update(float elapsedTime) override;
 
-	bool IsEnemyInSight();
-	void MoveRandom();
-	void TrackingTarget();
-	
 	// 활동범위 설정
 	void SetActivityScope(const XMFLOAT3& xmf3ActivityScope, const XMFLOAT3& xmf3Center);
 	XMFLOAT3 GetActivityScope() const { return m_xmf3ActivityScope; } 
 
+	// 시야 범위 설정
+	void SetSightBoundingBox(const XMFLOAT3& sight);
+
+	// 공격 대상 탐색 
+	bool IsEnemyInSight();
+
 	void ConnectPlayer(CPlayer** pPlayers, int playerCount); 
-private:
+
+	void ChangeState(CState<CEnemy>* nextState);
+
 	void FindNextPosition();
+
+	void PatrolToNextPosition(float elapsedTime);
+
+	void FixCollision();
+
+public:
+	bool IsOnMoving() const { return m_IsOnMoving; }
+	void SetIsOnMoving(bool info) { m_IsOnMoving = info; }
+	 
+	void SetAttackDelayTime(float delayTime) { m_AttackDelayTime = delayTime; }
+
+private:
+
 };
 
 class CEnemyCloseATK : public CGameObject

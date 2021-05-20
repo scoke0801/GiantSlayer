@@ -4,81 +4,107 @@
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-
-Wandering* Wandering::Instance()
+  
+void WaitState::Enter(CEnemy* pEnemy)
 {
-    static Wandering instance;
-
-    return &instance;
+    cout << "WaitState::Enter" << endl;
 }
 
-void Wandering::Enter(CEnemy* pEnemy)
+void WaitState::Execute(CEnemy* pEnemy, float elapsedTime)
 {
-    cout << "방황중..." << endl;
-}
-
-void Wandering::Execute(CEnemy* pEnemy)
-{
-    if (pEnemy->IsEnemyInSight())
+ /*   if (pEnemy->IsEnemyInSight())
         pEnemy->GetFSM()->ChangeState(Tracking::Instance());
     else
-        pEnemy->MoveRandom();
+        pEnemy->MoveRandom();*/
 }
 
-void Wandering::Exit(CEnemy* pEnemy)
+void WaitState::Exit(CEnemy* pEnemy)
 {
-    cout << "플레이어 발견!" << endl;
+    cout << "WaitState::Exit" << endl;
 }
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-
-Tracking* Tracking::Instance()
+  
+void IdleState::Enter(CEnemy* pEnemy)
 {
-    static Tracking instance;
-
-    return &instance;
+    cout << " IdleState::Enter" << endl;
 }
 
-void Tracking::Enter(CEnemy* pEnemy)
+void IdleState::Execute(CEnemy* pEnemy, float elapsedTime)
 {
-    cout << "플레이어 추적 시작" << endl;
-}
-
-void Tracking::Execute(CEnemy* pEnemy)
-{
-    if (!pEnemy->IsEnemyInSight())
+    /*if (!pEnemy->IsEnemyInSight())
         pEnemy->GetFSM()->ChangeState(Wandering::Instance());
     else
-        pEnemy->TrackingTarget();
+        pEnemy->TrackingTarget();*/
 }
 
-void Tracking::Exit(CEnemy* pEnemy)
+void IdleState::Exit(CEnemy* pEnemy)
 {
-    cout << "플레이어 추적 종료" << endl;
+    cout << "IdleState::Exit" << endl;
 }
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-
-RunAway* RunAway::Instance()
-{
-    static RunAway instance;
-
-    return &instance;
-}
-
-void RunAway::Enter(CEnemy* pEnemy)
+ 
+void RunAwayState::Enter(CEnemy* pEnemy)
 {
 
 }
 
-void RunAway::Execute(CEnemy* pEnemy)
+void RunAwayState::Execute(CEnemy* pEnemy, float elapsedTime)
 {
     
 }
 
-void RunAway::Exit(CEnemy* pEnemy)
+void RunAwayState::Exit(CEnemy* pEnemy)
 {
 
+}
+
+void PatrolState::Enter(CEnemy* enemy)
+{
+}
+
+void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
+{ 
+	if (false == enemy->IsOnMoving()) {
+		enemy->FindNextPosition();
+		enemy->SetIsOnMoving(true);
+	}
+	else {
+        enemy->PatrolToNextPosition(elapsedTime);
+	}
+    if (enemy->IsEnemyInSight()) {
+        enemy->ChangeState(new AttackState(enemy));
+    }
+}
+
+void PatrolState::Exit(CEnemy* enemy)
+{
+}
+
+void AttackState::Enter(CEnemy* enemy)
+{
+    m_LifeTime = MELLE_ENEMY_ATTACK_TIME;
+    enemy->SetAttackDelayTime(MELLE_ENEMY_ATTACK_TIME + 1.0f);
+}
+
+void AttackState::Execute(CEnemy* enemy, float elapsedTime)
+{
+    m_ElapsedTime += elapsedTime; 
+    if (m_LifeTime < m_ElapsedTime) {
+        cout << "공격 끝 \n";
+        enemy->ChangeState(new PatrolState(enemy));
+    }
+    else {
+
+        float rotateAnglePerFrame = 360.0f / 2.0f;
+
+        enemy->Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
+    }
+}
+
+void AttackState::Exit(CEnemy* enemy)
+{
 }
