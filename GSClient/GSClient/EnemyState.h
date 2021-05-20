@@ -2,6 +2,7 @@
 #include "State.h"
 
 class CEnemy;
+class CPlayer;
 
 constexpr float MELLE_ENEMY_ATTACK_TIME = 2.0f;
 constexpr float RANGED_ENEMY_ATTACK_TIME = 2.0f;
@@ -64,6 +65,24 @@ public:
     AttackState(CEnemy* enemy) { Enter(enemy); }
 
 public:  
+    virtual void Enter(CEnemy* enemy);
+
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
+
+    virtual void Exit(CEnemy* enemy);
+};
+
+ 
+class TraceState : public CState<CEnemy>
+{
+private:
+    float m_AttackRange;
+    CPlayer* m_TargetPlayer;
+
+public:
+    TraceState(CEnemy* enemy) { Enter(enemy); }
+
+public:
     virtual void Enter(CEnemy* enemy);
 
     virtual void Execute(CEnemy* enemy, float elapsedTime);

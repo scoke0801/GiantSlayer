@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "EnemyState.h"
 #include "Enemy.h"
+#include "Player.h"
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -73,19 +74,23 @@ void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
 		enemy->SetIsOnMoving(true);
 	}
 	else {
-        enemy->PatrolToNextPosition(elapsedTime);
+        enemy->MoveToNextPosition(elapsedTime);
 	}
     if (enemy->IsEnemyInSight()) {
-        enemy->ChangeState(new AttackState(enemy));
+        {
+            enemy->ChangeState(new TraceState(enemy));
+        } 
     }
 }
 
 void PatrolState::Exit(CEnemy* enemy)
 {
+    cout << " PatrolState::Exit\n";
 }
 
 void AttackState::Enter(CEnemy* enemy)
 {
+    cout << "AttackState::Enter \n";
     m_LifeTime = MELLE_ENEMY_ATTACK_TIME;
     enemy->SetAttackDelayTime(MELLE_ENEMY_ATTACK_TIME + 1.0f);
 }
@@ -94,17 +99,52 @@ void AttackState::Execute(CEnemy* enemy, float elapsedTime)
 {
     m_ElapsedTime += elapsedTime; 
     if (m_LifeTime < m_ElapsedTime) {
-        cout << "공격 끝 \n";
+        
         enemy->ChangeState(new PatrolState(enemy));
     }
-    else {
-
-        float rotateAnglePerFrame = 360.0f / 2.0f;
-
-        enemy->Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
+    else {  
+        enemy->Attack(elapsedTime);
     }
 }
 
 void AttackState::Exit(CEnemy* enemy)
 {
+    cout << "공격 끝 \n";
+}
+
+void TraceState::Enter(CEnemy* enemy)
+{
+    m_LifeTime = 0.5f;
+    cout << "TraceState::Enter \n";
+    m_AttackRange = enemy->GetAttackRange();
+    m_TargetPlayer = enemy->GetTargetPlayer();
+    if (m_TargetPlayer == nullptr) {
+        enemy->ChangeState(new PatrolState(enemy));
+    }
+}
+
+void TraceState::Execute(CEnemy* enemy, float elapsedTime)
+{
+    m_ElapsedTime += elapsedTime;
+    if (m_ElapsedTime > m_LifeTime) {
+        enemy->FindClosePositionToTarget(); 
+        m_ElapsedTime = 0.0f;
+    }
+
+    XMFLOAT3 targetPos = m_TargetPlayer->GetPosition();
+    XMFLOAT3 enemyPos = enemy->GetPosition();
+
+    enemyPos.y = targetPos.y;
+    if (Vector3::Length(Vector3::Subtract(targetPos, enemyPos)) < m_AttackRange) {
+        enemy->LookTarget(enemy->GetEnemyAttackType() == EnemyAttackType::Melee);
+        enemy->ChangeState(new AttackState(enemy));
+    }
+    else {
+        enemy->MoveToNextPosition(elapsedTime);
+    }
+}
+
+void TraceState::Exit(CEnemy* enemy)
+{
+    cout << "TraceState::Exit\n";
 }

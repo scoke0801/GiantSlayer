@@ -9,7 +9,6 @@ CEnemy::CEnemy()
 	m_Type = OBJ_TYPE::Enemy;
 
 	m_HeightFromTerrain = 150.0f; 
-	m_StateType == ObjectState::Idle;
 	m_State = new PatrolState(this); 
 }
   
@@ -61,11 +60,13 @@ bool CEnemy::IsEnemyInSight() // Chase State
 				// 해당 플레이어를 공격하도록 설정하자
 				cout << "공격할 대상을 찾았습니다.\n";
 				 
-				m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.5f;
+				m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.5f; 
+				m_TargetPlayer = player;
 				return true;
 			}
 		}
 	}
+	m_TargetPlayer = nullptr;
 	return false;
 }
 
@@ -104,8 +105,7 @@ void CEnemy::ChangeState(CState<CEnemy>* nextState)
 }
  
 void CEnemy::FindNextPosition()
-{
-	m_xmf3ActivityScope;
+{ 
 	m_ToMovePosition.x = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.x* 2 )) + m_xmf3ActivityScopeCenter.x - m_xmf3ActivityScope.x;
 	m_ToMovePosition.y = m_xmf3Position.y;
 	m_ToMovePosition.z = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.z * 2)) + m_xmf3ActivityScopeCenter.z - m_xmf3ActivityScope.z;
@@ -129,7 +129,38 @@ void CEnemy::FindNextPosition()
 	Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees( angle) ));
 }
 
-void CEnemy::PatrolToNextPosition(float elapsedTime)
+void CEnemy::FindClosePositionToTarget()
+{
+	XMFLOAT3 playerPos = m_TargetPlayer->GetPosition();
+	playerPos.y = m_xmf3Position.y;
+
+	XMFLOAT3 targetVec = Vector3::Subtract(m_xmf3Position, playerPos);
+	targetVec = Vector3::Normalize(targetVec);
+	 
+	m_ToMovePosition = Vector3::Subtract(m_TargetPlayer->GetPosition(),
+		Vector3::Multifly(targetVec, m_AttackRange * 1.5f));
+
+	m_ToMovePosition.y = m_xmf3Position.y;
+	 
+	//cout << "목표위치 설정 ";
+	//DisplayVector3(m_ToMovePosition);
+	m_xmf3Velocity = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
+	m_xmf3Velocity = Vector3::Normalize(m_xmf3Velocity);
+
+	XMFLOAT3 cross = Vector3::CrossProduct(targetVec, m_xmf3Velocity);
+	float dot = Vector3::DotProduct(targetVec, m_xmf3Velocity);
+
+	float angle = atan2(Vector3::Length(cross), dot);
+
+	float test = Vector3::DotProduct({ 0,1,0 }, cross);
+	if (test < 0.0) angle = -angle;
+
+	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 });
+	//cout << "회전 각: " << angle << "\n";
+	//Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees(angle)));
+}
+
+void CEnemy::MoveToNextPosition(float elapsedTime)
 {
 	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, 165.0f * elapsedTime)));
 	m_ToMovePosition.y = m_xmf3Position.y;
@@ -140,48 +171,139 @@ void CEnemy::PatrolToNextPosition(float elapsedTime)
 	}
 }
 
+void CEnemy::LookTarget(bool rotatedModel)
+{
+	XMFLOAT3 playerPos = m_TargetPlayer->GetPosition();
+	playerPos.y = m_xmf3Position.y;
+
+	XMFLOAT3 targetVec = Vector3::Subtract(m_xmf3Position, playerPos);
+	targetVec = Vector3::Normalize(targetVec);
+
+	m_ToMovePosition = Vector3::Subtract(m_TargetPlayer->GetPosition(),
+		Vector3::Multifly(targetVec, m_AttackRange * 1.5f));
+
+	m_ToMovePosition.y = m_xmf3Position.y;
+
+	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 });
+	if (rotatedModel) {
+		Rotate({ 0,1,0 }, 180.0f);
+	}
+} 
+
+void CEnemy::FixCollision(CGameObject* pCollideObject)
+{
+}
+
+void CEnemy::Attack(float elapsedTime)
+{
+}
+
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-CEnemyRangeATK::CEnemyRangeATK()
+CRangedEnemy::CRangedEnemy()
 {
 	m_Type = OBJ_TYPE::Enemy;
-}
+	m_AttackType = EnemyAttackType::Ranged;
 
-CEnemyRangeATK::CEnemyRangeATK(CGameObject* ptarget)
+	m_AttackRange = 1200.0f;
+	m_HeightFromTerrain = 150.0f; 
+	m_State = new PatrolState(this);
+}
+ 
+CRangedEnemy::~CRangedEnemy()
 {
-	m_Type = OBJ_TYPE::Enemy;
+
 }
 
-CEnemyRangeATK::~CEnemyRangeATK()
+void CRangedEnemy::Attack(float elapsedTime)
 {
+	float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
 
+	Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
 }
-
-void CEnemyRangeATK::Update(double elapsedTime)
-{
-	m_Statemachine->Update(elapsedTime);
-}
-
+  
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-CEnemyCloseATK::CEnemyCloseATK()
+CMeleeEnemy::CMeleeEnemy()
 {
 	m_Type = OBJ_TYPE::Enemy;
+	m_AttackType = EnemyAttackType::Melee;
+	m_AttackRange = 320.0f;
+
+	m_HeightFromTerrain = 150.0f;
+	m_State = new PatrolState(this);
+} 
+
+CMeleeEnemy::~CMeleeEnemy()
+{
+
+}
+void CMeleeEnemy::Attack(float elapsedTime)
+{
+	float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
+
+	Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
 }
 
-CEnemyCloseATK::CEnemyCloseATK(CGameObject* ptarget)
+void CMeleeEnemy::FindNextPosition()
 {
-	m_Type = OBJ_TYPE::Enemy;
+	m_xmf3ActivityScope;
+	m_ToMovePosition.x = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.x * 2)) + m_xmf3ActivityScopeCenter.x - m_xmf3ActivityScope.x;
+	m_ToMovePosition.y = m_xmf3Position.y;
+	m_ToMovePosition.z = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.z * 2)) + m_xmf3ActivityScopeCenter.z - m_xmf3ActivityScope.z;
+
+	//cout << "목표위치 설정 ";
+	//DisplayVector3(m_ToMovePosition);
+	m_xmf3Velocity = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
+	m_xmf3Velocity = Vector3::Normalize(m_xmf3Velocity);
+
+	XMFLOAT3 lookAt = Vector3::Normalize(GetLook());
+	lookAt = Vector3::Multifly(lookAt, -1);
+
+	XMFLOAT3 cross = Vector3::CrossProduct(lookAt, m_xmf3Velocity);
+	float dot = Vector3::DotProduct(lookAt, m_xmf3Velocity);
+
+	float angle = atan2(Vector3::Length(cross), dot);
+
+	float test = Vector3::DotProduct({ 0,1,0 }, cross);
+	if (test < 0.0) angle = -angle;
+
+	//cout << "회전 각: " << angle << "\n";
+	Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees(angle)));
 }
 
-CEnemyCloseATK::~CEnemyCloseATK()
+void CMeleeEnemy::FindClosePositionToTarget()
 {
+	XMFLOAT3 playerPos = m_TargetPlayer->GetPosition();
+	playerPos.y = m_xmf3Position.y;
 
-}
+	XMFLOAT3 targetVec = Vector3::Subtract(playerPos, m_xmf3Position);
+	targetVec = Vector3::Multifly(Vector3::Normalize(targetVec), -1);
 
-void CEnemyCloseATK::Update(float elapsedTime)
-{
-	m_Statemachine->Update(elapsedTime);
+	XMFLOAT3 lookAt = Vector3::Normalize(GetLook());
+
+	m_ToMovePosition = Vector3::Subtract(m_TargetPlayer->GetPosition(),
+		Vector3::Multifly(targetVec, m_AttackRange * 1.5f));
+
+	m_ToMovePosition.y = m_xmf3Position.y;
+
+	//cout << "목표위치 설정 ";
+	//DisplayVector3(m_ToMovePosition);
+	m_xmf3Velocity = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
+	m_xmf3Velocity = Vector3::Normalize(m_xmf3Velocity);
+
+	XMFLOAT3 cross = Vector3::CrossProduct(targetVec, m_xmf3Velocity);
+	float dot = Vector3::DotProduct(targetVec, m_xmf3Velocity);
+
+	float angle = atan2(Vector3::Length(cross), dot);
+
+	float test = Vector3::DotProduct({ 0,1,0 }, cross);
+	//if (test < 0.0) angle = -angle;
+
+	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 });
+	Rotate({ 0,1,0 }, 180.0f);
+	//cout << "회전 각: " << angle << "\n";
+	//Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees(angle)));
 }
