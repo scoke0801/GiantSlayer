@@ -234,7 +234,8 @@ public:
 
 	void SetCollisionHandleType(COLLISION_HANDLE_TYPE type) { m_CollisionHandleType = type; }
 	COLLISION_HANDLE_TYPE GetCollisionHandleType() const { return m_CollisionHandleType; }
-
+	
+	virtual ObjectState GetStateInfo() const { return ObjectState::Wait; }
 public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;

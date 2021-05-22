@@ -33,6 +33,8 @@ private:
 	float m_AttackWaitingTime = 0.0f;
 	bool m_IsCanAttack = true;
 
+	float m_AttackedDelay = 0.0f;
+
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -62,4 +64,6 @@ public:
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
 
 	void Jump();
+
+	bool Attacked(CGameObject* pObject);
 };

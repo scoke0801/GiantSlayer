@@ -85,9 +85,9 @@ void CEnemy::SetActivityScope(const XMFLOAT3& xmf3ActivityScope, const XMFLOAT3&
  
 void CEnemy::SetSightBoundingBox(const XMFLOAT3& sight)
 {
-	m_SightBox = BoundingBox({ 0,0,0 }, { sight.x, sight.y, sight.z });
+	m_SightBox = BoundingBox({ 0,0,0 }, { sight.x * 0.5f, sight.y * 0.5f, sight.z * 0.5f });
 
-	m_SightAABB = BoundingBox({ 0,0,0 }, { sight.x, sight.y, sight.z });
+	m_SightAABB = BoundingBox({ 0,0,0 }, { sight.x * 0.5f, sight.y * 0.5f, sight.z * 0.5f });
 }
 
 void CEnemy::ConnectPlayer(CPlayer** pPlayers, int playerCount)
@@ -162,7 +162,8 @@ void CEnemy::FindClosePositionToTarget()
 
 void CEnemy::MoveToNextPosition(float elapsedTime)
 {
-	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, 165.0f * elapsedTime)));
+	const float ENEMY_SPEED_TEMP = 165.0f * 2.5f;
+	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ENEMY_SPEED_TEMP * elapsedTime)));
 	m_ToMovePosition.y = m_xmf3Position.y;
 	XMFLOAT3 gap = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
 	if (Vector3::Length(gap) < 30) {

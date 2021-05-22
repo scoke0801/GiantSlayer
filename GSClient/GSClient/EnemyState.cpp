@@ -8,15 +8,12 @@
   
 void WaitState::Enter(CEnemy* pEnemy)
 {
+    m_StateName = ObjectState::Wait;
     cout << "WaitState::Enter" << endl;
 }
 
 void WaitState::Execute(CEnemy* pEnemy, float elapsedTime)
-{
- /*   if (pEnemy->IsEnemyInSight())
-        pEnemy->GetFSM()->ChangeState(Tracking::Instance());
-    else
-        pEnemy->MoveRandom();*/
+{ 
 }
 
 void WaitState::Exit(CEnemy* pEnemy)
@@ -29,15 +26,12 @@ void WaitState::Exit(CEnemy* pEnemy)
   
 void IdleState::Enter(CEnemy* pEnemy)
 {
+    m_StateName = ObjectState::Idle;
     cout << " IdleState::Enter" << endl;
 }
 
 void IdleState::Execute(CEnemy* pEnemy, float elapsedTime)
-{
-    /*if (!pEnemy->IsEnemyInSight())
-        pEnemy->GetFSM()->ChangeState(Wandering::Instance());
-    else
-        pEnemy->TrackingTarget();*/
+{ 
 }
 
 void IdleState::Exit(CEnemy* pEnemy)
@@ -50,7 +44,7 @@ void IdleState::Exit(CEnemy* pEnemy)
  
 void RunAwayState::Enter(CEnemy* pEnemy)
 {
-
+    m_StateName = ObjectState::RunAway; 
 }
 
 void RunAwayState::Execute(CEnemy* pEnemy, float elapsedTime)
@@ -65,6 +59,7 @@ void RunAwayState::Exit(CEnemy* pEnemy)
 
 void PatrolState::Enter(CEnemy* enemy)
 {
+    m_StateName = ObjectState::Patrol;
 }
 
 void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
@@ -77,9 +72,7 @@ void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
         enemy->MoveToNextPosition(elapsedTime);
 	}
     if (enemy->IsEnemyInSight()) {
-        {
-            enemy->ChangeState(new TraceState(enemy));
-        } 
+        enemy->ChangeState(new TraceState(enemy));
     }
 }
 
@@ -90,6 +83,7 @@ void PatrolState::Exit(CEnemy* enemy)
 
 void AttackState::Enter(CEnemy* enemy)
 {
+    m_StateName = ObjectState::Attack;
     cout << "AttackState::Enter \n";
     m_LifeTime = MELLE_ENEMY_ATTACK_TIME;
     enemy->SetAttackDelayTime(MELLE_ENEMY_ATTACK_TIME + 1.0f);
@@ -109,11 +103,13 @@ void AttackState::Execute(CEnemy* enemy, float elapsedTime)
 
 void AttackState::Exit(CEnemy* enemy)
 {
+    enemy->SetIsOnMoving(false);
     cout << "°ø°Ý ³¡ \n";
 }
 
 void TraceState::Enter(CEnemy* enemy)
 {
+    m_StateName = ObjectState::Trace;
     m_LifeTime = 0.5f;
     cout << "TraceState::Enter \n";
     m_AttackRange = enemy->GetAttackRange();

@@ -432,8 +432,16 @@ void CSceneJH::Update(float elapsedTime)
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		if (pEnemy->CollisionCheck(m_Player)) {
-			m_Player->FixCollision();
-			cout << "충돌 : 플레이어 - 적\n";
+			// 공격 상태일 때만 체력이 닳는것이 맞을까...
+			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+			//	
+			//}
+			if (m_Player->Attacked(pEnemy)) {
+				m_CurrentCamera->SetShake(true,0.5f, 15);
+			
+				m_Player->FixCollision();
+				cout << "충돌 : 플레이어 - 적\n";
+			}
 		}
 	}
 
@@ -872,7 +880,10 @@ void CSceneJH::ProcessInput()
 	if (false == m_IsFocusOn) {
 		return;
 	}
-
+	if (m_CurrentCamera->IsOnShake()) { 
+		// 피격 상태일 때 잠시 제어권 뺏기
+		return; 
+	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 		auto keyInput = GAME_INPUT; 
@@ -1037,8 +1048,9 @@ void CSceneJH::ProcessInput()
 		m_CurrentCamera->SetSpeed(max(cameraSpeed - 1.0f, 1.0f));
 	}
 	if (keyInput.KEY_F1)
-	{
-		m_Player->SetPosition({ 2500,  0, 2500 }); 
+	{ 
+		//m_Player->SetPosition({ 2500,  0, 2500 }); 
+		m_Player->SetPosition({ 1622,  0, 10772 });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F2)
@@ -1115,6 +1127,10 @@ void CSceneJH::OnMouseDown(WPARAM btnState, int x, int y)
 	if (false == m_IsFocusOn) {
 		return;
 	}
+	if (m_CurrentCamera->IsOnShake()) {
+		// 피격 상태일 때 잠시 제어권 뺏기
+		return;
+	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 	}
@@ -1126,6 +1142,10 @@ void CSceneJH::OnMouseDown(WPARAM btnState, int x, int y)
 void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 {
 	if (false == m_IsFocusOn) {
+		return;
+	}
+	if (m_CurrentCamera->IsOnShake()) {
+		// 피격 상태일 때 잠시 제어권 뺏기
 		return;
 	}
 	if (CFramework::GetInstance().IsOnConntected())
@@ -1141,6 +1161,10 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 {
 	if (false == m_IsFocusOn) {
+		return;
+	}
+	if (m_CurrentCamera->IsOnShake()) {
+		// 피격 상태일 때 잠시 제어권 뺏기
 		return;
 	}
 	//
@@ -1561,7 +1585,9 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
 	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f))); 
-	pEnemy->SetSightBoundingBox({ 1825 * 0.75f , 0, 3050 * 0.75f });  
+	pEnemy->SetSightBoundingBox({ 1825 * 0.75f / 125.0f, 10, 3050 * 0.75f / 125.0f });
+	
+	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / 125.0f, 10, 3050 * 0.75f / 125.0f, XMFLOAT3{ 0,-1.5f,0 });
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
 
 	pEnemy = new CMeleeEnemy();
@@ -1574,7 +1600,9 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
 	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-	pEnemy->SetSightBoundingBox({ 1825 * 0.75f , 0, 3050 * 0.75f });
+	pEnemy->SetSightBoundingBox({ 1825 * 0.75f / 125.0f, 10, 3050 * 0.75f /125.0f });
+
+	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / 125.0f, 10, 3050 * 0.75f / 125.0f, XMFLOAT3{ 0,-1.5f,0 });
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 	pEnemy = new CRangedEnemy();
