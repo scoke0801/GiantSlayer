@@ -69,7 +69,6 @@ class CGameObject
 private:
 	int					m_nReferences = 0;
 
-	bool				m_isDrawbale = true;
 public:
 	XMFLOAT4X4			m_xmf4x4World;
 
@@ -102,6 +101,7 @@ protected: // 렌더링 관련 변수
 
 	CCamera*			m_Camera = nullptr;
 
+	bool				m_isDrawbale = true;
 protected:	// 객체 관련 속성 변수
 	int					m_HP = 0;
 	int					m_SP = 0;
@@ -174,6 +174,8 @@ public:
 	vector<Collider*>& GetAABB() { return m_AABB; }
 
 	void FixPositionByTerrain(CTerrain* pTerrain);
+	 
+	virtual void ChangeState(ObjectState stateInfo, void* pData) {}
 public:
 	// about bounding box 
 	void BuildBoundigBoxMesh(ID3D12Device* pd3dDevice,

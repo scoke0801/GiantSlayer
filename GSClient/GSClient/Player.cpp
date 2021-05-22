@@ -225,6 +225,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 	if (m_AttackedDelay > 0.0f) {
 		return false;
 	}
+	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 	m_AttackedDelay += 1.5f;
 	m_HP -= 5;
 	if (m_HP <= 5) {

@@ -85,16 +85,14 @@ void AttackState::Enter(CEnemy* enemy)
 {
     m_StateName = ObjectState::Attack;
     cout << "AttackState::Enter \n";
-    m_LifeTime = MELLE_ENEMY_ATTACK_TIME;
-    enemy->SetAttackDelayTime(MELLE_ENEMY_ATTACK_TIME + 1.0f);
+    m_LifeTime = MELLE_ENEMY_ATTACK_TIME; 
 }
 
 void AttackState::Execute(CEnemy* enemy, float elapsedTime)
 {
     m_ElapsedTime += elapsedTime; 
-    if (m_LifeTime < m_ElapsedTime) {
-        
-        enemy->ChangeState(new PatrolState(enemy));
+    if (m_LifeTime < m_ElapsedTime) { 
+        enemy->ChangeState(new PatrolState(enemy)); 
     }
     else {  
         enemy->Attack(elapsedTime);
@@ -102,7 +100,7 @@ void AttackState::Execute(CEnemy* enemy, float elapsedTime)
 }
 
 void AttackState::Exit(CEnemy* enemy)
-{
+{ 
     enemy->SetIsOnMoving(false);
     cout << "°ø°Ý ³¡ \n";
 }
@@ -143,4 +141,16 @@ void TraceState::Execute(CEnemy* enemy, float elapsedTime)
 void TraceState::Exit(CEnemy* enemy)
 {
     cout << "TraceState::Exit\n";
+}
+
+void AttackedState::Enter(CEnemy* enemy)
+{
+}
+
+void AttackedState::Execute(CEnemy* enemy, float elapsedTime)
+{
+}
+
+void AttackedState::Exit(CEnemy* enemy)
+{
 }

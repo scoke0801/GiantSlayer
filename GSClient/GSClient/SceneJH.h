@@ -10,7 +10,7 @@ class HelpTextUI;
 class CTerrain;
 class CParticle;
 class CLightCamera;
-
+class CEnemy;
 
 class CSceneJH : public CScene
 {
@@ -103,7 +103,7 @@ private:
 	CSoundManager*				m_SoundManager;
 public:
 	CSceneJH();
-	~CSceneJH();
+	~CSceneJH(); 
 
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override;
 
@@ -152,6 +152,10 @@ public:
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
 
+public:
+	void ShotPlayerArrow();
+	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
+
 private: 
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
@@ -186,8 +190,6 @@ private:
 	void BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void EnterNewSector(int sectorNum);
-
-	void ShotArrow();
 
 	void MakingFog();
 	void MakingRain();

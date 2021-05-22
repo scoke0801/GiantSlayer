@@ -75,6 +75,8 @@ public:
 	void FixCollision(CGameObject* pCollideObject) override;
 
 	virtual void Attack(float elapsedTime);
+	 
+	void ChangeState(ObjectState stateInfo, void* pData) override;
 public:
 	bool IsOnMoving() const { return m_IsOnMoving; }
 	void SetIsOnMoving(bool info) { m_IsOnMoving = info; }

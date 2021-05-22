@@ -72,7 +72,18 @@ public:
     virtual void Exit(CEnemy* enemy);
 };
 
- 
+class AttackedState : public CState<CEnemy>
+{
+public:
+    AttackedState(CEnemy* enemy) { Enter(enemy); }
+
+public:
+    virtual void Enter(CEnemy* enemy);
+
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
+
+    virtual void Exit(CEnemy* enemy);
+};
 class TraceState : public CState<CEnemy>
 {
 private:

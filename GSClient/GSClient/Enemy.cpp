@@ -3,7 +3,7 @@
 #include "Player.h"
 #include "Terrain.h"
 #include "State.h"
-
+#include "SceneJH.h"
 CEnemy::CEnemy()
 {
 	m_Type = OBJ_TYPE::Enemy;
@@ -24,14 +24,13 @@ void CEnemy::Update(float elapsedTime)
 	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4World));
 
 	if (m_AttackDelayTime > 0.0f) {
-		m_AttackDelayTime -= elapsedTime;
+		m_AttackDelayTime = max(m_AttackDelayTime - elapsedTime, 0.0f); 
 	}
 }
 
 bool CEnemy::IsEnemyInSight() // Chase State
 { 
 	if (m_AttackDelayTime > 0.0f) {
-		cout << "공격 딜레이 중!\n";
 		return false;
 	}
 	for (auto player : m_ConnectedPlayers) { 
@@ -60,7 +59,7 @@ bool CEnemy::IsEnemyInSight() // Chase State
 				// 해당 플레이어를 공격하도록 설정하자
 				cout << "공격할 대상을 찾았습니다.\n";
 				 
-				m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.5f; 
+				//m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.5f; 
 				m_TargetPlayer = player;
 				return true;
 			}
@@ -199,6 +198,33 @@ void CEnemy::Attack(float elapsedTime)
 {
 }
 
+
+void CEnemy::ChangeState(ObjectState stateInfo, void* pData)
+{
+	switch (stateInfo)
+	{
+	case ObjectState::Wait:
+		break;
+	case ObjectState::Idle:
+		break;
+	case ObjectState::Patrol:
+		break;
+	case ObjectState::Trace:
+		break;
+	case ObjectState::Attack:
+		ChangeState(new AttackState(this));
+		break;
+	case ObjectState::Attacked:
+		ChangeState(new AttackedState(this));
+		break;
+	case ObjectState::Die:
+		break;
+	case ObjectState::RunAway:
+		break;
+	default:
+		break;
+	}
+}
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
@@ -219,9 +245,20 @@ CRangedEnemy::~CRangedEnemy()
 
 void CRangedEnemy::Attack(float elapsedTime)
 {
-	float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
+	// 공격관련 애니메이션 수행
+	// 현재는 임시코드
+	{
+		float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
 
-	Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
+		Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
+	}
+	
+	if (m_AttackDelayTime <= 0.0f) {
+		// 실제 공격!
+		cout << "원거리 몬스터 화살 발사\n"; 
+		m_AttackDelayTime = RANGED_ENEMY_ATTACK_TIME + 1.0f;
+		MAIN_GAME_SCENE->ShotMonsterArrow(this, GetLook());
+	}
 }
   
 //////////////////////////////////////////////////////////////////////////
@@ -243,9 +280,17 @@ CMeleeEnemy::~CMeleeEnemy()
 }
 void CMeleeEnemy::Attack(float elapsedTime)
 {
-	float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
+	// 공격관련 애니메이션 수행
+	// 현재는 임시코드
+	{
+		float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
 
-	Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
+		Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
+	}
+	if (m_AttackDelayTime <= 0.0f) {
+		// 실제 공격!  
+		m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.0f; 
+	}
 }
 
 void CMeleeEnemy::FindNextPosition()
