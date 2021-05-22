@@ -2514,6 +2514,15 @@ void CSceneJH::ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 	}
 }
 
+void CSceneJH::DeleteEnemy(CEnemy* pEmeny)
+{
+	auto res = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Enemy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end(), pEmeny);
+	if (res != m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end()) {
+		cout << " 몬스터 삭제\n";
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].erase(res);
+	}
+}
+
 void CSceneJH::MakingFog()
 {
 	int i = 0;

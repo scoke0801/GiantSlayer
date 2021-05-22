@@ -155,6 +155,7 @@ public:
 public:
 	void ShotPlayerArrow();
 	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
+	void DeleteEnemy(CEnemy* pEmeny);
 
 private: 
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
