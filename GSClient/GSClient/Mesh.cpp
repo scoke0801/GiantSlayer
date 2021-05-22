@@ -1094,7 +1094,7 @@ CAnimatedMesh::CAnimatedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_d3dBoneIndexBufferView.StrideInBytes = sizeof(XMUINT4);
 	m_d3dBoneIndexBufferView.SizeInBytes = sizeof(XMUINT4) * m_nVertices;
 
-	// Indices
+	// VertexIndices
 	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, indices.data(),
 		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
 	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();

@@ -8,6 +8,8 @@ struct Keyframe
 	XMFLOAT3 scale;
 	XMFLOAT4 rotationquat;
 
+	XMFLOAT4X4 animatrix;
+
 	bool operator == (const Keyframe& rhs) {
 		if (translation.x != rhs.translation.x || translation.y != rhs.translation.y || translation.z != rhs.translation.z)
 			return false;
@@ -22,18 +24,85 @@ struct Keyframe
 	}
 };
 
-struct AnimBone
+struct BoneAnimation
 {
-	vector<Keyframe> animFrame;
+	vector<Keyframe> keyframes;
+
+	float GetStartTime()const
+	{
+		return keyframes.front().frameTime;
+	}
+	float GetEndTime()const
+	{
+		return keyframes.back().frameTime;
+	}
+
+	void Interpolate(float t, XMFLOAT4X4& M)const
+	{
+		if (t <= keyframes.front().frameTime)
+		{
+			XMVECTOR S = XMLoadFloat3(&keyframes.front().scale);
+			XMVECTOR P = XMLoadFloat3(&keyframes.front().translation);
+			XMVECTOR Q = XMLoadFloat4(&keyframes.front().rotationquat);
+
+			XMVECTOR zero = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+			XMStoreFloat4x4(&M, XMMatrixAffineTransformation(S, zero, Q, P));
+		}
+		else if (t >= keyframes.back().frameTime)
+		{
+			XMVECTOR S = XMLoadFloat3(&keyframes.back().scale);
+			XMVECTOR P = XMLoadFloat3(&keyframes.back().translation);
+			XMVECTOR Q = XMLoadFloat4(&keyframes.back().rotationquat);
+
+			XMVECTOR zero = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+			XMStoreFloat4x4(&M, XMMatrixAffineTransformation(S, zero, Q, P));
+		}
+		else
+		{
+			for (UINT i = 0; i < keyframes.size() - 1; ++i)
+			{
+				if (t >= keyframes[i].frameTime && t <= keyframes[i + 1].frameTime)
+				{
+					float lerpPercent = (t - keyframes[i].frameTime) / (keyframes[i + 1].frameTime - keyframes[i].frameTime);
+
+					XMVECTOR s0 = XMLoadFloat3(&keyframes[i].scale);
+					XMVECTOR s1 = XMLoadFloat3(&keyframes[i + 1].scale);
+
+					XMVECTOR p0 = XMLoadFloat3(&keyframes[i].translation);
+					XMVECTOR p1 = XMLoadFloat3(&keyframes[i + 1].translation);
+
+					XMVECTOR q0 = XMLoadFloat4(&keyframes[i].rotationquat);
+					XMVECTOR q1 = XMLoadFloat4(&keyframes[i + 1].rotationquat);
+
+					XMVECTOR S = XMVectorLerp(s0, s1, lerpPercent);
+					XMVECTOR P = XMVectorLerp(p0, p1, lerpPercent);
+					XMVECTOR Q = XMQuaternionSlerp(q0, q1, lerpPercent);
+
+					XMVECTOR zero = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+					XMStoreFloat4x4(&M, XMMatrixAffineTransformation(S, zero, Q, P));
+
+					break;
+				}
+			}
+		}
+	}
 };
 
-struct Animation
+struct AnimationClip
 {
 	string name;
 	float startTime = 0;
 	float endTime = 0;
 
-	vector<AnimBone> bone;
+	vector<BoneAnimation> BoneAnimation;
+
+	void Interpolate(float t, vector<XMFLOAT4X4>& boneTransforms)const
+	{
+		for (UINT i = 0; i < BoneAnimation.size(); ++i)
+		{
+			BoneAnimation[i].Interpolate(t, boneTransforms[i]);
+		}
+	}
 };
 
 struct Joint
@@ -169,7 +238,7 @@ private:
 	FbxAnimStack** ppAnimationStacks;;
 
 	vector<Joint> mSkeleton;
-	vector<Animation> animations;
+	vector<AnimationClip> animClip;
 
 
 public:

@@ -3,7 +3,7 @@
 constexpr int FRAME_BUFFER_WIDTH = 1280;
 constexpr int FRAME_BUFFER_HEIGHT = 768;
 
-constexpr int MAX_PLAYER = 5;
+constexpr int MAX_PLAYER = 1;
 
 constexpr int MAX_PLAYER_NAME = 200;
 constexpr int SERVERPORT = 9000;

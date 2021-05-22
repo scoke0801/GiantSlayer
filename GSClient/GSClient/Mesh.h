@@ -494,11 +494,11 @@ protected:
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dPositionBufferView;
 
 	ID3D12Resource* m_pd3dTextureCoord0Buffer = NULL;
-	ID3D12Resource* m_pd3dTextureCoord0UploadBuffer = NULL;
+	//ID3D12Resource* m_pd3dTextureCoord0UploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dTextureCoord0BufferView;
 
 	ID3D12Resource* m_pd3dNormalBuffer = NULL;
-	ID3D12Resource* m_pd3dNormalUploadBuffer = NULL;
+	//ID3D12Resource* m_pd3dNormalUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dNormalBufferView;
 
 	ID3D12Resource* m_pd3dBoneIndexBuffer = NULL;

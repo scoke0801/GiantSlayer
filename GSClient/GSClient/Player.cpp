@@ -30,7 +30,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	t = 0;
 	endTime = 0;
 	for (int i = 0; i < skeleton.size(); i++) {
-		float t = animations[curAnim].bone[i].animFrame.back().frameTime;
+		float t = animations[curAnim].BoneAnimation[i].keyframes.back().frameTime;
 		if (t > endTime)
 			endTime = t;
 	}
