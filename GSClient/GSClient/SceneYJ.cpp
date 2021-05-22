@@ -422,6 +422,20 @@ void CSceneYJ::ReleaseObjects()
 
 void CSceneYJ::Update(float elapsedTime)
 {
+	// 퍼즐 범위 내일 작업할때 사용 
+
+	/*x축 12450 12150   11950 11650  11450 11150
+
+		9800
+		10000
+
+		10250
+		12250
+
+		12500
+		14500*/
+
+
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
@@ -477,11 +491,11 @@ void CSceneYJ::Update(float elapsedTime)
 	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
 	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 100.0f);
 
+
 	for (int i = 0; i < 8; i++)
 	{
 		if (m_PuzzleBox[i]->GetGriptBox())
 		{
-			
 			m_PuzzleBox[i]->SetPosition(
 				{
 					-Final_Vec.x+ m_Player->GetPosition().x,Final_Vec.y+ m_Player->GetPosition().y+300.0f,-Final_Vec.z+ m_Player->GetPosition().z
@@ -1047,20 +1061,23 @@ void CSceneYJ::ProcessInput()
 		else
 			m_CurrentCamera->Strafe(cameraSpeed);
 	}
+
+
+	
 	for (int i = 0; i < 7; i++)
 	{
 		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox())
 		{
 			//m_CurrentCamera->SetShake(true, 0.5f, 5.0f);
 			cout << "박스를 이동합니다";
-			m_isBoxDown = !m_isBoxDown;
+			//m_isBoxDown = !m_isBoxDown;
 
-			m_PuzzleBox[i]->SetGripBox(m_isBoxDown);
+			m_PuzzleBox[i]->SetGripBox(!m_isBoxDown);
 
-			if (!m_isBoxDown)
+			/*if (!m_isBoxDown)
 			{
 				m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
-			}
+			}*/
 		}
 	}
 	for (int i = 0; i < 7; i++)
@@ -1068,6 +1085,9 @@ void CSceneYJ::ProcessInput()
 		if (keyInput.KEY_1 && m_PuzzleBox[i]->GetSelectBox())
 		{
 			m_PuzzleBox[i]->SetGripBox(false);
+
+			cout <<" x축 : "<<m_PuzzleBox[i]->GetPosition().x <<" y축 :"<< m_PuzzleBox[i]->GetPosition().z << endl;
+
 			//-1760
 			m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
 
@@ -1555,6 +1575,11 @@ void CSceneYJ::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	for (int i = 0; i < 4; i++)
+	{
+		m_PuzzleNum[i] = rand() % 9;
+	}
+
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
 	pPuzzlePlate->SetPosition({ 10600.0f, -2000.0f, 1500.0f + 8000.0f });
 	//m_Objects.push_back(std::move(pPuzzlePlate));
@@ -2453,7 +2478,7 @@ void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->Scale(7, 7, 7);
 	m_Players[0]->SetObjectName(OBJ_NAME::Player);
 	m_Players[0]->Rotate({ 0,1,0 }, 180);
-	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	m_Players[0]->SetPosition({ 12000.0f,  -2000.0f, 11500.0f });
 
 	m_Players[0]->SetDrawable(true);
 	m_Players[0]->SetTextureIndex(0x400);

@@ -58,6 +58,7 @@ private:
 	CLightCamera* m_pLightCamera = nullptr;
 
 	short						m_DoorIdx = 0;
+	int							m_PuzzleNum[4];
 private:
 	POINT						m_LastMousePos;
 
