@@ -61,5 +61,7 @@ public:
 	bool IsCanAttack() const { return m_IsCanAttack; }
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
 
+	bool IsCanPickPuzzle(bool BoxSelect);
+
 	void Jump();
 };

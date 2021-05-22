@@ -440,8 +440,18 @@ void CSceneYJ::Update(float elapsedTime)
 
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
 		if (pPuzzle->CollisionCheck(m_Player)) {
-			m_Player->FixCollision();
-			cout << "충돌 : 플레이어 - 퍼즐";
+			m_Player->FixCollision(pPuzzle);
+			//cout << "충돌 : 플레이어 - 퍼즐";
+		}
+	}
+
+	for (auto pPuzzleBox : m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox]) {
+		if (pPuzzleBox->CollisionCheck(m_Player)) {
+			m_Player->FixCollision(pPuzzleBox);
+			m_isBoxSelect = TRUE;
+			m_Player->IsCanPickPuzzle(m_isBoxSelect);
+			
+			cout << "충돌 : 플레이어 - 퍼즐박스";
 		}
 	}
 
@@ -1036,13 +1046,16 @@ void CSceneYJ::ProcessInput()
 			p->CloserDoor();
 		}
 	}
-	if (keyInput.KEY_R)
+	if (keyInput.KEY_R && (m_isBoxSelect==TRUE))
 	{
+		
+		cout << "현재 박스를 선택 가능합니다.";
 		// 상호작용
-		for (int i = 0; i < 2; ++i)
+		// 오류 뜸
+		for (int j = 0; j < 2; ++j)
 		{
 			for (int i = 0; i < 5; ++i) {
-				CBox* p = reinterpret_cast<CBox*>(m_ObjectLayers[(int)OBJECT_LAYER::Puzzle][m_PuzzleBoxIdx + i]);
+				CBox* p = reinterpret_cast<CBox*>(m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox][m_PuzzleBoxIdx + i]);
 				p->PlayerSelecting();
 			}
 		}
@@ -1457,22 +1470,24 @@ void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pObject->SetPosition({ 10500.0f, -2000.0f, 1500.0f + 8000.0f });
 	//m_Objects.push_back(std::move(pObject));
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
-
 	
 	for (int i = 0; i < 2; ++i)
 	{
 		for (int j = 0; j < 5; ++j)
 		{
 			pObject = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
+			
 			pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
 			pObject->SetTextureIndex(0x200);
 			pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 			pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f, XMFLOAT3{ 0,0,0 });
+			pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 150 * 0.5f, 100*0.5f , 150 * 0.5f }));
 			//m_Objects.push_back(std::move(pObject));
-			m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
+			m_PuzzleBoxIdx = m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox].size();
+			m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox].push_back(pObject);
 		}
 	}
-	m_PuzzleBoxIdx = m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].size();
+	
 }
 
 void CSceneYJ::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -2251,7 +2266,6 @@ void CSceneYJ::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLightCamera->SetRight(xmf3Right);
 	m_pLightCamera->SetUp(xmf3Up);
 	m_pLightCamera->SetLook(xmf3Look);
-	//m_pLightCamera->SetPosition(XMFLOAT3(10000.0f, 1300.0f, 0.0f));
 	m_pLightCamera->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pLightCamera->SetViewport(0, 0, nWidth, nHeight, 0.0f, 1.0f);
 	m_pLightCamera->SetScissorRect(0, 0, nWidth, nHeight);
@@ -2292,7 +2306,7 @@ void CSceneYJ::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	MakingFog();
 	MakingRain();
-	MakingSandWind();
+	//MakingSandWind();
 
 }
 void CSceneYJ::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -2324,7 +2338,9 @@ void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->Scale(7, 7, 7);
 	m_Players[0]->SetObjectName(OBJ_NAME::Player);
 	m_Players[0]->Rotate({ 0,1,0 }, 180);
-	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	//m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	m_Players[0]->SetPosition({ 10500,  -2000, 13500 });
+	
 
 	m_Players[0]->SetDrawable(true);
 	m_Players[0]->SetTextureIndex(0x400);

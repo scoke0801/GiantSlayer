@@ -16,6 +16,7 @@ class CSceneYJ : public CScene
 {
 private:
 	bool						m_isPlayerSelected = true;
+	bool						m_isBoxSelect = false;
 
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;

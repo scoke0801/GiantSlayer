@@ -966,12 +966,11 @@ float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primitiv
 float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
 	float3 uvw = float3(input.uv, nPrimitiveID / 2);
-	float4 cColor;// = gtxtBox.Sample(gssWrap, uvw);
+	float4 cColor;
 
 	if (gnTexturesMask & 0x01)
 	{
-		//cColor = cColor = gtxtMirror.Sample(gssWrap, input.uv);
-        cColor = cColor = gtxtShadowMap.Sample(gssWrap, input.uv);
+		cColor = cColor = gtxtMirror.Sample(gssWrap, input.uv);
     }
     return cColor;
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
