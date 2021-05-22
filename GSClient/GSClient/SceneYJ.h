@@ -16,7 +16,6 @@ class CSceneYJ : public CScene
 {
 private:
 	bool						m_isPlayerSelected = true;
-	bool						m_isBoxSelect = false;
 
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -55,7 +54,6 @@ private:
 	CLightCamera* m_pLightCamera = nullptr;
 
 	short						m_DoorIdx = 0;
-	short						m_PuzzleBoxIdx = 0;
 private:
 	POINT						m_LastMousePos;
 
@@ -189,7 +187,7 @@ private:
 	void ShotArrow();
 	void MakingFog();
 	void MakingRain();
-	void MakingSandWind();
+	void MakingSand();
 
 private:
 	void SendMouseInputPacket();

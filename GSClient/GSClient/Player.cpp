@@ -205,11 +205,6 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
 }
 
-bool CPlayer::IsCanPickPuzzle(bool BoxSelect)
-{
-	return BoxSelect;
-}
-
 void CPlayer::Jump()
 {
 	if (false == m_isOnGround) {

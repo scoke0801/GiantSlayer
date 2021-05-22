@@ -454,11 +454,6 @@ CBox::~CBox()
 
 }
 
-void CBox::PlayerSelecting()
-{
-	cout << "¼±ÅÃµÊ";
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)

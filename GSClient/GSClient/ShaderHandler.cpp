@@ -300,16 +300,6 @@ void CShaderHandler::CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("RainParticle", pParticleShader);
 
-	pParticleShader = new CShader();
-	pParticleShader->CreateVertexShader(L"Shaders\\ParticleShader.hlsl", "VSSandWindParticle");
-	pParticleShader->CreatePixelShader(L"Shaders\\ParticleShader.hlsl", "PSTexParticle");
-
-	pParticleShader->CreateInputLayout(ShaderTypes::TexParticle);
-	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
-	m_Data.emplace("SandWindParticle", pParticleShader);
-
-	
-
 }
 
 void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)

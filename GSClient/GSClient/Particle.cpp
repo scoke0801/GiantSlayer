@@ -113,12 +113,12 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->SetType(type);
 		m_ParticleObjs.push_back(std::move(pObject));
 	}
-	else if (type == PARTICLE_TYPE::SandWindParticle)
+	else if (type == PARTICLE_TYPE::SandParticle)
 	{
-		CSandWindParticleMesh* pMesh = new CSandWindParticleMesh(pd3dDevice, pd3dCommandList, count);
+		CSandParticleMesh* pMesh = new CSandParticleMesh(pd3dDevice, pd3dCommandList, count);
 
 		ParticleObject* pObject = new ParticleObject();
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("SandWindParticle"));
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("SandParticle"));
 		pObject->SetMesh(pMesh);
 		pObject->SetType(type);
 		m_ParticleObjs.push_back(std::move(pObject));

@@ -16,6 +16,7 @@ class CSceneJH : public CScene
 {
 private:
 	bool						m_isPlayerSelected = true;
+	bool						m_isPlayerBoxCollide = false;
 
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -36,6 +37,7 @@ private:
 	int							m_CurrentPlayerNum = 0; 
 	//vector<CPlayer*>			m_Players[MAX_PLAYER];
 	CPlayer*					m_Players[MAX_PLAYER];
+	CBox*						m_PuzzleBox[8];
 
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
