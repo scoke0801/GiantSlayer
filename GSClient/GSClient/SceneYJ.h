@@ -11,11 +11,12 @@ class CTerrain;
 class CParticle;
 class CLightCamera;
 
-
 class CSceneYJ : public CScene
 {
 private:
 	bool						m_isPlayerSelected = true;
+	bool						m_isPlayerBoxCollide = false;
+	bool						m_isBoxDown = false;
 
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -24,7 +25,7 @@ private:
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
 
 	CParticle* m_Particles;
-	
+
 
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
@@ -34,7 +35,9 @@ private:
 	CPlayer* m_Player = nullptr;
 
 	int							m_CurrentPlayerNum = 0;
+	//vector<CPlayer*>			m_Players[MAX_PLAYER];
 	CPlayer* m_Players[MAX_PLAYER];
+	CBox* m_PuzzleBox[8];
 
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
@@ -46,6 +49,7 @@ private:
 
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 
+	vector<CCamera*>			m_PlayerCameras;
 	CCamera** m_Cameras;
 	CCamera* m_CurrentCamera = nullptr;
 	CCamera* m_MinimapCamera = nullptr;
@@ -97,6 +101,8 @@ private: // for server mouse input process
 	vector<POINTF>				m_MousePositions;
 	MOUSE_INPUT_TYPE			m_prevMouseInputType;
 
+private:
+	CSoundManager* m_SoundManager;
 public:
 	CSceneYJ();
 	~CSceneYJ();
@@ -159,8 +165,7 @@ private:
 
 	void BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	
-	
+
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);
 
@@ -185,9 +190,9 @@ private:
 	void EnterNewSector(int sectorNum);
 
 	void ShotArrow();
+
 	void MakingFog();
 	void MakingRain();
-	void MakingSand();
 
 private:
 	void SendMouseInputPacket();
