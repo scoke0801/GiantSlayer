@@ -144,6 +144,7 @@ public:
 	void DrawForBoundingObj(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
  
 	virtual void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera); 
+	virtual void SetTargetVector(const XMFLOAT3& playerLookAt);
 
 
 public:
@@ -242,6 +243,8 @@ public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;
 	DirectX::XMFLOAT3 GetLook()const; 
+
+	DirectX::XMFLOAT3 GetReflectLook()const;
 };
  
 class CBox : public CGameObject

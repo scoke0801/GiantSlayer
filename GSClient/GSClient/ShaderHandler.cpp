@@ -468,5 +468,6 @@ void CShaderHandler::CreateMirrorShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 	}
 	pMirrorShader->CreateInputLayout(ShaderTypes::Textured);
 	pMirrorShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
+	pMirrorShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Mirror", pMirrorShader);
 }

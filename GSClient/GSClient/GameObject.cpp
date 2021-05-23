@@ -279,6 +279,11 @@ XMFLOAT3 CGameObject::GetLook()const
 	return XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33);
 }
 
+XMFLOAT3 CGameObject::GetReflectLook() const
+{
+	return XMFLOAT3(-m_xmf4x4World._31 * cos(60),-m_xmf4x4World._32*cos(90),-m_xmf4x4World._33 );
+}
+
 void CGameObject::AddAABB(Collider* pCollider)
 {
 	auto type = pCollider->GetType();
@@ -399,6 +404,14 @@ void CGameObject::UpdateColliders()
 	/*for (auto collider : m_Colliders) {
 		collider->Update(m_xmf4x4World);
 	}*/
+}
+
+void CGameObject::SetTargetVector(const XMFLOAT3& playerLookAt)
+{
+	XMFLOAT3 dirVector = Vector3::Normalize(playerLookAt);
+	XMFLOAT3 targetPos = Vector3::Multifly(dirVector, 150000);
+	m_xmf3Velocity = dirVector;
+	LookAt(m_xmf3Position, targetPos, XMFLOAT3(0, 1, 0));
 }
  
 //void CGameObject::Rotate(float x, float y, float z)
