@@ -5,7 +5,7 @@ class ParticleObject;
 class CArrow :  public CGameObject
 {
 public:
-	CArrow() {}
+	CArrow() { m_isDrawbale = true; }
 	virtual ~CArrow() {}
 
 public:
@@ -15,17 +15,16 @@ public:
 
 public:
 	void SetTargetPosition(const XMFLOAT3& targetPos);
-	void SetTargetVector(const XMFLOAT3& playerLookAt);
+	void SetTargetVector(const XMFLOAT3& playerLookAt); 
 
-	bool IsCanUse() const { return m_IsCanUse; }
-	void SetUseable(bool data) { m_IsCanUse = data; }
+	bool IsCanUse() const { return m_isDrawbale; }
+	void SetUseable(bool data) { m_isDrawbale = data; }
 
 	void ConnectParticle(ParticleObject* particle) { m_ConnectedParticle = particle; }
 private:
 	XMFLOAT3 m_xmf3TargetPosition;
 
-	float m_ElapsedTime = 0.0f;
-	bool m_IsCanUse = true; 
+	float m_ElapsedTime = 0.0f; 
 	ParticleObject* m_ConnectedParticle = nullptr;
 };
 

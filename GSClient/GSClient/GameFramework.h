@@ -3,6 +3,7 @@
 #include "Scene.h"
 
 class CCamera;
+class CSceneJH;
 
 class CFramework
 {
@@ -81,6 +82,11 @@ public: // about GetInstance , init framework
 	}
 	void OnCreate(HWND hWnd, HINSTANCE hInst);
 	void OnDestroy();
+
+	// 씬 그자체에 접근이 필요할 때
+	CScene* GetScene() { return m_CurrentScene; }
+	// 메인 게임씬에 접근이 필요할 때
+	CSceneJH* GetMainGameScene() { return reinterpret_cast<CSceneJH*>(m_CurrentScene); }
 
 private:
 	void CreateSwapChain();
@@ -168,3 +174,5 @@ public:	// about scene change
 };
 
 DWORD WINAPI ClientMain(LPVOID arg);
+
+#define MAIN_GAME_SCENE CFramework::GetInstance().GetMainGameScene()

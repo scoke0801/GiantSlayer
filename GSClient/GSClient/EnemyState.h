@@ -2,68 +2,101 @@
 #include "State.h"
 
 class CEnemy;
+class CPlayer;
 
-class Wandering : public CState<CEnemy>
+constexpr float MELLE_ENEMY_ATTACK_TIME = 2.0f;
+constexpr float RANGED_ENEMY_ATTACK_TIME = 2.0f;
+
+class WaitState : public CState<CEnemy>
 {
-private:
+public: 
+    WaitState(CEnemy* enemy) { Enter(enemy); }
 
-    Wandering() {};
-
-    Wandering(const Wandering&);
-    Wandering& operator=(const Wandering&);
-
-public:
-
-    static Wandering* Instance();
-
+public: 
     virtual void Enter(CEnemy* enemy);
 
-    virtual void Execute(CEnemy* enemy);
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
 
     virtual void Exit(CEnemy* enemy);
 };
 
-class Tracking : public CState<CEnemy>
+class IdleState : public CState<CEnemy>
 {
-private:
-
-    Tracking() {};
-
-    Tracking(const Tracking&);
-    Tracking& operator=(const Tracking&);
-
 public:
+    IdleState(CEnemy* enemy) { Enter(enemy); }
 
-    static Tracking* Instance();
-
+public:  
     virtual void Enter(CEnemy* enemy);
 
-    virtual void Execute(CEnemy* enemy);
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
 
     virtual void Exit(CEnemy* enemy);
 };
 
-class RunAway : public CState<CEnemy>
+class PatrolState : public CState<CEnemy>
 {
-private:
-
-    RunAway() {};
-
-    RunAway(const Tracking&);
-    RunAway& operator=(const RunAway&);
-
 public:
+    PatrolState(CEnemy* enemy) { Enter(enemy); }
 
-    static RunAway* Instance();
-
+public: 
     virtual void Enter(CEnemy* enemy);
 
-    virtual void Execute(CEnemy* enemy);
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
 
     virtual void Exit(CEnemy* enemy);
 };
 
-class Attack : public CState<CEnemy>
+class RunAwayState : public CState<CEnemy>
 {
+public:
+    RunAwayState(CEnemy* enemy) { Enter(enemy); }
 
+public: 
+    virtual void Enter(CEnemy* enemy);
+
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
+
+    virtual void Exit(CEnemy* enemy);
+};
+
+class AttackState : public CState<CEnemy>
+{
+public:
+    AttackState(CEnemy* enemy) { Enter(enemy); }
+
+public:  
+    virtual void Enter(CEnemy* enemy);
+
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
+
+    virtual void Exit(CEnemy* enemy);
+};
+
+class AttackedState : public CState<CEnemy>
+{
+public:
+    AttackedState(CEnemy* enemy) { Enter(enemy); }
+
+public:
+    virtual void Enter(CEnemy* enemy);
+
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
+
+    virtual void Exit(CEnemy* enemy);
+};
+class TraceState : public CState<CEnemy>
+{
+private:
+    float m_AttackRange;
+    CPlayer* m_TargetPlayer;
+
+public:
+    TraceState(CEnemy* enemy) { Enter(enemy); }
+
+public:
+    virtual void Enter(CEnemy* enemy);
+
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
+
+    virtual void Exit(CEnemy* enemy);
 };

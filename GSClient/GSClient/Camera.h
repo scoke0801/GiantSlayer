@@ -161,6 +161,7 @@ public:
 
 public:
 	void SetShake(bool isOnShake, float shakeTime, float power);
+	bool IsOnShake() const { return m_isOnShake; }
 
 public:
 	XMFLOAT3 CalcTargetRight();
