@@ -279,9 +279,19 @@ XMFLOAT3 CGameObject::GetLook()const
 	return XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33);
 }
 
-XMFLOAT3 CGameObject::GetReflectLook() const
+XMFLOAT3 CGameObject::GetReflectLook_0() const
 {
 	return XMFLOAT3(-m_xmf4x4World._31 * cos(60),-m_xmf4x4World._32*cos(90),-m_xmf4x4World._33 );
+}
+
+XMFLOAT3 CGameObject::GetReflectLook_1() const
+{
+	return XMFLOAT3(-m_xmf4x4World._31 , -m_xmf4x4World._32 * cos(90), m_xmf4x4World._33 );
+}
+
+XMFLOAT3 CGameObject::GetReflectLook_2() const
+{
+	return XMFLOAT3(-m_xmf4x4World._31 , -m_xmf4x4World._32 * cos(90), m_xmf4x4World._33);
 }
 
 void CGameObject::AddAABB(Collider* pCollider)

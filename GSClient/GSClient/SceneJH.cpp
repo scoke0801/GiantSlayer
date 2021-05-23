@@ -482,7 +482,7 @@ void CSceneJH::Update(float elapsedTime)
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
 		if (pArrow->CollisionCheck(m_Mirror)) {
 			m_Mirror->FixCollision();
-			pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook(), 1));
+			pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_0(), 1));
 
 			cout << "충돌 : 플레이어 - 거울\n";
 		}

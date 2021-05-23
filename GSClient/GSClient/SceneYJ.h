@@ -32,7 +32,7 @@ private:
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
 	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;
 
-	CGameObject* m_Mirror = nullptr;
+	CGameObject* m_Mirror[3] = { nullptr };
 	CPlayer* m_Player = nullptr;
 
 

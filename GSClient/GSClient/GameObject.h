@@ -244,7 +244,9 @@ public:
 	DirectX::XMFLOAT3 GetUp()const;
 	DirectX::XMFLOAT3 GetLook()const; 
 
-	DirectX::XMFLOAT3 GetReflectLook()const;
+	DirectX::XMFLOAT3 GetReflectLook_0()const;
+	DirectX::XMFLOAT3 GetReflectLook_1()const;
+	DirectX::XMFLOAT3 GetReflectLook_2()const;
 };
  
 class CBox : public CGameObject
