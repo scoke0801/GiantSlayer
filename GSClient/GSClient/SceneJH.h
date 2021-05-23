@@ -10,13 +10,15 @@ class HelpTextUI;
 class CTerrain;
 class CParticle;
 class CLightCamera;
-
+class CEnemy;
 
 class CSceneJH : public CScene
 {
 private:
 	bool						m_isPlayerSelected = true;
-
+	bool						m_isPlayerBoxCollide = false;
+	 
+	bool						m_isBoxDown = false;
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
 	array<CMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -36,6 +38,7 @@ private:
 	int							m_CurrentPlayerNum = 0; 
 	//vector<CPlayer*>			m_Players[MAX_PLAYER];
 	CPlayer*					m_Players[MAX_PLAYER];
+	CBox*						m_PuzzleBox[8];
 
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
@@ -103,7 +106,7 @@ private:
 	CSoundManager*				m_SoundManager;
 public:
 	CSceneJH();
-	~CSceneJH();
+	~CSceneJH(); 
 
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override;
 
@@ -152,6 +155,11 @@ public:
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
 
+public:
+	void ShotPlayerArrow();
+	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
+	void DeleteEnemy(CEnemy* pEmeny);
+
 private: 
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
@@ -186,8 +194,6 @@ private:
 	void BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void EnterNewSector(int sectorNum);
-
-	void ShotArrow();
 
 	void MakingFog();
 	void MakingRain();

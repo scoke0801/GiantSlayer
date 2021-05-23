@@ -182,7 +182,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildMirror(pd3dDevice, pd3dCommandList);
 
 	string fileName = "Golem"; 
-	FbxLoader(m_pfbxManager, "Arrow", false, 1);
+	FbxLoader(m_pfbxManager, "Wolf", false, 1);
 
 
 	CFixedMesh* testMesh = new CFixedMesh(pd3dDevice, pd3dCommandList, fileName);

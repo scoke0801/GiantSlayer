@@ -251,6 +251,10 @@ namespace Vector3
 	{
 		return(XMFLOAT3(xmf3Vector.x * scalar, xmf3Vector.y * scalar, xmf3Vector.z * scalar));
 	}
+	inline XMFLOAT3 Multiply(XMFLOAT3& xmf3Vector, XMFLOAT3& xmf3Vector2)
+	{
+		return(XMFLOAT3(xmf3Vector.x * xmf3Vector2.x, xmf3Vector.y * xmf3Vector2.y, xmf3Vector.z * xmf3Vector2.z));
+	}
 }
 //4차원 벡터의 연산
 namespace Vector4

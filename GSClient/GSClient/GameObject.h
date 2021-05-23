@@ -52,13 +52,23 @@ struct GAMEOBJECT_INFO
 	MATERIAL						m_Material;
 	UINT							m_nTextureIndex;
 };
- 
+
+enum class ObjectState {
+	Wait,		// 상태와 상태 사이의 대기상태
+	Idle,		// 평소 상태
+	Patrol,		// 탐색 상태
+	Trace,		// 추격
+	Attack,		// 공격
+	Attacked,	// 피격
+	Die,		// 사망
+	RunAway		// 도망
+};
+
 class CGameObject
 {
 private:
 	int					m_nReferences = 0;
 
-	bool				m_isDrawbale = true;
 public:
 	XMFLOAT4X4			m_xmf4x4World;
 
@@ -91,6 +101,7 @@ protected: // 렌더링 관련 변수
 
 	CCamera*			m_Camera = nullptr;
 
+	bool				m_isDrawbale = true;
 protected:	// 객체 관련 속성 변수
 	int					m_HP = 0;
 	int					m_SP = 0;
@@ -98,6 +109,8 @@ protected:	// 객체 관련 속성 변수
 	OBJ_NAME			m_Name;
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
 	bool				m_isCollidable = true;
+
+	//ObjectState			m_StateType = ObjectState::Idle;
 
 public:
 	FbxScene*			m_pfbxScene = NULL;
@@ -149,7 +162,7 @@ public:
 	virtual bool CollisionCheck(CGameObject* other);
 
 	void FixCollision();
-	void FixCollision(CGameObject* pCollideObject);
+	virtual void FixCollision(CGameObject* pCollideObject);
 
 	virtual void UpdateColliders();
 
@@ -161,6 +174,8 @@ public:
 	vector<Collider*>& GetAABB() { return m_AABB; }
 
 	void FixPositionByTerrain(CTerrain* pTerrain);
+	 
+	virtual void ChangeState(ObjectState stateInfo, void* pData) {}
 public:
 	// about bounding box 
 	void BuildBoundigBoxMesh(ID3D12Device* pd3dDevice,
@@ -221,7 +236,8 @@ public:
 
 	void SetCollisionHandleType(COLLISION_HANDLE_TYPE type) { m_CollisionHandleType = type; }
 	COLLISION_HANDLE_TYPE GetCollisionHandleType() const { return m_CollisionHandleType; }
-
+	
+	virtual ObjectState GetStateInfo() const { return ObjectState::Wait; }
 public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;
@@ -238,10 +254,18 @@ public:
 private:
 	XMFLOAT3 m_xmf3RotationAxis;
 	float m_fRotationSpeed;
+	bool m_SelectedBox;
+	bool m_GripBox;
+
 
 public:
 	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
+	void SetSelectBox(bool SelectedBox) { m_SelectedBox = SelectedBox; }
+	bool GetSelectBox() { return m_SelectedBox; }
+
+	void SetGripBox(bool GripBox) { m_GripBox = GripBox; }
+	bool GetGriptBox() { return m_GripBox; }
 
 	virtual void Animate(float fTimeElapsed) {}
 };
