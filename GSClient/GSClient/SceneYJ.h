@@ -17,6 +17,7 @@ private:
 	bool						m_isPlayerSelected = true;
 	bool						m_isPlayerBoxCollide = false;
 	bool						m_isBoxDown = false;
+	bool						m_PuzzleNumSelect[9] = { false };
 
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -33,6 +34,7 @@ private:
 
 	CGameObject* m_Mirror = nullptr;
 	CPlayer* m_Player = nullptr;
+
 
 	int							m_CurrentPlayerNum = 0;
 	//vector<CPlayer*>			m_Players[MAX_PLAYER];
