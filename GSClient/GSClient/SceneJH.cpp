@@ -113,8 +113,14 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	//m_Cameras[3]->Pitch(XMConvertToRadians(90));
 	m_Cameras[4]->SetPosition({ 0,0,0 });
 	 
-	m_MirrorCamera = m_Cameras[3];
+	//m_MirrorCamera = m_Cameras[3];
 	m_MinimapCamera = m_Cameras[1];
+	 
+	m_MirrorCamera = new CCamera;
+	m_MirrorCamera->SetLens(0.45f * PI, width, height, 1.0f, 60000.0f);
+	m_MirrorCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
+	m_MirrorCamera->SetScissorRect(0, 0, width, height);
+	m_MirrorCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		CCamera* pCamera = new CCamera;
@@ -797,6 +803,9 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+		if (i == (int)OBJECT_LAYER::MirrorBox) {
+			continue;
+		}
 		for (auto pObject : m_ObjectLayers[i]) {
 			pObject->Draw(pd3dCommandList, m_CurrentCamera);
 		}
@@ -2032,7 +2041,7 @@ void CSceneJH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
 
-	m_MirrorCamera->SetPosition({ 17000, -3000, 210 });
+	m_MirrorCamera->SetPosition({ 17000, -2300.0f, -1050 });
 
 	m_Mirror->SetMesh(pMirrorMesh);
 	m_Mirror->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
@@ -2042,6 +2051,7 @@ void CSceneJH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	m_Mirror->SetTextureIndex(0x01);
 
+	m_Mirror->UpdateColliders();
 	m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox].push_back(m_Mirror);
 }
 
