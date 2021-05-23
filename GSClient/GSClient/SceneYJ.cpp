@@ -491,7 +491,6 @@ void CSceneYJ::Update(float elapsedTime)
 	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
 	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 100.0f);
 
-
 	for (int i = 0; i < 8; i++)
 	{
 		if (m_PuzzleBox[i]->GetGriptBox())
