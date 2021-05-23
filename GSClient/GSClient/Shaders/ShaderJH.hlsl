@@ -1051,6 +1051,19 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	if (gnTexturesMask & 0x20)
 	{
 		cColor = gtxtDesert_Rock.Sample(gssWrap, input.uv);
+	}  
+
+	if (gnTexturesMask & 0x40)
+	{
+		cColor = gtxtRockyWall.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x80)
+	{
+		cColor = gtxtBox.Sample(gssWrap, input.uv); 
+	}
+	if (gnTexturesMask & 0x100)
+	{
+		cColor = gtxtWood.Sample(gssWrap, input.uv);
 	} 
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor(input.shadowPosH);

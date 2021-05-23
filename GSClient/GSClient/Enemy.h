@@ -12,80 +12,105 @@
 // :: else toState(탐색)
 class CPlayer;
 
+enum class EnemyAttackType {
+	Melee,
+	Ranged
+};
 class CEnemy : public CGameObject
 {
 protected:
-	CStateMachine<CEnemy>* m_Statemachine;
-	float m_Sight;
+	EnemyAttackType			m_AttackType;
+	CState<CEnemy>*			m_State;
 
-	XMFLOAT3 m_xmf3ActivityScopeCenter;
-	XMFLOAT3 m_xmf3ActivityScope;
+	vector<CPlayer*>		m_ConnectedPlayers;
+	CPlayer*				m_TargetPlayer;
 
-	vector<CPlayer*>	m_ConnectedPlayers;
-	 					
-	USHORT				m_TargetPlayerIdx = -1; 
-	bool				m_IsOnMoving = false;
+	bool					m_IsOnMoving = false;
 
-	XMFLOAT3			m_ToMovePosition;
+	XMFLOAT3				m_ToMovePosition;
+
+	// 공격범위
+	float					m_AttackRange;
+
+	// 활동 범위
+	XMFLOAT3				m_xmf3ActivityScopeCenter;
+	XMFLOAT3				m_xmf3ActivityScope; 
+	
+	// 활동 범위 충돌체
+	BoundingBox				m_ActivityRegionBox;
+
+	// 시야 범위 충돌체
+	BoundingBox				m_SightBox;
+	BoundingBox				m_SightAABB;
+
+	float					m_AttackDelayTime = 0.0f;
+
 public:
 	CEnemy(); 
 	~CEnemy();
-	 
-	CStateMachine<CEnemy>* GetFSM()const { return m_Statemachine; }
-
+	  
 	virtual void Update(float elapsedTime) override;
 
-	bool IsEnemyInSight();
-	void MoveRandom();
-	void TrackingTarget();
-	
 	// 활동범위 설정
 	void SetActivityScope(const XMFLOAT3& xmf3ActivityScope, const XMFLOAT3& xmf3Center);
 	XMFLOAT3 GetActivityScope() const { return m_xmf3ActivityScope; } 
 
+	// 시야 범위 설정
+	void SetSightBoundingBox(const XMFLOAT3& sight);
+
+	// 공격 대상 탐색 
+	bool IsEnemyInSight();
+
 	void ConnectPlayer(CPlayer** pPlayers, int playerCount); 
-private:
-	void FindNextPosition();
+
+	void ChangeState(CState<CEnemy>* nextState);
+
+	virtual void FindNextPosition(); 
+	virtual void FindClosePositionToTarget();
+
+	void LookTarget(bool isRotatedModel);
+
+	void MoveToNextPosition(float elapsedTime);
+
+	void FixCollision(CGameObject* pCollideObject) override;
+
+	virtual void Attack(float elapsedTime);
+	 
+	void ChangeState(ObjectState stateInfo, void* pData) override;
+public:
+	bool IsOnMoving() const { return m_IsOnMoving; }
+	void SetIsOnMoving(bool info) { m_IsOnMoving = info; }
+	 
+	void SetAttackDelayTime(float delayTime) { m_AttackDelayTime = delayTime; }
+
+	EnemyAttackType GetEnemyAttackType() const { return m_AttackType; } 
+
+	float GetAttackRange() const { return m_AttackRange; }
+
+	CPlayer* GetTargetPlayer() const { return m_TargetPlayer; }
+
+	ObjectState GetStateInfo() const override{ return m_State->GetStatename(); }
 };
 
-class CEnemyCloseATK : public CGameObject
-{
-private:
-	CStateMachine<CEnemyCloseATK>* m_Statemachine;
-	float m_Sight;
-
+class CMeleeEnemy : public CEnemy
+{    
 public:
-	CGameObject* m_Target;
+	CMeleeEnemy(); 
+	~CMeleeEnemy(); 
 
-public:
-	CEnemyCloseATK();
-	CEnemyCloseATK(CGameObject* target);
-	~CEnemyCloseATK();
+	void Attack(float elapsedTime) override;
 
-	void SetTarget(CGameObject* t) { m_Target = t; }
-
-	CStateMachine<CEnemyCloseATK>* GetFSM()const { return m_Statemachine; }
-
-	virtual void Update(float elapsedTime) override; 
+	void FindNextPosition() override; 
+	void FindClosePositionToTarget() override;
+	//void Update(float elapsedTime) override {}
 };
 
-class CEnemyRangeATK : public CGameObject
-{
-private:
-	CStateMachine<CEnemyRangeATK>* m_Statemachine;
-	float sight;
-
+class CRangedEnemy : public CEnemy
+{    
 public:
-	CGameObject* target;
+	CRangedEnemy(); 
+	~CRangedEnemy();
 
-public:
-	CEnemyRangeATK();
-	CEnemyRangeATK(CGameObject* target);
-	~CEnemyRangeATK();
-
-	void SetTarget(CGameObject* t) { target = t; }
-
-	CStateMachine<CEnemyRangeATK>* GetFSM()const { return m_Statemachine; }
-
-	virtual void Update(double elapsedTime); 
+	void Attack(float elapsedTime) override;
+	//void Update(float elapsedTime) override {}
 };

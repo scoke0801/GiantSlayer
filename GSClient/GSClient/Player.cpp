@@ -59,6 +59,11 @@ void CPlayer::Update(float fTimeElapsed)
 		}
 	}
 	
+	// 피격
+	if (m_AttackedDelay > 0.0f) {
+		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
+	}
+
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 6000.0f;
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? 360.0f : 50.0f;
@@ -213,5 +218,19 @@ void CPlayer::Jump()
 	// 일반 사람의 점프 높이는 대략 30 ~ 40cm 
 	m_isOnGround = false;
 	m_JumpTime = 0.0f;
+}
+
+bool CPlayer::Attacked(CGameObject* pObject)
+{
+	if (m_AttackedDelay > 0.0f) {
+		return false;
+	}
+	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
+	m_AttackedDelay += 1.5f;
+	m_HP -= 5;
+	if (m_HP <= 5) {
+		m_HP = 0;
+	}
+	return true;
 }
  

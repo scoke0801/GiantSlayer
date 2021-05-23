@@ -17,7 +17,7 @@ public:
 	void  Update(double elapsedTime)const
 	{
 		if (m_pCurrentState) {
-			m_pCurrentState->Execute(m_pOwner);
+			m_pCurrentState->Execute(m_pOwner, elapsedTime);
 		}
 	}
 
