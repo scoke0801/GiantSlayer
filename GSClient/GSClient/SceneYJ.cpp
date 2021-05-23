@@ -459,13 +459,30 @@ void CSceneYJ::Update(float elapsedTime)
 		}
 	}
 
+	
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
-		if (pArrow->CollisionCheck(m_Mirror)) {
-			m_Mirror->FixCollision();
-			pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook(), 1));
-			
-			cout << "충돌 : 플레이어 - 거울\n";
+		for (int i = 0; i < 3; i++)
+		{
+			if (pArrow->CollisionCheck(m_Mirror[i])) {
+				m_Mirror[i]->FixCollision();
+				if (i == 0)
+				{
+					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_0(), 1));
+					cout << "충돌 : 플레이어 - 거울0\n";
+				}
+				else if (i == 1)
+				{
+					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_1(), 1));
+					cout << "충돌 : 플레이어 - 거울1\n";
+				}
+				else if (i == 2)
+				{
+					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_2(), 1));
+					cout << "충돌 : 플레이어 - 거울2\n";
+				}
+			}
 		}
+		
 	}
 	
 	
@@ -648,8 +665,10 @@ void CSceneYJ::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
-	m_Mirror->Draw(pd3dCommandList, m_CurrentCamera);
-
+	for (int i = 0; i < 3; i++)
+	{
+		m_Mirror[i]->Draw(pd3dCommandList, m_CurrentCamera);
+	}
 	m_Particles->Draw(pd3dCommandList, m_CurrentCamera);
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
@@ -1121,14 +1140,12 @@ void CSceneYJ::ProcessInput()
 			m_CurrentCamera->Strafe(cameraSpeed);
 	}
 
-
+	// 숫자 퍼즐 상자 집기
 	
 	for (int i = 0; i < 8; i++)
 	{
 		if (keyInput.KEY_C && m_PuzzleBox[i]->GetSelectBox() && !m_PuzzleBoxCount )
 		{
-			cout << "박스를 이동합니다";
-			
 			m_PuzzleBoxCount = TRUE;
 
 			m_PuzzleBox[i]->SetGripBox(!m_isBoxDown);
@@ -1142,10 +1159,6 @@ void CSceneYJ::ProcessInput()
 			m_PuzzleBoxCount = FALSE;
 
 			m_PuzzleBox[i]->SetGripBox(false);
-
-			cout <<" x축 : "<<m_PuzzleBox[i]->GetPosition().x <<" y축 :"<< m_PuzzleBox[i]->GetPosition().z << endl;
-
-			//-1760
 
 			m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
 
@@ -1793,21 +1806,39 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 void CSceneYJ::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_Mirror = new CGameObject();
+	for (int i = 0; i < 3; i++)
+	{
+		m_Mirror[i] = new CGameObject();
 
-	CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
+		CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
 
-	m_MirrorCamera->SetPosition({ 17000, -3000, 210 });
+		m_MirrorCamera->SetPosition({ 17000, -3000, 210 });
 
-	m_Mirror->SetMesh(pMirrorMesh);
-	m_Mirror->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
-	m_Mirror->SetPosition({ 17000, -2300, 200 });
-	m_Mirror->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000, 2600, 100.0, XMFLOAT3{ 0,0,0 });
-	m_Mirror->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f, 2600.0f * 0.5f, 100.0f*0.5f }));
+		m_Mirror[i]->SetMesh(pMirrorMesh);
+		m_Mirror[i]->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
+		if (i == 1 || i == 2)
+		{
+			m_Mirror[i]->Rotate({ 0,1,0 }, 90);
+		}
+		if (i == 0)
+		{
+			m_Mirror[i]->SetPosition({ float(17000 - (2900 * i)), -2300, 200 });
+		}
+		if (i == 1)
+		{
+			m_Mirror[i]->SetPosition({ float(17000 - (2900 * i)), -2300, 3200 });
+		}
+		if (i == 2)
+		{
+			m_Mirror[i]->SetPosition({ float(17000 +2900), -2300, 3200 });
+		}
+		m_Mirror[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000, 2600, 10.0, XMFLOAT3{ 0,0,0 });
+		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f, 2600.0f * 0.5f, 10.0f * 0.5f }));
 
-	m_Mirror->SetTextureIndex(0x01);
+		m_Mirror[i]->SetTextureIndex(0x01);
 
-	m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox].push_back(m_Mirror);
+		m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox].push_back(m_Mirror[i]);
+	}
 
 }
 
