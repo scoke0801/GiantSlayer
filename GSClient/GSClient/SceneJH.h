@@ -59,6 +59,7 @@ private:
 
 	short						m_DoorIdx = 0;	
 	int							m_PuzzleNum[4];
+	bool						m_PuzzleBoxCount = false;
 
 private:
 	POINT						m_LastMousePos;

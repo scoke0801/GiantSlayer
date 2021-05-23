@@ -494,12 +494,93 @@ void CSceneJH::Update(float elapsedTime)
 		if (m_PuzzleBox[i]->CollisionCheck(m_Player))
 		{
 			m_PuzzleBox[i]->SetSelectBox(true);
-			//cout << "충돌 : 플레이어 - 퍼즐" << i << endl;
 		}
 		else
 		{
 			m_PuzzleBox[i]->SetSelectBox(false);
 		}
+	}
+
+	// 퍼즐 범위 내일 작업할때 사용 
+
+	/*x축 12450 12150   11950 11650  11450 11150
+
+		9800
+		10000
+
+		10250
+		10450
+
+		10700
+		10900
+		*/
+		// 1번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 12150 && m_PuzzleBox[i]->GetPosition().x < 12450) &&
+			(m_PuzzleBox[i]->GetPosition().z > 9800 && m_PuzzleBox[i]->GetPosition().z < 10000) &&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
+			)
+		{
+			m_PuzzleNumSelect[1] = TRUE;
+		}
+	}
+
+	// 3번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 11150 && m_PuzzleBox[i]->GetPosition().x < 11450) &&
+			(m_PuzzleBox[i]->GetPosition().z > 9800 && m_PuzzleBox[i]->GetPosition().z < 10000) &&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
+			)
+		{
+			m_PuzzleNumSelect[3] = TRUE;
+		}
+	}
+
+	// 5번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
+			(m_PuzzleBox[i]->GetPosition().z > 10250 && m_PuzzleBox[i]->GetPosition().z < 10450) &&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
+		{
+			m_PuzzleNumSelect[5] = TRUE;
+		}
+	}
+
+	// 8번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
+			(m_PuzzleBox[i]->GetPosition().z > 10700 && m_PuzzleBox[i]->GetPosition().z < 10900) &&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
+		{
+			m_PuzzleNumSelect[7] = TRUE;
+		}
+	}
+
+	if (m_PuzzleNumSelect[1] && m_PuzzleNumSelect[5] && m_PuzzleNumSelect[3] && m_PuzzleNumSelect[7])
+	{
+		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
+		p->OpenDoor();
+	}
+
+	// 퍼즐 위치 선정
+	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
+	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 100.0f);
+
+	for (int i = 0; i < 8; i++)
+	{
+		if (m_PuzzleBox[i]->GetGriptBox())
+		{
+			m_PuzzleBox[i]->SetPosition(
+				{
+					-Final_Vec.x + m_Player->GetPosition().x,Final_Vec.y + m_Player->GetPosition().y + 300.0f,-Final_Vec.z + m_Player->GetPosition().z
+				}
+			);
+		}
+
 	}
 
 	//m_PlayerCameras[CFramework::GetInstance().GetPlayerId()]->Update(elapsedTime);
@@ -1055,27 +1136,36 @@ void CSceneJH::ProcessInput()
 		else
 			m_CurrentCamera->Strafe(cameraSpeed);
 	}
-	for (int i = 0; i < 7; i++)
-	{
-		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox())
-		{ 
-			cout << "박스를 이동합니다"; 
 
-			m_PuzzleBox[i]->SetGripBox(!m_isBoxDown); 
+	for (int i = 0; i < 8; i++)
+	{
+		if (keyInput.KEY_C && m_PuzzleBox[i]->GetSelectBox() && !m_PuzzleBoxCount)
+		{
+			cout << "박스를 이동합니다";
+
+			m_PuzzleBoxCount = TRUE;
+
+			m_PuzzleBox[i]->SetGripBox(!m_isBoxDown);
+
 		}
 	}
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 8; i++)
 	{
-		if (keyInput.KEY_1 && m_PuzzleBox[i]->GetSelectBox())
+		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox() && m_PuzzleBoxCount)
 		{
+			m_PuzzleBoxCount = FALSE;
+
 			m_PuzzleBox[i]->SetGripBox(false);
 
 			cout << " x축 : " << m_PuzzleBox[i]->GetPosition().x << " y축 :" << m_PuzzleBox[i]->GetPosition().z << endl;
-			 
+
+			//-1760
+
 			m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
-			
+
 		}
 	}
+
 	if (keyInput.KEY_1)
 	{
 		m_Player->SetWeapon(PlayerWeaponType::Sword);
