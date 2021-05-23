@@ -17,8 +17,8 @@ class CSceneJH : public CScene
 private:
 	bool						m_isPlayerSelected = true;
 	bool						m_isPlayerBoxCollide = false;
-	 
 	bool						m_isBoxDown = false;
+	bool						m_PuzzleNumSelect[9] = { false };
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
 	array<CMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -26,8 +26,7 @@ private:
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
 	 
 	CParticle*					m_Particles;
-	
-
+	 
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
 	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;	
@@ -58,7 +57,9 @@ private:
 
 	CLightCamera*				m_pLightCamera = nullptr;
 
-	short						m_DoorIdx = 0;
+	short						m_DoorIdx = 0;	
+	int							m_PuzzleNum[4];
+
 private:
 	POINT						m_LastMousePos;
 

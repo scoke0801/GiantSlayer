@@ -476,12 +476,32 @@ void CSceneJH::Update(float elapsedTime)
 		if (pPuzzle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pPuzzle);
 			m_isPlayerBoxCollide = true;
-			
-			
-			//cout << "충돌 : 플레이어 - 퍼즐아무\n";
+			 
 		}
 	} 
-	
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
+		if (pArrow->CollisionCheck(m_Mirror)) {
+			m_Mirror->FixCollision();
+			pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook(), 1));
+
+			cout << "충돌 : 플레이어 - 거울\n";
+		}
+	}
+	 
+	// 퍼즐 상자하고 충돌처리
+	for (int i = 0; i < 8; i++)
+	{
+		if (m_PuzzleBox[i]->CollisionCheck(m_Player))
+		{
+			m_PuzzleBox[i]->SetSelectBox(true);
+			//cout << "충돌 : 플레이어 - 퍼즐" << i << endl;
+		}
+		else
+		{
+			m_PuzzleBox[i]->SetSelectBox(false);
+		}
+	}
+
 	//m_PlayerCameras[CFramework::GetInstance().GetPlayerId()]->Update(elapsedTime);
 			
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
@@ -1038,21 +1058,28 @@ void CSceneJH::ProcessInput()
 	for (int i = 0; i < 7; i++)
 	{
 		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox())
-		{
-			//m_CurrentCamera->SetShake(true, 0.5f, 5.0f);
-			cout << "박스를 이동합니다";
+		{ 
+			cout << "박스를 이동합니다"; 
 
-			m_PuzzleBox[i]->SetGripBox(true);
+			m_PuzzleBox[i]->SetGripBox(!m_isBoxDown); 
 		}
 	}
 	for (int i = 0; i < 7; i++)
 	{
-		if (keyInput.KEY_1)
+		if (keyInput.KEY_1 && m_PuzzleBox[i]->GetSelectBox())
 		{
 			m_PuzzleBox[i]->SetGripBox(false);
-			//m_Player->SetWeapon(PlayerWeaponType::Sword);
-			//m_CurrentCamera = m_Cameras[0];
+
+			cout << " x축 : " << m_PuzzleBox[i]->GetPosition().x << " y축 :" << m_PuzzleBox[i]->GetPosition().z << endl;
+			 
+			m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
+			
 		}
+	}
+	if (keyInput.KEY_1)
+	{
+		m_Player->SetWeapon(PlayerWeaponType::Sword);
+		m_CurrentCamera = m_Cameras[0];
 	}
 	if (keyInput.KEY_2)
 	{
@@ -1548,38 +1575,43 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-		CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
-		pPuzzlePlate->SetPosition({ 10600.0f, -2000.0f, 1500.0f + 8000.0f });
-		//m_Objects.push_back(std::move(pPuzzlePlate));
-		m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pPuzzlePlate);
+	for (int i = 0; i < 4; i++)
+	{
+		m_PuzzleNum[i] = rand() % 9;
+	}
 
-		CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
-		pObject->SetPosition({ 10500.0f, -2000.0f, 1500.0f + 8000.0f });
-		//m_Objects.push_back(std::move(pObject));
-		m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
-		for (int i = 0; i < 8; ++i)
+	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
+	pPuzzlePlate->SetPosition({ 10600.0f, -2000.0f, 1500.0f + 8000.0f });
+	//m_Objects.push_back(std::move(pPuzzlePlate));
+	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pPuzzlePlate);
+
+	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
+	pObject->SetPosition({ 10500.0f, -2000.0f, 1500.0f + 8000.0f });
+	//m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
+	for (int i = 0; i < 8; ++i)
+	{
+		m_PuzzleBox[i] = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
+
+		if (i > 3)
 		{
-				m_PuzzleBox[i] = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
-				//pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
-				if (i > 3)
-				{
-					m_PuzzleBox[i]->SetPosition({ 0.0f + 1 * 1800.0f,  300, 1800.0f + i * 300.0f });
-				}
-				else
-				{
-					m_PuzzleBox[i]->SetPosition({ 0.0f + 0 * 1800.0f,  300, 1800.0f + i * 300.0f });
-				}
-				m_PuzzleBox[i]->SetTextureIndex(0x200);
-				m_PuzzleBox[i]->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-				m_PuzzleBox[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f, XMFLOAT3{ 0,0,0 });
-				m_PuzzleBox[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 150.0f * 0.5f, 100.0f * 0.5f, 150.0f * 0.5f }));
-				m_PuzzleBox[i]->SetSelectBox(FALSE);
-				m_PuzzleBox[i]->SetGripBox(FALSE);
-				//m_Objects.push_back(std::move(pObject));
-				m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox].push_back(m_PuzzleBox[i]);
-			
+			m_PuzzleBox[i]->SetPosition({ 10900.0f + 1 * 1800.0f,  300 - 2000.0f, 1800.0f + (i - 4) * 300.0f + 8000.0f });
 		}
-	
+		else
+		{
+			m_PuzzleBox[i]->SetPosition({ 10900.0f + 0 * 1800.0f,  300 - 2000.0f, 1800.0f + i * 300.0f + 8000.0f });
+		}
+		m_PuzzleBox[i]->SetTextureIndex(0x200);
+		m_PuzzleBox[i]->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		m_PuzzleBox[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f, XMFLOAT3{ 0,0,0 });
+		m_PuzzleBox[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 150.0f * 0.5f, 100.0f * 0.5f, 150.0f * 0.5f }));
+		m_PuzzleBox[i]->SetSelectBox(FALSE);
+		m_PuzzleBox[i]->SetGripBox(FALSE);
+		//m_Objects.push_back(std::move(pObject));
+		m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox].push_back(m_PuzzleBox[i]);
+
+	}
+
 }
 
 void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1915,7 +1947,12 @@ void CSceneJH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_Mirror->SetMesh(pMirrorMesh);
 	m_Mirror->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
 	m_Mirror->SetPosition({ 17000, -2300, 200 });
+	m_Mirror->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000, 2600, 100.0, XMFLOAT3{ 0,0,0 });
+	m_Mirror->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f, 2600.0f * 0.5f, 100.0f * 0.5f }));
+
 	m_Mirror->SetTextureIndex(0x01);
+
+	m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox].push_back(m_Mirror);
 }
 
 void CSceneJH::BuildMinimapResource(ID3D12Device* pd3dDevice)
