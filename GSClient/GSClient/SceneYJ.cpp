@@ -475,7 +475,6 @@ void CSceneYJ::Update(float elapsedTime)
 		if (m_PuzzleBox[i]->CollisionCheck(m_Player))
 		{
 			m_PuzzleBox[i]->SetSelectBox(true);
-			//cout << "충돌 : 플레이어 - 퍼즐" << i << endl;
 		}
 		else
 		{
@@ -554,15 +553,15 @@ void CSceneYJ::Update(float elapsedTime)
 
 	for (int i = 0; i < 8; i++)
 	{
-		if (m_PuzzleBox[i]->GetGriptBox())
+		if (m_PuzzleBox[i]->GetGriptBox() )
 		{
 			m_PuzzleBox[i]->SetPosition(
 				{
 					-Final_Vec.x+ m_Player->GetPosition().x,Final_Vec.y+ m_Player->GetPosition().y+300.0f,-Final_Vec.z+ m_Player->GetPosition().z
 				}
 			);
-
 		}
+		
 	}
 	////////////
 
@@ -1124,39 +1123,40 @@ void CSceneYJ::ProcessInput()
 
 
 	
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 8; i++)
 	{
-		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox())
+		if (keyInput.KEY_C && m_PuzzleBox[i]->GetSelectBox() && !m_PuzzleBoxCount )
 		{
-			//m_CurrentCamera->SetShake(true, 0.5f, 5.0f);
 			cout << "박스를 이동합니다";
-			//m_isBoxDown = !m_isBoxDown;
+			
+			m_PuzzleBoxCount = TRUE;
 
 			m_PuzzleBox[i]->SetGripBox(!m_isBoxDown);
 
-			/*if (!m_isBoxDown)
-			{
-				m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
-			}*/
 		}
 	}
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 8; i++)
 	{
-		if (keyInput.KEY_1 && m_PuzzleBox[i]->GetSelectBox())
+		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox()&& m_PuzzleBoxCount)
 		{
+			m_PuzzleBoxCount = FALSE;
+
 			m_PuzzleBox[i]->SetGripBox(false);
 
 			cout <<" x축 : "<<m_PuzzleBox[i]->GetPosition().x <<" y축 :"<< m_PuzzleBox[i]->GetPosition().z << endl;
 
 			//-1760
 
-
 			m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
 
-			//m_Player->SetWeapon(PlayerWeaponType::Sword);
-			//m_CurrentCamera = m_Cameras[0];
 		}
 	}
+	if (keyInput.KEY_1)
+	{
+		m_Player->SetWeapon(PlayerWeaponType::Sword);
+		//m_CurrentCamera = m_Cameras[1];
+	}
+
 	if (keyInput.KEY_2)
 	{
 		m_Player->SetWeapon(PlayerWeaponType::Bow);
@@ -1178,7 +1178,6 @@ void CSceneYJ::ProcessInput()
 		//m_isPlayerSelected = false;
 		//m_CurrentCamera = m_Cameras[3];
 
-		
 	}
 	if (keyInput.KEY_SPACE)
 	{
