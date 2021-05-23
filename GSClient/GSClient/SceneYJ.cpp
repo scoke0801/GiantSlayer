@@ -422,20 +422,6 @@ void CSceneYJ::ReleaseObjects()
 
 void CSceneYJ::Update(float elapsedTime)
 {
-	// 퍼즐 범위 내일 작업할때 사용 
-
-	/*x축 12450 12150   11950 11650  11450 11150
-
-		9800
-		10000
-
-		10250
-		12250
-
-		12500
-		14500*/
-
-
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
@@ -473,6 +459,16 @@ void CSceneYJ::Update(float elapsedTime)
 		}
 	}
 
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
+		if (pArrow->CollisionCheck(m_Mirror)) {
+			m_Mirror->FixCollision();
+			pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook(), 1));
+			
+			cout << "충돌 : 플레이어 - 거울\n";
+		}
+	}
+	
+	
 	// 퍼즐 상자하고 충돌처리
 	for (int i = 0; i < 8; i++)
 	{
@@ -487,10 +483,74 @@ void CSceneYJ::Update(float elapsedTime)
 		}
 	}
 
+	// 퍼즐 범위 내일 작업할때 사용 
+
+	/*x축 12450 12150   11950 11650  11450 11150
+
+		9800
+		10000
+
+		10250
+		10450
+
+		10700
+		10900
+		*/
+	// 1번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 12150 && m_PuzzleBox[i]->GetPosition().x < 12450) &&
+			(m_PuzzleBox[i]->GetPosition().z > 9800 && m_PuzzleBox[i]->GetPosition().z < 10000) &&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
+			)
+		{
+			m_PuzzleNumSelect[1] = TRUE;
+		}
+	}
+
+	// 3번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 11150 && m_PuzzleBox[i]->GetPosition().x < 11450) &&
+			(m_PuzzleBox[i]->GetPosition().z>9800&& m_PuzzleBox[i]->GetPosition().z < 10000)&&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
+			)
+		{
+			m_PuzzleNumSelect[3] = TRUE;
+		}
+	}
+
+	// 5번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
+			(m_PuzzleBox[i]->GetPosition().z > 10250 && m_PuzzleBox[i]->GetPosition().z < 10450)&&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
+		{
+			m_PuzzleNumSelect[5] = TRUE;
+		}
+	}
+
+	// 8번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
+			(m_PuzzleBox[i]->GetPosition().z > 10700 && m_PuzzleBox[i]->GetPosition().z < 10900) &&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
+		{
+			m_PuzzleNumSelect[7] = TRUE;
+		}
+	}
+
+	if (m_PuzzleNumSelect[1] && m_PuzzleNumSelect[5] && m_PuzzleNumSelect[3] && m_PuzzleNumSelect[7])
+	{
+		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
+		p->OpenDoor();
+	}
+
 	// 퍼즐 위치 선정
 	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
 	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 100.0f);
-
 
 	for (int i = 0; i < 8; i++)
 	{
@@ -1089,6 +1149,8 @@ void CSceneYJ::ProcessInput()
 			cout <<" x축 : "<<m_PuzzleBox[i]->GetPosition().x <<" y축 :"<< m_PuzzleBox[i]->GetPosition().z << endl;
 
 			//-1760
+
+
 			m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
 
 			//m_Player->SetWeapon(PlayerWeaponType::Sword);
@@ -1113,8 +1175,10 @@ void CSceneYJ::ProcessInput()
 	}
 	if (keyInput.KEY_5)
 	{
-		m_isPlayerSelected = false;
+		//m_isPlayerSelected = false;
 		//m_CurrentCamera = m_Cameras[3];
+
+		
 	}
 	if (keyInput.KEY_SPACE)
 	{
@@ -1154,6 +1218,8 @@ void CSceneYJ::ProcessInput()
 	{
 		m_Player->SetPosition({ 17000,  -6000, 5500 });
 		m_Player->FixPositionByTerrain(m_Terrain);
+
+
 	}
 	if (keyInput.KEY_U)
 	{
@@ -1737,7 +1803,13 @@ void CSceneYJ::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_Mirror->SetMesh(pMirrorMesh);
 	m_Mirror->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
 	m_Mirror->SetPosition({ 17000, -2300, 200 });
+	m_Mirror->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000, 2600, 100.0, XMFLOAT3{ 0,0,0 });
+	m_Mirror->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f, 2600.0f * 0.5f, 100.0f*0.5f }));
+
 	m_Mirror->SetTextureIndex(0x01);
+
+	m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox].push_back(m_Mirror);
+
 }
 
 void CSceneYJ::BuildMinimapResource(ID3D12Device* pd3dDevice)
@@ -2418,7 +2490,6 @@ void CSceneYJ::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pLightCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
-
 void CSceneYJ::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_Particles = new CParticle();
@@ -2478,7 +2549,11 @@ void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->Scale(7, 7, 7);
 	m_Players[0]->SetObjectName(OBJ_NAME::Player);
 	m_Players[0]->Rotate({ 0,1,0 }, 180);
-	m_Players[0]->SetPosition({ 12000.0f,  -2000.0f, 11500.0f });
+	// 퍼즐앞
+	//m_Players[0]->SetPosition({ 12000.0f,  -2000.0f, 11500.0f });
+	// 거울앞
+	m_Players[0]->SetPosition({ 17000.0f,  -3000.0f, 2000.0f });
+	
 
 	m_Players[0]->SetDrawable(true);
 	m_Players[0]->SetTextureIndex(0x400);
