@@ -18,7 +18,8 @@ public:
 	void SetTargetVector(const XMFLOAT3& playerLookAt); 
 
 	bool IsCanUse() const { return m_isDrawbale; }
-	void SetUseable(bool data) { m_isDrawbale = data; }
+	void SetUseable(bool data) { m_isDrawbale = data;  }
+	void SetDrawable(bool drawable);
 
 	void ConnectParticle(ParticleObject* particle) { m_ConnectedParticle = particle; }
 private:

@@ -46,6 +46,9 @@ void CPlayer::FixCameraByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][T
 	  
 	float offsetHeight = m_Camera->GetOffset().y;
 	float fHeight = GetDetailHeight(heightsMap, xmf3CameraPosition.x, xmf3CameraPosition.z) + 5.0f;
+	if (fHeight - 1500.0f > m_xmf3Position.y) {
+		fHeight = m_xmf3Position.y + 1500.0f;
+	}
 	if (xmf3CameraPosition.y <= fHeight)
 	{
 		xmf3CameraPosition.y = fHeight;

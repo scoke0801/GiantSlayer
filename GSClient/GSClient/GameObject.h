@@ -229,7 +229,7 @@ public:
 	void SetSize(const XMFLOAT3& size) { m_xmf3Size = size; }
 	XMFLOAT3 GetSize()const { return m_xmf3Size; }
 	 
-	void SetDrawable(bool drawable) { m_isDrawbale = drawable; }
+	virtual void SetDrawable(bool drawable) { m_isDrawbale = drawable; }
 	bool IsDrawable() const { return m_isDrawbale; }
 
 	void SetHegithFromTerrain(float height) { m_HeightFromTerrain = height; }

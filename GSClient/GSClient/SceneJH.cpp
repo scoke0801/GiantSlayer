@@ -466,6 +466,7 @@ void CSceneJH::Update(float elapsedTime)
 			if (pArrow->CollisionCheck(pEnemy)) {
 				pEnemy->ChangeState(ObjectState::Attacked, pArrow);
 				pArrow->SetDrawable(true); 
+				
 				cout << "충돌 : 플레이어 화살 - 적\n"; 
 				break;
 			}

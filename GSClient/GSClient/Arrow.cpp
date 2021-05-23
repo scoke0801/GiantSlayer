@@ -58,4 +58,13 @@ void CArrow::SetTargetVector(const XMFLOAT3& playerLookAt)
 	XMFLOAT3 targetPos = Vector3::Multifly(dirVector, 150000);
 	m_xmf3Velocity = dirVector;
 	LookAt(m_xmf3Position, targetPos, XMFLOAT3(0, 1, 0));
-} 
+}
+void CArrow::SetDrawable(bool drawable)
+{  
+	m_isDrawbale = drawable; 
+	if (drawable) {
+		if (m_ConnectedParticle != nullptr) {
+			m_ConnectedParticle->SetDrawable(false);
+		}
+	}
+}
