@@ -235,9 +235,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
-	//BuildMapSector1(pd3dDevice, pd3dCommandList);
-	//BuildMapSector2(pd3dDevice, pd3dCommandList);
-	//BuildMapSector3(pd3dDevice, pd3dCommandList); 
+	BuildMapSector1(pd3dDevice, pd3dCommandList);
+	BuildMapSector2(pd3dDevice, pd3dCommandList);
+	BuildMapSector3(pd3dDevice, pd3dCommandList); 
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList); 
 
@@ -1174,14 +1174,14 @@ void CSceneJH::ProcessInput()
 			IntToFloat(p_keyboardProcess.lookZ) }; 
 
 		m_Players[p_keyboard.id]->SetPosition(pos);
-		m_Players[p_keyboard.id]->FixPositionByTerrain(m_Terrain);
+		//m_Players[p_keyboard.id]->FixPositionByTerrain(m_Terrain);
 		//m_Players[p_keyboard.id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), {0,1,0});
 		
 		m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
 			look, -PLAYER_RUN_SPEED));
 
 		//m_Players[p_keyboard.id]->LookAt(pos, look, { 0,1,0 });
-		DisplayVector3(Vector3::Normalize(m_Players[p_keyboard.id]->GetLook()));
+		//DisplayVector3(Vector3::Normalize(m_Players[p_keyboard.id]->GetLook()));
 		//DisplayVector3(pos, true);
 		return;
 	}
@@ -2736,13 +2736,13 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
 	  
 
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree"); 
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree"); 
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
  
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
  
@@ -2898,9 +2898,9 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_MinimapCamera->SetTarget(m_Players[0]); 
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
-		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);  
-		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
-		//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
+		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);  
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
  
 		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 

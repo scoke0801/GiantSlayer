@@ -159,7 +159,7 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 		p_keyboardProcess.posZ = FloatToInt(pos.z);
 
 		XMFLOAT3 look = Vector3::Normalize(m_Players[p_keyboard.id]->GetLook());
-		DisplayVector3(look);
+		//DisplayVector3(look);
 		p_keyboardProcess.lookX = FloatToInt(look.x);
 		p_keyboardProcess.lookY = FloatToInt(look.y);
 		p_keyboardProcess.lookZ = FloatToInt(look.z);
@@ -417,16 +417,19 @@ void PacketProcessor::InitObstacle()
 	CGameObject* pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_1]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
+	pObject->UpdateColliders();
 	m_Objects.push_back(std::move(pObject));
 
 	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_2]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
+	pObject->UpdateColliders();
 	m_Objects.push_back(std::move(pObject));
 
 	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
-	pObject->Rotate({ 0, 1, 0 }, 90); 
+	pObject->Rotate({ 0, 1, 0 }, 90);
+	pObject->UpdateColliders();
 	m_Objects.push_back(std::move(pObject));
 ///////////////////////////////////////////////////////////////////////////////// 
 
