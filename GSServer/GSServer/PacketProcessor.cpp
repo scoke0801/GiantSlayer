@@ -128,7 +128,7 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 		
 		XMFLOAT3 pos = m_Players[p_keyboard.id]->GetPosition(); 
 		XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
-		float distance = PLAYER_RUN_VELOCITY; 
+		float distance = PLAYER_RUN_SPEED;
 		 
 		switch (p_keyboard.keyInput)
 		{
@@ -159,7 +159,7 @@ bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 		p_keyboardProcess.posZ = FloatToInt(pos.z);
 
 		XMFLOAT3 look = Vector3::Normalize(m_Players[p_keyboard.id]->GetLook());
-		//DisplayVector3(look);
+		DisplayVector3(look);
 		p_keyboardProcess.lookX = FloatToInt(look.x);
 		p_keyboardProcess.lookY = FloatToInt(look.y);
 		p_keyboardProcess.lookZ = FloatToInt(look.z);

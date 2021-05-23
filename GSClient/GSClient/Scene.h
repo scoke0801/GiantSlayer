@@ -67,8 +67,9 @@ public:
 	CScene();
 	virtual ~CScene();
 
-	// just proto, fill with d3d obj
 	virtual void Update(float elapsedTime) {}
+	virtual void UpdateForMultiplay(float elapsedTime) {}
+
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawPlayer_Shadow(ID3D12GraphicsCommandList* pd3dCommandList) {}

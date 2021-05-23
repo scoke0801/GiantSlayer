@@ -13,8 +13,16 @@ constexpr int I_TO_F = F_TO_I;
 
 constexpr int MAX_MOUSE_INPUT = 30;
 
-constexpr float ARROW_LIFE_TIME = 10.0f;
-constexpr float ARROW_SPEED = 165.0f * 3.5f * 4.0f;
+// 뛰기 : 100미터 16초, 1초에 6.25미터를 달린다. 625 
+// 걷기 : 100미터 60초, 1초에 1.66미터를 걷는다. 166
+// 게임이니까 1.5배정도 빠르게하자
+constexpr float PLAYER_RUN_SPEED = 938.0f;
+constexpr float PLAYER_WALK_SPEED = 250.0f;
+
+// 화살 속도, 시속 235000m, 분속 3916.66m, 391666cm, 초속 6527
+// 너무 빠르니 절반 속도로..
+constexpr float ARROW_LIFE_TIME = 5.0f;
+constexpr float ARROW_SPEED = 3263.0f;
 
 constexpr float PLAYER_JUMP_HEIGHT = 165.0 * 1.75f;
 constexpr float TO_JUMP_TIME = 1.0f;

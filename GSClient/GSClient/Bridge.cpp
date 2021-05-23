@@ -22,6 +22,7 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		m_Objects[idx]->AddColider(new ColliderBox(XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i), 
 			XMFLOAT3(1000 * 0.5f, 1 * 0.5f, 500 * 0.5f))); 
 	}
+
 // 난간 생성
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,	
 		XMFLOAT3(-500.0f, 250.0f + 12.5f, 0.0f),

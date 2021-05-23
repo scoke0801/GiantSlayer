@@ -369,7 +369,7 @@ void CFramework::MultiplayUpdate()
 
 void CFramework::SceneUpdate()
 {
-	m_CurrentScene->Update(FPS);
+	m_CurrentScene->UpdateForMultiplay(SERVER_FPS);
 }
 
 void CFramework::Animate()
@@ -490,11 +490,9 @@ bool CFramework::ConnectToServer()
 	SOCKADDR_IN serveraddr;
 	ZeroMemory(&serveraddr, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-//	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
-	//serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVER_ROOP);
-	serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVERIP);
+	serveraddr.sin_addr.s_addr = inet_addr(SERVER_ROOP);
+	//serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVERIP);
 	serveraddr.sin_port = htons(SERVERPORT);
-	//serveraddr.sin_port = ntohs(SERVERPORT);
 
 	// socket()
 	m_Sock = socket(AF_INET, SOCK_STREAM, 0);

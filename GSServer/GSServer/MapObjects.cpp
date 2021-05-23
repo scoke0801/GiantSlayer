@@ -4,6 +4,7 @@
 
 CBridge::CBridge(OBJECT_ID id)
 {
+	m_CollisionHandleType = COLLISION_HANDLE_TYPE::NotCollide;
 	CGameObject* pObject;// = new CGameObject();
 	for (int i = 0; i < 10; i += 5) {
 		pObject = new CGameObject();

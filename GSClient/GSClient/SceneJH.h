@@ -124,7 +124,8 @@ public:
 
 	void ReleaseObjects(); 
 public:
-	virtual void Update(float elapsedTime) override;
+	void Update(float elapsedTime) override;
+	void UpdateForMultiplay(float elapsedTime)override;
 	void AnimateObjects(float fTimeElapsed);
 
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;	

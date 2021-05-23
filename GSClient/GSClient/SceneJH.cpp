@@ -604,6 +604,7 @@ void CSceneJH::Update(float elapsedTime)
 
 	}
 
+
 	//m_PlayerCameras[CFramework::GetInstance().GetPlayerId()]->Update(elapsedTime);
 			
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
@@ -639,6 +640,64 @@ void CSceneJH::Update(float elapsedTime)
 	}
 }
 
+
+void CSceneJH::UpdateForMultiplay(float elapsedTime)
+{
+	m_SoundManager->OnUpdate();
+	ProcessInput();
+
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+		for (auto pObject : m_ObjectLayers[i]) {
+			pObject->Update(elapsedTime);
+			pObject->UpdateColliders();
+		}
+	}
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
+		pEnemy->FixPositionByTerrain(m_Terrain);
+	}
+	m_Particles->Update(elapsedTime);
+
+	m_HelpTextUI->Update(elapsedTime);
+
+	for (auto player : m_Players) {
+		if (!player->IsDrawable()) continue;
+		player->Update(elapsedTime);
+		player->UpdateColliders();
+		//player->FixPositionByTerrain(m_Terrain);
+		//player->FixCameraByTerrain(m_Terrain);
+	}
+	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
+
+	if (m_MirrorCamera)
+	{
+		m_MirrorCamera->UpdateViewMatrix();
+	}
+
+	if (m_pLightCamera)
+	{
+		LightPos = m_Player->GetPosition();
+		LightPos.y = 3000.0f;
+		LightPos.z += 10000.0f;
+
+		m_pLightCamera->LookAt({ LightPos },
+			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
+			m_Player->GetUp());
+
+		m_pLightCamera->UpdateViewMatrix();
+	}
+
+	if (m_MinimapCamera)
+	{
+		XMFLOAT3 pos = m_Player->GetPosition();
+		pos.y = m_MinimapCamera->GetPosition3f().y;
+		pos.z += 1;
+
+		m_MinimapCamera->LookAt(pos,
+			m_Player->GetPosition(),
+			m_Player->GetUp());
+		m_MinimapCamera->UpdateViewMatrix();
+	}
+}
 void CSceneJH::AnimateObjects(float fTimeElapsed)
 {
 }
@@ -961,6 +1020,8 @@ void CSceneJH::Communicate(SOCKET& sock)
 		m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
 		m_Players[p_syncUpdate.id[i]]->UpdateCamera();
 		m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+		m_Players[p_syncUpdate.id[i]]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
+			look, -PLAYER_RUN_SPEED));
 
 		m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
 	}
@@ -1114,8 +1175,13 @@ void CSceneJH::ProcessInput()
 
 		m_Players[p_keyboard.id]->SetPosition(pos);
 		m_Players[p_keyboard.id]->FixPositionByTerrain(m_Terrain);
-		m_Players[p_keyboard.id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), {0,1,0});
-		DisplayVector3(look);
+		//m_Players[p_keyboard.id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), {0,1,0});
+		
+		m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
+			look, -PLAYER_RUN_SPEED));
+
+		//m_Players[p_keyboard.id]->LookAt(pos, look, { 0,1,0 });
+		DisplayVector3(Vector3::Normalize(m_Players[p_keyboard.id]->GetLook()));
 		//DisplayVector3(pos, true);
 		return;
 	}
@@ -1125,15 +1191,13 @@ void CSceneJH::ProcessInput()
 	XMFLOAT3 velocity = m_Player->GetVelocity();
 
 	XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
-	float distance = PLAYER_RUN_VELOCITY;
+	float distance = PLAYER_RUN_SPEED;
 
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{ 
-		if (m_isPlayerSelected) {
-			XMFLOAT3 prevLook = m_Player->GetLook();
-			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));  
-			XMFLOAT3 afterLook = m_Player->GetLook(); 
+		if (m_isPlayerSelected) { 
+			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));   
 		}
 		else
 			m_CurrentCamera->Walk(cameraSpeed);

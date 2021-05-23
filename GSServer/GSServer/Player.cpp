@@ -11,11 +11,9 @@ CPlayer::~CPlayer()
 }
 
 void CPlayer::Update(float fTimeElapsed)
-{
-	static float MaxVelocityXZ = 120.0f;
-	static float MaxVelocityY = 120.0f;
-	float Friction = (m_MovingType == Player_Move_Type::Run) ? 360.0f : 50.0f;
-
+{ 
+	float Friction = (m_MovingType == Player_Move_Type::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
+	
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
 	Move(vel);  
@@ -73,9 +71,10 @@ void CPlayer::SetVelocity(const XMFLOAT3& dir)
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, m_xmf3Velocity.y, 0.0f);
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity,
-		Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY));
+		Vector3::Multifly(normalizedDir, PLAYER_RUN_SPEED));
 
-	float speed = m_MovingType == (Player_Move_Type::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
+	float speed = m_MovingType == (Player_Move_Type::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
+
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;
 	if (m_xmf3Velocity.z > speed) m_xmf3Velocity.z = speed;
