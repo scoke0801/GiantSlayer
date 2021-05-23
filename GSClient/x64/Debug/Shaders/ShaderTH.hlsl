@@ -923,7 +923,7 @@ struct VS_FBX_ANIMATED_INPUT
 	float3 position : POSITION;
 	float2 uv : TEXCOORD;
 	float3 normal : NORMAL;
-	float3 weights : BONEWEIGHT;
+	float4 weights : BONEWEIGHT;
 	uint4 indices : BONEINDEX;
 };
 
@@ -943,34 +943,31 @@ VS_FBX_ANIMATED_OUTPUT VSFbxAnimated(VS_FBX_ANIMATED_INPUT input)
 	TempWeights[0] = input.weights.x;
 	TempWeights[1] = input.weights.y;
 	TempWeights[2] = input.weights.z;
-	TempWeights[3] = 1.0f - TempWeights[0] - TempWeights[1] - TempWeights[2];
+	TempWeights[3] = input.weights.w;
+	
+	/*if(input.weights.w < 0.001f) 
+		TempWeights[3] = 1.0f - TempWeights[0] - TempWeights[1] - TempWeights[2];
+	else
+		TempWeights[3] = input.weights.w;*/
 
 	float3 TempPos = float3(0.0f, 0.0f, 0.0f);
 	float3 TempNormal = float3(0.0f, 0.0f, 0.0f);
 
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 4; i++)
 	{
-		//TempPos += TempWeights[i] * mul(float4(input.position, 1.0f), gpmtxBoneTransforms[input.indices[i]]).xyz;
-		TempPos += TempWeights[i] * mul(gpmtxBoneTransforms[input.indices[i]], float4(input.position, 1.0f)).xyz;
+		TempPos += TempWeights[i] * mul(float4(input.position, 1.0f), gpmtxBoneTransforms[input.indices[i]]).xyz;
+		//TempPos += TempWeights[i] * mul(gpmtxBoneTransforms[input.indices[i]], float4(input.position, 1.0f)).xyz;
 		TempNormal += TempWeights[i] * mul(input.normal, (float3x3)gpmtxBoneTransforms[input.indices[i]]);
 	}
 
-	input.position = TempPos;
-	input.normal = TempNormal;
+	//input.position = TempPos;
+	//input.normal = TempNormal;
 
 	float4 TempPosW = mul(float4(input.position, 1.0f), gmtxWorld);
 	output.positionW = TempPosW.xyz;
 	output.position = mul(mul(TempPosW, gmtxView), gmtxProjection);
 	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
 	output.uv = input.uv;
-
-	/*
-	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
-	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxWorld);
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-	output.uv = input.uv;
-
-	*/
 
 	return(output);
 }

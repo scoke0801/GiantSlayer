@@ -26,7 +26,6 @@
 #define ROOT_PARAMETER_LIGHT				5
 #define ROOT_PARAMETER_TEXTURE				6
 
-
 D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor;
 D3D12_GPU_DESCRIPTOR_HANDLE srvGpuStart;
 D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuStart;
@@ -216,7 +215,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
-	FbxLoader(m_pfbxManager, "idle01", true, 9);
+	//FbxLoader(m_pfbxManager, "idle01", true, 9);
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		m_ObjectLayers[i].reserve(50);

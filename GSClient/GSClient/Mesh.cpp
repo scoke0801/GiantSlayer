@@ -1041,15 +1041,19 @@ CAnimatedMesh::CAnimatedMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	XMFLOAT3* pos = new XMFLOAT3[m_nVertices];
 	XMFLOAT2* uv = new XMFLOAT2[m_nVertices];
 	XMFLOAT3* normal = new XMFLOAT3[m_nVertices];
-	XMFLOAT3* boneWeights = new XMFLOAT3[m_nVertices];
+	XMFLOAT4* boneWeights = new XMFLOAT4[m_nVertices];
 	XMUINT4* boneIndices = new XMUINT4[m_nVertices];
 
 	for (int i = 0; i < m_nVertices; i++) {
 		pos[i] = vertices[i].pos;
 		uv[i] = vertices[i].uv;
 		normal[i] = vertices[i].normal;
-		boneWeights[i] = vertices[i].weights;
-	
+
+		boneWeights[i].x = vertices[i].weights[0];
+		boneWeights[i].y = vertices[i].weights[1];
+		boneWeights[i].z = vertices[i].weights[2];
+		boneWeights[i].w = vertices[i].weights[3];
+		
 		boneIndices[i].x = vertices[i].indices[0];
 		boneIndices[i].y = vertices[i].indices[1];
 		boneIndices[i].z = vertices[i].indices[2];

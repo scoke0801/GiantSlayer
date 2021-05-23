@@ -923,7 +923,7 @@ struct VS_FBX_ANIMATED_INPUT
 	float3 position : POSITION;
 	float2 uv : TEXCOORD;
 	float3 normal : NORMAL;
-	float3 weights : BONEWEIGHT;
+	float4 weights : BONEWEIGHT;
 	uint4 indices : BONEINDEX;
 };
 
@@ -943,10 +943,14 @@ VS_FBX_ANIMATED_OUTPUT VSFbxAnimated(VS_FBX_ANIMATED_INPUT input)
 	TempWeights[0] = input.weights.x;
 	TempWeights[1] = input.weights.y;
 	TempWeights[2] = input.weights.z;
-	TempWeights[3] = 1.0f - TempWeights[0] - TempWeights[1] - TempWeights[2];
-	//TempWeights[3] = 0.0f;
+	TempWeights[3] = input.weights.w;
+	
+	/*if(input.weights.w < 0.001f) 
+		TempWeights[3] = 1.0f - TempWeights[0] - TempWeights[1] - TempWeights[2];
+	else
+		TempWeights[3] = input.weights.w;*/
 
-	float3 TempPos = float3(1.0f, 0.0f, 0.0f);
+	float3 TempPos = float3(0.0f, 0.0f, 0.0f);
 	float3 TempNormal = float3(0.0f, 0.0f, 0.0f);
 
 	for (int i = 0; i < 4; i++)

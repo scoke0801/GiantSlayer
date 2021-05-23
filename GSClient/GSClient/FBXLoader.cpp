@@ -1,58 +1,6 @@
 #include "stdafx.h"
 #include "FbxLoader.h"
 #include "Mesh.h"
-FbxAMatrix GeometricOffsetTransform(FbxNode* pfbxNode)
-{
-	const FbxVector4 T = pfbxNode->GetGeometricTranslation(FbxNode::eSourcePivot);
-	const FbxVector4 R = pfbxNode->GetGeometricRotation(FbxNode::eSourcePivot);
-	const FbxVector4 S = pfbxNode->GetGeometricScaling(FbxNode::eSourcePivot);
-
-	return(FbxAMatrix(T, R, S));
-}
-
-XMFLOAT4X4 FbxMatrixToXmFloat4x4(FbxAMatrix* pfbxmtxSource)
-{
-	FbxVector4 S = pfbxmtxSource->GetS();
-	FbxVector4 R = pfbxmtxSource->GetR();
-	FbxVector4 T = pfbxmtxSource->GetT();
-
-	FbxAMatrix fbxmtxTransform = FbxAMatrix(T, R, S);
-
-	XMFLOAT4X4 xmf4x4Result;
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++) xmf4x4Result.m[i][j] = (float)(*pfbxmtxSource)[i][j];
-	}
-
-	XMFLOAT3 xmf3S = XMFLOAT3((float)S.mData[0], (float)S.mData[1], (float)S.mData[2]);
-	XMFLOAT3 xmf3R = XMFLOAT3((float)R.mData[0], (float)R.mData[1], (float)R.mData[2]);
-	XMFLOAT3 xmf3T = XMFLOAT3((float)T.mData[0], (float)T.mData[1], (float)T.mData[2]);
-
-	XMMATRIX Rx = XMMatrixRotationX(XMConvertToRadians(xmf3R.x));
-	XMMATRIX Ry = XMMatrixRotationY(XMConvertToRadians(xmf3R.y));
-	XMMATRIX Rz = XMMatrixRotationZ(XMConvertToRadians(xmf3R.z));
-	XMMATRIX xmR = XMMatrixMultiply(XMMatrixMultiply(Rx, Ry), Rz);
-	XMFLOAT4X4 xmf4x4Multiply;
-	XMStoreFloat4x4(&xmf4x4Multiply, XMMatrixMultiply(XMMatrixMultiply(XMMatrixScaling(xmf3S.x, xmf3S.y, xmf3S.z), xmR), XMMatrixTranslation(xmf3T.x, xmf3T.y, xmf3T.z)));
-
-	return(xmf4x4Result);
-}
-
-void SetMatrixScale(FbxAMatrix& fbxmtxSrcMatrix, double pValue)
-{
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++) fbxmtxSrcMatrix[i][j] *= pValue;
-	}
-}
-
-void SetMatrixAdd(FbxAMatrix& fbxmtxDstMatrix, FbxAMatrix& fbxmtxSrcMatrix)
-{
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++) fbxmtxDstMatrix[i][j] += fbxmtxSrcMatrix[i][j];
-	}
-}
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -284,7 +232,6 @@ void FbxLoader::LoadBoneOffsets(FbxNode* pNode)
 			FbxAMatrix fbxTransformLinkMTX;
 			currCluster->GetTransformLinkMatrix(fbxTransformLinkMTX);
 			FbxAMatrix fbxGBindPoseInvMTX = fbxTransformLinkMTX.Inverse() * fbxTransformMTX * fbxmtxGeometryOffset;
-			//FbxAMatrix fbxGBindPoseInvMTX = fbxTransformLinkMTX * fbxTransformMTX * fbxmtxGeometryOffset;
 
 			XMFLOAT4X4 tempXMF4X4;
 			for (int row = 0; row < 4; row++) {
@@ -419,9 +366,8 @@ void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
 					tempKey.frameTime = static_cast<float>(k) / 8.0f;
 
 					FbxAMatrix currentTransformOffset =
-						pSceneEvaluator->GetNodeGlobalTransform(pNode, currTime);
-					//FbxAMatrix tempMTX = currentTransformOffset.Inverse() * pSceneEvaluator->GetNodeGlobalTransform(currCluster->GetLink(), currTime);
-					FbxAMatrix tempMTX = pSceneEvaluator->GetNodeGlobalTransform(currCluster->GetLink(), currTime);
+						pSceneEvaluator->GetNodeGlobalTransform(pNode, currTime) * fbxmtxGeometryOffset;
+					FbxAMatrix tempMTX = currentTransformOffset.Inverse() * pSceneEvaluator->GetNodeGlobalTransform(currCluster->GetLink(), currTime);
 
 					tempKey.translation = { static_cast<float>(tempMTX.GetT().mData[0]), static_cast<float>(tempMTX.GetT().mData[1]), static_cast<float>(tempMTX.GetT().mData[2]) };
 					tempKey.scale = { static_cast<float>(tempMTX.GetS().mData[0]), static_cast<float>(tempMTX.GetS().mData[1]), static_cast<float>(tempMTX.GetS().mData[2]) };

@@ -79,7 +79,7 @@ void CFbxObject::LoadFile(char* pstrFbxFileName)
 			tempVertex.uv.x >> tempVertex.uv.y >>
 			tempVertex.normal.x >> tempVertex.normal.y >> tempVertex.normal.z;
 		file >> tempVertex.indices[0] >> tempVertex.indices[1] >> tempVertex.indices[2] >> tempVertex.indices[3] >>
-				tempVertex.weights.x >> tempVertex.weights.y >> tempVertex.weights.z >> temp;
+				tempVertex.weights[0] >> tempVertex.weights[1] >> tempVertex.weights[2] >> tempVertex.weights[3];
 
 		tempVertex.pos.z *= -1;
 		vertices.push_back(tempVertex);
@@ -213,11 +213,6 @@ void CFbxObject::Animate(float fTimeElapsed)
 
 		XMStoreFloat4x4(&finTransform[i], XMMatrixTranspose(finalTransform));
 	}
-
-	/*cout << finTransform[nBones - 1]._11 << " " << finTransform[nBones - 1]._12 << " " << finTransform[nBones - 1]._13 << " " << finTransform[nBones - 1]._14 << " " <<
-		finTransform[nBones - 1]._21 << " " << finTransform[nBones - 1]._22 << " " << finTransform[nBones - 1]._23 << " " << finTransform[nBones - 1]._24 << " " <<
-		finTransform[nBones - 1]._31 << " " << finTransform[nBones - 1]._32 << " " << finTransform[nBones - 1]._33 << " " << finTransform[nBones - 1]._34 << " " <<
-		finTransform[nBones - 1]._41 << " " << finTransform[nBones - 1]._42 << " " << finTransform[nBones - 1]._43 << " " << finTransform[nBones - 1]._44 << endl;*/
 }
 
 void CFbxObject::Update(float fTimeElapsed)
