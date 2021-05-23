@@ -475,7 +475,10 @@ void CSceneJH::Update(float elapsedTime)
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
 		if (pPuzzle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pPuzzle);
-			cout << "충돌 : 플레이어 - 퍼즐\n";
+			m_isPlayerBoxCollide = true;
+			
+			
+			//cout << "충돌 : 플레이어 - 퍼즐아무\n";
 		}
 	} 
 	
@@ -755,6 +758,7 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 			D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ)); 
 	} 
 
+
 	/*if (m_CurrentCamera)
 	{
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
@@ -1028,14 +1032,24 @@ void CSceneJH::ProcessInput()
 		else
 			m_CurrentCamera->Strafe(cameraSpeed);
 	}
-	if (keyInput.KEY_B)
+	for (int i = 0; i < 7; i++)
 	{
-		m_CurrentCamera->SetShake(true, 0.5f, 5.0f);
+		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox())
+		{
+			//m_CurrentCamera->SetShake(true, 0.5f, 5.0f);
+			cout << "박스를 이동합니다";
+
+			m_PuzzleBox[i]->SetGripBox(true);
+		}
 	}
-	if (keyInput.KEY_1)
+	for (int i = 0; i < 7; i++)
 	{
-		m_Player->SetWeapon(PlayerWeaponType::Sword);
-		//m_CurrentCamera = m_Cameras[0];
+		if (keyInput.KEY_1)
+		{
+			m_PuzzleBox[i]->SetGripBox(false);
+			//m_Player->SetWeapon(PlayerWeaponType::Sword);
+			//m_CurrentCamera = m_Cameras[0];
+		}
 	}
 	if (keyInput.KEY_2)
 	{
@@ -1169,6 +1183,7 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 	if (false == m_IsFocusOn) {
 		return;
 	}
+
 	if (m_CurrentCamera->IsOnShake()) {
 		// 피격 상태일 때 잠시 제어권 뺏기
 		return;
@@ -1180,6 +1195,7 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 			RecvMouseProcessPacket();
 		}
 	}
+
 	ReleaseCapture();
 }
 
@@ -1525,32 +1541,43 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	pUI->SetShader(CShaderHandler::GetInstance().GetData("Minimap"));
 	pUI->Rotate(180);
 	m_UIs.push_back(pUI);
+	
 }
 
 void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
-	pPuzzlePlate->SetPosition({ 10600.0f, -2000.0f, 1500.0f + 8000.0f }); 
-	//m_Objects.push_back(std::move(pPuzzlePlate));
-	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pPuzzlePlate);
+		CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
+		pPuzzlePlate->SetPosition({ 10600.0f, -2000.0f, 1500.0f + 8000.0f });
+		//m_Objects.push_back(std::move(pPuzzlePlate));
+		m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pPuzzlePlate);
 
-	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
-	pObject->SetPosition({ 10500.0f, -2000.0f, 1500.0f + 8000.0f });
-	//m_Objects.push_back(std::move(pObject));
-	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
-	for (int i = 0; i < 2; ++i)
-	{
-		for (int j = 0; j < 5; ++j)
+		CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
+		pObject->SetPosition({ 10500.0f, -2000.0f, 1500.0f + 8000.0f });
+		//m_Objects.push_back(std::move(pObject));
+		m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
+		for (int i = 0; i < 8; ++i)
 		{
-			pObject = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
-			pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
-			pObject->SetTextureIndex(0x200);
-			pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-			pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f, XMFLOAT3{ 0,0,0 });
-			//m_Objects.push_back(std::move(pObject));
-			m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
+				m_PuzzleBox[i] = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
+				//pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
+				if (i > 3)
+				{
+					m_PuzzleBox[i]->SetPosition({ 0.0f + 1 * 1800.0f,  300, 1800.0f + i * 300.0f });
+				}
+				else
+				{
+					m_PuzzleBox[i]->SetPosition({ 0.0f + 0 * 1800.0f,  300, 1800.0f + i * 300.0f });
+				}
+				m_PuzzleBox[i]->SetTextureIndex(0x200);
+				m_PuzzleBox[i]->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+				m_PuzzleBox[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f, XMFLOAT3{ 0,0,0 });
+				m_PuzzleBox[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 150.0f * 0.5f, 100.0f * 0.5f, 150.0f * 0.5f }));
+				m_PuzzleBox[i]->SetSelectBox(FALSE);
+				m_PuzzleBox[i]->SetGripBox(FALSE);
+				//m_Objects.push_back(std::move(pObject));
+				m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox].push_back(m_PuzzleBox[i]);
+			
 		}
-	}
+	
 }
 
 void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -2278,10 +2305,11 @@ void CSceneJH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_pfbxManager = FbxManager::Create();
+	/*m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
-	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, ""); 
-	m_pfbxManager->SetIOSettings(m_pfbxIOs); 
+	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");   
+	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
+	  
 
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
@@ -2290,7 +2318,9 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
+ 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
+ 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow"); 
@@ -2443,9 +2473,10 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_MinimapCamera->SetTarget(m_Players[0]); 
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
-		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);  
 		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
 		//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
+ 
 		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 
 		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));

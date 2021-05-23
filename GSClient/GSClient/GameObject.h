@@ -254,16 +254,20 @@ public:
 private:
 	XMFLOAT3 m_xmf3RotationAxis;
 	float m_fRotationSpeed;
+	bool m_SelectedBox;
+	bool m_GripBox;
+
 
 public:
 	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
+	void SetSelectBox(bool SelectedBox) { m_SelectedBox = SelectedBox; }
+	bool GetSelectBox() { return m_SelectedBox; }
+
+	void SetGripBox(bool GripBox) { m_GripBox = GripBox; }
+	bool GetGriptBox() { return m_GripBox; }
 
 	virtual void Animate(float fTimeElapsed) {}
-
-	void PlayerSelecting();
-
-	
 };
 
 //////////////////////////////////////////////////////////////////////////////

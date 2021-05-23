@@ -490,9 +490,12 @@ bool CFramework::ConnectToServer()
 	SOCKADDR_IN serveraddr;
 	ZeroMemory(&serveraddr, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
+//	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
+	//serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVER_ROOP);
+	serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVERIP);
 	serveraddr.sin_port = htons(SERVERPORT);
-	 
+	//serveraddr.sin_port = ntohs(SERVERPORT);
+
 	// socket()
 	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_Sock == INVALID_SOCKET)
@@ -500,16 +503,43 @@ bool CFramework::ConnectToServer()
 		m_IsServerConnected = false;
 		return false;
 	}
+
 	int opt_val = TRUE;
 	setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
+	{
+		unsigned long arg = 1;
+		ioctlsocket(m_Sock, FIONBIO, &arg);
+	}
+	fd_set set;
+	FD_ZERO(&set);
+	timeval tvout = { 10000, 0 };  // 2 seconds timeout  
+	FD_SET(m_Sock, &set);
+
 	retval = connect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+
 	if (retval == SOCKET_ERROR)
 	{
+		int errNo = WSAGetLastError();
+		if (errNo != WSAEWOULDBLOCK) { 
+			error_display("cconnect() failed");
+			cout << "서버 연결 실패\n";
+			return false;
+		}
+		if (select(m_Sock + 1, NULL, &set, NULL, &tvout) <= 0) {
+			error_display("select/connect() failed"); 
+			cout << "서버 연결 실패\n";
+			return false;
+		} 
+		/*error_display("connect()");
 		m_IsServerConnected = false; 
 		cout << "서버 연결 실패\n";
-		return false;
+		return false;*/
 	}
 
+	{
+		unsigned long arg = 0;
+		ioctlsocket(m_Sock, FIONBIO, &arg);
+	}
 	// 소켓 통신 스레드 생성
 	CreateThread(NULL, 0, ClientMain,
 		NULL/*reinterpret_cast<LPVOID>(&gFramework)*/, 0, NULL);

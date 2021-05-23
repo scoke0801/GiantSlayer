@@ -23,6 +23,7 @@ int main(int argc, char* argv[])
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
 	serverAddr.sin_port = htons(SERVERPORT);
+
 	retVal = bind(listen_sock, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
 	if (retVal == SOCKET_ERROR) { error_quit("bind()"); }
 	 
