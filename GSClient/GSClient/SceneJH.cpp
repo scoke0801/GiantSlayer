@@ -1614,7 +1614,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / 125.0f, 10, 3050 * 0.75f / 125.0f, XMFLOAT3{ 0,-1.5f,0 });
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
 
-	/*pEnemy = new CMeleeEnemy();
+	pEnemy = new CMeleeEnemy();
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft")); 
 	pEnemy->Scale(125.0f, 125.0f, 125.0f);
 	pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
@@ -1627,7 +1627,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pEnemy->SetSightBoundingBox({ 1825 * 0.75f / 125.0f, 10, 3050 * 0.75f /125.0f });
 
 	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / 125.0f, 10, 3050 * 0.75f / 125.0f, XMFLOAT3{ 0,-1.5f,0 });
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));*/
+	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 	pEnemy = new CRangedEnemy();
 	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
