@@ -12,7 +12,8 @@
 
 //#define SERVERIP   "119.207.200.191"	 // 루프백 
 //#define SERVERIP   "192.168.0.3"	 // 루프백 
-#define SERVERIP   "192.168.35.158"// 종현 
+
+#define SERVERIP   "192.168.122.1"  // 학교 wifi 주소
 #define MAX_FILE_NAME_LAN 256
 
 #define UV_TEX 100.0F
