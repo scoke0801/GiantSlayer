@@ -463,6 +463,12 @@ void CGameObject::SetTargetVector(const XMFLOAT3& playerLookAt)
 CBox::CBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	float width, float height, float depth)
 {
+#define MAX_PRODUCT 10
+	typedef struct product {
+
+	}PRODUCT;
+	PRODUCT p[MAX_PRODUCT];
+
 	m_Name = OBJ_NAME::Box;
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
 		width, height, depth);

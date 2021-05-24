@@ -34,6 +34,16 @@ enum class OBJ_DIRECTION
 };
 string ConvertToObjectName(const OBJ_NAME& name);
 
+enum class ObjectState {
+	Wait,		// 상태와 상태 사이의 대기상태
+	Idle,		// 평소 상태
+	Patrol,		// 탐색 상태
+	Trace,		// 추격
+	Attack,		// 공격
+	Attacked,	// 피격
+	Die,		// 사망
+	RunAway		// 도망
+};
 
 class CGameObject
 {
@@ -51,6 +61,8 @@ protected:
 	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
 
 	OBJ_NAME			m_Name;
+	int					m_HP = 0;
+	int					m_SP = 0;
 
 	float				m_HeightFromTerrain = 0.0f;
 
@@ -101,7 +113,7 @@ public:
 	virtual bool CollisionCheck(CGameObject* other);
 
 	void FixCollision(); 
-	void FixCollision(CGameObject* pCollideObject);
+	virtual void FixCollision(CGameObject* pCollideObject);
 
 	virtual void UpdateColliders();
 
@@ -118,6 +130,11 @@ public:
 	
 	void SetSize(const XMFLOAT3& size) { m_xmf3Size = size; }
 	XMFLOAT3 GetSize()const { return m_xmf3Size; }
+
+	 virtual void FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
+
+	virtual void ChangeState(ObjectState stateInfo, void* pData) {}
+	virtual ObjectState GetStateInfo() const { return ObjectState::Wait; }
 
 public:
 	DirectX::XMFLOAT3 GetRight()const;

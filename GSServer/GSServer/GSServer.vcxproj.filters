@@ -23,6 +23,9 @@
     <Filter Include="Camera">
       <UniqueIdentifier>{b10d37d3-da58-4354-b8a3-82c0e630eacd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="State">
+      <UniqueIdentifier>{de84c23c-083f-4cb5-8d36-240e570c9265}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PacketProcessor.cpp">
@@ -47,6 +50,15 @@
       <Filter>Camera</Filter>
     </ClCompile>
     <ClCompile Include="MapObjects.cpp" />
+    <ClCompile Include="Enemy.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyState.cpp">
+      <Filter>State</Filter>
+    </ClCompile>
+    <ClCompile Include="State.cpp">
+      <Filter>State</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PacketProcessor.h">
@@ -69,6 +81,15 @@
       <Filter>Camera</Filter>
     </ClInclude>
     <ClInclude Include="MapObjects.h" />
+    <ClInclude Include="Enemy.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyState.h">
+      <Filter>State</Filter>
+    </ClInclude>
+    <ClInclude Include="State.h">
+      <Filter>State</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\ObjectPositionData.json" />

@@ -165,8 +165,14 @@ void CGameObject::UpdateColliders()
 }
 
 void CGameObject::AddAABB(const BoundingBox& boundingBox)
-{
+{  
 	m_AABB.push_back(boundingBox);
+}
+  
+void CGameObject::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1])
+{
+	m_xmf3Position.y = GetDetailHeight(heightsMap, m_xmf3Position.x, m_xmf3Position.z) + m_HeightFromTerrain;
+	SetPosition(m_xmf3Position);
 }
 
 XMFLOAT3 CGameObject::GetRight()const

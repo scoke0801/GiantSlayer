@@ -15,9 +15,12 @@ enum class OBJECT_LAYER : int {
 	Skybox,
 	TerrainWater,
 	Puzzle,
+	PuzzleBox,
 	Obstacle,
+	MirrorBox,
 	Enemy,
-	Arrow,
+	PlayerArrow,
+	MonsterArrow,
 	Billboard,
 	Fog,
 	Count,
@@ -37,7 +40,7 @@ private:
 
 	int							m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 
-	vector<CGameObject*>		m_Objects;
+	//vector<CGameObject*>		m_Objects;
 
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
 

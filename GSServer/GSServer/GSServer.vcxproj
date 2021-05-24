@@ -148,6 +148,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="EnemyState.cpp" />
     <ClCompile Include="MapObjects.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Communicates.cpp" />
@@ -155,11 +157,14 @@
     <ClCompile Include="PacketProcessor.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="State.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Enemy.h" />
+    <ClInclude Include="EnemyState.h" />
     <ClInclude Include="MapObjects.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Communicates.h" />
@@ -167,6 +172,7 @@
     <ClInclude Include="PacketProcessor.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="protocol.h" />
+    <ClInclude Include="State.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

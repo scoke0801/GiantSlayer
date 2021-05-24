@@ -2,6 +2,7 @@
 #include "PacketProcessor.h"
 #include "protocol.h" 
 #include "MapObjects.h"
+#include "Enemy.h"
 
 bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 { 
@@ -261,13 +262,17 @@ void PacketProcessor::InitAll()
 	InitMonsters();
 	InitObstacle();
 	BuildBlockingRegionOnMap();
+
+	cout << "서버 준비 완료!\n";
 }
 
 void PacketProcessor::Update(float elapsedTime)
 {
-	for (auto pObject : m_Objects) {
-		pObject->Update(elapsedTime);
-		pObject->UpdateColliders();
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+		for (auto pObject : m_ObjectLayers[i]) {
+			pObject->Update(elapsedTime);
+			pObject->UpdateColliders();
+		}
 	}
 	  
 	for (int i = 0; i < MAX_PLAYER; ++i) {
@@ -277,16 +282,68 @@ void PacketProcessor::Update(float elapsedTime)
 			m_Players[i]->FixPositionByTerrain(m_Heights);
 			m_Players[i]->FixCameraByTerrain(m_Heights);
 		}
-	}
-
-	// 오브젝트 - 플레이어 간 충돌처리
-	for (auto pObject : m_Objects) {
+	} 
+	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) { 
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			if (m_Players[i]->IsExist() == false) continue;
 
-			if (pObject->CollisionCheck(m_Players[i])) {
-				m_Players[i]->FixCollision(pObject);
+			if (pObstacle->CollisionCheck(m_Players[i])) {
+				m_Players[i]->FixCollision(pObstacle);
 				//cout << "충돌발생 - [오브젝트, 플레이어 " << i << "]\n";
+			}
+		}
+	}
+
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) { 
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+
+			if (pEnemy->CollisionCheck(m_Players[i])) { 
+				if (m_Players[i]->Attacked(pEnemy)) {
+					m_Players[i]->FixCollision();
+					cout << "충돌 : 플레이어 - 적\n";
+				}
+			}
+		}
+	}
+	//for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
+	//	// 변수명 변경으로 인한 true/false 반전..
+	//	if (true == pArrow->IsDrawable()) {
+	//		continue;
+	//	}
+	//	
+	//	for (int i = 0; i < MAX_PLAYER; ++i) {
+	//		if (m_Players[i]->IsExist() == false) continue;
+	//		if (pArrow->CollisionCheck(m_Players[i])) {
+	//			if (m_Players[i]->Attacked(pArrow)) {
+	//				pArrow->SetDrawable(true); 
+	//			}
+	//		}
+	//	}
+	//}
+	//for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
+	//	// 변수명 변경으로 인한 true/false 반전..
+	//	if (true == pArrow->IsDrawable()) {
+	//		continue;
+	//	}
+	//	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy])
+	//	{
+	//		if (pArrow->CollisionCheck(pEnemy)) {
+	//			pEnemy->ChangeState(ObjectState::Attacked, pArrow);
+	//			pArrow->SetDrawable(true);
+
+	//			cout << "충돌 : 플레이어 화살 - 적\n";
+	//			break;
+	//		}
+	//	}
+	//}
+	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
+		
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+			if (pPuzzle->CollisionCheck(m_Players[i])) {
+				m_Players[i]->FixCollision(pPuzzle);
+				//m_isPlayerBoxCollide = true; 
 			}
 		}
 	}
@@ -332,7 +389,184 @@ void PacketProcessor::InitCameras()
 
 void PacketProcessor::InitMonsters()
 {
-	
+	CEnemy* pEnemy;
+	XMFLOAT3 scale = { 125.0f,125.0f,125.0f };
+	{	// Monster Area1
+		pEnemy = new CRangedEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 2005.0f, GetDetailHeight(m_Heights,2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, GetDetailHeight(m_Heights, 2005.0f, 11650.0f), 11650.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum); 
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z }); 
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 2005.0f,  GetDetailHeight(m_Heights,2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f,  GetDetailHeight(m_Heights,2005.0f, 11650.0f), 11650.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy(); 
+		pEnemy->Scale(scale.x, scale.y, scale.z); 
+		pEnemy->SetPosition({ 2005.0f,  GetDetailHeight(m_Heights,2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f,  GetDetailHeight(m_Heights,2005.0f, 11650.0f), 11650.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z }); 
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+		 
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 2005.0f,  GetDetailHeight(m_Heights,2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f,  GetDetailHeight(m_Heights,2005.0f, 11650.0f), 11650.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+	}
+
+	{	// Monster Area1-2
+		pEnemy = new CRangedEnemy(); 
+		pEnemy->Scale(scale.x, scale.y, scale.z); 
+		pEnemy->SetPosition({ 7800.0f, GetDetailHeight(m_Heights,7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, GetDetailHeight(m_Heights, 800.0f,  11450.0f),  11450.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CRangedEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 7800.0f, GetDetailHeight(m_Heights,7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, GetDetailHeight(m_Heights, 800.0f,  11450.0f),  11450.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy(); 
+		pEnemy->Scale(scale.x, scale.y, scale.z); 
+		pEnemy->SetPosition({ 2005.0f, GetDetailHeight(m_Heights, 2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, GetDetailHeight(m_Heights,2005.0f, 11650.0f), 11650.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum); 
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z }); 
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 2005.0f, GetDetailHeight(m_Heights, 2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, GetDetailHeight(m_Heights,2005.0f, 11650.0f), 11650.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+	} 
+	{// Monster Area2-1
+
+		pEnemy = new CRangedEnemy(); 
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z); 
+		pEnemy->SetPosition({ 12100.0f,GetDetailHeight(m_Heights,12100.0f, 17950.0f), 17950.0f });
+		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f,GetDetailHeight(m_Heights,12100.0f, 17950.0f), 17950.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum); 
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z }); 
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CRangedEnemy(); 
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z); 
+		pEnemy->SetPosition({ 12100.0f,GetDetailHeight(m_Heights,12100.0f, 17950.0f), 17950.0f });
+		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f,GetDetailHeight(m_Heights,12100.0f, 17950.0f), 17950.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum); 
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z }); 
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy(); 
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z); 
+		pEnemy->SetPosition({ 12100.0f,GetDetailHeight(m_Heights,12100.0f, 17950.0f), 17950.0f });
+		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f,GetDetailHeight(m_Heights,12100.0f, 17950.0f), 17950.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum); 
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z }); 
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+	}
+
+	{// Monster Area2-2
+		pEnemy = new CRangedEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 11900.0f,GetDetailHeight(m_Heights,11900.0f, 13300.0f), 13300.0f });
+		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f,GetDetailHeight(m_Heights,11900.0f, 13300.0f), 13300.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 11900.0f,GetDetailHeight(m_Heights,11900.0f, 13300.0f), 13300.0f });
+		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f,GetDetailHeight(m_Heights,11900.0f, 13300.0f), 13300.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 11900.0f,GetDetailHeight(m_Heights,11900.0f, 13300.0f), 13300.0f });
+		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f,GetDetailHeight(m_Heights,11900.0f, 13300.0f), 13300.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+	}
+
+	{// Monster Area3
+		pEnemy = new CRangedEnemy();
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 11900.0f,GetDetailHeight(m_Heights,11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f,GetDetailHeight(m_Heights,11900.0f, 3250.0f), 3250.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CRangedEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 11900.0f,GetDetailHeight(m_Heights,11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, GetDetailHeight(m_Heights,11900.0f, 3250.0f), 3250.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CRangedEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 11900.0f, GetDetailHeight(m_Heights,11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, GetDetailHeight(m_Heights,11900.0f, 3250.0f), 3250.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
+
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetPosition({ 11900.0f, GetDetailHeight(m_Heights,11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, GetDetailHeight(m_Heights,11900.0f, 3250.0f), 3250.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+	}
 }
 
 void PacketProcessor::ReadObstaclesPosition()
@@ -417,37 +651,37 @@ void PacketProcessor::InitObstacle()
 	CGameObject* pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_1]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
-	pObject->UpdateColliders();
-	m_Objects.push_back(std::move(pObject));
+	pObject->UpdateColliders();	
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_2]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	pObject->UpdateColliders();
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	pObject->UpdateColliders();
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 ///////////////////////////////////////////////////////////////////////////////// 
 
 // PUZZLE----------------------------------------------------------------------
 	pObject = new CPuzzle(OBJECT_ID::PUZZLE_1);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::PUZZLE_1]); 
-	m_Objects.push_back(std::move(pObject));
+	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::PUZZLE_1]);
+	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
 
 	XMFLOAT3 tempPos = m_ObjectPositions[OBJECT_ID::PUZZLE_1];
 	tempPos.x += 100;
 	pObject = new CPlate(OBJECT_ID::PUZZLE_1_PLATE);
 	pObject->SetPosition(tempPos);
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
 
 	for (int i = 0; i < 10; ++i) {
 		pObject = new CPuzzleBox((OBJECT_ID)((int)OBJECT_ID::PUZZLE_BOX_1 + i));
 		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::PUZZLE_BOX_1 + i)]);
-		m_Objects.push_back(std::move(pObject));
+		m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox].push_back(pObject);
 	}
 	//pObject = new CPuzzle(OBJECT_ID::PUZZLE_2);
 	//pObject->SetPosition(m_ObjectPositions[OBJECT_ID::PUZZLE_2]);
@@ -457,50 +691,50 @@ void PacketProcessor::InitObstacle()
 // DoorWall----------------------------------------------------------------------
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC1);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC1]);
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC2);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC2]);
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC3);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC3]);
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC4);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC4]);
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC5);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC5]);
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject(); 
 	pObject->Rotate({ 0,1,0 }, 90);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::WALL_1]);
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->Rotate({ 0,1,0 }, 90);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::WALL_2]);
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 ////////////////////////////////////////////////////////////////////////////////
 
 // Sign-------------------------------------------------------------------------
 	pObject = new CSign(OBJECT_ID::SIGN_SCROLL);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_SCROLL]);
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CSign(OBJECT_ID::SIGN_PUZZLE);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_PUZZLE]);
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CSign(OBJECT_ID::SIGN_MEDUSA);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_MEDUSA]);
 	pObject->Rotate({ 0,1,0 }, 90.0f);
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	//pObject = new CSign(OBJECT_ID::BOSS);
 	//pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BOSS]);
@@ -513,7 +747,7 @@ void PacketProcessor::InitObstacle()
 		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_ROCK_1 + i)]);
 		pObject->Scale(50, 50, 50);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5 * 0.5f, 7 * 0.5f, 3 * 0.5f)));
-		m_Objects.push_back(std::move(pObject));
+		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	} 
 
 	for (int i = 0; i < 2; ++i) {
@@ -522,7 +756,7 @@ void PacketProcessor::InitObstacle()
 		pObject->Rotate({ 0,1,0 }, 60 + 30 * i);
 		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_1 + i)]);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
-		m_Objects.push_back(std::move(pObject));
+		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 	for (int i = 0; i < 2; ++i) {
 		pObject = new CGameObject();
@@ -530,27 +764,27 @@ void PacketProcessor::InitObstacle()
 		pObject->Rotate({ 0,1,0 }, 0 + 15 * i);
 		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_3 + i)]);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
-		m_Objects.push_back(std::move(pObject));
+		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 
 	pObject = new CGameObject();
 	pObject->Scale(20.0f, 20.0f, 20.0f);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DRY_FOREST_STUMP_1]);
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(15 *0.5f, 10 * 0.5f, 15 * 0.5f)));
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();	
 	pObject->Scale(150.0f, 150.0f, 150.0f);
 	pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_1)]);
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	for (int i = 0; i < 2; ++i) {
 		pObject = new CGameObject(); 
 		pObject->Scale(150.0f + 50 * i, 150.0f + 50 * i, 150.0f + 50 * i);
 		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_2 + i)]);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
-		m_Objects.push_back(std::move(pObject));
+		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 
 	for (int i = 0; i < 5; ++i) {
@@ -569,7 +803,7 @@ void PacketProcessor::InitObstacle()
 		pObject = new CGameObject();
 		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_1 + i)]);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600*0.5f, 250 * 0.5f, 600 * 0.5f)));
-		m_Objects.push_back(std::move(pObject));
+		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 
 	for (int i = 0; i < 6; ++i) {
@@ -593,7 +827,7 @@ void PacketProcessor::InitObstacle()
 		pObject = new CGameObject();
 		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_6 + i)]);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
-		m_Objects.push_back(std::move(pObject));
+		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 
 	for (int i = 0; i < 4; ++i) {
@@ -602,7 +836,7 @@ void PacketProcessor::InitObstacle()
 		pObject = new CGameObject();
 		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_12 + i)]);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
-		m_Objects.push_back(std::move(pObject));
+		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 	int stop = 3;
 }
@@ -632,25 +866,25 @@ void PacketProcessor::BuildBlockingRegionOnMap()
 	pObject->SetPosition({ 0,-2000,10000 });
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f)));
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), 
 		XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f)));
 	pObject->SetPosition({ 19950,-2000,10000 });
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), 
 		XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 10000,-2000,00 });
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), 
 		XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 10000,-2000,19950 });
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	// Forest to DryDesrt 아래 방향 벽  
 	pObject = new CGameObject();
@@ -664,7 +898,7 @@ void PacketProcessor::BuildBlockingRegionOnMap()
 	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
 		XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 15200 * 0.5f)));
 	pObject->SetPosition({ 10000,-2000, 7600 });
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	// Forest 지역 내 못가는 지형 
 	pObject = new CGameObject();
@@ -672,27 +906,27 @@ void PacketProcessor::BuildBlockingRegionOnMap()
 		XMFLOAT3(2000 * 0.5f, 10000 * 0.5f, 7000 * 0.5f)));
 	pObject->SetPosition({ 4000 + 1000, -2000, 11100 });
 	pObject->UpdateColliders();
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	// Desrt to DryDesrt and Rock 왼쪽 벽
 	pObject = new CGameObject();
 	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
 		XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 12800 * 0.5f)));
 	pObject->SetPosition({ 13800, -2000, 7200 + 6400 });
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	// boss 지역 중간 벽
 	pObject = new CGameObject();
 	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
 		XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
 	pObject->SetPosition({ 15200 + 400,-2000, 2800 + 8000 });
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
 		XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
 	pObject->SetPosition({ 17600 + 400,-2000, 2800 + 8000 });
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	// 사막 지역 가로 벽
 	pObject = new CGameObject();
@@ -712,13 +946,13 @@ void PacketProcessor::BuildBlockingRegionOnMap()
 	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
 		XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 1200 + 13600,-2000, 8000 });
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->AddBoundingBox( BoundingBox(XMFLOAT3(0, 0, 0), 
 		XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 1200 + 13600 + 1600 + 2400,-2000, 8000 });
-	m_Objects.push_back(std::move(pObject));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 }
 
 void PacketProcessor::EnterNewSector(int sectorNum)
@@ -728,6 +962,6 @@ void PacketProcessor::EnterNewSector(int sectorNum)
 	CGameObject* obj = m_BlockingPlateToPreviousSector[sectorNum - 1];
 	m_BlockingPlateToPreviousSector.erase(sectorNum - 1);
 
-	m_Objects.push_back(std::move(obj));
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(obj);
 	EnterNewSector(sectorNum - 1);
 }

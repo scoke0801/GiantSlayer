@@ -3,6 +3,8 @@
 
 CPlayer::CPlayer()
 {
+	m_HP = 100;
+	m_SP = 100;
 }
 
 CPlayer::~CPlayer()
@@ -11,7 +13,21 @@ CPlayer::~CPlayer()
 }
 
 void CPlayer::Update(float fTimeElapsed)
-{ 
+{
+	if (false == m_IsCanAttack) {
+		m_AttackWaitingTime -= fTimeElapsed;
+
+		if (m_AttackWaitingTime < 0.0f) {
+			m_AttackWaitingTime = 0.0f;
+			m_IsCanAttack = true;
+		}
+	}
+
+	// ÇÇ°Ý
+	if (m_AttackedDelay > 0.0f) {
+		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
+	}
+
 	float Friction = (m_MovingType == Player_Move_Type::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 	
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
@@ -81,4 +97,18 @@ void CPlayer::SetVelocity(const XMFLOAT3& dir)
 	if (m_xmf3Velocity.x < -speed) m_xmf3Velocity.x = -speed;
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
+}
+
+bool CPlayer::Attacked(CGameObject* pObject)
+{
+	if (m_AttackedDelay > 0.0f) {
+		return false;
+	}
+	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
+	m_AttackedDelay += 1.5f;
+	m_HP -= 5;
+	if (m_HP <= 5) {
+		m_HP = 0;
+	}
+	return true;
 }
