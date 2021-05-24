@@ -67,6 +67,10 @@ protected:
 	float				m_HeightFromTerrain = 0.0f;
 
 	COLLISION_HANDLE_TYPE m_CollisionHandleType = COLLISION_HANDLE_TYPE::Stop;
+
+	// 재활용 처리를 위한 변수
+	bool				m_isUsing = true;
+
 protected:// 충돌처리 관련 변수
 	vector<BoundingBox>	m_BoundingBox;
 	vector<BoundingBox>	m_AABB;
@@ -107,6 +111,8 @@ public:
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetObjectName(const OBJ_NAME& name) { m_Name = name; }
 
+	virtual void SetIsUsable(bool drawable) { m_isUsing = drawable; }
+	bool IsUsable() const { return m_isUsing; }
 public:
 	// about collision
 	virtual bool CollisionCheck(const BoundingBox& pCollider);
@@ -121,7 +127,7 @@ public:
 	void AddAABB(const BoundingBox& boundingBox);
 
 	int GetColliderCount() const { return m_BoundingBox.size(); }
-
+	 
 	vector<BoundingBox>& GetColliders() { return m_BoundingBox; }
 	vector<BoundingBox>& GetAABB() { return m_AABB; }
 

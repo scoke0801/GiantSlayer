@@ -86,7 +86,8 @@ private:
 	void InitPlayers();
 	void InitCameras();
 	void InitMonsters();
-	
+	void InitArrows();
+
 	void ReadObstaclesPosition();
 	XMFLOAT3 GetPosition(const string& name, const Document& document);
 

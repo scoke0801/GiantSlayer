@@ -3,6 +3,7 @@
 #include "protocol.h" 
 #include "MapObjects.h"
 #include "Enemy.h"
+#include "Arrow.h"
 
 bool PacketProcessor::ProcessGameScene(SOCKET& socket)
 { 
@@ -261,6 +262,7 @@ void PacketProcessor::InitAll()
 	InitCameras();
 	InitMonsters();
 	InitObstacle();
+	InitArrows();
 	BuildBlockingRegionOnMap();
 
 	cout << "서버 준비 완료!\n";
@@ -306,37 +308,37 @@ void PacketProcessor::Update(float elapsedTime)
 			}
 		}
 	}
-	//for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
-	//	// 변수명 변경으로 인한 true/false 반전..
-	//	if (true == pArrow->IsDrawable()) {
-	//		continue;
-	//	}
-	//	
-	//	for (int i = 0; i < MAX_PLAYER; ++i) {
-	//		if (m_Players[i]->IsExist() == false) continue;
-	//		if (pArrow->CollisionCheck(m_Players[i])) {
-	//			if (m_Players[i]->Attacked(pArrow)) {
-	//				pArrow->SetDrawable(true); 
-	//			}
-	//		}
-	//	}
-	//}
-	//for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
-	//	// 변수명 변경으로 인한 true/false 반전..
-	//	if (true == pArrow->IsDrawable()) {
-	//		continue;
-	//	}
-	//	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy])
-	//	{
-	//		if (pArrow->CollisionCheck(pEnemy)) {
-	//			pEnemy->ChangeState(ObjectState::Attacked, pArrow);
-	//			pArrow->SetDrawable(true);
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pArrow->IsUsable()) {
+			continue;
+		}
+		
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+			if (pArrow->CollisionCheck(m_Players[i])) {
+				if (m_Players[i]->Attacked(pArrow)) {
+					pArrow->SetIsUsable(true);
+				}
+			}
+		}
+	}
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pArrow->IsUsable()) {
+			continue;
+		}
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy])
+		{
+			if (pArrow->CollisionCheck(pEnemy)) {
+				pEnemy->ChangeState(ObjectState::Attacked, pArrow);
+				pArrow->SetIsUsable(true);
 
-	//			cout << "충돌 : 플레이어 화살 - 적\n";
-	//			break;
-	//		}
-	//	}
-	//}
+				cout << "충돌 : 플레이어 화살 - 적\n";
+				break;
+			}
+		}
+	}
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
 		
 		for (int i = 0; i < MAX_PLAYER; ++i) {
@@ -566,6 +568,27 @@ void PacketProcessor::InitMonsters()
 		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
 		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+	}
+}
+
+void PacketProcessor::InitArrows()
+{
+	for (int i = 0; i < 10; ++i) {
+		CArrow* pArrow = new CArrow();
+		pArrow->SetPosition({ 500.0f,  100.0f, 1500.0f });
+		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
+		pArrow->Scale(25.0f, 25.0f, 25.0f);
+		pArrow->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow].push_back(pArrow);
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		CArrow* pArrow = new CArrow();
+		pArrow->SetPosition({ 500.0f,  100.0f, 1500.0f });
+		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
+		pArrow->Scale(100.0f, 100.0f, 50.0f);
+		pArrow->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
 	}
 }
 

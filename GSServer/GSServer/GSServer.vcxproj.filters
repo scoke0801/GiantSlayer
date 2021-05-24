@@ -59,6 +59,9 @@
     <ClCompile Include="State.cpp">
       <Filter>State</Filter>
     </ClCompile>
+    <ClCompile Include="Arrow.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PacketProcessor.h">
@@ -89,6 +92,9 @@
     </ClInclude>
     <ClInclude Include="State.h">
       <Filter>State</Filter>
+    </ClInclude>
+    <ClInclude Include="Arrow.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
