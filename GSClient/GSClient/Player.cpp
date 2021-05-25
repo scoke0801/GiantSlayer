@@ -67,9 +67,10 @@ void CPlayer::Update(float fTimeElapsed)
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
-	if (Vector3::Length(vel) > 0.0f) { 
+	//if (Vector3::Length(vel) > 0.0f) 
+	//{ 
 		Animate(fTimeElapsed );
-	}
+	//}
 	Move(vel);
 
 	if (false == m_isOnGround) {

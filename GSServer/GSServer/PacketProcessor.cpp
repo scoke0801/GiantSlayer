@@ -88,7 +88,7 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 	PACKET_PROTOCOL type = (PACKET_PROTOCOL)p_buf[1];
 	switch (type) {
 	case PACKET_PROTOCOL::C2S_LOGIN:
-	{ 
+	{
 		P_S2C_PROCESS_LOGIN p_processLogin;
 		p_processLogin.size = sizeof(p_processLogin);
 		p_processLogin.type = PACKET_PROTOCOL::S2C_LOGIN_HANDLE;
@@ -111,7 +111,7 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			p_processLogin.existPlayer[i] = m_Players[i]->IsExist();
 		}
-		SendPacket(p_id, &p_processLogin); 
+		SendPacket(p_id, &p_processLogin);
 
 		m_CurrentPlayerNum++;
 
@@ -172,7 +172,7 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 
 		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
 		p_keyboardProcess.size = sizeof(p_keyboardProcess);
-		p_keyboardProcess.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
+		p_keyboardProcess.type = PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT;
 
 		p_keyboardProcess.posX = FloatToInt(pos.x);
 		p_keyboardProcess.posY = FloatToInt(pos.y);
@@ -183,7 +183,7 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 		p_keyboardProcess.lookX = FloatToInt(look.x);
 		p_keyboardProcess.lookY = FloatToInt(look.y);
 		p_keyboardProcess.lookZ = FloatToInt(look.z);
-		SendPacket(p_id, &p_keyboardProcess); 
+		SendPacket(p_id, &p_keyboardProcess);
 	}
 	break;
 	case PACKET_PROTOCOL::C2S_INGAME_UPDATE_SYNC:
@@ -205,7 +205,7 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 			p_addPlayer.x = FloatToInt(pos.x);
 			p_addPlayer.y = FloatToInt(pos.y);
 			p_addPlayer.z = FloatToInt(pos.z);
-			SendPacket(p_id, &p_addPlayer); 
+			SendPacket(p_id, &p_addPlayer);
 		}
 
 		// 도어 변경 조건에 따라서
@@ -234,10 +234,51 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			p_syncUpdate.existance[i] = m_Players[i]->IsExist();
 		}
-		SendPacket(p_id, &p_syncUpdate); 
+		SendPacket(p_id, &p_syncUpdate);
 	}
 	break;
 	case PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT:
+	{
+		P_C2S_MOUSE_INPUT p_mouse = *reinterpret_cast<P_C2S_MOUSE_INPUT*>(p_buf);
+
+		BYTE size;
+		PACKET_PROTOCOL type;
+		MOUSE_INPUT_TYPE InputType;
+		short inputNum;
+		int xInput[MAX_MOUSE_INPUT];
+		int yInput[MAX_MOUSE_INPUT];
+
+		P_S2C_PROCESS_MOUSE p_mouseProcess;
+		ZeroMemory(&p_mouseProcess, sizeof(P_S2C_PROCESS_MOUSE));
+		p_mouseProcess.size = sizeof(P_S2C_PROCESS_MOUSE);
+		p_mouseProcess.type = PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT;
+		float playerRotateY = 0.0f;
+		float cameraRotateY = 0.0f;
+		float cameraOffset = 0.0f;
+		if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_LMOVE) {
+			for (int i = 0; i < p_mouse.inputNum; ++i) {
+				float dx = IntToFloat(p_mouse.xInput[i]);
+
+				m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+				playerRotateY += dx;
+				if (m_Players[p_mouse.id]->IsMoving())
+				{
+					//p_mouseProcess.playerRotateY += dx;
+					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
+				}
+			}
+			p_mouseProcess.playerRotateY = FloatToInt(playerRotateY);
+		}
+		else if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_RMOVE) {
+			for (int i = 0; i < p_mouse.inputNum; ++i) {
+				float offset = IntToFloat(p_mouse.yInput[i]);
+				cameraOffset += offset;
+				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset));
+			}
+			p_mouseProcess.cameraOffset = FloatToInt(cameraOffset);
+		}
+		SendPacket(p_id, &p_mouseProcess);
+	}
 		break;
 	default: 
 		cout << "Unknown Packet Type from Client[" << p_id << "] Packet Type [" << +p_buf[1] << "]" << endl;

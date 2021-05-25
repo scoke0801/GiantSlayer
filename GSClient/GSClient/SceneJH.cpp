@@ -1001,7 +1001,8 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 		break;
 	case PACKET_PROTOCOL::S2C_NEW_PLAYER:
 		cout << "Packet::NewPlayer[ServerToClient]\n";
-		P_S2C_ADD_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_ADD_PLAYER*>(&p_buf);
+		P_S2C_ADD_PLAYER p_addPlayer;
+		memcpy(&p_addPlayer, p_buf, p_buf[0]);
 		XMFLOAT3 pos = { IntToFloat(p_addPlayer.x), IntToFloat(p_addPlayer.y), IntToFloat(p_addPlayer.z) };
 
 		m_Players[p_addPlayer.id]->SetPosition(pos);
@@ -1015,8 +1016,8 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT: 
 	{
-		P_S2C_PROCESS_KEYBOARD p_keyboardProcess = *reinterpret_cast<P_S2C_PROCESS_KEYBOARD*>(&p_buf);
-
+		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
+		memcpy(&p_keyboardProcess, p_buf, p_buf[0]);
 		XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_keyboardProcess.posX),
 			IntToFloat(p_keyboardProcess.posY),
 			IntToFloat(p_keyboardProcess.posZ) };
@@ -1031,7 +1032,8 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 	}
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT:
-		P_S2C_PROCESS_MOUSE p_mouseProcess = *reinterpret_cast<P_S2C_PROCESS_MOUSE*>(&p_buf);
+		P_S2C_PROCESS_MOUSE p_mouseProcess; 
+		memcpy(&p_mouseProcess, p_buf, p_buf[0]);
 		if (p_mouseProcess.cameraOffset != 0) {
 			float offset = IntToFloat(p_mouseProcess.cameraOffset);
 			//cout << "offset : " << offset << "\n";
@@ -1066,8 +1068,8 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT:
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:
-		P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&p_buf);
-
+		P_S2C_UPDATE_SYNC p_syncUpdate;
+		memcpy(&p_syncUpdate, p_buf, p_buf[0]);
 		for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
 			if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
 
@@ -1397,8 +1399,8 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 		if (m_MousePositions.size() > 0) {
-			SendMouseInputPacket();
-			RecvMouseProcessPacket();
+			//SendMouseInputPacket();
+			//RecvMouseProcessPacket();
 		}
 	} 
 	ReleaseCapture();
