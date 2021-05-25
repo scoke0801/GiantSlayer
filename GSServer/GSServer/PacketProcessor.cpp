@@ -237,6 +237,8 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 		SendPacket(p_id, &p_syncUpdate); 
 	}
 	break;
+	case PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT:
+		break;
 	default: 
 		cout << "Unknown Packet Type from Client[" << p_id << "] Packet Type [" << +p_buf[1] << "]" << endl;
 		while (true) {
@@ -990,6 +992,8 @@ void PacketProcessor::SendPacket(int p_id, void* p)
 
 void recv_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags)
 {
+	if (dataBytes == 0) { 
+	}
 	auto session = reinterpret_cast<CLIENT*>(overlapped);
 	SOCKET client_s = session->m_socket;
 	auto ex_over = &session->m_recv_over;

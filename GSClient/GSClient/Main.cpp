@@ -213,7 +213,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEMOVE:
         gFramework->OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         //CInputHandler::GetInstance().MouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-        return 0;
+        return 0; 
+    case WM_SOCKET:
+        gFramework->OnHandleSocketMessage(wParam, lParam); 
+        break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
         //return gFramework->ProcessWindowInput(hWnd, message, wParam, lParam);

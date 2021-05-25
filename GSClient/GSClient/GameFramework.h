@@ -114,13 +114,12 @@ public: // about Mouse process
 	void OnMouseDown(WPARAM btnState, int x, int y) { if (m_CurrentScene) m_CurrentScene->OnMouseDown(btnState, x, y); }
 	void OnMouseUp(WPARAM btnState, int x, int y) { if (m_CurrentScene) m_CurrentScene->OnMouseUp(btnState, x, y); }
 	void OnMouseMove(WPARAM btnState, int x, int y) { if (m_CurrentScene) m_CurrentScene->OnMouseMove(btnState, x, y); }
-
+	void OnHandleSocketMessage(WPARAM wParam, LPARAM lParam);
 public:
 	HWND GetHWND() const { return m_hWnd; }
 
 public:	// about server
 	bool ConnectToServer();
-
 	void LoginToServer();
 	void LogoutToServer();
 	void Communicate();

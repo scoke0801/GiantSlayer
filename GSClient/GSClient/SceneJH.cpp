@@ -974,7 +974,8 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 	switch (type)
 	{  
 	case PACKET_PROTOCOL::S2C_LOGIN_HANDLE:
-		P_S2C_PROCESS_LOGIN p_processLogin = *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&p_buf);
+		P_S2C_PROCESS_LOGIN p_processLogin; //= *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&p_buf);
+		memcpy(&p_processLogin, p_buf, p_buf[0]);
 		if (p_processLogin.isSuccess)
 		{
 			XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_processLogin.x),
@@ -1097,10 +1098,6 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 		}
 		break;
 	}
-}
-
-void CSceneJH::DoRecv()
-{
 }
 
 void CSceneJH::LoginToServer()

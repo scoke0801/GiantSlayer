@@ -7,9 +7,10 @@
 #pragma comment(lib, "ws2_32")
 #include <WinSock2.h>  
 
+#define	WM_SOCKET				WM_USER + 1
 struct EX_OVER {
 	WSAOVERLAPPED   m_over;
-	WSABUF         m_wsabuf;
+	WSABUF          m_wsabuf;
 	unsigned char   m_packetbuf[MAX_BUFFER];
 	SOCKET m_csocket; // OP_ACCEPT 에서만 사용
 };

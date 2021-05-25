@@ -92,7 +92,7 @@ public:
 	virtual void Communicate(SOCKET& sock) {}
 
 	virtual void ProcessPacket(unsigned char* p_buf) {}
-	virtual void DoRecv() {}
+	virtual void DoRecv();
 
 	virtual void LoginToServer() {}
 	virtual void LogoutToServer() {}

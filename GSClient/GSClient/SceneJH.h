@@ -140,7 +140,6 @@ public:
 	void Communicate(SOCKET& sock) override;
 
 	void ProcessPacket(unsigned char* p_buf) override;
-	void DoRecv() override;
 
 	void LoginToServer()  override;
 	void LogoutToServer() override;

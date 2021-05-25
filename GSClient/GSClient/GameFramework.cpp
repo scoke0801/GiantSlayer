@@ -477,6 +477,24 @@ void CFramework::Draw()
 	LeaveCriticalSection(&m_cs);
 }
 
+void CFramework::OnHandleSocketMessage(WPARAM wParam, LPARAM lParam)
+{
+	{
+		if (WSAGETSELECTERROR(lParam)) {
+			closesocket((SOCKET)wParam);
+			error_display("WSAGETSELECTERROR"); 
+		}
+		switch (WSAGETSELECTEVENT(lParam)) {
+		case FD_READ:
+			m_CurrentScene->DoRecv(); 
+			break;
+		case FD_CLOSE:
+			closesocket((SOCKET)wParam);
+			error_display("FD_CLOSE");
+		}
+	}
+}
+
 bool CFramework::ConnectToServer()
 {
 	static bool isFirst = true;
@@ -492,30 +510,25 @@ bool CFramework::ConnectToServer()
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_addr.s_addr = inet_addr(SERVER_ROOP);
 	//serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVERIP);
-	serveraddr.sin_port = htons(SERVERPORT);
+	serveraddr.sin_port = htons(SERVERPORT); 
 
 	// socket()
 	m_Sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-	if (m_Sock == INVALID_SOCKET)
+	if (m_Sock == INVALID_SOCKET) 
 	{
 		m_IsServerConnected = false;
 		return false;
 	}
-	int opt_val = TRUE;
-	setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
-	{
-		unsigned long arg = 1;
-		ioctlsocket(m_Sock, FIONBIO, &arg);
-	}
-	fd_set set;
-	FD_ZERO(&set);
-	timeval tvout = { 10000, 0 };  // 2 seconds timeout  
-	FD_SET(m_Sock, &set);
-
+	//int opt_val = TRUE;
+	//setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
+	
 	retval = connect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+	//retval = WSAConnect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr), NULL, NULL, NULL, NULL);
+
+	WSAAsyncSelect(m_Sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
 
 	g_Client.m_socket = m_Sock;
-
+	//m_CurrentScene->DoRecv();
 	if (retval == SOCKET_ERROR)
 	{
 		int errNo = WSAGetLastError();
@@ -524,28 +537,19 @@ bool CFramework::ConnectToServer()
 			cout << "서버 연결 실패\n";
 			return false;
 		}
-		if (select(m_Sock + 1, NULL, &set, NULL, &tvout) <= 0) {
-			error_display("select/connect() failed"); 
-			cout << "서버 연결 실패\n";
-			return false;
-		} 
 		/*error_display("connect()");
 		m_IsServerConnected = false; 
 		cout << "서버 연결 실패\n";
 		return false;*/
 	}
 
-	{
-		unsigned long arg = 0;
-		ioctlsocket(m_Sock, FIONBIO, &arg);
-	}
-	// 소켓 통신 스레드 생성
-	CreateThread(NULL, 0, ClientMain,
-		NULL/*reinterpret_cast<LPVOID>(&gFramework)*/, 0, NULL);
 	isFirst = false;
 	m_IsServerConnected = true;
 
-	return true;	
+	//// 소켓 통신 스레드 생성
+	CreateThread(NULL, 0, ClientMain,
+		NULL/*reinterpret_cast<LPVOID>(&gFramework)*/, 0, NULL);
+	return true;
 }
 
 void CFramework::LoginToServer()
