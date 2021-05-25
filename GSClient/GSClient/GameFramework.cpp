@@ -495,13 +495,12 @@ bool CFramework::ConnectToServer()
 	serveraddr.sin_port = htons(SERVERPORT);
 
 	// socket()
-	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
+	m_Sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (m_Sock == INVALID_SOCKET)
 	{
 		m_IsServerConnected = false;
 		return false;
 	}
-
 	int opt_val = TRUE;
 	setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
 	{
@@ -514,6 +513,8 @@ bool CFramework::ConnectToServer()
 	FD_SET(m_Sock, &set);
 
 	retval = connect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+
+	g_Client.m_socket = m_Sock;
 
 	if (retval == SOCKET_ERROR)
 	{

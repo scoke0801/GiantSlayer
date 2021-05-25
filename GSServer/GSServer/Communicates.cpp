@@ -120,8 +120,8 @@ DWORD __stdcall MainServerThread(LPVOID arg)
 		timeElapsed = std::chrono::system_clock::now() - currentTime;
 		currentTime = std::chrono::system_clock::now();
 		//cout << "TimeElapsed: " << timeElapsed.count() << " \n";
-		if (false == PacketProcessor::GetInstance()->ProcessGameScene(client_sock))
-			break;
+		//if (false == PacketProcessor::GetInstance()->ProcessGameScene(client_sock))
+		//	break;
 
 		PacketProcessor::GetInstance()->UpdateLoop();
 	}

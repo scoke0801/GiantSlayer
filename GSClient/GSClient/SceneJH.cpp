@@ -964,72 +964,143 @@ void CSceneJH::Communicate(SOCKET& sock)
 
 	int retVal;
 	bool haveToRecv = false;
-	SendPacket(CFramework::GetInstance().GetSocket(), reinterpret_cast<char*>(&p_syncUpdateRequest), p_syncUpdateRequest.size, retVal);
+	SendPacket(&p_syncUpdateRequest); 
+}
 
-	char buffer[BUFSIZE + 1] = {};
-	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-	PACKET_PROTOCOL type = (PACKET_PROTOCOL)buffer[1];
+void CSceneJH::ProcessPacket(unsigned char* p_buf)
+{
+	char buf[10000];
+	PACKET_PROTOCOL type = (PACKET_PROTOCOL)p_buf[1]; 
+	switch (type)
+	{  
+	case PACKET_PROTOCOL::S2C_LOGIN_HANDLE:
+		P_S2C_PROCESS_LOGIN p_processLogin = *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&p_buf);
+		if (p_processLogin.isSuccess)
+		{
+			XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_processLogin.x),
+				IntToFloat(p_processLogin.y), IntToFloat(p_processLogin.z) };
 
-	// 플레이어 추가 혹은 삭제 패킷 수신
-	if (type == PACKET_PROTOCOL::S2C_NEW_PLAYER) {
+			CFramework::GetInstance().SetPlayerId(p_processLogin.id);
+
+			cout << "Login id = " << p_processLogin.id << "\n";
+
+			m_Players[p_processLogin.id]->SetDrawable(true);
+
+			m_Player = m_Players[p_processLogin.id];
+			m_CurrentCamera = m_PlayerCameras[p_processLogin.id];
+			//m_Player->SetCamera(m_CurrentCamera); 
+			//m_CurrentCamera->SetTarget(m_Player);
+
+			m_MinimapCamera->SetTarget(m_Players[p_processLogin.id]);
+
+			for (int i = 0; i < MAX_PLAYER; ++i) {
+				m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
+			}
+		}
+		break;
+	case PACKET_PROTOCOL::S2C_NEW_PLAYER:
 		cout << "Packet::NewPlayer[ServerToClient]\n";
-		P_S2C_ADD_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_ADD_PLAYER*>(&buffer);
+		P_S2C_ADD_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_ADD_PLAYER*>(&p_buf);
 		XMFLOAT3 pos = { IntToFloat(p_addPlayer.x), IntToFloat(p_addPlayer.y), IntToFloat(p_addPlayer.z) };
 
 		m_Players[p_addPlayer.id]->SetPosition(pos);
 		m_Players[p_addPlayer.id]->SetDrawable(true);
 		++m_CurrentPlayerNum;
-		haveToRecv = true;
-	}
-	else if (type == PACKET_PROTOCOL::S2C_DELETE_PLAYER) { 
+		break;
+	case PACKET_PROTOCOL::S2C_DELETE_PLAYER:
 		cout << "Packet::DeletePlayer[ServerToClient]\n";
-		P_S2C_DELETE_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_DELETE_PLAYER*>(&buffer); 
-		m_Players[p_addPlayer.id]->SetDrawable(false);
-		haveToRecv = true;
-	}
-	// 갱신 정보를 다시 받아와야 하는 경우.
-	if (haveToRecv) {
-		ZeroMemory(buffer, sizeof(buffer));
-		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-		haveToRecv = false;
-	}
+		P_S2C_DELETE_PLAYER p_deletePlayer = *reinterpret_cast<P_S2C_DELETE_PLAYER*>(&p_buf);
+		m_Players[p_deletePlayer.id]->SetDrawable(false);
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT: 
+	{
+		P_S2C_PROCESS_KEYBOARD p_keyboardProcess = *reinterpret_cast<P_S2C_PROCESS_KEYBOARD*>(&p_buf);
 
-	// 새롭게 받아온 정보가 갱신 정보가 아닌 기타 정보인 경우.
-	if (type == PACKET_PROTOCOL::S2C_INGAME_DOOR_EVENT) {
-		cout << "Packet::DoorEvent[ServerToClient]\n";
-		haveToRecv = true;
-	}
-	if (type == PACKET_PROTOCOL::S2C_INGAME_END) {
-		cout << "Packet::GameEnd[ServerToClient]\n";
-		return;
-	}
+		XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_keyboardProcess.posX),
+			IntToFloat(p_keyboardProcess.posY),
+			IntToFloat(p_keyboardProcess.posZ) };
+		XMFLOAT3 look = XMFLOAT3{ IntToFloat(p_keyboardProcess.lookX),
+			IntToFloat(p_keyboardProcess.lookY),
+			IntToFloat(p_keyboardProcess.lookZ) };
 
-	// 모든 부가 정보들 갱신을 마치고 플레이어들 정보를 다시 받아와야 하는 경우.
-	if (haveToRecv) {
-		ZeroMemory(buffer, sizeof(buffer));
-		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-	}
-	P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&buffer);
+		m_Player->SetPosition(pos);
 
-	for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
-		if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
-
-		XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
-		XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
-
-		m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
-		m_Players[p_syncUpdate.id[i]]->UpdateCamera();
-		m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-		m_Players[p_syncUpdate.id[i]]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
+		m_Player->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
 			look, -PLAYER_RUN_SPEED));
-
-		m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
 	}
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT:
+		P_S2C_PROCESS_MOUSE p_mouseProcess = *reinterpret_cast<P_S2C_PROCESS_MOUSE*>(&p_buf);
+		if (p_mouseProcess.cameraOffset != 0) {
+			float offset = IntToFloat(p_mouseProcess.cameraOffset);
+			//cout << "offset : " << offset << "\n";
+			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
+		}
+		if (p_mouseProcess.cameraRotateX != 0) {
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX);
+		}
 
-	if (m_MousePositions.size() > 0) {
-		SendMouseInputPacket();
-		RecvMouseProcessPacket();
+		if (p_mouseProcess.cameraRotateY != 0) {
+			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY);
+			//cout << "cameraRotateY : " << rotateY << "\n";
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), rotateY);
+		}
+
+		if (p_mouseProcess.cameraRotateZ != 0) {
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ);
+		}
+		if (p_mouseProcess.playerRotateX != 0) {
+			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX);
+		}
+		if (p_mouseProcess.playerRotateY != 0) {
+			float rotateY = IntToFloat(p_mouseProcess.playerRotateY);
+			//cout << "playerRotateY : " << rotateY << "\n";
+			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY);
+			m_MinimapArrow->Rotate(-rotateY);
+		}
+		if (p_mouseProcess.playerRotateZ != 0) {
+			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ);
+		}
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT:
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:
+		P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&p_buf);
+
+		for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
+			if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
+
+			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
+			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
+
+			m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
+			m_Players[p_syncUpdate.id[i]]->UpdateCamera();
+			m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+			m_Players[p_syncUpdate.id[i]]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
+				look, -PLAYER_RUN_SPEED));
+
+			m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
+		}
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_DOOR_EVENT:
+		cout << "Packet::DoorEvent[ServerToClient]\n";
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_PUZZLE_EVENT:
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_END:
+		cout << "Packet::GameEnd[ServerToClient]\n"; 
+		break;
+	default:
+		cout << "Unknown Packet Type from server" << " Packet Type [" << +p_buf[1] << "]" << endl;
+		while (true) {
+			// 멈춰
+		}
+		break;
 	}
+}
+
+void CSceneJH::DoRecv()
+{
 }
 
 void CSceneJH::LoginToServer()
@@ -1040,55 +1111,7 @@ void CSceneJH::LoginToServer()
 	strcpy_s(p_login.name, CFramework::GetInstance().GetPlayerName().c_str());
 
 	int retVal;
-	SendPacket(CFramework::GetInstance().GetSocket(), reinterpret_cast<char*>(&p_login), p_login.size, retVal);
-
-	char buffer[BUFSIZE + 1] = {}; 
-	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-
-	P_S2C_PROCESS_LOGIN p_processLogin = *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&buffer);
-	if (p_processLogin.isSuccess)
-	{
-		XMFLOAT3 pos = XMFLOAT3{IntToFloat(p_processLogin.x), 
-			IntToFloat(p_processLogin.y), IntToFloat(p_processLogin.z) };
-		
-		CFramework::GetInstance().SetPlayerId(p_processLogin.id);
-
-		cout << "Login id = " << p_processLogin.id << "\n";
-		 
-		m_Players[p_processLogin.id]->SetDrawable(true);
-
-		m_Player = m_Players[p_processLogin.id];
-		m_CurrentCamera = m_PlayerCameras[p_processLogin.id];
-		//m_Player->SetCamera(m_CurrentCamera); 
-		//m_CurrentCamera->SetTarget(m_Player);
-
-		m_MinimapCamera->SetTarget(m_Players[p_processLogin.id]);
-		  
-		for (int i = 0; i < MAX_PLAYER; ++i) {
-			m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
-		}
-
-		// Sync Data
-		ZeroMemory(buffer, sizeof(buffer));
-		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-		
-		P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&buffer);
-		
-		m_CurrentPlayerNum = p_syncUpdate.playerNum;
-
-		for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
-			if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
-
-			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
-			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
-			 
-			m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
-			m_Players[p_syncUpdate.id[i]]->UpdateCamera();
-			m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-		
-			m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
-		}
-	}  
+	SendPacket(&p_login); 
 }
 
 void CSceneJH::LogoutToServer()
@@ -1158,32 +1181,8 @@ void CSceneJH::ProcessInput()
 		}
 		if (processKey == false) return;
 		int retVal = 0;
-		SendPacket(CFramework::GetInstance().GetSocket(),
-			reinterpret_cast<char*>(&p_keyboard), p_keyboard.size, retVal);
-
-		char buffer[BUFSIZE + 1] = {};
-		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-		 
-		P_S2C_PROCESS_KEYBOARD p_keyboardProcess = *reinterpret_cast<P_S2C_PROCESS_KEYBOARD*>(&buffer);
-		
-		XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_keyboardProcess.posX),
-			IntToFloat(p_keyboardProcess.posY), 
-			IntToFloat(p_keyboardProcess.posZ) };
-		XMFLOAT3 look = XMFLOAT3{ IntToFloat(p_keyboardProcess.lookX),
-			IntToFloat(p_keyboardProcess.lookY),
-			IntToFloat(p_keyboardProcess.lookZ) }; 
-
-		m_Players[p_keyboard.id]->SetPosition(pos);
-		//m_Players[p_keyboard.id]->FixPositionByTerrain(m_Terrain);
-		//m_Players[p_keyboard.id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), {0,1,0});
-		
-		m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
-			look, -PLAYER_RUN_SPEED));
-
-		//m_Players[p_keyboard.id]->LookAt(pos, look, { 0,1,0 });
-		//DisplayVector3(Vector3::Normalize(m_Players[p_keyboard.id]->GetLook()));
-		//DisplayVector3(pos, true);
-		return;
+		SendPacket(&p_keyboard);
+		return; 
 	}
 	if (m_CurrentCamera == nullptr) return;
 
@@ -3022,8 +3021,7 @@ void CSceneJH::SendMouseInputPacket()
 	p_mouseInput.InputType = m_prevMouseInputType; 
 
 	int retVal = 0;
-	SendPacket(CFramework::GetInstance().GetSocket(),
-		reinterpret_cast<char*>(&p_mouseInput), p_mouseInput.size, retVal);
+	SendPacket(&p_mouseInput);
 
 	//cout << "마우스 입력 전송 크기 : " << m_MousePositions.size() << "\n";
 	m_MousePositions.clear();
@@ -3142,6 +3140,7 @@ void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 void CSceneJH::RecvMouseProcessPacket()
 {
+	return;
 	int retVal;
 	char buffer[BUFSIZE + 1] = {};
 	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
@@ -3150,36 +3149,6 @@ void CSceneJH::RecvMouseProcessPacket()
 
 	// 플레이어 추가 혹은 삭제 패킷 수신
 	if (type == PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT) {
-		P_S2C_PROCESS_MOUSE p_mouseProcess = *reinterpret_cast<P_S2C_PROCESS_MOUSE*>(&buffer);
-		if (p_mouseProcess.cameraOffset != 0) {
-			float offset = IntToFloat(p_mouseProcess.cameraOffset);
-			//cout << "offset : " << offset << "\n";
-			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
-		}
-		if (p_mouseProcess.cameraRotateX != 0) {
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX);
-		}
-
-		if (p_mouseProcess.cameraRotateY != 0) {
-			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY);
-			//cout << "cameraRotateY : " << rotateY << "\n";
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), rotateY);
-		}
-
-		if (p_mouseProcess.cameraRotateZ != 0) { 
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ);
-		}
-		if (p_mouseProcess.playerRotateX != 0) {
-			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX);
-		} 
-		if (p_mouseProcess.playerRotateY != 0) {
-			float rotateY = IntToFloat(p_mouseProcess.playerRotateY);
-			//cout << "playerRotateY : " << rotateY << "\n";
-			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY );
-			m_MinimapArrow->Rotate(-rotateY );
-		} 
-		if (p_mouseProcess.playerRotateZ != 0) {
-			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ);
-		}
+		
 	}
 }

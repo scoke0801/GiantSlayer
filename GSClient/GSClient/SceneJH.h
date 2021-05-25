@@ -137,19 +137,22 @@ public:
 	void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
-	virtual void Communicate(SOCKET& sock) override;
+	void Communicate(SOCKET& sock) override;
 
-	virtual void LoginToServer()  override;
-	virtual void LogoutToServer() override;
+	void ProcessPacket(unsigned char* p_buf) override;
+	void DoRecv() override;
 
-	virtual void DeletePlayer(int playerId) override {}
-	virtual void AddPlayer(int palyerId) override {}
+	void LoginToServer()  override;
+	void LogoutToServer() override;
+
+	void DeletePlayer(int playerId) override {}
+	void AddPlayer(int palyerId) override {}
 public:
-	virtual void ProcessInput();
+	void ProcessInput() override;
 
-	virtual void OnMouseDown(WPARAM btnState, int x, int y) override;
-	virtual void OnMouseUp(WPARAM btnState, int x, int y)	override;
-	virtual void OnMouseMove(WPARAM btnState, int x, int y) override;
+	void OnMouseDown(WPARAM btnState, int x, int y) override;
+	void OnMouseUp(WPARAM btnState, int x, int y)	override;
+	void OnMouseMove(WPARAM btnState, int x, int y) override;
 
 public:
 	virtual void ReleaseUploadBuffers() override;

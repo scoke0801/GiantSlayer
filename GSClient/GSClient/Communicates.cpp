@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Communicates.h"
 
+SESSION g_Client = SESSION();
 
 void textConvert(const char* msg, wchar_t* ret)
 {
@@ -52,6 +53,27 @@ int recvn(SOCKET s, char* buf, int len, int flags)
     }
 
     return (len - left);
+}
+
+void SendPacket(void* p)
+{
+    unsigned char p_size = reinterpret_cast<unsigned char*>(p)[0];
+    unsigned char p_type = reinterpret_cast<unsigned char*>(p)[1];
+
+    EX_OVER* s_over = new EX_OVER;
+    memset(&s_over->m_over, 0, sizeof(s_over->m_over));
+    memcpy(s_over->m_packetbuf, p, p_size);
+    s_over->m_wsabuf.buf = reinterpret_cast<CHAR*>(s_over->m_packetbuf);
+    s_over->m_wsabuf.len = p_size;
+
+    auto ret = WSASend(g_Client.m_socket, &s_over->m_wsabuf, 1, NULL, 0, &s_over->m_over, NULL);
+    if (0 != ret) {
+        auto err_no = WSAGetLastError();
+        if (WSA_IO_PENDING != err_no) { 
+            cout << "로그아웃\n";
+            //disconnect(p_id);
+        }
+    }
 }
 
 bool SendPacket(SOCKET& sock, char* packet, int packetSize, int& retVal)
@@ -139,4 +161,29 @@ int ConvertoIntFromText(const char* text, const char* token)
 XMFLOAT3 GetVectorFromText(const char* text)
 {
     return XMFLOAT3();
+}
+
+void recv_callback(DWORD error, DWORD num_bytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags)
+{
+    auto session = reinterpret_cast<SESSION*>(overlapped);
+    SOCKET client_s = session->m_socket;
+    auto ex_over = &session->m_recv_over;
+
+    unsigned char* packet_ptr = ex_over->m_packetbuf;
+    int num_data = num_bytes + session->m_prev_size;
+    int packet_size = packet_ptr[0];
+
+    while (num_data >= packet_size) {
+        CFramework::GetInstance().GetCurrentScene()->ProcessPacket(packet_ptr); 
+        num_data -= packet_size;
+        packet_ptr += packet_size;
+        if (0 >= num_data) break;
+        packet_size = packet_ptr[0];
+    }
+    session->m_prev_size = num_data;
+    if (0 != num_data) {
+        memcpy(ex_over->m_packetbuf, packet_ptr, num_data);
+    }
+
+    CFramework::GetInstance().GetCurrentScene()->DoRecv(); 
 }

@@ -104,7 +104,6 @@ public:
 	void InitPrevUserData(int c_id);
 	void DoRecv(int c_id);
 	 
-	bool ProcessGameScene(SOCKET& socket); 
 	void ProcessPacket(int p_id, unsigned char* p_buf);
 private:
 	void Update(float elapsedTime);

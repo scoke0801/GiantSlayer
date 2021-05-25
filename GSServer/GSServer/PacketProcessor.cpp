@@ -78,23 +78,6 @@ void PacketProcessor::DoRecv(int s_id)
 	}
 }
 
-bool PacketProcessor::ProcessGameScene(SOCKET& socket)
-{
-	char buffer[BUFSIZE + 1] = {};
-	int count = 0;
-	int retval = 0;
-	bool packetRecvResult = RecvPacket(socket, buffer, retval);
-	if (false == packetRecvResult) {
-		auto res = m_SocketRegister.find(socket);
-		if (m_SocketRegister.end() != res) {
-			res->second;
-			m_Players[res->second]->SetExistence(false);
-			cout << res->second << " 로 그 아 웃\n";
-		}
-		return false;
-	} 
-	return false;
-}
 void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 {
 	char buf[10000];
@@ -132,22 +115,22 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 
 		m_CurrentPlayerNum++;
 
-		// 로그인 이후 데이터 싱크 맞추기 작업용 패킷 전송
-		P_S2C_UPDATE_SYNC p_syncUpdate;
-		p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
-		p_syncUpdate.size = sizeof(p_syncUpdate);
+		//// 로그인 이후 데이터 싱크 맞추기 작업용 패킷 전송
+		//P_S2C_UPDATE_SYNC p_syncUpdate;
+		//p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
+		//p_syncUpdate.size = sizeof(p_syncUpdate);
 
-		p_syncUpdate.playerNum = m_CurrentPlayerNum;
+		//p_syncUpdate.playerNum = m_CurrentPlayerNum;
 
-		for (int i = 0; i < m_CurrentPlayerNum; ++i) {
-			p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId());
+		//for (int i = 0; i < m_CurrentPlayerNum; ++i) {
+		//	p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId());
 
-			XMFLOAT3 pos = m_Players[i]->GetPosition();
-			p_syncUpdate.posX[i] = FloatToInt(pos.x);
-			p_syncUpdate.posY[i] = FloatToInt(pos.y);
-			p_syncUpdate.posZ[i] = FloatToInt(pos.z);
-		}
-		SendPacket(p_id, &p_syncUpdate); 
+		//	XMFLOAT3 pos = m_Players[i]->GetPosition();
+		//	p_syncUpdate.posX[i] = FloatToInt(pos.x);
+		//	p_syncUpdate.posY[i] = FloatToInt(pos.y);
+		//	p_syncUpdate.posZ[i] = FloatToInt(pos.z);
+		//}
+		//SendPacket(p_id, &p_syncUpdate); 
 	}
 	break;
 	case PACKET_PROTOCOL::C2S_LOGOUT:
