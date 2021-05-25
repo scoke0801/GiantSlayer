@@ -3,9 +3,11 @@
 constexpr int FRAME_BUFFER_WIDTH = 1280;
 constexpr int FRAME_BUFFER_HEIGHT = 768;
 
-constexpr int MAX_PLAYER = 5;
+constexpr int MAX_PLAYER = 5; 
 
-constexpr int MAX_PLAYER_NAME = 200;
+constexpr int MAX_BUFFER = 1024;
+constexpr int MAX_NAME = 200;
+
 constexpr int SERVERPORT = 9000;
 constexpr int BUFSIZE = 4096;
 constexpr int F_TO_I = 100000;
@@ -195,14 +197,14 @@ enum class PACKET_PROTOCOL : short
 struct P_C2S_LOGIN {
 	BYTE size;
 	PACKET_PROTOCOL type;
-	char name[MAX_PLAYER_NAME];
+	char name[MAX_NAME];
 };
 
 struct P_C2S_LOGOUT {
 	BYTE size;
 	PACKET_PROTOCOL type;
 	short id;
-	char name[MAX_PLAYER_NAME];
+	char name[MAX_NAME];
 };
 
 struct P_C2S_KEYBOARD_INPUT {

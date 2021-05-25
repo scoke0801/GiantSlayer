@@ -49,7 +49,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
-    <ClCompile Include="MapObjects.cpp" />
     <ClCompile Include="Enemy.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
@@ -60,6 +59,9 @@
       <Filter>State</Filter>
     </ClCompile>
     <ClCompile Include="Arrow.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="MapObjects.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
   </ItemGroup>
@@ -83,7 +85,6 @@
     <ClInclude Include="Camera.h">
       <Filter>Camera</Filter>
     </ClInclude>
-    <ClInclude Include="MapObjects.h" />
     <ClInclude Include="Enemy.h">
       <Filter>GameObject</Filter>
     </ClInclude>
@@ -94,6 +95,9 @@
       <Filter>State</Filter>
     </ClInclude>
     <ClInclude Include="Arrow.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="MapObjects.h">
       <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>

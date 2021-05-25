@@ -268,6 +268,54 @@ void PacketProcessor::InitAll()
 	cout << "¼­¹ö ÁØºñ ¿Ï·á!\n";
 }
 
+int PacketProcessor::GetNewPlayerId(SOCKET socket)
+{
+	for (int i = SERVER_ID + 1; i <= MAX_PLAYER; ++i) { 
+		if (PLST_FREE == players[i].m_state) {
+			players[i].m_state = PLST_CONNECTED;
+			players[i].m_socket = socket;
+			players[i].m_name[0] = 0;
+			return i;
+		}
+	}
+	return -1;
+}
+
+void PacketProcessor::InitPrevUserData(int c_id)
+{
+	players[c_id].m_prev_size = 0;
+}
+
+void PacketProcessor::DoRecv(int s_id)
+{
+	players[s_id].m_recv_over.m_wsabuf.buf = reinterpret_cast<char*>(players[s_id].m_recv_over.m_packetbuf) + players[s_id].m_prev_size;
+	players[s_id].m_recv_over.m_wsabuf.len = MAX_BUFFER - players[s_id].m_prev_size;
+
+	memset(&players[s_id].m_recv_over.m_over, 0, sizeof(players[s_id].m_recv_over.m_over));
+
+	DWORD r_flag = 0;
+	auto ret = WSARecv(players[s_id].m_socket, &players[s_id].m_recv_over.m_wsabuf, 1, NULL, &r_flag, &players[s_id].m_recv_over.m_over, recv_callback);
+
+	if (0 != ret) {
+		auto err_no = WSAGetLastError();
+		if (WSA_IO_PENDING != err_no) 
+			error_display("Error in RecvPacket: ");
+	}
+}
+
+void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
+{
+	char buf[10000];
+	int copyPos = 0;
+	switch (p_buf[1]) { 
+	default:
+		cout << "Unknown Packet Type from Client[" << p_id << "] Packet Type [" << +p_buf[1] << "]" << endl;
+		while (true) {
+			// ¸ØÃç
+		}
+	}
+}
+
 void PacketProcessor::Update(float elapsedTime)
 {
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
@@ -275,8 +323,7 @@ void PacketProcessor::Update(float elapsedTime)
 			pObject->Update(elapsedTime);
 			pObject->UpdateColliders();
 		}
-	}
-	  
+	} 
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		if (m_Players[i]->IsExist()) {
 			m_Players[i]->Update(elapsedTime);
@@ -987,4 +1034,35 @@ void PacketProcessor::EnterNewSector(int sectorNum)
 
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(obj);
 	EnterNewSector(sectorNum - 1);
+}
+
+void recv_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags)
+{
+	auto session = reinterpret_cast<SESSION*>(overlapped);
+	SOCKET client_s = session->m_socket;
+	auto ex_over = &session->m_recv_over;
+
+	unsigned char* packet_ptr = ex_over->m_packetbuf;
+	int num_data = dataBytes + session->m_prev_size;
+	int packet_size = packet_ptr[0];
+	 
+	while (num_data >= packet_size) {
+	//	bool PacketProcessor::ProcessGameScene(SOCKET & socket);
+		PacketProcessor::GetInstance()->ProcessGameScene(client_s);
+		PacketProcessor::GetInstance()->ProcessPacket(session->id, packet_ptr);
+		num_data -= packet_size;
+		packet_ptr += packet_size;
+		if (0 >= num_data) break;
+		packet_size = packet_ptr[0];
+	}
+	session->m_prev_size = num_data;
+	if (0 != num_data) {
+		memcpy(ex_over->m_packetbuf, packet_ptr, num_data);
+	}
+
+	PacketProcessor::GetInstance()->DoRecv(session->id);
+}
+
+void send_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags)
+{
 }

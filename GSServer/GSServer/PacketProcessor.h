@@ -26,11 +26,33 @@ enum class OBJECT_LAYER : int {
 	Count,
 };
 
+struct EX_OVER {
+	WSAOVERLAPPED   m_over;
+	WSABUF         m_wsabuf;
+	unsigned char   m_packetbuf[MAX_BUFFER];
+	SOCKET m_csocket; // OP_ACCEPT 에서만 사용
+};
+
+enum PL_STATE { PLST_FREE, PLST_CONNECTED, PLST_INGAME };
+struct SESSION {
+	EX_OVER		m_recv_over;
+	SOCKET		m_socket;	
+	PL_STATE	m_state;
+	int			id;
+
+	char		m_name[200];
+	int			m_prev_size;
+};
+
+constexpr int SERVER_ID = 0;
+
 class PacketProcessor
 {
 private:
-	unordered_map<SOCKET, int>	m_SocketRegister;
+	array <SESSION, MAX_PLAYER + 1> players;
 
+private:
+	unordered_map<SOCKET, int>	m_SocketRegister;
 	CRITICAL_SECTION			m_cs;
 	CPlayer*					m_Players[MAX_PLAYER];
 	CCamera*				    m_Cameras[MAX_PLAYER];
@@ -78,6 +100,12 @@ public:
 
 	void RegistSocket(SOCKET& socket, int id) { m_SocketRegister[socket] = id; }
 
+	int GetNewPlayerId(SOCKET socket);
+
+	void InitPrevUserData(int c_id);
+	void DoRecv(int c_id);
+
+	void ProcessPacket(int p_id, unsigned char* p_buf);
 private:
 	void Update(float elapsedTime);
 
@@ -102,3 +130,6 @@ private:
 private:
 	unordered_map<OBJECT_ID, XMFLOAT3> m_ObjectPositions;
 };
+
+void CALLBACK recv_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags);
+void CALLBACK send_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags);
