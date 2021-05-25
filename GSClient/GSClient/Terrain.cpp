@@ -79,21 +79,21 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	pObject->SetShader(pShader); 
 	pObject->SetTextureIndex(0x01); 
 	pObject->SetMesh(m_BindTerrainMesh); 
-	pObject->Scale(200.0f, 1.0f, 200.0f);
+	pObject->Scale(400.0f, 1.0f, 400.0f);
 	m_Objects.push_back(std::move(pObject)); 
 
 	pObject = new CGameObject();
 	pObject->SetShader(pShader);
 	pObject->SetTextureIndex(0x01);
 	pObject->SetMesh(m_BindTerrainMeshForLoosedWall[0]);
-	pObject->Scale(40.0f, 1.0f, 200.0f);
+	pObject->Scale(80.0f, 1.0f, 400.0f);
 	m_Objects.push_back(std::move(pObject));
 
 	pObject = new CGameObject();
 	pObject->SetShader(pShader);
 	pObject->SetTextureIndex(0x01);
 	pObject->SetMesh(m_BindTerrainMeshForLoosedWall[1]);
-	pObject->Scale(200.0f, 1.0f, 40.0f);
+	pObject->Scale(400.0f, 1.0f, 80.0f);
 	m_Objects.push_back(std::move(pObject)); 
 }
 
@@ -116,8 +116,8 @@ void CTerrain::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
  
 float CTerrain::GetHeight(int xPosition, int zPosition)
 {
-	int x = xPosition / 200;
-	int z = zPosition / 200;
+	int x = xPosition / 400;
+	int z = zPosition / 400;
 
 	return m_Heights[z][x];
 }
@@ -127,7 +127,7 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 	// 1. center
 	// 2. left end
 	// 3. right end
-	const float SCALE_SIZE = 200.0f;
+	const float SCALE_SIZE = 400.0f;
 	float fx = xPosition / SCALE_SIZE;
 	float fz = zPosition / SCALE_SIZE;
 
