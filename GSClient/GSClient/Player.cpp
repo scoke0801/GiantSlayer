@@ -67,7 +67,9 @@ void CPlayer::Update(float fTimeElapsed)
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
-	 
+	if (Vector3::Length(vel) > 0.0f) { 
+		Animate(fTimeElapsed );
+	}
 	Move(vel);
 
 	if (false == m_isOnGround) {
@@ -93,7 +95,6 @@ void CPlayer::Update(float fTimeElapsed)
 	if (fDeceleration > fLength) fDeceleration = fLength; 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 	 
-	Animate(fTimeElapsed);
 }
 
 void CPlayer::UpdateCamera()
@@ -138,7 +139,8 @@ void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
 	if (m_isOnGround) {
-		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z);
+		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z)
+			+ m_HeightFromTerrain; 
 	}
 }
  

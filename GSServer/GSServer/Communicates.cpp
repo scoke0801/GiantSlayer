@@ -52,7 +52,7 @@ int recvn(SOCKET s, char* buf, int len, int flags)
 
 	return (len - left);
 }
-
+ 
 bool SendPacket(SOCKET& sock, char* packet, int packetSize, int& retVal)
 {
 	// 데이터 보내기(고정 길이)

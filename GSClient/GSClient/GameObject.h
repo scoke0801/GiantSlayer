@@ -174,7 +174,7 @@ public:
 	vector<Collider*>& GetColliders() { return m_Colliders; }
 	vector<Collider*>& GetAABB() { return m_AABB; }
 
-	void FixPositionByTerrain(CTerrain* pTerrain);
+	virtual void FixPositionByTerrain(CTerrain* pTerrain);
 	 
 	virtual void ChangeState(ObjectState stateInfo, void* pData) {}
 public:

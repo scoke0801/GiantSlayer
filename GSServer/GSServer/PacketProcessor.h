@@ -34,7 +34,7 @@ struct EX_OVER {
 };
 
 enum PL_STATE { PLST_FREE, PLST_CONNECTED, PLST_INGAME };
-struct SESSION {
+struct CLIENT {
 	EX_OVER		m_recv_over;
 	SOCKET		m_socket;	
 	PL_STATE	m_state;
@@ -49,7 +49,7 @@ constexpr int SERVER_ID = 0;
 class PacketProcessor
 {
 private:
-	array <SESSION, MAX_PLAYER + 1> players;
+	array <CLIENT, MAX_PLAYER + 1> m_Clients;
 
 private:
 	unordered_map<SOCKET, int>	m_SocketRegister;
@@ -68,7 +68,9 @@ private:
 
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
-	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;
+	unordered_map<int, CGameObject*>		m_BlockingPlateToPreviousSector;
+
+	unordered_map<OBJECT_ID, XMFLOAT3>		m_ObjectPositions;
 private:
 	// for update timer
 	chrono::system_clock::time_point currentTime;
@@ -93,9 +95,6 @@ public:
 		static PacketProcessor self;
 		return &self;
 	}
-
-	bool ProcessGameScene(SOCKET& socket);
-
 	void UpdateLoop();
 
 	void RegistSocket(SOCKET& socket, int id) { m_SocketRegister[socket] = id; }
@@ -104,7 +103,8 @@ public:
 
 	void InitPrevUserData(int c_id);
 	void DoRecv(int c_id);
-
+	 
+	bool ProcessGameScene(SOCKET& socket); 
 	void ProcessPacket(int p_id, unsigned char* p_buf);
 private:
 	void Update(float elapsedTime);
@@ -128,7 +128,9 @@ private:
 	void EnterNewSector(int sectorNum);
 
 private:
-	unordered_map<OBJECT_ID, XMFLOAT3> m_ObjectPositions;
+
+private:
+	void SendPacket(int p_id, void* p);
 };
 
 void CALLBACK recv_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags);

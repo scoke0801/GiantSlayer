@@ -48,7 +48,7 @@ public:
 	void UpdateCamera();
 	void FixCameraByTerrain(CTerrain* pTerrain);
 
-	void FixPositionByTerrain(CTerrain* pTerrain);
+	void FixPositionByTerrain(CTerrain* pTerrain) override;
 	 
 public:
 

@@ -42,9 +42,6 @@ int main(int argc, char* argv[])
 	HANDLE hThread;
 	int registIndex = 0;
 	while (1) {
-		DWORD num_bytes;
-		ULONG_PTR ikey;
-		WSAOVERLAPPED* over;
 		// accept()
 		addrLen = sizeof(clientAddr);
 		client_sock = accept(listenSocket, (struct sockaddr*)&clientAddr, &addrLen);
@@ -54,15 +51,15 @@ int main(int argc, char* argv[])
 			break;
 		}
 
-		cout << "\n[TCP 서버] 클라이언트 접속 : IP 주소 = " << inet_ntoa(clientAddr.sin_addr)
-			<< ", 포트 번호 = " << ntohs(clientAddr.sin_port) << endl;
-		PacketProcessor::GetInstance()->RegistSocket(client_sock, registIndex++);
-
 		int c_id = PacketProcessor::GetInstance()->GetNewPlayerId(client_sock);
 
 		if (-1 != c_id) {
+			cout << "\n[TCP 서버] 클라이언트 접속 : IP 주소 = " << inet_ntoa(clientAddr.sin_addr)
+				<< ", 포트 번호 = " << ntohs(clientAddr.sin_port) << endl;
+			PacketProcessor::GetInstance()->RegistSocket(client_sock, registIndex++);
+
 			PacketProcessor::GetInstance()->InitPrevUserData(c_id); 
-			PacketProcessor::GetInstance()->DoRecv(c_id); 
+			PacketProcessor::GetInstance()->DoRecv(c_id);  
 		}
 		else {
 			closesocket(client_sock);

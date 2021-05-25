@@ -56,13 +56,13 @@ int recvn(SOCKET s, char* buf, int len, int flags)
 
 bool SendPacket(SOCKET& sock, char* packet, int packetSize, int& retVal)
 {  
-    // 데이터 보내기(고정 길이)
-    retVal = send(sock, (char*)&packetSize, sizeof(int), 0);
-    if (retVal == SOCKET_ERROR)
-    {
-        error_display("send()");
-        return false;
-    }
+    //// 데이터 보내기(고정 길이)
+    //retVal = send(sock, (char*)&packetSize, sizeof(int), 0);
+    //if (retVal == SOCKET_ERROR)
+    //{
+    //    error_display("send()");
+    //    return false;
+    //}
     // 데이터 보내기(가변 길이)
     retVal = send(sock, packet, packetSize, 0);
     if (retVal == SOCKET_ERROR)
@@ -77,14 +77,14 @@ bool RecvPacket(SOCKET& sock, char* buf, int& retVal)
 {
     // 데이터 받기(고정 길이)
     int len;
-    retVal = recvn(sock, (char*)&len, sizeof(int), 0);
+   /* retVal = recvn(sock, (char*)&len, sizeof(int), 0);
 
     if (retVal == SOCKET_ERROR)
     {
         error_display("recv()");
         return false;
     }
-    else if (retVal == 0) return false;
+    else if (retVal == 0) return false;*/
 
     // 데이터 받기(가변 길이)
     retVal = recvn(sock, buf, len, 0);

@@ -4,234 +4,7 @@
 #include "MapObjects.h"
 #include "Enemy.h"
 #include "Arrow.h"
-
-bool PacketProcessor::ProcessGameScene(SOCKET& socket)
-{ 
-	char buffer[BUFSIZE + 1] = {}; 
-	int count = 0;
-	int retval = 0;
-	bool packetRecvResult = RecvPacket(socket, buffer, retval); 
-	if (false == packetRecvResult) {
-		auto res = m_SocketRegister.find(socket);
-		if (m_SocketRegister.end() != res) {
-			res->second;
-			m_Players[res->second]->SetExistence(false);
-			cout << res->second << " 로 그 아 웃\n";
-		}
-		return false;
-	}
-	// buffer[0]의 값은 packet protocol size
-	// buffer[1]의 값은 packet protocol type
-	PACKET_PROTOCOL type = (PACKET_PROTOCOL)buffer[1];
-	switch (type) {
-	case PACKET_PROTOCOL::C2S_LOGIN:
-	{
-		//P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(buffer);
-		 
-		P_S2C_PROCESS_LOGIN p_processLogin;
-		p_processLogin.size = sizeof(p_processLogin);
-		p_processLogin.type = PACKET_PROTOCOL::S2C_LOGIN_HANDLE;
-		
-		if (m_CurrentPlayerNum > MAX_PLAYER) {
-			p_processLogin.isSuccess = false;
-		}
-		else{
-			p_processLogin.isSuccess = true; 
-
-			m_Players[m_CurrentPlayerNum]->SetExistence(true);
-			m_Players[m_CurrentPlayerNum]->SetId(m_CurrentPlayerNum);
-			XMFLOAT3 pos = m_Players[m_CurrentPlayerNum]->GetPosition();
-
-			p_processLogin.x = FloatToInt(pos.x);
-			p_processLogin.y = FloatToInt(pos.y);
-			p_processLogin.z = FloatToInt(pos.z);
-		} 
-		p_processLogin.id = m_CurrentPlayerNum;
-		for (int i = 0; i < MAX_PLAYER; ++i) {
-			p_processLogin.existPlayer[i] = m_Players[i]->IsExist();
-		}
-		SendPacket(socket, reinterpret_cast<char*>(&p_processLogin), sizeof(p_processLogin), retval);
-		
-		m_CurrentPlayerNum++;
-
-		// 로그인 이후 데이터 싱크 맞추기 작업용 패킷 전송
-		P_S2C_UPDATE_SYNC p_syncUpdate;
-		p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
-		p_syncUpdate.size = sizeof(p_syncUpdate);
-
-		p_syncUpdate.playerNum = m_CurrentPlayerNum;
-
-		for (int i = 0; i < m_CurrentPlayerNum; ++i) {
-			p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId());
-
-			XMFLOAT3 pos = m_Players[i]->GetPosition();
-			p_syncUpdate.posX[i] = FloatToInt(pos.x);
-			p_syncUpdate.posY[i] = FloatToInt(pos.y);
-			p_syncUpdate.posZ[i] = FloatToInt(pos.z);
-		}
-		SendPacket(socket, reinterpret_cast<char*>(&p_syncUpdate), sizeof(p_syncUpdate), retval);
-	}
-	return true;
-	case PACKET_PROTOCOL::C2S_LOGOUT:
-	{
-		P_C2S_LOGOUT p_logout = 
-			*reinterpret_cast<P_C2S_LOGOUT*>(buffer);
-		m_CurrentlyDeletedPlayerId = p_logout.id;
-		m_Players[p_logout.id]->SetExistence(false);
-	}
-	return true;
-	case PACKET_PROTOCOL::C2S_INGAME_MOUSE_INPUT: 
-	{ 
-		P_C2S_MOUSE_INPUT p_mouse = *reinterpret_cast<P_C2S_MOUSE_INPUT*>(buffer);
-		
-		BYTE size;
-		PACKET_PROTOCOL type;
-		MOUSE_INPUT_TYPE InputType;
-		short inputNum;
-		int xInput[MAX_MOUSE_INPUT];
-		int yInput[MAX_MOUSE_INPUT];
-
-		P_S2C_PROCESS_MOUSE p_mouseProcess;
-		ZeroMemory(&p_mouseProcess, sizeof(P_S2C_PROCESS_MOUSE));
-		p_mouseProcess.size = sizeof(P_S2C_PROCESS_MOUSE);
-		p_mouseProcess.type = PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT; 
-		float playerRotateY = 0.0f;
-		float cameraRotateY = 0.0f;
-		float cameraOffset = 0.0f;
-		if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_LMOVE) {
-			for (int i = 0; i < p_mouse.inputNum; ++i) { 
-				float dx = IntToFloat(p_mouse.xInput[i]);
-
-				m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
-				playerRotateY += dx;
-				if (m_Players[p_mouse.id]->IsMoving())
-				{
-					//p_mouseProcess.playerRotateY += dx;
-					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
-				}
-			}
-			p_mouseProcess.playerRotateY = FloatToInt(playerRotateY);
-		}
-		else if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_RMOVE) {
-			for (int i = 0; i < p_mouse.inputNum; ++i) {
-				float offset = IntToFloat(p_mouse.yInput[i]);
-				cameraOffset += offset;
-				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset));
-			}
-			p_mouseProcess.cameraOffset = FloatToInt(cameraOffset);
-		}
-		SendPacket(socket, reinterpret_cast<char*>(&p_mouseProcess), p_mouseProcess.size, retval);
-	}
-	return true;
-	case PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT:
-	{
-		P_C2S_KEYBOARD_INPUT p_keyboard =
-			*reinterpret_cast<P_C2S_KEYBOARD_INPUT*>(buffer);
-		
-		XMFLOAT3 pos = m_Players[p_keyboard.id]->GetPosition(); 
-		XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
-		float distance = PLAYER_RUN_SPEED;
-		 
-		switch (p_keyboard.keyInput)
-		{
-		case VK_W:
-			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
-				m_Cameras[p_keyboard.id]->GetLook3f(), distance)); 
-			break;
-		case VK_S:
-			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
-				m_Cameras[p_keyboard.id]->GetLook3f(), -distance));
-			break; 
-		case VK_A:
-			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
-				m_Cameras[p_keyboard.id]->GetRight3f(), -distance));
-			break;
-		case VK_D:
-			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift, 
-				m_Cameras[p_keyboard.id]->GetRight3f(), distance));
-			break;
-		}
-
-		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
-		p_keyboardProcess.size = sizeof(p_keyboardProcess);
-		p_keyboardProcess.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
-
-		p_keyboardProcess.posX = FloatToInt(pos.x);
-		p_keyboardProcess.posY = FloatToInt(pos.y);
-		p_keyboardProcess.posZ = FloatToInt(pos.z);
-
-		XMFLOAT3 look = Vector3::Normalize(m_Players[p_keyboard.id]->GetLook());
-		//DisplayVector3(look);
-		p_keyboardProcess.lookX = FloatToInt(look.x);
-		p_keyboardProcess.lookY = FloatToInt(look.y);
-		p_keyboardProcess.lookZ = FloatToInt(look.z);
-		
-		SendPacket(socket, reinterpret_cast<char*>(&p_keyboardProcess), p_keyboardProcess.size, retval);
-	}
-	return true;
-	case PACKET_PROTOCOL::C2S_INGAME_UPDATE_SYNC:
-	{
-		P_C2S_UPDATE_SYNC_REQUEST p_updateSyncRequest =
-			*reinterpret_cast<P_C2S_UPDATE_SYNC_REQUEST*>(buffer);
-
-		// 클라이언트의 유저 수와 다르게
-		// 새롭게 추가된 유저가 있는 경우 
-		// 추가된 유저의 정보를 클라이언트에 전송합니다.
-		int clientPlayerNum = p_updateSyncRequest.playerNum;
-		if (clientPlayerNum < m_CurrentPlayerNum) {
-			P_S2C_ADD_PLAYER p_addPlayer;
-			p_addPlayer.size = sizeof(p_addPlayer);
-			p_addPlayer.type = PACKET_PROTOCOL::S2C_NEW_PLAYER;
-			p_addPlayer.id = m_CurrentPlayerNum - 1;	// 가장 마지막에 들어온 유저
-			
-			XMFLOAT3 pos = m_Players[p_addPlayer.id]->GetPosition();
-			p_addPlayer.x = FloatToInt(pos.x);
-			p_addPlayer.y = FloatToInt(pos.y);
-			p_addPlayer.z = FloatToInt(pos.z);
-			SendPacket(socket, reinterpret_cast<char*>(&p_addPlayer), sizeof(p_addPlayer), retval);
-		}
-		//else if (clientPlayerNum > m_CurrentPlayerNum) {
-		//	P_S2C_DELETE_PLAYER p_deletePlayer;
-		//	p_deletePlayer.size = sizeof(p_deletePlayer);
-		//	p_deletePlayer.type = PACKET_PROTOCOL::S2C_DELETE_PLAYER;
-		//	p_deletePlayer.id = m_CurrentlyDeletedPlayerId;
-		//	SendPacket(socket, reinterpret_cast<char*>(&p_deletePlayer), p_deletePlayer.size, retval);
-		//} 
-
-		// 도어 변경 조건에 따라서
-		// 게임 엔딩 조건에 따라서 
-		// 추가적인 내용을 더 보내도록 코드 수정 필요 
-
-		P_S2C_UPDATE_SYNC p_syncUpdate;
-		p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
-		p_syncUpdate.size = sizeof(p_syncUpdate);
-
-		p_syncUpdate.playerNum = m_CurrentPlayerNum;
-
-		for (int i = 0; i < m_CurrentPlayerNum; ++i) {
-			p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId()); 
-			
-			XMFLOAT3 pos = m_Players[i]->GetPosition();
-			XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
-			p_syncUpdate.posX[i] = FloatToInt(pos.x);
-			p_syncUpdate.posY[i] = FloatToInt(pos.y);
-			p_syncUpdate.posZ[i] = FloatToInt(pos.z);
-
-			p_syncUpdate.lookX[i] = FloatToInt(look.x);
-			p_syncUpdate.lookY[i] = FloatToInt(look.y);
-			p_syncUpdate.lookZ[i] = FloatToInt(look.z); 
-		}
-		for (int i = 0; i < MAX_PLAYER; ++i) { 
-			p_syncUpdate.existance[i] = m_Players[i]->IsExist();
-		}
-		SendPacket(socket, reinterpret_cast<char*>(&p_syncUpdate), sizeof(p_syncUpdate), retval);
-	}
-	return true;
-	}
-	      
-	return false;
-}
-
+ 
 void PacketProcessor::UpdateLoop()
 {	 
 	timeElapsed = std::chrono::system_clock::now() - currentTime;
@@ -271,10 +44,11 @@ void PacketProcessor::InitAll()
 int PacketProcessor::GetNewPlayerId(SOCKET socket)
 {
 	for (int i = SERVER_ID + 1; i <= MAX_PLAYER; ++i) { 
-		if (PLST_FREE == players[i].m_state) {
-			players[i].m_state = PLST_CONNECTED;
-			players[i].m_socket = socket;
-			players[i].m_name[0] = 0;
+		if (PLST_FREE == m_Clients[i].m_state) {
+			m_Clients[i].m_state = PLST_CONNECTED;
+			m_Clients[i].m_socket = socket;
+			m_Clients[i].m_name[0] = 0;
+			m_Clients[i].id = i;
 			return i;
 		}
 	}
@@ -283,18 +57,19 @@ int PacketProcessor::GetNewPlayerId(SOCKET socket)
 
 void PacketProcessor::InitPrevUserData(int c_id)
 {
-	players[c_id].m_prev_size = 0;
+	m_Clients[c_id].m_prev_size = 0;
 }
 
 void PacketProcessor::DoRecv(int s_id)
 {
-	players[s_id].m_recv_over.m_wsabuf.buf = reinterpret_cast<char*>(players[s_id].m_recv_over.m_packetbuf) + players[s_id].m_prev_size;
-	players[s_id].m_recv_over.m_wsabuf.len = MAX_BUFFER - players[s_id].m_prev_size;
+	m_Clients[s_id].m_recv_over.m_wsabuf.buf = reinterpret_cast<char*>(m_Clients[s_id].m_recv_over.m_packetbuf) + m_Clients[s_id].m_prev_size;
+	m_Clients[s_id].m_recv_over.m_wsabuf.len = MAX_BUFFER - m_Clients[s_id].m_prev_size;
 
-	memset(&players[s_id].m_recv_over.m_over, 0, sizeof(players[s_id].m_recv_over.m_over));
+	memset(&m_Clients[s_id].m_recv_over.m_over, 0, sizeof(m_Clients[s_id].m_recv_over.m_over));
 
 	DWORD r_flag = 0;
-	auto ret = WSARecv(players[s_id].m_socket, &players[s_id].m_recv_over.m_wsabuf, 1, NULL, &r_flag, &players[s_id].m_recv_over.m_over, recv_callback);
+	auto ret = WSARecv(m_Clients[s_id].m_socket, &m_Clients[s_id].m_recv_over.m_wsabuf, 1, NULL,
+		&r_flag, &m_Clients[s_id].m_recv_over.m_over, recv_callback);
 
 	if (0 != ret) {
 		auto err_no = WSAGetLastError();
@@ -303,12 +78,183 @@ void PacketProcessor::DoRecv(int s_id)
 	}
 }
 
+bool PacketProcessor::ProcessGameScene(SOCKET& socket)
+{
+	char buffer[BUFSIZE + 1] = {};
+	int count = 0;
+	int retval = 0;
+	bool packetRecvResult = RecvPacket(socket, buffer, retval);
+	if (false == packetRecvResult) {
+		auto res = m_SocketRegister.find(socket);
+		if (m_SocketRegister.end() != res) {
+			res->second;
+			m_Players[res->second]->SetExistence(false);
+			cout << res->second << " 로 그 아 웃\n";
+		}
+		return false;
+	} 
+	return false;
+}
 void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 {
 	char buf[10000];
 	int copyPos = 0;
-	switch (p_buf[1]) { 
-	default:
+	int retval;
+	// buffer[0]의 값은 packet protocol size
+	// buffer[1]의 값은 packet protocol type
+	PACKET_PROTOCOL type = (PACKET_PROTOCOL)p_buf[1];
+	switch (type) {
+	case PACKET_PROTOCOL::C2S_LOGIN:
+	{ 
+		P_S2C_PROCESS_LOGIN p_processLogin;
+		p_processLogin.size = sizeof(p_processLogin);
+		p_processLogin.type = PACKET_PROTOCOL::S2C_LOGIN_HANDLE;
+
+		if (m_CurrentPlayerNum > MAX_PLAYER) {
+			p_processLogin.isSuccess = false;
+		}
+		else {
+			p_processLogin.isSuccess = true;
+
+			m_Players[m_CurrentPlayerNum]->SetExistence(true);
+			m_Players[m_CurrentPlayerNum]->SetId(m_CurrentPlayerNum);
+			XMFLOAT3 pos = m_Players[m_CurrentPlayerNum]->GetPosition();
+
+			p_processLogin.x = FloatToInt(pos.x);
+			p_processLogin.y = FloatToInt(pos.y);
+			p_processLogin.z = FloatToInt(pos.z);
+		}
+		p_processLogin.id = m_CurrentPlayerNum;
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			p_processLogin.existPlayer[i] = m_Players[i]->IsExist();
+		}
+		SendPacket(p_id, &p_processLogin); 
+
+		m_CurrentPlayerNum++;
+
+		// 로그인 이후 데이터 싱크 맞추기 작업용 패킷 전송
+		P_S2C_UPDATE_SYNC p_syncUpdate;
+		p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
+		p_syncUpdate.size = sizeof(p_syncUpdate);
+
+		p_syncUpdate.playerNum = m_CurrentPlayerNum;
+
+		for (int i = 0; i < m_CurrentPlayerNum; ++i) {
+			p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId());
+
+			XMFLOAT3 pos = m_Players[i]->GetPosition();
+			p_syncUpdate.posX[i] = FloatToInt(pos.x);
+			p_syncUpdate.posY[i] = FloatToInt(pos.y);
+			p_syncUpdate.posZ[i] = FloatToInt(pos.z);
+		}
+		SendPacket(p_id, &p_syncUpdate); 
+	}
+	break;
+	case PACKET_PROTOCOL::C2S_LOGOUT:
+	{
+		P_C2S_LOGOUT p_logout =
+			*reinterpret_cast<P_C2S_LOGOUT*>(p_buf);
+		m_CurrentlyDeletedPlayerId = p_logout.id;
+		m_Players[p_logout.id]->SetExistence(false);
+	}
+	break;
+	case PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT:
+	{
+		P_C2S_KEYBOARD_INPUT p_keyboard =
+			*reinterpret_cast<P_C2S_KEYBOARD_INPUT*>(p_buf);
+
+		XMFLOAT3 pos = m_Players[p_keyboard.id]->GetPosition();
+		XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
+		float distance = PLAYER_RUN_SPEED;
+
+		switch (p_keyboard.keyInput)
+		{
+		case VK_W:
+			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift,
+				m_Cameras[p_keyboard.id]->GetLook3f(), distance));
+			break;
+		case VK_S:
+			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift,
+				m_Cameras[p_keyboard.id]->GetLook3f(), -distance));
+			break;
+		case VK_A:
+			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift,
+				m_Cameras[p_keyboard.id]->GetRight3f(), -distance));
+			break;
+		case VK_D:
+			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift,
+				m_Cameras[p_keyboard.id]->GetRight3f(), distance));
+			break;
+		}
+
+		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
+		p_keyboardProcess.size = sizeof(p_keyboardProcess);
+		p_keyboardProcess.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
+
+		p_keyboardProcess.posX = FloatToInt(pos.x);
+		p_keyboardProcess.posY = FloatToInt(pos.y);
+		p_keyboardProcess.posZ = FloatToInt(pos.z);
+
+		XMFLOAT3 look = Vector3::Normalize(m_Players[p_keyboard.id]->GetLook());
+		//DisplayVector3(look);
+		p_keyboardProcess.lookX = FloatToInt(look.x);
+		p_keyboardProcess.lookY = FloatToInt(look.y);
+		p_keyboardProcess.lookZ = FloatToInt(look.z);
+		SendPacket(p_id, &p_keyboardProcess); 
+	}
+	break;
+	case PACKET_PROTOCOL::C2S_INGAME_UPDATE_SYNC:
+	{
+		P_C2S_UPDATE_SYNC_REQUEST p_updateSyncRequest =
+			*reinterpret_cast<P_C2S_UPDATE_SYNC_REQUEST*>(p_buf);
+
+		// 클라이언트의 유저 수와 다르게
+		// 새롭게 추가된 유저가 있는 경우 
+		// 추가된 유저의 정보를 클라이언트에 전송합니다.
+		int clientPlayerNum = p_updateSyncRequest.playerNum;
+		if (clientPlayerNum < m_CurrentPlayerNum) {
+			P_S2C_ADD_PLAYER p_addPlayer;
+			p_addPlayer.size = sizeof(p_addPlayer);
+			p_addPlayer.type = PACKET_PROTOCOL::S2C_NEW_PLAYER;
+			p_addPlayer.id = m_CurrentPlayerNum - 1;	// 가장 마지막에 들어온 유저
+
+			XMFLOAT3 pos = m_Players[p_addPlayer.id]->GetPosition();
+			p_addPlayer.x = FloatToInt(pos.x);
+			p_addPlayer.y = FloatToInt(pos.y);
+			p_addPlayer.z = FloatToInt(pos.z);
+			SendPacket(p_id, &p_addPlayer); 
+		}
+
+		// 도어 변경 조건에 따라서
+		// 게임 엔딩 조건에 따라서 
+		// 추가적인 내용을 더 보내도록 코드 수정 필요 
+
+		P_S2C_UPDATE_SYNC p_syncUpdate;
+		p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
+		p_syncUpdate.size = sizeof(p_syncUpdate);
+
+		p_syncUpdate.playerNum = m_CurrentPlayerNum;
+
+		for (int i = 0; i < m_CurrentPlayerNum; ++i) {
+			p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId());
+
+			XMFLOAT3 pos = m_Players[i]->GetPosition();
+			XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
+			p_syncUpdate.posX[i] = FloatToInt(pos.x);
+			p_syncUpdate.posY[i] = FloatToInt(pos.y);
+			p_syncUpdate.posZ[i] = FloatToInt(pos.z);
+
+			p_syncUpdate.lookX[i] = FloatToInt(look.x);
+			p_syncUpdate.lookY[i] = FloatToInt(look.y);
+			p_syncUpdate.lookZ[i] = FloatToInt(look.z);
+		}
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			p_syncUpdate.existance[i] = m_Players[i]->IsExist();
+		}
+		SendPacket(p_id, &p_syncUpdate); 
+	}
+	break;
+	default: 
 		cout << "Unknown Packet Type from Client[" << p_id << "] Packet Type [" << +p_buf[1] << "]" << endl;
 		while (true) {
 			// 멈춰
@@ -1036,9 +982,32 @@ void PacketProcessor::EnterNewSector(int sectorNum)
 	EnterNewSector(sectorNum - 1);
 }
 
+void PacketProcessor::SendPacket(int p_id, void* p)
+{
+	unsigned char p_size = reinterpret_cast<unsigned char*>(p)[0];
+	unsigned char p_type = reinterpret_cast<unsigned char*>(p)[1];
+
+	EX_OVER* s_over = new EX_OVER;
+	memset(&s_over->m_over, 0, sizeof(s_over->m_over));
+	memcpy(s_over->m_packetbuf, p, p_size);
+	s_over->m_wsabuf.buf = reinterpret_cast<CHAR*>(s_over->m_packetbuf);
+	s_over->m_wsabuf.len = p_size;
+	
+	auto ret = WSASend(m_Clients[p_id].m_socket, &s_over->m_wsabuf, 1, NULL, 0, &s_over->m_over, NULL);
+	if (0 != ret) {
+		auto err_no = WSAGetLastError();
+		if (WSA_IO_PENDING != err_no) {
+			error_display("WSASend : ");
+			m_Players[p_id]->SetExistence(false);
+			cout << "로그아웃\n";
+			//disconnect(p_id);
+		}
+	}
+}
+
 void recv_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags)
 {
-	auto session = reinterpret_cast<SESSION*>(overlapped);
+	auto session = reinterpret_cast<CLIENT*>(overlapped);
 	SOCKET client_s = session->m_socket;
 	auto ex_over = &session->m_recv_over;
 
@@ -1046,9 +1015,7 @@ void recv_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWO
 	int num_data = dataBytes + session->m_prev_size;
 	int packet_size = packet_ptr[0];
 	 
-	while (num_data >= packet_size) {
-	//	bool PacketProcessor::ProcessGameScene(SOCKET & socket);
-		PacketProcessor::GetInstance()->ProcessGameScene(client_s);
+	while (num_data >= packet_size) { 
 		PacketProcessor::GetInstance()->ProcessPacket(session->id, packet_ptr);
 		num_data -= packet_size;
 		packet_ptr += packet_size;
