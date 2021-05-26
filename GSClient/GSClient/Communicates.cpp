@@ -124,14 +124,12 @@ bool RecvPacket(SOCKET& sock, char* buf, int& retVal)
 void ProcessPacket(SOCKET& sock, char* packet, int packetSize, PACKET_PROTOCOL packetType)
 {
     int retVal = -1;
-   // 
-     
+   //  
     switch (packetType)
     {
     // client
     ///////////////////////////////////////////////////////////////////////////////
-    case PACKET_PROTOCOL::C2S_LOGIN:
-    
+    case PACKET_PROTOCOL::C2S_LOGIN: 
     break;
     case PACKET_PROTOCOL::C2S_LOGOUT:
     break;

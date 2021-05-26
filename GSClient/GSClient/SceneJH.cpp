@@ -964,7 +964,12 @@ void CSceneJH::Communicate(SOCKET& sock)
 
 	int retVal;
 	bool haveToRecv = false;
-	SendPacket(&p_syncUpdateRequest); 
+	SendPacket(&p_syncUpdateRequest);
+	
+	if (m_MousePositions.size() > 0) {
+		SendMouseInputPacket();
+		//RecvMouseProcessPacket();
+	}
 }
 
 void CSceneJH::ProcessPacket(unsigned char* p_buf)
@@ -1070,7 +1075,9 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:
 		P_S2C_UPDATE_SYNC p_syncUpdate;
 		memcpy(&p_syncUpdate, p_buf, p_buf[0]);
+		m_CurrentPlayerNum = p_syncUpdate.playerNum;
 		for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
+			m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
 			if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
 
 			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
@@ -1399,7 +1406,7 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 		if (m_MousePositions.size() > 0) {
-			//SendMouseInputPacket();
+			SendMouseInputPacket();
 			//RecvMouseProcessPacket();
 		}
 	} 

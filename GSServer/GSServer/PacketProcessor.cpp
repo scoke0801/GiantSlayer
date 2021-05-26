@@ -19,7 +19,7 @@ void PacketProcessor::UpdateLoop()
 		for (int i = 0; dLag > FPS && i < MAX_LOOP_TIME; ++i)
 		{
 			Update(FPS);
-			SendSyncUpdatePacket();
+			//SendSyncUpdatePacket();
 			dLag -= FPS;
 		}
 	}
@@ -74,8 +74,10 @@ void PacketProcessor::DoRecv(int s_id)
 
 	if (0 != ret) {
 		auto err_no = WSAGetLastError();
-		if (WSA_IO_PENDING != err_no) 
+		if (WSA_IO_PENDING != err_no) {
 			error_display("Error in RecvPacket: ");
+			Disconnect(s_id);
+		}
 	}
 }
 
@@ -114,24 +116,7 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 		}
 		SendPacket(p_id, &p_processLogin);
 
-		m_CurrentPlayerNum++;
-
-		//// 로그인 이후 데이터 싱크 맞추기 작업용 패킷 전송
-		//P_S2C_UPDATE_SYNC p_syncUpdate;
-		//p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
-		//p_syncUpdate.size = sizeof(p_syncUpdate);
-
-		//p_syncUpdate.playerNum = m_CurrentPlayerNum;
-
-		//for (int i = 0; i < m_CurrentPlayerNum; ++i) {
-		//	p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId());
-
-		//	XMFLOAT3 pos = m_Players[i]->GetPosition();
-		//	p_syncUpdate.posX[i] = FloatToInt(pos.x);
-		//	p_syncUpdate.posY[i] = FloatToInt(pos.y);
-		//	p_syncUpdate.posZ[i] = FloatToInt(pos.z);
-		//}
-		//SendPacket(p_id, &p_syncUpdate); 
+		m_CurrentPlayerNum++; 
 	}
 	break;
 	case PACKET_PROTOCOL::C2S_LOGOUT:
@@ -188,31 +173,7 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 	}
 	break;
 	case PACKET_PROTOCOL::C2S_INGAME_UPDATE_SYNC:
-	{
-		P_C2S_UPDATE_SYNC_REQUEST p_updateSyncRequest =
-			*reinterpret_cast<P_C2S_UPDATE_SYNC_REQUEST*>(p_buf);
-
-		// 클라이언트의 유저 수와 다르게
-		// 새롭게 추가된 유저가 있는 경우 
-		// 추가된 유저의 정보를 클라이언트에 전송합니다.
-		int clientPlayerNum = p_updateSyncRequest.playerNum;
-		if (clientPlayerNum < m_CurrentPlayerNum) {
-			P_S2C_ADD_PLAYER p_addPlayer;
-			p_addPlayer.size = sizeof(p_addPlayer);
-			p_addPlayer.type = PACKET_PROTOCOL::S2C_NEW_PLAYER;
-			p_addPlayer.id = m_CurrentPlayerNum - 1;	// 가장 마지막에 들어온 유저
-
-			XMFLOAT3 pos = m_Players[p_addPlayer.id]->GetPosition();
-			p_addPlayer.x = FloatToInt(pos.x);
-			p_addPlayer.y = FloatToInt(pos.y);
-			p_addPlayer.z = FloatToInt(pos.z);
-			SendPacket(p_id, &p_addPlayer);
-		}
-
-		// 도어 변경 조건에 따라서
-		// 게임 엔딩 조건에 따라서 
-		// 추가적인 내용을 더 보내도록 코드 수정 필요 
-
+	{ 
 		P_S2C_UPDATE_SYNC p_syncUpdate;
 		p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
 		p_syncUpdate.size = sizeof(p_syncUpdate);
@@ -287,6 +248,13 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 			// 멈춰
 		}
 	}
+}
+
+void PacketProcessor::Disconnect(int p_id)
+{
+	cout << "로그 아웃\n";
+	m_Players[p_id]->SetExistence(false);
+	m_Clients[p_id].m_state = PLST_FREE;
 }
 
 void PacketProcessor::Update(float elapsedTime)
@@ -1027,6 +995,7 @@ void PacketProcessor::SendPacket(int p_id, void* p)
 			error_display("WSASend : ");
 			m_Players[p_id]->SetExistence(false);
 			cout << "로그아웃\n";
+			Disconnect(p_id);
 			//disconnect(p_id);
 		}
 	}
@@ -1065,12 +1034,14 @@ void PacketProcessor::SendSyncUpdatePacket()
 
 void recv_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags)
 {
-	if (dataBytes == 0) { 
-	}
 	auto session = reinterpret_cast<CLIENT*>(overlapped);
 	SOCKET client_s = session->m_socket;
 	auto ex_over = &session->m_recv_over;
 
+	if (dataBytes == 0) { 
+		PacketProcessor::GetInstance()->Disconnect(session->id);
+		return;
+	}
 	unsigned char* packet_ptr = ex_over->m_packetbuf;
 	int num_data = dataBytes + session->m_prev_size;
 	int packet_size = packet_ptr[0];

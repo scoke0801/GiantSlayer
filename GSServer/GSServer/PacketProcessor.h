@@ -105,6 +105,8 @@ public:
 	void DoRecv(int c_id);
 	 
 	void ProcessPacket(int p_id, unsigned char* p_buf);
+
+	void Disconnect(int p_id);
 private:
 	void Update(float elapsedTime);
 
