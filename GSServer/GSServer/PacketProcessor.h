@@ -12,7 +12,6 @@ enum class CommandType
 
 // 편의를 위해 Layer에서 몇 가지 객체 유형은 제외하고 별도로 관리
 enum class OBJECT_LAYER : int {
-	Skybox,
 	TerrainWater,
 	Puzzle,
 	PuzzleBox,
@@ -21,8 +20,6 @@ enum class OBJECT_LAYER : int {
 	Enemy,
 	PlayerArrow,
 	MonsterArrow,
-	Billboard,
-	Fog,
 	Count,
 };
 
