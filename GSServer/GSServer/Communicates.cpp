@@ -134,3 +134,16 @@ DWORD __stdcall MainServerThread(LPVOID arg)
 
 	return 0;
 }
+
+void UpdateWorker()
+{
+	while (1) {
+		//static std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
+		//static std::chrono::duration<double> timeElapsed;
+
+		//timeElapsed = std::chrono::system_clock::now() - currentTime;
+		//currentTime = std::chrono::system_clock::now(); 
+
+		PacketProcessor::GetInstance()->UpdateLoop();
+	}
+}

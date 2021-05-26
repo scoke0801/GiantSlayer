@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "PacketProcessor.h"
 #include "Communicates.h"  
+#include <thread>
 
 int main(int argc, char* argv[])
 {
@@ -41,6 +42,9 @@ int main(int argc, char* argv[])
 
 	HANDLE hThread;
 	int registIndex = 0;
+
+	thread worker(UpdateWorker);
+
 	while (1) {
 		// accept()
 		addrLen = sizeof(clientAddr);
@@ -66,6 +70,7 @@ int main(int argc, char* argv[])
 		} 
 	}
 
+	worker.join();
 	// closesocket()
 	closesocket(listenSocket);
 

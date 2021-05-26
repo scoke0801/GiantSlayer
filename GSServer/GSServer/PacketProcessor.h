@@ -130,6 +130,7 @@ private:
 
 private:
 	void SendPacket(int p_id, void* p);
+	void SendSyncUpdatePacket();
 };
 
 void CALLBACK recv_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags);

@@ -19,6 +19,7 @@ void PacketProcessor::UpdateLoop()
 		for (int i = 0; dLag > FPS && i < MAX_LOOP_TIME; ++i)
 		{
 			Update(FPS);
+			SendSyncUpdatePacket();
 			dLag -= FPS;
 		}
 	}
@@ -1027,6 +1028,37 @@ void PacketProcessor::SendPacket(int p_id, void* p)
 			m_Players[p_id]->SetExistence(false);
 			cout << "·Î±×¾Æ¿ô\n";
 			//disconnect(p_id);
+		}
+	}
+}
+
+void PacketProcessor::SendSyncUpdatePacket()
+{
+	P_S2C_UPDATE_SYNC p_syncUpdate;
+	p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
+	p_syncUpdate.size = sizeof(p_syncUpdate);
+
+	p_syncUpdate.playerNum = m_CurrentPlayerNum;
+
+	for (int i = 0; i < m_CurrentPlayerNum; ++i) {
+		p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId());
+
+		XMFLOAT3 pos = m_Players[i]->GetPosition();
+		XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
+		p_syncUpdate.posX[i] = FloatToInt(pos.x);
+		p_syncUpdate.posY[i] = FloatToInt(pos.y);
+		p_syncUpdate.posZ[i] = FloatToInt(pos.z);
+
+		p_syncUpdate.lookX[i] = FloatToInt(look.x);
+		p_syncUpdate.lookY[i] = FloatToInt(look.y);
+		p_syncUpdate.lookZ[i] = FloatToInt(look.z);
+	}
+	for (int i = 0; i < MAX_PLAYER; ++i) {
+		p_syncUpdate.existance[i] = m_Players[i]->IsExist();
+	}
+	for (int i = SERVER_ID + 1; i <= MAX_PLAYER; ++i) {
+		if (m_Clients[i].m_state == PL_STATE::PLST_CONNECTED) { 
+			SendPacket(i, &p_syncUpdate);
 		}
 	}
 }

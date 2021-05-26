@@ -17,3 +17,4 @@ bool RecvPacket(SOCKET& sock, char* buf, int& retVal);
 XMFLOAT3 GetVectorFromText(const char* text);
 
 DWORD WINAPI MainServerThread(LPVOID arg);
+void UpdateWorker();
