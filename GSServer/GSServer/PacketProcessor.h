@@ -106,7 +106,7 @@ public:
 	void Disconnect(int p_id);
 private:
 	void Update(float elapsedTime);
-
+	
 private:
 	void InitAll();
 	void InitPlayers();
@@ -126,6 +126,7 @@ private:
 	void EnterNewSector(int sectorNum);
 
 private:
+	void ResetPlayer(int player_id);
 
 private:
 	void SendPacket(int p_id, void* p);

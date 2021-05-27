@@ -4,7 +4,15 @@
 #include "MapObjects.h"
 #include "Enemy.h"
 #include "Arrow.h"
- 
+
+// 플레이어 시작 위치..
+constexpr XMFLOAT3 PLAYER_START_POSITIONS[MAX_PLAYER] = {
+	{ 550.0f,   230.0f,  1850.0f },
+	{ 850.0f,   230.0f,  1850.0f },
+	{ 1250.0f,  230.0f,  1850.0f },
+	{ 850.0f,   230.0f,  2200.0f },
+	{ 850.0f,   230.0f,  1500.0f }
+};
 void PacketProcessor::UpdateLoop()
 {	 
 	timeElapsed = std::chrono::system_clock::now() - currentTime;
@@ -96,21 +104,24 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 		p_processLogin.size = sizeof(p_processLogin);
 		p_processLogin.type = PACKET_PROTOCOL::S2C_LOGIN_HANDLE;
 
+		// p_id mean packet_id...
+		int player_id = p_id - 1;
+		cout << "player_id : " << player_id << " p_id : " << p_id << endl;
 		if (m_CurrentPlayerNum > MAX_PLAYER) {
 			p_processLogin.isSuccess = false;
 		}
 		else {
 			p_processLogin.isSuccess = true;
-
-			m_Players[m_CurrentPlayerNum]->SetExistence(true);
-			m_Players[m_CurrentPlayerNum]->SetId(m_CurrentPlayerNum);
-			XMFLOAT3 pos = m_Players[m_CurrentPlayerNum]->GetPosition();
+			 
+			m_Players[player_id]->SetExistence(true);
+			m_Players[player_id]->SetId(player_id);
+			XMFLOAT3 pos = m_Players[player_id]->GetPosition();
 
 			p_processLogin.x = FloatToInt(pos.x);
 			p_processLogin.y = FloatToInt(pos.y);
 			p_processLogin.z = FloatToInt(pos.z);
 		}
-		p_processLogin.id = m_CurrentPlayerNum;
+		p_processLogin.id = player_id;
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			p_processLogin.existPlayer[i] = m_Players[i]->IsExist();
 		}
@@ -180,8 +191,8 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 
 		p_syncUpdate.playerNum = m_CurrentPlayerNum;
 
-		for (int i = 0; i < m_CurrentPlayerNum; ++i) {
-			p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId());
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			p_syncUpdate.id[i] = i;// static_cast<char>(m_Players[i]->GetId());
 
 			XMFLOAT3 pos = m_Players[i]->GetPosition();
 			XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
@@ -250,11 +261,24 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 	}
 }
 
-void PacketProcessor::Disconnect(int p_id)
+void PacketProcessor::Disconnect(int packet_id)
 {
 	cout << "로그 아웃\n";
-	m_Players[p_id]->SetExistence(false);
-	m_Clients[p_id].m_state = PLST_FREE;
+	int player_id = packet_id - 1;
+	m_Players[player_id]->SetExistence(false);
+	m_Clients[packet_id].m_state = PLST_FREE;
+
+	P_S2C_DELETE_PLAYER p_deletePlayer;
+	p_deletePlayer.type = PACKET_PROTOCOL::S2C_DELETE_PLAYER;
+	p_deletePlayer.size = sizeof(P_S2C_DELETE_PLAYER);
+	p_deletePlayer.id = player_id;
+
+	for (int i = 1; i <= MAX_PLAYER; ++i) {
+		if (m_Clients[i].m_state != PLST_FREE) {
+			SendPacket(i, &p_deletePlayer);
+		}
+	}
+	ResetPlayer(player_id);
 }
 
 void PacketProcessor::Update(float elapsedTime)
@@ -341,18 +365,10 @@ void PacketProcessor::Update(float elapsedTime)
 
 void PacketProcessor::InitPlayers()
 {
-	// 플레이어 시작 위치..
-	XMFLOAT3 positions[MAX_PLAYER] = {
-		{ 550.0f,   230.0f,  1850.0f },
-		{ 850.0f,   230.0f,  1850.0f },
-		{ 1250.0f,  230.0f,  1850.0f },
-		{ 850.0f,   230.0f,  2200.0f },
-		{ 850.0f,   230.0f,  1500.0f }
-	};
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer(); 
 		m_Players[i]->Scale(7, 7, 7);
-		m_Players[i]->SetPosition(positions[i]);
+		m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
 		m_Players[i]->SetExistence(false); 
 		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
 	}
@@ -977,6 +993,30 @@ void PacketProcessor::EnterNewSector(int sectorNum)
 	EnterNewSector(sectorNum - 1);
 }
 
+void PacketProcessor::ResetPlayer(int player_id)
+{  
+	delete m_Players[player_id];
+	delete m_Cameras[player_id];
+
+	m_Players[player_id] = new CPlayer();
+	m_Players[player_id]->Scale(7, 7, 7);
+	m_Players[player_id]->SetPosition(PLAYER_START_POSITIONS[player_id]);
+	m_Players[player_id]->SetExistence(false);
+	m_Players[player_id]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10))); 
+	 
+	int nCameras = MAX_PLAYER;
+	const float PI = 3.141592; 
+		
+	CCamera* pCamera = new CCamera;
+	pCamera->SetLens(0.25f * PI, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 1.0f, 60000.0f);
+	m_Cameras[player_id] = pCamera; 
+	m_Cameras[player_id]->SetPosition(m_Players[player_id]->GetPosition());
+	m_Cameras[player_id]->Pitch(XMConvertToRadians(15));
+	m_Cameras[player_id]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
+	m_Cameras[player_id]->SetTarget(m_Players[player_id]);
+	m_Players[player_id]->SetCamera(m_Cameras[player_id]); 
+}
+
 void PacketProcessor::SendPacket(int p_id, void* p)
 {
 	unsigned char p_size = reinterpret_cast<unsigned char*>(p)[0];
@@ -993,10 +1033,7 @@ void PacketProcessor::SendPacket(int p_id, void* p)
 		auto err_no = WSAGetLastError();
 		if (WSA_IO_PENDING != err_no) {
 			error_display("WSASend : ");
-			m_Players[p_id]->SetExistence(false);
-			cout << "로그아웃\n";
 			Disconnect(p_id);
-			//disconnect(p_id);
 		}
 	}
 }

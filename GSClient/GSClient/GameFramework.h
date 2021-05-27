@@ -172,6 +172,4 @@ public:	// about scene change
 
 };
 
-DWORD WINAPI ClientMain(LPVOID arg);
-
 #define MAIN_GAME_SCENE CFramework::GetInstance().GetMainGameScene()

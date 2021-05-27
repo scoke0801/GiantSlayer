@@ -160,29 +160,3 @@ XMFLOAT3 GetVectorFromText(const char* text)
 {
     return XMFLOAT3();
 }
-
-void recv_callback(DWORD error, DWORD num_bytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags)
-{
-    // 여기 안들어오고 씬의 DoRecv에서 처리함
-    auto session = reinterpret_cast<SESSION*>(overlapped);
-    SOCKET client_s = session->m_socket;
-    auto ex_over = &session->m_recv_over;
-
-    unsigned char* packet_ptr = ex_over->m_packetbuf;
-    int num_data = num_bytes + session->m_prev_size;
-    int packet_size = packet_ptr[0];
-
-    while (num_data >= packet_size) {
-        CFramework::GetInstance().GetCurrentScene()->ProcessPacket(packet_ptr); 
-        num_data -= packet_size;
-        packet_ptr += packet_size;
-        if (0 >= num_data) break;
-        packet_size = packet_ptr[0];
-    }
-    session->m_prev_size = num_data;
-    if (0 != num_data) {
-        memcpy(ex_over->m_packetbuf, packet_ptr, num_data);
-    }
-
-    CFramework::GetInstance().GetCurrentScene()->DoRecv(); 
-}

@@ -48,16 +48,6 @@ void CScene::DoRecv()
 	if (0 != num_data) {
 		memcpy(g_Client.m_recv_over.m_packetbuf, packet_ptr, num_data);
 	}
-
-	/*DWORD r_flag = 0;
-	auto ret = WSARecv(g_Client.m_socket, &g_Client.m_recv_over.m_wsabuf, 1, NULL,
-		&r_flag, &g_Client.m_recv_over.m_over, recv_callback);
-
-	if (0 != ret) {
-		auto err_no = WSAGetLastError();
-		if (WSA_IO_PENDING != err_no)
-			error_display("Error in RecvPacket: ");
-	}*/
 }
 
 CNullScene::CNullScene()

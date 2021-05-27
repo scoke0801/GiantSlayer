@@ -44,6 +44,3 @@ int ConvertoIntFromText(const char* text, const char* token);
 
 XMFLOAT3 GetVectorFromText(const char* text);
  
-void CALLBACK recv_callback(DWORD error, DWORD num_bytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags);
-
-void CALLBACK send_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags) {}

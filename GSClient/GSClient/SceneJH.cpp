@@ -998,9 +998,9 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 
 			m_MinimapCamera->SetTarget(m_Players[p_processLogin.id]);
 
-			for (int i = 0; i < MAX_PLAYER; ++i) {
-				m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
-			}
+			//for (int i = 0; i < MAX_PLAYER; ++i) {
+			//	m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
+			//}
 		}
 		break;
 	case PACKET_PROTOCOL::S2C_NEW_PLAYER:
@@ -1015,8 +1015,9 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 		break;
 	case PACKET_PROTOCOL::S2C_DELETE_PLAYER:
 		cout << "Packet::DeletePlayer[ServerToClient]\n";
-		P_S2C_DELETE_PLAYER p_deletePlayer = *reinterpret_cast<P_S2C_DELETE_PLAYER*>(&p_buf);
-		m_Players[p_deletePlayer.id]->SetDrawable(false);
+		P_S2C_DELETE_PLAYER p_deletePlayer;
+		memcpy(&p_deletePlayer, p_buf, p_buf[0]);
+		m_Players[p_deletePlayer.id]->SetDrawable(false); 
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT: 
 	{
@@ -1075,22 +1076,19 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 		P_S2C_UPDATE_SYNC p_syncUpdate;
 		memcpy(&p_syncUpdate, p_buf, p_buf[0]);
 		m_CurrentPlayerNum = p_syncUpdate.playerNum;
-		for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
-			m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
-			if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
+		for (int i = 0; i <MAX_PLAYER; ++i) {
+			m_Players[i]->SetDrawable(p_syncUpdate.existance[i]);
+			if (m_Players[i]->IsDrawable() == false) continue;
 
 			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
 
-			m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
-			m_Players[p_syncUpdate.id[i]]->UpdateCamera();
-			m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-			m_Players[p_syncUpdate.id[i]]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
+			m_Players[i]->SetPosition(pos);
+			m_Players[i]->UpdateCamera();
+			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
 				look, -PLAYER_RUN_SPEED));
-
-			m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
 		}
-		CFramework::GetInstance().SetFrameDirtyFlag(true);
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_DOOR_EVENT:
 		cout << "Packet::DoorEvent[ServerToClient]\n";
