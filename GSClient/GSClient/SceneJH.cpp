@@ -1091,6 +1091,7 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 
 			m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
 		}
+		CFramework::GetInstance().SetFrameDirtyFlag(true);
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_DOOR_EVENT:
 		cout << "Packet::DoorEvent[ServerToClient]\n";
@@ -1107,6 +1108,7 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 		}
 		break;
 	}
+
 }
 
 void CSceneJH::LoginToServer()

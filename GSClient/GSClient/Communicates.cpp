@@ -163,6 +163,7 @@ XMFLOAT3 GetVectorFromText(const char* text)
 
 void recv_callback(DWORD error, DWORD num_bytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags)
 {
+    // 여기 안들어오고 씬의 DoRecv에서 처리함
     auto session = reinterpret_cast<SESSION*>(overlapped);
     SOCKET client_s = session->m_socket;
     auto ex_over = &session->m_recv_over;
