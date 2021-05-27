@@ -603,8 +603,7 @@ void CSceneJH::Update(float elapsedTime)
 		}
 
 	}
-
-
+	 
 	//m_PlayerCameras[CFramework::GetInstance().GetPlayerId()]->Update(elapsedTime);
 			
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);

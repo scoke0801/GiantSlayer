@@ -61,8 +61,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
         else
         {
-            //if (gFramework->IsOnConntected()) continue;
-            gFramework->SinglePlayUpdate(); 
+            if (gFramework->IsOnConntected()) {
+                gFramework->SceneUpdate();
+            }
+            else {
+                gFramework->SinglePlayUpdate();
+            }
         }
     }
 

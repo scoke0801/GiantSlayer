@@ -152,7 +152,6 @@ public:
 	void OnMouseDown(WPARAM btnState, int x, int y) override;
 	void OnMouseUp(WPARAM btnState, int x, int y)	override;
 	void OnMouseMove(WPARAM btnState, int x, int y) override;
-
 public:
 	virtual void ReleaseUploadBuffers() override;
 
