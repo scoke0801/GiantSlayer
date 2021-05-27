@@ -176,6 +176,7 @@
     <ClInclude Include="Communicates.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="EnemyState.h" />
+    <ClInclude Include="FbxObject2.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameObject.h" />
@@ -232,6 +233,7 @@
     </ClCompile>
     <ClCompile Include="FbxObject.cpp" />
     <ClCompile Include="Communicates.cpp" />
+    <ClCompile Include="FbxObject2.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="SceneExport.cpp" />
     <ClCompile Include="ShaderHandler.cpp" />

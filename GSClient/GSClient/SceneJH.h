@@ -11,9 +11,13 @@ class CTerrain;
 class CParticle;
 class CLightCamera;
 class CEnemy;
+class CFbxObject2;
 
 class CSceneJH : public CScene
 {
+private:
+	CFbxObject2*					pfbxTestObject;
+
 private:
 	bool						m_isPlayerSelected = true;
 	bool						m_isPlayerBoxCollide = false;

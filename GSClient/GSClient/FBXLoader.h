@@ -42,7 +42,7 @@ struct Joint
 	int parentIndex = -1;
 	XMFLOAT4X4 offset;
 };
-
+ 
 struct BlendingInfo
 {
 	int index;

@@ -17,6 +17,7 @@
 #include "Enemy.h"
 #include "Sound.h"
 #include "FbxObject.h"
+#include "FbxObject2.h"
 #include "FbxLoader.h"
 #define ROOT_PARAMETER_OBJECT				0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA		1
@@ -256,6 +257,14 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
 	  
+	pfbxTestObject = new CFbxObject2(pd3dDevice, pd3dCommandList, 
+		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
+	pfbxTestObject->SetAnimationStack(0);
+	pfbxTestObject->m_pAnimationController->SetPosition(0, 0.0f);
+	//pfbxTestObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pfbxTestObject->SetPosition({ 1000,  150, 1000 });
+	pfbxTestObject->SetTextureIndex(0x01);
+
 	auto end_t = chrono::high_resolution_clock::now();
 
 	auto elasepsed_t = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start_t);
@@ -414,6 +423,7 @@ void CSceneJH::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	} 
+	pfbxTestObject->Update(elapsedTime);
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) { 
 		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
@@ -738,7 +748,9 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	for (auto mirror : m_Mirror) {
 		mirror->Draw(pd3dCommandList, m_CurrentCamera);
 	} 
-	 
+
+	pfbxTestObject->Draw(pd3dCommandList, m_CurrentCamera);
+
 	m_Particles->Draw(pd3dCommandList, m_CurrentCamera); 
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
@@ -2902,9 +2914,9 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_MinimapCamera->SetTarget(m_Players[0]); 
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
-		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);  
-		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);  
+		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
+		//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
  
 		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 
