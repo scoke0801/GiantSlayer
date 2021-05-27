@@ -3009,7 +3009,7 @@ void CSceneJH::MakingRain()
 		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
 	}
 }
- 
+
 void CSceneJH::SendMouseInputPacket()
 {  
 	P_C2S_MOUSE_INPUT p_mouseInput;
@@ -3023,13 +3023,13 @@ void CSceneJH::SendMouseInputPacket()
 		p_mouseInput.xInput[i] = FloatToInt(m_MousePositions[i].x);
 		p_mouseInput.yInput[i] = FloatToInt(m_MousePositions[i].y);
 	}
+	m_MousePositions.clear();
 	p_mouseInput.InputType = m_prevMouseInputType; 
 
 	int retVal = 0;
 	SendPacket(&p_mouseInput);
 
 	//cout << "마우스 입력 전송 크기 : " << m_MousePositions.size() << "\n";
-	m_MousePositions.clear();
 }
 
 void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

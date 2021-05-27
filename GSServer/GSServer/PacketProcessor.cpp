@@ -233,10 +233,9 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 				float dx = IntToFloat(p_mouse.xInput[i]);
 
 				m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
-				playerRotateY += dx;
 				if (m_Players[p_mouse.id]->IsMoving())
 				{
-					//p_mouseProcess.playerRotateY += dx;
+					playerRotateY += dx;
 					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
 				}
 			}
@@ -278,6 +277,7 @@ void PacketProcessor::Disconnect(int packet_id)
 			SendPacket(i, &p_deletePlayer);
 		}
 	}
+	m_CurrentPlayerNum--;
 	ResetPlayer(player_id);
 }
 
