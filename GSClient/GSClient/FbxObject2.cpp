@@ -297,8 +297,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed)
 CFbxObject2::CFbxObject2()
 {
 	m_xmf3Position = { 0, 0, 0 };
-	m_xmf3Velocity = { 0, 0, 0 };
-	m_time = 0;
+	m_xmf3Velocity = { 0, 0, 0 }; 
 
 	XMStoreFloat4x4(&m_xmf4x4World, XMMatrixIdentity());
 }
@@ -315,9 +314,7 @@ CFbxObject2::CFbxObject2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 		LoadFbxMesh(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, m_pfbxScene->GetRootNode());
 		m_pAnimationController = new CAnimationController(m_pfbxScene);
 		cout << "fbx 메쉬 로드 성공!" << endl;
-	}
-
-	m_time = 0;
+	} 
 }
 
 CFbxObject2::~CFbxObject2()
@@ -607,12 +604,11 @@ void CFbxObject2::Update(float fTimeElapsed)
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 
-	//cout << fTimeElapsed << endl;
+	m_AnimationTime += fTimeElapsed;
 
-	m_time++;
-	if (m_time > 4) {
-		Animate(fTimeElapsed*4);
-		m_time = 0;
+	if (m_AnimationTime > 0.5f) {
+		Animate(m_AnimationTime);
+		m_AnimationTime = 0.0f;
 	}
 }
 

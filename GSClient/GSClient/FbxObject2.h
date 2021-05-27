@@ -75,8 +75,9 @@ public:
 
 public:
 	vector<MeshInfo> vMesh;
-	int m_time;
 	 
+	float m_AnimationTime = 0.0f;
+
 public: 
 	CAnimationController* m_pAnimationController = NULL;
 

@@ -259,9 +259,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	  
 	pfbxTestObject = new CFbxObject2(pd3dDevice, pd3dCommandList, 
 		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
-	pfbxTestObject->SetAnimationStack(0);
+	pfbxTestObject->SetAnimationStack(2);
 	pfbxTestObject->m_pAnimationController->SetPosition(0, 0.0f);
-	//pfbxTestObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pfbxTestObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	pfbxTestObject->SetPosition({ 1000,  150, 1000 });
 	pfbxTestObject->SetTextureIndex(0x01);
 
