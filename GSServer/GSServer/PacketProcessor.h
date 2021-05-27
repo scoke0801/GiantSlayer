@@ -104,6 +104,7 @@ public:
 	void ProcessPacket(int p_id, unsigned char* p_buf);
 
 	void Disconnect(int p_id);
+
 private:
 	void Update(float elapsedTime);
 	
@@ -131,6 +132,7 @@ private:
 private:
 	void SendPacket(int p_id, void* p);
 	void SendSyncUpdatePacket();
+	void SendMonsterActPacket();
 };
 
 void CALLBACK recv_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags);

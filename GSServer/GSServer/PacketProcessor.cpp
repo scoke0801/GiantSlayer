@@ -27,7 +27,8 @@ void PacketProcessor::UpdateLoop()
 		for (int i = 0; dLag > FPS && i < MAX_LOOP_TIME; ++i)
 		{
 			Update(FPS);
-			//SendSyncUpdatePacket();
+			SendSyncUpdatePacket();
+			SendMonsterActPacket();
 			dLag -= FPS;
 		}
 	}
@@ -313,7 +314,8 @@ void PacketProcessor::Update(float elapsedTime)
 			if (m_Players[i]->IsExist() == false) continue;
 
 			if (pEnemy->CollisionCheck(m_Players[i])) { 
-				if (m_Players[i]->Attacked(pEnemy)) {
+				//if (m_Players[i]->Attacked(pEnemy)) 
+				{
 					m_Players[i]->FixCollision();
 					cout << "충돌 : 플레이어 - 적\n";
 				}
@@ -1046,8 +1048,8 @@ void PacketProcessor::SendSyncUpdatePacket()
 
 	p_syncUpdate.playerNum = m_CurrentPlayerNum;
 
-	for (int i = 0; i < m_CurrentPlayerNum; ++i) {
-		p_syncUpdate.id[i] = static_cast<char>(m_Players[i]->GetId());
+	for (int i = 0; i < MAX_PLAYER; ++i) {
+		p_syncUpdate.id[i] = i;// static_cast<char>(m_Players[i]->GetId());
 
 		XMFLOAT3 pos = m_Players[i]->GetPosition();
 		XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
@@ -1065,6 +1067,41 @@ void PacketProcessor::SendSyncUpdatePacket()
 	for (int i = SERVER_ID + 1; i <= MAX_PLAYER; ++i) {
 		if (m_Clients[i].m_state == PL_STATE::PLST_CONNECTED) { 
 			SendPacket(i, &p_syncUpdate);
+		}
+	}
+}
+
+void PacketProcessor::SendMonsterActPacket()
+{
+	if (m_CurrentPlayerNum == 0) return;
+
+	P_S2C_MONSTERS_UPDATE_SYNC p_monsterUpdate[MAX_MONSTER_COUNT];
+	ZeroMemory(&p_monsterUpdate, sizeof(p_monsterUpdate));
+
+	for (int i = 0; i < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++i) {
+		auto mon = m_ObjectLayers[(int)OBJECT_LAYER::Enemy][i];
+
+		XMFLOAT3 pos = mon->GetPosition();
+		XMFLOAT3 look = Vector3::Normalize(mon->GetLook());
+
+		p_monsterUpdate[i].type = PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT;
+		p_monsterUpdate[i].size = sizeof(p_monsterUpdate);
+		p_monsterUpdate[i].id = i;
+
+		p_monsterUpdate[i].posX = FloatToInt(pos.x);
+		p_monsterUpdate[i].posY = FloatToInt(pos.y);
+		p_monsterUpdate[i].posZ = FloatToInt(pos.z);
+					   
+		p_monsterUpdate[i].lookX = FloatToInt(look.x);
+		p_monsterUpdate[i].lookY = FloatToInt(look.y);
+		p_monsterUpdate[i].lookZ = FloatToInt(look.z);	 
+	}
+	for (int i = SERVER_ID + 1; i <= MAX_PLAYER; ++i) {
+		if (m_Clients[i].m_state != PL_STATE::PLST_CONNECTED) {
+			continue;
+		}
+		for (int j = 0; j < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++j) {
+			SendPacket(i, &p_monsterUpdate[j]);
 		}
 	}
 }

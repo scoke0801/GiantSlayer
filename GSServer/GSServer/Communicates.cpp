@@ -103,38 +103,6 @@ XMFLOAT3 GetVectorFromText(const char* text)
 	return XMFLOAT3();
 }
 
-DWORD __stdcall MainServerThread(LPVOID arg)
-{
-	SOCKET client_sock = (SOCKET)arg;
-	SOCKADDR_IN clientAddr;
-	int addrLen;
-	 
-	// 클라이언트 정보 받기
-	addrLen = sizeof(clientAddr);
-	getpeername(client_sock, (SOCKADDR*)&clientAddr, &addrLen);
-	  
-	while (1) {
-		static std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
-		static std::chrono::duration<double> timeElapsed;
-
-		timeElapsed = std::chrono::system_clock::now() - currentTime;
-		currentTime = std::chrono::system_clock::now();
-		//cout << "TimeElapsed: " << timeElapsed.count() << " \n";
-		//if (false == PacketProcessor::GetInstance()->ProcessGameScene(client_sock))
-		//	break;
-
-		PacketProcessor::GetInstance()->UpdateLoop();
-	}
-
-	// closesocket()
-	closesocket(client_sock);
-
-	std::cout << "[TCP 서버] 클라이언트 종료 : IP 주소 = " << inet_ntoa(clientAddr.sin_addr)
-		<< ", 포트 번호 = " << ntohs(clientAddr.sin_port) << endl;
-
-	return 0;
-}
-
 void UpdateWorker()
 {
 	while (1) {

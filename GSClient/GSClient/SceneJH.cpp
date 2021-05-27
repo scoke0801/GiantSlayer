@@ -252,18 +252,18 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildPlayers(pd3dDevice, pd3dCommandList); 
 
 	BuildParticles(pd3dDevice, pd3dCommandList);
-	//BuildArrows(pd3dDevice, pd3dCommandList);
+	BuildArrows(pd3dDevice, pd3dCommandList);
 
-	//BuildEnemys(pd3dDevice, pd3dCommandList);
+	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
 	  
-	pfbxTestObject = new CFbxObject2(pd3dDevice, pd3dCommandList, 
+	/*pfbxTestObject = new CFbxObject2(pd3dDevice, pd3dCommandList, 
 		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
 	pfbxTestObject->SetAnimationStack(2);
 	pfbxTestObject->m_pAnimationController->SetPosition(0, 0.0f);
 	pfbxTestObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	pfbxTestObject->SetPosition({ 1000,  150, 1000 });
-	pfbxTestObject->SetTextureIndex(0x01);
+	pfbxTestObject->SetTextureIndex(0x01);*/
 
 	auto end_t = chrono::high_resolution_clock::now();
 
@@ -423,7 +423,8 @@ void CSceneJH::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	} 
-	pfbxTestObject->Update(elapsedTime);
+	//pfbxTestObject->Update(elapsedTime);
+
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) { 
 		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
@@ -656,6 +657,9 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 	ProcessInput();
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+		if (i == (int)OBJECT_LAYER::Enemy) {
+			continue;
+		}
 		for (auto pObject : m_ObjectLayers[i]) {
 			pObject->Update(elapsedTime);
 			pObject->UpdateColliders();
@@ -749,7 +753,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		mirror->Draw(pd3dCommandList, m_CurrentCamera);
 	} 
 
-	pfbxTestObject->Draw(pd3dCommandList, m_CurrentCamera);
+	//pfbxTestObject->Draw(pd3dCommandList, m_CurrentCamera);
 
 	m_Particles->Draw(pd3dCommandList, m_CurrentCamera); 
 
@@ -975,7 +979,7 @@ void CSceneJH::Communicate(SOCKET& sock)
 
 	int retVal;
 	bool haveToRecv = false;
-	SendPacket(&p_syncUpdateRequest);
+	//SendPacket(&p_syncUpdateRequest);
 	
 	if (m_MousePositions.size() > 0) {
 		SendMouseInputPacket();
@@ -986,9 +990,9 @@ void CSceneJH::Communicate(SOCKET& sock)
 void CSceneJH::ProcessPacket(unsigned char* p_buf)
 {
 	char buf[10000];
-	PACKET_PROTOCOL type = (PACKET_PROTOCOL)p_buf[1]; 
+	PACKET_PROTOCOL type = (PACKET_PROTOCOL)p_buf[1];
 	switch (type)
-	{  
+	{
 	case PACKET_PROTOCOL::S2C_LOGIN_HANDLE:
 		P_S2C_PROCESS_LOGIN p_processLogin; //= *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&p_buf);
 		memcpy(&p_processLogin, p_buf, p_buf[0]);
@@ -1029,9 +1033,9 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 		cout << "Packet::DeletePlayer[ServerToClient]\n";
 		P_S2C_DELETE_PLAYER p_deletePlayer;
 		memcpy(&p_deletePlayer, p_buf, p_buf[0]);
-		m_Players[p_deletePlayer.id]->SetDrawable(false); 
+		m_Players[p_deletePlayer.id]->SetDrawable(false);
 		break;
-	case PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT: 
+	case PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT:
 	{
 		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
 		memcpy(&p_keyboardProcess, p_buf, p_buf[0]);
@@ -1047,9 +1051,9 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 		m_Player->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
 			look, -PLAYER_RUN_SPEED));
 	}
-		break;
+	break;
 	case PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT:
-		P_S2C_PROCESS_MOUSE p_mouseProcess; 
+		P_S2C_PROCESS_MOUSE p_mouseProcess;
 		memcpy(&p_mouseProcess, p_buf, p_buf[0]);
 		if (p_mouseProcess.cameraOffset != 0) {
 			float offset = IntToFloat(p_mouseProcess.cameraOffset);
@@ -1083,12 +1087,27 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 		}
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT:
-		break;
+	{
+		//P_S2C_MONSTERS_UPDATE_SYNC p_monsterUpdate;
+		//memcpy(&p_monsterUpdate, p_buf, p_buf[0]);
+		P_S2C_MONSTERS_UPDATE_SYNC* p_monsterUpdate = reinterpret_cast<P_S2C_MONSTERS_UPDATE_SYNC*>(p_buf);
+
+		XMFLOAT3 pos = { IntToFloat(p_monsterUpdate->posX),
+			IntToFloat(p_monsterUpdate->posY),
+			IntToFloat(p_monsterUpdate->posZ) };
+		XMFLOAT3 look = { IntToFloat(p_monsterUpdate->lookX),
+			IntToFloat(p_monsterUpdate->lookY),
+			IntToFloat(p_monsterUpdate->lookZ) };
+		int id = p_monsterUpdate->id;
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition(pos);
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+	}
+	break;
 	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:
 		P_S2C_UPDATE_SYNC p_syncUpdate;
 		memcpy(&p_syncUpdate, p_buf, p_buf[0]);
 		m_CurrentPlayerNum = p_syncUpdate.playerNum;
-		for (int i = 0; i <MAX_PLAYER; ++i) {
+		for (int i = 0; i < MAX_PLAYER; ++i) {
 			m_Players[i]->SetDrawable(p_syncUpdate.existance[i]);
 			if (m_Players[i]->IsDrawable() == false) continue;
 
@@ -1108,7 +1127,7 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 	case PACKET_PROTOCOL::S2C_INGAME_PUZZLE_EVENT:
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_END:
-		cout << "Packet::GameEnd[ServerToClient]\n"; 
+		cout << "Packet::GameEnd[ServerToClient]\n";
 		break;
 	default:
 		cout << "Unknown Packet Type from server" << " Packet Type [" << +p_buf[1] << "]" << endl;
@@ -1852,7 +1871,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, -10, 20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,-10,-20 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, -10, -20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::Boss].push_back(pObject);
 
 	CEnemy* pEnemy;
 	XMFLOAT3 scale = { 125.0f,125.0f,125.0f };
@@ -2760,11 +2779,11 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
  
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
  
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow"); 
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow"); 
 }
 
 void CSceneJH::BuildShadowResource(ID3D12Device* pd3dDevice)
