@@ -60,9 +60,25 @@ public:
 	int* indexCP;
 	XMFLOAT3* mControlPoint;
 
-	CMesh* pMesh;
-	CShader* pShader;
+	FbxAMatrix* BoneOffsets;
+
+	CMesh* pMesh = NULL;
+	CShader* pShader = NULL;
 	bool animation = false;
+};
+
+struct Bone2
+{
+	FbxAMatrix offset;
+	int pIndex = -1;
+	string name;
+};
+
+struct Vertex2
+{
+	XMFLOAT3 pos;
+	XMFLOAT2 uv;
+	XMFLOAT3 normal;
 };
 
 class CFbxObject2 : public CGameObject
@@ -75,7 +91,11 @@ public:
 
 public:
 	vector<MeshInfo> vMesh;
+	vector<XMFLOAT3> cp;
+	vector<Vertex2> vertices;
+	vector<Bone2> skeleton;
 	 
+	bool hasAnimation = false;
 	float m_AnimationTime = 0.0f;
 
 public: 
@@ -85,6 +105,14 @@ public:
 	void LoadScene(char* pstrFbxFileName, FbxManager* pfbxSdkManager);
 	void LoadFbxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pNode);
+
+	void ExploreFbxHierarchy(FbxNode* inRootNode);
+	void LoadControlPoints(FbxNode* inNode);
+	void LoadBoneOffsets(FbxNode* inNode);
+	void LoadMesh(FbxNode* inNode);
+
+	void ProcessSkeletonHierarchy(FbxNode* inRootNode);
+	void ProcessSkeletonHierarchyRecursively(FbxNode* inNode, int inDepth, int myIndex, int inParentIndex);
 
 	void AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime);
 	void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList, FbxNode* pNode, FbxTime& fbxCurrentTime, FbxAMatrix& fbxmtxWorld);
@@ -100,38 +128,4 @@ public:
 
 	void SetAnimationStack(int nAnimationStack) override;
 	void LoadFbxModelFromFile(char* pstrFbxFileName);
-};
-
-class CFbxObjectFileLoadVer : public CGameObject
-{
-public:
-	CFbxObjectFileLoadVer();
-	CFbxObjectFileLoadVer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFbxFileName);
-	virtual ~CFbxObjectFileLoadVer();
-
-public:
-	vector<FbxSubMesh>			mFbxMesh;
-	vector<MeshInfo>			mMesh;
-
-	int							vertexnum;
-	int							m_time;
-
-public:
-	void LoadFbxModelFromFile(char* pstrFbxFileName);
-
-	void AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime);
-	void DrawFbxMesh(ID3D12GraphicsCommandList* pd3dCommandList);
-
-	void Animate(float fTimeElapsed) override;
-	void Update(float fTimeElapsed) override;
-	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
-
-	static void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
-	static void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
-
-	virtual void ReleaseUploadBuffers();
-
-	void SetAnimationStack(int nAnimationStack) override;
-
 };
