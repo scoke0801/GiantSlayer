@@ -56,11 +56,11 @@ private:
 
 public:
 	void BernsteinCoeffcient5x5(float t,float fBernstein[5]);
-	float CubicBezierSum5x5_C(int m_Heights[][101], float uB[5], float vB[5]);
+	float CubicBezierSum5x5_C(int m_Heights[][101], float uB[5], float vB[5], int xIndex, int zIndex);
 
 	void InitNormals();	
 	XMFLOAT3 GetHeightMapNormal(int x, int z);
-	float GetHeighty(float nx,float nz);
+	float GetHeighty(float nx,float nz, int xIndex, int zIndex);
 };
 
 
