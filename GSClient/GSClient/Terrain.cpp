@@ -8,7 +8,7 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_nWidth = 100, m_nLength = 100;
 	InitHeightDatas();
 	InitNormals();
-	 
+
 	int vertexMeshCount = 25;
 	int meshVertexCount = 833 * vertexMeshCount;//20825
 	int loosedWallCount[2] = { 110, 5 };
@@ -24,28 +24,28 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 			int WidthBlock_Count = 9, DepthBlock_Count = 9;
 			int WidthBlock_Index = 257, DepthBlock_Index = 257;
 			int xStart = 0, zStart = 0;
-			 
 
 			float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
 
 			int* copyHeights = new int[25];
 
+			int xIndex = 4 * j;
+			int zIndex = 4 * i;
 			for (int a = 0, b = 4, z = (zStart + 10 - 1); z >= zStart; z -= 2, --b)
 			{
 				for (int x = xStart; x < (xStart + 10 - 1); x += 2, a++)
 				{
 					if (a >= 25) break;
 
-					int xIndex = 4 * b;
-					int zIndex = 4 * a;
 					copyHeights[a] = m_Heights[zIndex + b][xIndex + a % 5];
-					 
+
 				}
 			}
 
 			m_GridHeights[i][j] = copyHeights;
 		}
 	}
+
 	for (int i = 0; i < 25; ++i)
 	{
 		for (int j = 0; j < 25; ++j)

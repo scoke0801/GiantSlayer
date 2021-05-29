@@ -23,9 +23,9 @@ private:
 public:
 	int m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 
-	XMFLOAT3 m_Normals[TERRAIN_HEIGHT_MAP_HEIGHT][TERRAIN_HEIGHT_MAP_WIDTH ];
+	XMFLOAT3 m_Normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 	 
-	int* m_GridHeights[25 + 1][25 + 1];
+	int* m_GridHeights[25][25];
 
 private:
 	int						m_nWidth;
