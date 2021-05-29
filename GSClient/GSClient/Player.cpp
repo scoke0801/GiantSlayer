@@ -126,6 +126,7 @@ void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
 	float offsetHeight = m_Camera->GetOffset().y;
 	//float fHeight = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + 5.0f;	
 	float fHeight = pTerrain->GetDetailHeight(xmf3CameraPosition.x, xmf3CameraPosition.z) + 5.0f;
+
 	if (fHeight - 1500.0f > m_xmf3Position.y) {
 		fHeight = m_xmf3Position.y + 1500.0f;
 	}
@@ -141,7 +142,9 @@ void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
 	if (m_isOnGround) {
 		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z);
+		
 	}
+	
 }
 
 void CPlayer::SetVelocity(OBJ_DIRECTION direction)
