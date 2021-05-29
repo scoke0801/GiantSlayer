@@ -94,7 +94,7 @@ void CPlayer::Update(float fTimeElapsed)
 	float fDeceleration = (Friction * fTimeElapsed); 
 	if (fDeceleration > fLength) fDeceleration = fLength; 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-	 
+	m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
 	Animate(fTimeElapsed);
 }
 
@@ -142,7 +142,24 @@ void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
 	if (m_isOnGround) {
 		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z);
-		
+		//auto aabb = m_AABB[0]->GetBox();
+		//
+		//float heightLT = pTerrain->GetDetailHeight(m_xmf3Position.x - aabb.Extents.x, m_xmf3Position.z + aabb.Extents.z);
+		//float heightLB = pTerrain->GetDetailHeight(m_xmf3Position.x - aabb.Extents.x, m_xmf3Position.z - aabb.Extents.z);  
+		//float heightRT = pTerrain->GetDetailHeight(m_xmf3Position.x + aabb.Extents.x, m_xmf3Position.z + aabb.Extents.z);
+		//float heightRB = pTerrain->GetDetailHeight(m_xmf3Position.x + aabb.Extents.x, m_xmf3Position.z - aabb.Extents.z); 
+		//
+		//int x = (int)m_xmf3Position.x;
+		//int z = (int)m_xmf3Position.z;
+		//float fxPercent = m_xmf3Position.x - x;
+		//float fzPercent = m_xmf3Position.z - z;
+		//
+		////사각형의 네 점을 보간하여 높이(픽셀 값)를 계산한다.
+		//float fTopHeight = heightLT * (1 - fxPercent) + heightRT * fxPercent;
+		//float fBottomHeight = heightLB * (1 - fxPercent) + heightRB * fxPercent;
+		//float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
+		//
+		//m_xmf3Position.y = fHeight;
 	}
 	
 }
