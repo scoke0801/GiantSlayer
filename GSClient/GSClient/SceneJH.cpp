@@ -2932,6 +2932,11 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	++m_CurrentPlayerNum;
 	
 	m_MinimapCamera->SetTarget(m_Players[0]); 
+	//auto pBox = new CBox(pd3dDevice, pd3dCommandList, 80, 165.0, 80.0f);
+	//pBox->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	//pBox->SetTextureIndex(0x100); 
+	//pBox->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);  
