@@ -21,6 +21,35 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	{
 		for (int j = 0; j < 25; ++j)
 		{
+			int WidthBlock_Count = 9, DepthBlock_Count = 9;
+			int WidthBlock_Index = 257, DepthBlock_Index = 257;
+			int xStart = 0, zStart = 0;
+			 
+
+			float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+			int* copyHeights = new int[25];
+
+			for (int a = 0, b = 4, z = (zStart + 10 - 1); z >= zStart; z -= 2, --b)
+			{
+				for (int x = xStart; x < (xStart + 10 - 1); x += 2, a++)
+				{
+					if (a >= 25) break;
+
+					int xIndex = 4 * b;
+					int zIndex = 4 * a;
+					copyHeights[a] = m_Heights[zIndex + b][xIndex + a % 5];
+					 
+				}
+			}
+
+			m_GridHeights[i][j] = copyHeights;
+		}
+	}
+	for (int i = 0; i < 25; ++i)
+	{
+		for (int j = 0; j < 25; ++j)
+		{
 			// 늘어진 텍스쳐 발생 부분 제외 후 생성
 			if (j == 17 && (i >= 17 && i <= 24) ||
 				(j == 19) && (i >= 10 && i < 17) ||
@@ -56,16 +85,12 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 				textureInfo = 0x10;
 			}
 			
-			int* copyHeights = new int[25];
 			m_BindTerrainMesh->CreateGridMesh(pd3dDevice, pd3dCommandList, 
 				{ 4.0f * j, 0, 4.0f * i },
 				textureInfo,
 				4 * j, 4 * i,
 				m_Heights,
-				m_Normals, copyHeights);
-
-			 
-			m_GridHeights[i][j] = copyHeights;
+				m_Normals);
 		}
 	}   
 	BuildFrontWalls(pd3dDevice, pd3dCommandList, pShader);
