@@ -426,7 +426,7 @@ void CSceneJH::Update(float elapsedTime)
 		player->Update(elapsedTime);
 		player->UpdateColliders();
 		player->FixPositionByTerrain(m_Terrain);
-		//player->FixCameraByTerrain(m_Terrain);
+		player->FixCameraByTerrain(m_Terrain);
 	}
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (pObstacle->CollisionCheck(m_Player)) {

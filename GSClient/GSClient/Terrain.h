@@ -1,7 +1,17 @@
 #pragma once 
  
 #include "Camera.h"
+ 
+struct GP {
+	int x, y;
 
+	constexpr bool operator<(const GP& other) {
+		return x < other.x&& y < other.y;
+	}
+};
+constexpr bool operator<(const GP& a, const GP& b) {
+	return a.x < b.x || a.y < b.y;
+}
 class CTerrain
 {
 public:
@@ -14,6 +24,8 @@ public:
 	int m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 
 	XMFLOAT3 m_Normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
+	 
+	int* m_GridHeights[25 + 1][25 + 1];
 
 private:
 	int						m_nWidth;

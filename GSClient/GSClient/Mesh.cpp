@@ -1484,7 +1484,8 @@ void CBindingTerrainMesh::CreateGridMesh(ID3D12Device* pd3dDevice,
  ID3D12GraphicsCommandList* pd3dCommandList,
 	const XMFLOAT3& shift, BYTE textureInfo,
 	int xIndex, int zIndex,
-	int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]) 
+	int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1],
+	int copyHeights[25])
 {  
 	int WidthBlock_Count = 9, DepthBlock_Count = 9;
 	int WidthBlock_Index = 257, DepthBlock_Index = 257;
@@ -1507,6 +1508,7 @@ void CBindingTerrainMesh::CreateGridMesh(ID3D12Device* pd3dDevice,
 			m_Vertices[m_CurrentVertexIndex].m_xmf3Normal = normals[zIndex + j][xIndex + i % 5];
 			m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(x / 8, z / 9);  
 			m_Vertices[m_CurrentVertexIndex].m_TextureInfo = textureInfo;
+			copyHeights[i] = heights[zIndex + j][xIndex + i % 5];
 			++m_CurrentVertexIndex;
 		}
 	} 
