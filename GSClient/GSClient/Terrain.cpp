@@ -125,20 +125,29 @@ float CTerrain::GetHeight(int xPosition, int zPosition)
 
 float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 {
+	/*{
+		if ((xPosition < 0.0f)
+			|| (zPosition < 0.0f)
+			|| (xPosition > 20000)
+			|| (zPosition > 20000))
+			return(0.0f);
+
+		return m_DetailHeights[(int)zPosition][(int)xPosition];
+	}*/
 	const float SCALE_SIZE = 200.0f;
-	float fx = xPosition;// / SCALE_SIZE;
-	float fz = zPosition;// / SCALE_SIZE;
+	float fx = xPosition  / SCALE_SIZE;
+	float fz = zPosition  / SCALE_SIZE;
 
 	/*지형의 좌표 (fx, fz)는 이미지 좌표계이다.
 	높이 맵의 x-좌표와 z-좌표가 높이 맵의 범위를 벗어나면
 	지형의 높이는0이다.*/
 	if ((fx < 0.0f)
 		|| (fz < 0.0f)
-		|| (fx > 20000)
-		|| (fz > 20000))
+		|| (fx > 100)
+		|| (fz > 100))
 		return(0.0f);
 	
-	return m_DetailHeights[(int)zPosition][(int)xPosition];
+	//return m_DetailHeights[(int)zPosition][(int)xPosition];
 	// 1. center
 	// 2. left end
 	// 3. right end
@@ -877,7 +886,7 @@ void CTerrain::FileSave()
 {
 	ofstream fileOut("resources/DetailHeights.txt");
 	int indexX, indexY;
-	/*for (int i = 0; i <= TERRAIN_HEIGHT_MAP_HEIGHT; ++i)
+	for (int i = 0; i <= TERRAIN_HEIGHT_MAP_HEIGHT; ++i)
 	{
 		for (int j = 0; j <= TERRAIN_HEIGHT_MAP_WIDTH; ++j)
 		{ 
@@ -895,31 +904,6 @@ void CTerrain::FileSave()
 		}
 		fileOut << endl;
 		if (((i + 1) % 5 == 0 && (i != 0 && i != 100)))
-		{
-			fileOut << "\n\n";
-		}
-
-		fileOut << endl;
-	}*/
-
-	for (int i = 0; i < 20000; ++i)
-	{
-		for (int j = 0; j < 20000; ++j)
-		{
-			indexX = j, indexY = i;
-			if (j == 20000) {
-				indexX = j - 1;
-			}
-			else if (i == 20000) {
-				indexY = i - 1;
-			}
-			fileOut << m_DetailHeights[indexY][indexX] << "\t";
-
-			if (((j + 1) % 5 == 0 && (j != 0 && j != 20000)))
-				fileOut << "//\t";
-		}
-		fileOut << endl;
-		if (((i + 1) % 5 == 0 && (i != 0 && i != 20000)))
 		{
 			fileOut << "\n\n";
 		}
@@ -944,7 +928,8 @@ void CTerrain::FileRead()
 			} 
 			m_Heights[i][j] = stoi(text);
 		} 
-	}
+	}        
+	return;
 	for (int i = 0; i < 20000; ++i)
 	{
 		for (int j = 0; j < 20000; ++j)
@@ -973,23 +958,7 @@ void CTerrain::FileRead()
 			int BottomRight = m_Heights[z][x + 1];
 			int TopLeft = m_Heights[z + 1][x];
 			int TopRight = m_Heights[z + 1][x + 1];
-
-			bool bRightToLeft = ((z % 2) != 0);
-			if (bRightToLeft)
-			{
-				if (fzPercent >= fxPercent)
-					BottomRight = BottomLeft + (TopRight - TopLeft);
-				else
-					TopLeft = TopRight + (BottomLeft - BottomRight);
-			}
-			else
-			{
-				if (fzPercent < (1.0f - fxPercent))
-					TopRight = TopLeft + (BottomRight - BottomLeft);
-				else
-					BottomLeft = TopLeft + (BottomRight - TopRight);
-			}
-
+			 
 			//사각형의 네 점을 보간하여 높이(픽셀 값)를 계산한다.
 			float fTopHeight = TopLeft * (1 - fxPercent) + TopRight * fxPercent;
 			float fBottomHeight = BottomLeft * (1 - fxPercent) + BottomRight * fxPercent;
