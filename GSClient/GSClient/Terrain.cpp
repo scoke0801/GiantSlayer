@@ -141,8 +141,7 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 		|| (fz > 100))
 		return(0.0f);
 	//높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다.
-
-	
+	 
 	int x = (int)fx;
 	int z = (int)fz;
 	float fxPercent = fx - x;
@@ -153,29 +152,11 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 	int TopLeft = m_Heights[z+1][x];
 	int TopRight = m_Heights[z+1][x + 1];
 
-	/*XMFLOAT3 B_L = { float(x), float(BottomLeft), float(z) };
-	XMFLOAT3 B_R = { float(x),float(BottomRight), float(z) };
-	XMFLOAT3 T_L = { float(x), float(TopLeft), float(z) };
-	XMFLOAT3 T_R = { float(x), float(TopRight), float(z) };
-
-	XMVECTOR posB_L = XMLoadFloat3(&B_L);
-	XMVECTOR posB_R = XMLoadFloat3(&B_L);
-	XMVECTOR posT_L = XMLoadFloat3(&T_L);
-	XMVECTOR posT_R = XMLoadFloat3(&T_R);*/
-
 	//사각형의 네 점을 보간하여 높이(픽셀 값)를 계산한다.
 	float fTopHeight = TopLeft * (1 - fxPercent) + TopRight * fxPercent;
 	float fBottomHeight = BottomLeft * (1 - fxPercent) + BottomRight * fxPercent;
 	float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
 
-	/*XMVECTOR fHeight=XMVectorCatmullRom(posB_L, posB_R, posT_L, posT_R, (float)0.8f);
-
-	XMFLOAT3 posB_E; 
-	XMStoreFloat3(&posB_E,fHeight);*/
-
-	//return XMVectorCatmullRom(posB_L, posB_R, posT_L, posT_R, (float)0.5f);
-
-	//return(posB_E.y);
 	return(fHeight);
 }
 
@@ -658,234 +639,235 @@ void CTerrain::InitHeightDatas()
 	//}
 
 	//// 첫번째 지형및 구조물
-	//for (int i = 0; i < 15; i++)
+	//for (int k = 0; k < 15; k++)
 	//{
 	//	for (int Garo = 0; Garo < 15; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = 100;
+	//		m_Heights[k][Garo] = 100;
 	//	}
 	//}
 
-	//for (int i = 7; i < 15; i++)
+	//for (int k = 7; k < 15; k++)
 	//{
 	//	for (int Garo = 5; Garo < 15; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 150;
-	//		//m_Heights[i][Garo] = rand() % 500 + (Garo * Garo *2);
+	//		m_Heights[k][Garo] = rand() % 300 - 150;
+	//		//m_Heights[k][Garo] = rand() % 500 + (Garo * Garo *2);
 	//	}
 	//}
 
-	//for (int i = 0; i < 5; i++)
+	//for (int k = 0; k < 5; k++)
 	//{
 	//	for (int Garo = 15; Garo < 25; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 500 + (Garo * Garo * 2);
+	//		m_Heights[k][Garo] = rand() % 500 + (Garo * Garo * 2);
 	//	}
 	//}
 
-	//for (int i = 5; i < 15; i++)
+	//for (int k = 5; k < 15; k++)
 	//{
 	//	for (int Garo = 20; Garo < 25; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 500 + (Garo * Garo * 2);
+	//		m_Heights[k][Garo] = rand() % 500 + (Garo * Garo * 2);
 	//	}
 	//}
 
 
-	//for (int i = 15; i < 25; i++)
+	//for (int k = 15; k < 25; k++)
 	//{
 	//	for (int Garo = 0; Garo < 5; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 500 - (i * i );
+	//		m_Heights[k][Garo] = rand() % 500 - (k * k );
 	//	}
 	//}
 	// 
-	//for (int i = 25; i < 35; i++)
+	//for (int k = 25; k < 35; k++)
 	//{
 	//	for (int Garo = 15; Garo < 20; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i*20);
+	//		m_Heights[k][Garo] = rand() % 300 + (k*20);
 	//	}
 	//}
 
-	//for (int i = 25; i < 35; i++)
+	//for (int k = 25; k < 35; k++)
 	//{
 	//	for (int Garo = 0; Garo < 7; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i * 20);
+	//		m_Heights[k][Garo] = rand() % 300 + (k * 20);
 	//	}
 	//}
 
-	//for (int i = 0; i < 35; i++)
+	//for (int k = 0; k < 35; k++)
 	//{
 	//	for (int Garo = 30; Garo < 40; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i * 30);
+	//		m_Heights[k][Garo] = rand() % 300 + (k * 30);
 	//	}
 	//}
 
-	//for (int i = 40; i < 50; i++)
+	//for (int k = 40; k < 50; k++)
 	//{
 	//	for (int Garo = 20; Garo < 30; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i * 30);
+	//		m_Heights[k][Garo] = rand() % 300 + (k * 30);
 	//	}
 	//}
 
-	//for (int i = 57; i < 62; i++)
+	//for (int k = 57; k < 62; k++)
 	//{
 	//	for (int Garo = 20; Garo < 27; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i * 30)-1300.0f;
+	//		m_Heights[k][Garo] = rand() % 300 + (k * 30)-1300.0f;
 	//	}
 	//}
 
-	//for (int i = 65; i < 72; i++)
+	//for (int k = 65; k < 72; k++)
 	//{
 	//	for (int Garo = 20; Garo < 27; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i * 30) -1300.0f;
+	//		m_Heights[k][Garo] = rand() % 300 + (k * 30) -1300.0f;
 	//	}
 	//}
 
-	//for (int i = 55; i < 65; i++)
+	//for (int k = 55; k < 65; k++)
 	//{
 	//	for (int Garo = 40; Garo < 50; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i * 30)-1700.0f;
+	//		m_Heights[k][Garo] = rand() % 300 + (k * 30)-1700.0f;
 	//	}
 	//}
 
-	//for (int i = 62; i < 65; i++)
+	//for (int k = 62; k < 65; k++)
 	//{
 	//	for (int Garo = 0; Garo < 10; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 + (i * 30) - 2000.0f;
+	//		m_Heights[k][Garo] = rand() % 300 + (k * 30) - 2000.0f;
 	//	}
 	//}
 
-	//for (int i = 25; i < 30; i++)
+	//for (int k = 25; k < 30; k++)
 	//{
 	//	for (int Garo = 45; Garo < 50; Garo++)
 	//	{
-	//		//m_Heights[i][Garo] = rand() % 300 - (i * 30)-500.0f;
+	//		//m_Heights[k][Garo] = rand() % 300 - (k * 30)-500.0f;
 	//	}
 	//}
 	//
 	//// 두번째 지형및 구조물
-	//for (int i = 80; i < 100; i++)
+	//for (int k = 80; k < 100; k++)
 	//{
 	//	for (int Garo = 0; Garo < 50; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1150;
+	//		m_Heights[k][Garo] = rand() % 300 - 1150;
 	//	}
 	//}
-	//for (int i = 80; i < 100; i++)
+	//for (int k = 80; k < 100; k++)
 	//{
 	//	for (int Garo = 40; Garo < 50; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1750;
+	//		m_Heights[k][Garo] = rand() % 300 - 1750;
 	//	}
 	//}
 
-	//for (int i = 35; i < 80; i++)
+	//for (int k = 35; k < 80; k++)
 	//{
 	//	for (int Garo = 50; Garo < 70; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 2150;
+	//		m_Heights[k][Garo] = rand() % 300 - 2150;
 	//	}
 	//} 
 
 	//// 구덩이
-	//for (int i = 95; i < 100; i++)
+	//for (int k = 95; k < 100; k++)
 	//{
 	//	for (int Garo = 10; Garo < 15; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1650;
+	//		m_Heights[k][Garo] = rand() % 300 - 1650;
 	//	}
 	//}
 
-	//for (int i = 85; i < 90; i++)
+	//for (int k = 85; k < 90; k++)
 	//{
 	//	for (int Garo = 7; Garo < 12; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1650;
+	//		m_Heights[k][Garo] = rand() % 300 - 1650;
 	//	}
 	//}
 
-	//for (int i = 80; i < 85; i++)
+	//for (int k = 80; k < 85; k++)
 	//{
 	//	for (int Garo = 22; Garo < 27; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1650;
+	//		m_Heights[k][Garo] = rand() % 300 - 1650;
 	//	}
 	//}
 
-	//for (int i = 95; i < 100; i++)
+	//for (int k = 95; k < 100; k++)
 	//{
 	//	for (int Garo = 27; Garo < 32; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1650;
+	//		m_Heights[k][Garo] = rand() % 300 - 1650;
 	//	}
 	//}
 
 	//
 	//// 세번째 지형및 구조물
-	//for (int i = 80; i < 100; i++)
+	//for (int k = 80; k < 100; k++)
 	//{
 	//	for (int Garo = 50; Garo < 70; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 1150;
+	//		m_Heights[k][Garo] = rand() % 300 - 1150;
 	//	}
 	//}
-	//for (int i = 0; i < 35; i++)
+	//for (int k = 0; k < 35; k++)
 	//{
 	//	for (int Garo = 50; Garo < 70; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 3650;
+	//		m_Heights[k][Garo] = rand() % 300 - 3650;
 	//	}
 	//}
 	// 
 	//// 4번째~보스
-	//for (int i = 0; i < 20; i++)
+	//for (int k = 0; k < 20; k++)
 	//{
 	//	for (int Garo = 70; Garo < 100; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 3650;
+	//		m_Heights[k][Garo] = rand() % 300 - 3650;
 	//	}
 	//}
-	//for (int i = 20; i < 40; i++)
+	//for (int k = 20; k < 40; k++)
 	//{
 	//	for (int Garo = 70; Garo < 100; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 3650;
+	//		m_Heights[k][Garo] = rand() % 300 - 3650;
 	//	}
 	//}
-	//for (int i = 40; i < 70; i++)
+	//for (int k = 40; k < 70; k++)
 	//{
 	//	for (int Garo = 70; Garo < 100; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 2550;
+	//		m_Heights[k][Garo] = rand() % 300 - 2550;
 	//		if (Garo >= 78 && Garo <= 88)
 	//		{
-	//			m_Heights[i][Garo] = rand() % 300 - 4650;
-	//			for(int i= 45; i<= 70; i++)
+	//			m_Heights[k][Garo] = rand() % 300 - 4650;
+	//			for(int k= 45; k<= 70; k++)
 	//			{
-	//				m_Heights[i][Garo] = -(100*i);
+	//				m_Heights[k][Garo] = -(100*k);
 	//			}
 	//		}
 	//	}
 	//}
-	//for (int i = 69; i < 100; i++)
+	//for (int k = 69; k < 100; k++)
 	//{
 	//	for (int Garo = 70; Garo < 100; Garo++)
 	//	{
-	//		m_Heights[i][Garo] = rand() % 300 - 7150;
+	//		m_Heights[k][Garo] = rand() % 300 - 7150;
 	//	}
 	//} 
 
 	//FileSave();
 	FileRead();
+	CalculateDetailHeightMap();
 }
 void CTerrain::FileSave()
 {
@@ -957,7 +939,48 @@ XMFLOAT3 CTerrain::CubicBezierSum5x5_C(int m_Heights[100][100], float uB[5], flo
 			f3Sum.y = vB[0] * (uB[0] * m_Heights[j][i] + uB[1] * m_Heights[j][i] + uB[2] * m_Heights[j][i] + uB[3] * m_Heights[j][i] + uB[4] * m_Heights[j][i]);
 		}
 	}
+	return(f3Sum); 
+}
+
+XMFLOAT3 CTerrain::CubicBezierSum5x5(XMFLOAT3 patch[25], float uB[5], float vB[5])
+{
+	XMFLOAT3 f3Sum = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	  
+	f3Sum.y = vB[0] * (uB[0] * patch[0].y + uB[1]   * patch[1 ].y + uB[2] * patch[2 ].y + uB[3] * patch[3 ].y + uB[4] * patch[4 ].y);
+	f3Sum.y += vB[1] * (uB[0] * patch[5].y + uB[1]  * patch[6 ].y + uB[2] * patch[7 ].y + uB[3] * patch[8 ].y + uB[4] * patch[9 ].y);
+	f3Sum.y += vB[2] * (uB[0] * patch[10].y + uB[1] * patch[11].y + uB[2] * patch[12].y + uB[3] * patch[13].y + uB[4] * patch[14].y);
+	f3Sum.y += vB[3] * (uB[0] * patch[15].y + uB[1] * patch[16].y + uB[2] * patch[17].y + uB[3] * patch[18].y + uB[4] * patch[19].y);
+	f3Sum.y += vB[4] * (uB[0] * patch[20].y + uB[1] * patch[21].y + uB[2] * patch[22].y + uB[3] * patch[23].y + uB[4] * patch[24].y);
+
 	return(f3Sum);
+}
+
+void CTerrain::CalculateDetailHeightMap()
+{  
+	float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+	 
+	XMFLOAT3 patch[25];
+	 
+	for (int i = 0; i < 25; ++i) {
+		for (int j = 0; j < 25; ++j) {
+			int xIndex = 4 * j;
+			int zIndex = 4 * i;
+			XMFLOAT3 shift = {  4.0f * j, 0, 4.0f * i  };
+			for (int k = 0; k < 25; ++k) {
+				patch[k].x = k % 5 + shift.x;
+				patch[k].z = 4 - (k / 5) + shift.z;
+				patch[k].y = m_Heights[zIndex + k / 5][xIndex + i % 5];
+			}
+
+			float uB[5] = { 0, };
+			float vB[5] = { 0, };	
+			BernsteinCoeffcient5x5(0.5f, uB);
+			BernsteinCoeffcient5x5(0.5f, vB);
+
+			XMFLOAT3 position = CubicBezierSum5x5(patch, uB, vB);
+			int stop = 3;
+		}
+	}
 }
 
 CTerrainWater::CTerrainWater(ID3D12Device* pd3dDevice, 
