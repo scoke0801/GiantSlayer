@@ -143,6 +143,30 @@ float CTerrain::CubicBezierSum5x5_C(int m_Heights[][101], float uB[5], float vB[
 	f3Sum += vB[3] *(uB[0] * m_Heights[zIndex + 3][xIndex + 0] + uB[1] * m_Heights[zIndex + 3][xIndex + 1] + uB[2] * m_Heights[zIndex + 3][xIndex + 2] + uB[3] * m_Heights[zIndex + 3][xIndex + 3] + uB[4] * m_Heights[zIndex + 3][xIndex + 4]);
 	f3Sum += vB[4] *(uB[0] * m_Heights[zIndex + 4][xIndex + 0] + uB[1] * m_Heights[zIndex + 4][xIndex + 1] + uB[2] * m_Heights[zIndex + 4][xIndex + 2] + uB[3] * m_Heights[zIndex + 4][xIndex + 3] + uB[4] * m_Heights[zIndex + 4][xIndex + 4]);
 	
+	/*f3Sum =  vB[0] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 1] + uB[2] * m_Heights[zIndex + 0][xIndex + 2] + uB[3] * m_Heights[zIndex + 0][xIndex + 3] + uB[4] * m_Heights[zIndex + 0][xIndex + 4]);
+	f3Sum += vB[1] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 1] + uB[2] * m_Heights[zIndex + 0][xIndex + 2] + uB[3] * m_Heights[zIndex + 0][xIndex + 3] + uB[4] * m_Heights[zIndex + 0][xIndex + 4]);
+	f3Sum += vB[2] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 1] + uB[2] * m_Heights[zIndex + 0][xIndex + 2] + uB[3] * m_Heights[zIndex + 0][xIndex + 3] + uB[4] * m_Heights[zIndex + 0][xIndex + 4]);
+	f3Sum += vB[3] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 1] + uB[2] * m_Heights[zIndex + 0][xIndex + 2] + uB[3] * m_Heights[zIndex + 0][xIndex + 3] + uB[4] * m_Heights[zIndex + 0][xIndex + 4]);
+	f3Sum += vB[4] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 1] + uB[2] * m_Heights[zIndex + 0][xIndex + 2] + uB[3] * m_Heights[zIndex + 0][xIndex + 3] + uB[4] * m_Heights[zIndex + 0][xIndex + 4]);*/
+	
+	//f3Sum =  vB[0] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 1][xIndex + 0] + uB[2] * m_Heights[zIndex + 2][xIndex + 0] + uB[3] * m_Heights[zIndex + 3][xIndex + 0] + uB[4] * m_Heights[zIndex + 4][xIndex + 0]);
+	//f3Sum += vB[1] * (uB[0] * m_Heights[zIndex + 0][xIndex + 1] + uB[1] * m_Heights[zIndex + 1][xIndex + 1] + uB[2] * m_Heights[zIndex + 2][xIndex + 1] + uB[3] * m_Heights[zIndex + 3][xIndex + 1] + uB[4] * m_Heights[zIndex + 4][xIndex + 1]);
+	//f3Sum += vB[2] * (uB[0] * m_Heights[zIndex + 0][xIndex + 2] + uB[1] * m_Heights[zIndex + 1][xIndex + 2] + uB[2] * m_Heights[zIndex + 2][xIndex + 2] + uB[3] * m_Heights[zIndex + 3][xIndex + 2] + uB[4] * m_Heights[zIndex + 4][xIndex + 2]);
+	//f3Sum += vB[3] * (uB[0] * m_Heights[zIndex + 0][xIndex + 3] + uB[1] * m_Heights[zIndex + 1][xIndex + 3] + uB[2] * m_Heights[zIndex + 2][xIndex + 3] + uB[3] * m_Heights[zIndex + 3][xIndex + 3] + uB[4] * m_Heights[zIndex + 4][xIndex + 3]);
+	//f3Sum += vB[4] * (uB[0] * m_Heights[zIndex + 0][xIndex + 4] + uB[1] * m_Heights[zIndex + 1][xIndex + 4] + uB[2] * m_Heights[zIndex + 2][xIndex + 4] + uB[3] * m_Heights[zIndex + 3][xIndex + 4] + uB[4] * m_Heights[zIndex + 4][xIndex + 4]);
+
+	//f3Sum =  vB[0] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 0] + uB[2] * m_Heights[zIndex + 0][xIndex + 0] + uB[3] * m_Heights[zIndex + 0][xIndex + 0] + uB[4] * m_Heights[zIndex + 0][xIndex + 0]);
+	//f3Sum += vB[1] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 0] + uB[2] * m_Heights[zIndex + 0][xIndex + 0] + uB[3] * m_Heights[zIndex + 0][xIndex + 0] + uB[4] * m_Heights[zIndex + 0][xIndex + 0]);
+	//f3Sum += vB[2] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 0] + uB[2] * m_Heights[zIndex + 0][xIndex + 0] + uB[3] * m_Heights[zIndex + 0][xIndex + 0] + uB[4] * m_Heights[zIndex + 0][xIndex + 0]);
+	//f3Sum += vB[3] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 0] + uB[2] * m_Heights[zIndex + 0][xIndex + 0] + uB[3] * m_Heights[zIndex + 0][xIndex + 0] + uB[4] * m_Heights[zIndex + 0][xIndex + 0]);
+	//f3Sum += vB[4] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 0] + uB[2] * m_Heights[zIndex + 0][xIndex + 0] + uB[3] * m_Heights[zIndex + 0][xIndex + 0] + uB[4] * m_Heights[zIndex + 0][xIndex + 0]);
+	
+	//f3Sum =  vB[0] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 1] + uB[2] * m_Heights[zIndex + 0][xIndex + 2] + uB[3] * m_Heights[zIndex + 0][xIndex + 3] + uB[4] * m_Heights[zIndex + 0][xIndex + 4]);
+	//f3Sum += vB[1] * (uB[0] * m_Heights[zIndex + 1][xIndex + 0] + uB[1] * m_Heights[zIndex + 1][xIndex + 1] + uB[2] * m_Heights[zIndex + 1][xIndex + 2] + uB[3] * m_Heights[zIndex + 1][xIndex + 3] + uB[4] * m_Heights[zIndex + 1][xIndex + 4]);
+	//f3Sum += vB[2] * (uB[0] * m_Heights[zIndex + 2][xIndex + 0] + uB[1] * m_Heights[zIndex + 2][xIndex + 1] + uB[2] * m_Heights[zIndex + 2][xIndex + 2] + uB[3] * m_Heights[zIndex + 2][xIndex + 3] + uB[4] * m_Heights[zIndex + 2][xIndex + 4]);
+	//f3Sum += vB[3] * (uB[0] * m_Heights[zIndex + 1][xIndex + 0] + uB[1] * m_Heights[zIndex + 1][xIndex + 1] + uB[2] * m_Heights[zIndex + 1][xIndex + 2] + uB[3] * m_Heights[zIndex + 1][xIndex + 3] + uB[4] * m_Heights[zIndex + 1][xIndex + 4]);
+	//f3Sum += vB[4] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 1] + uB[2] * m_Heights[zIndex + 0][xIndex + 2] + uB[3] * m_Heights[zIndex + 0][xIndex + 3] + uB[4] * m_Heights[zIndex + 0][xIndex + 4]);
+
 	return(f3Sum);
 }
 
@@ -171,24 +195,26 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 
 	float height;   
 	bool found = false;
+
 	float min_x, max_x, min_z, max_z;
 	float grid_x_size = 4.0f;
 	float gird_z_size = 4.0f;
-	for (int i= 0; i < 100; ++i) {
+	for (int i= 0; i <= TERRAIN_HEIGHT_MAP_WIDTH; ++i) {
 		min_x = i * grid_x_size;
 		max_x = (i + 1) * grid_x_size;
 
 		if (!(min_x <= fx && fx <= max_x))
 			continue;
 
-		for (int j = 0; j < 100; ++j) {
+		for (int j = 0; j <= TERRAIN_HEIGHT_MAP_HEIGHT; ++j) {
 			min_z = j * gird_z_size;
 			max_z = (j + 1) * gird_z_size;
+
 			if (!(min_z <= fz && fz <= max_z))
 				continue;
 
-			float n_x = InvLerp(float(min_x), float(max_x), fx);
-			float n_z = InvLerp(float(min_z), float(max_z), fz);
+			float n_x = InvLerp(min_x, max_x, fx);
+			float n_z = InvLerp(min_z, max_z, fz);
 
 			height = GetHeighty(n_x, n_z, x, z);
 			found = true;
