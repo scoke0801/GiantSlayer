@@ -639,6 +639,7 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	float uB[5], vB[5];
 	BernsteinCoeffcient5x5(uv.x, uB);
 	BernsteinCoeffcient5x5(uv.y, vB);
+	
 
 	output.uv0 = lerp(lerp(patch[0].uv0, patch[4].uv0, uv.x), lerp(patch[20].uv0, patch[24].uv0, uv.x), uv.y);
 

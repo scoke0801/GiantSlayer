@@ -113,7 +113,7 @@ inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
 inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
 inline void Swap(float *pfS, float *pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
-
+inline float InvLerp(float a, float b, float v) { return (v - a) / (b - a); }
 //3차원 벡터의 연산
 namespace Vector3
 {

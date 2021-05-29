@@ -123,8 +123,32 @@ float CTerrain::GetHeight(int xPosition, int zPosition)
 	return m_Heights[z][x];
 }
 
+void CTerrain::BernsteinCoeffcient5x5(float t, float fBernstein[5])
+{
+	float tInv = 1.0f - t;
+	fBernstein[0] = tInv * tInv * tInv * tInv;
+	fBernstein[1] = 4.0f * t * tInv * tInv * tInv;
+	fBernstein[2] = 6.0f * t * t * tInv * tInv;
+	fBernstein[3] = 4.0f * t * t * t * tInv;
+	fBernstein[4] = t * t * t * t;
+}
+
+float CTerrain::CubicBezierSum5x5_C(int m_Heights[][101], float uB[5], float vB[5])
+{
+	float f3Sum = 0.0f;
+	
+	f3Sum = vB[0] * (uB[0] * m_Heights[0][0] + uB[1] * m_Heights[0][1] + uB[2] * m_Heights[0][2] + uB[3] * m_Heights[0][3] + uB[4] * m_Heights[0][4]);
+	f3Sum += vB[1] * (uB[0] * m_Heights[1][0] + uB[1] * m_Heights[1][1] + uB[2] * m_Heights[1][2] + uB[3] * m_Heights[1][3] + uB[4] * m_Heights[1][4]);
+	f3Sum += vB[2] * (uB[0] * m_Heights[2][0] + uB[1] * m_Heights[2][1] + uB[2] * m_Heights[2][2] + uB[3] * m_Heights[2][3] + uB[4] * m_Heights[2][4]);
+	f3Sum += vB[3] * (uB[0] * m_Heights[3][0] + uB[1] * m_Heights[3][1] + uB[2] * m_Heights[3][2] + uB[3] * m_Heights[3][3] + uB[4] * m_Heights[3][4]);
+	f3Sum += vB[4] * (uB[0] * m_Heights[4][0] + uB[1] * m_Heights[4][1] + uB[2] * m_Heights[4][2] + uB[3] * m_Heights[4][3] + uB[4] * m_Heights[4][4]);
+	
+	return(f3Sum);
+}
+
 float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 {
+	// 원래 테스트
 	// 1. center
 	// 2. left end
 	// 3. right end
@@ -132,18 +156,38 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 	float fx = xPosition / SCALE_SIZE;
 	float fz = zPosition / SCALE_SIZE;
 
-	/*지형의 좌표 (fx, fz)는 이미지 좌표계이다.
-	높이 맵의 x-좌표와 z-좌표가 높이 맵의 범위를 벗어나면
-	지형의 높이는0이다.*/
+	///*지형의 좌표 (fx, fz)는 이미지 좌표계이다.
+	//높이 맵의 x-좌표와 z-좌표가 높이 맵의 범위를 벗어나면
+	//지형의 높이는0이다.*/
 	if ((fx < 0.0f)
 		|| (fz < 0.0f)
 		|| (fx > 100)
 		|| (fz > 100))
 		return(0.0f);
-	//높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다.
+	////높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다.
 
-	
 	int x = (int)fx;
+	int z = (int)fz;
+	float fxPercent = fx - x;
+	float fzPercent = fz - z;
+	//
+	float height;
+
+	int BottomLeft = m_Heights[z][x];
+	int BottomRight = m_Heights[z][x + 1];
+	int TopLeft = m_Heights[z + 1][x];
+	int TopRight = m_Heights[z + 1][x + 1];
+	
+	//return (v - a) / (b - a);
+	float n_x = InvLerp(float(BottomLeft), float(BottomRight), fx);
+	float n_z = InvLerp(float(TopLeft), float(TopRight), fz);
+
+	height = GetHeighty(n_x, n_z);
+	
+
+
+
+	/*int x = (int)fx;
 	int z = (int)fz;
 	float fxPercent = fx - x;
 	float fzPercent = fz - z;
@@ -153,30 +197,56 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 	int TopLeft = m_Heights[z+1][x];
 	int TopRight = m_Heights[z+1][x + 1];
 
-	/*XMFLOAT3 B_L = { float(x), float(BottomLeft), float(z) };
-	XMFLOAT3 B_R = { float(x),float(BottomRight), float(z) };
-	XMFLOAT3 T_L = { float(x), float(TopLeft), float(z) };
-	XMFLOAT3 T_R = { float(x), float(TopRight), float(z) };
+	float n_x = InvLerp(float(BottomLeft),float(BottomRight),fx);
+	float n_z = InvLerp(float(TopLeft), float(TopRight),fz);*/
 
-	XMVECTOR posB_L = XMLoadFloat3(&B_L);
-	XMVECTOR posB_R = XMLoadFloat3(&B_L);
-	XMVECTOR posT_L = XMLoadFloat3(&T_L);
-	XMVECTOR posT_R = XMLoadFloat3(&T_R);*/
+	
+	//////사각형의 네 점을 보간하여 높이(픽셀 값)를 계산한다.
+	//float fTopHeight = TopLeft * (1 - fxPercent) + TopRight * fxPercent;
+	//float fBottomHeight = BottomLeft * (1 - fxPercent) + BottomRight * fxPercent;
 
-	//사각형의 네 점을 보간하여 높이(픽셀 값)를 계산한다.
-	float fTopHeight = TopLeft * (1 - fxPercent) + TopRight * fxPercent;
-	float fBottomHeight = BottomLeft * (1 - fxPercent) + BottomRight * fxPercent;
-	float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
+	//float fHeight2 = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
 
-	/*XMVECTOR fHeight=XMVectorCatmullRom(posB_L, posB_R, posT_L, posT_R, (float)0.8f);
+	////
+	
 
-	XMFLOAT3 posB_E; 
-	XMStoreFloat3(&posB_E,fHeight);*/
+	//XMFLOAT3 position; 
+	//position= CubicBezierSum5x5_C(m_Heights, uB, vB,x,z);
+
+	//
+	//// 캣멀롬
+	//XMFLOAT3 B_L = { float(fx), float(BottomLeft), float(fz) };
+	//XMFLOAT3 B_R = { float(fx),float(BottomRight), float(fz) };
+	//XMFLOAT3 T_L = { float(fx), float(TopLeft), float(fz) };
+	//XMFLOAT3 T_R = { float(fx), float(TopRight), float(fz) };
+	////XMFLOAT3 P_T = {float(fx),float()}
+
+	//
+	//XMFLOAT2 BB = { float(fxPercent),float(fzPercent)};
+
+	//XMVECTOR posB_L = XMLoadFloat3(&B_L);
+	//XMVECTOR posB_R = XMLoadFloat3(&B_R);
+	//XMVECTOR posT_L = XMLoadFloat3(&T_L);
+	//XMVECTOR posT_R = XMLoadFloat3(&T_R);
+
+	//XMVECTOR posT = XMLoadFloat2(&BB);
+	//
+	//
+	//XMVECTOR fHeightz= XMVectorHermite(posT_L, posT_R, fxPercent);
+	//XMVECTOR fHeightx = XMVectorHermite(posB_L, posB_R, fzPercent);
+
+	//XMVECTOR fHeight = XMVectorCatmullRom(fHeightz, fHeightx, fzPercent);
+
+	//
+	//XMFLOAT3 posB_E; 
+
+	//XMStoreFloat3(&posB_E,fHeight);
 
 	//return XMVectorCatmullRom(posB_L, posB_R, posT_L, posT_R, (float)0.5f);
 
-	//return(posB_E.y);
-	return(fHeight);
+	
+	//return(position.y);
+	return height;
 }
 
 
@@ -647,6 +717,15 @@ XMFLOAT3 CTerrain::GetHeightMapNormal(int x, int z)
 	return(xmf3Normal);  
 }
 
+float CTerrain::GetHeighty(float nx, float nz)
+{
+	float uB[5], vB[5];
+	BernsteinCoeffcient5x5(nx, uB);
+	BernsteinCoeffcient5x5(1.0f - nz, vB);
+
+	return CubicBezierSum5x5_C(m_Heights, uB, vB);
+}
+
 void CTerrain::InitHeightDatas()
 {
 	//for (int Sero = 0; Sero <= TERRAIN_HEIGHT_MAP_HEIGHT; ++Sero)
@@ -936,29 +1015,7 @@ void CTerrain::FileRead()
 	}
 }
 
-void CTerrain::BernsteinCoeffcient5x5(float t, float fBernstein[5])
-{
-	float tInv = 1.0f - t;
-	fBernstein[0] = tInv * tInv * tInv * tInv;
-	fBernstein[1] = 4.0f * t * tInv * tInv * tInv;
-	fBernstein[2] = 6.0f * t * t * tInv * tInv;
-	fBernstein[3] = 4.0f * t * t * t * tInv;
-	fBernstein[4] = t * t * t * t;
-}
 
-XMFLOAT3 CTerrain::CubicBezierSum5x5_C(int m_Heights[100][100], float uB[5], float vB[5])
-{
-	XMFLOAT3 f3Sum = XMFLOAT3(0.0f, 0.0f, 0.0f);
-
-	for (int j = 0; j < 5; j++)
-	{
-		for (int i = 0; i < 5; i++)
-		{
-			f3Sum.y = vB[0] * (uB[0] * m_Heights[j][i] + uB[1] * m_Heights[j][i] + uB[2] * m_Heights[j][i] + uB[3] * m_Heights[j][i] + uB[4] * m_Heights[j][i]);
-		}
-	}
-	return(f3Sum);
-}
 
 CTerrainWater::CTerrainWater(ID3D12Device* pd3dDevice, 
 	ID3D12GraphicsCommandList* pd3dCommandList, 

@@ -10,7 +10,7 @@ public:
 private:
 	CBindingTerrainMesh* m_BindTerrainMesh;
 	CBindingTerrainMesh* m_BindTerrainMeshForLoosedWall[2];
-private:
+public:
 	int m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 
 	XMFLOAT3 m_Normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
@@ -56,10 +56,11 @@ private:
 
 public:
 	void BernsteinCoeffcient5x5(float t,float fBernstein[5]);
-	XMFLOAT3 CubicBezierSum5x5_C(int m_Heights[100][100], float uB[5], float vB[5]);
+	float CubicBezierSum5x5_C(int m_Heights[][101], float uB[5], float vB[5]);
 
 	void InitNormals();	
 	XMFLOAT3 GetHeightMapNormal(int x, int z);
+	float GetHeighty(float nx,float nz);
 };
 
 

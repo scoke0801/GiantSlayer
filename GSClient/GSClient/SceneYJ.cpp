@@ -425,6 +425,8 @@ void CSceneYJ::Update(float elapsedTime)
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
+	cout << m_Player->GetPosition().y << endl;
+
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
 			pObject->Update(elapsedTime);
