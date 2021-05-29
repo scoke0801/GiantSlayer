@@ -141,8 +141,21 @@ void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
 	if (m_isOnGround) {
-		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z);
-		
+		/*float heightCenter = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z);
+		float heightLT = pTerrain->GetDetailHeight(m_xmf3Position.x - 150, m_xmf3Position.z + 100);
+		float heightLB = pTerrain->GetDetailHeight(m_xmf3Position.x - 150, m_xmf3Position.z - 100);
+		float heightRT = pTerrain->GetDetailHeight(m_xmf3Position.x + 150, m_xmf3Position.z + 100);
+		float heightRB = pTerrain->GetDetailHeight(m_xmf3Position.x + 150, m_xmf3Position.z - 100);
+		m_xmf3Position.y = (heightCenter + heightLT + heightLB + heightRT + heightRB) / 5.0f + 5;*/
+		 
+		float sum = 0;
+		for (int i = 0; i < 4; ++i) {
+			float xPos[4] = { m_xmf3Position.x - 120, m_xmf3Position.x - 40, m_xmf3Position.x + 40,  m_xmf3Position.x + 120 };
+			float zPos[4] = { m_xmf3Position.z - 120 + i * 80, m_xmf3Position.z - 120 + i * 80, m_xmf3Position.z - 120 + i * 80, m_xmf3Position.z - 120 + i * 80 };
+			sum += pTerrain->GetDetailHeight(xPos, zPos);
+		}
+		  
+		m_xmf3Position.y = sum / 4.0f;
 	}
 	
 }

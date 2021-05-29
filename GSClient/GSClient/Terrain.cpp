@@ -142,7 +142,6 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 		return(0.0f);
 	//높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다.
 
-	
 	int x = (int)fx;
 	int z = (int)fz;
 	float fxPercent = fx - x;
@@ -153,30 +152,77 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 	int TopLeft = m_Heights[z+1][x];
 	int TopRight = m_Heights[z+1][x + 1];
 
-	/*XMFLOAT3 B_L = { float(x), float(BottomLeft), float(z) };
-	XMFLOAT3 B_R = { float(x),float(BottomRight), float(z) };
-	XMFLOAT3 T_L = { float(x), float(TopLeft), float(z) };
-	XMFLOAT3 T_R = { float(x), float(TopRight), float(z) };
+	XMFLOAT3 B_L = { float(x), float(BottomLeft),  float(z) };
+	XMFLOAT3 B_R = { float(x), float(BottomRight), float(z) };
+	XMFLOAT3 T_L = { float(x), float(TopLeft),     float(z) };
+	XMFLOAT3 T_R = { float(x), float(TopRight),    float(z) };
 
 	XMVECTOR posB_L = XMLoadFloat3(&B_L);
 	XMVECTOR posB_R = XMLoadFloat3(&B_L);
 	XMVECTOR posT_L = XMLoadFloat3(&T_L);
-	XMVECTOR posT_R = XMLoadFloat3(&T_R);*/
+	XMVECTOR posT_R = XMLoadFloat3(&T_R);
 
 	//사각형의 네 점을 보간하여 높이(픽셀 값)를 계산한다.
 	float fTopHeight = TopLeft * (1 - fxPercent) + TopRight * fxPercent;
 	float fBottomHeight = BottomLeft * (1 - fxPercent) + BottomRight * fxPercent;
-	float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
+	//float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
 
-	/*XMVECTOR fHeight=XMVectorCatmullRom(posB_L, posB_R, posT_L, posT_R, (float)0.8f);
+	XMFLOAT4 temp = XMFLOAT4(fxPercent, fxPercent, fzPercent, fzPercent);
+	XMVECTOR fHeight=XMVectorCatmullRomV(posB_L, posB_R, posT_L, posT_R, XMLoadFloat4(
+		&temp));
 
 	XMFLOAT3 posB_E; 
-	XMStoreFloat3(&posB_E,fHeight);*/
+	XMStoreFloat3(&posB_E,fHeight);
 
-	//return XMVectorCatmullRom(posB_L, posB_R, posT_L, posT_R, (float)0.5f);
+	//return XMVectorCatmullRom(vec_1, vec_2, vec_3, vec_4, (float)0.5f);
 
-	//return(posB_E.y);
-	return(fHeight);
+	return(posB_E.y);
+	//return(fHeight);
+}
+
+float CTerrain::GetDetailHeight(float xPosition[4], float zPosition[4])
+{
+	const float SCALE_SIZE = 200.0f;
+	float fx[4], fz[4];
+	int x[4], z[4]; 
+	float fxPercent[4], fzPercent[4];
+
+	for (int i = 0; i < 4; ++i) {
+		fx[i] = xPosition[i] / SCALE_SIZE;
+		fz[i] = zPosition[i] / SCALE_SIZE;
+
+		if ((fx[i] < 0.0f)
+			|| (fz[i] < 0.0f)
+			|| (fx[i] > 100)
+			|| (fz[i] > 100))
+		return 0.0f;
+
+		x[i] = (int)fx[i];
+		z[i] = (int)fz[i];
+		fxPercent[i] = fx[i] - x[i];
+		fzPercent[i] = fz[i] - z[i];
+	}
+	 
+	//높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다. 
+
+	XMFLOAT3 pos_1 = { (xPosition[0]), float(m_Heights[z[0]][x[0]]), (zPosition[0]) };
+	XMFLOAT3 pos_2 = { (xPosition[1]), float(m_Heights[z[1]][x[1]]), (zPosition[1]) };
+	XMFLOAT3 pos_3 = { (xPosition[2]), float(m_Heights[z[2]][x[2]]), (zPosition[2]) };
+	XMFLOAT3 pos_4 = { (xPosition[3]), float(m_Heights[z[3]][x[3]]), (zPosition[3]) };
+
+	XMVECTOR vec_1 = XMLoadFloat3(&pos_1);
+	XMVECTOR vec_2 = XMLoadFloat3(&pos_2);
+	XMVECTOR vec_3 = XMLoadFloat3(&pos_3);
+	XMVECTOR vec_4 = XMLoadFloat3(&pos_4);
+
+	XMFLOAT4 temp = XMFLOAT4(fxPercent[0], fxPercent[1], fxPercent[2], fxPercent[3] );
+	XMVECTOR fHeight = XMVectorCatmullRomV(vec_1, vec_2, vec_3, vec_4, XMLoadFloat4(&temp));
+	///XMVECTOR fHeight = XMVectorCatmullRom(vec_1, vec_2, vec_3, vec_4, 0.01f);
+
+	XMFLOAT3 posB_E;
+	XMStoreFloat3(&posB_E, fHeight);
+	 
+	return(posB_E.y); 
 }
 
 
