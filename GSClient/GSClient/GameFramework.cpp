@@ -400,7 +400,10 @@ void CFramework::SceneUpdate()
 	else
 		return;
 
-	Draw();
+	if (m_FrameDirtyFlag) {
+		Draw();
+		m_FrameDirtyFlag = false;
+	}
 
 #if defined(SHOW_CAPTIONFPS)
 
