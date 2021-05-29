@@ -5,6 +5,7 @@
 
 #include "FBXLoader.h"
 #include "FbxObject.h"
+#include "FbxObject2.h"
 enum class PlayerMoveType
 {
 	None = 0,
@@ -20,7 +21,7 @@ enum class PlayerWeaponType
 
 class CTerrain; 
 
-class CPlayer : public CFbxObject
+class CPlayer : public CFbxObject2
 {    
 private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
@@ -39,7 +40,7 @@ public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
-
+	
 	~CPlayer();	
 	
 public:

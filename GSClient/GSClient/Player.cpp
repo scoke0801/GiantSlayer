@@ -14,34 +14,44 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName)
 {
-	LoadFile(pstrFbxFileName);
+	//LoadFile(pstrFbxFileName);
 
-	finTransform = new XMFLOAT4X4[100];
+	//finTransform = new XMFLOAT4X4[100];
 
-	cout << indices.size() << " " << vertices.size() << " " << skeleton.size() << endl;
-	 
-	SetMesh(new CAnimatedMesh(pd3dDevice, pd3dCommandList, vertices, indices, skeleton));
-	//SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	SetShader(CShaderHandler::GetInstance().GetData("FbxAnimated"));
+	//cout << indices.size() << " " << vertices.size() << " " << skeleton.size() << endl;
+	// 
+	//SetMesh(new CAnimatedMesh(pd3dDevice, pd3dCommandList, vertices, indices, skeleton));
+	////SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+	//SetShader(CShaderHandler::GetInstance().GetData("FbxAnimated"));
 
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	m_time = 0;
-	t = 0;
-	endTime = 0;
-	for (int i = 0; i < skeleton.size(); i++) {
-		float t = animations[curAnim].bone[i].animFrame.back().frameTime;
-		if (t > endTime)
-			endTime = t;
+	//m_time = 0;
+	//t = 0;
+	//endTime = 0;
+	//for (int i = 0; i < skeleton.size(); i++) {
+	//	float t = animations[curAnim].bone[i].animFrame.back().frameTime;
+	//	if (t > endTime)
+	//		endTime = t;
+	//}
+
+	//cout << endTime << endl;	
+
+	LoadScene(pstrFbxFileName, pfbxSdkManager);
+
+	if (m_pfbxScene == NULL)
+		cout << "fbx 메쉬 로드 실패" << endl;
+	else {
+		LoadFbxMesh(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, m_pfbxScene->GetRootNode());
+		m_pAnimationController = new CAnimationController(m_pfbxScene);
+		cout << "fbx 메쉬 로드 성공!" << endl;
 	}
-
-	cout << endTime << endl;	
 	
 	m_Type = OBJ_TYPE::Player;
 
 	m_HP = 100;
 	m_SP = 100;
-}
+} 
 
 CPlayer::~CPlayer()
 {
@@ -67,10 +77,14 @@ void CPlayer::Update(float fTimeElapsed)
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
-	//if (Vector3::Length(vel) > 0.0f) 
-	//{ 
-		Animate(fTimeElapsed );
-	//}
+
+	m_AnimationTime += fTimeElapsed;
+
+	if (m_AnimationTime > 0.05f) {
+		Animate(m_AnimationTime);
+		m_AnimationTime = 0.0f;
+	}
+
 	Move(vel);
 
 	if (false == m_isOnGround) {

@@ -2911,15 +2911,19 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 { 
+	//m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList,
+	//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin"); 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin"); 
+		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
 	m_Player = m_Players[0];
+	m_Player->SetAnimationStack(1);
+	m_Player->m_pAnimationController->SetPosition(0, 0.0f);
 
 	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
 	m_PlayerCameras[0]->SetTarget(m_Players[0]);
 	m_Players[0]->SetCamera(m_PlayerCameras[0]);
 
-	m_Players[0]->Scale(7, 7, 7);
+	m_Players[0]->Scale(3, 3, 3);
 	m_Players[0]->SetObjectName(OBJ_NAME::Player);
 	m_Players[0]->Rotate({ 0,1,0 }, 180);
 	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });

@@ -543,6 +543,8 @@ struct DS_TERRAIN_TESSELLATION_OUTPUT
 	uint texIndex : TEXTURE;
 
 	float4 shadowPosH : SHADOWPOS;
+
+	float height : HEIGHT;
 };
 
 void BernsteinCoeffcient5x5(float t, out float fBernstein[5])
@@ -661,6 +663,7 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
 	output.texIndex = patch[0].texIndex;
 
+	output.height = position.y;
 	return(output);
 }
 
@@ -731,6 +734,8 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		 
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
+	cColor = float4(input.height, input.height, input.height, input.height);
+	return cColor;
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
