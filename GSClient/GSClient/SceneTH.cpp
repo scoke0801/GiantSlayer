@@ -230,14 +230,13 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pTerrainWater->SetPosition(XMFLOAT3(5450.0f, -1300.0f, 16500.0f));
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater].push_back(pTerrainWater);
 
-
-	/*CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, 
+	CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, 
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/Knight.bin", NULL, true);
 	ExportedObject* test = new ExportedObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	test->SetChild(pKinght, true);
 	test->SetPosition({ 750.0f,   230.0f,  1850.0f });
 	test->Scale(20, 20, 20);
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(test);*/
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(test);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
@@ -320,14 +319,14 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
 		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
-		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
+		L"resources/Textures/TT_RTS_Units_blue.dds", L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board.dds",
 		L"resources/UI/HelpText.dds",
 		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds",
 		L"resources/OBJ/Desert_Rock.dds",
 		L"resources/OBJ/Water.dds",
-		L"resources/OBJ/Rain.dds"
+		L"resources/OBJ/Rain.dds",
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
