@@ -179,6 +179,7 @@
     <ClInclude Include="Font.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GameObjectVer2.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="SceneExport.h" />
@@ -232,6 +233,7 @@
     </ClCompile>
     <ClCompile Include="FbxObject.cpp" />
     <ClCompile Include="Communicates.cpp" />
+    <ClCompile Include="GameObjectVer2.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="SceneExport.cpp" />
     <ClCompile Include="ShaderHandler.cpp" />
