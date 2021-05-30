@@ -354,7 +354,7 @@ void CShaderHandler::CreateSkinnedShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
 
-	pSkinnedShader->CreateInputLayout(ShaderTypes::Standard);
+	pSkinnedShader->CreateInputLayout(ShaderTypes::Skinned);
 	pSkinnedShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
 	//pSkinnedShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Skinned", pSkinnedShader);
