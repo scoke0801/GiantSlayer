@@ -1137,7 +1137,7 @@ float4 PSFbxAnimated(VS_FBX_ANIMATED_OUTPUT input, uint nPrimitiveID : SV_Primit
 ////////////////////////////////////////////////////////////////////////////////////
 //
 //#define MAX_VERTEX_INFLUENCES			4
-//#define SKINNED_ANIMATION_BONES			128
+//#define SKINNED_ANIMATION_BONES		128
 //
 //cbuffer cbBoneOffsets : register(b7)
 //{

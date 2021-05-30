@@ -3,6 +3,7 @@
 
 class CShader;
 class CGameObject;
+class CGameObjectVer2;
 class CCamera;
 class CPlayer;
 class UI;

@@ -12,6 +12,8 @@ enum class ShaderTypes
 	Billboard,
 	Terrain,
 	FbxAnimated,
+	Standard,
+	Skinned,
 	Particle,
 	TexParticle,
 	TerrainWater,  

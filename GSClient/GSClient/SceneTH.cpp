@@ -17,6 +17,7 @@
 #include "Sound.h"
 #include "FbxObject.h"
 #include "FbxLoader.h"
+#include "GameObjectVer2.h"
 
 #define ROOT_PARAMETER_OBJECT				0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA		1
@@ -228,6 +229,15 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_pd3dGraphicsRootSignature, 257 * 35, 257 * 32);
 	pTerrainWater->SetPosition(XMFLOAT3(5450.0f, -1300.0f, 16500.0f));
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater].push_back(pTerrainWater);
+
+
+	/*CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, 
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Knight.bin", NULL, true);
+	ExportedObject* test = new ExportedObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	test->SetChild(pKinght, true);
+	test->SetPosition({ 750.0f,   230.0f,  1850.0f });
+	test->Scale(20, 20, 20);
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(test);*/
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 

@@ -323,6 +323,37 @@ void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12Roo
 	m_Data.emplace("Object", pShader);
 }
 
+void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CShader* pStandardShader = new CShader();
+
+	//if (m_UserID == ShaderHandlerUser::TH) 
+	{
+		pStandardShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSStandard");
+		pStandardShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
+	}
+
+	pStandardShader->CreateInputLayout(ShaderTypes::FbxAnimated);
+	pStandardShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pStandardShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("Standard", pStandardShader);
+}
+
+void CShaderHandler::CreateSkinnedShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CShader* pSkinnedShader = new CShader();
+
+	//if (m_UserID == ShaderHandlerUser::TH) 
+	{
+		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSSkinnedAnimationStandard");
+	}
+
+	pSkinnedShader->CreateInputLayout(ShaderTypes::FbxAnimated);
+	pSkinnedShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pSkinnedShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("Skinned", pSkinnedShader);
+}
+
 void CShaderHandler::CreateBillboardShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	CShader* pBillboardShader = new CBillboardShader();	

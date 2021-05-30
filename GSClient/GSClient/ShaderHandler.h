@@ -93,6 +93,12 @@ public:
 		if (id.compare("FbxAnimated")) {
 			return GetData("FbxAnimated");
 		}
+		if (id.compare("Standard")) {
+			return GetData("Standard");
+		}
+		if (id.compare("Skinned")) {
+			return GetData("Skinned");
+		}
 		string resultText = "지정되지 않은 셰이더 호출!";
 		resultText += (" " + id);
 		assert(!resultText.c_str());
@@ -104,6 +110,9 @@ public:
 	void CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	void CreateFBXAnimatedShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	void CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature); 
+
+	void CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	void CreateSkinnedShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	void CreateDoorWallShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	void CreateBridgeShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
