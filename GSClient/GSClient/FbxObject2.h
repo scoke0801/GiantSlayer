@@ -48,25 +48,6 @@ public:
 	void SetPosition(int nAnimationStack, float fPosition);
 };
 
-class MeshInfo
-{
-public:
-	MeshInfo() { }
-	~MeshInfo() { };
-
-public:
-	int numCP, numPG, numDC;
-
-	int* indexCP;
-	XMFLOAT3* mControlPoint;
-
-	FbxAMatrix* BoneOffsets;
-
-	CMesh* pMesh = NULL;
-	CShader* pShader = NULL;
-	bool animation = false;
-};
-
 struct Bone2
 {
 	FbxAMatrix offset;
@@ -74,11 +55,72 @@ struct Bone2
 	string name;
 };
 
+struct ControlPoint2
+{
+	XMFLOAT3 pos;
+	vector<int> indices;
+	vector<double> weights;
+};
+
 struct Vertex2
 {
 	XMFLOAT3 pos;
 	XMFLOAT2 uv;
 	XMFLOAT3 normal;
+
+	vector<int> indices;
+	vector<double> weights;
+};
+
+struct Keyframe2
+{
+	float frameTime;
+	FbxAMatrix aniMatrix;
+
+	bool operator == (const Keyframe2& rhs) {
+		if (aniMatrix != rhs.aniMatrix)
+			return false;
+
+		return true;
+	}
+};
+
+struct AnimBones
+{
+	vector<Keyframe2> keyframes;
+
+	float GetAnimLength() {
+		return keyframes.back().frameTime;
+	}
+};
+
+struct Animation2
+{
+	float animLength;
+	vector<AnimBones> animBones;
+};
+
+class MeshInfo
+{
+public:
+	MeshInfo() { }
+	~MeshInfo() { };
+
+public:
+	int numCP = 0;
+	int	numPG = 0;
+	int	numDC = 0;
+	bool hasAnimation = false;
+
+	int* indexCP = NULL;
+
+	unordered_map<int, ControlPoint2> mControlPoint;
+	vector<Vertex2> vertices;
+	CMesh* pMesh = NULL;
+	CShader* pShader = NULL;
+
+	vector<Bone2> skeleton;
+	vector<Animation2> animations;
 };
 
 class CFbxObject2 : public CGameObject
@@ -90,9 +132,9 @@ public:
 	virtual ~CFbxObject2();
 
 public:
+
+	vector<MeshInfo> renderinfo;
 	vector<MeshInfo> vMesh;
-	vector<XMFLOAT3> cp;
-	vector<Vertex2> vertices;
 	vector<Bone2> skeleton;
 	 
 	bool hasAnimation = false;
@@ -107,11 +149,11 @@ public:
 		ID3D12RootSignature* pd3dGraphicsRootSignature, FbxNode* pNode);
 
 	void ExploreFbxHierarchy(FbxNode* inRootNode);
-	void LoadControlPoints(FbxNode* inNode);
-	void LoadBoneOffsets(FbxNode* inNode);
-	void LoadMesh(FbxNode* inNode);
+	void LoadControlPoints(FbxNode* inNode, MeshInfo* tempMesh);
+	void LoadAnimations(FbxNode* inNode, MeshInfo* tempMesh);
+	void LoadMesh(FbxNode* inNode, MeshInfo* tempMesh);
 
-	void ProcessSkeletonHierarchy(FbxNode* inRootNode);
+	void LoadSkeletonHierarchy(FbxNode* inRootNode);
 	void ProcessSkeletonHierarchyRecursively(FbxNode* inNode, int inDepth, int myIndex, int inParentIndex);
 
 	void AnimateFbxMesh(FbxNode* pNode, FbxTime& fbxCurrentTime);
