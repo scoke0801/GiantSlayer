@@ -562,8 +562,8 @@ bool CFramework::ConnectToServer()
 	SOCKADDR_IN serveraddr;
 	ZeroMemory(&serveraddr, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = inet_addr(SERVER_ROOP);
-	//serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVERIP);
+	//serveraddr.sin_addr.s_addr = inet_addr(SERVER_ROOP);
+	serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVERIP);
 	serveraddr.sin_port = htons(SERVERPORT); 
 
 	// socket()
