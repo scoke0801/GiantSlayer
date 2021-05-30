@@ -1,13 +1,31 @@
 #pragma once 
  
+#include "Camera.h"
+ 
+struct GP {
+	int x, y;
+
+	constexpr bool operator<(const GP& other) {
+		return x < other.x&& y < other.y;
+	}
+};
+constexpr bool operator<(const GP& a, const GP& b) {
+	return a.x < b.x || a.y < b.y;
+}
 class CTerrain
 {
+public:
+	
+
 private:
 	CBindingTerrainMesh* m_BindTerrainMesh;
 	CBindingTerrainMesh* m_BindTerrainMeshForLoosedWall[2];
-private:
+public:
 	int m_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
+
 	XMFLOAT3 m_Normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
+	 
+	int*	 m_GridHeights[25][25];
 
 private:
 	int						m_nWidth;
@@ -48,8 +66,13 @@ private:
 	void FileSave();
 	void FileRead();
 
+public:
+	void BernsteinCoeffcient5x5(float t,float fBernstein[5]);
+	float CubicBezierSum5x5_C(float uB[5], float vB[5], int xIndex, int zIndex);
+
 	void InitNormals();	
 	XMFLOAT3 GetHeightMapNormal(int x, int z);
+	float GetHeighty(float nx,float nz, int xIndex, int zIndex);
 };
 
 

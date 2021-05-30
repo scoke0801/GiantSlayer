@@ -35,6 +35,7 @@ protected:
 	bool						m_ViewDirty = true;
 
 	// Cache View/Proj matrices.
+public:
 	DirectX::XMFLOAT4X4			m_xmf4x4View;
 	DirectX::XMFLOAT4X4			m_xmf4x4Proj;
 
