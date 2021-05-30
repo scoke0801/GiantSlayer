@@ -166,6 +166,7 @@ public:
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
 
 	void SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate = false);
+	void SetShadertoAll(CShader* pshader);
 
 public:
 	CGameObjectVer2* GetParent() { return(m_pParent); }

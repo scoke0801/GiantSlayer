@@ -612,6 +612,8 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet) override;
+
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
 };
 
@@ -665,6 +667,8 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void ReleaseUploadBuffers();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet) override;
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
 };

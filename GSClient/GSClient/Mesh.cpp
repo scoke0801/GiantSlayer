@@ -1311,6 +1311,25 @@ void CStandardMesh::ReleaseUploadBuffers()
 	m_pd3dBiTangentUploadBuffer = NULL;
 }
 
+void CStandardMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
+{
+	//UpdateShaderVariables(pd3dCommandList);
+
+	OnPreRender(pd3dCommandList, NULL);
+
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+
+	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
+	{
+		pd3dCommandList->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
+		pd3dCommandList->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+	}
+	else
+	{
+		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+	}
+}
+
 void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)
 {
 	char pstrToken[64] = { '\0' };
@@ -1551,6 +1570,25 @@ void CSkinnedMesh::ReleaseUploadBuffers()
 
 	if (m_pd3dBoneWeightUploadBuffer) m_pd3dBoneWeightUploadBuffer->Release();
 	m_pd3dBoneWeightUploadBuffer = NULL;
+}
+
+void CSkinnedMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
+{
+	//UpdateShaderVariables(pd3dCommandList);
+
+	OnPreRender(pd3dCommandList, NULL);
+
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+
+	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
+	{
+		pd3dCommandList->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
+		pd3dCommandList->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+	}
+	else
+	{
+		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+	}
 }
 
 void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)

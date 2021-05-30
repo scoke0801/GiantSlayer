@@ -230,6 +230,14 @@ void CGameObjectVer2::SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate)
 	}
 }
 
+void CGameObjectVer2::SetShadertoAll(CShader* pshader)
+{
+	SetShader(pshader);
+
+	if (m_pSibling) m_pSibling->SetShadertoAll(pshader);
+	if (m_pChild) m_pChild->SetShadertoAll(pshader);
+}
+
 void CGameObjectVer2::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
@@ -274,13 +282,27 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 {
 	OnPrepareRender();
 
-	if (m_pShader)
+	if (m_pMesh)
 	{
-		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
-		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
-		m_pShader->Render(pd3dCommandList, pCamera);
+		//UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+
+		if (m_nMaterials > 0)
+		{
+			for (int i = 0; i < m_nMaterials; i++)
+			{
+				if (m_ppMaterials[i])
+				{
+					if (m_pShader)
+					{
+						//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
+						m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
+						m_pShader->Render(pd3dCommandList, pCamera);
+					}
+				}
+				m_pMesh->Render(pd3dCommandList, i);
+			}
+		}
 	}
-	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
 
 	if (m_pSibling) m_pSibling->Draw(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Draw(pd3dCommandList, pCamera);
