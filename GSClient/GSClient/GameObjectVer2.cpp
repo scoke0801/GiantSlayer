@@ -234,8 +234,12 @@ void CGameObjectVer2::SetShadertoAll(CShader* pshader)
 {
 	SetShader(pshader);
 
-	if (m_pSibling) m_pSibling->SetShadertoAll(pshader);
-	if (m_pChild) m_pChild->SetShadertoAll(pshader);
+	if (m_pSibling) {
+		m_pSibling->SetShadertoAll(pshader); 
+	}
+	if (m_pChild) { 
+		m_pChild->SetShadertoAll(pshader); 
+	}
 }
 
 void CGameObjectVer2::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -282,7 +286,7 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 {
 	OnPrepareRender();
 
-	if (m_pMesh)
+	//if (m_pMesh)
 	{
 		//UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 
@@ -290,7 +294,7 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 		{
 			for (int i = 0; i < m_nMaterials; i++)
 			{
-				if (m_ppMaterials[i])
+				//if (m_ppMaterials[i])
 				{
 					if (m_pShader)
 					{
