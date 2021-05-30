@@ -236,7 +236,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	test->SetShadertoAll(CShaderHandler::GetInstance().GetData("Skinned"));
 	test->SetChild(pKinght, true);
 	test->SetPosition({ 750.0f,   230.0f,  1850.0f });
-	test->Scale(20000, 20000, 20000);
+	test->Scale(20, 20, 20);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(test);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
