@@ -149,9 +149,9 @@ public:
 	CAnimationController* m_pAnimationController = NULL;
 
 public:
-	void SetShader(CShader* pShader) override;
-	void SetShader(int nMaterial, CShader* pShader);
-	void SetMaterial(int nMaterial, CMaterial* pMaterial);
+	//void SetShader(CShader* pShader) override;
+	//void SetShader(int nMaterial, CShader* pShader);
+	//void SetMaterial(int nMaterial, CMaterial* pMaterial);
 
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 	virtual void OnPrepareAnimate() { }

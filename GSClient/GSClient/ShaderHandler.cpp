@@ -8,8 +8,6 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateFBXAnimatedShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateBasicObjectShader(pd3dDevice,pd3dGraphicsRootSignature);
 
-	CreateStandardShader(pd3dDevice, pd3dGraphicsRootSignature);
-	CreateSkinnedShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateDoorWallShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateBridgeShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -33,6 +31,9 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateTerrainWaterShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
+
+	CreateStandardShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateSkinnedShader(pd3dDevice, pd3dGraphicsRootSignature);
 }
 
 void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -328,6 +329,7 @@ void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12Roo
 
 void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
+	return;
 	CShader* pStandardShader = new CShader();
 
 	//if (m_UserID == ShaderHandlerUser::TH) 
@@ -338,7 +340,7 @@ void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 
 	pStandardShader->CreateInputLayout(ShaderTypes::FbxAnimated);
 	pStandardShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
-	pStandardShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	//pStandardShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Standard", pStandardShader);
 }
 
@@ -352,9 +354,9 @@ void CShaderHandler::CreateSkinnedShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
 
-	pSkinnedShader->CreateInputLayout(ShaderTypes::FbxAnimated);
+	pSkinnedShader->CreateInputLayout(ShaderTypes::Standard);
 	pSkinnedShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
-	pSkinnedShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	//pSkinnedShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Skinned", pSkinnedShader);
 }
 

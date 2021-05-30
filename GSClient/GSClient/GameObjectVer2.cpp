@@ -191,27 +191,27 @@ CGameObjectVer2::CGameObjectVer2(int nMaterials)
 CGameObjectVer2::~CGameObjectVer2()
 {
 }
-
-void CGameObjectVer2::SetShader(CShader* pShader)
-{
-	m_nMaterials = 1;
-	m_ppMaterials = new CMaterial * [m_nMaterials];
-	m_ppMaterials[0] = new CMaterial(0);
-	m_ppMaterials[0]->SetShader(pShader);
-}
-
-void CGameObjectVer2::SetShader(int nMaterial, CShader* pShader)
-{
-	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->SetShader(pShader);
-}
-
-void CGameObjectVer2::SetMaterial(int nMaterial, CMaterial* pMaterial)
-{
-	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->Release();
-	m_ppMaterials[nMaterial] = pMaterial;
-	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
-}
-
+//
+//void CGameObjectVer2::SetShader(CShader* pShader)
+//{
+//	m_nMaterials = 1;
+//	m_ppMaterials = new CMaterial * [m_nMaterials];
+//	m_ppMaterials[0] = new CMaterial(0);
+//	m_ppMaterials[0]->SetShader(pShader);
+//}
+//
+//void CGameObjectVer2::SetShader(int nMaterial, CShader* pShader)
+//{
+//	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->SetShader(pShader);
+//}
+//
+//void CGameObjectVer2::SetMaterial(int nMaterial, CMaterial* pMaterial)
+//{
+//	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->Release();
+//	m_ppMaterials[nMaterial] = pMaterial;
+//	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
+//}
+//
 void CGameObjectVer2::SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate)
 {
 	if (pChild)
@@ -274,24 +274,14 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 {
 	OnPrepareRender();
 
-	if (m_pMesh)
+	if (m_pShader)
 	{
-		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-
-		if (m_nMaterials > 0)
-		{
-			for (int i = 0; i < m_nMaterials; i++)
-			{
-				if (m_ppMaterials[i])
-				{
-					if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
-					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
-				}
-
-				m_pMesh->Render(pd3dCommandList, i);
-			}
-		}
+		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
+		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
+		m_pShader->Render(pd3dCommandList, pCamera);
 	}
+	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
+
 	if (m_pSibling) m_pSibling->Draw(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Draw(pd3dCommandList, pCamera);
 }
@@ -421,7 +411,7 @@ void CGameObjectVer2::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 					}
 				}
 			}
-			SetMaterial(nMaterial, pMaterial);
+			//SetMaterial(nMaterial, pMaterial);
 		}
 		else if (!strcmp(pstrToken, "<AlbedoColor>:"))
 		{
