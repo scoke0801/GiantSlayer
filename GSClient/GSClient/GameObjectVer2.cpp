@@ -205,13 +205,13 @@ CGameObjectVer2::~CGameObjectVer2()
 //	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->SetShader(pShader);
 //}
 //
-//void CGameObjectVer2::SetMaterial(int nMaterial, CMaterial* pMaterial)
-//{
-//	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->Release();
-//	m_ppMaterials[nMaterial] = pMaterial;
-//	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
-//}
-//
+void CGameObjectVer2::SetMaterial(int nMaterial, CMaterial* pMaterial)
+{
+	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->Release();
+	m_ppMaterials[nMaterial] = pMaterial;
+	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
+}
+
 void CGameObjectVer2::SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate)
 {
 	if (pChild)
@@ -268,6 +268,37 @@ void CGameObjectVer2::ReleaseUploadBuffers()
 
 	if (m_pSibling) m_pSibling->ReleaseUploadBuffers();
 	if (m_pChild) m_pChild->ReleaseUploadBuffers();
+}
+
+void CGameObjectVer2::Update(float fTimeElapsed)
+{
+	//if (!m_isDrawbale) return;
+	static float MaxVelocityXZ = 120.0f;
+	static float MaxVelocityY = 120.0f;
+	static float Friction = 50.0f;
+
+	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Gravity, fTimeElapsed, false));
+	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	float fMaxVelocityXZ = MaxVelocityXZ * fTimeElapsed;
+	if (fLength > MaxVelocityXZ)
+	{
+		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+	}
+	float fMaxVelocityY = MaxVelocityY * fTimeElapsed;
+	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+	if (fLength > MaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
+
+	Move(m_xmf3Velocity);
+
+	fLength = Vector3::Length(m_xmf3Velocity);
+	float fDeceleration = (Friction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	
+	UpdateTransform(NULL);
+
+	Animate(fTimeElapsed);
 }
 
 void CGameObjectVer2::Animate(float fTimeElapsed)
@@ -433,7 +464,7 @@ void CGameObjectVer2::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 					}
 				}
 			}
-			//SetMaterial(nMaterial, pMaterial);
+			SetMaterial(nMaterial, pMaterial);
 		}
 		else if (!strcmp(pstrToken, "<AlbedoColor>:"))
 		{
@@ -698,7 +729,7 @@ CGameObjectVer2* CGameObjectVer2::LoadGeometryAndAnimationFromFile(ID3D12Device*
 	_stprintf_s(pstrDebug, 256, "Frame Hierarchy\n"));
 	OutputDebugString(pstrDebug);
 
-	CGameObject::PrintFrameInfo(pGameObject, NULL);
+	CGameObjectVer2::PrintFrameInfo(pGameObject, NULL);
 #endif
 
 	if (bHasAnimation)

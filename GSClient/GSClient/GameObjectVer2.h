@@ -151,7 +151,7 @@ public:
 public:
 	//void SetShader(CShader* pShader) override;
 	//void SetShader(int nMaterial, CShader* pShader);
-	//void SetMaterial(int nMaterial, CMaterial* pMaterial);
+	void SetMaterial(int nMaterial, CMaterial* pMaterial);
 
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 	virtual void OnPrepareAnimate() { }
@@ -162,6 +162,7 @@ public:
 	virtual void ReleaseShaderVariables();
 	virtual void ReleaseUploadBuffers();
 
+	void Update(float fTimeElapsed) override;
 	void Animate(float fTimeElapsed) override;
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
 

@@ -1315,7 +1315,8 @@ void CStandardMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubS
 {
 	//UpdateShaderVariables(pd3dCommandList);
 
-	OnPreRender(pd3dCommandList, NULL);
+	//OnPreRender(pd3dCommandList, NULL);
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 
@@ -1577,6 +1578,7 @@ void CSkinnedMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSe
 	UpdateShaderVariables(pd3dCommandList);
 
 	OnPreRender(pd3dCommandList, NULL);
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 
