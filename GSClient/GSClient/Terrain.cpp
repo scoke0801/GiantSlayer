@@ -164,45 +164,7 @@ void CTerrain::BernsteinCoeffcient5x5(float t, float fBernstein[5])
 float CTerrain::CubicBezierSum5x5_C(float uB[5], float vB[5], int xIndex, int zIndex)
 {
 	float f3Sum = 0.0f;
-	 
-	/*float pHeights[25]; 
-	int WidthBlock_Count = 9, DepthBlock_Count = 9; 
 	  
-	float width = WidthBlock_Count + 1;
-	float depth = DepthBlock_Count + 1;
-	 
-	for (int i = 0, j = 4, z = (depth - 1); z >= 0; z -= 2, --j) {
-		for (int x = 0; x < (width - 1); x += 2, i++) {
-			if (i >= 25) break;
-
-			pHeights[i] = m_Heights[zIndex + j][xIndex + i % 5];
-		}
-	}*/
-
-	//f3Sum =  vB[0] * (uB[0] * pHeights[0]  + uB[1] * pHeights[1]  + uB[2] * pHeights[2]  + uB[3] * pHeights[3]  + uB[4] * pHeights[4]);
-	//f3Sum += vB[1] * (uB[0] * pHeights[5]  + uB[1] * pHeights[6]  + uB[2] * pHeights[7]  + uB[3] * pHeights[8]  + uB[4] * pHeights[9]);
-	//f3Sum += vB[2] * (uB[0] * pHeights[10] + uB[1] * pHeights[11] + uB[2] * pHeights[12] + uB[3] * pHeights[13] + uB[4] * pHeights[14]);
-	//f3Sum += vB[3] * (uB[0] * pHeights[15] + uB[1] * pHeights[16] + uB[2] * pHeights[17] + uB[3] * pHeights[18] + uB[4] * pHeights[19]);
-	//f3Sum += vB[4] * (uB[0] * pHeights[20] + uB[1] * pHeights[21] + uB[2] * pHeights[22] + uB[3] * pHeights[23] + uB[4] * pHeights[24]);
-	 
-	//f3Sum =  vB[0] *(uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 1] + uB[2] * m_Heights[zIndex + 0][xIndex + 2] + uB[3] * m_Heights[zIndex + 0][xIndex + 3] + uB[4] * m_Heights[zIndex + 0][xIndex + 4]);
-	//f3Sum += vB[1] *(uB[0] * m_Heights[zIndex + 1][xIndex + 0] + uB[1] * m_Heights[zIndex + 1][xIndex + 1] + uB[2] * m_Heights[zIndex + 1][xIndex + 2] + uB[3] * m_Heights[zIndex + 1][xIndex + 3] + uB[4] * m_Heights[zIndex + 1][xIndex + 4]);
-	//f3Sum += vB[2] *(uB[0] * m_Heights[zIndex + 2][xIndex + 0] + uB[1] * m_Heights[zIndex + 2][xIndex + 1] + uB[2] * m_Heights[zIndex + 2][xIndex + 2] + uB[3] * m_Heights[zIndex + 2][xIndex + 3] + uB[4] * m_Heights[zIndex + 2][xIndex + 4]);
-	//f3Sum += vB[3] *(uB[0] * m_Heights[zIndex + 3][xIndex + 0] + uB[1] * m_Heights[zIndex + 3][xIndex + 1] + uB[2] * m_Heights[zIndex + 3][xIndex + 2] + uB[3] * m_Heights[zIndex + 3][xIndex + 3] + uB[4] * m_Heights[zIndex + 3][xIndex + 4]);
-	//f3Sum += vB[4] *(uB[0] * m_Heights[zIndex + 4][xIndex + 0] + uB[1] * m_Heights[zIndex + 4][xIndex + 1] + uB[2] * m_Heights[zIndex + 4][xIndex + 2] + uB[3] * m_Heights[zIndex + 4][xIndex + 3] + uB[4] * m_Heights[zIndex + 4][xIndex + 4]);
-	
-	//f3Sum =  vB[0] * (uB[0] * m_Heights[zIndex + 4][xIndex + 0] + uB[1] * m_Heights[zIndex + 4][xIndex + 1] + uB[2] * m_Heights[zIndex + 4][xIndex + 2] + uB[3] * m_Heights[zIndex + 4][xIndex + 3] + uB[4] * m_Heights[zIndex + 4][xIndex + 4]);
-	//f3Sum += vB[1] * (uB[0] * m_Heights[zIndex + 3][xIndex + 0] + uB[1] * m_Heights[zIndex + 3][xIndex + 1] + uB[2] * m_Heights[zIndex + 3][xIndex + 2] + uB[3] * m_Heights[zIndex + 3][xIndex + 3] + uB[4] * m_Heights[zIndex + 3][xIndex + 4]);
-	//f3Sum += vB[2] * (uB[0] * m_Heights[zIndex + 2][xIndex + 0] + uB[1] * m_Heights[zIndex + 2][xIndex + 1] + uB[2] * m_Heights[zIndex + 2][xIndex + 2] + uB[3] * m_Heights[zIndex + 2][xIndex + 3] + uB[4] * m_Heights[zIndex + 2][xIndex + 4]);
-	//f3Sum += vB[3] * (uB[0] * m_Heights[zIndex + 1][xIndex + 0] + uB[1] * m_Heights[zIndex + 1][xIndex + 1] + uB[2] * m_Heights[zIndex + 1][xIndex + 2] + uB[3] * m_Heights[zIndex + 1][xIndex + 3] + uB[4] * m_Heights[zIndex + 1][xIndex + 4]);
-	//f3Sum += vB[4] * (uB[0] * m_Heights[zIndex + 0][xIndex + 0] + uB[1] * m_Heights[zIndex + 0][xIndex + 1] + uB[2] * m_Heights[zIndex + 0][xIndex + 2] + uB[3] * m_Heights[zIndex + 0][xIndex + 3] + uB[4] * m_Heights[zIndex + 0][xIndex + 4]);
-
-	//f3Sum =  vB[0] * (uB[0] * m_Heights[zIndex ][xIndex + 0] + uB[1] * m_Heights[zIndex ][xIndex + 0] + uB[2] * m_Heights[zIndex ][xIndex + 0] + uB[3] * m_Heights[zIndex ][xIndex + 0] + uB[4] * m_Heights[zIndex ][xIndex + 0]);
-	//f3Sum += vB[1] * (uB[0] * m_Heights[zIndex ][xIndex + 0] + uB[1] * m_Heights[zIndex ][xIndex + 0] + uB[2] * m_Heights[zIndex ][xIndex + 0] + uB[3] * m_Heights[zIndex ][xIndex + 0] + uB[4] * m_Heights[zIndex ][xIndex + 0]);
-	//f3Sum += vB[2] * (uB[0] * m_Heights[zIndex ][xIndex + 0] + uB[1] * m_Heights[zIndex ][xIndex + 0] + uB[2] * m_Heights[zIndex ][xIndex + 0] + uB[3] * m_Heights[zIndex ][xIndex + 0] + uB[4] * m_Heights[zIndex ][xIndex + 0]);
-	//f3Sum += vB[3] * (uB[0] * m_Heights[zIndex ][xIndex + 0] + uB[1] * m_Heights[zIndex ][xIndex + 0] + uB[2] * m_Heights[zIndex ][xIndex + 0] + uB[3] * m_Heights[zIndex ][xIndex + 0] + uB[4] * m_Heights[zIndex ][xIndex + 0]);
-	//f3Sum += vB[4] * (uB[0] * m_Heights[zIndex ][xIndex + 0] + uB[1] * m_Heights[zIndex ][xIndex + 0] + uB[2] * m_Heights[zIndex ][xIndex + 0] + uB[3] * m_Heights[zIndex ][xIndex + 0] + uB[4] * m_Heights[zIndex ][xIndex + 0]);
-	
 	int* pHeights = m_GridHeights[zIndex / 4][xIndex / 4];
 	f3Sum =  vB[0] * (uB[0] * pHeights[0]  + uB[1] * pHeights[1]  + uB[2] * pHeights[2]  + uB[3] * pHeights[3]  + uB[4] * pHeights[4]);
 	f3Sum += vB[1] * (uB[0] * pHeights[5]  + uB[1] * pHeights[6]  + uB[2] * pHeights[7]  + uB[3] * pHeights[8]  + uB[4] * pHeights[9]);
@@ -229,18 +191,56 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 		|| (fx >= 100)
 		|| (fz >= 100))
 		return(0.0f);
-	////높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다.
-	  
-	float n_x = InvLerp(x, x + 4, fx);
-	float n_z = InvLerp(z, z + 4, fz);
 
-	//n_x = 0.5f;
-	//n_z = 0.5f;
-	float height = GetHeighty(n_x, n_z, x, z);
-	 
-	cout << "n_x : " << n_x << " n_z : " << n_z << " ";
-	cout << "x : " << x << " z: " << z << " height : " << height << "\n";
-	return height;
+	//////높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다.
+	//  
+	//float n_x = InvLerp(x, x + 4, fx);
+	//float n_z = InvLerp(z, z + 4, fz);
+
+	////n_x = 0.5f;
+	////n_z = 0.5f;
+	//float height = GetHeighty(n_x, n_z, x, z);
+	// 
+
+	//cout << "n_x : " << n_x << " n_z : " << n_z << " ";
+	//cout << "x : " << x << " z: " << z << " height : " << height << "\n";
+
+
+	bool found = false; 
+	float minX, maxX, minZ, maxZ;
+	float gridX = 4;
+	float gridZ = 4;
+	float height = 0.0f;
+	for (int i = 0; i < 100; ++i) {
+		minX = i * gridX;
+		maxX = (i + 1) * gridX;
+
+		if (!(minX <= fx && fx <= maxX)) {
+			continue;
+		}
+
+		for (int j = 0; j < 100; ++j) {
+			minZ = j * gridZ;
+			maxZ = (j + 1) * gridZ;
+
+			if (!(minZ <= fz && fz <= maxZ)) {
+				continue;
+			}
+			float n_x = InvLerp(minX, maxX, fx);
+			float n_z = InvLerp(minZ, maxZ, fz);
+
+			height = GetHeighty(n_x, n_z, x, z);
+			found = true;
+			break;
+		}
+		break;
+	}
+	if (found) { 
+		return height;
+	}
+	else {
+		return 0.0f;
+	}
 }
 
 

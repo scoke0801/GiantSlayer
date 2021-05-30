@@ -410,12 +410,12 @@ void CSceneJH::Update(float elapsedTime)
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i){
 		for (auto pObject : m_ObjectLayers[i]) {
-			//pObject->Update(elapsedTime);
+			pObject->Update(elapsedTime);
 			pObject->UpdateColliders();
 		}
 	} 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) { 
-		//pEnemy->FixPositionByTerrain(m_Terrain);
+		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
 	m_Particles->Update(elapsedTime); 
 
@@ -426,7 +426,7 @@ void CSceneJH::Update(float elapsedTime)
 		player->Update(elapsedTime);
 		player->UpdateColliders();
 		player->FixPositionByTerrain(m_Terrain);
-		//player->FixCameraByTerrain(m_Terrain);
+		player->FixCameraByTerrain(m_Terrain);
 	}
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
