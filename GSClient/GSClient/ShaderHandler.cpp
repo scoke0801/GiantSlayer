@@ -8,6 +8,9 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateFBXAnimatedShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateBasicObjectShader(pd3dDevice,pd3dGraphicsRootSignature);
 
+	CreateStandardShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateSkinnedShader(pd3dDevice, pd3dGraphicsRootSignature);
+
 	CreateDoorWallShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateBridgeShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreatePuzzleShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -346,6 +349,7 @@ void CShaderHandler::CreateSkinnedShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 	//if (m_UserID == ShaderHandlerUser::TH) 
 	{
 		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSSkinnedAnimationStandard");
+		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
 
 	pSkinnedShader->CreateInputLayout(ShaderTypes::FbxAnimated);
