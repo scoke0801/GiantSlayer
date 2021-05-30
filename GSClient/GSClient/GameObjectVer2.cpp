@@ -296,9 +296,9 @@ void CGameObjectVer2::Update(float fTimeElapsed)
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 	
-	UpdateTransform(NULL);
 
-	Animate(fTimeElapsed);
+	CGameObjectVer2::Animate(fTimeElapsed);
+	UpdateTransform(NULL);
 }
 
 void CGameObjectVer2::Animate(float fTimeElapsed)
@@ -321,7 +321,7 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 		{
 			for (int i = 0; i < m_nMaterials; i++)
 			{
-				if (m_ppMaterials[i])
+				//if (m_ppMaterials[i])
 				{
 					if (m_pShader)
 					{
@@ -769,5 +769,5 @@ void ExportedObject::OnPrepareAnimate()
 
 void ExportedObject::Animate(float fTimeElapsed)
 {
-	CGameObject::Animate(fTimeElapsed);
+	CGameObjectVer2::Animate(fTimeElapsed);
 }
