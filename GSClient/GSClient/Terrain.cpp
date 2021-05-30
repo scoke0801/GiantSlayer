@@ -231,12 +231,15 @@ float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 		return(0.0f);
 	////높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다.
 	  
-	float n_x = InvLerp(x, x + 1, fx);
-	float n_z = InvLerp(z, z + 1, fz);
+	float n_x = InvLerp(x, x + 4, fx);
+	float n_z = InvLerp(z, z + 4, fz);
 
+	//n_x = 0.5f;
+	//n_z = 0.5f;
 	float height = GetHeighty(n_x, n_z, x, z);
 	 
-	//cout << "x : " << x << " z: " << z << " height : " << height << "\n";
+	cout << "n_x : " << n_x << " n_z : " << n_z << " ";
+	cout << "x : " << x << " z: " << z << " height : " << height << "\n";
 	return height;
 }
 
