@@ -967,8 +967,9 @@ VS_FBX_ANIMATED_OUTPUT VSFbxAnimated(VS_FBX_ANIMATED_INPUT input)
 	TempWeights[0] = input.weights.x;
 	TempWeights[1] = input.weights.y;
 	TempWeights[2] = input.weights.z;
-	TempWeights[3] = input.weights.w;
-	
+	//TempWeights[3] = input.weights.w;
+	TempWeights[3] = 1.0f - TempWeights[0] - TempWeights[1] - TempWeights[2];
+
 	/*if(input.weights.w < 0.001f) 
 		TempWeights[3] = 1.0f - TempWeights[0] - TempWeights[1] - TempWeights[2];
 	else
