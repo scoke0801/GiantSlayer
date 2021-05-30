@@ -55,6 +55,8 @@ struct GAMEOBJECT_INFO
  
 class CGameObject
 {
+public:
+	XMFLOAT4X4			m_xmf4x4ToParent;
 private:
 	int					m_nReferences = 0;
 
@@ -63,6 +65,7 @@ public:
 	XMFLOAT4X4			m_xmf4x4World;
 
 protected:	// 좌표 관련 변수
+
 
 	// frame update loop, update 갱신 후의 좌표
 	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
@@ -141,7 +144,7 @@ public:
 
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 
-	void Scale(float x, float y, float z, bool setSize = true);
+	virtual void Scale(float x, float y, float z, bool setSize = true);
 
 public:
 	// about collision
@@ -185,6 +188,7 @@ public:
 	XMFLOAT3 GetVelocity() const { return m_xmf3Velocity; }
 	XMFLOAT4X4 GetWorldTransform() const { return m_xmf4x4World; }
 
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL) {}
 	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
 	virtual void SetPosition(XMFLOAT3 pos);
