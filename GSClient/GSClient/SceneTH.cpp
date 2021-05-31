@@ -237,6 +237,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	test->SetPosition({ 1750.0f,   230.0f,  1850.0f });
 	test->Scale(200, 200, 200);
 	test->SetShadertoAll();
+	
 	//m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(test);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
@@ -439,7 +440,7 @@ void CSceneTH::Update(float elapsedTime)
 	ProcessInput();
 	
 	test->Update(elapsedTime);
-
+	test->FixPositionByTerrain(m_Terrain);
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
 			pObject->Update(elapsedTime);
@@ -2415,9 +2416,7 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_MinimapCamera->SetTarget(m_Players[0]);
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
-		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
-		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/human.bin");
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 
 		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));

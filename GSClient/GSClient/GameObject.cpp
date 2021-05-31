@@ -59,6 +59,7 @@ void CGameObject::SetMesh(CMesh* pMesh)
 }
 void CGameObject::FixPositionByTerrain(CTerrain* pTerrain)
 {
+	m_xmf3Position = GetPosition();
 	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_HeightFromTerrain;
 	SetPosition(m_xmf3Position);
 }

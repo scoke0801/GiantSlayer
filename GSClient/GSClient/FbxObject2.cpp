@@ -217,7 +217,7 @@ void ComputeLinearDeformation(FbxMesh* pfbxMesh, FbxTime& fbxCurrentTime, FbxVec
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CAnimationController::CAnimationController(FbxScene* pfbxScene)
+CAnimationController_01::CAnimationController_01(FbxScene* pfbxScene)
 {
 	FbxArray<FbxString*> fbxAnimationStackNames;
 	pfbxScene->FillAnimStackNameArray(fbxAnimationStackNames);
@@ -261,7 +261,7 @@ CAnimationController::CAnimationController(FbxScene* pfbxScene)
 	FbxArrayDelete(fbxAnimationStackNames);
 }
 
-CAnimationController::~CAnimationController()
+CAnimationController_01::~CAnimationController_01()
 {
 	if (m_ppfbxAnimationStacks) delete[] m_ppfbxAnimationStacks;
 	if (m_pfbxStartTimes) delete[] m_pfbxStartTimes;
@@ -269,18 +269,18 @@ CAnimationController::~CAnimationController()
 	if (m_pfbxCurrentTimes) delete[] m_pfbxCurrentTimes;
 }
 
-void CAnimationController::SetAnimationStack(FbxScene* pfbxScene, int nAnimationStack)
+void CAnimationController_01::SetAnimationStack(FbxScene* pfbxScene, int nAnimationStack)
 {
 	m_nAnimationStack = nAnimationStack;
 	pfbxScene->SetCurrentAnimationStack(m_ppfbxAnimationStacks[nAnimationStack]);
 }
 
-void CAnimationController::SetPosition(int nAnimationStack, float fPosition)
+void CAnimationController_01::SetPosition(int nAnimationStack, float fPosition)
 {
 	m_pfbxCurrentTimes[nAnimationStack].SetSecondDouble(fPosition);
 }
 
-void CAnimationController::AdvanceTime(float fTimeElapsed)
+void CAnimationController_01::AdvanceTime(float fTimeElapsed)
 {
 	m_fTime += fTimeElapsed;
 
@@ -312,7 +312,7 @@ CFbxObject2::CFbxObject2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 		cout << "fbx 메쉬 로드 실패" << endl;
 	else {
 		LoadFbxMesh(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, m_pfbxScene->GetRootNode());
-		m_pAnimationController = new CAnimationController(m_pfbxScene);
+		m_pAnimationController = new CAnimationController_01(m_pfbxScene);
 		cout << "fbx 메쉬 로드 성공!" << endl;
 	} 
 }

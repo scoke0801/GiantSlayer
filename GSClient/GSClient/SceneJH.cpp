@@ -301,7 +301,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
 		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
-		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
+		L"resources/Textures/TT_RTS_Units_blue.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board.dds",
 		L"resources/UI/HelpText.dds",
@@ -957,7 +957,7 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 		 
 		for (auto player : m_Players) {
 			if (!player->IsDrawable()) continue;
-			player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
+			//player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
 		}
 
 		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
@@ -2910,25 +2910,32 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	}
 }
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
-	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin"); 
+{
+	CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Knight.bin", NULL, true); 
+	
+	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
 
-	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
-	m_PlayerCameras[0]->SetTarget(m_Players[0]);
-	m_Players[0]->SetCamera(m_PlayerCameras[0]);
+	m_Players[0]->SetChild(pKinght, true);
+	m_Players[0]->SetPosition({ 1750.0f,   230.0f,  1850.0f });
+	m_Players[0]->Scale(200, 200, 200);
+	m_Players[0]->SetShadertoAll();
 
-	m_Players[0]->Scale(7, 7, 7);
-	m_Players[0]->SetObjectName(OBJ_NAME::Player);
-	m_Players[0]->Rotate({ 0,1,0 }, 180);
-	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	//m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
+	//m_PlayerCameras[0]->SetTarget(m_Players[0]);
+	//m_Players[0]->SetCamera(m_PlayerCameras[0]);
 
-	m_Players[0]->SetDrawable(true);
-	m_Players[0]->SetTextureIndex(0x400); 
+	//m_Players[0]->Scale(7, 7, 7);
+	//m_Players[0]->SetObjectName(OBJ_NAME::Player);
+	//m_Players[0]->Rotate({ 0,1,0 }, 180);
+	//m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 
-	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 });
-	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
+	//m_Players[0]->SetDrawable(true);
+	//m_Players[0]->SetTextureIndex(0x400); 
+
+	//m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 });
+	//m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
 	++m_CurrentPlayerNum;
 	
 	m_MinimapCamera->SetTarget(m_Players[0]); 
