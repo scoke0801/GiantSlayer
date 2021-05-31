@@ -55,6 +55,7 @@ void CPlayer::Update(float fTimeElapsed)
 		else {
 			y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
 		}
+		SetAnimationSet(2);
 		Move({ 0,y,0 });
 		m_JumpTime += fTimeElapsed;
 		if (m_JumpTime > TO_JUMP_TIME) {
@@ -72,7 +73,7 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
 	//m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
 
-	if (vel.x == 0 && vel.z == 0)
+	if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
 		SetAnimationSet(0);
 	else
 		SetAnimationSet(1);

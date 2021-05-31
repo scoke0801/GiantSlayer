@@ -653,6 +653,9 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 		nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pInFile);
 		pstrToken[nStrLength] = '\0';
 
+		if (!strcmp(pstrToken, "run"))
+			cout << "!!!!!!!" << endl;
+
 		if (!strcmp(pstrToken, "<AnimationSets>:"))
 		{
 			nReads = (UINT)::fread(&m_pAnimationController->m_nAnimationSets, sizeof(int), 1, pInFile);
