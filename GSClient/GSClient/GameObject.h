@@ -140,7 +140,7 @@ public:
 	virtual void Move(XMFLOAT3 shift);
 	void Move();
 
-	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
+	virtual void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
 
 	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 

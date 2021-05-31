@@ -1183,18 +1183,18 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	output.tangentW = float3(0.0f, 0.0f, 0.0f);
 	output.bitangentW = float3(0.0f, 0.0f, 0.0f);
 	matrix mtxVertexToBoneWorld;
-	//for (int i = 0; i < 4; i++)
-	//{
-	//	mtxVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
-	//	output.positionW += input.weights[i] * mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
-	//	output.normalW += input.weights[i] * mul(input.normal, (float3x3)mtxVertexToBoneWorld);
-	//	output.tangentW += input.weights[i] * mul(input.tangent, (float3x3)mtxVertexToBoneWorld);
-	//	output.bitangentW += input.weights[i] * mul(input.bitangent, (float3x3)mtxVertexToBoneWorld);
-	//}
+	for (int i = 0; i < 4; i++)
+	{
+		mtxVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
+		output.positionW += input.weights[i] * mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
+		output.normalW += input.weights[i] * mul(input.normal, (float3x3)mtxVertexToBoneWorld);
+		output.tangentW += input.weights[i] * mul(input.tangent, (float3x3)mtxVertexToBoneWorld);
+		output.bitangentW += input.weights[i] * mul(input.bitangent, (float3x3)mtxVertexToBoneWorld);
+	}
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
-	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
-	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	//output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	//output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
 	return(output);

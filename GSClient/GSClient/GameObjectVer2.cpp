@@ -234,7 +234,10 @@ void CGameObjectVer2::SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate)
 
 void CGameObjectVer2::SetShadertoAll(CShader* pshader)
 {
-	SetShader(pshader);
+	//if (m_pMesh != nullptr)
+	{
+		SetShader(pshader);
+	}
 
 	if (m_pSibling) m_pSibling->SetShadertoAll(pshader);
 	if (m_pChild) m_pChild->SetShadertoAll(pshader);
@@ -251,27 +254,24 @@ void CGameObjectVer2::SetPosition(XMFLOAT3 pos)
 
 void CGameObjectVer2::Scale(float x, float y, float z, bool setSize)
 {
-	if (setSize)
-	{
-		m_xmf3Size = { x,y,z };
-	}
+	//if (setSize)
+	//{
+	//	m_xmf3Size = { x,y,z };
+	//}
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
 	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
 
 	UpdateTransform(NULL);
 }
 
-//void CGameObjectVer2::SetPositionToAll(XMFLOAT3 pos)
-//{
-//	SetPosition(pos);
-//	UpdateTransform(NULL);
-//}
-//
-//void CGameObjectVer2::ScaleToAll(float x, float y, float z, bool setSize)
-//{
-//	Scale(x,y,z, setSize);
-//	UpdateTransform(NULL);
-//}
+void CGameObjectVer2::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
+{
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis), XMConvertToRadians(fAngle));
+	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4ToParent);
+
+	UpdateTransform(NULL);
+}
+ 
 
 void CGameObjectVer2::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -282,10 +282,13 @@ void CGameObjectVer2::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dComman
 }
 
 void CGameObjectVer2::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
-{
+{  
 	XMFLOAT4X4 xmf4x4World;
+	int matIndex = 0;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 16, &xmf4x4World, 0);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &m_nTextureIndex, 16);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(0, 1, &matIndex, 17);
 }
 
 void CGameObjectVer2::ReleaseShaderVariables()
@@ -331,8 +334,8 @@ void CGameObjectVer2::Update(float fTimeElapsed)
 	//if (fDeceleration > fLength) fDeceleration = fLength;
 	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 	
-	//CGameObjectVer2::Animate(fTimeElapsed);
-	//UpdateTransform(NULL);
+	CGameObjectVer2::Animate(fTimeElapsed);
+	UpdateTransform(NULL);
 }
 
 void CGameObjectVer2::Animate(float fTimeElapsed)
@@ -349,11 +352,11 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 
 	if (m_pMesh)
 	{
-		//UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-		if (m_pShader)
-		{
-			m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
-		}
+		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		//if (m_pShader)
+		///{
+			//m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
+		//}
 		if (m_nMaterials > 0)
 		{
 			for (int i = 0; i < m_nMaterials; i++)

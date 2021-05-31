@@ -169,6 +169,7 @@ public:
 	void SetShadertoAll(CShader* pshader);
 	void SetPosition(XMFLOAT3 pos) override;
 	void Scale(float x, float y, float z, bool setSize = true) override;
+	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle)override;
 	//void SetPositionToAll(XMFLOAT3 pos);
 	//void ScaleToAll(float x, float y, float z, bool setSize = true);
 public:

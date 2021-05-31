@@ -934,12 +934,12 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 ////////////////////////////////////////////////////////////////////////////////////////
 cbuffer cbBoneOffsets : register(b6)
 {
-	float4x4 gpmtxBoneOffsets[100];
+	float4x4 gpmtxBoneOffsets[128];
 };
 
 cbuffer cbBoneTransforms : register(b7)
 {
-	float4x4 gpmtxBoneTransforms[100];
+	float4x4 gpmtxBoneTransforms[128];
 };
 
 struct VS_FBX_ANIMATED_INPUT
@@ -1192,10 +1192,10 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 		output.bitangentW += input.weights[i] * mul(input.bitangent, (float3x3)mtxVertexToBoneWorld);
 	}
 
-	//output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
-	//output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	//output.position = mul(mul(float4(input.position, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
+	 
 	return(output);
 }

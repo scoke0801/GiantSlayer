@@ -237,7 +237,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	test->SetPosition({ 1750.0f,   230.0f,  1850.0f });
 	test->Scale(200, 200, 200);
 	test->SetShadertoAll(CShaderHandler::GetInstance().GetData("Skinned"));
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(test);
+	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(test);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
@@ -443,7 +443,7 @@ void CSceneTH::Update(float elapsedTime)
 		}
 	}
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
-		pEnemy->FixPositionByTerrain(m_Terrain);
+		//pEnemy->FixPositionByTerrain(m_Terrain);
 	}
 	m_Particles->Update(elapsedTime);
 
