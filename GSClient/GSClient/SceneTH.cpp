@@ -232,12 +232,12 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, 
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/Knight.bin", NULL, true);
-	ExportedObject* test = new ExportedObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	test = new ExportedObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	test->SetChild(pKinght, true);
 	test->SetPosition({ 1750.0f,   230.0f,  1850.0f });
 	test->Scale(200, 200, 200);
 	test->SetShadertoAll(CShaderHandler::GetInstance().GetData("Skinned"));
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(test);
+	//m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(test);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
@@ -435,6 +435,8 @@ void CSceneTH::Update(float elapsedTime)
 {
 	m_SoundManager->OnUpdate();
 	ProcessInput();
+	
+	test->Update(elapsedTime);
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
@@ -554,6 +556,7 @@ void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	m_Particles->Draw(pd3dCommandList, m_CurrentCamera);
 
+	test->Draw(pd3dCommandList, m_CurrentCamera);
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		//if (i == (int)OBJECT_LAYER::Enemy) {
 		//	continue;
@@ -562,10 +565,10 @@ void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 			pObject->Draw(pd3dCommandList, m_CurrentCamera);
 		}
 	}
-	for (auto player : m_Players) {
+	/*for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->Draw(pd3dCommandList, m_CurrentCamera);
-	}
+	}*/
 }
 
 void CSceneTH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -744,10 +747,10 @@ void CSceneTH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 			}
 		}
 
-		for (auto player : m_Players) {
+		/*for (auto player : m_Players) {
 			if (!player->IsDrawable()) continue;
 			player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
-		}
+		}*/
 
 		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
 			D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
@@ -2387,8 +2390,8 @@ void CSceneTH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/idle01.bin");
+	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
+	//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/idle01.bin");
 	m_Player = m_Players[0];
 
 	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));

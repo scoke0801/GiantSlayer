@@ -1313,10 +1313,10 @@ void CStandardMesh::ReleaseUploadBuffers()
 
 void CStandardMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 {
-	//UpdateShaderVariables(pd3dCommandList);
+	UpdateShaderVariables(pd3dCommandList);
 
-	//OnPreRender(pd3dCommandList, NULL);
-	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
+	OnPreRender(pd3dCommandList, NULL);
+	//pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 
@@ -1552,6 +1552,23 @@ void CSkinnedMesh::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandL
 		{
 			XMStoreFloat4x4(&m_pcbxmf4x4BoneOffsets[i], XMMatrixTranspose(XMLoadFloat4x4(&m_pxmf4x4BindPoseBoneOffsets[i])));
 			XMStoreFloat4x4(&m_pcbxmf4x4BoneTransforms[i], XMMatrixTranspose(XMLoadFloat4x4(&m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World)));
+			//cout << " i : " << i;
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._11 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._12 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._13 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._14 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._21 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._22 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._23 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._24 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._31 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._32 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._33 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._34 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._41 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._42 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._43 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._44 << "\n";
 		}
 	}
 }
@@ -1633,6 +1650,10 @@ void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 					m_ppSkinningBoneFrameCaches[i] = NULL;
 				}
 			}
+			for (int i = 0; i < m_nSkinningBones; ++i) {
+				cout << "BoneName: " << m_ppstrSkinningBoneNames[i] << endl;
+			}
+			int stop = 3;
 		}
 		else if (!strcmp(pstrToken, "<BoneOffsets>:"))
 		{

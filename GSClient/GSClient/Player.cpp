@@ -90,7 +90,7 @@ void CPlayer::Update(float fTimeElapsed)
 	if (fDeceleration > fLength) fDeceleration = fLength; 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 	 
-	Animate(fTimeElapsed);
+	//Animate(fTimeElapsed);
 }
 
 void CPlayer::UpdateCamera()

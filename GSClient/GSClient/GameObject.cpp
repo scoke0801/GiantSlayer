@@ -311,7 +311,7 @@ void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 		XMConvertToRadians(fAngle));
 	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);	
 	
-	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4ToParent);
+	//m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4ToParent);
 
 	UpdateTransform(NULL);
 }
@@ -347,7 +347,7 @@ void CGameObject::Scale(float x, float y, float z, bool setSize)
 	}
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
 	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World); 
-	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
+	//m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
 
 	UpdateTransform(NULL);
 }
