@@ -145,6 +145,8 @@ public:
 	int				m_nMaterials = 0;
 	CMaterial**		m_ppMaterials = NULL;
 
+	bool isSkinned = false;
+
 	CAnimationController* m_pAnimationController = NULL;
 
 public:
@@ -166,7 +168,7 @@ public:
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
 
 	void SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate = false);
-	void SetShadertoAll(CShader* pshader);
+	void SetShadertoAll();
 	void SetPosition(XMFLOAT3 pos) override;
 	void Scale(float x, float y, float z, bool setSize = true) override;
 	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle)override;

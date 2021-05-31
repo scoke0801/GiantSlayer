@@ -329,7 +329,6 @@ void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12Roo
 
 void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
-	return;
 	CShader* pStandardShader = new CShader();
 
 	//if (m_UserID == ShaderHandlerUser::TH) 
@@ -338,8 +337,8 @@ void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 		pStandardShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
 
-	pStandardShader->CreateInputLayout(ShaderTypes::FbxAnimated);
-	pStandardShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pStandardShader->CreateInputLayout(ShaderTypes::Standard);
+	pStandardShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
 	//pStandardShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Standard", pStandardShader);
 }

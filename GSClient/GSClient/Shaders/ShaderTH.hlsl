@@ -1195,9 +1195,9 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 		output.tangentW += input.weights[i] * mul(input.tangent, (float3x3)mtxVertexToBoneWorld);
 		output.bitangentW += input.weights[i] * mul(input.bitangent, (float3x3)mtxVertexToBoneWorld);
 	}
-	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	//output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
 	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
 	 

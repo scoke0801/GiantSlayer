@@ -250,15 +250,19 @@ void CGameObjectVer2::SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate)
 	}
 }
 
-void CGameObjectVer2::SetShadertoAll(CShader* pshader)
+void CGameObjectVer2::SetShadertoAll()
 {
-	//if (m_pMesh != nullptr)
-	{
-		SetShader(pshader);
+	if (isSkinned == true) {
+		SetShader(CShaderHandler::GetInstance().GetData("Skinned"));
+		cout << "MESH: SKINNED" << endl;
+	}
+	else {
+		SetShader(CShaderHandler::GetInstance().GetData("Standard"));
+		cout << "MESH: STANDARD" << endl;
 	}
 
-	if (m_pSibling) m_pSibling->SetShadertoAll(pshader);
-	if (m_pChild) m_pChild->SetShadertoAll(pshader);
+	if (m_pSibling) m_pSibling->SetShadertoAll();
+	if (m_pChild) m_pChild->SetShadertoAll();
 }
 
 void CGameObjectVer2::SetPosition(XMFLOAT3 pos)
@@ -790,6 +794,7 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 			pSkinnedMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 
 			pGameObject->SetMesh(pSkinnedMesh);
+			pGameObject->isSkinned = true;
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{

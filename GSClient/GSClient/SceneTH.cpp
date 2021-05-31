@@ -236,7 +236,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	test->SetChild(pKinght, true);
 	test->SetPosition({ 1750.0f,   230.0f,  1850.0f });
 	test->Scale(200, 200, 200);
-	test->SetShadertoAll(CShaderHandler::GetInstance().GetData("Skinned"));
+	test->SetShadertoAll();
 	//m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(test);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
