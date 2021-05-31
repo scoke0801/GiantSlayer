@@ -2393,31 +2393,29 @@ void CSceneTH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Knight.bin", NULL, true);
+
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
-	//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/idle01.bin");
 	m_Player = m_Players[0];
 
-	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
+	m_Players[0]->SetChild(pKinght, true);
+	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	m_Players[0]->Scale(200, 200, 200);
+	m_Players[0]->SetShadertoAll();
+
+	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 4.5f, -13.20f));
 	m_PlayerCameras[0]->SetTarget(m_Players[0]);
 	m_Players[0]->SetCamera(m_PlayerCameras[0]);
 
-	m_Players[0]->Scale(5, 5, 5);
-	m_Players[0]->SetObjectName(OBJ_NAME::Player);
-	m_Players[0]->Rotate({ 0,1,0 }, 180);
-	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
-
 	m_Players[0]->SetDrawable(true);
-	m_Players[0]->SetTextureIndex(0x400);
 
-	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 });
-	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
 	++m_CurrentPlayerNum;
 
 	m_MinimapCamera->SetTarget(m_Players[0]);
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
-		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 
 		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
 		m_PlayerCameras[i]->SetTarget(m_Players[i]);
