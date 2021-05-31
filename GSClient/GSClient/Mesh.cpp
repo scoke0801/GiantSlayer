@@ -1152,8 +1152,7 @@ void CAnimatedMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	else
 	{
 		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
-	}
-
+	} 
 }
 
 CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -1552,7 +1551,7 @@ void CSkinnedMesh::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandL
 		{
 			XMStoreFloat4x4(&m_pcbxmf4x4BoneOffsets[i], XMMatrixTranspose(XMLoadFloat4x4(&m_pxmf4x4BindPoseBoneOffsets[i])));
 			XMStoreFloat4x4(&m_pcbxmf4x4BoneTransforms[i], XMMatrixTranspose(XMLoadFloat4x4(&m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World)));
-			//cout << " i : " << i;
+			//cout << " i : " << i << " ";
 			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._11 << " ";
 			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._12 << " ";
 			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._13 << " ";
@@ -1595,7 +1594,7 @@ void CSkinnedMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSe
 	UpdateShaderVariables(pd3dCommandList);
 
 	OnPreRender(pd3dCommandList, NULL);
-	//pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
+	///pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 

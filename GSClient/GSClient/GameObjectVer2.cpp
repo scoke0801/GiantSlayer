@@ -607,6 +607,7 @@ void CGameObjectVer2::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 
 void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 {
+	system("cls");
 	char pstrToken[64] = { '\0' };
 
 	BYTE nStrLength = 0;
@@ -680,6 +681,23 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 
 					nReads = (UINT)::fread(&pAnimationSet->m_pfKeyFrameTransformTimes[i], sizeof(float), 1, pInFile);
 					nReads = (UINT)::fread(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i], sizeof(float), 16 * m_pAnimationController->m_nAnimationBoneFrames, pInFile);
+					cout << " i : " << i << "\n";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_11 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_12 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_13 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_14 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_21 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_22 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_23 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_24 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_31 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_32 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_33 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_34 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_41 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_42 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_43 << " ";
+					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_44 << "\n";
 				}
 			}
 #ifdef _WITH_ANIMATION_SRT
