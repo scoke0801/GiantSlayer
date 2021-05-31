@@ -19,7 +19,7 @@ public:
 	vector<Vertex> vertices;
 	vector<int> indices;
 	vector<Bone> skeleton;
-	vector<Animation> animations;
+	vector<AnimationClip> animations;
 
 	XMFLOAT4X4* m_pxmf4x4BindPoseBoneOffsets = NULL;
 	ID3D12Resource* m_pd3dcbBoneOffsets = NULL;
@@ -38,6 +38,7 @@ public:
 	void LoadFile(char* pstrFbxFileName);
 
 	void Animate(float fTimeElapsed) override;
+	void AnimateVer2(float fTimeElapsed);
 	void Update(float fTimeElapsed) override;
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
 

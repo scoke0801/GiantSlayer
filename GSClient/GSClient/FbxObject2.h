@@ -20,11 +20,11 @@ struct FbxSubMesh
 	XMFLOAT3* mClusterDef;
 };
 
-class CAnimationController
+class CAnimationController_01
 {
 public:
-	CAnimationController(FbxScene* pfbxScene);
-	~CAnimationController();
+	CAnimationController_01(FbxScene* pfbxScene);
+	~CAnimationController_01();
 
 public:
 	float 					m_fTime = 0.0f;
@@ -79,7 +79,7 @@ public:
 	float m_AnimationTime = 0.0f;
 
 public: 
-	CAnimationController* m_pAnimationController = NULL;
+	CAnimationController_01* m_pAnimationController = NULL;
 
 public:
 	void LoadScene(char* pstrFbxFileName, FbxManager* pfbxSdkManager);

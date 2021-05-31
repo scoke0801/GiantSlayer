@@ -1,58 +1,6 @@
 #include "stdafx.h"
 #include "FbxLoader.h"
 #include "Mesh.h"
-FbxAMatrix GeometricOffsetTransform(FbxNode* pfbxNode)
-{
-	const FbxVector4 T = pfbxNode->GetGeometricTranslation(FbxNode::eSourcePivot);
-	const FbxVector4 R = pfbxNode->GetGeometricRotation(FbxNode::eSourcePivot);
-	const FbxVector4 S = pfbxNode->GetGeometricScaling(FbxNode::eSourcePivot);
-
-	return(FbxAMatrix(T, R, S));
-}
-
-XMFLOAT4X4 FbxMatrixToXmFloat4x4(FbxAMatrix* pfbxmtxSource)
-{
-	FbxVector4 S = pfbxmtxSource->GetS();
-	FbxVector4 R = pfbxmtxSource->GetR();
-	FbxVector4 T = pfbxmtxSource->GetT();
-
-	FbxAMatrix fbxmtxTransform = FbxAMatrix(T, R, S);
-
-	XMFLOAT4X4 xmf4x4Result;
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++) xmf4x4Result.m[i][j] = (float)(*pfbxmtxSource)[i][j];
-	}
-
-	XMFLOAT3 xmf3S = XMFLOAT3((float)S.mData[0], (float)S.mData[1], (float)S.mData[2]);
-	XMFLOAT3 xmf3R = XMFLOAT3((float)R.mData[0], (float)R.mData[1], (float)R.mData[2]);
-	XMFLOAT3 xmf3T = XMFLOAT3((float)T.mData[0], (float)T.mData[1], (float)T.mData[2]);
-
-	XMMATRIX Rx = XMMatrixRotationX(XMConvertToRadians(xmf3R.x));
-	XMMATRIX Ry = XMMatrixRotationY(XMConvertToRadians(xmf3R.y));
-	XMMATRIX Rz = XMMatrixRotationZ(XMConvertToRadians(xmf3R.z));
-	XMMATRIX xmR = XMMatrixMultiply(XMMatrixMultiply(Rx, Ry), Rz);
-	XMFLOAT4X4 xmf4x4Multiply;
-	XMStoreFloat4x4(&xmf4x4Multiply, XMMatrixMultiply(XMMatrixMultiply(XMMatrixScaling(xmf3S.x, xmf3S.y, xmf3S.z), xmR), XMMatrixTranslation(xmf3T.x, xmf3T.y, xmf3T.z)));
-
-	return(xmf4x4Result);
-}
-
-void SetMatrixScale(FbxAMatrix& fbxmtxSrcMatrix, double pValue)
-{
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++) fbxmtxSrcMatrix[i][j] *= pValue;
-	}
-}
-
-void SetMatrixAdd(FbxAMatrix& fbxmtxDstMatrix, FbxAMatrix& fbxmtxSrcMatrix)
-{
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++) fbxmtxDstMatrix[i][j] += fbxmtxSrcMatrix[i][j];
-	}
-}
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -90,13 +38,13 @@ FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, string fileName, bool hasAnim, 
 
 		ppAnimationStacks = new FbxAnimStack * [nAnimation];
 
-		animations.resize(nAnimation);
+		animClip.resize(nAnimation);
 		for (int i = 0; i < nAnimation; i++) {
 			FbxString* pfbxStackName = fbxAnimationStackNames[i];
 
 			FbxAnimStack* pfbxAnimationStack = mFbxScene->FindMember<FbxAnimStack>(pfbxStackName->Buffer());
 			ppAnimationStacks[i] = pfbxAnimationStack;
-			animations[i].bone.resize(mSkeleton.size());
+			animClip[i].BoneAnimation.resize(mSkeleton.size());
 		}
 		FbxArrayDelete(fbxAnimationStackNames);
 
@@ -180,7 +128,13 @@ void FbxLoader::LoadScene(char* pstrFbxFileName)
 	}
 	else if (mAxisSystem == FbxAxisSystem::eMayaYUp) {
 		cout << "MayaYUp" << endl;
-		//fbxSceneAxisSystem = FbxAxisSystem::eMax;
+		FbxAxisSystem directxAxisSystem(
+								FbxAxisSystem::EUpVector::eYAxis,
+								FbxAxisSystem::EFrontVector::eParityOdd,
+								FbxAxisSystem::ECoordSystem::eLeftHanded
+		);
+		//directxAxisSystem.ConvertScene(mFbxScene);
+		//FbxAxisSystem::MayaZUp.ConvertScene(mFbxScene);
 	}
 	else if (mAxisSystem == FbxAxisSystem::eMax) {
 		cout << "Max" << endl;
@@ -197,8 +151,6 @@ void FbxLoader::LoadScene(char* pstrFbxFileName)
 	else {
 		cout << "Unknown..." << endl;
 	}
-	//mAxisSystem = FbxAxisSystem::eDirectX;
-	//fbxSceneAxisSystem.ConvertScene(mFbxScene);
 
 	FbxSystemUnit fbxSceneSystemUnit = mFbxScene->GetGlobalSettings().GetSystemUnit();
 	if (fbxSceneSystemUnit.GetScaleFactor() != 1.0) FbxSystemUnit::cm.ConvertScene(mFbxScene);
@@ -267,7 +219,7 @@ void FbxLoader::LoadBoneOffsets(FbxNode* pNode)
 			FbxCluster* currCluster = currSkin->GetCluster(j);
 			string jName = currCluster->GetLink()->GetName();
 
-			int jIndex;
+			int jIndex = 0;
 			for (int k = 0; k < mSkeleton.size(); k++) {
 				if (mSkeleton[k].name == jName) {
 					jIndex = k;
@@ -281,12 +233,6 @@ void FbxLoader::LoadBoneOffsets(FbxNode* pNode)
 			currCluster->GetTransformLinkMatrix(fbxTransformLinkMTX);
 			FbxAMatrix fbxGBindPoseInvMTX = fbxTransformLinkMTX.Inverse() * fbxTransformMTX * fbxmtxGeometryOffset;
 
-			/*if (mAxisSystem == FbxAxisSystem::eMayaYUp) {
-				double tempd = fbxGBindPoseInvMTX[3][2];
-				fbxGBindPoseInvMTX[3][2] = fbxGBindPoseInvMTX[3][3];
-				fbxGBindPoseInvMTX[3][3] = tempd;
-			}*/
-
 			XMFLOAT4X4 tempXMF4X4;
 			for (int row = 0; row < 4; row++) {
 				for (int column = 0; column < 4; column++) {
@@ -298,7 +244,7 @@ void FbxLoader::LoadBoneOffsets(FbxNode* pNode)
 			int numIDX = currCluster->GetControlPointIndicesCount();
 			for (int k = 0; k < numIDX; k++) {
 				BlendingInfo tempBlendinfo;
-				tempBlendinfo.index = j;
+				tempBlendinfo.index = jIndex;
 				tempBlendinfo.weight = currCluster->GetControlPointWeights()[k];
 				cpoints[currCluster->GetControlPointIndices()[k]].blendInfo.push_back(tempBlendinfo);
 			}
@@ -387,14 +333,6 @@ void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
 
 		FbxAMatrix fbxmtxGeometryOffset = GeometricOffsetTransform(pfbxMesh->GetNode());
 
-		/*for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				cout << fbxmtxGeometryOffset[i][j] << " ";
-			}
-		}
-		cout << endl;
-		*/
-
 		// Deformer
 		int numDF = pfbxMesh->GetDeformerCount();
 		for (int i = 0; i < numDF; i++) {
@@ -417,7 +355,7 @@ void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
 
 				FbxAnimStack* pCurrAnimStack = ppAnimationStacks[stackNum];
 				FbxString animStackName = pCurrAnimStack->GetName();
-				animations[stackNum].name = animStackName.Buffer();
+				animClip[stackNum].name = animStackName.Buffer();
 				FbxAnimEvaluator* pSceneEvaluator = mFbxScene->GetAnimationEvaluator();
 
 				for (FbxLongLong k = 0; k < 100; k++) {
@@ -429,21 +367,15 @@ void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
 
 					FbxAMatrix currentTransformOffset =
 						pSceneEvaluator->GetNodeGlobalTransform(pNode, currTime) * fbxmtxGeometryOffset;
-					FbxAMatrix tempMTX =
-						currentTransformOffset.Inverse() * pSceneEvaluator->GetNodeGlobalTransform(currCluster->GetLink(), currTime);
+					FbxAMatrix tempMTX = currentTransformOffset.Inverse() * pSceneEvaluator->GetNodeGlobalTransform(currCluster->GetLink(), currTime);
 
 					tempKey.translation = { static_cast<float>(tempMTX.GetT().mData[0]), static_cast<float>(tempMTX.GetT().mData[1]), static_cast<float>(tempMTX.GetT().mData[2]) };
 					tempKey.scale = { static_cast<float>(tempMTX.GetS().mData[0]), static_cast<float>(tempMTX.GetS().mData[1]), static_cast<float>(tempMTX.GetS().mData[2]) };
 					tempKey.rotationquat = { static_cast<float>(tempMTX.GetQ().mData[0]), static_cast<float>(tempMTX.GetQ().mData[1]), static_cast<float>(tempMTX.GetQ().mData[2]), static_cast<float>(tempMTX.GetQ().mData[3]) };
-
-					/*if (mAxisSystem == FbxAxisSystem::eMayaYUp) {
-						tempKey.translation = { static_cast<float>(tempMTX.GetT().mData[0]), static_cast<float>(tempMTX.GetT().mData[2]), static_cast<float>(tempMTX.GetT().mData[1]) };
-						tempKey.rotationquat = { static_cast<float>(tempMTX.GetQ().mData[0]), static_cast<float>(tempMTX.GetQ().mData[2]), static_cast<float>(tempMTX.GetQ().mData[1]), static_cast<float>(tempMTX.GetQ().mData[3]) };
-					}*/
-
-					if (k != 0 && animations[stackNum].bone[jIndex].animFrame.back() == tempKey)
+					
+					if (k != 0 && animClip[stackNum].BoneAnimation[jIndex].keyframes.back() == tempKey)
 						break;
-					animations[stackNum].bone[jIndex].animFrame.push_back(tempKey);
+					animClip[stackNum].BoneAnimation[jIndex].keyframes.push_back(tempKey);
 				}
 			}// Cluster End
 		}// Deformer End
@@ -452,7 +384,7 @@ void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
 
 		for (int i = 0; i < mSkeleton.size(); i++)
 		{
-			int KeyframeSize = animations[stackNum].bone[i].animFrame.size();
+			int KeyframeSize = animClip[stackNum].BoneAnimation[i].keyframes.size();
 			if (KeyframeSize != 0)
 			{
 				for (int j = 0; j < KeyframeSize; j++)
@@ -471,10 +403,10 @@ void FbxLoader::LoadAnimations(FbxNode* pNode, int stackNum)
 
 		for (int i = 0; i < mSkeleton.size(); i++)
 		{
-			if (animations[stackNum].bone[i].animFrame.size() != 0)
+			if (animClip[stackNum].BoneAnimation[i].keyframes.size() != 0)
 				continue;
 
-			animations[stackNum].bone[i].animFrame = nullKeys;
+			animClip[stackNum].BoneAnimation[i].keyframes = nullKeys;
 		}
 	}
 
@@ -542,6 +474,16 @@ void FbxLoader::SaveAsFile(string filePath)
 				vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
 				vertices[i].normal.x << " " << vertices[i].normal.z << " " << vertices[i].normal.y << endl;
 		}
+		else if (rotateNum == 8) {
+			file << vertices[i].pos.x << " " << vertices[i].pos.z << " " << vertices[i].pos.y << " " <<
+				vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
+				vertices[i].normal.x << " " << vertices[i].normal.z << " " << vertices[i].normal.y << endl;
+		}
+		else if (rotateNum == 9) {
+			file << vertices[i].pos.x << " " << vertices[i].pos.y << " " << vertices[i].pos.z << " " <<
+				vertices[i].uv.x << " " << vertices[i].uv.y << " " <<
+				vertices[i].normal.x << " " << vertices[i].normal.y << " " << vertices[i].normal.z << endl;
+		}
 
 		// bindex 1~4 + bweight 1~4
 		if (hasAnimation == true) {
@@ -563,6 +505,14 @@ void FbxLoader::SaveAsFile(string filePath)
 		if (rotateNum == 1) {
 			file << triangles[i].indices[0] << " " << triangles[i].indices[1] << " " << triangles[i].indices[2] << endl;
 		}
+		if (rotateNum == 8) {
+			file << triangles[i].indices[0] << " " << triangles[i].indices[1] << " " << triangles[i].indices[2] << endl;
+
+		}
+		if (rotateNum == 9) {
+			file << triangles[i].indices[0] << " " << triangles[i].indices[1] << " " << triangles[i].indices[2] << endl;
+
+		}
 	}
 	file << endl;
 
@@ -582,15 +532,21 @@ void FbxLoader::SaveAsFile(string filePath)
 		file << "Stack " << nAnimation << endl;
 
 		for (int i = 0; i < nAnimation; i++) {
-			file << ">AnimName " << animations[i].name << endl;
-			for (int j = 0; j < animations[i].bone.size(); j++) {
-				file << "bone" << j << " " << animations[i].bone[j].animFrame.size() << endl;
-				for (int k = 0; k < animations[i].bone[j].animFrame.size(); k++) {
-					Keyframe tempKey = animations[i].bone[j].animFrame[k];
+			//file << ">AnimName " << animations[i].name << endl;
+			file << ">AnimName " << "Animation" << i << endl;
+			for (int j = 0; j < animClip[i].BoneAnimation.size(); j++) {
+				file << "bone" << j << " " << animClip[i].BoneAnimation[j].keyframes.size() << endl;
+				for (int k = 0; k < animClip[i].BoneAnimation[j].keyframes.size(); k++) {
+					Keyframe tempKey = animClip[i].BoneAnimation[j].keyframes[k];
 					file << tempKey.frameTime << " ";
 					file << tempKey.translation.x << " " << tempKey.translation.y << " " << tempKey.translation.z << " " <<
 						tempKey.scale.x << " " << tempKey.scale.y << " " << tempKey.scale.z << " " <<
 						tempKey.rotationquat.x << " " << tempKey.rotationquat.y << " " << tempKey.rotationquat.z << " " << tempKey.rotationquat.w << endl;
+
+					/*file << tempKey.animatrix._11 << " " << tempKey.animatrix._12 << " " << tempKey.animatrix._13 << " " << tempKey.animatrix._14 << " " <<
+							tempKey.animatrix._21 << " " << tempKey.animatrix._22 << " " << tempKey.animatrix._23 << " " << tempKey.animatrix._24 << " " <<
+							tempKey.animatrix._31 << " " << tempKey.animatrix._32 << " " << tempKey.animatrix._33 << " " << tempKey.animatrix._34 << " " <<
+							tempKey.animatrix._41 << " " << tempKey.animatrix._42 << " " << tempKey.animatrix._43 << " " << tempKey.animatrix._44 << endl;*/
 				}
 			}
 		}

@@ -56,9 +56,10 @@ void CGameObject::SetMesh(CMesh* pMesh)
 	m_pMesh = pMesh;
 
 	if (m_pMesh) m_pMesh->AddRef();
-}  
+}
 void CGameObject::FixPositionByTerrain(CTerrain* pTerrain)
 {
+	m_xmf3Position = GetPosition();
 	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_HeightFromTerrain;
 	SetPosition(m_xmf3Position);
 }
@@ -214,6 +215,8 @@ void CGameObject::SetPosition(XMFLOAT3 pos)
 	m_xmf4x4World._41 = pos.x;
 	m_xmf4x4World._42 = pos.y;
 	m_xmf4x4World._43 = pos.z;
+
+	UpdateTransform(NULL);
 }
 
 void CGameObject::SetPositionPlus(XMFLOAT3 pos)
@@ -225,6 +228,8 @@ void CGameObject::SetPositionPlus(XMFLOAT3 pos)
 	m_xmf4x4World._41 = pos.x;
 	m_xmf4x4World._42 = pos.y;
 	m_xmf4x4World._43 = pos.z;
+
+	UpdateTransform(NULL);
 }
 
 void CGameObject::SetVelocity(XMFLOAT3 vel)
@@ -320,7 +325,11 @@ void CGameObject::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&pxmf3Axis),
 		XMConvertToRadians(fAngle));
-	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);	
+	
+	//m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4ToParent);
+
+	UpdateTransform(NULL);
 }
 void CGameObject::LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up)
 {  
@@ -354,6 +363,9 @@ void CGameObject::Scale(float x, float y, float z, bool setSize)
 	}
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
 	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World); 
+	//m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
+
+	UpdateTransform(NULL);
 }
 
 bool CGameObject::CollisionCheck(Collider* pAABB)

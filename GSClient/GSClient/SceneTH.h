@@ -3,26 +3,40 @@
 
 class CShader;
 class CGameObject;
-class CFbxObject;
+class CGameObjectVer2;
 class CCamera;
 class CPlayer;
 class UI;
 class HelpTextUI;
 class CTerrain;
-class FbxLoader;
+class CParticle;
+class CLightCamera;
+class ExportedObject;
 
 class CSceneTH : public CScene
 {
+	ExportedObject* test;
 private:
 	bool						m_isPlayerSelected = true;
 
-protected:
-	vector<CGameObject*>		m_Objects;
-	vector<CGameObject*>		m_BillboardObjects;
+private:
+	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
+	array<CMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
+
+	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
+
+	CParticle* m_Particles;
+
+
+	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
+	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
+	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;
 
 	CGameObject* m_Mirror = nullptr;
 	CPlayer* m_Player = nullptr;
 
+	int							m_CurrentPlayerNum = 0;
+	//vector<CPlayer*>			m_Players[MAX_PLAYER];
 	CPlayer* m_Players[MAX_PLAYER];
 
 	vector<UI*>					m_UIs;
@@ -35,15 +49,26 @@ protected:
 
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 
+	vector<CCamera*>			m_PlayerCameras;
 	CCamera** m_Cameras;
 	CCamera* m_CurrentCamera = nullptr;
 	CCamera* m_MinimapCamera = nullptr;
 	CCamera* m_MirrorCamera = nullptr;
+
+	CLightCamera* m_pLightCamera = nullptr;
+
+	short						m_DoorIdx = 0;
 private:
 	POINT						m_LastMousePos;
 
-	ID3D12DescriptorHeap* m_pd3dBasicSrvDescriptorHeap = nullptr;
-	ID3D12DescriptorHeap* m_pd3dMonsterDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap* m_pd3dSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap* m_pd3dDsvDescriptorHeap = nullptr;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dDsvShadowMapCPUHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvShadowMapGPUHandle;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dDsvCPUDesciptorStartHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dDsvGPUDesciptorStartHandle;
 
 private:	// about Meterail
 	MATERIALS* m_pMaterials = NULL;
@@ -64,10 +89,20 @@ private:	// about Minimap
 private:
 	ID3D12Resource* m_pd3dMirrorTex = NULL;
 
+private:
+	ID3D12Resource* m_pd3dShadowMap = NULL;
+
 private:	// about SceneInfo
 	ID3D12Resource* m_pd3dcbSceneInfo = NULL;
 	CB_GAMESCENE_FRAME_DATA* m_pcbMappedSceneFrameData = NULL;
+	chrono::steady_clock::time_point m_CreatedTime;
 
+private: // for server mouse input process
+	vector<POINTF>				m_MousePositions;
+	MOUSE_INPUT_TYPE			m_prevMouseInputType;
+
+private:
+	CSoundManager* m_SoundManager;
 public:
 	CSceneTH();
 	~CSceneTH();
@@ -83,24 +118,28 @@ public:
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
 	virtual void BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
-	virtual void BuildFbxManager() override;
 
 	void ReleaseObjects();
 public:
 	virtual void Update(float elapsedTime) override;
 	void AnimateObjects(float fTimeElapsed);
 
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
-	virtual void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
-	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
-	virtual void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
-	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
-	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
+	void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
+	void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
+	void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
 	virtual void Communicate(SOCKET& sock) override;
+
 	virtual void LoginToServer()  override;
 	virtual void LogoutToServer() override;
+
+	virtual void DeletePlayer(int playerId) override {}
+	virtual void AddPlayer(int palyerId) override {}
 public:
 	virtual void ProcessInput();
 
@@ -124,8 +163,20 @@ private:
 	void BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
+	void BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);
+
+	void BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	// 그림자
+	void BuildShadowResource(ID3D12Device* pd3dDevice);
+
+	void CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nWidth, int nHeight);
 
 private:
 	void BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -133,4 +184,17 @@ private:
 	void BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void EnterNewSector(int sectorNum);
+
+	void ShotArrow();
+
+	void MakingFog();
+	void MakingRain();
+
+private:
+	void SendMouseInputPacket();
+	void RecvMouseProcessPacket();
 };

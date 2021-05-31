@@ -3,8 +3,8 @@
 #include "Camera.h"
 #include "stdafx.h"
 
-#include "FBXLoader.h"
-#include "FbxObject.h"
+#include "GameObjectVer2.h"
+
 enum class PlayerMoveType
 {
 	None = 0,
@@ -20,7 +20,7 @@ enum class PlayerWeaponType
 
 class CTerrain; 
 
-class CPlayer : public CFbxObject
+class CPlayer : public CGameObjectVer2
 {    
 private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
@@ -43,7 +43,7 @@ public:
 	~CPlayer();	
 	
 public:
-	void Update(float fTimeElapsed) override;
+	//void Update(float fTimeElapsed) override;
 
 	void UpdateCamera();
 	void FixCameraByTerrain(CTerrain* pTerrain);
