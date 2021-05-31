@@ -267,6 +267,7 @@ void CGameObjectVer2::SetShadertoAll()
 
 void CGameObjectVer2::SetPosition(XMFLOAT3 pos)
 {
+	m_xmf3Position = pos;
 	m_xmf4x4ToParent._41 = pos.x;
 	m_xmf4x4ToParent._42 = pos.y;
 	m_xmf4x4ToParent._43 = pos.z;
@@ -274,12 +275,17 @@ void CGameObjectVer2::SetPosition(XMFLOAT3 pos)
 	UpdateTransform(NULL);
 }
 
+void CGameObjectVer2::Move(XMFLOAT3 shift)
+{
+	SetPosition(Vector3::Add(m_xmf3Position, shift));
+}
+
 void CGameObjectVer2::Scale(float x, float y, float z, bool setSize)
 {
-	//if (setSize)
-	//{
-	//	m_xmf3Size = { x,y,z };
-	//}
+	if (setSize)
+	{
+		m_xmf3Size = { x,y,z };
+	}
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
 	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
 
@@ -292,6 +298,30 @@ void CGameObjectVer2::Rotate(XMFLOAT3 pxmf3Axis, float fAngle)
 	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4ToParent);
 
 	UpdateTransform(NULL);
+}
+
+void CGameObjectVer2::LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up)
+{
+	XMFLOAT3 L = Vector3::Normalize(Vector3::Subtract(target, pos));
+	XMFLOAT3 R = Vector3::Normalize(Vector3::CrossProduct(up, L));
+	XMFLOAT3 U = Vector3::CrossProduct(L, R);
+
+	float x = -(Vector3::DotProduct(pos, R));
+	float y = -(Vector3::DotProduct(pos, U));
+	float z = -(Vector3::DotProduct(pos, L));
+
+	m_xmf4x4ToParent(0, 0) = R.x;
+	m_xmf4x4ToParent(0, 1) = R.y;
+	m_xmf4x4ToParent(0, 2) = R.z;
+
+	m_xmf4x4ToParent(1, 0) = U.x;
+	m_xmf4x4ToParent(1, 1) = U.y;
+	m_xmf4x4ToParent(1, 2) = U.z;
+
+	m_xmf4x4ToParent(2, 0) = L.x;
+	m_xmf4x4ToParent(2, 1) = L.y;
+	m_xmf4x4ToParent(2, 2) = L.z;
+	Scale(m_xmf3Size.x, m_xmf3Size.y, m_xmf3Size.z, false);
 }
  
 

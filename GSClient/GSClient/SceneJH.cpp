@@ -2918,20 +2918,20 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player = m_Players[0];
 
 	m_Players[0]->SetChild(pKinght, true);
-	m_Players[0]->SetPosition({ 1750.0f,   230.0f,  1850.0f });
+	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 	m_Players[0]->Scale(200, 200, 200);
 	m_Players[0]->SetShadertoAll();
 
-	//m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
-	//m_PlayerCameras[0]->SetTarget(m_Players[0]);
-	//m_Players[0]->SetCamera(m_PlayerCameras[0]);
+	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 4.5f, -13.20f));
+	m_PlayerCameras[0]->SetTarget(m_Players[0]);
+	m_Players[0]->SetCamera(m_PlayerCameras[0]);
 
 	//m_Players[0]->Scale(7, 7, 7);
 	//m_Players[0]->SetObjectName(OBJ_NAME::Player);
 	//m_Players[0]->Rotate({ 0,1,0 }, 180);
 	//m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 
-	//m_Players[0]->SetDrawable(true);
+	m_Players[0]->SetDrawable(true);
 	//m_Players[0]->SetTextureIndex(0x400); 
 
 	//m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 });

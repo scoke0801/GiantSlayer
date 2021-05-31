@@ -156,7 +156,7 @@ public:
 
 	virtual void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
 
-	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
+	virtual void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 
 	virtual void Scale(float x, float y, float z, bool setSize = true);
 
@@ -199,6 +199,7 @@ public:
 		float fWidth, float fHeight, float fDepth,
 		const XMFLOAT3& shift); 
 public:
+	XMFLOAT3 GetPositionToParent() { return(XMFLOAT3(m_xmf4x4ToParent._41, m_xmf4x4ToParent._42, m_xmf4x4ToParent._43)); }
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
 	string GetObjectName() const { return ConvertToObjectName(m_Name); }
 	XMFLOAT3 GetVelocity() const { return m_xmf3Velocity; }

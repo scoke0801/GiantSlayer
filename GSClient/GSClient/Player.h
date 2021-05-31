@@ -43,7 +43,7 @@ public:
 	~CPlayer();	
 	
 public:
-	//void Update(float fTimeElapsed) override;
+	void Update(float fTimeElapsed) override;
 
 	void UpdateCamera();
 	void FixCameraByTerrain(CTerrain* pTerrain);

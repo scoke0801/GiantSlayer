@@ -170,8 +170,10 @@ public:
 	void SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate = false);
 	void SetShadertoAll();
 	void SetPosition(XMFLOAT3 pos) override;
+	void Move(XMFLOAT3 shift) override;
 	void Scale(float x, float y, float z, bool setSize = true) override;
 	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle)override;
+	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up) override;
 	//void SetPositionToAll(XMFLOAT3 pos);
 	//void ScaleToAll(float x, float y, float z, bool setSize = true);
 public:

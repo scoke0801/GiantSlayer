@@ -76,7 +76,7 @@ void CCamera::Update(const XMFLOAT3& xmf3LookAt)
 	if (fDistance > 0)
 	{
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
-		LookAt(xmf3LookAt, m_TargetPlayer->GetUp());
+		LookAt(xmf3LookAt, { 0,1,0 });
 	}
 }
 
