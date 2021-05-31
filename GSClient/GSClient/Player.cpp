@@ -69,7 +69,7 @@ void CPlayer::Update(float fTimeElapsed)
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 	//if (Vector3::Length(vel) > 0.0f) 
 	//{ 
-		Animate(fTimeElapsed );
+		//Animate(fTimeElapsed );
 	//}
 	Move(vel);
 
