@@ -8,6 +8,8 @@ struct Keyframe
 	XMFLOAT3 scale;
 	XMFLOAT4 rotationquat;
 
+	XMFLOAT4X4 animatrix;
+
 	bool operator == (const Keyframe& rhs) {
 		if (translation.x != rhs.translation.x || translation.y != rhs.translation.y || translation.z != rhs.translation.z)
 			return false;
@@ -22,18 +24,85 @@ struct Keyframe
 	}
 };
 
-struct AnimBone
+struct BoneAnimation
 {
-	vector<Keyframe> animFrame;
+	vector<Keyframe> keyframes;
+
+	float GetStartTime()const
+	{
+		return keyframes.front().frameTime;
+	}
+	float GetEndTime()const
+	{
+		return keyframes.back().frameTime;
+	}
+
+	void Interpolate(float t, XMFLOAT4X4& M)const
+	{
+		if (t <= keyframes.front().frameTime)
+		{
+			XMVECTOR S = XMLoadFloat3(&keyframes.front().scale);
+			XMVECTOR P = XMLoadFloat3(&keyframes.front().translation);
+			XMVECTOR Q = XMLoadFloat4(&keyframes.front().rotationquat);
+
+			XMVECTOR zero = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+			XMStoreFloat4x4(&M, XMMatrixAffineTransformation(S, zero, Q, P));
+		}
+		else if (t >= keyframes.back().frameTime)
+		{
+			XMVECTOR S = XMLoadFloat3(&keyframes.back().scale);
+			XMVECTOR P = XMLoadFloat3(&keyframes.back().translation);
+			XMVECTOR Q = XMLoadFloat4(&keyframes.back().rotationquat);
+
+			XMVECTOR zero = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+			XMStoreFloat4x4(&M, XMMatrixAffineTransformation(S, zero, Q, P));
+		}
+		else
+		{
+			for (UINT i = 0; i < keyframes.size() - 1; ++i)
+			{
+				if (t >= keyframes[i].frameTime && t <= keyframes[i + 1].frameTime)
+				{
+					float lerpPercent = (t - keyframes[i].frameTime) / (keyframes[i + 1].frameTime - keyframes[i].frameTime);
+
+					XMVECTOR s0 = XMLoadFloat3(&keyframes[i].scale);
+					XMVECTOR s1 = XMLoadFloat3(&keyframes[i + 1].scale);
+
+					XMVECTOR p0 = XMLoadFloat3(&keyframes[i].translation);
+					XMVECTOR p1 = XMLoadFloat3(&keyframes[i + 1].translation);
+
+					XMVECTOR q0 = XMLoadFloat4(&keyframes[i].rotationquat);
+					XMVECTOR q1 = XMLoadFloat4(&keyframes[i + 1].rotationquat);
+
+					XMVECTOR S = XMVectorLerp(s0, s1, lerpPercent);
+					XMVECTOR P = XMVectorLerp(p0, p1, lerpPercent);
+					XMVECTOR Q = XMQuaternionSlerp(q0, q1, lerpPercent);
+
+					XMVECTOR zero = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+					XMStoreFloat4x4(&M, XMMatrixAffineTransformation(S, zero, Q, P));
+
+					break;
+				}
+			}
+		}
+	}
 };
 
-struct Animation
+struct AnimationClip
 {
 	string name;
 	float startTime = 0;
 	float endTime = 0;
 
-	vector<AnimBone> bone;
+	vector<BoneAnimation> BoneAnimation;
+
+	void Interpolate(float t, vector<XMFLOAT4X4>& boneTransforms)const
+	{
+		for (UINT i = 0; i < BoneAnimation.size(); ++i)
+		{
+			BoneAnimation[i].Interpolate(t, boneTransforms[i]);
+		}
+	}
 };
 
 struct Joint
@@ -125,7 +194,7 @@ struct Vertex
 	XMFLOAT3 binormal;
 	XMFLOAT3 tangent;
 
-	XMFLOAT3 weights;
+	float weights[4];
 	int indices[4];
 };
 
@@ -169,7 +238,7 @@ private:
 	FbxAnimStack** ppAnimationStacks;;
 
 	vector<Joint> mSkeleton;
-	vector<Animation> animations;
+	vector<AnimationClip> animClip;
 
 
 public:
@@ -195,3 +264,56 @@ public:
 
 	void SaveAsFile(string filePath);
 };
+
+FbxAMatrix GeometricOffsetTransform(FbxNode* pfbxNode)
+{
+	const FbxVector4 T = pfbxNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+	const FbxVector4 R = pfbxNode->GetGeometricRotation(FbxNode::eSourcePivot);
+	const FbxVector4 S = pfbxNode->GetGeometricScaling(FbxNode::eSourcePivot);
+
+	return(FbxAMatrix(T, R, S));
+}
+
+XMFLOAT4X4 FbxMatrixToXmFloat4x4(FbxAMatrix* pfbxmtxSource)
+{
+	FbxVector4 S = pfbxmtxSource->GetS();
+	FbxVector4 R = pfbxmtxSource->GetR();
+	FbxVector4 T = pfbxmtxSource->GetT();
+
+	FbxAMatrix fbxmtxTransform = FbxAMatrix(T, R, S);
+
+	XMFLOAT4X4 xmf4x4Result;
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++) xmf4x4Result.m[i][j] = (float)(*pfbxmtxSource)[i][j];
+	}
+
+	XMFLOAT3 xmf3S = XMFLOAT3((float)S.mData[0], (float)S.mData[1], (float)S.mData[2]);
+	XMFLOAT3 xmf3R = XMFLOAT3((float)R.mData[0], (float)R.mData[1], (float)R.mData[2]);
+	XMFLOAT3 xmf3T = XMFLOAT3((float)T.mData[0], (float)T.mData[1], (float)T.mData[2]);
+
+	XMMATRIX Rx = XMMatrixRotationX(XMConvertToRadians(xmf3R.x));
+	XMMATRIX Ry = XMMatrixRotationY(XMConvertToRadians(xmf3R.y));
+	XMMATRIX Rz = XMMatrixRotationZ(XMConvertToRadians(xmf3R.z));
+	XMMATRIX xmR = XMMatrixMultiply(XMMatrixMultiply(Rx, Ry), Rz);
+	XMFLOAT4X4 xmf4x4Multiply;
+	XMStoreFloat4x4(&xmf4x4Multiply, XMMatrixMultiply(XMMatrixMultiply(XMMatrixScaling(xmf3S.x, xmf3S.y, xmf3S.z), xmR), XMMatrixTranslation(xmf3T.x, xmf3T.y, xmf3T.z)));
+
+	return(xmf4x4Result);
+}
+
+void SetMatrixScale(FbxAMatrix& fbxmtxSrcMatrix, double pValue)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++) fbxmtxSrcMatrix[i][j] *= pValue;
+	}
+}
+
+void SetMatrixAdd(FbxAMatrix& fbxmtxDstMatrix, FbxAMatrix& fbxmtxSrcMatrix)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++) fbxmtxDstMatrix[i][j] += fbxmtxSrcMatrix[i][j];
+	}
+}

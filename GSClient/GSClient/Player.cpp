@@ -30,7 +30,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	t = 0;
 	endTime = 0;
 	for (int i = 0; i < skeleton.size(); i++) {
-		float t = animations[curAnim].bone[i].animFrame.back().frameTime;
+		float t = animations[curAnim].BoneAnimation[i].keyframes.back().frameTime;
 		if (t > endTime)
 			endTime = t;
 	}
@@ -94,6 +94,7 @@ void CPlayer::Update(float fTimeElapsed)
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 
 	if (fDeceleration > fLength) fDeceleration = fLength; 
+
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
 	m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
 	//Animate(fTimeElapsed); 
