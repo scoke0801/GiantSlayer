@@ -31,9 +31,14 @@ enum class OBJECT_LAYER : int {
 	Skybox,
 	TerrainWater,
 	Puzzle,
+	PuzzleBox,
 	Obstacle,
+	MirrorBox,
 	Enemy,
+	Boss,
 	Arrow,
+	PlayerArrow,
+	MonsterArrow,
 	Billboard,
 	Fog,
 	Count,
@@ -64,8 +69,9 @@ public:
 	CScene();
 	virtual ~CScene();
 
-	// just proto, fill with d3d obj
 	virtual void Update(float elapsedTime) {}
+	virtual void UpdateForMultiplay(float elapsedTime) {}
+
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) {}
 	virtual void DrawPlayer_Shadow(ID3D12GraphicsCommandList* pd3dCommandList) {}
@@ -86,6 +92,9 @@ public:
 
 public:
 	virtual void Communicate(SOCKET& sock) {}
+
+	virtual void ProcessPacket(unsigned char* p_buf) {}
+	virtual void DoRecv();
 
 	virtual void LoginToServer() {}
 	virtual void LogoutToServer() {}

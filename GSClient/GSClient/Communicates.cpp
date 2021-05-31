@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Communicates.h"
 
+SESSION g_Client = SESSION();
 
 void textConvert(const char* msg, wchar_t* ret)
 {
@@ -54,15 +55,36 @@ int recvn(SOCKET s, char* buf, int len, int flags)
     return (len - left);
 }
 
+void SendPacket(void* p)
+{
+    unsigned char p_size = reinterpret_cast<unsigned char*>(p)[0];
+    unsigned char p_type = reinterpret_cast<unsigned char*>(p)[1];
+
+    EX_OVER* s_over = new EX_OVER;
+    memset(&s_over->m_over, 0, sizeof(s_over->m_over));
+    memcpy(s_over->m_packetbuf, p, p_size);
+    s_over->m_wsabuf.buf = reinterpret_cast<CHAR*>(s_over->m_packetbuf);
+    s_over->m_wsabuf.len = p_size;
+
+    auto ret = WSASend(g_Client.m_socket, &s_over->m_wsabuf, 1, NULL, 0, &s_over->m_over, NULL);
+    if (0 != ret) {
+        auto err_no = WSAGetLastError();
+        if (WSA_IO_PENDING != err_no) { 
+            cout << "로그아웃\n";
+            //disconnect(p_id);
+        }
+    }
+}
+
 bool SendPacket(SOCKET& sock, char* packet, int packetSize, int& retVal)
 {  
-    // 데이터 보내기(고정 길이)
-    retVal = send(sock, (char*)&packetSize, sizeof(int), 0);
-    if (retVal == SOCKET_ERROR)
-    {
-        error_display("send()");
-        return false;
-    }
+    //// 데이터 보내기(고정 길이)
+    //retVal = send(sock, (char*)&packetSize, sizeof(int), 0);
+    //if (retVal == SOCKET_ERROR)
+    //{
+    //    error_display("send()");
+    //    return false;
+    //}
     // 데이터 보내기(가변 길이)
     retVal = send(sock, packet, packetSize, 0);
     if (retVal == SOCKET_ERROR)
@@ -77,14 +99,14 @@ bool RecvPacket(SOCKET& sock, char* buf, int& retVal)
 {
     // 데이터 받기(고정 길이)
     int len;
-    retVal = recvn(sock, (char*)&len, sizeof(int), 0);
+   /* retVal = recvn(sock, (char*)&len, sizeof(int), 0);
 
     if (retVal == SOCKET_ERROR)
     {
         error_display("recv()");
         return false;
     }
-    else if (retVal == 0) return false;
+    else if (retVal == 0) return false;*/
 
     // 데이터 받기(가변 길이)
     retVal = recvn(sock, buf, len, 0);
@@ -102,14 +124,12 @@ bool RecvPacket(SOCKET& sock, char* buf, int& retVal)
 void ProcessPacket(SOCKET& sock, char* packet, int packetSize, PACKET_PROTOCOL packetType)
 {
     int retVal = -1;
-   // 
-     
+   //  
     switch (packetType)
     {
     // client
     ///////////////////////////////////////////////////////////////////////////////
-    case PACKET_PROTOCOL::C2S_LOGIN:
-    
+    case PACKET_PROTOCOL::C2S_LOGIN: 
     break;
     case PACKET_PROTOCOL::C2S_LOGOUT:
     break;

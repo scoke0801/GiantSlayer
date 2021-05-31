@@ -54,8 +54,18 @@ using namespace rapidjson;
 
 #define EPSILON					1.0e-10f
 
+extern int* g_GridHeights[25][25];
+
+inline float Lerp(float a, float b, float t) { return (1.0f - t) * a + (b * t); }
+inline float InvLerp(float a, float b, float v) { return (v - a) / (b - a); }
+
+extern void BernsteinCoeffcient5x5(float t, float fBernstein[5]);
+extern float CubicBezierSum5x5_C(float uB[5], float vB[5], int xIndex, int zIndex);
+
 extern float GetDetailHeight(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], 
 	float xPosition, float zPosition);
+
+float GetHeighty(float nx, float nz, int xIndex, int zIndex);
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }

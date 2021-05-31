@@ -369,7 +369,60 @@ void CFramework::MultiplayUpdate()
 
 void CFramework::SceneUpdate()
 {
-	m_CurrentScene->Update(FPS);
+	m_GameTimer.UpdateElapsedTime();
+
+	CInputHandler::GetInstance().ProcessInput();
+
+	double lag = 0.0f;
+	double fps = 0.0f;
+	double elapsedTime = m_GameTimer.GetElapsedTime();
+
+	if (elapsedTime > SERVER_FPS)				//지정된 시간이 흘렀다면
+	{
+		//m_currentTime = std::chrono::system_clock::now();//현재시간 갱신
+		m_GameTimer.UpdateCurrentTime();
+
+		if (elapsedTime > 0.0)
+		{
+			fps = 1.0 / elapsedTime;
+		}
+
+		//게임 시간이 늦어진 경우 이를 따라잡을 때 까지 업데이트 시킵니다.
+		lag += elapsedTime;
+		for (int i = 0; lag > SERVER_FPS && i < MAX_LOOP_TIME; ++i)
+		{
+			Communicate();
+			m_CurrentScene->UpdateForMultiplay(SERVER_FPS);
+			lag -= SERVER_FPS;
+		}
+	}
+	// 최대 FPS 미만의 시간이 경과하면 진행 생략(Frame Per Second)
+	else
+		return;
+
+	if (m_FrameDirtyFlag) {
+		Draw();
+		m_FrameDirtyFlag = false;
+	}
+
+#if defined(SHOW_CAPTIONFPS)
+
+	std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();
+
+	double updateElapsed = m_FPSTimer.GetElapsedTime(lastUpdateTime);
+
+	if (updateElapsed > MAX_UPDATE_FPS)
+		m_FPSTimer.UpdateCurrentTime();
+	else
+		return;
+	fps = 1.0 / m_GameTimer.GetElapsedTime();
+
+	_itow_s(fps + 0.1f,
+		m_captionTitle + m_titleLength,
+		TITLE_LENGTH - m_titleLength, 10);
+	wcscat_s(m_captionTitle + m_titleLength, TITLE_LENGTH - m_titleLength, TEXT(" FPS)"));
+	SetWindowText(m_hWnd, m_captionTitle);
+#endif
 }
 
 void CFramework::Animate()
@@ -477,6 +530,25 @@ void CFramework::Draw()
 	LeaveCriticalSection(&m_cs);
 }
 
+void CFramework::OnHandleSocketMessage(WPARAM wParam, LPARAM lParam)
+{
+	if (WSAGETSELECTERROR(lParam)) {
+		//m_CurrentScene->LogoutToServer();
+		closesocket((SOCKET)wParam);
+		error_display("WSAGETSELECTERROR");
+	}
+	switch (WSAGETSELECTEVENT(lParam))
+	{
+	case FD_READ:
+		m_CurrentScene->DoRecv();
+		break;
+	case FD_CLOSE:
+		//m_CurrentScene->LogoutToServer();
+		closesocket((SOCKET)wParam);
+		error_display("FD_CLOSE");
+	}
+}
+
 bool CFramework::ConnectToServer()
 {
 	static bool isFirst = true;
@@ -490,33 +562,26 @@ bool CFramework::ConnectToServer()
 	SOCKADDR_IN serveraddr;
 	ZeroMemory(&serveraddr, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-//	serveraddr.sin_addr.s_addr = inet_addr(SERVERIP);
-	//serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVER_ROOP);
-	serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVERIP);
-	serveraddr.sin_port = htons(SERVERPORT);
-	//serveraddr.sin_port = ntohs(SERVERPORT);
+	serveraddr.sin_addr.s_addr = inet_addr(SERVER_ROOP);
+	//serveraddr.sin_addr.S_un.S_addr = inet_addr(SERVERIP);
+	serveraddr.sin_port = htons(SERVERPORT); 
 
 	// socket()
-	m_Sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (m_Sock == INVALID_SOCKET)
+	m_Sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	if (m_Sock == INVALID_SOCKET) 
 	{
 		m_IsServerConnected = false;
 		return false;
 	}
-
-	int opt_val = TRUE;
-	setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
-	{
-		unsigned long arg = 1;
-		ioctlsocket(m_Sock, FIONBIO, &arg);
-	}
-	fd_set set;
-	FD_ZERO(&set);
-	timeval tvout = { 10000, 0 };  // 2 seconds timeout  
-	FD_SET(m_Sock, &set);
-
+	//int opt_val = TRUE;
+	//setsockopt(m_Sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
+	
 	retval = connect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+	//retval = WSAConnect(m_Sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr), NULL, NULL, NULL, NULL);
 
+	WSAAsyncSelect(m_Sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
+
+	g_Client.m_socket = m_Sock; 
 	if (retval == SOCKET_ERROR)
 	{
 		int errNo = WSAGetLastError();
@@ -524,29 +589,13 @@ bool CFramework::ConnectToServer()
 			error_display("cconnect() failed");
 			cout << "서버 연결 실패\n";
 			return false;
-		}
-		if (select(m_Sock + 1, NULL, &set, NULL, &tvout) <= 0) {
-			error_display("select/connect() failed"); 
-			cout << "서버 연결 실패\n";
-			return false;
 		} 
-		/*error_display("connect()");
-		m_IsServerConnected = false; 
-		cout << "서버 연결 실패\n";
-		return false;*/
 	}
 
-	{
-		unsigned long arg = 0;
-		ioctlsocket(m_Sock, FIONBIO, &arg);
-	}
-	// 소켓 통신 스레드 생성
-	CreateThread(NULL, 0, ClientMain,
-		NULL/*reinterpret_cast<LPVOID>(&gFramework)*/, 0, NULL);
 	isFirst = false;
 	m_IsServerConnected = true;
-
-	return true;	
+	 
+	return true;
 }
 
 void CFramework::LoginToServer()
@@ -570,75 +619,4 @@ void CFramework::LogoutToServer()
 void CFramework::Communicate()
 {
 	if (m_CurrentScene) m_CurrentScene->Communicate(m_Sock);
-}
-
-DWORD __stdcall ClientMain(LPVOID arg)
-{
-	cout << "---Enter ClientMain()\n";
-
-	CGameTimer					m_GameTimer;
-	CGameTimer					m_FPSTimer;	
-	m_GameTimer.Init();
-	m_FPSTimer.Init();
-	   
-	double lag = 0.0f;
-	double fps = 0.0f;
-	double elapsedTime = m_GameTimer.GetElapsedTime();
-	 
-	while (1)
-	{
-		m_GameTimer.UpdateElapsedTime();
-
-		CInputHandler::GetInstance().ProcessInput();
-
-		lag = 0.0f;
-		fps = 0.0f;
-		elapsedTime = m_GameTimer.GetElapsedTime();
-
-		if (elapsedTime > SERVER_FPS)				//지정된 시간이 흘렀다면
-		{
-			m_GameTimer.UpdateCurrentTime();
-
-			if (elapsedTime > 0.0)
-			{
-				fps = 1.0 / elapsedTime;
-			}
-
-			//게임 시간이 늦어진 경우 이를 따라잡을 때 까지 업데이트 시킵니다.
-			lag += elapsedTime;
-			for (int i = 0; lag > SERVER_FPS && i < MAX_LOOP_TIME; ++i)
-			{
-				//Communicate(); 
-				CFramework::GetInstance().Communicate(); 
-				CFramework::GetInstance().SceneUpdate();
-				lag -= SERVER_FPS;
-			}
-		}
-		// 최대 FPS 미만의 시간이 경과하면 진행 생략(Frame Per Second)
-		else
-			continue;
-
-		CFramework::GetInstance().SetFrameDirtyFlag(true);
-		//CFramework::GetInstance().Draw();
-#if defined(SHOW_CAPTIONFPS)
-
-		std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();
-
-		double updateElapsed = m_FPSTimer.GetElapsedTime(lastUpdateTime);
-		if (updateElapsed > MAX_UPDATE_FPS)
-			m_FPSTimer.UpdateCurrentTime();
-		else
-			continue;
-		fps = 1.0 / m_GameTimer.GetElapsedTime();
-
-		_itow_s(fps + 0.1f,
-			CFramework::GetInstance().m_captionTitle +
-			CFramework::GetInstance().m_titleLength,
-			TITLE_LENGTH - CFramework::GetInstance().m_titleLength, 10);
-		wcscat_s(CFramework::GetInstance().m_captionTitle + CFramework::GetInstance().m_titleLength, 
-			TITLE_LENGTH - CFramework::GetInstance().m_titleLength, TEXT(" FPS)"));
-		SetWindowText(CFramework::GetInstance().GetHWND(), CFramework::GetInstance().m_captionTitle);
-#endif
-	} 
-	return 0;
 }

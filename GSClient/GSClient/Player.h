@@ -3,8 +3,8 @@
 #include "Camera.h"
 #include "stdafx.h"
 
-#include "FBXLoader.h"
-#include "FbxObject.h"
+#include "GameObjectVer2.h"
+
 enum class PlayerMoveType
 {
 	None = 0,
@@ -20,7 +20,7 @@ enum class PlayerWeaponType
 
 class CTerrain; 
 
-class CPlayer : public CFbxObject
+class CPlayer : public CGameObjectVer2
 {    
 private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
@@ -32,6 +32,8 @@ private:
 private:
 	float m_AttackWaitingTime = 0.0f;
 	bool m_IsCanAttack = true;
+
+	float m_AttackedDelay = 0.0f;
 
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -46,10 +48,10 @@ public:
 	void UpdateCamera();
 	void FixCameraByTerrain(CTerrain* pTerrain);
 
-	void FixPositionByTerrain(CTerrain* pTerrain);
+	void FixPositionByTerrain(CTerrain* pTerrain) override;
 	 
 public:
-	virtual void SetVelocity(OBJ_DIRECTION direction) override;
+
 	virtual void SetVelocity(XMFLOAT3 dir) override;
 
 	bool IsMoving() const { return Vector3::Length(m_xmf3Velocity) > 0.01f; }
@@ -62,4 +64,6 @@ public:
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
 
 	void Jump();
+
+	bool Attacked(CGameObject* pObject);
 };

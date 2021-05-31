@@ -932,14 +932,16 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 
 ////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
+#define MAX_VERTEX_INFLUENCES		4
+#define SKINNED_ANIMATION_BONES		128
 cbuffer cbBoneOffsets : register(b6)
 {
-	float4x4 gpmtxBoneOffsets[100];
+	float4x4 gpmtxBoneOffsets[SKINNED_ANIMATION_BONES];
 };
 
 cbuffer cbBoneTransforms : register(b7)
 {
-	float4x4 gpmtxBoneTransforms[100];
+	float4x4 gpmtxBoneTransforms[SKINNED_ANIMATION_BONES];
 };
 
 struct VS_FBX_ANIMATED_INPUT
@@ -1076,6 +1078,13 @@ float4 PSFbxAnimated(VS_FBX_ANIMATED_OUTPUT input, uint nPrimitiveID : SV_Primit
 ////////////////////////////////////////////////////////////////////
 struct VS_STANDARD_INPUT
 {
+	//pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	//pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	//pd3dInputElementDescs[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	//pd3dInputElementDescs[3] = { "BONEWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 3, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	//pd3dInputElementDescs[4] = { "BONEINDEX", 0, DXGI_FORMAT_R32G32B32A32_UINT, 4, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	//pd3dInputElementDescs[5] = { "TEXTURE", 0, DXGI_FORMAT_R32_UINT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
 	float3 position : POSITION;
 	float2 uv : TEXCOORD;
 	float3 normal : NORMAL;
@@ -1109,7 +1118,7 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 
 float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 {
-	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	/*float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
 	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
@@ -1118,29 +1127,33 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
 	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
+	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);*/
 
 	float3 normalW;
-	float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
-	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
-	{
-		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
-		normalW = normalize(mul(vNormal, TBN));
-	}
-	else
-	{
-		normalW = normalize(input.normalW);
-	}
-	float4 cIllumination = Lighting(input.positionW, normalW, gnMaterialID);
+	float4 cColor = gtxtFlower_Red.Sample(gssWrap, input.uv);// cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
 	
-	return(lerp(cColor, cIllumination, 0.5f));
+	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+	//{
+	//	float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
+	//	float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+	//	normalW = normalize(mul(vNormal, TBN));
+	//}
+	//else
+	//{
+	//	normalW = normalize(input.normalW);
+	//}
+	//float4 cIllumination = Lighting(input.positionW, normalW, gnMaterialID);
+
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return(cColor * cIllumination);
+	//return(lerp(cColor, cIllumination, 0.5f));
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 
-//#define MAX_VERTEX_INFLUENCES			4
-//#define SKINNED_ANIMATION_BONES		128
+
 //
 //cbuffer cbBoneOffsets : register(b8)
 //{
@@ -1166,13 +1179,16 @@ struct VS_SKINNED_STANDARD_INPUT
 VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 {
 	VS_STANDARD_OUTPUT output;
-
+	  
 	output.positionW = float3(0.0f, 0.0f, 0.0f);
 	output.normalW = float3(0.0f, 0.0f, 0.0f);
 	output.tangentW = float3(0.0f, 0.0f, 0.0f);
 	output.bitangentW = float3(0.0f, 0.0f, 0.0f);
 	matrix mtxVertexToBoneWorld;
-	for (int i = 0; i < 4; i++)
+
+	float TempWeights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
 	{
 		mtxVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
 		output.positionW += input.weights[i] * mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
@@ -1180,9 +1196,11 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 		output.tangentW += input.weights[i] * mul(input.tangent, (float3x3)mtxVertexToBoneWorld);
 		output.bitangentW += input.weights[i] * mul(input.bitangent, (float3x3)mtxVertexToBoneWorld);
 	}
-
+	//output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
+	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
+	 
 	return(output);
 }

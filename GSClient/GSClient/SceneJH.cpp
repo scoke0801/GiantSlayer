@@ -17,6 +17,7 @@
 #include "Enemy.h"
 #include "Sound.h"
 #include "FbxObject.h"
+#include "FbxObject2.h"
 #include "FbxLoader.h"
 #define ROOT_PARAMETER_OBJECT				0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA		1
@@ -113,8 +114,14 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	//m_Cameras[3]->Pitch(XMConvertToRadians(90));
 	m_Cameras[4]->SetPosition({ 0,0,0 });
 	 
-	m_MirrorCamera = m_Cameras[3];
+	//m_MirrorCamera = m_Cameras[3];
 	m_MinimapCamera = m_Cameras[1];
+	 
+	m_MirrorCamera = new CCamera;
+	m_MirrorCamera->SetLens(0.45f * PI, width, height, 1.0f, 60000.0f);
+	m_MirrorCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
+	m_MirrorCamera->SetScissorRect(0, 0, width, height);
+	m_MirrorCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		CCamera* pCamera = new CCamera;
@@ -229,9 +236,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
-	BuildMapSector1(pd3dDevice, pd3dCommandList);
-	BuildMapSector2(pd3dDevice, pd3dCommandList);
-	BuildMapSector3(pd3dDevice, pd3dCommandList); 
+	//BuildMapSector1(pd3dDevice, pd3dCommandList);
+	//BuildMapSector2(pd3dDevice, pd3dCommandList);
+	//BuildMapSector3(pd3dDevice, pd3dCommandList); 
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList); 
 
@@ -249,28 +256,14 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
-	 
-	//CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
-	//CGameObject* pObject = new CGameObject();
-	//CMeshFbx* fbxMesh;
-	//fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");
-	//CArrow* pObject = new CArrow(); 
-	//pObject->SetMesh(fbxMesh);
-	//pObject->SetPosition({ 500.0f,  100.0f, 1500.0f });
-	//pObject->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
-	//pObject->SetTextureIndex(0x20);
-	//pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	//pObject->Scale(15.0f, 15.0f, 15.0f);
-	//pObject->SetUseable(false);
-	////pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
-	////pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30, 10, 30)));
-	//m_Objects.push_back(reinterpret_cast<CGameObject*>(std::move(pObject)));
-
-	//int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
-	//if (-1 != idx) {
-	//	m_Particles->UseParticle(idx, pObject->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
-	//	pObject->ConnectParticle(m_Particles->GetParticleObj(idx));
-	//}
+	  
+	/*pfbxTestObject = new CFbxObject2(pd3dDevice, pd3dCommandList, 
+		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
+	pfbxTestObject->SetAnimationStack(2);
+	pfbxTestObject->m_pAnimationController->SetPosition(0, 0.0f);
+	pfbxTestObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pfbxTestObject->SetPosition({ 1000,  150, 1000 });
+	pfbxTestObject->SetTextureIndex(0x01);*/
 
 	auto end_t = chrono::high_resolution_clock::now();
 
@@ -308,7 +301,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
 		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
-		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
+		L"resources/Textures/TT_RTS_Units_blue.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board.dds",
 		L"resources/UI/HelpText.dds",
@@ -430,6 +423,8 @@ void CSceneJH::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	} 
+	//pfbxTestObject->Update(elapsedTime);
+
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) { 
 		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
@@ -453,18 +448,173 @@ void CSceneJH::Update(float elapsedTime)
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		if (pEnemy->CollisionCheck(m_Player)) {
-			m_Player->FixCollision();
-			cout << "충돌 : 플레이어 - 적\n";
+			// 공격 상태일 때만 체력이 닳는것이 맞을까...
+			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+			//	
+			//}
+			if (m_Player->Attacked(pEnemy)) {
+				m_CurrentCamera->SetShake(true,0.5f, 15);
+			
+				m_Player->FixCollision();
+				cout << "충돌 : 플레이어 - 적\n";
+			}
 		}
 	}
-
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pArrow->IsDrawable()) {
+			continue;
+		}
+		if (pArrow->CollisionCheck(m_Player)) {
+			if (m_Player->Attacked(pArrow)) { 
+				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				pArrow->SetDrawable(true); 
+				cout << "충돌 : 플레이어 - 적\n";
+			}
+		}
+	}
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pArrow->IsDrawable()) {
+			continue;
+		}
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy])
+		{
+			if (pArrow->CollisionCheck(pEnemy)) {
+				pEnemy->ChangeState(ObjectState::Attacked, pArrow);
+				pArrow->SetDrawable(true); 
+				
+				cout << "충돌 : 플레이어 화살 - 적\n"; 
+				break;
+			}
+		}
+	}
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
 		if (pPuzzle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pPuzzle);
-			cout << "충돌 : 플레이어 - 퍼즐\n";
+			m_isPlayerBoxCollide = true;
+			 
 		}
 	} 
-	
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
+		for (int i = 0; i < 3; i++)
+		{
+			if (pArrow->CollisionCheck(m_Mirror[i])) {
+				m_Mirror[i]->FixCollision();
+				if (i == 0)
+				{
+					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_0(), 1));
+					cout << "충돌 : 플레이어 - 거울0\n";
+				}
+				else if (i == 1)
+				{
+					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_1(), 1));
+					cout << "충돌 : 플레이어 - 거울1\n";
+				}
+				else if (i == 2)
+				{
+					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_2(), 1));
+					cout << "충돌 : 플레이어 - 거울2\n";
+				}
+			}
+		} 
+	}
+	 
+	// 퍼즐 상자하고 충돌처리
+	for (int i = 0; i < 8; i++)
+	{
+		if (m_PuzzleBox[i]->CollisionCheck(m_Player))
+		{
+			m_PuzzleBox[i]->SetSelectBox(true);
+		}
+		else
+		{
+			m_PuzzleBox[i]->SetSelectBox(false);
+		}
+	}
+
+	// 퍼즐 범위 내일 작업할때 사용 
+
+	/*x축 12450 12150   11950 11650  11450 11150
+
+		9800
+		10000
+
+		10250
+		10450
+
+		10700
+		10900
+		*/
+		// 1번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 12150 && m_PuzzleBox[i]->GetPosition().x < 12450) &&
+			(m_PuzzleBox[i]->GetPosition().z > 9800 && m_PuzzleBox[i]->GetPosition().z < 10000) &&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
+			)
+		{
+			m_PuzzleNumSelect[1] = TRUE;
+		}
+	}
+
+	// 3번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 11150 && m_PuzzleBox[i]->GetPosition().x < 11450) &&
+			(m_PuzzleBox[i]->GetPosition().z > 9800 && m_PuzzleBox[i]->GetPosition().z < 10000) &&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
+			)
+		{
+			m_PuzzleNumSelect[3] = TRUE;
+		}
+	}
+
+	// 5번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
+			(m_PuzzleBox[i]->GetPosition().z > 10250 && m_PuzzleBox[i]->GetPosition().z < 10450) &&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
+		{
+			m_PuzzleNumSelect[5] = TRUE;
+		}
+	}
+
+	// 8번
+	for (int i = 0; i < 8; i++)
+	{
+		if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
+			(m_PuzzleBox[i]->GetPosition().z > 10700 && m_PuzzleBox[i]->GetPosition().z < 10900) &&
+			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
+		{
+			m_PuzzleNumSelect[7] = TRUE;
+		}
+	}
+
+	if (m_PuzzleNumSelect[1] && m_PuzzleNumSelect[5] && m_PuzzleNumSelect[3] && m_PuzzleNumSelect[7])
+	{
+		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
+		p->OpenDoor();
+	}
+
+	// 퍼즐 위치 선정
+	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
+	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 100.0f);
+
+	for (int i = 0; i < 8; i++)
+	{
+		if (m_PuzzleBox[i]->GetGriptBox())
+		{
+			m_PuzzleBox[i]->SetPosition(
+				{
+					-Final_Vec.x + m_Player->GetPosition().x,Final_Vec.y + m_Player->GetPosition().y + 300.0f,-Final_Vec.z + m_Player->GetPosition().z
+				}
+			);
+		}
+
+	}
+	 
 	//m_PlayerCameras[CFramework::GetInstance().GetPlayerId()]->Update(elapsedTime);
 			
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
@@ -500,6 +650,67 @@ void CSceneJH::Update(float elapsedTime)
 	}
 }
 
+
+void CSceneJH::UpdateForMultiplay(float elapsedTime)
+{
+	m_SoundManager->OnUpdate();
+	ProcessInput();
+
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+		if (i == (int)OBJECT_LAYER::Enemy) {
+			continue;
+		}
+		for (auto pObject : m_ObjectLayers[i]) {
+			pObject->Update(elapsedTime);
+			pObject->UpdateColliders();
+		}
+	}
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
+		pEnemy->FixPositionByTerrain(m_Terrain);
+	}
+	m_Particles->Update(elapsedTime);
+
+	m_HelpTextUI->Update(elapsedTime);
+
+	for (auto player : m_Players) {
+		if (!player->IsDrawable()) continue;
+		player->Update(elapsedTime);
+		player->UpdateColliders();
+		//player->FixPositionByTerrain(m_Terrain);
+		//player->FixCameraByTerrain(m_Terrain);
+	}
+	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
+
+	if (m_MirrorCamera)
+	{
+		m_MirrorCamera->UpdateViewMatrix();
+	}
+
+	if (m_pLightCamera)
+	{
+		LightPos = m_Player->GetPosition();
+		LightPos.y = 3000.0f;
+		LightPos.z += 10000.0f;
+
+		m_pLightCamera->LookAt({ LightPos },
+			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
+			m_Player->GetUp());
+
+		m_pLightCamera->UpdateViewMatrix();
+	}
+
+	if (m_MinimapCamera)
+	{
+		XMFLOAT3 pos = m_Player->GetPosition();
+		pos.y = m_MinimapCamera->GetPosition3f().y;
+		pos.z += 1;
+
+		m_MinimapCamera->LookAt(pos,
+			m_Player->GetPosition(),
+			m_Player->GetUp());
+		m_MinimapCamera->UpdateViewMatrix();
+	}
+}
 void CSceneJH::AnimateObjects(float fTimeElapsed)
 {
 }
@@ -538,8 +749,12 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
-	m_Mirror->Draw(pd3dCommandList, m_CurrentCamera);
-	 
+	for (auto mirror : m_Mirror) {
+		mirror->Draw(pd3dCommandList, m_CurrentCamera);
+	} 
+
+	//pfbxTestObject->Draw(pd3dCommandList, m_CurrentCamera);
+
 	m_Particles->Draw(pd3dCommandList, m_CurrentCamera); 
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
@@ -679,6 +894,9 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+		if (i == (int)OBJECT_LAYER::MirrorBox) {
+			continue;
+		}
 		for (auto pObject : m_ObjectLayers[i]) {
 			pObject->Draw(pd3dCommandList, m_CurrentCamera);
 		}
@@ -730,16 +948,21 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 			for (auto pObject : m_ObjectLayers[i]) {
 				pObject->Draw_Shadow(pd3dCommandList, m_CurrentCamera);
 			}
-		}
+		} 
 
 		for (auto player : m_Players) {
 			if (!player->IsDrawable()) continue;
 			player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
 		}
+		 
+		for (auto player : m_Players) {
+			if (!player->IsDrawable()) continue;
+			//player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
+		}
 
 		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
 			D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
-	}
+	} 
 	/*if (m_CurrentCamera)
 	{
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
@@ -756,69 +979,164 @@ void CSceneJH::Communicate(SOCKET& sock)
 
 	int retVal;
 	bool haveToRecv = false;
-	SendPacket(CFramework::GetInstance().GetSocket(), reinterpret_cast<char*>(&p_syncUpdateRequest), p_syncUpdateRequest.size, retVal);
+	//SendPacket(&p_syncUpdateRequest);
+	
+	if (m_MousePositions.size() > 0) {
+		SendMouseInputPacket();
+		//RecvMouseProcessPacket();
+	}
+}
 
-	char buffer[BUFSIZE + 1] = {};
-	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-	PACKET_PROTOCOL type = (PACKET_PROTOCOL)buffer[1];
+void CSceneJH::ProcessPacket(unsigned char* p_buf)
+{
+	char buf[10000];
+	PACKET_PROTOCOL type = (PACKET_PROTOCOL)p_buf[1];
+	switch (type)
+	{
+	case PACKET_PROTOCOL::S2C_LOGIN_HANDLE:
+		P_S2C_PROCESS_LOGIN p_processLogin; //= *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&p_buf);
+		memcpy(&p_processLogin, p_buf, p_buf[0]);
+		if (p_processLogin.isSuccess)
+		{
+			XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_processLogin.x),
+				IntToFloat(p_processLogin.y), IntToFloat(p_processLogin.z) };
 
-	// 플레이어 추가 혹은 삭제 패킷 수신
-	if (type == PACKET_PROTOCOL::S2C_NEW_PLAYER) {
+			CFramework::GetInstance().SetPlayerId(p_processLogin.id);
+
+			cout << "Login id = " << p_processLogin.id << "\n";
+
+			m_Players[p_processLogin.id]->SetDrawable(true);
+
+			m_Player = m_Players[p_processLogin.id];
+			m_CurrentCamera = m_PlayerCameras[p_processLogin.id];
+			//m_Player->SetCamera(m_CurrentCamera); 
+			//m_CurrentCamera->SetTarget(m_Player);
+
+			m_MinimapCamera->SetTarget(m_Players[p_processLogin.id]);
+
+			//for (int i = 0; i < MAX_PLAYER; ++i) {
+			//	m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
+			//}
+		}
+		break;
+	case PACKET_PROTOCOL::S2C_NEW_PLAYER:
 		cout << "Packet::NewPlayer[ServerToClient]\n";
-		P_S2C_ADD_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_ADD_PLAYER*>(&buffer);
+		P_S2C_ADD_PLAYER p_addPlayer;
+		memcpy(&p_addPlayer, p_buf, p_buf[0]);
 		XMFLOAT3 pos = { IntToFloat(p_addPlayer.x), IntToFloat(p_addPlayer.y), IntToFloat(p_addPlayer.z) };
 
 		m_Players[p_addPlayer.id]->SetPosition(pos);
 		m_Players[p_addPlayer.id]->SetDrawable(true);
 		++m_CurrentPlayerNum;
-		haveToRecv = true;
-	}
-	else if (type == PACKET_PROTOCOL::S2C_DELETE_PLAYER) { 
+		break;
+	case PACKET_PROTOCOL::S2C_DELETE_PLAYER:
 		cout << "Packet::DeletePlayer[ServerToClient]\n";
-		P_S2C_DELETE_PLAYER p_addPlayer = *reinterpret_cast<P_S2C_DELETE_PLAYER*>(&buffer); 
-		m_Players[p_addPlayer.id]->SetDrawable(false);
-		haveToRecv = true;
-	}
-	// 갱신 정보를 다시 받아와야 하는 경우.
-	if (haveToRecv) {
-		ZeroMemory(buffer, sizeof(buffer));
-		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-		haveToRecv = false;
-	}
+		P_S2C_DELETE_PLAYER p_deletePlayer;
+		memcpy(&p_deletePlayer, p_buf, p_buf[0]);
+		m_Players[p_deletePlayer.id]->SetDrawable(false);
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT:
+	{
+		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
+		memcpy(&p_keyboardProcess, p_buf, p_buf[0]);
+		XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_keyboardProcess.posX),
+			IntToFloat(p_keyboardProcess.posY),
+			IntToFloat(p_keyboardProcess.posZ) };
+		XMFLOAT3 look = XMFLOAT3{ IntToFloat(p_keyboardProcess.lookX),
+			IntToFloat(p_keyboardProcess.lookY),
+			IntToFloat(p_keyboardProcess.lookZ) };
 
-	// 새롭게 받아온 정보가 갱신 정보가 아닌 기타 정보인 경우.
-	if (type == PACKET_PROTOCOL::S2C_INGAME_DOOR_EVENT) {
+		m_Player->SetPosition(pos);
+
+		m_Player->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
+			look, -PLAYER_RUN_SPEED));
+	}
+	break;
+	case PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT:
+		P_S2C_PROCESS_MOUSE p_mouseProcess;
+		memcpy(&p_mouseProcess, p_buf, p_buf[0]);
+		if (p_mouseProcess.cameraOffset != 0) {
+			float offset = IntToFloat(p_mouseProcess.cameraOffset);
+			//cout << "offset : " << offset << "\n";
+			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
+		}
+		if (p_mouseProcess.cameraRotateX != 0) {
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX);
+		}
+
+		if (p_mouseProcess.cameraRotateY != 0) {
+			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY);
+			//cout << "cameraRotateY : " << rotateY << "\n";
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), rotateY);
+		}
+
+		if (p_mouseProcess.cameraRotateZ != 0) {
+			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ);
+		}
+		if (p_mouseProcess.playerRotateX != 0) {
+			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX);
+		}
+		if (p_mouseProcess.playerRotateY != 0) {
+			float rotateY = IntToFloat(p_mouseProcess.playerRotateY);
+			//cout << "playerRotateY : " << rotateY << "\n";
+			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY);
+			m_MinimapArrow->Rotate(-rotateY);
+		}
+		if (p_mouseProcess.playerRotateZ != 0) {
+			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ);
+		}
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT:
+	{
+		//P_S2C_MONSTERS_UPDATE_SYNC p_monsterUpdate;
+		//memcpy(&p_monsterUpdate, p_buf, p_buf[0]);
+		P_S2C_MONSTERS_UPDATE_SYNC* p_monsterUpdate = reinterpret_cast<P_S2C_MONSTERS_UPDATE_SYNC*>(p_buf);
+
+		XMFLOAT3 pos = { IntToFloat(p_monsterUpdate->posX),
+			IntToFloat(p_monsterUpdate->posY),
+			IntToFloat(p_monsterUpdate->posZ) };
+		XMFLOAT3 look = { IntToFloat(p_monsterUpdate->lookX),
+			IntToFloat(p_monsterUpdate->lookY),
+			IntToFloat(p_monsterUpdate->lookZ) };
+		int id = p_monsterUpdate->id;
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition(pos);
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+	}
+	break;
+	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:
+		P_S2C_UPDATE_SYNC p_syncUpdate;
+		memcpy(&p_syncUpdate, p_buf, p_buf[0]);
+		m_CurrentPlayerNum = p_syncUpdate.playerNum;
+		for (int i = 0; i < MAX_PLAYER; ++i) {
+			m_Players[i]->SetDrawable(p_syncUpdate.existance[i]);
+			if (m_Players[i]->IsDrawable() == false) continue;
+
+			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
+			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
+
+			m_Players[i]->SetPosition(pos);
+			m_Players[i]->UpdateCamera();
+			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
+				look, -PLAYER_RUN_SPEED));
+		}
+
+		CFramework::GetInstance().SetFrameDirtyFlag(true);
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_DOOR_EVENT:
 		cout << "Packet::DoorEvent[ServerToClient]\n";
-		haveToRecv = true;
-	}
-	if (type == PACKET_PROTOCOL::S2C_INGAME_END) {
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_PUZZLE_EVENT:
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_END:
 		cout << "Packet::GameEnd[ServerToClient]\n";
-		return;
-	}
-
-	// 모든 부가 정보들 갱신을 마치고 플레이어들 정보를 다시 받아와야 하는 경우.
-	if (haveToRecv) {
-		ZeroMemory(buffer, sizeof(buffer));
-		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-	}
-	P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&buffer);
-
-	for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
-		if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
-
-		XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
-		XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
-
-		m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
-		m_Players[p_syncUpdate.id[i]]->UpdateCamera();
-		m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-
-		m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
-	}
-
-	if (m_MousePositions.size() > 0) {
-		SendMouseInputPacket();
-		RecvMouseProcessPacket();
+		break;
+	default:
+		cout << "Unknown Packet Type from server" << " Packet Type [" << +p_buf[1] << "]" << endl;
+		while (true) {
+			// 멈춰
+		}
+		break;
 	}
 }
 
@@ -830,55 +1148,7 @@ void CSceneJH::LoginToServer()
 	strcpy_s(p_login.name, CFramework::GetInstance().GetPlayerName().c_str());
 
 	int retVal;
-	SendPacket(CFramework::GetInstance().GetSocket(), reinterpret_cast<char*>(&p_login), p_login.size, retVal);
-
-	char buffer[BUFSIZE + 1] = {}; 
-	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-
-	P_S2C_PROCESS_LOGIN p_processLogin = *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&buffer);
-	if (p_processLogin.isSuccess)
-	{
-		XMFLOAT3 pos = XMFLOAT3{IntToFloat(p_processLogin.x), 
-			IntToFloat(p_processLogin.y), IntToFloat(p_processLogin.z) };
-		
-		CFramework::GetInstance().SetPlayerId(p_processLogin.id);
-
-		cout << "Login id = " << p_processLogin.id << "\n";
-		 
-		m_Players[p_processLogin.id]->SetDrawable(true);
-
-		m_Player = m_Players[p_processLogin.id];
-		m_CurrentCamera = m_PlayerCameras[p_processLogin.id];
-		//m_Player->SetCamera(m_CurrentCamera); 
-		//m_CurrentCamera->SetTarget(m_Player);
-
-		m_MinimapCamera->SetTarget(m_Players[p_processLogin.id]);
-		  
-		for (int i = 0; i < MAX_PLAYER; ++i) {
-			m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
-		}
-
-		// Sync Data
-		ZeroMemory(buffer, sizeof(buffer));
-		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-		
-		P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&buffer);
-		
-		m_CurrentPlayerNum = p_syncUpdate.playerNum;
-
-		for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
-			if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
-
-			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
-			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
-			 
-			m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
-			m_Players[p_syncUpdate.id[i]]->UpdateCamera();
-			m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-		
-			m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
-		}
-	}  
+	SendPacket(&p_login); 
 }
 
 void CSceneJH::LogoutToServer()
@@ -890,7 +1160,10 @@ void CSceneJH::ProcessInput()
 	if (false == m_IsFocusOn) {
 		return;
 	}
-
+	if (m_CurrentCamera->IsOnShake()) { 
+		// 피격 상태일 때 잠시 제어권 뺏기
+		return; 
+	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 		auto keyInput = GAME_INPUT; 
@@ -945,27 +1218,8 @@ void CSceneJH::ProcessInput()
 		}
 		if (processKey == false) return;
 		int retVal = 0;
-		SendPacket(CFramework::GetInstance().GetSocket(),
-			reinterpret_cast<char*>(&p_keyboard), p_keyboard.size, retVal);
-
-		char buffer[BUFSIZE + 1] = {};
-		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-		 
-		P_S2C_PROCESS_KEYBOARD p_keyboardProcess = *reinterpret_cast<P_S2C_PROCESS_KEYBOARD*>(&buffer);
-		
-		XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_keyboardProcess.posX),
-			IntToFloat(p_keyboardProcess.posY), 
-			IntToFloat(p_keyboardProcess.posZ) };
-		XMFLOAT3 look = XMFLOAT3{ IntToFloat(p_keyboardProcess.lookX),
-			IntToFloat(p_keyboardProcess.lookY),
-			IntToFloat(p_keyboardProcess.lookZ) }; 
-
-		m_Players[p_keyboard.id]->SetPosition(pos);
-		m_Players[p_keyboard.id]->FixPositionByTerrain(m_Terrain);
-		m_Players[p_keyboard.id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), {0,1,0});
-		DisplayVector3(look);
-		//DisplayVector3(pos, true);
-		return;
+		SendPacket(&p_keyboard);
+		return; 
 	}
 	if (m_CurrentCamera == nullptr) return;
 
@@ -973,15 +1227,13 @@ void CSceneJH::ProcessInput()
 	XMFLOAT3 velocity = m_Player->GetVelocity();
 
 	XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
-	float distance = PLAYER_RUN_VELOCITY;
+	float distance = PLAYER_RUN_SPEED;
 
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
 	{ 
-		if (m_isPlayerSelected) {
-			XMFLOAT3 prevLook = m_Player->GetLook();
-			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));  
-			XMFLOAT3 afterLook = m_Player->GetLook(); 
+		if (m_isPlayerSelected) { 
+			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));   
 		}
 		else
 			m_CurrentCamera->Walk(cameraSpeed);
@@ -1010,14 +1262,40 @@ void CSceneJH::ProcessInput()
 		else
 			m_CurrentCamera->Strafe(cameraSpeed);
 	}
-	if (keyInput.KEY_B)
+
+	for (int i = 0; i < 8; i++)
 	{
-		m_CurrentCamera->SetShake(true, 0.5f, 5.0f);
+		if (keyInput.KEY_C && m_PuzzleBox[i]->GetSelectBox() && !m_PuzzleBoxCount)
+		{
+			cout << "박스를 이동합니다";
+
+			m_PuzzleBoxCount = TRUE;
+
+			m_PuzzleBox[i]->SetGripBox(!m_isBoxDown);
+
+		}
 	}
+	for (int i = 0; i < 8; i++)
+	{
+		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox() && m_PuzzleBoxCount)
+		{
+			m_PuzzleBoxCount = FALSE;
+
+			m_PuzzleBox[i]->SetGripBox(false);
+
+			cout << " x축 : " << m_PuzzleBox[i]->GetPosition().x << " y축 :" << m_PuzzleBox[i]->GetPosition().z << endl;
+
+			//-1760
+
+			m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
+
+		}
+	}
+
 	if (keyInput.KEY_1)
 	{
 		m_Player->SetWeapon(PlayerWeaponType::Sword);
-		//m_CurrentCamera = m_Cameras[0];
+		m_CurrentCamera = m_Cameras[0];
 	}
 	if (keyInput.KEY_2)
 	{
@@ -1055,8 +1333,9 @@ void CSceneJH::ProcessInput()
 		m_CurrentCamera->SetSpeed(max(cameraSpeed - 1.0f, 1.0f));
 	}
 	if (keyInput.KEY_F1)
-	{
-		m_Player->SetPosition({ 2500,  0, 2500 }); 
+	{ 
+		//m_Player->SetPosition({ 2500,  0, 2500 }); 
+		m_Player->SetPosition({ 1622,  0, 10772 });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F2)
@@ -1106,7 +1385,7 @@ void CSceneJH::ProcessInput()
 		if (m_Player->IsCanAttack()) {
 			m_Player->SetCanAttack(false);
 			m_Player->IncreaseAttackWaitingTime(1.5f);
-			ShotArrow();
+			ShotPlayerArrow();
 		}
 	}
 	if (keyInput.KEY_K)
@@ -1133,6 +1412,10 @@ void CSceneJH::OnMouseDown(WPARAM btnState, int x, int y)
 	if (false == m_IsFocusOn) {
 		return;
 	}
+	if (m_CurrentCamera->IsOnShake()) {
+		// 피격 상태일 때 잠시 제어권 뺏기
+		return;
+	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 	}
@@ -1146,19 +1429,28 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 	if (false == m_IsFocusOn) {
 		return;
 	}
-	//if (CFramework::GetInstance().IsOnConntected())
-	//{
-	//	if (m_MousePositions.size() > 0) {
-	//		SendMouseInputPacket();
-	//		RecvMouseProcessPacket();
-	//	}
-	//}
+
+	if (m_CurrentCamera->IsOnShake()) {
+		// 피격 상태일 때 잠시 제어권 뺏기
+		return;
+	}
+	if (CFramework::GetInstance().IsOnConntected())
+	{
+		if (m_MousePositions.size() > 0) {
+			SendMouseInputPacket();
+			//RecvMouseProcessPacket();
+		}
+	} 
 	ReleaseCapture();
 }
 
 void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 {
 	if (false == m_IsFocusOn) {
+		return;
+	}
+	if (m_CurrentCamera->IsOnShake()) {
+		// 피격 상태일 때 잠시 제어권 뺏기
 		return;
 	}
 	//
@@ -1494,12 +1786,18 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	pUI->SetShader(CShaderHandler::GetInstance().GetData("Minimap"));
 	pUI->Rotate(180);
 	m_UIs.push_back(pUI);
+	
 }
 
 void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	for (int i = 0; i < 4; i++)
+	{
+		m_PuzzleNum[i] = rand() % 9;
+	}
+
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
-	pPuzzlePlate->SetPosition({ 10600.0f, -2000.0f, 1500.0f + 8000.0f }); 
+	pPuzzlePlate->SetPosition({ 10600.0f, -2000.0f, 1500.0f + 8000.0f });
 	//m_Objects.push_back(std::move(pPuzzlePlate));
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pPuzzlePlate);
 
@@ -1507,19 +1805,29 @@ void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pObject->SetPosition({ 10500.0f, -2000.0f, 1500.0f + 8000.0f });
 	//m_Objects.push_back(std::move(pObject));
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 8; ++i)
 	{
-		for (int j = 0; j < 5; ++j)
+		m_PuzzleBox[i] = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
+
+		if (i > 3)
 		{
-			pObject = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
-			pObject->SetPosition({ 10900.0f + i * 1800.0f,  300 - 2000.0f, 1800.0f + j * 300.0f + 8000.0f });
-			pObject->SetTextureIndex(0x200);
-			pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-			pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f, XMFLOAT3{ 0,0,0 });
-			//m_Objects.push_back(std::move(pObject));
-			m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
+			m_PuzzleBox[i]->SetPosition({ 10900.0f + 1 * 1800.0f,  300 - 2000.0f, 1800.0f + (i - 4) * 300.0f + 8000.0f });
 		}
+		else
+		{
+			m_PuzzleBox[i]->SetPosition({ 10900.0f + 0 * 1800.0f,  300 - 2000.0f, 1800.0f + i * 300.0f + 8000.0f });
+		}
+		m_PuzzleBox[i]->SetTextureIndex(0x200);
+		m_PuzzleBox[i]->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		m_PuzzleBox[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f, XMFLOAT3{ 0,0,0 });
+		m_PuzzleBox[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 150.0f * 0.5f, 100.0f * 0.5f, 150.0f * 0.5f }));
+		m_PuzzleBox[i]->SetSelectBox(FALSE);
+		m_PuzzleBox[i]->SetGripBox(FALSE);
+		//m_Objects.push_back(std::move(pObject));
+		m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox].push_back(m_PuzzleBox[i]);
+
 	}
+
 }
 
 void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1556,96 +1864,329 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pObject->SetTextureIndex(0x01);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	pObject->SetTextureIndex(0x80);
-	pObject->Scale(35, 35, 35); 
+	pObject->Scale(35, 35, 35);
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
 	pObject->SetHegithFromTerrain(750.0f);
-
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,-10,20 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, -10, 20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
-	 
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,-10,-20 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, -10, -20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pObject);  
+	m_ObjectLayers[(int)OBJECT_LAYER::Boss].push_back(pObject);
 
-	CEnemy* pEnemy = new CEnemy();
-	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pEnemy->Scale(125.0f, 125.0f, 125.0f);
-	pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-	pEnemy->SetTextureIndex(0x200); 
-	pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f }); 
-	pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f } );
-	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
+	CEnemy* pEnemy;
+	XMFLOAT3 scale = { 125.0f,125.0f,125.0f };
+	{	// Monster Area1
+		pEnemy = new CRangedEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
+		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
-	pEnemy = new CEnemy();
-	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pEnemy->Scale(125.0f, 125.0f, 125.0f);
-	pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-	pEnemy->SetTextureIndex(0x200);
-	pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });	
-	pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f } );
-	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-	 
-	pEnemy = new CEnemy();
-	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pEnemy->Scale(125.0f, 125.0f, 125.0f);
-	pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-	pEnemy->SetTextureIndex(0x200);
-	pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
-	pEnemy->SetActivityScope({ 1300, 0, 1450 },{ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f } );
-	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+		pEnemy = new CMeleeEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
+		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
-	pEnemy = new CEnemy();
-	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pEnemy->Scale(125.0f, 125.0f, 125.0f);
-	pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-	pEnemy->SetTextureIndex(0x200);
-	pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
-	pEnemy->SetActivityScope({ 1400, 0, 1200 },{ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f } );
-	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+		pEnemy = new CMeleeEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pEnemy->Scale(scale.x, scale.y, scale.z); 
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
+		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
-	pEnemy = new CEnemy();
-	pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-	pEnemy->Scale(125.0f, 125.0f, 125.0f);
-	pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-	pEnemy->SetTextureIndex(0x200);
-	pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-	pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-	pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-	pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-	pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
+		pEnemy = new CMeleeEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
+		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+	}
+
+	{	// Monster Area1-2
+		pEnemy = new CRangedEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
+		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f/ scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 10, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CRangedEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
+		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 10, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
+		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 10, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
+		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 10, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+	}
+	{// Monster Area2-1
+		pEnemy = new CRangedEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
+		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale. z});
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+		 
+		pEnemy = new CRangedEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
+		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
+		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
+	}
+	{// Monster Area2-2
+		pEnemy = new CRangedEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
+		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
+		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z});
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 10, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
+		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
+		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 10, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
+		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
+		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 10, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+	}
+
+	{// Monster Area3
+		pEnemy = new CRangedEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
+		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 10, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CRangedEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
+		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 10, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CRangedEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
+		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 10, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pEnemy = new CMeleeEnemy();
+		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
+		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 10, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+	}
 }
 
 void CSceneJH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_Mirror = new CGameObject();
+	for (int i = 0; i < 3; i++)
+	{
+		m_Mirror[i] = new CGameObject();
 
-	CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
+		CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
 
-	m_MirrorCamera->SetPosition({ 17000, -3000, 210 });
+		m_MirrorCamera->SetPosition({ 17000, -3000, 210 });
 
-	m_Mirror->SetMesh(pMirrorMesh);
-	m_Mirror->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
-	m_Mirror->SetPosition({ 17000, -2300, 200 });
-	m_Mirror->SetTextureIndex(0x01);
+		m_Mirror[i]->SetMesh(pMirrorMesh);
+		m_Mirror[i]->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
+		if (i == 1 || i == 2)
+		{
+			m_Mirror[i]->Rotate({ 0,1,0 }, 90);
+		}
+		if (i == 0)
+		{
+			m_Mirror[i]->SetPosition({ float(17000 - (2900 * i)), -2300, 200 });
+		}
+		if (i == 1)
+		{
+			m_Mirror[i]->SetPosition({ float(17000 - (2900 * i)), -2300, 3200 });
+		}
+		if (i == 2)
+		{
+			m_Mirror[i]->SetPosition({ float(17000 + 2900), -2300, 3200 });
+		}
+		m_Mirror[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000, 2600, 10.0, XMFLOAT3{ 0,0,0 });
+		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f, 2600.0f * 0.5f, 10.0f * 0.5f }));
+
+		m_Mirror[i]->SetTextureIndex(0x01);
+
+		m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox].push_back(m_Mirror[i]);
+	}
 }
 
 void CSceneJH::BuildMinimapResource(ID3D12Device* pd3dDevice)
@@ -2225,43 +2766,25 @@ void CSceneJH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_pfbxManager = FbxManager::Create();
+	/*m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
-	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, ""); 
-	m_pfbxManager->SetIOSettings(m_pfbxIOs);
-	 
-	/*m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/rock.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true); 
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Enemy_t2.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");  */ 
+	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");   
+	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
+	  
 
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree"); 
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree"); 
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
+ 
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
+ 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow");
-
-	/*m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/bush-01.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/rock.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Golem.fbx");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dry_Tree.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Stump_01.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Dead_Tree.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Desert_Rock.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Enemy_t2.fbx", true); 
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/Arrow.fbx");*/
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow"); 
 }
 
 void CSceneJH::BuildShadowResource(ID3D12Device* pd3dDevice)
@@ -2370,37 +2893,63 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pArrow->Scale(25.0f, 25.0f, 25.0f);
 		pArrow->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
 		pArrow->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
-		m_ObjectLayers[(int)OBJECT_LAYER::Arrow].push_back(pArrow);
+		m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow].push_back(pArrow);
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		CArrow* pArrow = new CArrow();
+		pArrow->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow]);
+		pArrow->SetPosition({ 500.0f,  100.0f, 1500.0f });
+		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
+		pArrow->SetTextureIndex(0x20);
+		pArrow->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		pArrow->Scale(100.0f, 100.0f, 50.0f);
+		pArrow->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
+		pArrow->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
 	}
 }
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
-	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin"); 
+{
+	CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Knight.bin", NULL, true); 
+	
+	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
 
-	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
+	m_Players[0]->SetChild(pKinght, true);
+	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	m_Players[0]->Scale(200, 200, 200);
+	m_Players[0]->SetShadertoAll();
+
+	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 4.5f, -13.20f));
 	m_PlayerCameras[0]->SetTarget(m_Players[0]);
 	m_Players[0]->SetCamera(m_PlayerCameras[0]);
 
-	m_Players[0]->Scale(7, 7, 7);
-	m_Players[0]->SetObjectName(OBJ_NAME::Player);
-	m_Players[0]->Rotate({ 0,1,0 }, 180);
-	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	//m_Players[0]->Scale(7, 7, 7);
+	//m_Players[0]->SetObjectName(OBJ_NAME::Player);
+	//m_Players[0]->Rotate({ 0,1,0 }, 180);
+	//m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 
 	m_Players[0]->SetDrawable(true);
-	m_Players[0]->SetTextureIndex(0x400); 
+	//m_Players[0]->SetTextureIndex(0x400); 
 
-	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 });
-	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
+	//m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 });
+	//m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
 	++m_CurrentPlayerNum;
-
+	
 	m_MinimapCamera->SetTarget(m_Players[0]); 
+	//auto pBox = new CBox(pd3dDevice, pd3dCommandList, 80, 165.0, 80.0f);
+	//pBox->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	//pBox->SetTextureIndex(0x100); 
+	//pBox->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
-		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
-		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);  
+		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
+		//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
+ 
 		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 
 		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
@@ -2431,10 +2980,10 @@ void CSceneJH::EnterNewSector(int sectorNum)
 	EnterNewSector(sectorNum - 1); 
 }
 
-void CSceneJH::ShotArrow()
+void CSceneJH::ShotPlayerArrow()
 {
 	int i = 0;
-	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Arrow]) {
+	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
 		CArrow* pArrow = reinterpret_cast<CArrow*>(pObj);
 		if (pArrow->IsCanUse()) {
 			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
@@ -2453,6 +3002,30 @@ void CSceneJH::ShotArrow()
 		}
 		++i;
 	} 
+}
+
+void CSceneJH::ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector)
+{ 
+	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
+		CArrow* pArrow = reinterpret_cast<CArrow*>(pObj);
+		if (pArrow->IsCanUse()) { 
+			pArrow->SetUseable(false);
+			XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ pEmeny->GetPosition() }, { 0,150,0 });
+			pArrow->SetPosition(pos);
+			pArrow->SetTargetVector(lookVector);
+			//m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT); 
+			break;
+		} 
+	}
+}
+
+void CSceneJH::DeleteEnemy(CEnemy* pEmeny)
+{
+	auto res = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Enemy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end(), pEmeny);
+	if (res != m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end()) {
+		cout << " 몬스터 삭제\n";
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].erase(res);
+	}
 }
 
 void CSceneJH::MakingFog()
@@ -2480,7 +3053,7 @@ void CSceneJH::MakingRain()
 		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
 	}
 }
- 
+
 void CSceneJH::SendMouseInputPacket()
 {  
 	P_C2S_MOUSE_INPUT p_mouseInput;
@@ -2494,14 +3067,13 @@ void CSceneJH::SendMouseInputPacket()
 		p_mouseInput.xInput[i] = FloatToInt(m_MousePositions[i].x);
 		p_mouseInput.yInput[i] = FloatToInt(m_MousePositions[i].y);
 	}
+	m_MousePositions.clear();
 	p_mouseInput.InputType = m_prevMouseInputType; 
 
 	int retVal = 0;
-	SendPacket(CFramework::GetInstance().GetSocket(),
-		reinterpret_cast<char*>(&p_mouseInput), p_mouseInput.size, retVal);
+	SendPacket(&p_mouseInput);
 
 	//cout << "마우스 입력 전송 크기 : " << m_MousePositions.size() << "\n";
-	m_MousePositions.clear();
 }
 
 void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -2617,6 +3189,7 @@ void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 void CSceneJH::RecvMouseProcessPacket()
 {
+	return;
 	int retVal;
 	char buffer[BUFSIZE + 1] = {};
 	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
@@ -2625,36 +3198,6 @@ void CSceneJH::RecvMouseProcessPacket()
 
 	// 플레이어 추가 혹은 삭제 패킷 수신
 	if (type == PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT) {
-		P_S2C_PROCESS_MOUSE p_mouseProcess = *reinterpret_cast<P_S2C_PROCESS_MOUSE*>(&buffer);
-		if (p_mouseProcess.cameraOffset != 0) {
-			float offset = IntToFloat(p_mouseProcess.cameraOffset);
-			//cout << "offset : " << offset << "\n";
-			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
-		}
-		if (p_mouseProcess.cameraRotateX != 0) {
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX);
-		}
-
-		if (p_mouseProcess.cameraRotateY != 0) {
-			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY);
-			//cout << "cameraRotateY : " << rotateY << "\n";
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), rotateY);
-		}
-
-		if (p_mouseProcess.cameraRotateZ != 0) { 
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ);
-		}
-		if (p_mouseProcess.playerRotateX != 0) {
-			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX);
-		} 
-		if (p_mouseProcess.playerRotateY != 0) {
-			float rotateY = IntToFloat(p_mouseProcess.playerRotateY);
-			//cout << "playerRotateY : " << rotateY << "\n";
-			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY );
-			m_MinimapArrow->Rotate(-rotateY );
-		} 
-		if (p_mouseProcess.playerRotateZ != 0) {
-			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ);
-		}
+		
 	}
 }

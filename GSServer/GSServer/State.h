@@ -1,4 +1,5 @@
 #pragma once
+#include "GameObject.h"
 
 template <class object_type>
 class CState

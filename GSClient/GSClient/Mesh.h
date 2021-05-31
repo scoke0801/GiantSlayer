@@ -571,6 +571,13 @@ public:
 	void LoadMesh(FbxNode* node, CMeshinfo* info, bool rotateFlag = false);
 };
 
+class CMeshFbxTextured : public CMesh
+{
+public:
+	CMeshFbxTextured(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nVertices, int nIndices, int* pnIndices);
+	virtual ~CMeshFbxTextured();
+};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CStandardMesh : public CMesh
@@ -611,6 +618,8 @@ public:
 	void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 
 	virtual void ReleaseUploadBuffers();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet) override;
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
 };
@@ -665,6 +674,8 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void ReleaseUploadBuffers();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet) override;
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
 };

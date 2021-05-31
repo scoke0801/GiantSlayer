@@ -1152,8 +1152,7 @@ void CAnimatedMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	else
 	{
 		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
-	}
-
+	} 
 }
 
 CMeshFbx::CMeshFbx(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -1309,6 +1308,26 @@ void CStandardMesh::ReleaseUploadBuffers()
 
 	if (m_pd3dBiTangentUploadBuffer) m_pd3dBiTangentUploadBuffer->Release();
 	m_pd3dBiTangentUploadBuffer = NULL;
+}
+
+void CStandardMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
+{
+	UpdateShaderVariables(pd3dCommandList);
+
+	OnPreRender(pd3dCommandList, NULL);
+	//pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
+
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+
+	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
+	{
+		pd3dCommandList->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
+		pd3dCommandList->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+	}
+	else
+	{
+		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+	}
 }
 
 void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)
@@ -1524,14 +1543,31 @@ void CSkinnedMesh::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandL
 	if (m_pd3dcbBoneOffsets && m_pd3dcbBoneTransforms)
 	{
 		D3D12_GPU_VIRTUAL_ADDRESS d3dcbBoneOffsetsGpuVirtualAddress = m_pd3dcbBoneOffsets->GetGPUVirtualAddress();
-		pd3dCommandList->SetGraphicsRootConstantBufferView(11, d3dcbBoneOffsetsGpuVirtualAddress); //Skinned Bone Offsets
+		pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dcbBoneOffsetsGpuVirtualAddress); //Skinned Bone Offsets
 		D3D12_GPU_VIRTUAL_ADDRESS d3dcbBoneTransformsGpuVirtualAddress = m_pd3dcbBoneTransforms->GetGPUVirtualAddress();
-		pd3dCommandList->SetGraphicsRootConstantBufferView(12, d3dcbBoneTransformsGpuVirtualAddress); //Skinned Bone Transforms
-
+		pd3dCommandList->SetGraphicsRootConstantBufferView(8, d3dcbBoneTransformsGpuVirtualAddress); //Skinned Bone Transforms
+		 
 		for (int i = 0; i < m_nSkinningBones; i++)
 		{
 			XMStoreFloat4x4(&m_pcbxmf4x4BoneOffsets[i], XMMatrixTranspose(XMLoadFloat4x4(&m_pxmf4x4BindPoseBoneOffsets[i])));
 			XMStoreFloat4x4(&m_pcbxmf4x4BoneTransforms[i], XMMatrixTranspose(XMLoadFloat4x4(&m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World)));
+			//cout << " i : " << i << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._11 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._12 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._13 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._14 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._21 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._22 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._23 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._24 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._31 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._32 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._33 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._34 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._41 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._42 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._43 << " ";
+			//cout << m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._44 << "\n";
 		}
 	}
 }
@@ -1551,6 +1587,26 @@ void CSkinnedMesh::ReleaseUploadBuffers()
 
 	if (m_pd3dBoneWeightUploadBuffer) m_pd3dBoneWeightUploadBuffer->Release();
 	m_pd3dBoneWeightUploadBuffer = NULL;
+}
+
+void CSkinnedMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
+{
+	UpdateShaderVariables(pd3dCommandList);
+
+	OnPreRender(pd3dCommandList, NULL);
+	///pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
+
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+
+	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
+	{
+		pd3dCommandList->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
+		pd3dCommandList->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+	}
+	else
+	{
+		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+	}
 }
 
 void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)
@@ -1593,6 +1649,10 @@ void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 					m_ppSkinningBoneFrameCaches[i] = NULL;
 				}
 			}
+			for (int i = 0; i < m_nSkinningBones; ++i) {
+				cout << "BoneName: " << m_ppstrSkinningBoneNames[i] << endl;
+			}
+			int stop = 3;
 		}
 		else if (!strcmp(pstrToken, "<BoneOffsets>:"))
 		{
@@ -1882,7 +1942,7 @@ void CBindingTerrainMesh::CreateGridMesh(ID3D12Device* pd3dDevice,
  ID3D12GraphicsCommandList* pd3dCommandList,
 	const XMFLOAT3& shift, BYTE textureInfo,
 	int xIndex, int zIndex,
-	int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]) 
+	int heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1], XMFLOAT3 normals[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1])
 {  
 	int WidthBlock_Count = 9, DepthBlock_Count = 9;
 	int WidthBlock_Index = 257, DepthBlock_Index = 257;
@@ -2950,4 +3010,38 @@ void CSandParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12Graph
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
 
 	delete[] m_Vertices;
+}
+
+CMeshFbxTextured::CMeshFbxTextured(ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList, 
+	int nVertices, int nIndices, int* pnIndices) 
+	: CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = nVertices;
+	m_nStride = sizeof(CTexturedVertex);
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL,
+		m_nStride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dIndexUploadBuffer);
+
+	m_pd3dVertexBuffer->Map(0, NULL, (void**)&m_pxmf4MappedPositions);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	m_nIndices = nIndices;
+
+	m_pd3dIndexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pnIndices,
+		sizeof(UINT) * m_nIndices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_pd3dIndexUploadBuffer);
+
+	m_d3dIndexBufferView.BufferLocation = m_pd3dIndexBuffer->GetGPUVirtualAddress();
+	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
+}
+
+CMeshFbxTextured::~CMeshFbxTextured()
+{
+	if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+	if (m_pd3dIndexBuffer) m_pd3dIndexBuffer->Release();
 }

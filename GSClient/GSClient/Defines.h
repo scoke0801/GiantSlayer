@@ -5,14 +5,15 @@
 #pragma warning(disable  : 4996)    // mbstowcs unsafe###
 #define SERVER_ROOP   "127.0.0.1"		 // 루프백
 //#define SERVERIP   "127.0.0.1"		 // 루프백 
-//#define SERVERIP   "211.207.24.227"// 종현 
+#define SERVERIP   "211.207.24.227"// 종현 
 //#define SERVERIP	 "192.168.35.229"// 태훈?
 //#define SERVERIP   "192.168.0.15"  // 영진 
 //#define SERVERIP   "172.30.1.39"	 // 루프백  
 
 //#define SERVERIP   "119.207.200.191"	 // 루프백 
 //#define SERVERIP   "192.168.0.3"	 // 루프백 
-#define SERVERIP   "192.168.35.158"// 종현 
+
+//#define SERVERIP   "192.168.122.1"  // 학교 wifi 주소
 #define MAX_FILE_NAME_LAN 256
 
 #define UV_TEX 100.0F

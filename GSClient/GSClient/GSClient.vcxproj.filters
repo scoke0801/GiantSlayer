@@ -150,6 +150,9 @@
     <ClCompile Include="Arrow.cpp">
       <Filter>GameObject\Arrow</Filter>
     </ClCompile>
+    <ClCompile Include="FbxObject2.cpp">
+		<Filter>GameObject</Filter>
+	</ClCompile>
     <ClCompile Include="GameObjectVer2.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
@@ -300,6 +303,9 @@
     <ClInclude Include="Arrow.h">
       <Filter>GameObject\Arrow</Filter>
     </ClInclude>
+    <ClInclude Include="FbxObject2.h">
+		<Filter>GameObject</Filter>
+	</ClInclude>
     <ClInclude Include="GameObjectVer2.h">
       <Filter>GameObject</Filter>
     </ClInclude>

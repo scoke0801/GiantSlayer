@@ -18,6 +18,13 @@ private:
 	bool	m_isExist = false;
 
 	CCamera* m_Camera = nullptr;
+
+private:
+	float m_AttackWaitingTime = 0.0f;
+	bool m_IsCanAttack = true;
+
+	float m_AttackedDelay = 0.0f;
+
 public:
 	CPlayer();
 	~CPlayer();	
@@ -25,9 +32,9 @@ public:
 public:
 	void Update(float fTimeElapsed) override;
 	void UpdateCamera();
-	void FixCameraByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 
-	void FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
+	void FixCameraByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
+	void FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]) override;
 
 public:
 	virtual void SetVelocity(const XMFLOAT3& dir) override;
@@ -45,4 +52,13 @@ public:
 	 
 	void SetCamera(CCamera* camera) { m_Camera = camera; }
 	CCamera* GetCamera() const { return m_Camera; }
+	 
+
+public:
+	void SetCanAttack(bool info) { m_IsCanAttack = info; }
+	bool IsCanAttack() const { return m_IsCanAttack; }
+	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
+
+public:
+	bool Attacked(CGameObject* pObject);
 };

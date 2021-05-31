@@ -8,8 +8,6 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateFBXAnimatedShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateBasicObjectShader(pd3dDevice,pd3dGraphicsRootSignature);
 
-	CreateStandardShader(pd3dDevice, pd3dGraphicsRootSignature);
-	CreateSkinnedShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateDoorWallShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateBridgeShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -33,6 +31,9 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateTerrainWaterShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
+
+	CreateStandardShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateSkinnedShader(pd3dDevice, pd3dGraphicsRootSignature);
 }
 
 void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -336,9 +337,9 @@ void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 		pStandardShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
 
-	pStandardShader->CreateInputLayout(ShaderTypes::FbxAnimated);
-	pStandardShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
-	pStandardShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pStandardShader->CreateInputLayout(ShaderTypes::Standard);
+	pStandardShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
+	//pStandardShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Standard", pStandardShader);
 }
 
@@ -352,9 +353,9 @@ void CShaderHandler::CreateSkinnedShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
 
-	pSkinnedShader->CreateInputLayout(ShaderTypes::FbxAnimated);
-	pSkinnedShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
-	pSkinnedShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pSkinnedShader->CreateInputLayout(ShaderTypes::Skinned);
+	pSkinnedShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
+	//pSkinnedShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Skinned", pSkinnedShader);
 }
 
@@ -503,5 +504,6 @@ void CShaderHandler::CreateMirrorShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 	}
 	pMirrorShader->CreateInputLayout(ShaderTypes::Textured);
 	pMirrorShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
+	pMirrorShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Mirror", pMirrorShader);
 }

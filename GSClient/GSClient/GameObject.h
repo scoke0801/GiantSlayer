@@ -9,7 +9,7 @@ class CCamera;
 class CTerrain;
 
 #define OBJECT_MAX_VELOCITY 120.0f 
-#define PLAYER_RUN_VELOCITY 250.0f * 4
+#define PLAYER_RUN_VELOCITY 650.0f
 #define PLAYER_WALK_VELOCITY 80.0f  
 
 enum class OBJ_TYPE
@@ -52,17 +52,30 @@ struct GAMEOBJECT_INFO
 	MATERIAL						m_Material;
 	UINT							m_nTextureIndex;
 };
- 
+
+enum class ObjectState {
+	Wait,		// 상태와 상태 사이의 대기상태
+	Idle,		// 평소 상태
+	Patrol,		// 탐색 상태
+	Trace,		// 추격
+	Attack,		// 공격
+	Attacked,	// 피격
+	Die,		// 사망
+	RunAway		// 도망
+};
+
 class CGameObject
 {
+public:
+	XMFLOAT4X4			m_xmf4x4ToParent;
 private:
 	int					m_nReferences = 0;
 
-	bool				m_isDrawbale = true;
 public:
 	XMFLOAT4X4			m_xmf4x4World;
 
 protected:	// 좌표 관련 변수
+
 
 	// frame update loop, update 갱신 후의 좌표
 	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
@@ -91,6 +104,7 @@ protected: // 렌더링 관련 변수
 
 	CCamera*			m_Camera = nullptr;
 
+	bool				m_isDrawbale = true;
 protected:	// 객체 관련 속성 변수
 	int					m_HP = 0;
 	int					m_SP = 0;
@@ -98,6 +112,8 @@ protected:	// 객체 관련 속성 변수
 	OBJ_NAME			m_Name;
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
 	bool				m_isCollidable = true;
+
+	//ObjectState			m_StateType = ObjectState::Idle;
 
 public:
 	FbxScene*			m_pfbxScene = NULL;
@@ -131,17 +147,18 @@ public:
 	void DrawForBoundingObj(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
  
 	virtual void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera); 
+	virtual void SetTargetVector(const XMFLOAT3& playerLookAt);
 
 
 public:
 	virtual void Move(XMFLOAT3 shift);
 	void Move();
 
-	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
+	virtual void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
 
-	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
+	virtual void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 
-	void Scale(float x, float y, float z, bool setSize = true);
+	virtual void Scale(float x, float y, float z, bool setSize = true);
 
 public:
 	// about collision
@@ -149,7 +166,7 @@ public:
 	virtual bool CollisionCheck(CGameObject* other);
 
 	void FixCollision();
-	void FixCollision(CGameObject* pCollideObject);
+	virtual void FixCollision(CGameObject* pCollideObject);
 
 	virtual void UpdateColliders();
 
@@ -160,7 +177,9 @@ public:
 	vector<Collider*>& GetColliders() { return m_Colliders; }
 	vector<Collider*>& GetAABB() { return m_AABB; }
 
-	void FixPositionByTerrain(CTerrain* pTerrain);
+	virtual void FixPositionByTerrain(CTerrain* pTerrain);
+	 
+	virtual void ChangeState(ObjectState stateInfo, void* pData) {}
 public:
 	// about bounding box 
 	void BuildBoundigBoxMesh(ID3D12Device* pd3dDevice,
@@ -180,11 +199,13 @@ public:
 		float fWidth, float fHeight, float fDepth,
 		const XMFLOAT3& shift); 
 public:
+	XMFLOAT3 GetPositionToParent() { return(XMFLOAT3(m_xmf4x4ToParent._41, m_xmf4x4ToParent._42, m_xmf4x4ToParent._43)); }
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
 	string GetObjectName() const { return ConvertToObjectName(m_Name); }
 	XMFLOAT3 GetVelocity() const { return m_xmf3Velocity; }
 	XMFLOAT4X4 GetWorldTransform() const { return m_xmf4x4World; }
 
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL) {}
 	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
 	virtual void SetPosition(XMFLOAT3 pos);
@@ -213,7 +234,7 @@ public:
 	void SetSize(const XMFLOAT3& size) { m_xmf3Size = size; }
 	XMFLOAT3 GetSize()const { return m_xmf3Size; }
 	 
-	void SetDrawable(bool drawable) { m_isDrawbale = drawable; }
+	virtual void SetDrawable(bool drawable) { m_isDrawbale = drawable; }
 	bool IsDrawable() const { return m_isDrawbale; }
 
 	void SetHegithFromTerrain(float height) { m_HeightFromTerrain = height; }
@@ -221,11 +242,16 @@ public:
 
 	void SetCollisionHandleType(COLLISION_HANDLE_TYPE type) { m_CollisionHandleType = type; }
 	COLLISION_HANDLE_TYPE GetCollisionHandleType() const { return m_CollisionHandleType; }
-
+	
+	virtual ObjectState GetStateInfo() const { return ObjectState::Wait; }
 public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;
 	DirectX::XMFLOAT3 GetLook()const; 
+
+	DirectX::XMFLOAT3 GetReflectLook_0()const;
+	DirectX::XMFLOAT3 GetReflectLook_1()const;
+	DirectX::XMFLOAT3 GetReflectLook_2()const;
 };
  
 class CBox : public CGameObject
@@ -238,10 +264,18 @@ public:
 private:
 	XMFLOAT3 m_xmf3RotationAxis;
 	float m_fRotationSpeed;
+	bool m_SelectedBox;
+	bool m_GripBox;
+
 
 public:
 	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
+	void SetSelectBox(bool SelectedBox) { m_SelectedBox = SelectedBox; }
+	bool GetSelectBox() { return m_SelectedBox; }
+
+	void SetGripBox(bool GripBox) { m_GripBox = GripBox; }
+	bool GetGriptBox() { return m_GripBox; }
 
 	virtual void Animate(float fTimeElapsed) {}
 };

@@ -3,9 +3,11 @@
 constexpr int FRAME_BUFFER_WIDTH = 1280;
 constexpr int FRAME_BUFFER_HEIGHT = 768;
 
-constexpr int MAX_PLAYER = 1;
+constexpr int MAX_PLAYER = 5; 
 
-constexpr int MAX_PLAYER_NAME = 200;
+constexpr int MAX_BUFFER = 1024;
+constexpr int MAX_NAME = 200;
+
 constexpr int SERVERPORT = 9000;
 constexpr int BUFSIZE = 4096;
 constexpr int F_TO_I = 100000;
@@ -13,12 +15,25 @@ constexpr int I_TO_F = F_TO_I;
 
 constexpr int MAX_MOUSE_INPUT = 30;
 
-constexpr float ARROW_LIFE_TIME = 10.0f;
-constexpr float ARROW_SPEED = 165.0f * 3.5f * 4.0f;
+constexpr int MAX_MONSTER_COUNT = 20;
+
+// 뛰기 : 100미터 16초, 1초에 6.25미터를 달린다. 625 
+// 걷기 : 100미터 60초, 1초에 1.66미터를 걷는다. 166
+// 게임이니까 1.5배정도 빠르게하자
+constexpr float PLAYER_RUN_SPEED = 650.0f;
+constexpr float PLAYER_WALK_SPEED = 250.0f;
+
+// 화살 속도, 시속 235000m, 분속 3916.66m, 391666cm, 초속 6527
+// 너무 빠르니 절반 속도로..
+constexpr float ARROW_LIFE_TIME = 5.0f;
+constexpr float ARROW_SPEED = 3263.0f;
 
 constexpr float PLAYER_JUMP_HEIGHT = 165.0 * 1.75f;
 constexpr float TO_JUMP_TIME = 1.0f;
- 
+
+constexpr float MELLE_ENEMY_ATTACK_TIME = 2.0f;
+constexpr float RANGED_ENEMY_ATTACK_TIME = 2.0f;
+
 // x,y,z 크기를 short로 보내면 맵 크기 20000에서 
 // int, float 형 변환 계산하기에 크기가 작아서 int형으로 사용
 inline int FloatToInt(float num)
@@ -184,14 +199,14 @@ enum class PACKET_PROTOCOL : short
 struct P_C2S_LOGIN {
 	BYTE size;
 	PACKET_PROTOCOL type;
-	char name[MAX_PLAYER_NAME];
+	char name[MAX_NAME];
 };
 
 struct P_C2S_LOGOUT {
 	BYTE size;
 	PACKET_PROTOCOL type;
 	short id;
-	char name[MAX_PLAYER_NAME];
+	char name[MAX_NAME];
 };
 
 struct P_C2S_KEYBOARD_INPUT {
@@ -287,4 +302,19 @@ struct P_S2C_UPDATE_SYNC {
 
 	WEAPON_TYPE weaponType[MAX_PLAYER];  
 };
+
+struct P_S2C_MONSTERS_UPDATE_SYNC {
+	BYTE			size;
+	PACKET_PROTOCOL type;  
+
+	int				id;
+	int				posX;
+	int				posY;
+	int				posZ;
+
+	int				lookX;
+	int				lookY;
+	int				lookZ;
+};
+
 #pragma pack (pop)

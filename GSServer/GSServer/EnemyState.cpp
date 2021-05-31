@@ -2,7 +2,7 @@
 #include "EnemyState.h"
 #include "Enemy.h"
 #include "Player.h"
-#include "SceneJH.h"
+#include "PacketProcessor.h"
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -142,18 +142,19 @@ void TraceState::Execute(CEnemy* enemy, float elapsedTime)
 void TraceState::Exit(CEnemy* enemy)
 {
     cout << "TraceState::Exit\n";
+     
 }
 
 void AttackedState::Enter(CEnemy* enemy)
 {
-    const int PLAYER_DAMAGE = 15;
+   /* const int PLAYER_DAMAGE = 15;
     int hp = enemy->GetHP();
     hp -= PLAYER_DAMAGE;
     if (hp <= 0) {
         MAIN_GAME_SCENE->DeleteEnemy(enemy);
         return;
     }
-    enemy->SetHP(hp);
+    enemy->SetHP(hp);*/
 }
 
 void AttackedState::Execute(CEnemy* enemy, float elapsedTime)

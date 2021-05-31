@@ -494,6 +494,7 @@ struct VS_TERRAIN_TESSELLATION_OUTPUT
 	float3 normalW : NORMAL;
 	uint texIndex : TEXTURE;
     float4 shadowPosH : SHADOWPOS;
+	
 	//float3 tangentW : TANGENT;
 	//float3 bitangentW : BITANGENT;
 };
@@ -532,16 +533,12 @@ struct DS_TERRAIN_TESSELLATION_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
-
 	float2 uv0 : TEXCOORD0;
-
 	float3 normalW : NORMAL;
-
 	float4 tessellation : TEXCOORD2;
-
 	uint texIndex : TEXTURE;
-	
     float4 shadowPosH : SHADOWPOS;
+    
 };
 
 void BernsteinCoeffcient5x5(float t, out float fBernstein[5])
@@ -602,6 +599,7 @@ HS_TERRAIN_TESSELLATION_OUTPUT HSTerrainTessellation(InputPatch<VS_TERRAIN_TESSE
 	output.uv0 = input[i].uv0;
 	output.texIndex = input[i].texIndex;
     output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+
 	return(output);
 }
 
@@ -641,11 +639,14 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	float uB[5], vB[5];
 	BernsteinCoeffcient5x5(uv.x, uB);
 	BernsteinCoeffcient5x5(uv.y, vB);
+	
 
 	output.uv0 = lerp(lerp(patch[0].uv0, patch[4].uv0, uv.x), lerp(patch[20].uv0, patch[24].uv0, uv.x), uv.y);
 
 	float3 position = CubicBezierSum5x5(patch, uB, vB);
+	
 	float3 normal = CubicBezierNormalSum5x5(patch, uB, vB);
+	
 	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
 	output.position = mul(float4(position, 1.0f), mtxWorldViewProjection);
 
@@ -658,8 +659,11 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 
 	output.tessellation = float4(patchConstant.fTessEdges[0], patchConstant.fTessEdges[1], patchConstant.fTessEdges[2], patchConstant.fTessEdges[3]);
 	output.texIndex = patch[0].texIndex;
-
+	
+    
+	
 	return(output);
+	
 }
 
 // PS 
@@ -733,7 +737,7 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
     shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 	
 	input.normalW = normalize(input.normalW);
-    float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID,shadowFactor);
+    float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID , shadowFactor);
 
 	//else
 	//{
@@ -1050,7 +1054,6 @@ void PSStandardShadow(VS_STANDARD_SHADOW_OUTPUT input)
 {
     float4 f4AlbedoColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
 	
-
 	f4AlbedoColor = gtxtBox.Sample(gssWrap, input.uv);
 
     clip(f4AlbedoColor.a - 0.1f);

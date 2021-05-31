@@ -115,7 +115,9 @@ inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
 inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
 inline void Swap(float *pfS, float *pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
-
+inline float Lerp(float a, float b, float t) { return (1.0f - t) * a + (b * t); }
+// fx - x / (x + 1) - x
+inline float InvLerp(float a, float b, float v) { return (v - a) / (b - a); }
 //3차원 벡터의 연산
 namespace Vector3
 {
@@ -252,6 +254,10 @@ namespace Vector3
 	inline XMFLOAT3 Multifly(XMFLOAT3& xmf3Vector, float scalar)
 	{
 		return(XMFLOAT3(xmf3Vector.x * scalar, xmf3Vector.y * scalar, xmf3Vector.z * scalar));
+	}
+	inline XMFLOAT3 Multiply(XMFLOAT3& xmf3Vector, XMFLOAT3& xmf3Vector2)
+	{
+		return(XMFLOAT3(xmf3Vector.x * xmf3Vector2.x, xmf3Vector.y * xmf3Vector2.y, xmf3Vector.z * xmf3Vector2.z));
 	}
 }
 //4차원 벡터의 연산

@@ -3,6 +3,8 @@
 
 CPlayer::CPlayer()
 {
+	m_HP = 100;
+	m_SP = 100;
 }
 
 CPlayer::~CPlayer()
@@ -12,10 +14,22 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
-	static float MaxVelocityXZ = 120.0f;
-	static float MaxVelocityY = 120.0f;
-	float Friction = (m_MovingType == Player_Move_Type::Run) ? 360.0f : 50.0f;
+	if (false == m_IsCanAttack) {
+		m_AttackWaitingTime -= fTimeElapsed;
 
+		if (m_AttackWaitingTime < 0.0f) {
+			m_AttackWaitingTime = 0.0f;
+			m_IsCanAttack = true;
+		}
+	}
+
+	// ÇÇ°Ý
+	if (m_AttackedDelay > 0.0f) {
+		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
+	}
+
+	float Friction = (m_MovingType == Player_Move_Type::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
+	
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
 	Move(vel);  
@@ -46,6 +60,9 @@ void CPlayer::FixCameraByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][T
 	  
 	float offsetHeight = m_Camera->GetOffset().y;
 	float fHeight = GetDetailHeight(heightsMap, xmf3CameraPosition.x, xmf3CameraPosition.z) + 5.0f;
+	if (fHeight - 1500.0f > m_xmf3Position.y) {
+		fHeight = m_xmf3Position.y + 1500.0f;
+	}
 	if (xmf3CameraPosition.y <= fHeight)
 	{
 		xmf3CameraPosition.y = fHeight;
@@ -56,7 +73,9 @@ void CPlayer::FixCameraByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][T
 
 void CPlayer::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1])
 {
-	m_xmf3Position.y = GetDetailHeight(heightsMap, m_xmf3Position.x, m_xmf3Position.z);
+	m_xmf3Position.y = GetDetailHeight(heightsMap, m_xmf3Position.x, m_xmf3Position.z)
+		+ m_HeightFromTerrain;
+	//SetPosition(m_xmf3Position);
 }
 
 void CPlayer::SetVelocity(const XMFLOAT3& dir)
@@ -70,13 +89,28 @@ void CPlayer::SetVelocity(const XMFLOAT3& dir)
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, m_xmf3Velocity.y, 0.0f);
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity,
-		Vector3::Multifly(normalizedDir, PLAYER_RUN_VELOCITY));
+		Vector3::Multifly(normalizedDir, PLAYER_RUN_SPEED));
 
-	float speed = m_MovingType == (Player_Move_Type::Run) ? PLAYER_RUN_VELOCITY : PLAYER_WALK_VELOCITY;
+	float speed = m_MovingType == (Player_Move_Type::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
+
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;
 	if (m_xmf3Velocity.z > speed) m_xmf3Velocity.z = speed;
 	if (m_xmf3Velocity.x < -speed) m_xmf3Velocity.x = -speed;
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
+}
+
+bool CPlayer::Attacked(CGameObject* pObject)
+{
+	if (m_AttackedDelay > 0.0f) {
+		return false;
+	}
+	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
+	m_AttackedDelay += 1.5f;
+	m_HP -= 5;
+	if (m_HP <= 5) {
+		m_HP = 0;
+	}
+	return true;
 }

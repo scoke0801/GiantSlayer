@@ -232,11 +232,13 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, 
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/Knight.bin", NULL, true);
-	ExportedObject* test = new ExportedObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	test = new ExportedObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	test->SetChild(pKinght, true);
-	test->SetPosition({ 750.0f,   230.0f,  1850.0f });
-	test->Scale(20, 20, 20);
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(test);
+	test->SetPosition({ 1750.0f,   230.0f,  1850.0f });
+	test->Scale(200, 200, 200);
+	test->SetShadertoAll();
+	
+	//m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(test);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
@@ -260,6 +262,8 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
+
+	//FbxLoader(m_pfbxManager, "Wolf", false, 1);
 
 	//CMeshFbx* fbxMesh = new CMeshFbx(pd3dDevice, pd3dCommandList, m_pfbxManager, "resources/Fbx/babymos.fbx", true);
 	//CGameObject* pObject = new CGameObject();
@@ -434,7 +438,9 @@ void CSceneTH::Update(float elapsedTime)
 {
 	m_SoundManager->OnUpdate();
 	ProcessInput();
-
+	
+	test->Update(elapsedTime);
+	test->FixPositionByTerrain(m_Terrain);
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
 			pObject->Update(elapsedTime);
@@ -442,7 +448,7 @@ void CSceneTH::Update(float elapsedTime)
 		}
 	}
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
-		pEnemy->FixPositionByTerrain(m_Terrain);
+		//pEnemy->FixPositionByTerrain(m_Terrain);
 	}
 	m_Particles->Update(elapsedTime);
 
@@ -553,6 +559,7 @@ void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	m_Particles->Draw(pd3dCommandList, m_CurrentCamera);
 
+	test->Draw(pd3dCommandList, m_CurrentCamera);
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		//if (i == (int)OBJECT_LAYER::Enemy) {
 		//	continue;
@@ -561,10 +568,10 @@ void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 			pObject->Draw(pd3dCommandList, m_CurrentCamera);
 		}
 	}
-	for (auto player : m_Players) {
+	/*for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->Draw(pd3dCommandList, m_CurrentCamera);
-	}
+	}*/
 }
 
 void CSceneTH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -743,10 +750,10 @@ void CSceneTH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 			}
 		}
 
-		for (auto player : m_Players) {
+		/*for (auto player : m_Players) {
 			if (!player->IsDrawable()) continue;
 			player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
-		}
+		}*/
 
 		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
 			D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
@@ -2386,8 +2393,8 @@ void CSceneTH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/idle01.bin");
+	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
+	//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/idle01.bin");
 	m_Player = m_Players[0];
 
 	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
@@ -2409,9 +2416,7 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_MinimapCamera->SetTarget(m_Players[0]);
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
-		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
-		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/human.bin");
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 
 		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));

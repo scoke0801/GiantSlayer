@@ -4,6 +4,7 @@
 
 CBridge::CBridge(OBJECT_ID id)
 {
+	m_CollisionHandleType = COLLISION_HANDLE_TYPE::NotCollide;
 	CGameObject* pObject;// = new CGameObject();
 	for (int i = 0; i < 10; i += 5) {
 		pObject = new CGameObject();
@@ -91,6 +92,7 @@ void CBridge::SetPosition(XMFLOAT3 pos)
 	for (auto pPlate : m_Plates) {
 		pPlate->SetPosition(pos);
 	}
+	CGameObject::SetPosition(pos);
 }
 
 void CBridge::Rotate(const XMFLOAT3& axis, float angle)
@@ -105,12 +107,12 @@ void CBridge::Rotate(const XMFLOAT3& axis, float angle)
 
 bool CBridge::CollisionCheck(const BoundingBox& aabb)
 { 
-	for (auto pObj : m_Objects) {
+	/*for (auto pObj : m_Objects) {
 		if (pObj->CollisionCheck(aabb)) {
 			m_CollideObject = pObj;
 			return true; 
 		}
-	}
+	}*/
 	for (auto pPlate : m_Plates) {
 		if (pPlate->CollisionCheck(aabb)) {
 			m_CollideObject = pPlate;

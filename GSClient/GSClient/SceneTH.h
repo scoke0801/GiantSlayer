@@ -11,10 +11,11 @@ class HelpTextUI;
 class CTerrain;
 class CParticle;
 class CLightCamera;
-
+class ExportedObject;
 
 class CSceneTH : public CScene
 {
+	ExportedObject* test;
 private:
 	bool						m_isPlayerSelected = true;
 

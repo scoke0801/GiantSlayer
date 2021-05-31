@@ -1,13 +1,14 @@
 #include "stdafx.h"
 #include "Terrain.h"
 
+
 CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	CShader* pShader)
 {
 	m_nWidth = 100, m_nLength = 100;
 	InitHeightDatas();
 	InitNormals();
-	 
+
 	int vertexMeshCount = 25;
 	int meshVertexCount = 833 * vertexMeshCount;//20825
 	int loosedWallCount[2] = { 110, 5 };
@@ -15,6 +16,35 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 	m_BindTerrainMesh = new CBindingTerrainMesh(pd3dDevice, pd3dCommandList, meshVertexCount);
 	m_BindTerrainMeshForLoosedWall[0] = new CBindingTerrainMesh(pd3dDevice, pd3dCommandList, vertexMeshCount * loosedWallCount[0]);
 	m_BindTerrainMeshForLoosedWall[1] = new CBindingTerrainMesh(pd3dDevice, pd3dCommandList, vertexMeshCount * loosedWallCount[1]);
+
+	for (int i = 0; i < 25; ++i)
+	{
+		for (int j = 0; j < 25; ++j)
+		{
+			int WidthBlock_Count = 9, DepthBlock_Count = 9;
+			int WidthBlock_Index = 257, DepthBlock_Index = 257;
+			int xStart = 0, zStart = 0;
+
+			float fHeight = 0.0f, fMinHeight = +FLT_MAX, fMaxHeight = -FLT_MAX;
+
+			int* copyHeights = new int[25];
+
+			int xIndex = 4 * j;
+			int zIndex = 4 * i;
+			for (int a = 0, b = 4, z = (zStart + 10 - 1); z >= zStart; z -= 2, --b)
+			{
+				for (int x = xStart; x < (xStart + 10 - 1); x += 2, a++)
+				{
+					if (a >= 25) break;
+
+					copyHeights[a] = m_Heights[zIndex + b][xIndex + a % 5];
+
+				}
+			}
+
+			m_GridHeights[i][j] = copyHeights;
+		}
+	}
 
 	for (int i = 0; i < 25; ++i)
 	{
@@ -60,10 +90,9 @@ CTerrain::CTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComm
 				textureInfo,
 				4 * j, 4 * i,
 				m_Heights,
-				m_Normals);   
+				m_Normals);
 		}
-	} 
-	
+	}   
 	BuildFrontWalls(pd3dDevice, pd3dCommandList, pShader);
 	BuildLeftWalls(pd3dDevice, pd3dCommandList, pShader);
 	BuildRightWalls(pd3dDevice, pd3dCommandList, pShader);
@@ -122,42 +151,99 @@ float CTerrain::GetHeight(int xPosition, int zPosition)
 	return m_Heights[z][x];
 }
 
+void CTerrain::BernsteinCoeffcient5x5(float t, float fBernstein[5])
+{
+	float tInv = 1.0f - t;
+	fBernstein[0] = tInv * tInv * tInv * tInv;
+	fBernstein[1] = 4.0f * t * tInv * tInv * tInv;
+	fBernstein[2] = 6.0f * t * t * tInv * tInv;
+	fBernstein[3] = 4.0f * t * t * t * tInv;
+	fBernstein[4] = t * t * t * t;
+}
+
+float CTerrain::CubicBezierSum5x5_C(float uB[5], float vB[5], int xIndex, int zIndex)
+{
+	float f3Sum = 0.0f;
+	  
+	int* pHeights = m_GridHeights[zIndex / 4][xIndex / 4];
+	f3Sum =  vB[0] * (uB[0] * pHeights[0]  + uB[1] * pHeights[1]  + uB[2] * pHeights[2]  + uB[3] * pHeights[3]  + uB[4] * pHeights[4]);
+	f3Sum += vB[1] * (uB[0] * pHeights[5]  + uB[1] * pHeights[6]  + uB[2] * pHeights[7]  + uB[3] * pHeights[8]  + uB[4] * pHeights[9]);
+	f3Sum += vB[2] * (uB[0] * pHeights[10] + uB[1] * pHeights[11] + uB[2] * pHeights[12] + uB[3] * pHeights[13] + uB[4] * pHeights[14]);
+	f3Sum += vB[3] * (uB[0] * pHeights[15] + uB[1] * pHeights[16] + uB[2] * pHeights[17] + uB[3] * pHeights[18] + uB[4] * pHeights[19]);
+	f3Sum += vB[4] * (uB[0] * pHeights[20] + uB[1] * pHeights[21] + uB[2] * pHeights[22] + uB[3] * pHeights[23] + uB[4] * pHeights[24]);
+	
+	return(f3Sum);
+}
+
 float CTerrain::GetDetailHeight(float xPosition, float zPosition)
 {
+	// 원래 테스트
 	// 1. center
 	// 2. left end
 	// 3. right end
 	const float SCALE_SIZE = 200.0f;
 	float fx = xPosition / SCALE_SIZE;
-	float fz = zPosition / SCALE_SIZE;
-
-	/*지형의 좌표 (fx, fz)는 이미지 좌표계이다.
-	높이 맵의 x-좌표와 z-좌표가 높이 맵의 범위를 벗어나면
-	지형의 높이는0이다.*/
+	float fz = zPosition / SCALE_SIZE; 
+	int x = (int)fx;
+	int z = (int)fz; 
 	if ((fx < 0.0f)
 		|| (fz < 0.0f)
-		|| (fx > 100)
-		|| (fz > 100))
+		|| (fx >= 100)
+		|| (fz >= 100))
 		return(0.0f);
-	//높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다.
 
-	int x = (int)fx;
-	int z = (int)fz;
-	float fxPercent = fx - x;
-	float fzPercent = fz - z;
+	//////높이 맵의 좌표의 정수 부분과 소수 부분을 계산한다.
+	//  
+	//float n_x = InvLerp(x, x + 4, fx);
+	//float n_z = InvLerp(z, z + 4, fz);
 
-	int BottomLeft = m_Heights[z][x];
-	int BottomRight = m_Heights[z][x + 1];
-	int TopLeft = m_Heights[z+1][x];
-	int TopRight = m_Heights[z+1][x + 1];
-	 
-	//사각형의 네 점을 보간하여 높이(픽셀 값)를 계산한다.
-	float fTopHeight = TopLeft * (1 - fxPercent) + TopRight * fxPercent;
-	float fBottomHeight = BottomLeft * (1 - fxPercent) + BottomRight * fxPercent;
-	float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
+	////n_x = 0.5f;
+	////n_z = 0.5f;
+	//float height = GetHeighty(n_x, n_z, x, z);
+	// 
 
-	return(fHeight);
+	//cout << "n_x : " << n_x << " n_z : " << n_z << " ";
+	//cout << "x : " << x << " z: " << z << " height : " << height << "\n";
+
+
+	bool found = false; 
+	float minX, maxX, minZ, maxZ;
+	float gridX = 4;
+	float gridZ = 4;
+	float height = 0.0f;
+	for (int i = 0; i < 100; ++i) {
+		minX = i * gridX;
+		maxX = (i + 1) * gridX;
+
+		if (!(minX <= fx && fx <= maxX)) {
+			continue;
+		}
+
+		for (int j = 0; j < 100; ++j) {
+			minZ = j * gridZ;
+			maxZ = (j + 1) * gridZ;
+
+			if (!(minZ <= fz && fz <= maxZ)) {
+				continue;
+			}
+			float n_x = InvLerp(minX, maxX, fx);
+			float n_z = InvLerp(minZ, maxZ, fz);
+
+			height = GetHeighty(n_x, n_z, x, z);
+			found = true;
+			break;
+		}
+		break;
+	}
+	if (found) { 
+		return height;
+	}
+	else {
+		return 0.0f;
+	}
 }
+
+
 
 void CTerrain::BuildBackWalls(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
@@ -625,6 +711,15 @@ XMFLOAT3 CTerrain::GetHeightMapNormal(int x, int z)
 	return(xmf3Normal);  
 }
 
+float CTerrain::GetHeighty(float nx, float nz, int xIndex, int zIndex)
+{
+	float uB[5], vB[5];
+	BernsteinCoeffcient5x5(nx, uB);
+	BernsteinCoeffcient5x5(1.0f - nz, vB);
+
+	return CubicBezierSum5x5_C(uB, vB, xIndex, zIndex);
+}
+
 void CTerrain::InitHeightDatas()
 {
 	//for (int Sero = 0; Sero <= TERRAIN_HEIGHT_MAP_HEIGHT; ++Sero)
@@ -913,6 +1008,8 @@ void CTerrain::FileRead()
 		} 
 	}
 }
+
+
 
 CTerrainWater::CTerrainWater(ID3D12Device* pd3dDevice, 
 	ID3D12GraphicsCommandList* pd3dCommandList, 
