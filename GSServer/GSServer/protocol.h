@@ -298,6 +298,7 @@ struct P_S2C_UPDATE_SYNC {
 	char hp[MAX_PLAYER];
 	char sp[MAX_PLAYER];
 
+	BYTE states[MAX_PLAYER];
 	bool existance[MAX_PLAYER];
 
 	WEAPON_TYPE weaponType[MAX_PLAYER];  
@@ -315,6 +316,8 @@ struct P_S2C_MONSTERS_UPDATE_SYNC {
 	int				lookX;
 	int				lookY;
 	int				lookZ;
+
+	BYTE			state;
 };
 
 #pragma pack (pop)

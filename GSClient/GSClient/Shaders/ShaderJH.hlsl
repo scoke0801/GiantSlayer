@@ -134,7 +134,11 @@ float CalcShadowFactor(float4 f4ShadowPos)
 		percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
 	}
 
+<<<<<<< HEAD
 	return (percentLit / 9.0f) + 0.8f;
+=======
+	return (percentLit / 9.0f) + 0.3f;
+>>>>>>> 37b3fb9b4943643e00a6c1592c228a55b4f98cf8
 }
 
 float CalcShadowFactor_t(float4 f4ShadowPos)
@@ -748,7 +752,7 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
+	shadowFactor = CalcShadowFactor(input.shadowPosH);
 
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);

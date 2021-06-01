@@ -151,6 +151,10 @@ void CGameObject::Update(float fTimeElapsed)
 	Animate(fTimeElapsed);
 }
 
+void CGameObject::UpdateOnServer(float fTimeElapsed)
+{
+}
+
 void CGameObject::OnPrepareRender()
 {
 

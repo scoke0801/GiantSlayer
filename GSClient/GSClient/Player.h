@@ -35,6 +35,10 @@ private:
 
 	float m_AttackedDelay = 0.0f;
 
+	CMesh* m_SpareBoundingBox;
+	Collider* m_SpareCollisionBox;
+	Collider* m_SpareAABB;
+
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -44,6 +48,7 @@ public:
 	
 public:
 	void Update(float fTimeElapsed) override;
+	void UpdateOnServer(float fTimeElapsed) override;
 
 	void UpdateCamera();
 	void FixCameraByTerrain(CTerrain* pTerrain);
@@ -66,4 +71,5 @@ public:
 	void Jump();
 
 	bool Attacked(CGameObject* pObject);
+	void Attack();
 };

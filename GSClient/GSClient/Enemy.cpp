@@ -34,6 +34,13 @@ void CEnemy::Update(float elapsedTime)
 	UpdateTransform(NULL);
 }
 
+void CEnemy::UpdateOnServer(float fTimeElapsed)
+{
+	CGameObjectVer2::Animate(fTimeElapsed);
+	UpdateTransform(NULL);
+}
+
+
 bool CEnemy::IsEnemyInSight() // Chase State
 { 
 	if (m_AttackDelayTime > 0.0f) {
