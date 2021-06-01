@@ -76,7 +76,7 @@ void CCamera::Update(const XMFLOAT3& xmf3LookAt)
 	if (fDistance > 0)
 	{
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
-		LookAt(xmf3LookAt, m_TargetPlayer->GetUp());
+		LookAt(xmf3LookAt, { 0,1,0 });
 	}
 }
 
@@ -600,6 +600,7 @@ void CLightCamera::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphic
 
 void CLightCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, int rootParameterIndex)
 {
+	CCamera::UpdateShaderVariables(pd3dCommandList, 2);
 	//CCamera::UpdateShaderVariables(pd3dCommandList, rootParameterIndex);
 
 	XMFLOAT4X4 T(

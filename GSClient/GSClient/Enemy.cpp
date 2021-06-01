@@ -4,11 +4,11 @@
 #include "Terrain.h"
 #include "State.h"
 #include "SceneJH.h"
-CEnemy::CEnemy()
+CEnemy::CEnemy() : CGameObjectVer2()
 {
 	m_Type = OBJ_TYPE::Enemy;
 
-	m_HeightFromTerrain = 150.0f; 
+	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this); 
 }
   
@@ -18,15 +18,28 @@ CEnemy::~CEnemy()
 }
 
 void CEnemy::Update(float elapsedTime)
-{
+{ 
 	m_State->Execute(this, elapsedTime);
 
-	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4World));
+	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
 
 	if (m_AttackDelayTime > 0.0f) {
 		m_AttackDelayTime = max(m_AttackDelayTime - elapsedTime, 0.0f); 
 	}
+	//if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
+	//	SetAnimationSet(0);
+	//else
+	//	SetAnimationSet(1);
+	CGameObjectVer2::Animate(elapsedTime);
+	UpdateTransform(NULL);
 }
+
+void CEnemy::UpdateOnServer(float fTimeElapsed)
+{
+	CGameObjectVer2::Animate(fTimeElapsed);
+	UpdateTransform(NULL);
+}
+
 
 bool CEnemy::IsEnemyInSight() // Chase State
 { 
@@ -165,7 +178,7 @@ void CEnemy::MoveToNextPosition(float elapsedTime)
 	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ENEMY_SPEED_TEMP * elapsedTime)));
 	m_ToMovePosition.y = m_xmf3Position.y;
 	XMFLOAT3 gap = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
-	if (Vector3::Length(gap) < 30) {
+	if (Vector3::Length(gap) < 10.0f) {
 		SetPosition(m_ToMovePosition);
 		SetIsOnMoving(false);
 	}
@@ -186,7 +199,7 @@ void CEnemy::LookTarget(bool rotatedModel)
 
 	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 });
 	if (rotatedModel) {
-		Rotate({ 0,1,0 }, 180.0f);
+		//Rotate({ 0,1,0 }, 180.0f);
 	}
 } 
 
@@ -234,7 +247,7 @@ CRangedEnemy::CRangedEnemy()
 	m_AttackType = EnemyAttackType::Ranged;
 
 	m_AttackRange = 1200.0f;
-	m_HeightFromTerrain = 150.0f; 
+	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this);
 }
  
@@ -250,7 +263,7 @@ void CRangedEnemy::Attack(float elapsedTime)
 	{
 		float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
 
-		Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
+		//Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
 	}
 	
 	if (m_AttackDelayTime <= 0.0f) {
@@ -270,7 +283,7 @@ CMeleeEnemy::CMeleeEnemy()
 	m_AttackType = EnemyAttackType::Melee;
 	m_AttackRange = 320.0f;
 
-	m_HeightFromTerrain = 150.0f;
+	//m_HeightFromTerrain = 150.0f;
 	m_State = new PatrolState(this);
 } 
 
@@ -285,7 +298,7 @@ void CMeleeEnemy::Attack(float elapsedTime)
 	{
 		float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
 
-		Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
+		//Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
 	}
 	if (m_AttackDelayTime <= 0.0f) {
 		// 실제 공격!  
@@ -306,7 +319,7 @@ void CMeleeEnemy::FindNextPosition()
 	m_xmf3Velocity = Vector3::Normalize(m_xmf3Velocity);
 
 	XMFLOAT3 lookAt = Vector3::Normalize(GetLook());
-	lookAt = Vector3::Multifly(lookAt, -1);
+	//lookAt = Vector3::Multifly(lookAt, -1);
 
 	XMFLOAT3 cross = Vector3::CrossProduct(lookAt, m_xmf3Velocity);
 	float dot = Vector3::DotProduct(lookAt, m_xmf3Velocity);
@@ -349,7 +362,7 @@ void CMeleeEnemy::FindClosePositionToTarget()
 	//if (test < 0.0) angle = -angle;
 
 	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 });
-	Rotate({ 0,1,0 }, 180.0f);
+	//Rotate({ 0,1,0 }, 180.0f);
 	//cout << "회전 각: " << angle << "\n";
 	//Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees(angle)));
 }

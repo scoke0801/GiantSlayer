@@ -12,6 +12,8 @@ enum class ShaderTypes
 	Billboard,
 	Terrain,
 	FbxAnimated,
+	Standard,
+	Skinned,
 	Particle,
 	TexParticle,
 	TerrainWater,  
@@ -92,6 +94,7 @@ public:
 	void CreateBoundaryShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	void CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, bool isLeftSide = true);
+
 	void CreateUIShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
  
 	void CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
@@ -196,3 +199,28 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+class CStandardShader : public CShader
+{
+public:
+	CStandardShader();
+	virtual ~CStandardShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CSkinnedAnimationShader : public CStandardShader
+{
+public:
+	CSkinnedAnimationShader();
+	virtual ~CSkinnedAnimationShader();
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+};
+

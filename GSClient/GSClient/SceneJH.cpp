@@ -26,7 +26,7 @@
 #define ROOT_PARAMETER_MATERIAL				4
 #define ROOT_PARAMETER_LIGHT				5
 #define ROOT_PARAMETER_TEXTURE				6
- 
+
 D3D12_CPU_DESCRIPTOR_HANDLE hDescriptor;
 D3D12_GPU_DESCRIPTOR_HANDLE srvGpuStart;
 D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuStart;
@@ -131,7 +131,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList); 
 		pCamera->SetPosition({ 500,  250 + 150, 1200 });
 		pCamera->Pitch(XMConvertToRadians(15)); 
-		pCamera->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+		pCamera->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 		m_PlayerCameras.emplace_back(std::move(pCamera));
 	}
 
@@ -289,6 +289,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Desert_Rock",
 		"TerrainWater",
 		"Rain",
+		"Boss_D", "Boss_C","Boss_E","Boss_N",
+		"MeleeSkeleton_01_D"
 	};
 
 	const wchar_t* address[] =
@@ -301,14 +303,18 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
 		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
-		L"resources/Billboard/Flower01.dds",L"resources/Billboard/Flower02.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
+		//L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds",
+		L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds",
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board.dds",
 		L"resources/UI/HelpText.dds",
 		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds",
 		L"resources/OBJ/Desert_Rock.dds",
 		L"resources/OBJ/Water.dds",
-		L"resources/OBJ/Rain.dds"
+		L"resources/OBJ/Rain.dds",
+		L"resources/Textures/Body_D.dds",L"resources/Textures/Body_C.dds",L"resources/Textures/Body_E.dds",L"resources/Textures/Body_N.dds",
+		L"resources/Textures/Skeleton_D.dds"
+	
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -359,6 +365,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"Desert_Rock",
 		"TerrainWater",
 		"Rain",
+		"Boss_D", "Boss_C","Boss_E","Boss_N",
+		"MeleeSkeleton_01_D"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -453,10 +461,17 @@ void CSceneJH::Update(float elapsedTime)
 			//	
 			//}
 			if (m_Player->Attacked(pEnemy)) {
-				m_CurrentCamera->SetShake(true,0.5f, 15);
-			
-				m_Player->FixCollision();
-				cout << "충돌 : 플레이어 - 적\n";
+				if (false == m_Player->IsCanAttack()) { 
+					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+					cout << "플레이어 공격 - 몬스터\n";
+				}
+				else {
+					m_CurrentCamera->SetShake(true, 0.5f, 15);
+
+					m_Player->FixCollision();
+
+					cout << "충돌 : 플레이어 - 적\n";
+				}
 			}
 		}
 	}
@@ -624,15 +639,26 @@ void CSceneJH::Update(float elapsedTime)
 		m_MirrorCamera->UpdateViewMatrix();
 	}
 
+
 	if (m_pLightCamera)
 	{
 		LightPos = m_Player->GetPosition();
-		LightPos.y = 3000.0f;
-		LightPos.z += 10000.0f;
+		XMFLOAT3 TempPlayerPosition = m_Player->GetPosition();
 
-		m_pLightCamera->LookAt({ LightPos },
-			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
-			m_Player->GetUp());
+		LightPos.y = 3000.0f; 
+		LightPos.z += 2000.0f;
+		 
+		//LightPos.x = m_Player->GetLook().x;
+		//LightPos.y = m_Player->GetPosition().y+3000.0f;
+
+		
+		m_pLightCamera->LookAt(LightPos,
+			{ TempPlayerPosition },
+			m_Player->GetReflectLook_P()
+		);
+		
+		//m_pLightCamera->SetPosition(LightPos); 
+
 		 
 		m_pLightCamera->UpdateViewMatrix();
 	}
@@ -656,12 +682,9 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
-	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
-		if (i == (int)OBJECT_LAYER::Enemy) {
-			continue;
-		}
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) { 
 		for (auto pObject : m_ObjectLayers[i]) {
-			pObject->Update(elapsedTime);
+			pObject->UpdateOnServer(elapsedTime);
 			pObject->UpdateColliders();
 		}
 	}
@@ -674,7 +697,7 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
-		player->Update(elapsedTime);
+		player->UpdateOnServer(elapsedTime);
 		player->UpdateColliders();
 		//player->FixPositionByTerrain(m_Terrain);
 		//player->FixCameraByTerrain(m_Terrain);
@@ -689,8 +712,9 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 	if (m_pLightCamera)
 	{
 		LightPos = m_Player->GetPosition();
+ 
 		LightPos.y = 3000.0f;
-		LightPos.z += 10000.0f;
+		LightPos.z += 1000.0f; 
 
 		m_pLightCamera->LookAt({ LightPos },
 			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
@@ -934,7 +958,7 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 			m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 			m_pLightCamera->GenerateViewMatrix();
 			m_pLightCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_LIGHT_CAMERA);
-			m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
+			//m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
 		}
 
 		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
@@ -946,15 +970,10 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 
 		for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 			for (auto pObject : m_ObjectLayers[i]) {
-				pObject->Draw_Shadow(pd3dCommandList, m_CurrentCamera);
+				pObject->Draw_Shadow(pd3dCommandList, m_pLightCamera);
 			}
 		} 
 
-		for (auto player : m_Players) {
-			if (!player->IsDrawable()) continue;
-			player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
-		}
-		 
 		for (auto player : m_Players) {
 			if (!player->IsDrawable()) continue;
 			player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
@@ -1099,6 +1118,8 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			IntToFloat(p_monsterUpdate->lookY),
 			IntToFloat(p_monsterUpdate->lookZ) };
 		int id = p_monsterUpdate->id;
+		
+		reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id])->SetAnimationSet(p_monsterUpdate->state);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition(pos);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
 	}
@@ -1119,6 +1140,7 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
 				look, -PLAYER_RUN_SPEED));
+			m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
 		}
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
@@ -1383,9 +1405,9 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_J)
 	{
 		if (m_Player->IsCanAttack()) {
-			m_Player->SetCanAttack(false);
-			m_Player->IncreaseAttackWaitingTime(1.5f);
-			ShotPlayerArrow();
+			m_Player->Attack();
+			m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+			//ShotPlayerArrow();
 		}
 	}
 	if (keyInput.KEY_K)
@@ -1504,7 +1526,7 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		float dx = static_cast<float>(x - m_LastMousePos.x);
 		float dy = static_cast<float>(y - m_LastMousePos.y);
 		 
-		m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, dy));
+		m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, dy * 0.025f));
 	}
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
@@ -1858,296 +1880,324 @@ void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CGameObject* pObject = new CGameObject();
-	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss]);
-	pObject->SetPosition({ 16800,  -6070, 16500 });
-	pObject->SetTextureIndex(0x01);
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pObject->SetTextureIndex(0x80);
-	pObject->Scale(35, 35, 35);
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
-	pObject->SetHegithFromTerrain(750.0f);
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,-10,20 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, -10, 20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 30, 10, 30, XMFLOAT3{ 0,-10,-20 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, -10, -20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
-	m_ObjectLayers[(int)OBJECT_LAYER::Boss].push_back(pObject);
+	CGameObjectVer2* pBossParent = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Boss.bin", NULL, true);
+
+	CGameObjectVer2* pBoss = new CGameObjectVer2();
+	pBoss->SetPosition({ 16800,  -6070, 16500 });
+	pBoss->FixPositionByTerrain(m_Terrain);
+	pBoss->Scale(120, 120, 120);
+	pBoss->Rotate({ 0,1,0 }, 180);
+	pBoss->SetChild(pBossParent, true);
+	pBoss->SetAnimationSet(1);
+	//pBoss->Scale(200, 200, 200);
+	pBoss->SetShadertoAll();
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 11, 10, 7, XMFLOAT3{ 0,0,0 });
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ 2.5, 3, 7 });
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, -10, 20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ -2.5, 3, 7 });
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, -10, 20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 3, 3, 5, XMFLOAT3{ 0,3,-7 });
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, -10, -20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
+	m_ObjectLayers[(int)OBJECT_LAYER::Boss].push_back(pBoss);
+
+	CGameObjectVer2* pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
 
 	CEnemy* pEnemy;
-	XMFLOAT3 scale = { 125.0f,125.0f,125.0f };
+	XMFLOAT3 scale = { 600.0f,600.0f,600.0f };
 	{	// Monster Area1
-		pEnemy = new CRangedEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
 		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
 		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
+		
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
-		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
 		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
 		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		pEnemy->Scale(scale.x, scale.y, scale.z); 
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
-		pEnemy->SetTextureIndex(0x40);
-		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
-		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
-		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-
-		pEnemy = new CMeleeEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
-		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
 		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
 		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 	}
 
 	{	// Monster Area1-2
-		pEnemy = new CRangedEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-		pEnemy->SetTextureIndex(0x200);
-		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
-		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
-		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f/ scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 10, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-
-		pEnemy = new CRangedEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-		pEnemy->SetTextureIndex(0x200);
-		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
-		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
-		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 10, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
-		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
 		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
 		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
 		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 10, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 3, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
-		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
 		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
 		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
 		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 10, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 3, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 3, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 3, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 	}
 	{// Monster Area2-1
-		pEnemy = new CRangedEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
 		pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
 		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale. z});
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-		 
-		pEnemy = new CRangedEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-		pEnemy->SetTextureIndex(0x200);
-		pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
-		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
-		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
-		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
 		pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
 		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 	}
 	{// Monster Area2-2
-		pEnemy = new CRangedEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-		pEnemy->SetTextureIndex(0x200);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
 		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
 		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z});
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 10, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 3, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
-		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
 		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
 		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
 		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 10, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 3, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
-		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
 		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
 		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
 		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 10, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 3, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 	}
 
 	{// Monster Area3
-		pEnemy = new CRangedEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-		pEnemy->SetTextureIndex(0x200);
-		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 10, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-
-		pEnemy = new CRangedEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-		pEnemy->SetTextureIndex(0x200);
-		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 10, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-
-		pEnemy = new CRangedEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
-		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02]);
-		pEnemy->SetTextureIndex(0x200);
-		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
-		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 10, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
-		pEnemy->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01]);
-		pEnemy->SetTextureIndex(0x40);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
 		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
 		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 5.5f, 3.0f, 6.5f, XMFLOAT3{ 0,-1.5f,0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0,-1.5f,0 }, XMFLOAT3(2.25f, 1.5f, 3.25f)));
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
 		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 10, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,-1.5f,0 });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 3, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 3, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 3, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.8f, 0.625f, 0.6f, XMFLOAT3{ 0, 0.0f, 0 }); 
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
+		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 3, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 	}
 }
@@ -2836,9 +2886,9 @@ void CSceneJH::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	XMFLOAT3 xmf3Up = Vector3::CrossProduct(xmf3Look, xmf3Right, true);
 
 	m_pLightCamera = new CLightCamera();
-
-	m_pLightCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pLightCamera->SetLens(0.25f * PI, nWidth, nHeight, 1.0f, lensize);
+	 
+	m_pLightCamera->SetOffset(XMFLOAT3(0.0f, 500.0f, -400.0f));
+	m_pLightCamera->SetLens( 0.25 * PI, nWidth, nHeight, 1.0f, lensize); 
 	m_pLightCamera->SetRight(xmf3Right);
 	m_pLightCamera->SetUp(xmf3Up);
 	m_pLightCamera->SetLook(xmf3Look);
@@ -2910,55 +2960,58 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	}
 }
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
-	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin"); 
+{
+	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true); 
+	
+	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
 
-	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
+	m_Players[0]->SetChild(pPlayerModel, true);
+	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	m_Players[0]->Scale(200, 200, 200);
+	m_Players[0]->SetShadertoAll();
+
+	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 	m_PlayerCameras[0]->SetTarget(m_Players[0]);
 	m_Players[0]->SetCamera(m_PlayerCameras[0]);
-
-	m_Players[0]->Scale(7, 7, 7);
-	m_Players[0]->SetObjectName(OBJ_NAME::Player);
-	m_Players[0]->Rotate({ 0,1,0 }, 180);
-	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
-
+	 
 	m_Players[0]->SetDrawable(true);
-	m_Players[0]->SetTextureIndex(0x400); 
+	//m_Players[0]->SetTextureIndex(0x400); 
 
-	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 });
-	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
+	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
+	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
+
 	++m_CurrentPlayerNum;
 	
 	m_MinimapCamera->SetTarget(m_Players[0]); 
 	//auto pBox = new CBox(pd3dDevice, pd3dCommandList, 80, 165.0, 80.0f);
 	//pBox->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	//pBox->SetTextureIndex(0x100); 
-	//pBox->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	//pBox->SetPosition({ 550.0f,  m_Terrain->GetDetailHeight(550.0f, 1850.0f) + 82.5f,  1850.0f }); 
 	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
-		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);  
-		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
-		//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
- 
-		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
 
-		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
-		m_PlayerCameras[i]->SetTarget(m_Players[i]);
-		m_Players[i]->SetCamera(m_PlayerCameras[i]);
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);   
+
 		
-		m_Players[i]->Scale(7, 7, 7);
-		m_Players[i]->SetObjectName(OBJ_NAME::Player);
-		m_Players[i]->Rotate({ 0,1,0 }, 180);
+		m_Players[i]->SetCamera(m_PlayerCameras[i]);
+
+		m_Players[i]->SetChild(pPlayerModel, true);
 		m_Players[i]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+		m_Players[i]->Scale(200, 200, 200);
+		m_Players[i]->SetShadertoAll(); 
 
-		m_Players[i]->SetDrawable(false);
-		m_Players[i]->SetTextureIndex(0x400);
+		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
+		m_PlayerCameras[i]->SetTarget(m_Players[i]);
 
-		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 }); 
-		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
+		m_Players[i]->SetDrawable(false); 
+
+		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
+		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 	}
 }
 

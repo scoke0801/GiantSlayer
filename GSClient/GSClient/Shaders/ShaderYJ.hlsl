@@ -90,6 +90,7 @@ Texture2D gtxtShadowMap	   : register(t41);
 float CalcShadowFactor(float4 f4ShadowPos)
 {
     f4ShadowPos.xyz /= f4ShadowPos.w;
+    
 
     float fDepth = f4ShadowPos.z;
 
@@ -986,43 +987,43 @@ float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 
 float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
-	float3 uvw = float3(input.uv, nPrimitiveID / 2);
-	float4 cColor;// = gtxtBox.Sample(gssWrap, uvw);
+    float3 uvw = float3(input.uv, nPrimitiveID / 2);
+    float4 cColor; // = gtxtBox.Sample(gssWrap, uvw);
 
-	if (gnTexturesMask & 0x01)
-	{
-		cColor = gtxtLeaves.Sample(gssWrap, input.uv);
-	}
-	if (gnTexturesMask & 0x02)
-	{
-		cColor = gtxtMoss_Rock.Sample(gssWrap, input.uv);
-	}
-	if (gnTexturesMask & 0x04)
-	{
-		cColor = gtxtDry_Tree.Sample(gssWrap, input.uv);
-	}
-	if (gnTexturesMask & 0x08)
-	{
-		cColor = gtxtStump.Sample(gssWrap, input.uv);
-	}
-	if (gnTexturesMask & 0x10)
-	{
-		cColor = gtxtDead_Tree.Sample(gssWrap, input.uv);
-	}
+    if (gnTexturesMask & 0x01)
+    {
+        cColor = gtxtLeaves.Sample(gssWrap, input.uv);
+    }
+    if (gnTexturesMask & 0x02)
+    {
+        cColor = gtxtMoss_Rock.Sample(gssWrap, input.uv);
+    }
+    if (gnTexturesMask & 0x04)
+    {
+        cColor = gtxtDry_Tree.Sample(gssWrap, input.uv);
+    }
+    if (gnTexturesMask & 0x08)
+    {
+        cColor = gtxtStump.Sample(gssWrap, input.uv);
+    }
+    if (gnTexturesMask & 0x10)
+    {
+        cColor = gtxtDead_Tree.Sample(gssWrap, input.uv);
+    }
     if (gnTexturesMask & 0x20)
     {
         cColor = gtxtDesert_Rock.Sample(gssWrap, input.uv);
     }
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
     shadowFactor = CalcShadowFactor(input.shadowPosH);
-   
-	input.normalW = normalize(input.normalW);
+	
+    input.normalW = normalize(input.normalW);
     //float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
-	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
+    float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 	
 	
-	return(cColor * cIllumination);
-}
+        return (cColor * cIllumination);
+    }
 
 // 그림자 계산
 

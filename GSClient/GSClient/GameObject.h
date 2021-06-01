@@ -66,6 +66,8 @@ enum class ObjectState {
 
 class CGameObject
 {
+public:
+	XMFLOAT4X4			m_xmf4x4ToParent;
 private:
 	int					m_nReferences = 0;
 
@@ -73,6 +75,7 @@ public:
 	XMFLOAT4X4			m_xmf4x4World;
 
 protected:	// 좌표 관련 변수
+
 
 	// frame update loop, update 갱신 후의 좌표
 	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
@@ -137,6 +140,7 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
+	virtual void UpdateOnServer(float fTimeElapsed);
 
 	virtual void OnPrepareRender();
 	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera); 
@@ -151,11 +155,11 @@ public:
 	virtual void Move(XMFLOAT3 shift);
 	void Move();
 
-	void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
+	virtual void Rotate(XMFLOAT3 pxmf3Axis, float fAngle);
 
-	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
+	virtual void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
 
-	void Scale(float x, float y, float z, bool setSize = true);
+	virtual void Scale(float x, float y, float z, bool setSize = true);
 
 public:
 	// about collision
@@ -196,11 +200,13 @@ public:
 		float fWidth, float fHeight, float fDepth,
 		const XMFLOAT3& shift); 
 public:
+	XMFLOAT3 GetPositionToParent() { return(XMFLOAT3(m_xmf4x4ToParent._41, m_xmf4x4ToParent._42, m_xmf4x4ToParent._43)); }
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
 	string GetObjectName() const { return ConvertToObjectName(m_Name); }
 	XMFLOAT3 GetVelocity() const { return m_xmf3Velocity; }
 	XMFLOAT4X4 GetWorldTransform() const { return m_xmf4x4World; }
 
+	virtual void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL) {}
 	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
 	virtual void SetPosition(XMFLOAT3 pos);
@@ -208,6 +214,7 @@ public:
 	//void SetVelocity(XMFLOAT3 vel); 
 	virtual void SetVelocity(OBJ_DIRECTION direction);
 	virtual void SetVelocity(XMFLOAT3 dir);
+	void SetVelocityToZero() { m_xmf3Velocity = XMFLOAT3(0, 0, 0); }
 
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }
@@ -247,6 +254,7 @@ public:
 	DirectX::XMFLOAT3 GetReflectLook_0()const;
 	DirectX::XMFLOAT3 GetReflectLook_1()const;
 	DirectX::XMFLOAT3 GetReflectLook_2()const;
+	DirectX::XMFLOAT3 GetReflectLook_P()const;
 };
  
 class CBox : public CGameObject

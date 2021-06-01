@@ -4,39 +4,21 @@
 #include "Terrain.h"
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+	:CGameObjectVer2()
 {
 	m_Type = OBJ_TYPE::Player;
 
 	m_HP = 100;
-	m_SP = 100;
+	m_SP = 100; 
+
+	m_SpareBoundingBox = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 1.4, XMFLOAT3{ 0,0.6, 0.2f });
+	m_SpareCollisionBox = new ColliderBox(ColliderBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4)));
+	m_SpareAABB = new ColliderBox(ColliderBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4))); 
 }
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName)
 {
-	LoadFile(pstrFbxFileName);
-
-	finTransform = new XMFLOAT4X4[100];
-
-	cout << indices.size() << " " << vertices.size() << " " << skeleton.size() << endl;
-	 
-	SetMesh(new CAnimatedMesh(pd3dDevice, pd3dCommandList, vertices, indices, skeleton));
-	//SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	SetShader(CShaderHandler::GetInstance().GetData("FbxAnimated"));
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	m_time = 0;
-	t = 0;
-	endTime = 0;
-	for (int i = 0; i < skeleton.size(); i++) {
-		float t = animations[curAnim].bone[i].animFrame.back().frameTime;
-		if (t > endTime)
-			endTime = t;
-	}
-
-	cout << endTime << endl;	
-	
 	m_Type = OBJ_TYPE::Player;
 
 	m_HP = 100;
@@ -52,13 +34,31 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	if (false == m_IsCanAttack) {
 		m_AttackWaitingTime -= fTimeElapsed;
-	
+		SetAnimationSet(2);
 		if (m_AttackWaitingTime < 0.0f){
 			m_AttackWaitingTime = 0.0f;
 			m_IsCanAttack = true;
+
+			auto temp = m_SpareCollisionBox;
+			m_SpareCollisionBox = m_Colliders[0];
+			m_Colliders[0] = temp;
+
+			temp = m_SpareAABB;
+			m_SpareAABB = m_AABB[0];
+			m_AABB[0] = temp;
+			 
+			auto tempMesh = m_SpareBoundingBox;
+			m_SpareBoundingBox = m_BoundingObjectMeshes[0];
+			m_BoundingObjectMeshes[0] = tempMesh;
+			UpdateColliders();
 		}
 	}
-	
+	else {
+		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
+			SetAnimationSet(0);
+		else
+			SetAnimationSet(1);
+	}
 	// ÇÇ°Ý
 	if (m_AttackedDelay > 0.0f) {
 		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
@@ -66,11 +66,7 @@ void CPlayer::Update(float fTimeElapsed)
 	 
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
-	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
-	//if (Vector3::Length(vel) > 0.0f) 
-	//{ 
-		Animate(fTimeElapsed );
-	//}
+	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed); 
 	Move(vel);
 
 	if (false == m_isOnGround) {
@@ -81,6 +77,7 @@ void CPlayer::Update(float fTimeElapsed)
 		else {
 			y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
 		}
+		//SetAnimationSet(2);
 		Move({ 0,y,0 });
 		m_JumpTime += fTimeElapsed;
 		if (m_JumpTime > TO_JUMP_TIME) {
@@ -94,9 +91,18 @@ void CPlayer::Update(float fTimeElapsed)
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = (Friction * fTimeElapsed); 
 	if (fDeceleration > fLength) fDeceleration = fLength; 
+
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
 	m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
-	//Animate(fTimeElapsed); 
+	 
+	CGameObjectVer2::Animate(fTimeElapsed);
+	UpdateTransform(NULL);
+}
+
+void CPlayer::UpdateOnServer(float fTimeElapsed)
+{
+	CGameObjectVer2::Animate(fTimeElapsed);
+	UpdateTransform(NULL);
 }
 
 void CPlayer::UpdateCamera()
@@ -142,18 +148,28 @@ void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
 	if (m_isOnGround) { 
-		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z); 
+		m_xmf3Position = GetPosition();
+		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_HeightFromTerrain;
+		m_xmf4x4ToParent._41 = m_xmf3Position.x;
+		m_xmf4x4ToParent._42 = m_xmf3Position.y;
+		m_xmf4x4ToParent._43 = m_xmf3Position.z;
+		//SetPosition(m_xmf3Position);
+		//CGameObjectVer2::SetPosition(m_xmf3Position);
+		//m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z); 
 	}
 	
 }
  
 void CPlayer::SetVelocity(XMFLOAT3 dir)
 {
+	if (false == IsCanAttack()) {
+		return;
+	}
 	dir.y = 0;
 	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);  
 	XMFLOAT3 targetPosition = Vector3::Multifly(normalizedDir, 150000.0f);
 	LookAt(m_xmf3Position, targetPosition, XMFLOAT3{ 0,1,0 }); 
-	Rotate({ 0,1,0 }, 180.0f);
+	//Rotate({ 0,1,0 }, 180.0f);
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, m_xmf3Velocity.y, 0.0f);
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, 
@@ -191,5 +207,25 @@ bool CPlayer::Attacked(CGameObject* pObject)
 		m_HP = 0;
 	}
 	return true;
+}
+
+void CPlayer::Attack()
+{
+	SetCanAttack(false);
+	IncreaseAttackWaitingTime(1.4f);
+	SetVelocityToZero();
+
+	auto temp = m_Colliders[0];
+	m_Colliders[0] = m_SpareCollisionBox;
+	m_SpareCollisionBox = temp;
+
+	temp = m_AABB[0];
+	m_AABB[0] = m_SpareAABB;
+	m_SpareAABB = temp;
+
+	auto tempMesh = m_BoundingObjectMeshes[0];
+	m_BoundingObjectMeshes[0] = m_SpareBoundingBox;
+	m_SpareBoundingBox = tempMesh;
+	UpdateColliders();
 }
  

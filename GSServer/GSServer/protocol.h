@@ -31,7 +31,7 @@ constexpr float ARROW_SPEED = 3263.0f;
 constexpr float PLAYER_JUMP_HEIGHT = 165.0 * 1.75f;
 constexpr float TO_JUMP_TIME = 1.0f;
 
-constexpr float MELLE_ENEMY_ATTACK_TIME = 2.0f;
+constexpr float MELLE_ENEMY_ATTACK_TIME = 2.7f;
 constexpr float RANGED_ENEMY_ATTACK_TIME = 2.0f;
 
 // x,y,z 크기를 short로 보내면 맵 크기 20000에서 
@@ -298,6 +298,7 @@ struct P_S2C_UPDATE_SYNC {
 	char hp[MAX_PLAYER];
 	char sp[MAX_PLAYER];
 
+	BYTE states[MAX_PLAYER];
 	bool existance[MAX_PLAYER];
 
 	WEAPON_TYPE weaponType[MAX_PLAYER];  
@@ -315,6 +316,8 @@ struct P_S2C_MONSTERS_UPDATE_SYNC {
 	int				lookX;
 	int				lookY;
 	int				lookZ;
+
+	BYTE			state;
 };
 
 #pragma pack (pop)
