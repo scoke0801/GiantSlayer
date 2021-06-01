@@ -134,7 +134,7 @@ float CalcShadowFactor(float4 f4ShadowPos)
 		percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
 	}
 
-	return (percentLit / 9.0f) + 0.7f;
+	return (percentLit / 9.0f) + 0.8f;
 }
 
 float CalcShadowFactor_t(float4 f4ShadowPos)
@@ -163,7 +163,7 @@ float CalcShadowFactor_t(float4 f4ShadowPos)
 		percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
 	}
 
-	return (percentLit / 9.0f) + 0.4f;
+	return (percentLit / 9.0f) + 0.3f;
 }
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -1273,6 +1273,6 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv; 
-	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+	output.shadowPosH = mul(float4(output.positionW, 0.5f), gmtxShadowTransform);
 	return(output);
 }
