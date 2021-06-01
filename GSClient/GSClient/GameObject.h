@@ -213,6 +213,7 @@ public:
 	//void SetVelocity(XMFLOAT3 vel); 
 	virtual void SetVelocity(OBJ_DIRECTION direction);
 	virtual void SetVelocity(XMFLOAT3 dir);
+	void SetVelocityToZero() { m_xmf3Velocity = XMFLOAT3(0, 0, 0); }
 
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetTextureIndex(UINT index) { m_nTextureIndex = index; }

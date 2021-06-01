@@ -250,19 +250,27 @@ void CGameObjectVer2::SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate)
 	}
 }
 
-void CGameObjectVer2::SetShadertoAll()
+void CGameObjectVer2::SetShadertoAll(CShader* pShader)
 {
-	if (isSkinned == true) {
-		SetShader(CShaderHandler::GetInstance().GetData("Skinned"));
-		//cout << "MESH: SKINNED" << endl;
+	if (pShader == nullptr) {
+		if (isSkinned == true) {
+			SetShader(CShaderHandler::GetInstance().GetData("Skinned"));
+			//cout << "MESH: SKINNED" << endl;
+		}
+		else {
+			SetShader(CShaderHandler::GetInstance().GetData("Standard"));
+			//cout << "MESH: STANDARD" << endl;
+		}
 	}
-	else {
-		SetShader(CShaderHandler::GetInstance().GetData("Standard"));
-		//cout << "MESH: STANDARD" << endl;
-	}
-
 	if (m_pSibling) m_pSibling->SetShadertoAll();
 	if (m_pChild) m_pChild->SetShadertoAll();
+}
+
+void CGameObjectVer2::SetTextureInedxToAll(UINT index)
+{
+	SetTextureIndex(index);
+	if (m_pSibling) m_pSibling->SetTextureInedxToAll(index);
+	if (m_pChild) m_pChild->SetTextureInedxToAll(index);
 }
 
 void CGameObjectVer2::SetPosition(XMFLOAT3 pos)
@@ -359,6 +367,13 @@ void CGameObjectVer2::ReleaseUploadBuffers()
 
 	if (m_pSibling) m_pSibling->ReleaseUploadBuffers();
 	if (m_pChild) m_pChild->ReleaseUploadBuffers();
+}
+
+void CGameObjectVer2::UpdateColliders()
+{
+	for (int i = 0; i < m_Colliders.size(); ++i) {
+		m_Colliders[i]->GetBox().Transform(m_AABB[i]->GetBox(), XMLoadFloat4x4(&m_xmf4x4ToParent));
+	}
 }
 
 void CGameObjectVer2::Update(float fTimeElapsed)
@@ -623,26 +638,32 @@ void CGameObjectVer2::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 		else if (!strcmp(pstrToken, "<SpecularMap>:"))
 		{
 			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_SPECULAR_MAP, 4, pMaterial->m_ppstrTextureNames[1], &(pMaterial->m_ppTextures[1]), pParent, pInFile, pShader);
+			SetTextureIndexFindByName(pMaterial->FindTextureName(MATERIAL_SPECULAR_MAP));
 		}
 		else if (!strcmp(pstrToken, "<NormalMap>:"))
 		{
 			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_NORMAL_MAP, 5, pMaterial->m_ppstrTextureNames[2], &(pMaterial->m_ppTextures[2]), pParent, pInFile, pShader);
+			SetTextureIndexFindByName(pMaterial->FindTextureName(MATERIAL_NORMAL_MAP));
 		}
 		else if (!strcmp(pstrToken, "<MetallicMap>:"))
 		{
 			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_METALLIC_MAP, 6, pMaterial->m_ppstrTextureNames[3], &(pMaterial->m_ppTextures[3]), pParent, pInFile, pShader);
+			SetTextureIndexFindByName(pMaterial->FindTextureName(MATERIAL_METALLIC_MAP));
 		}
 		else if (!strcmp(pstrToken, "<EmissionMap>:"))
 		{
 			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_EMISSION_MAP, 7, pMaterial->m_ppstrTextureNames[4], &(pMaterial->m_ppTextures[4]), pParent, pInFile, pShader);
+			SetTextureIndexFindByName(pMaterial->FindTextureName(MATERIAL_EMISSION_MAP));
 		}
 		else if (!strcmp(pstrToken, "<DetailAlbedoMap>:"))
 		{
 			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_ALBEDO_MAP, 8, pMaterial->m_ppstrTextureNames[5], &(pMaterial->m_ppTextures[5]), pParent, pInFile, pShader);
+			SetTextureIndexFindByName(pMaterial->FindTextureName(MATERIAL_DETAIL_ALBEDO_MAP));
 		}
 		else if (!strcmp(pstrToken, "<DetailNormalMap>:"))
 		{
 			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_NORMAL_MAP, 9, pMaterial->m_ppstrTextureNames[6], &(pMaterial->m_ppTextures[6]), pParent, pInFile, pShader);
+			SetTextureIndexFindByName(pMaterial->FindTextureName(MATERIAL_DETAIL_NORMAL_MAP)); 
 		}
 		else if (!strcmp(pstrToken, "</Materials>"))
 		{
@@ -948,9 +969,21 @@ void CGameObjectVer2::SetTextureIndexFindByName(string fileName)
 	else if (fileName == "sword1") {
 		SetTextureIndex(0x08);
 	}
-	else if (fileName == "Skeleton_D") {
+	else if (fileName == "Body_D") {
 		SetTextureIndex(0x10);
 	} 
+	else if (fileName == "Body_C") {
+		SetTextureIndex(0x10);
+	}
+	else if (fileName == "Body_E") {
+		SetTextureIndex(0x10);
+	}
+	else if (fileName == "Body_N") {
+		SetTextureIndex(0x10);
+	} 
+	else if (fileName == "Skeleton_D") {
+		SetTextureIndex(0x20);
+	}
 	int stop = 3;
 }
 

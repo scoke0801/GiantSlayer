@@ -30,13 +30,18 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	if (false == m_IsCanAttack) {
 		m_AttackWaitingTime -= fTimeElapsed;
-	
+		SetAnimationSet(2);
 		if (m_AttackWaitingTime < 0.0f){
 			m_AttackWaitingTime = 0.0f;
 			m_IsCanAttack = true;
 		}
 	}
-	
+	else {
+		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
+			SetAnimationSet(0);
+		else
+			SetAnimationSet(1);
+	}
 	// ÇÇ°Ý
 	if (m_AttackedDelay > 0.0f) {
 		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
@@ -55,7 +60,7 @@ void CPlayer::Update(float fTimeElapsed)
 		else {
 			y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
 		}
-		SetAnimationSet(2);
+		//SetAnimationSet(2);
 		Move({ 0,y,0 });
 		m_JumpTime += fTimeElapsed;
 		if (m_JumpTime > TO_JUMP_TIME) {
@@ -73,10 +78,6 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
 	//m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
 
-	if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
-		SetAnimationSet(0);
-	else
-		SetAnimationSet(1);
 
 	CGameObjectVer2::Animate(fTimeElapsed);
 	UpdateTransform(NULL);
@@ -139,6 +140,9 @@ void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
  
 void CPlayer::SetVelocity(XMFLOAT3 dir)
 {
+	if (false == IsCanAttack()) {
+		return;
+	}
 	dir.y = 0;
 	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);  
 	XMFLOAT3 targetPosition = Vector3::Multifly(normalizedDir, 150000.0f);

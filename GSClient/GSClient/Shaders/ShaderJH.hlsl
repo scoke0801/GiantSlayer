@@ -95,11 +95,18 @@ Texture2D gtxtStump		   : register(t34);
 Texture2D gtxtDead_Tree	   : register(t35);
 Texture2D gtxtDesert_Rock  : register(t36);
 Texture2D gtxtWater		   : register(t37);
-Texture2D gtxtRain		   : register(t38);
+Texture2D gtxtRain		   : register(t38); 
 
-Texture2D gtxtMap		   : register(t39);
-Texture2D gtxtMirror	   : register(t40);
-Texture2D gtxtShadowMap	   : register(t41);
+Texture2D gtxtBossD		   : register(t39);
+Texture2D gtxtBossC		   : register(t40);
+Texture2D gtxtBossE		   : register(t41);
+Texture2D gtxtBossN		   : register(t42);
+
+Texture2D gtxtMeleeSkeleton_01_D: register(t43);
+
+Texture2D gtxtMap		   : register(t44);
+Texture2D gtxtMirror	   : register(t45);
+Texture2D gtxtShadowMap	   : register(t46);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -1173,7 +1180,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	//if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
 	//float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	//if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
-	
+
 	// cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
 	float3 normalW;
 	float4 cColor = gtxtPlayerClothes.Sample(gssWrap, input.uv);
@@ -1188,7 +1195,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 	else if (gnTexturesMask & 0x04)
 	{
-		cColor = gtxtPlayerHair.Sample(gssWrap, input.uv); 
+		cColor = gtxtPlayerHair.Sample(gssWrap, input.uv);
 	}
 	else if (gnTexturesMask & 0x08)
 	{
@@ -1196,7 +1203,13 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 	else if (gnTexturesMask & 0x10)
 	{
-		cColor = gtxtPlayerSword.Sample(gssWrap, input.uv);
+		cColor = gtxtBossD.Sample(gssWrap, input.uv);
+		cColor += gtxtBossC.Sample(gssWrap, input.uv);
+		cColor += gtxtBossE.Sample(gssWrap, input.uv);
+	} 
+	else if (gnTexturesMask & 0x20)
+	{
+		cColor = gtxtMeleeSkeleton_01_D.Sample(gssWrap, input.uv);
 	}
 	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	//{
@@ -1210,10 +1223,10 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	//}
 	//float4 cIllumination = Lighting(input.positionW, normalW, gnMaterialID);
 
-input.normalW = normalize(input.normalW);
-float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
-
-return(cColor * cIllumination);
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+	
+	return(cColor * cIllumination);
 //return(lerp(cColor, cIllumination, 0.5f));
 }
 

@@ -163,12 +163,14 @@ public:
 	virtual void ReleaseShaderVariables();
 	virtual void ReleaseUploadBuffers();
 
+	void UpdateColliders() override;
 	void Update(float fTimeElapsed) override;
 	void Animate(float fTimeElapsed) override;
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
 
 	void SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate = false);
-	void SetShadertoAll();
+	void SetShadertoAll(CShader* pShader = nullptr);
+	void SetTextureInedxToAll(UINT index);
 	void SetPosition(XMFLOAT3 pos) override;
 	void Move(XMFLOAT3 shift) override;
 	void Scale(float x, float y, float z, bool setSize = true) override;
