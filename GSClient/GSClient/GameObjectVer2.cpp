@@ -656,15 +656,21 @@ void CGameObjectVer2::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 {
 	//system("cls");
-	char pstrToken[64] = { '\0' };
-
+	char pstrToken[64] = { '\0' }; 
 	BYTE nStrLength = 0;
 	UINT nReads = 0;
 
+	bool haveToRead = true;
+
 	for (; ; )
 	{
-		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
-		nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pInFile);
+		if (haveToRead == true)
+		{
+			nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
+		
+			nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pInFile);
+			haveToRead = false;
+		} 
 		pstrToken[nStrLength] = '\0';
 
 		if (!strcmp(pstrToken, "<AnimationSets>:"))
@@ -673,9 +679,11 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 
 			m_pAnimationController->m_pAnimationSets = new CAnimationSet[m_pAnimationController->m_nAnimationSets];
 			cout << "애니메이션 개수: " << m_pAnimationController->m_nAnimationSets << endl;
+			haveToRead = true;
 		}
 		else if (!strcmp(pstrToken, "<FrameNames>:"))
 		{
+			haveToRead = true;
 			nReads = (UINT)::fread(&m_pAnimationController->m_nAnimationBoneFrames, sizeof(int), 1, pInFile);
 			m_pAnimationController->m_ppAnimationBoneFrameCaches = new CGameObjectVer2 * [m_pAnimationController->m_nAnimationBoneFrames];
 
@@ -701,6 +709,7 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 		}
 		else if (!strcmp(pstrToken, "<AnimationSet>:"))
 		{
+			haveToRead = true;
 			int nAnimationSet = 0;
 			nReads = (UINT)::fread(&nAnimationSet, sizeof(int), 1, pInFile);
 			CAnimationSet* pAnimationSet = &m_pAnimationController->m_pAnimationSets[nAnimationSet];
@@ -712,7 +721,7 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 			nReads = (UINT)::fread(&pAnimationSet->m_fLength, sizeof(float), 1, pInFile);
 			nReads = (UINT)::fread(&pAnimationSet->m_nFramesPerSecond, sizeof(int), 1, pInFile);
 
-			nReads = (UINT)::fread(&pAnimationSet->m_nKeyFrameTransforms, sizeof(int), 1, pInFile);
+			nReads = (UINT)::fread(&pAnimationSet->m_nKeyFrameTransforms, sizeof(int), 1, pInFile);  
 			pAnimationSet->m_pfKeyFrameTransformTimes = new float[pAnimationSet->m_nKeyFrameTransforms];
 			pAnimationSet->m_ppxmf4x4KeyFrameTransforms = new XMFLOAT4X4 * [pAnimationSet->m_nKeyFrameTransforms];
 			for (int i = 0; i < pAnimationSet->m_nKeyFrameTransforms; i++) pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = new XMFLOAT4X4[m_pAnimationController->m_nAnimationBoneFrames];
@@ -723,13 +732,26 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 				nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pInFile);
 				pstrToken[nStrLength] = '\0';
 
+				//if (nReads == 1) {
+				//	haveToRead = true;
+				//	pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 1];
+				//	break;
+				//}
+				if (!strcmp(pstrToken, "<AnimationSet>:"))
+				{
+					haveToRead = false;
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 1];
+					break;
+				}
 				if (!strcmp(pstrToken, "<Transforms>:"))
 				{
 					int nKeyFrame = 0;
 					nReads = (UINT)::fread(&nKeyFrame, sizeof(int), 1, pInFile); //i
 
 					nReads = (UINT)::fread(&pAnimationSet->m_pfKeyFrameTransformTimes[i], sizeof(float), 1, pInFile);
+					
 					nReads = (UINT)::fread(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i], sizeof(float), 16 * m_pAnimationController->m_nAnimationBoneFrames, pInFile);
+					
 					//cout << " i : " << i << "\n";
 					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_11 << " ";
 					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_12 << " ";
@@ -748,6 +770,7 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_43 << " ";
 					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_44 << "\n";
 				}
+				
 			}
 #ifdef _WITH_ANIMATION_SRT
 			nReads = (UINT)::fread(&pAnimationSet->m_nKeyFrameTranslations, sizeof(int), 1, pInFile);
@@ -758,6 +781,7 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 		}
 		else if (!strcmp(pstrToken, "</AnimationSets>"))
 		{
+			haveToRead = true;
 			break;
 		}
 	}
@@ -921,6 +945,12 @@ void CGameObjectVer2::SetTextureIndexFindByName(string fileName)
 	else if (fileName == "hair1") {
 		SetTextureIndex(0x04);
 	}
+	else if (fileName == "sword1") {
+		SetTextureIndex(0x08);
+	}
+	else if (fileName == "Skeleton_D") {
+		SetTextureIndex(0x10);
+	} 
 	int stop = 3;
 }
 

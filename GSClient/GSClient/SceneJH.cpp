@@ -301,7 +301,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
 		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
-		L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/TT_RTS_Units_blue.dds",
+		//L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds",
+		L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/Skeleton_D.dds",
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board.dds",
 		L"resources/UI/HelpText.dds",
@@ -2912,7 +2913,7 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true); 
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true); 
 	
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];

@@ -81,7 +81,7 @@ Texture2D gtxtWeapons      : register(t22);
 Texture2D gtxtPlayerClothes    : register(t23); // 여분
 Texture2D gtxtPlayerFace  : register(t24); // 여분
 Texture2D gtxtPlayerHair    : register(t25); // 여분
-Texture2D gtxtMetallicTexture  : register(t26); // 여분
+Texture2D gtxtPlayerSword  : register(t26); // 여분
 
 Texture2D gtxtTree         : register(t27);
 Texture2D gtxtNoLeafTrees  : register(t28);
@@ -1189,6 +1189,14 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	else if (gnTexturesMask & 0x04)
 	{
 		cColor = gtxtPlayerHair.Sample(gssWrap, input.uv); 
+	}
+	else if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtPlayerSword.Sample(gssWrap, input.uv);
+	}
+	else if (gnTexturesMask & 0x10)
+	{
+		cColor = gtxtPlayerSword.Sample(gssWrap, input.uv);
 	}
 	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	//{
