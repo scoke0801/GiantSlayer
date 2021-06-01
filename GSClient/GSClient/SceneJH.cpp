@@ -636,7 +636,7 @@ void CSceneJH::Update(float elapsedTime)
 	{
 		LightPos = m_Player->GetPosition();
 		LightPos.y = 3000.0f;
-		LightPos.z += 10000.0f;
+		LightPos.z += 1000.0f;
 
 		m_pLightCamera->LookAt({ LightPos },
 			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
@@ -664,10 +664,7 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
-	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
-		if (i == (int)OBJECT_LAYER::Enemy) {
-			continue;
-		}
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) { 
 		for (auto pObject : m_ObjectLayers[i]) {
 			pObject->Update(elapsedTime);
 			pObject->UpdateColliders();
@@ -698,7 +695,7 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 	{
 		LightPos = m_Player->GetPosition();
 		LightPos.y = 3000.0f;
-		LightPos.z += 10000.0f;
+		LightPos.z += 1000.0f;
 
 		m_pLightCamera->LookAt({ LightPos },
 			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
@@ -2987,8 +2984,8 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 		m_Players[i]->SetDrawable(false); 
 
-		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 }); 
-		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
+		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
+		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 	}
 }
 

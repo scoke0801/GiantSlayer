@@ -748,7 +748,7 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
+	shadowFactor = CalcShadowFactor(input.shadowPosH);
 
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
