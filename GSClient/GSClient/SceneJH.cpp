@@ -1880,11 +1880,13 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pBoss->SetAnimationSet(1);
 	//pBoss->Scale(200, 200, 200);
 	pBoss->SetShadertoAll();
-	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 15, 5, 15, XMFLOAT3{ 0,0,0 });
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 11, 10, 7, XMFLOAT3{ 0,0,0 });
 	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
-	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 3, 1, 3, XMFLOAT3{ 0,-10,20 });
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ 2.5, 3, 7 });
 	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, -10, 20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
-	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 3, 1, 3, XMFLOAT3{ 0,-10,-20 });
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ -2.5, 3, 7 });
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, -10, 20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 3, 3, 5, XMFLOAT3{ 0,3,-7 });
 	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, -10, -20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Boss].push_back(pBoss);
 

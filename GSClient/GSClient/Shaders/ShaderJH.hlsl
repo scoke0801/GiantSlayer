@@ -1152,6 +1152,8 @@ struct VS_STANDARD_OUTPUT
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
 	float2 uv : TEXCOORD;
+
+	float4 shadowPosH : SHADOWPOS;
 };
 
 VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
@@ -1165,6 +1167,7 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
+	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
 	return(output);
 }
 
@@ -1266,8 +1269,7 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	//output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
 	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-	output.uv = input.uv;
-
-
+	output.uv = input.uv; 
+	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
 	return(output);
 }
