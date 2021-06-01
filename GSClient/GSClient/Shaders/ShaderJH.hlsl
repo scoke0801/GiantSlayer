@@ -135,6 +135,7 @@ float CalcShadowFactor(float4 f4ShadowPos)
 	}
 
 	return (percentLit / 9.0f) + 0.3f;
+
 }
 
 float CalcShadowFactor_t(float4 f4ShadowPos)
@@ -163,7 +164,37 @@ float CalcShadowFactor_t(float4 f4ShadowPos)
 		percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
 	}
 
-	return (percentLit / 9.0f) + 0.4f;
+	return (percentLit / 9.0f) + 0.3f;
+}
+
+float CalcShadowFactor_P(float4 f4ShadowPos)
+{
+    f4ShadowPos.xyz /= f4ShadowPos.w;
+
+    float fDepth = f4ShadowPos.z;
+
+    uint nWidth, nHeight, nMips;
+    gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
+
+    float dx = 1.0f / (float) nWidth;
+  
+    float percentLit = 0.3f;
+
+    const float2 offsets[9] =
+    {
+        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
+		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
+    };
+
+	[unroll]
+    for (int i = 0; i < 9; i++)
+    {
+        percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
+    }
+
+    return (percentLit / 9.0f) + 1.0f;
+
 }
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -1228,7 +1259,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	//float4 cIllumination = Lighting(input.positionW, normalW, gnMaterialID);
 
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-	shadowFactor = CalcShadowFactor(input.shadowPosH);
+    shadowFactor = CalcShadowFactor_P(input.shadowPosH);
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 	
@@ -1273,6 +1304,6 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv; 
-	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+	output.shadowPosH = mul(float4(output.positionW, 0.5f), gmtxShadowTransform);
 	return(output);
 }

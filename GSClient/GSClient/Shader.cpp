@@ -337,8 +337,8 @@ D3D12_RASTERIZER_DESC CShader::CreateShadowRasterizerState()
 	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
-	d3dRasterizerDesc.DepthBias = 10000.0f;
-	d3dRasterizerDesc.DepthBiasClamp = 0.5f;
+	d3dRasterizerDesc.DepthBias = 1000000;
+	d3dRasterizerDesc.DepthBiasClamp = 10000.f;
 	d3dRasterizerDesc.SlopeScaledDepthBias = 0.1f;
 	d3dRasterizerDesc.DepthClipEnable = TRUE;
 	d3dRasterizerDesc.MultisampleEnable = FALSE;

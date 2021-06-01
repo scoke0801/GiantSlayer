@@ -157,11 +157,13 @@ void AttackedState::Enter(CEnemy* enemy)
     const int PLAYER_DAMAGE = 15;
     int hp = enemy->GetHP();
     hp -= PLAYER_DAMAGE;
+    enemy->SetHP(hp);
     if (hp <= 0) {
+        cout << " »èÁ¦ ÇØ !!\n";
         MAIN_GAME_SCENE->DeleteEnemy(enemy);
         return;
     }
-    enemy->SetHP(hp);
+    //enemy->SetHP(hp);
 }
 
 void AttackedState::Execute(CEnemy* enemy, float elapsedTime)
