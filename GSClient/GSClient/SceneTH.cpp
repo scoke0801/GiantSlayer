@@ -235,7 +235,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	ExportedObject* test = new ExportedObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	test->SetShadertoAll(CShaderHandler::GetInstance().GetData("Skinned"));
 	test->SetChild(pKinght, true);
-	test->SetPosition({ 750.0f,   230.0f,  1850.0f });
+	test->SetPosition({ 0.0f,   200.0f,  1850.0f });
 	test->Scale(20, 20, 20);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(test);
 
