@@ -1128,10 +1128,10 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
 	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);*/
-
-	float3 normalW;
-	float4 cColor = gtxtFlower_White.Sample(gssWrap, input.uv);// cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
 	
+	// cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
+	float3 normalW;
+float4 cColor = gtxtFlower_Red.Sample(gssWrap, input.uv);
 	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	//{
 	//	float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));

@@ -301,7 +301,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
 		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
-		L"resources/Textures/TT_RTS_Units_blue.dds",L"resources/Textures/clothingSet_01_tex.dds",L"resources/Billboard/Grass01.dds",L"resources/Billboard/Grass02.dds",
+		L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/TT_RTS_Units_blue.dds",
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board.dds",
 		L"resources/UI/HelpText.dds",
@@ -1504,7 +1504,7 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		float dx = static_cast<float>(x - m_LastMousePos.x);
 		float dy = static_cast<float>(y - m_LastMousePos.y);
 		 
-		m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, dy));
+		m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, dy * 0.025f));
 	}
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
@@ -2922,15 +2922,10 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->Scale(200, 200, 200);
 	m_Players[0]->SetShadertoAll();
 
-	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 4.5f, -13.20f));
+	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 	m_PlayerCameras[0]->SetTarget(m_Players[0]);
 	m_Players[0]->SetCamera(m_PlayerCameras[0]);
-
-	//m_Players[0]->Scale(7, 7, 7);
-	//m_Players[0]->SetObjectName(OBJ_NAME::Player);
-	//m_Players[0]->Rotate({ 0,1,0 }, 180);
-	//m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
-
+	 
 	m_Players[0]->SetDrawable(true);
 	//m_Players[0]->SetTextureIndex(0x400); 
 
@@ -2939,30 +2934,25 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	++m_CurrentPlayerNum;
 	
 	m_MinimapCamera->SetTarget(m_Players[0]); 
-	//auto pBox = new CBox(pd3dDevice, pd3dCommandList, 80, 165.0, 80.0f);
-	//pBox->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	//pBox->SetTextureIndex(0x100); 
-	//pBox->SetPosition({ 550.0f,   230.0f,  1850.0f });
-	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
+	auto pBox = new CBox(pd3dDevice, pd3dCommandList, 80, 165.0, 80.0f);
+	pBox->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pBox->SetTextureIndex(0x100); 
+	pBox->SetPosition({ 550.0f,  m_Terrain->GetDetailHeight(550.0f, 1850.0f) + 82.5f,  1850.0f }); 
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
-		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);  
-		//m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,
-		//	m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/FbxExported/fbxsoldier.bin");
- 
-		//m_Players[i]->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);   
 
-		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));
+		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 		m_PlayerCameras[i]->SetTarget(m_Players[i]);
 		m_Players[i]->SetCamera(m_PlayerCameras[i]);
-		
-		m_Players[i]->Scale(7, 7, 7);
-		m_Players[i]->SetObjectName(OBJ_NAME::Player);
-		m_Players[i]->Rotate({ 0,1,0 }, 180);
-		m_Players[i]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 
-		m_Players[i]->SetDrawable(false);
-		m_Players[i]->SetTextureIndex(0x400);
+		m_Players[i]->SetChild(pKinght, true);
+		m_Players[i]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+		m_Players[i]->Scale(200, 200, 200);
+		m_Players[i]->SetShadertoAll(); 
+
+		m_Players[i]->SetDrawable(false); 
 
 		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 }); 
 		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));

@@ -246,7 +246,7 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 			for (int i = 0; i < p_mouse.inputNum; ++i) {
 				float offset = IntToFloat(p_mouse.yInput[i]);
 				cameraOffset += offset;
-				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset));
+				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset * 0.025f));
 			}
 			p_mouseProcess.cameraOffset = FloatToInt(cameraOffset);
 		}
@@ -369,10 +369,10 @@ void PacketProcessor::InitPlayers()
 {
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer(); 
-		m_Players[i]->Scale(7, 7, 7);
+		m_Players[i]->Scale(200, 200, 200);
 		m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
 		m_Players[i]->SetExistence(false); 
-		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
+		//m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
 	}
 }
 
@@ -389,7 +389,7 @@ void PacketProcessor::InitCameras()
 
 		m_Cameras[i]->SetPosition(m_Players[i]->GetPosition());
 		m_Cameras[i]->Pitch(XMConvertToRadians(15));
-		m_Cameras[i]->SetOffset(XMFLOAT3(0.0f, 450.0f, -1320.0f));	
+		m_Cameras[i]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 		m_Cameras[i]->SetTarget(m_Players[i]);
 		m_Players[i]->SetCamera(m_Cameras[i]);
 	}
