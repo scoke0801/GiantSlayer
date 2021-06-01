@@ -443,11 +443,12 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 	{
 		if (m_pShader)
 		{
-		m_pShader->RenderBoundary(pd3dCommandList, pCamera);
-		for (auto pBoundingMesh : m_BoundingObjectMeshes)
-		{
-			pBoundingMesh->Render(pd3dCommandList);
-		}
+			m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4ToParent, m_nTextureIndex, 0);
+			m_pShader->RenderBoundary(pd3dCommandList, pCamera);
+			for (auto pBoundingMesh : m_BoundingObjectMeshes)
+			{
+				pBoundingMesh->Render(pd3dCommandList);
+			}
 		}
 	}
 	if (m_pSibling) m_pSibling->Draw(pd3dCommandList, pCamera);

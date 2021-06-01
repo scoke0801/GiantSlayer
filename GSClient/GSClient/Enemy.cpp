@@ -18,9 +18,7 @@ CEnemy::~CEnemy()
 }
 
 void CEnemy::Update(float elapsedTime)
-{
-	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
-	return;
+{ 
 	m_State->Execute(this, elapsedTime);
 
 	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
@@ -173,7 +171,7 @@ void CEnemy::MoveToNextPosition(float elapsedTime)
 	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ENEMY_SPEED_TEMP * elapsedTime)));
 	m_ToMovePosition.y = m_xmf3Position.y;
 	XMFLOAT3 gap = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
-	if (Vector3::Length(gap) < 0.5f) {
+	if (Vector3::Length(gap) < 10.0f) {
 		SetPosition(m_ToMovePosition);
 		SetIsOnMoving(false);
 	}
