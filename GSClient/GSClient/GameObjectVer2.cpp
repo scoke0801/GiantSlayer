@@ -406,6 +406,12 @@ void CGameObjectVer2::Update(float fTimeElapsed)
 	UpdateTransform(NULL);
 }
 
+void CGameObjectVer2::UpdateOnServer(float fTimeElapsed)
+{
+	CGameObjectVer2::Animate(fTimeElapsed);
+	UpdateTransform(NULL);
+}
+
 void CGameObjectVer2::Animate(float fTimeElapsed)
 {
 	if (m_pAnimationController) m_pAnimationController->AdvanceTime(fTimeElapsed, NULL);

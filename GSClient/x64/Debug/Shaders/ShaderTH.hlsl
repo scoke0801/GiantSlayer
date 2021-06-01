@@ -932,14 +932,16 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 
 ////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
+#define MAX_VERTEX_INFLUENCES		4
+#define SKINNED_ANIMATION_BONES		128
 cbuffer cbBoneOffsets : register(b6)
 {
-	float4x4 gpmtxBoneOffsets[100];
+	float4x4 gpmtxBoneOffsets[SKINNED_ANIMATION_BONES];
 };
 
 cbuffer cbBoneTransforms : register(b7)
 {
-	float4x4 gpmtxBoneTransforms[100];
+	float4x4 gpmtxBoneTransforms[SKINNED_ANIMATION_BONES];
 };
 
 struct VS_FBX_ANIMATED_INPUT
@@ -967,8 +969,9 @@ VS_FBX_ANIMATED_OUTPUT VSFbxAnimated(VS_FBX_ANIMATED_INPUT input)
 	TempWeights[0] = input.weights.x;
 	TempWeights[1] = input.weights.y;
 	TempWeights[2] = input.weights.z;
-	TempWeights[3] = input.weights.w;
-	
+	//TempWeights[3] = input.weights.w;
+	TempWeights[3] = 1.0f - TempWeights[0] - TempWeights[1] - TempWeights[2];
+
 	/*if(input.weights.w < 0.001f) 
 		TempWeights[3] = 1.0f - TempWeights[0] - TempWeights[1] - TempWeights[2];
 	else
@@ -1125,10 +1128,10 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
 	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);*/
-
-	float3 normalW;
-	float4 cColor = gtxtFlower_Red.Sample(gssWrap, input.uv);// cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
 	
+	// cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
+	float3 normalW;
+float4 cColor = gtxtFlower_Red.Sample(gssWrap, input.uv);
 	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	//{
 	//	float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
@@ -1150,8 +1153,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
 //////////////////////////////////////////////////////////////////////////////////
 
-//#define MAX_VERTEX_INFLUENCES			4
-//#define SKINNED_ANIMATION_BONES		128
+
 //
 //cbuffer cbBoneOffsets : register(b8)
 //{
@@ -1183,7 +1185,10 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	output.tangentW = float3(0.0f, 0.0f, 0.0f);
 	output.bitangentW = float3(0.0f, 0.0f, 0.0f);
 	matrix mtxVertexToBoneWorld;
-	for (int i = 0; i < 4; i++)
+
+	float TempWeights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
 	{
 		mtxVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
 		output.positionW += input.weights[i] * mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
@@ -1191,11 +1196,11 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 		output.tangentW += input.weights[i] * mul(input.tangent, (float3x3)mtxVertexToBoneWorld);
 		output.bitangentW += input.weights[i] * mul(input.bitangent, (float3x3)mtxVertexToBoneWorld);
 	}
-
-	//output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
 	//output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
+	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
+	 
 	return(output);
 }

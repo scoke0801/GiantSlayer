@@ -131,7 +131,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList); 
 		pCamera->SetPosition({ 500,  250 + 150, 1200 });
 		pCamera->Pitch(XMConvertToRadians(15)); 
-		pCamera->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+		pCamera->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 		m_PlayerCameras.emplace_back(std::move(pCamera));
 	}
 
@@ -673,7 +673,7 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) { 
 		for (auto pObject : m_ObjectLayers[i]) {
-			pObject->Update(elapsedTime);
+			pObject->UpdateOnServer(elapsedTime);
 			pObject->UpdateColliders();
 		}
 	}
@@ -686,7 +686,7 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
-		player->Update(elapsedTime);
+		player->UpdateOnServer(elapsedTime);
 		player->UpdateColliders();
 		//player->FixPositionByTerrain(m_Terrain);
 		//player->FixCameraByTerrain(m_Terrain);
@@ -1106,6 +1106,8 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			IntToFloat(p_monsterUpdate->lookY),
 			IntToFloat(p_monsterUpdate->lookZ) };
 		int id = p_monsterUpdate->id;
+		
+		reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id])->SetAnimationSet(p_monsterUpdate->state);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition(pos);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
 	}
@@ -1126,6 +1128,7 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
 				look, -PLAYER_RUN_SPEED));
+			m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
 		}
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
@@ -2946,13 +2949,13 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true); 
 	
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
 
-	m_Players[0]->SetChild(pKinght, true);
+	m_Players[0]->SetChild(pPlayerModel, true);
 	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 	m_Players[0]->Scale(200, 200, 200);
 	m_Players[0]->SetShadertoAll();
@@ -2977,16 +2980,21 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
+		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
+
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);   
 
-		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
-		m_PlayerCameras[i]->SetTarget(m_Players[i]);
+		
 		m_Players[i]->SetCamera(m_PlayerCameras[i]);
 
-		m_Players[i]->SetChild(pKinght, true);
+		m_Players[i]->SetChild(pPlayerModel, true);
 		m_Players[i]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 		m_Players[i]->Scale(200, 200, 200);
 		m_Players[i]->SetShadertoAll(); 
+
+		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
+		m_PlayerCameras[i]->SetTarget(m_Players[i]);
 
 		m_Players[i]->SetDrawable(false); 
 

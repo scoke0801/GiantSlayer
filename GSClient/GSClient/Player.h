@@ -48,6 +48,7 @@ public:
 	
 public:
 	void Update(float fTimeElapsed) override;
+	void UpdateOnServer(float fTimeElapsed) override;
 
 	void UpdateCamera();
 	void FixCameraByTerrain(CTerrain* pTerrain);

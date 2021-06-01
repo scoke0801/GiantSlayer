@@ -1089,6 +1089,13 @@ void PacketProcessor::SendSyncUpdatePacket()
 		p_syncUpdate.lookX[i] = FloatToInt(look.x);
 		p_syncUpdate.lookY[i] = FloatToInt(look.y);
 		p_syncUpdate.lookZ[i] = FloatToInt(look.z);
+
+		if (m_Players[i]->IsMoving()) {
+			p_syncUpdate.states[i] = 1;
+		}
+		else {
+			p_syncUpdate.states[i] = 0;
+		}
 	}
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		p_syncUpdate.existance[i] = m_Players[i]->IsExist();
@@ -1124,6 +1131,7 @@ void PacketProcessor::SendMonsterActPacket()
 		p_monsterUpdate[i].lookX = FloatToInt(look.x);
 		p_monsterUpdate[i].lookY = FloatToInt(look.y);
 		p_monsterUpdate[i].lookZ = FloatToInt(look.z);	 
+		p_monsterUpdate[i].state = 1;
 	}
 	for (int i = SERVER_ID + 1; i <= MAX_PLAYER; ++i) {
 		if (m_Clients[i].m_state != PL_STATE::PLST_CONNECTED) {

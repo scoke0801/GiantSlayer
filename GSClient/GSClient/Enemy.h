@@ -50,6 +50,7 @@ public:
 	~CEnemy();
 	  
 	virtual void Update(float elapsedTime) override;
+	void UpdateOnServer(float fTimeElapsed) override;
 
 	// 활동범위 설정
 	void SetActivityScope(const XMFLOAT3& xmf3ActivityScope, const XMFLOAT3& xmf3Center);
