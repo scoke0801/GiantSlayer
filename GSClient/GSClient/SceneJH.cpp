@@ -2913,7 +2913,7 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true); 
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Boss.bin", NULL, true); 
 	
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
