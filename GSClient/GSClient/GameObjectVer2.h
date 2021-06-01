@@ -165,6 +165,7 @@ public:
 
 	void UpdateColliders() override;
 	void Update(float fTimeElapsed) override;
+	void UpdateOnServer(float fTimeElapsed) override;
 	void Animate(float fTimeElapsed) override;
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
 	void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;

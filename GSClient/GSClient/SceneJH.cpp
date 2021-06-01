@@ -131,7 +131,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList); 
 		pCamera->SetPosition({ 500,  250 + 150, 1200 });
 		pCamera->Pitch(XMConvertToRadians(15)); 
-		pCamera->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
+		pCamera->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 		m_PlayerCameras.emplace_back(std::move(pCamera));
 	}
 
@@ -461,10 +461,17 @@ void CSceneJH::Update(float elapsedTime)
 			//	
 			//}
 			if (m_Player->Attacked(pEnemy)) {
-				m_CurrentCamera->SetShake(true,0.5f, 15);
-			
-				m_Player->FixCollision();
-				cout << "충돌 : 플레이어 - 적\n";
+				if (false == m_Player->IsCanAttack()) { 
+					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+					cout << "플레이어 공격 - 몬스터\n";
+				}
+				else {
+					m_CurrentCamera->SetShake(true, 0.5f, 15);
+
+					m_Player->FixCollision();
+
+					cout << "충돌 : 플레이어 - 적\n";
+				}
 			}
 		}
 	}
@@ -638,11 +645,9 @@ void CSceneJH::Update(float elapsedTime)
 		LightPos = m_Player->GetPosition();
 		XMFLOAT3 TempPlayerPosition = m_Player->GetPosition();
 
-		LightPos.y = 3000.0f;
+		LightPos.y = 3000.0f; 
 		LightPos.z += 2000.0f;
-
-		
-
+		 
 		//LightPos.x = m_Player->GetLook().x;
 		//LightPos.y = m_Player->GetPosition().y+3000.0f;
 
@@ -652,7 +657,7 @@ void CSceneJH::Update(float elapsedTime)
 			m_Player->GetReflectLook_P()
 		);
 		
-		//m_pLightCamera->SetPosition(LightPos);
+		//m_pLightCamera->SetPosition(LightPos); 
 
 		 
 		m_pLightCamera->UpdateViewMatrix();
@@ -677,12 +682,9 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
-	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
-		if (i == (int)OBJECT_LAYER::Enemy) {
-			continue;
-		}
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) { 
 		for (auto pObject : m_ObjectLayers[i]) {
-			pObject->Update(elapsedTime);
+			pObject->UpdateOnServer(elapsedTime);
 			pObject->UpdateColliders();
 		}
 	}
@@ -695,7 +697,7 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
-		player->Update(elapsedTime);
+		player->UpdateOnServer(elapsedTime);
 		player->UpdateColliders();
 		//player->FixPositionByTerrain(m_Terrain);
 		//player->FixCameraByTerrain(m_Terrain);
@@ -710,8 +712,9 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 	if (m_pLightCamera)
 	{
 		LightPos = m_Player->GetPosition();
-		LightPos.y = 100.0f;
-		LightPos.z = 10000.0f;
+ 
+		LightPos.y = 3000.0f;
+		LightPos.z += 1000.0f; 
 
 		m_pLightCamera->LookAt({ LightPos },
 			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
@@ -1115,6 +1118,8 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			IntToFloat(p_monsterUpdate->lookY),
 			IntToFloat(p_monsterUpdate->lookZ) };
 		int id = p_monsterUpdate->id;
+		
+		reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id])->SetAnimationSet(p_monsterUpdate->state);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition(pos);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
 	}
@@ -1135,6 +1140,7 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
 				look, -PLAYER_RUN_SPEED));
+			m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
 		}
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
@@ -1399,9 +1405,7 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_J)
 	{
 		if (m_Player->IsCanAttack()) {
-			m_Player->SetCanAttack(false);
-			m_Player->IncreaseAttackWaitingTime(1.4f);
-			m_Player->SetVelocityToZero();
+			m_Player->Attack();
 			m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 			//ShotPlayerArrow();
 		}
@@ -2882,9 +2886,9 @@ void CSceneJH::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	XMFLOAT3 xmf3Up = Vector3::CrossProduct(xmf3Look, xmf3Right, true);
 
 	m_pLightCamera = new CLightCamera();
-
+	 
 	m_pLightCamera->SetOffset(XMFLOAT3(0.0f, 500.0f, -400.0f));
-	m_pLightCamera->SetLens( 0.25 * PI, nWidth, nHeight, 1.0f, lensize);
+	m_pLightCamera->SetLens( 0.25 * PI, nWidth, nHeight, 1.0f, lensize); 
 	m_pLightCamera->SetRight(xmf3Right);
 	m_pLightCamera->SetUp(xmf3Up);
 	m_pLightCamera->SetLook(xmf3Look);
@@ -2957,13 +2961,13 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true); 
 	
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
 
-	m_Players[0]->SetChild(pKinght, true);
+	m_Players[0]->SetChild(pPlayerModel, true);
 	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 	m_Players[0]->Scale(200, 200, 200);
 	m_Players[0]->SetShadertoAll();
@@ -2977,6 +2981,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
 	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
+
 	++m_CurrentPlayerNum;
 	
 	m_MinimapCamera->SetTarget(m_Players[0]); 
@@ -2987,21 +2992,26 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
+		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
+
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);   
 
-		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
-		m_PlayerCameras[i]->SetTarget(m_Players[i]);
+		
 		m_Players[i]->SetCamera(m_PlayerCameras[i]);
 
-		m_Players[i]->SetChild(pKinght, true);
+		m_Players[i]->SetChild(pPlayerModel, true);
 		m_Players[i]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 		m_Players[i]->Scale(200, 200, 200);
 		m_Players[i]->SetShadertoAll(); 
 
+		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
+		m_PlayerCameras[i]->SetTarget(m_Players[i]);
+
 		m_Players[i]->SetDrawable(false); 
 
-		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 }); 
-		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
+		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
+		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 	}
 }
 

@@ -5,7 +5,6 @@
 #include "State.h"
 CEnemy::CEnemy() 
 {
-	m_HeightFromTerrain = 150.0f;
 	m_State = new PatrolState(this);
 }
 
@@ -230,7 +229,6 @@ CRangedEnemy::CRangedEnemy()
 	m_AttackType = EnemyAttackType::Ranged;
 
 	m_AttackRange = 1200.0f;
-	m_HeightFromTerrain = 150.0f;
 	m_State = new PatrolState(this);
 }
 
@@ -246,7 +244,7 @@ void CRangedEnemy::Attack(float elapsedTime)
 	{
 		float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
 
-		Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
+		//Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
 	}
 
 	//if (m_AttackDelayTime <= 0.0f) {
@@ -265,7 +263,6 @@ CMeleeEnemy::CMeleeEnemy()
 	m_AttackType = EnemyAttackType::Melee;
 	m_AttackRange = 320.0f;
 
-	m_HeightFromTerrain = 150.0f;
 	m_State = new PatrolState(this);
 }
 
@@ -280,7 +277,7 @@ void CMeleeEnemy::Attack(float elapsedTime)
 	{
 		float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
 
-		Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
+		//Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
 	}
 	if (m_AttackDelayTime <= 0.0f) {
 		// 실제 공격!  
@@ -301,7 +298,7 @@ void CMeleeEnemy::FindNextPosition()
 	m_xmf3Velocity = Vector3::Normalize(m_xmf3Velocity);
 
 	XMFLOAT3 lookAt = Vector3::Normalize(GetLook());
-	lookAt = Vector3::Multifly(lookAt, -1);
+	//lookAt = Vector3::Multifly(lookAt, -1);
 
 	XMFLOAT3 cross = Vector3::CrossProduct(lookAt, m_xmf3Velocity);
 	float dot = Vector3::DotProduct(lookAt, m_xmf3Velocity);
@@ -323,8 +320,6 @@ void CMeleeEnemy::FindClosePositionToTarget()
 	XMFLOAT3 targetVec = Vector3::Subtract(playerPos, m_xmf3Position);
 	targetVec = Vector3::Multifly(Vector3::Normalize(targetVec), -1);
 
-	XMFLOAT3 lookAt = Vector3::Normalize(GetLook());
-
 	m_ToMovePosition = Vector3::Subtract(m_TargetPlayer->GetPosition(),
 		Vector3::Multifly(targetVec, m_AttackRange * 1.5f));
 
@@ -344,7 +339,7 @@ void CMeleeEnemy::FindClosePositionToTarget()
 	//if (test < 0.0) angle = -angle;
 
 	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 });
-	Rotate({ 0,1,0 }, 180.0f);
+	//Rotate({ 0,1,0 }, 180.0f);
 	//cout << "회전 각: " << angle << "\n";
 	//Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees(angle)));
 }
