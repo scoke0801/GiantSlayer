@@ -1226,8 +1226,10 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	//}
 	//float4 cIllumination = Lighting(input.positionW, normalW, gnMaterialID);
 
+	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	shadowFactor = CalcShadowFactor(input.shadowPosH);
 	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 	
 	return(cColor * cIllumination);
 //return(lerp(cColor, cIllumination, 0.5f));
