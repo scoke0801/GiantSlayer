@@ -2,7 +2,7 @@
 #include "GameObject.h"
 #include "StateMachine.h"
 #include "EnemyState.h"
-
+#include "GameObjectVer2.h"
 // 에너미의 상태..
 // 탐색 - 활동 범위를 탐색
 // :: if(탐색 성공) toState(공격)
@@ -16,7 +16,7 @@ enum class EnemyAttackType {
 	Melee,
 	Ranged
 };
-class CEnemy : public CGameObject
+class CEnemy : public CGameObjectVer2
 {
 protected:
 	EnemyAttackType			m_AttackType;
