@@ -646,7 +646,7 @@ void CSceneJH::Update(float elapsedTime)
 		XMFLOAT3 TempPlayerPosition = m_Player->GetPosition();
 
 		LightPos.y = 3000.0f; 
-		LightPos.z += 2000.0f;
+		LightPos.z += 5000.0f;
 		 
 		//LightPos.x = m_Player->GetLook().x;
 		//LightPos.y = m_Player->GetPosition().y+3000.0f;
@@ -714,7 +714,7 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 		LightPos = m_Player->GetPosition();
  
 		LightPos.y = 3000.0f;
-		LightPos.z += 1000.0f; 
+		LightPos.z += 5000.0f; 
 
 		m_pLightCamera->LookAt({ LightPos },
 			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
