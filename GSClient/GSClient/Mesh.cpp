@@ -1649,10 +1649,9 @@ void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 					m_ppSkinningBoneFrameCaches[i] = NULL;
 				}
 			}
-			for (int i = 0; i < m_nSkinningBones; ++i) {
-				cout << "BoneName: " << m_ppstrSkinningBoneNames[i] << endl;
-			}
-			int stop = 3;
+			//for (int i = 0; i < m_nSkinningBones; ++i) {
+			//	cout << "BoneName: " << m_ppstrSkinningBoneNames[i] << endl;
+			//}
 		}
 		else if (!strcmp(pstrToken, "<BoneOffsets>:"))
 		{

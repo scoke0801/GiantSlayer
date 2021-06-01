@@ -2929,16 +2929,16 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->SetDrawable(true);
 	//m_Players[0]->SetTextureIndex(0x400); 
 
-	//m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 20, 72, 20, XMFLOAT3{ 0,0,0 });
-	//m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10, 36, 10)));
+	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1, 0.4, XMFLOAT3{ 0,0,0 });
+	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(0.4, 1, 0.4)));
 	++m_CurrentPlayerNum;
 	
 	m_MinimapCamera->SetTarget(m_Players[0]); 
-	auto pBox = new CBox(pd3dDevice, pd3dCommandList, 80, 165.0, 80.0f);
-	pBox->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pBox->SetTextureIndex(0x100); 
-	pBox->SetPosition({ 550.0f,  m_Terrain->GetDetailHeight(550.0f, 1850.0f) + 82.5f,  1850.0f }); 
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
+	//auto pBox = new CBox(pd3dDevice, pd3dCommandList, 80, 165.0, 80.0f);
+	//pBox->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	//pBox->SetTextureIndex(0x100); 
+	//pBox->SetPosition({ 550.0f,  m_Terrain->GetDetailHeight(550.0f, 1850.0f) + 82.5f,  1850.0f }); 
+	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
 
 	for (int i = 1; i < MAX_PLAYER; ++i) {
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);   

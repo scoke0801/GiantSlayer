@@ -198,6 +198,7 @@ public:
 	static CGameObjectVer2* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader, bool bHasAnimation);
 	static void PrintFrameInfo(CGameObjectVer2* pGameObject, CGameObjectVer2* pParent);
 
+	void SetTextureIndexFindByName(string fileName);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

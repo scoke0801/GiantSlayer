@@ -67,6 +67,11 @@ void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pSkinnedAnimationShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
+string CMaterial::FindTextureName(UINT index)
+{
+	return m_TextureFileNames[index];
+}
+
 void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4AmbientColor, 16);
@@ -82,7 +87,8 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
-void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, CTexture** ppTexture, CGameObjectVer2* pParent, FILE* pInFile, CShader* pShader)
+void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter,
+	_TCHAR* pwstrTextureName, CTexture** ppTexture, CGameObjectVer2* pParent, FILE* pInFile, CShader* pShader)
 {
 	char pstrTextureName[64] = { '\0' };
 
@@ -94,13 +100,14 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	bool bDuplicated = false;
 	if (strcmp(pstrTextureName, "null"))
 	{
-		SetMaterialType(nType);
+		SetMaterialType(nType); 
+		m_TextureFileNames[nType] = pstrTextureName;
 
 		char pstrFilePath[64] = { '\0' };
 		strcpy_s(pstrFilePath, 64, "resources/Textures/");
 
 		bDuplicated = (pstrTextureName[0] == '@');
-		strcpy_s(pstrFilePath + 19, 64 - 19, (bDuplicated) ? (pstrTextureName + 1) : pstrTextureName);
+		strcpy_s(pstrFilePath + 19, 64 - 19, (bDuplicated) ? (pstrTextureName + 1) : pstrTextureName); 
 		strcpy_s(pstrFilePath + 19 + ((bDuplicated) ? (nStrLength - 1) : nStrLength), 64 - 19 - ((bDuplicated) ? (nStrLength - 1) : nStrLength), ".dds");
 
 		size_t nConverted = 0;

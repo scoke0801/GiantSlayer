@@ -331,7 +331,11 @@ void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 {
 	CShader* pStandardShader = new CShader();
 
-	//if (m_UserID == ShaderHandlerUser::TH) 
+	if (m_UserID == ShaderHandlerUser::JH) {
+		pStandardShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSStandard");
+		pStandardShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSStandard");
+	}
+	else
 	{
 		pStandardShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSStandard");
 		pStandardShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
@@ -339,15 +343,18 @@ void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 
 	pStandardShader->CreateInputLayout(ShaderTypes::Standard);
 	pStandardShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
-	//pStandardShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pStandardShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Standard", pStandardShader);
 }
 
 void CShaderHandler::CreateSkinnedShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	CShader* pSkinnedShader = new CShader();
-
-	//if (m_UserID == ShaderHandlerUser::TH) 
+	if (m_UserID == ShaderHandlerUser::JH) {
+		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSSkinnedAnimationStandard");
+		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSStandard");
+	}
+	else
 	{
 		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSSkinnedAnimationStandard");
 		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
@@ -355,7 +362,7 @@ void CShaderHandler::CreateSkinnedShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 
 	pSkinnedShader->CreateInputLayout(ShaderTypes::Skinned);
 	pSkinnedShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
-	//pSkinnedShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pSkinnedShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Skinned", pSkinnedShader);
 }
 

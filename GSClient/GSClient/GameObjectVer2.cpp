@@ -254,11 +254,11 @@ void CGameObjectVer2::SetShadertoAll()
 {
 	if (isSkinned == true) {
 		SetShader(CShaderHandler::GetInstance().GetData("Skinned"));
-		cout << "MESH: SKINNED" << endl;
+		//cout << "MESH: SKINNED" << endl;
 	}
 	else {
 		SetShader(CShaderHandler::GetInstance().GetData("Standard"));
-		cout << "MESH: STANDARD" << endl;
+		//cout << "MESH: STANDARD" << endl;
 	}
 
 	if (m_pSibling) m_pSibling->SetShadertoAll();
@@ -267,6 +267,7 @@ void CGameObjectVer2::SetShadertoAll()
 
 void CGameObjectVer2::SetPosition(XMFLOAT3 pos)
 {
+	m_xmf3PrevPosition = m_xmf3Position;
 	m_xmf3Position = pos;
 	m_xmf4x4ToParent._41 = pos.x;
 	m_xmf4x4ToParent._42 = pos.y;
@@ -423,7 +424,17 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 			}
 		}
 	}
-
+	if (gbBoundaryOn)
+	{
+		if (m_pShader)
+		{
+		m_pShader->RenderBoundary(pd3dCommandList, pCamera);
+		for (auto pBoundingMesh : m_BoundingObjectMeshes)
+		{
+			pBoundingMesh->Render(pd3dCommandList);
+		}
+		}
+	}
 	if (m_pSibling) m_pSibling->Draw(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Draw(pd3dCommandList, pCamera);
 }
@@ -607,6 +618,7 @@ void CGameObjectVer2::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 		else if (!strcmp(pstrToken, "<AlbedoMap>:"))
 		{
 			pMaterial->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_ALBEDO_MAP, 3, pMaterial->m_ppstrTextureNames[0], &(pMaterial->m_ppTextures[0]), pParent, pInFile, pShader);
+			SetTextureIndexFindByName(pMaterial->FindTextureName(MATERIAL_ALBEDO_MAP));
 		}
 		else if (!strcmp(pstrToken, "<SpecularMap>:"))
 		{
@@ -637,11 +649,13 @@ void CGameObjectVer2::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 			break;
 		}
 	}
+	
+	int stop = 3;
 }
 
 void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 {
-	system("cls");
+	//system("cls");
 	char pstrToken[64] = { '\0' };
 
 	BYTE nStrLength = 0;
@@ -652,9 +666,6 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
 		nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pInFile);
 		pstrToken[nStrLength] = '\0';
-
-		if (!strcmp(pstrToken, "run"))
-			cout << "!!!!!!!" << endl;
 
 		if (!strcmp(pstrToken, "<AnimationSets>:"))
 		{
@@ -719,23 +730,23 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 
 					nReads = (UINT)::fread(&pAnimationSet->m_pfKeyFrameTransformTimes[i], sizeof(float), 1, pInFile);
 					nReads = (UINT)::fread(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i], sizeof(float), 16 * m_pAnimationController->m_nAnimationBoneFrames, pInFile);
-					cout << " i : " << i << "\n";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_11 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_12 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_13 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_14 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_21 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_22 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_23 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_24 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_31 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_32 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_33 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_34 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_41 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_42 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_43 << " ";
-					cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_44 << "\n";
+					//cout << " i : " << i << "\n";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_11 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_12 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_13 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_14 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_21 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_22 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_23 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_24 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_31 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_32 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_33 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_34 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_41 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_42 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_43 << " ";
+					//cout << pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i]->_44 << "\n";
 				}
 			}
 #ifdef _WITH_ANIMATION_SRT
@@ -792,23 +803,23 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 		else if (!strcmp(pstrToken, "<TransformMatrix>:"))
 		{
 			nReads = (UINT)::fread(&pGameObject->m_xmf4x4ToParent, sizeof(float), 16, pInFile);
-			cout << " TransformMatrix : ";
-			cout << pGameObject->m_xmf4x4ToParent._11 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._12 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._13 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._14 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._21 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._22 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._23 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._24 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._31 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._32 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._33 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._34 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._41 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._42 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._43 << " ";
-			cout << pGameObject->m_xmf4x4ToParent._44 << "\n";
+			//cout << " TransformMatrix : ";
+			//cout << pGameObject->m_xmf4x4ToParent._11 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._12 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._13 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._14 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._21 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._22 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._23 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._24 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._31 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._32 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._33 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._34 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._41 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._42 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._43 << " ";
+			//cout << pGameObject->m_xmf4x4ToParent._44 << "\n";
 		}
 		else if (!strcmp(pstrToken, "<Mesh>:"))
 		{
@@ -897,6 +908,20 @@ void CGameObjectVer2::PrintFrameInfo(CGameObjectVer2* pGameObject, CGameObjectVe
 
 	if (pGameObject->m_pSibling) CGameObjectVer2::PrintFrameInfo(pGameObject->m_pSibling, pParent);
 	if (pGameObject->m_pChild) CGameObjectVer2::PrintFrameInfo(pGameObject->m_pChild, pGameObject);
+}
+
+void CGameObjectVer2::SetTextureIndexFindByName(string fileName)
+{
+	if (fileName == "clothingSet_01_tex") {
+		SetTextureIndex(0x01);
+	}
+	else if (fileName == "girl_texture_01") {
+		SetTextureIndex(0x02);
+	}
+	else if (fileName == "hair1") {
+		SetTextureIndex(0x04);
+	}
+	int stop = 3;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

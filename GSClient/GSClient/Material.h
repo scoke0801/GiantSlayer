@@ -64,12 +64,16 @@ public:
 	float							m_fMetallic = 0.0f;
 	float							m_fGlossyReflection = 0.0f;
 
+	unordered_map<UINT, string>		m_TextureFileNames;
 public:
 	int 							m_nTextures = 0;
 	_TCHAR(*m_ppstrTextureNames)[64] = NULL;
 	CTexture** m_ppTextures = NULL; //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
 
-	void LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, CTexture** ppTexture, CGameObjectVer2* pParent, FILE* pInFile, CShader* pShader);
+	void LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		UINT nType, UINT nRootParameter, 
+		_TCHAR* pwstrTextureName, CTexture** ppTexture, 
+		CGameObjectVer2* pParent, FILE* pInFile, CShader* pShader);
 
 public:
 	static CShader* m_pStandardShader;
@@ -79,4 +83,6 @@ public:
 
 	void SetStandardShader() { CMaterial::SetShader(m_pStandardShader); }
 	void SetSkinnedAnimationShader() { CMaterial::SetShader(m_pSkinnedAnimationShader); }
+
+	string FindTextureName(UINT index);
 };

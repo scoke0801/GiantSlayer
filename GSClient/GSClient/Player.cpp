@@ -127,8 +127,11 @@ void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 	if (m_isOnGround) { 
 		m_xmf3Position = GetPosition();
 		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_HeightFromTerrain;
+		m_xmf4x4ToParent._41 = m_xmf3Position.x;
+		m_xmf4x4ToParent._42 = m_xmf3Position.y;
+		m_xmf4x4ToParent._43 = m_xmf3Position.z;
 		//SetPosition(m_xmf3Position);
-		CGameObjectVer2::SetPosition(m_xmf3Position);
+		//CGameObjectVer2::SetPosition(m_xmf3Position);
 		//m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z); 
 	}
 	
