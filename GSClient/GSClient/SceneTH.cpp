@@ -233,10 +233,15 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	CGameObjectVer2* pKinght = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, 
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/Knight.bin", NULL, true);
 	ExportedObject* test = new ExportedObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	test->SetShadertoAll(CShaderHandler::GetInstance().GetData("Skinned"));
 	test->SetChild(pKinght, true);
+<<<<<<< HEAD
 	test->SetPosition({ 0.0f,   200.0f,  1850.0f });
 	test->Scale(20, 20, 20);
+=======
+	test->SetPosition({ 1750.0f,   230.0f,  1850.0f });
+	test->Scale(200, 200, 200);
+	test->SetShadertoAll(CShaderHandler::GetInstance().GetData("Skinned"));
+>>>>>>> 7477e7c896419db4785141af071b4ecdb7350956
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(test);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);

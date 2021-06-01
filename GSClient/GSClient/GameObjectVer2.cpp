@@ -182,6 +182,8 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHan
 //
 CGameObjectVer2::CGameObjectVer2()
 {
+	m_xmf4x4ToParent = Matrix4x4::Identity();
+	m_xmf4x4World = Matrix4x4::Identity();
 }
 
 CGameObjectVer2::CGameObjectVer2(int nMaterials)
@@ -205,13 +207,13 @@ CGameObjectVer2::~CGameObjectVer2()
 //	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->SetShader(pShader);
 //}
 //
-//void CGameObjectVer2::SetMaterial(int nMaterial, CMaterial* pMaterial)
-//{
-//	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->Release();
-//	m_ppMaterials[nMaterial] = pMaterial;
-//	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
-//}
-//
+void CGameObjectVer2::SetMaterial(int nMaterial, CMaterial* pMaterial)
+{
+	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->Release();
+	m_ppMaterials[nMaterial] = pMaterial;
+	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
+}
+
 void CGameObjectVer2::SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate)
 {
 	if (pChild)
@@ -237,6 +239,39 @@ void CGameObjectVer2::SetShadertoAll(CShader* pshader)
 	if (m_pSibling) m_pSibling->SetShadertoAll(pshader);
 	if (m_pChild) m_pChild->SetShadertoAll(pshader);
 }
+
+void CGameObjectVer2::SetPosition(XMFLOAT3 pos)
+{
+	m_xmf4x4ToParent._41 = pos.x;
+	m_xmf4x4ToParent._42 = pos.y;
+	m_xmf4x4ToParent._43 = pos.z;
+
+	UpdateTransform(NULL);
+}
+
+void CGameObjectVer2::Scale(float x, float y, float z, bool setSize)
+{
+	if (setSize)
+	{
+		m_xmf3Size = { x,y,z };
+	}
+	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
+	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
+
+	UpdateTransform(NULL);
+}
+
+//void CGameObjectVer2::SetPositionToAll(XMFLOAT3 pos)
+//{
+//	SetPosition(pos);
+//	UpdateTransform(NULL);
+//}
+//
+//void CGameObjectVer2::ScaleToAll(float x, float y, float z, bool setSize)
+//{
+//	Scale(x,y,z, setSize);
+//	UpdateTransform(NULL);
+//}
 
 void CGameObjectVer2::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -270,6 +305,36 @@ void CGameObjectVer2::ReleaseUploadBuffers()
 	if (m_pChild) m_pChild->ReleaseUploadBuffers();
 }
 
+void CGameObjectVer2::Update(float fTimeElapsed)
+{
+	//if (!m_isDrawbale) return;
+	//static float MaxVelocityXZ = 120.0f;
+	//static float MaxVelocityY = 120.0f;
+	//static float Friction = 50.0f;
+	//
+	////m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Gravity, fTimeElapsed, false));
+	//float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+	//float fMaxVelocityXZ = MaxVelocityXZ * fTimeElapsed;
+	//if (fLength > MaxVelocityXZ)
+	//{
+	//	m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+	//	m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+	//}
+	//float fMaxVelocityY = MaxVelocityY * fTimeElapsed;
+	//fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
+	//if (fLength > MaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
+	//
+	//Move(m_xmf3Velocity);
+	//
+	//fLength = Vector3::Length(m_xmf3Velocity);
+	//float fDeceleration = (Friction * fTimeElapsed);
+	//if (fDeceleration > fLength) fDeceleration = fLength;
+	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	
+	//CGameObjectVer2::Animate(fTimeElapsed);
+	//UpdateTransform(NULL);
+}
+
 void CGameObjectVer2::Animate(float fTimeElapsed)
 {
 	if (m_pAnimationController) m_pAnimationController->AdvanceTime(fTimeElapsed, NULL);
@@ -284,9 +349,33 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 
 	if (m_pShader)
 	{
+<<<<<<< HEAD
 		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
 		m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
 		m_pShader->Render(pd3dCommandList, pCamera);
+=======
+		//UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+		if (m_pShader)
+		{
+			m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
+		}
+		if (m_nMaterials > 0)
+		{
+			for (int i = 0; i < m_nMaterials; i++)
+			{
+				//if (m_ppMaterials[i])
+				{
+					if (m_pShader)
+					{
+						//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
+						//m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
+						m_pShader->Render(pd3dCommandList, pCamera);
+					}
+				}
+				m_pMesh->Render(pd3dCommandList, i);
+			}
+		}
+>>>>>>> 7477e7c896419db4785141af071b4ecdb7350956
 	}
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
 
@@ -450,7 +539,7 @@ void CGameObjectVer2::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 					}
 				}
 			}
-			//SetMaterial(nMaterial, pMaterial);
+			SetMaterial(nMaterial, pMaterial);
 		}
 		else if (!strcmp(pstrToken, "<AlbedoColor>:"))
 		{
@@ -715,7 +804,7 @@ CGameObjectVer2* CGameObjectVer2::LoadGeometryAndAnimationFromFile(ID3D12Device*
 	_stprintf_s(pstrDebug, 256, "Frame Hierarchy\n"));
 	OutputDebugString(pstrDebug);
 
-	CGameObject::PrintFrameInfo(pGameObject, NULL);
+	CGameObjectVer2::PrintFrameInfo(pGameObject, NULL);
 #endif
 
 	if (bHasAnimation)
@@ -755,5 +844,5 @@ void ExportedObject::OnPrepareAnimate()
 
 void ExportedObject::Animate(float fTimeElapsed)
 {
-	CGameObject::Animate(fTimeElapsed);
+	CGameObjectVer2::Animate(fTimeElapsed);
 }

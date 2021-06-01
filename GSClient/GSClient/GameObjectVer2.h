@@ -137,7 +137,6 @@ public:
 public:
 	char			m_pstrFrameName[64];
 
-	XMFLOAT4X4		m_xmf4x4ToParent;
 
 	CGameObjectVer2* m_pParent = NULL;
 	CGameObjectVer2* m_pChild = NULL;
@@ -151,7 +150,7 @@ public:
 public:
 	//void SetShader(CShader* pShader) override;
 	//void SetShader(int nMaterial, CShader* pShader);
-	//void SetMaterial(int nMaterial, CMaterial* pMaterial);
+	void SetMaterial(int nMaterial, CMaterial* pMaterial);
 
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 	virtual void OnPrepareAnimate() { }
@@ -162,15 +161,19 @@ public:
 	virtual void ReleaseShaderVariables();
 	virtual void ReleaseUploadBuffers();
 
+	void Update(float fTimeElapsed) override;
 	void Animate(float fTimeElapsed) override;
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
 
 	void SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate = false);
 	void SetShadertoAll(CShader* pshader);
-
+	void SetPosition(XMFLOAT3 pos) override;
+	void Scale(float x, float y, float z, bool setSize = true) override;
+	//void SetPositionToAll(XMFLOAT3 pos);
+	//void ScaleToAll(float x, float y, float z, bool setSize = true);
 public:
 	CGameObjectVer2* GetParent() { return(m_pParent); }
-	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL) override;
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
 
 	CGameObjectVer2* FindFrame(char* pstrFrameName);
