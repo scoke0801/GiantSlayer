@@ -134,7 +134,7 @@ float CalcShadowFactor(float4 f4ShadowPos)
 		percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
 	}
 
-	return (percentLit / 9.0f) + 0.7f;
+	return (percentLit / 9.0f) + 0.3f;
 }
 
 float CalcShadowFactor_t(float4 f4ShadowPos)
