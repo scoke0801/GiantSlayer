@@ -9,7 +9,11 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_Type = OBJ_TYPE::Player;
 
 	m_HP = 100;
-	m_SP = 100;
+	m_SP = 100; 
+
+	m_SpareBoundingBox = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 1.4, XMFLOAT3{ 0,0.6, 0.2f });
+	m_SpareCollisionBox = new ColliderBox(ColliderBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4)));
+	m_SpareAABB = new ColliderBox(ColliderBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4))); 
 }
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -34,6 +38,19 @@ void CPlayer::Update(float fTimeElapsed)
 		if (m_AttackWaitingTime < 0.0f){
 			m_AttackWaitingTime = 0.0f;
 			m_IsCanAttack = true;
+
+			auto temp = m_SpareCollisionBox;
+			m_SpareCollisionBox = m_Colliders[0];
+			m_Colliders[0] = temp;
+
+			temp = m_SpareAABB;
+			m_SpareAABB = m_AABB[0];
+			m_AABB[0] = temp;
+			 
+			auto tempMesh = m_SpareBoundingBox;
+			m_SpareBoundingBox = m_BoundingObjectMeshes[0];
+			m_BoundingObjectMeshes[0] = tempMesh;
+			UpdateColliders();
 		}
 	}
 	else {
@@ -185,5 +202,25 @@ bool CPlayer::Attacked(CGameObject* pObject)
 		m_HP = 0;
 	}
 	return true;
+}
+
+void CPlayer::Attack()
+{
+	SetCanAttack(false);
+	IncreaseAttackWaitingTime(1.4f);
+	SetVelocityToZero();
+
+	auto temp = m_Colliders[0];
+	m_Colliders[0] = m_SpareCollisionBox;
+	m_SpareCollisionBox = temp;
+
+	temp = m_AABB[0];
+	m_AABB[0] = m_SpareAABB;
+	m_SpareAABB = temp;
+
+	auto tempMesh = m_BoundingObjectMeshes[0];
+	m_BoundingObjectMeshes[0] = m_SpareBoundingBox;
+	m_SpareBoundingBox = tempMesh;
+	UpdateColliders();
 }
  

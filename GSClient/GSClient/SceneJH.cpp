@@ -461,10 +461,17 @@ void CSceneJH::Update(float elapsedTime)
 			//	
 			//}
 			if (m_Player->Attacked(pEnemy)) {
-				m_CurrentCamera->SetShake(true,0.5f, 15);
-			
-				m_Player->FixCollision();
-				cout << "충돌 : 플레이어 - 적\n";
+				if (false == m_Player->IsCanAttack()) { 
+					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+					cout << "플레이어 공격 - 몬스터\n";
+				}
+				else {
+					m_CurrentCamera->SetShake(true, 0.5f, 15);
+
+					m_Player->FixCollision();
+
+					cout << "충돌 : 플레이어 - 적\n";
+				}
 			}
 		}
 	}
@@ -1383,9 +1390,7 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_J)
 	{
 		if (m_Player->IsCanAttack()) {
-			m_Player->SetCanAttack(false);
-			m_Player->IncreaseAttackWaitingTime(1.4f);
-			m_Player->SetVelocityToZero();
+			m_Player->Attack();
 			m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 			//ShotPlayerArrow();
 		}
@@ -2868,7 +2873,7 @@ void CSceneJH::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLightCamera = new CLightCamera();
 
 	m_pLightCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pLightCamera->SetLens(0.25f * PI, nWidth, nHeight, 1.0f, lensize);
+	m_pLightCamera->SetLens(0.5f * PI, nWidth, nHeight, 1.0f, lensize);
 	m_pLightCamera->SetRight(xmf3Right);
 	m_pLightCamera->SetUp(xmf3Up);
 	m_pLightCamera->SetLook(xmf3Look);
@@ -2961,6 +2966,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
 	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
+
 	++m_CurrentPlayerNum;
 	
 	m_MinimapCamera->SetTarget(m_Players[0]); 

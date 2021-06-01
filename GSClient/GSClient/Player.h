@@ -35,6 +35,10 @@ private:
 
 	float m_AttackedDelay = 0.0f;
 
+	CMesh* m_SpareBoundingBox;
+	Collider* m_SpareCollisionBox;
+	Collider* m_SpareAABB;
+
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -66,4 +70,5 @@ public:
 	void Jump();
 
 	bool Attacked(CGameObject* pObject);
+	void Attack();
 };
