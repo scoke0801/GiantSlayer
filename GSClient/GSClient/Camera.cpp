@@ -600,6 +600,7 @@ void CLightCamera::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphic
 
 void CLightCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, int rootParameterIndex)
 {
+	CCamera::UpdateShaderVariables(pd3dCommandList, 2);
 	//CCamera::UpdateShaderVariables(pd3dCommandList, rootParameterIndex);
 
 	XMFLOAT4X4 T(

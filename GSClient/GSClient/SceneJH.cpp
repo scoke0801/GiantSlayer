@@ -632,15 +632,28 @@ void CSceneJH::Update(float elapsedTime)
 		m_MirrorCamera->UpdateViewMatrix();
 	}
 
+
 	if (m_pLightCamera)
 	{
 		LightPos = m_Player->GetPosition();
-		LightPos.y = 3000.0f;
-		LightPos.z += 10000.0f;
+		XMFLOAT3 TempPlayerPosition = m_Player->GetPosition();
 
-		m_pLightCamera->LookAt({ LightPos },
-			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
-			m_Player->GetUp());
+		LightPos.y = 3000.0f;
+		LightPos.z += 2000.0f;
+
+		
+
+		//LightPos.x = m_Player->GetLook().x;
+		//LightPos.y = m_Player->GetPosition().y+3000.0f;
+
+		
+		m_pLightCamera->LookAt(LightPos,
+			{ TempPlayerPosition },
+			m_Player->GetReflectLook_P()
+		);
+		
+		//m_pLightCamera->SetPosition(LightPos);
+
 		 
 		m_pLightCamera->UpdateViewMatrix();
 	}
@@ -697,8 +710,8 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 	if (m_pLightCamera)
 	{
 		LightPos = m_Player->GetPosition();
-		LightPos.y = 3000.0f;
-		LightPos.z += 10000.0f;
+		LightPos.y = 100.0f;
+		LightPos.z = 10000.0f;
 
 		m_pLightCamera->LookAt({ LightPos },
 			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
@@ -942,7 +955,7 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 			m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 			m_pLightCamera->GenerateViewMatrix();
 			m_pLightCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_LIGHT_CAMERA);
-			m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
+			//m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
 		}
 
 		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
@@ -954,7 +967,7 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 
 		for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 			for (auto pObject : m_ObjectLayers[i]) {
-				pObject->Draw_Shadow(pd3dCommandList, m_CurrentCamera);
+				pObject->Draw_Shadow(pd3dCommandList, m_pLightCamera);
 			}
 		} 
 
@@ -2870,8 +2883,8 @@ void CSceneJH::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	m_pLightCamera = new CLightCamera();
 
-	m_pLightCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	m_pLightCamera->SetLens(0.25f * PI, nWidth, nHeight, 1.0f, lensize);
+	m_pLightCamera->SetOffset(XMFLOAT3(0.0f, 500.0f, -400.0f));
+	m_pLightCamera->SetLens( 0.25 * PI, nWidth, nHeight, 1.0f, lensize);
 	m_pLightCamera->SetRight(xmf3Right);
 	m_pLightCamera->SetUp(xmf3Up);
 	m_pLightCamera->SetLook(xmf3Look);

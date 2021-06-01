@@ -110,16 +110,16 @@ Texture2D gtxtShadowMap	   : register(t46);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
-	f4ShadowPos.xyz /= f4ShadowPos.w;
+    f4ShadowPos.xyz /= f4ShadowPos.w;
 
 	float fDepth = f4ShadowPos.z;
 
 	uint nWidth, nHeight, nMips;
 	gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
 
-	float dx = 1.0f / (float)nWidth;
-
-	float percentLit = 0.0f;
+    float dx = 1.0f / (float) nWidth ;
+  
+	float percentLit = 0.3f;
 
 	const float2 offsets[9] =
 	{
@@ -134,7 +134,7 @@ float CalcShadowFactor(float4 f4ShadowPos)
 		percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
 	}
 
-	return (percentLit / 9.0f) + 0.3f;
+	return (percentLit / 9.0f) + 0.7f;
 }
 
 float CalcShadowFactor_t(float4 f4ShadowPos)
@@ -1168,6 +1168,7 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 	output.uv = input.uv;
 
 	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+
 	return(output);
 }
 
