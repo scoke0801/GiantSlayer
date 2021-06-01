@@ -512,7 +512,7 @@ void CSceneJH::Update(float elapsedTime)
 		}
 	} 
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			if (pArrow->CollisionCheck(m_Mirror[i])) {
 				m_Mirror[i]->FixCollision();
@@ -1893,13 +1893,13 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	//pBoss->Scale(200, 200, 200);
 	pBoss->SetShadertoAll();
 	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 11, 10, 7, XMFLOAT3{ 0,0,0 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.5,5,3.5)));
 	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ 2.5, 3, 7 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, -10, 20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
 	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ -2.5, 3, 7 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, -10, 20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(-2.5, 5.5, 7), XMFLOAT3(2.25,2.5,3)));
 	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 3, 3, 5, XMFLOAT3{ 0,3,-7 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, -10, -20), XMFLOAT3(30 * 0.5f, 10 * 0.5f, 30 * 0.5f)));
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pBoss);
 
 	CGameObjectVer2* pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
@@ -2204,7 +2204,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 void CSceneJH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		m_Mirror[i] = new CGameObject();
 
