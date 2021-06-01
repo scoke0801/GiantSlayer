@@ -31,7 +31,7 @@ constexpr float ARROW_SPEED = 3263.0f;
 constexpr float PLAYER_JUMP_HEIGHT = 165.0 * 1.75f;
 constexpr float TO_JUMP_TIME = 1.0f;
 
-constexpr float MELLE_ENEMY_ATTACK_TIME = 2.0f;
+constexpr float MELLE_ENEMY_ATTACK_TIME = 2.7f;
 constexpr float RANGED_ENEMY_ATTACK_TIME = 2.0f;
 
 // x,y,z 크기를 short로 보내면 맵 크기 20000에서 

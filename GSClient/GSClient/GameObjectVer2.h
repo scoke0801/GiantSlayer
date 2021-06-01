@@ -167,6 +167,7 @@ public:
 	void Update(float fTimeElapsed) override;
 	void Animate(float fTimeElapsed) override;
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
+	void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
 
 	void SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate = false);
 	void SetShadertoAll(CShader* pShader = nullptr);

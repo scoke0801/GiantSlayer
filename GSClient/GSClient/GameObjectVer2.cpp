@@ -455,6 +455,35 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 	if (m_pChild) m_pChild->Draw(pd3dCommandList, pCamera);
 }
 
+void CGameObjectVer2::Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	OnPrepareRender();
+
+	if (m_pMesh)
+	{
+		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+
+		if (m_nMaterials > 0)
+		{
+			for (int i = 0; i < m_nMaterials; i++)
+			{
+				if (m_ppMaterials[i])
+				{
+					if (m_pShader)
+					{
+						//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
+						//m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
+						m_pShader->Render_Shadow(pd3dCommandList, pCamera);
+					}
+					m_pMesh->Render(pd3dCommandList, i);
+				}
+			}
+		}
+	} 
+	if (m_pSibling) m_pSibling->Draw(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->Draw(pd3dCommandList, pCamera);
+}
+
 void CGameObjectVer2::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4ToParent, *pxmf4x4Parent) : m_xmf4x4ToParent;

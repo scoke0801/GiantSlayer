@@ -6,9 +6,10 @@
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-  
+  // 0 idle, 1run 2attack, 3attacked, 4Death 
 void WaitState::Enter(CEnemy* pEnemy)
 {
+    pEnemy->SetAnimationSet(1);
     m_StateName = ObjectState::Wait;
     cout << "WaitState::Enter" << endl;
 }
@@ -27,6 +28,7 @@ void WaitState::Exit(CEnemy* pEnemy)
   
 void IdleState::Enter(CEnemy* pEnemy)
 {
+    pEnemy->SetAnimationSet(1);
     m_StateName = ObjectState::Idle;
     cout << " IdleState::Enter" << endl;
 }
@@ -45,6 +47,7 @@ void IdleState::Exit(CEnemy* pEnemy)
  
 void RunAwayState::Enter(CEnemy* pEnemy)
 {
+    pEnemy->SetAnimationSet(1);
     m_StateName = ObjectState::RunAway; 
 }
 
@@ -60,11 +63,13 @@ void RunAwayState::Exit(CEnemy* pEnemy)
 
 void PatrolState::Enter(CEnemy* enemy)
 {
+    enemy->SetAnimationSet(1);
     m_StateName = ObjectState::Patrol;
 }
 
 void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
-{ 
+{
+    enemy->SetAnimationSet(1);
 	if (false == enemy->IsOnMoving()) {
 		enemy->FindNextPosition();
 		enemy->SetIsOnMoving(true);
@@ -95,7 +100,8 @@ void AttackState::Execute(CEnemy* enemy, float elapsedTime)
     if (m_LifeTime < m_ElapsedTime) { 
         enemy->ChangeState(new PatrolState(enemy)); 
     }
-    else {  
+    else {
+        enemy->SetAnimationSet(2);
         enemy->Attack(elapsedTime);
     }
 }
@@ -108,6 +114,7 @@ void AttackState::Exit(CEnemy* enemy)
 
 void TraceState::Enter(CEnemy* enemy)
 {
+    enemy->SetAnimationSet(1);
     m_StateName = ObjectState::Trace;
     m_LifeTime = 0.5f;
     cout << "TraceState::Enter \n";
@@ -146,6 +153,7 @@ void TraceState::Exit(CEnemy* enemy)
 
 void AttackedState::Enter(CEnemy* enemy)
 {
+    enemy->SetAnimationSet(3);
     const int PLAYER_DAMAGE = 15;
     int hp = enemy->GetHP();
     hp -= PLAYER_DAMAGE;

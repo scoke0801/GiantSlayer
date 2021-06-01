@@ -962,11 +962,6 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 			if (!player->IsDrawable()) continue;
 			player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
 		}
-		 
-		for (auto player : m_Players) {
-			if (!player->IsDrawable()) continue;
-			//player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
-		}
 
 		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
 			D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
@@ -1896,7 +1891,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	CEnemy* pEnemy;
 	XMFLOAT3 scale = { 600.0f,600.0f,600.0f };
 	{	// Monster Area1
-		pEnemy = new CRangedEnemy();
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
@@ -1962,7 +1957,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	{	// Monster Area1-2
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
-		pEnemy = new CRangedEnemy();
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
@@ -1978,7 +1973,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
-		pEnemy = new CRangedEnemy();
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
@@ -2027,7 +2022,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	{// Monster Area2-1
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
-		pEnemy = new CRangedEnemy();
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
@@ -2043,7 +2038,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
-		pEnemy = new CRangedEnemy();
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
@@ -2076,7 +2071,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	{// Monster Area2-2
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
-		pEnemy = new CRangedEnemy();
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
@@ -2126,7 +2121,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	{// Monster Area3
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
-		pEnemy = new CRangedEnemy();
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
@@ -2142,7 +2137,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
-		pEnemy = new CRangedEnemy();
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
@@ -2158,7 +2153,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
-		pEnemy = new CRangedEnemy();
+		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
