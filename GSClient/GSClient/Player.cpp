@@ -50,19 +50,26 @@ void CPlayer::Update(float fTimeElapsed)
 			auto tempMesh = m_SpareBoundingBox;
 			m_SpareBoundingBox = m_BoundingObjectMeshes[0];
 			m_BoundingObjectMeshes[0] = tempMesh;
-			UpdateColliders();
+
+			UpdateColliders(); 
+			//SetAnimationSet(AnimationType::IDLE);
 		}
 	}
+	// 피격
+	else if (m_AttackedDelay > 0.0f) {
+		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
+		/*if (m_AttackedDelay == 0.0f) {
+			SetAnimationSet(AnimationType::IDLE);
+		}*/
+	}
+	
 	else {
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
 			SetAnimationSet(AnimationType::IDLE);
 		else
 			SetAnimationSet(AnimationType::RUN);
 	}
-	// 피격
-	if (m_AttackedDelay > 0.0f) {
-		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
-	}
+
 	 
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
@@ -202,6 +209,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 	m_AttackedDelay += 1.5f;
 	m_HP -= 5;
+	SetAnimationSet(AnimationType::DAMAGED);
 	if (m_HP <= 5) {
 		m_HP = 0;
 	}
@@ -211,7 +219,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 void CPlayer::Attack()
 {
 	SetCanAttack(false);
-	IncreaseAttackWaitingTime(1.03f);
+	IncreaseAttackWaitingTime(PLAYER_SWORD_ATTACK_TIME);
 	SetVelocityToZero();
 
 	auto temp = m_Colliders[0];

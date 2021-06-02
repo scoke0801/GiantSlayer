@@ -85,6 +85,8 @@ public:
 	CPlayer* GetTargetPlayer() const { return m_TargetPlayer; }
 
 	ObjectState GetStateInfo() const override { return m_State->GetStatename(); }
+
+	BYTE GetAnimationType() const override;
 };
 
 class CMeleeEnemy : public CEnemy

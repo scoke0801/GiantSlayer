@@ -210,6 +210,9 @@ void CSign::UpdateColliders()
 CDoor::CDoor(bool isLeft)
 {
 	if (!m_IsLeft) Rotate(XMFLOAT3(0, 1, 0), 180.0);
+
+	m_IsOnAnimating = false;
+	m_IsOnOpening = false;
 }
 
 CDoor::~CDoor()
@@ -257,6 +260,24 @@ void CDoor::Update(float fTimeElapsed)
 			m_IsOnAnimating = false;
 		}
 	}
+}
+
+void CDoor::Open()
+{
+	if (m_IsOnOpening) {
+		return;
+	}
+	m_IsOnAnimating = true;
+	m_IsOnOpening = true;
+}
+
+void CDoor::Close()
+{
+	if (false == m_IsOnOpening) {
+		return;
+	}
+	m_IsOnAnimating = true;
+	m_IsOnOpening = false;
 }
 
 CDoorWall::CDoorWall(OBJECT_ID id)
@@ -381,6 +402,17 @@ void CDoorWall::UpdateColliders()
 	}
 }
 
+void CDoorWall::OpenDoor()
+{
+	m_LeftDoor->Open();
+	m_RightDoor->Open();
+}
+
+void CDoorWall::CloserDoor()
+{
+	m_LeftDoor->Close();
+	m_RightDoor->Close();
+}
 CPuzzle::CPuzzle(OBJECT_ID id)
 {
 	for (int i = 1; i <= 3; ++i)

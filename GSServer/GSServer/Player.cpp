@@ -80,6 +80,9 @@ void CPlayer::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1]
 
 void CPlayer::SetVelocity(const XMFLOAT3& dir)
 {
+	if (false == IsCanAttack()) {
+		return;
+	}
 	XMFLOAT3 xmf3Dir = dir;
 	xmf3Dir.y = 0;
 	XMFLOAT3 normalizedDir = Vector3::Normalize(xmf3Dir); 
@@ -113,4 +116,11 @@ bool CPlayer::Attacked(CGameObject* pObject)
 		m_HP = 0;
 	}
 	return true;
+}
+
+void CPlayer::Attack()
+{
+	SetCanAttack(false);
+	IncreaseAttackWaitingTime(PLAYER_SWORD_ATTACK_TIME);
+	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 }

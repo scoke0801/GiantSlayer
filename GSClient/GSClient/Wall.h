@@ -24,7 +24,6 @@ public:
     CDoor(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
         float width, float height, float depth, bool isLeft = true);
     ~CDoor();
-
 public:
     virtual void Update(float fTimeElapsed);
 
@@ -53,6 +52,8 @@ public:
 
 public:
     virtual void Update(float fTimeElapsed) override;
+
+    void UpdateOnServer(float elapsedTime) override;
     virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
     void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 

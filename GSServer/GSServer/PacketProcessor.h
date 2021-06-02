@@ -68,6 +68,7 @@ private:
 	unordered_map<int, CGameObject*>		m_BlockingPlateToPreviousSector;
 
 	unordered_map<OBJECT_ID, XMFLOAT3>		m_ObjectPositions;
+	int										m_DoorStartIndex;
 private:
 	// for update timer
 	chrono::system_clock::time_point currentTime;

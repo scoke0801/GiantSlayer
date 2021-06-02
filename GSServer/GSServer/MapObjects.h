@@ -50,6 +50,9 @@ public:
 public:
 	void Update(float fTimeElapsed) override; 
 
+	void Open();
+	void Close();
+
 private:
 	bool m_IsLeft;
 
@@ -76,7 +79,8 @@ public:
 	bool CollisionCheck(const BoundingBox& aabb) override;
 
 	void UpdateColliders() override;
-
+	void OpenDoor();
+	void CloserDoor();
 private:
 	CDoor* m_LeftDoor;
 	CDoor* m_RightDoor;

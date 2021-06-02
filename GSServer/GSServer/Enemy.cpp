@@ -65,6 +65,24 @@ bool CEnemy::IsEnemyInSight() // Chase State
 	return false;
 }
 
+BYTE CEnemy::GetAnimationType() const
+{
+	auto stateName = m_State->GetStatename();
+
+	switch (stateName)
+	{
+	case ObjectState::Wait: return 0;
+	case ObjectState::Idle: return 0;
+	case ObjectState::Patrol: return 1;
+	case ObjectState::Trace: return 1;
+	case ObjectState::Attack: return 2;
+	case ObjectState::Attacked:  return 3;
+	case ObjectState::Die:	 return 3;
+	case ObjectState::RunAway: return 0;
+	default: return 1;
+	}
+}
+
 void CEnemy::SetActivityScope(const XMFLOAT3& xmf3ActivityScope, const XMFLOAT3& xmf3Center)
 {
 	m_xmf3ActivityScope = xmf3ActivityScope;
@@ -161,7 +179,7 @@ void CEnemy::MoveToNextPosition(float elapsedTime)
 	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ENEMY_SPEED_TEMP * elapsedTime)));
 	m_ToMovePosition.y = m_xmf3Position.y;
 	XMFLOAT3 gap = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
-	if (Vector3::Length(gap) < 30) {
+	if (Vector3::Length(gap) < 10) {
 		SetPosition(m_ToMovePosition);
 		SetIsOnMoving(false);
 	}
@@ -182,7 +200,7 @@ void CEnemy::LookTarget(bool rotatedModel)
 
 	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 });
 	if (rotatedModel) {
-		Rotate({ 0,1,0 }, 180.0f);
+		//Rotate({ 0,1,0 }, 180.0f);
 	}
 }
 
@@ -319,7 +337,7 @@ void CMeleeEnemy::FindClosePositionToTarget()
 
 	XMFLOAT3 targetVec = Vector3::Subtract(playerPos, m_xmf3Position);
 	targetVec = Vector3::Multifly(Vector3::Normalize(targetVec), -1);
-
+	 
 	m_ToMovePosition = Vector3::Subtract(m_TargetPlayer->GetPosition(),
 		Vector3::Multifly(targetVec, m_AttackRange * 1.5f));
 

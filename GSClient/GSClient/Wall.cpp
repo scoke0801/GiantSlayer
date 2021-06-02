@@ -222,6 +222,16 @@ void CDoorWall::Update(float fTimeElapsed)
 	}
 }
 
+void CDoorWall::UpdateOnServer(float elapsedTime)
+{
+	m_LeftDoor->Update(elapsedTime);
+	m_RightDoor->Update(elapsedTime);
+	for (CWall* pWall : m_Walls)
+	{
+		pWall->Update(elapsedTime);
+	}
+}
+
 void CDoorWall::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	m_LeftDoor->Draw(pd3dCommandList, pCamera);

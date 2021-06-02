@@ -48,6 +48,11 @@ void PacketProcessor::InitAll()
 	InitArrows();
 	BuildBlockingRegionOnMap();
 
+	for (int i = m_DoorStartIndex; i < m_DoorStartIndex + 5; ++i) {
+		CDoorWall* pDoorWall = reinterpret_cast<CDoorWall*>(
+			m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][i]);
+		pDoorWall->OpenDoor();
+	}
 	cout << "서버 준비 완료!\n";
 }
 
@@ -166,6 +171,25 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift,
 				m_Cameras[p_keyboard.id]->GetRight3f(), distance));
 			break;
+		case VK_J:
+			if (m_Players[p_keyboard.id]->IsCanAttack()) {
+				m_Players[p_keyboard.id]->Attack();
+			}
+			break;
+		case VK_U: 
+			for (int i = m_DoorStartIndex; i < m_DoorStartIndex + 5; ++i) {
+				CDoorWall* pDoorWall = reinterpret_cast<CDoorWall*>(
+					m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][i]);
+				pDoorWall->OpenDoor();
+			}
+			break;
+		case VK_I:
+			for (int i = m_DoorStartIndex; i < m_DoorStartIndex + 5; ++i) {
+				CDoorWall* pDoorWall = reinterpret_cast<CDoorWall*>(
+					m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][i]);
+				pDoorWall->CloserDoor();
+			}
+			break;
 		}
 
 		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
@@ -245,14 +269,14 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 			}
 			else if (p_mouse.InputType[i] == MOUSE_INPUT_TYPE::M_RMOVE) {
 				float offset = IntToFloat(p_mouse.yInput[i]);
-				cameraOffset += offset * 0.025f;
-				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset * 0.025f));
+				cameraOffset += offset * 0.125f;
+				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset * 0.125f));
 			}
-			p_mouseProcess.cameraRotateY = FloatToInt(cameraRotateY);
-			p_mouseProcess.playerRotateY = FloatToInt(playerRotateY);
-			p_mouseProcess.cameraOffset = FloatToInt(cameraOffset);
 		}
-		 
+
+		p_mouseProcess.cameraRotateY = FloatToInt(cameraRotateY);
+		p_mouseProcess.playerRotateY = FloatToInt(playerRotateY);
+		p_mouseProcess.cameraOffset = FloatToInt(cameraOffset);
 		SendPacket(p_id, &p_mouseProcess);
 	}
 		break;
@@ -578,6 +602,10 @@ void PacketProcessor::InitMonsters()
 		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 	}
+	for (int i = 0; i < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++i) {
+		auto pEnemy = reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][i]);
+		pEnemy->ConnectPlayer(m_Players, MAX_PLAYER);
+	} 
 }
 
 void PacketProcessor::InitArrows()
@@ -721,6 +749,7 @@ void PacketProcessor::InitObstacle()
 /////////////////////////////////////////////////////////////////////////////////
 
 // DoorWall----------------------------------------------------------------------
+	m_DoorStartIndex = m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].size();
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC1);
 	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC1]);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
@@ -1093,11 +1122,15 @@ void PacketProcessor::SendSyncUpdatePacket()
 		p_syncUpdate.lookY[i] = FloatToInt(look.y);
 		p_syncUpdate.lookZ[i] = FloatToInt(look.z);
 
-		if (m_Players[i]->IsMoving()) {
-			p_syncUpdate.states[i] = 1;
+		if (false == m_Players[i]->IsCanAttack())
+		{
+			p_syncUpdate.states[i] = AnimationType::ATTACK;
+		}
+		else if (m_Players[i]->IsMoving()) {
+			p_syncUpdate.states[i] = AnimationType::RUN;
 		}
 		else {
-			p_syncUpdate.states[i] = 0;
+			p_syncUpdate.states[i] = AnimationType::IDLE;
 		}
 	}
 	for (int i = 0; i < MAX_PLAYER; ++i) {
@@ -1134,7 +1167,7 @@ void PacketProcessor::SendMonsterActPacket()
 		p_monsterUpdate[i].lookX = FloatToInt(look.x);
 		p_monsterUpdate[i].lookY = FloatToInt(look.y);
 		p_monsterUpdate[i].lookZ = FloatToInt(look.z);	 
-		p_monsterUpdate[i].state = 1;
+		p_monsterUpdate[i].state = mon->GetAnimationType();
 	}
 	for (int i = SERVER_ID + 1; i <= MAX_PLAYER; ++i) {
 		if (m_Clients[i].m_state != PL_STATE::PLST_CONNECTED) {

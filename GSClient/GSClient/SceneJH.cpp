@@ -468,8 +468,7 @@ void CSceneJH::Update(float elapsedTime)
 				else {
 					m_CurrentCamera->SetShake(true, 0.5f, 15);
 
-					m_Player->FixCollision();
-
+					m_Player->FixCollision(); 
 					cout << "충돌 : 플레이어 - 적\n";
 				}
 			}
@@ -1033,6 +1032,10 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 
 			m_MinimapCamera->SetTarget(m_Players[p_processLogin.id]);
 
+			for (int i = 0; i < 5; ++i) {
+				CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
+				p->OpenDoor();
+			}
 			//for (int i = 0; i < MAX_PLAYER; ++i) {
 			//	m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
 			//}
@@ -1079,9 +1082,9 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			//cout << "offset : " << offset << "\n";
 			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
 		}
-		if (p_mouseProcess.cameraRotateX != 0) {
+		/*if (p_mouseProcess.cameraRotateX != 0) {
 			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX);
-		}
+		}*/
 
 		if (p_mouseProcess.cameraRotateY != 0) {
 			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY);
@@ -1089,21 +1092,21 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), rotateY);
 		}
 
-		if (p_mouseProcess.cameraRotateZ != 0) {
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ);
-		}
-		if (p_mouseProcess.playerRotateX != 0) {
+		//if (p_mouseProcess.cameraRotateZ != 0) {
+		//	m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ);
+		//}
+		/*if (p_mouseProcess.playerRotateX != 0) {
 			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX);
-		}
+		}*/
 		if (p_mouseProcess.playerRotateY != 0) {
 			float rotateY = IntToFloat(p_mouseProcess.playerRotateY);
 			//cout << "playerRotateY : " << rotateY << "\n";
 			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY);
 			m_MinimapArrow->Rotate(-rotateY);
 		}
-		if (p_mouseProcess.playerRotateZ != 0) {
+		/*if (p_mouseProcess.playerRotateZ != 0) {
 			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ);
-		}
+		}*/
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT:
 	{
@@ -1182,39 +1185,60 @@ void CSceneJH::ProcessInput()
 	if (false == m_IsFocusOn) {
 		return;
 	}
-	if (m_CurrentCamera->IsOnShake()) { 
+	if (m_CurrentCamera->IsOnShake()) {
 		// 피격 상태일 때 잠시 제어권 뺏기
-		return; 
+		return;
 	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
-		auto keyInput = GAME_INPUT; 
+		auto keyInput = GAME_INPUT;
 		bool processKey = false;
 		P_C2S_KEYBOARD_INPUT p_keyboard;
 		p_keyboard.size = sizeof(P_C2S_KEYBOARD_INPUT);
 		p_keyboard.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
 		p_keyboard.id = CFramework::GetInstance().GetPlayerId();
 
-		if (keyInput.KEY_W){ 
+		if (keyInput.KEY_W) {
 			p_keyboard.keyInput = VK_W;
 			processKey = true;
 		}
-		if (keyInput.KEY_A){ 
+		if (keyInput.KEY_A) {
 			p_keyboard.keyInput = VK_A;
 			processKey = true;
 		}
-		if (keyInput.KEY_S){ 
+		if (keyInput.KEY_S) {
 			p_keyboard.keyInput = VK_S;
 			processKey = true;
 		}
-		if (keyInput.KEY_D){ 
-			p_keyboard.keyInput = VK_D; 
+		if (keyInput.KEY_D) {
+			p_keyboard.keyInput = VK_D;
 			processKey = true;
 		}
+		if (keyInput.KEY_J) {
+			p_keyboard.keyInput = VK_J;
+			processKey = true;
+		}
+		if (keyInput.KEY_U) {
+			p_keyboard.keyInput = VK_U;
+			processKey = true;
+			//for (int i = 0; i < 5; ++i) {
+			//	CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
+			//	p->OpenDoor();
+			//}
+		}
+		if (keyInput.KEY_I) {
+			p_keyboard.keyInput = VK_I;
+			processKey = true;
+			//for (int i = 0; i < 5; ++i) {
+			//	CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
+			//	p->CloserDoor();
+			//}
+		}
+
 		if (keyInput.KEY_3)
 		{
 			m_isPlayerSelected = true;
-			m_CurrentCamera = m_Cameras[0]; 
+			m_CurrentCamera = m_Cameras[0];
 			m_CurrentCamera = m_PlayerCameras[0];
 		}
 		if (keyInput.KEY_4)
@@ -1229,7 +1253,7 @@ void CSceneJH::ProcessInput()
 		if (keyInput.KEY_P)
 		{
 			gbBoundaryOn = false;
-		} 
+		}
 		if (keyInput.KEY_K)
 		{
 			gbWireframeOn = true;
@@ -1241,8 +1265,9 @@ void CSceneJH::ProcessInput()
 		if (processKey == false) return;
 		int retVal = 0;
 		SendPacket(&p_keyboard);
-		return; 
+		return;
 	}
+
 	if (m_CurrentCamera == nullptr) return;
 
 	float cameraSpeed = m_CurrentCamera->GetSpeed();
@@ -1873,29 +1898,7 @@ void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 }
 
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	CGameObjectVer2* pBossParent = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Boss.bin", NULL, true);
-
-	CGameObjectVer2* pBoss = new CGameObjectVer2();
-	pBoss->SetPosition({ 16800,  -6070, 16500 });
-	pBoss->FixPositionByTerrain(m_Terrain);
-	pBoss->Scale(120, 120, 120);
-	pBoss->Rotate({ 0,1,0 }, 180);
-	pBoss->SetChild(pBossParent, true);
-	pBoss->SetAnimationSet(1);
-	//pBoss->Scale(200, 200, 200);
-	pBoss->SetShadertoAll();
-	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 11, 10, 7, XMFLOAT3{ 0,0,0 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.5,5,3.5)));
-	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ 2.5, 3, 7 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
-	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ -2.5, 3, 7 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(-2.5, 5.5, 7), XMFLOAT3(2.25,2.5,3)));
-	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 3, 3, 5, XMFLOAT3{ 0,3,-7 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5)));
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pBoss);
-
+{ 
 	CGameObjectVer2* pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
 
@@ -2194,6 +2197,28 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 3, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 	}
+	CGameObjectVer2* pBossParent = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Boss.bin", NULL, true);
+
+	CGameObjectVer2* pBoss = new CGameObjectVer2();
+	pBoss->SetPosition({ 16800,  -6070, 16500 });
+	pBoss->FixPositionByTerrain(m_Terrain);
+	pBoss->Scale(120, 120, 120);
+	pBoss->Rotate({ 0,1,0 }, 180);
+	pBoss->SetChild(pBossParent, true);
+	pBoss->SetAnimationSet(1);
+	//pBoss->Scale(200, 200, 200);
+	pBoss->SetShadertoAll();
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 11, 10, 7, XMFLOAT3{ 0,0,0 });
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.5, 5, 3.5)));
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ 2.5, 3, 7 });
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ -2.5, 3, 7 });
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(-2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
+	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 3, 3, 5, XMFLOAT3{ 0,3,-7 });
+	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5)));
+	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pBoss);
+
 }
 
 void CSceneJH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

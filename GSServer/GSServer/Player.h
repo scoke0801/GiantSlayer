@@ -61,4 +61,5 @@ public:
 
 public:
 	bool Attacked(CGameObject* pObject);
+	void Attack();
 };
