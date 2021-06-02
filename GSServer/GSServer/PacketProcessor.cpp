@@ -229,27 +229,30 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 		float playerRotateY = 0.0f;
 		float cameraRotateY = 0.0f;
 		float cameraOffset = 0.0f;
-		if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_LMOVE) {
-			for (int i = 0; i < p_mouse.inputNum; ++i) {
+
+		for (int i = 0; i < p_mouse.inputNum; ++i) {
+			if (p_mouse.InputType[i] == MOUSE_INPUT_TYPE::M_LMOVE) {
 				float dx = IntToFloat(p_mouse.xInput[i]);
 
 				m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+				cameraRotateY += dx * 75;
 				if (m_Players[p_mouse.id]->IsMoving())
 				{
 					playerRotateY += dx * 150;
 					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
 				}
+
 			}
-			p_mouseProcess.playerRotateY = FloatToInt(playerRotateY);
-		}
-		else if (p_mouse.InputType == MOUSE_INPUT_TYPE::M_RMOVE) {
-			for (int i = 0; i < p_mouse.inputNum; ++i) {
+			else if (p_mouse.InputType[i] == MOUSE_INPUT_TYPE::M_RMOVE) {
 				float offset = IntToFloat(p_mouse.yInput[i]);
 				cameraOffset += offset * 0.025f;
 				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset * 0.025f));
 			}
+			p_mouseProcess.cameraRotateY = FloatToInt(cameraRotateY);
+			p_mouseProcess.playerRotateY = FloatToInt(playerRotateY);
 			p_mouseProcess.cameraOffset = FloatToInt(cameraOffset);
 		}
+		 
 		SendPacket(p_id, &p_mouseProcess);
 	}
 		break;

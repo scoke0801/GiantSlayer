@@ -2508,7 +2508,7 @@ void CSceneTH::SendMouseInputPacket()
 		p_mouseInput.xInput[i] = FloatToInt(m_MousePositions[i].x);
 		p_mouseInput.yInput[i] = FloatToInt(m_MousePositions[i].y);
 	}
-	p_mouseInput.InputType = m_prevMouseInputType;
+	//p_mouseInput.InputType = m_prevMouseInputType;
 
 	int retVal = 0;
 	SendPacket(CFramework::GetInstance().GetSocket(),

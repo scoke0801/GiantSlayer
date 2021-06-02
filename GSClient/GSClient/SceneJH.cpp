@@ -1437,10 +1437,7 @@ void CSceneJH::OnMouseDown(WPARAM btnState, int x, int y)
 	if (m_CurrentCamera->IsOnShake()) {
 		// 피격 상태일 때 잠시 제어권 뺏기
 		return;
-	}
-	if (CFramework::GetInstance().IsOnConntected())
-	{
-	}
+	} 
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
 	SetCapture(CFramework::GetInstance().GetHWND());
@@ -1455,13 +1452,6 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 	if (m_CurrentCamera->IsOnShake()) {
 		// 피격 상태일 때 잠시 제어권 뺏기
 		return;
-	}
-	if (CFramework::GetInstance().IsOnConntected())
-	{
-		if (m_MousePositions.size() > 0) {
-			SendMouseInputPacket();
-			//RecvMouseProcessPacket();
-		}
 	} 
 	ReleaseCapture();
 }
@@ -1486,7 +1476,7 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 			float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
 			 
 			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_LMOVE;
-			 
+			m_MouseInputTypes.emplace_back(MOUSE_INPUT_TYPE::M_LMOVE);
 			m_MousePositions.emplace_back(POINTF{ dx, dy });  
 		}
 		else if ((btnState & MK_RBUTTON) != 0)
@@ -1495,38 +1485,42 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 			float dy = static_cast<float>(y - m_LastMousePos.y);
 			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_RMOVE;
 
+			m_MouseInputTypes.emplace_back(MOUSE_INPUT_TYPE::M_RMOVE);
 			m_MousePositions.emplace_back(POINTF{ dx, dy });
 		} 
 	}
-	if ((btnState & MK_LBUTTON) != 0)
-	{
-		// Make each pixel correspond to a quarter of a degree.
-		float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
-		float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
-
-		if (m_isPlayerSelected)
+	else {
+		if ((btnState & MK_LBUTTON) != 0)
 		{
-			//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+			// Make each pixel correspond to a quarter of a degree.
+			float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
+			float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
 
-			if (m_Player->IsMoving())
+			if (m_isPlayerSelected)
 			{
-				m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
-				m_MinimapArrow->Rotate(-dx * 150);
-			} 
-		}
-		else {
-			m_CurrentCamera->Pitch(dy);
-			m_CurrentCamera->RotateY(dx);
-		} 
-	}
+				//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
+				m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
 
-	if ((btnState & MK_RBUTTON) != 0)
-	{
-		float dx = static_cast<float>(x - m_LastMousePos.x);
-		float dy = static_cast<float>(y - m_LastMousePos.y);
-		 
-		m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, dy * 0.025f));
+				if (m_Player->IsMoving())
+				{
+					m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
+					m_MinimapArrow->Rotate(-dx * 150);
+				}
+			}
+			else {
+				m_CurrentCamera->Pitch(dy);
+				m_CurrentCamera->RotateY(dx);
+			}
+		}
+
+
+		if ((btnState & MK_RBUTTON) != 0)
+		{
+			float dx = static_cast<float>(x - m_LastMousePos.x);
+			float dy = static_cast<float>(y - m_LastMousePos.y);
+
+			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, dy * 0.025f));
+		}
 	}
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
@@ -3110,11 +3104,13 @@ void CSceneJH::SendMouseInputPacket()
 	p_mouseInput.inputNum = m_MousePositions.size();
 
 	for (int i = 0; i < p_mouseInput.inputNum; ++i) {   
+		p_mouseInput.InputType[i] = m_MouseInputTypes[i];
 		p_mouseInput.xInput[i] = FloatToInt(m_MousePositions[i].x);
 		p_mouseInput.yInput[i] = FloatToInt(m_MousePositions[i].y);
 	}
 	m_MousePositions.clear();
-	p_mouseInput.InputType = m_prevMouseInputType; 
+	m_MouseInputTypes.clear();
+	//p_mouseInput.InputType = m_prevMouseInputType; 
 
 	int retVal = 0;
 	SendPacket(&p_mouseInput);

@@ -106,6 +106,7 @@ private:	// about SceneInfo
 
 private: // for server mouse input process
 	vector<POINTF>				m_MousePositions;
+	vector<MOUSE_INPUT_TYPE>    m_MouseInputTypes;
 	MOUSE_INPUT_TYPE			m_prevMouseInputType;
 
 private:

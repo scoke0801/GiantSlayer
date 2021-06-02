@@ -143,8 +143,8 @@ enum class GAME_STATE : short {
 	S_RESULT
 };
 
-enum class MOUSE_INPUT_TYPE : short {
-	M_LMOVE,
+enum class MOUSE_INPUT_TYPE : BYTE {
+	M_LMOVE = 0,
 	M_RMOVE,
 	M_LBUTTON_UP,
 	M_LBUTTON_DOWN,
@@ -220,7 +220,7 @@ struct P_C2S_MOUSE_INPUT {
 	BYTE size; 
 	PACKET_PROTOCOL type;
 	short id;
-	MOUSE_INPUT_TYPE InputType; 
+	MOUSE_INPUT_TYPE InputType[MAX_MOUSE_INPUT];
 	short inputNum;
 	short xInput[MAX_MOUSE_INPUT];
 	short yInput[MAX_MOUSE_INPUT];
