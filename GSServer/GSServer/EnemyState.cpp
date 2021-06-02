@@ -10,7 +10,7 @@
 void WaitState::Enter(CEnemy* pEnemy)
 {
     m_StateName = ObjectState::Wait;
-    cout << "WaitState::Enter" << endl;
+  //  cout << "WaitState::Enter" << endl;
 }
 
 void WaitState::Execute(CEnemy* pEnemy, float elapsedTime)
@@ -19,7 +19,7 @@ void WaitState::Execute(CEnemy* pEnemy, float elapsedTime)
 
 void WaitState::Exit(CEnemy* pEnemy)
 {
-    cout << "WaitState::Exit" << endl;
+  // cout << "WaitState::Exit" << endl;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ void WaitState::Exit(CEnemy* pEnemy)
 void IdleState::Enter(CEnemy* pEnemy)
 {
     m_StateName = ObjectState::Idle;
-    cout << " IdleState::Enter" << endl;
+   //cout << " IdleState::Enter" << endl;
 }
 
 void IdleState::Execute(CEnemy* pEnemy, float elapsedTime)
@@ -37,7 +37,7 @@ void IdleState::Execute(CEnemy* pEnemy, float elapsedTime)
 
 void IdleState::Exit(CEnemy* pEnemy)
 {
-    cout << "IdleState::Exit" << endl;
+    //cout << "IdleState::Exit" << endl;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -79,13 +79,13 @@ void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
 
 void PatrolState::Exit(CEnemy* enemy)
 {
-    cout << " PatrolState::Exit\n";
+  //  cout << " PatrolState::Exit\n";
 }
 
 void AttackState::Enter(CEnemy* enemy)
 {
     m_StateName = ObjectState::Attack;
-    cout << "AttackState::Enter \n";
+   // cout << "AttackState::Enter \n";
     m_LifeTime = MELLE_ENEMY_ATTACK_TIME; 
 }
 
@@ -103,14 +103,14 @@ void AttackState::Execute(CEnemy* enemy, float elapsedTime)
 void AttackState::Exit(CEnemy* enemy)
 { 
     enemy->SetIsOnMoving(false);
-    cout << "공격 끝 \n";
+   // cout << "공격 끝 \n";
 }
 
 void TraceState::Enter(CEnemy* enemy)
 {
     m_StateName = ObjectState::Trace;
     m_LifeTime = 0.5f;
-    cout << "TraceState::Enter \n";
+   // cout << "TraceState::Enter \n";
     m_AttackRange = enemy->GetAttackRange();
     m_TargetPlayer = enemy->GetTargetPlayer();
     if (m_TargetPlayer == nullptr) {
@@ -141,20 +141,20 @@ void TraceState::Execute(CEnemy* enemy, float elapsedTime)
 
 void TraceState::Exit(CEnemy* enemy)
 {
-    cout << "TraceState::Exit\n";
+   //  cout << "TraceState::Exit\n";
      
 }
 
 void AttackedState::Enter(CEnemy* enemy)
 {
-   /* const int PLAYER_DAMAGE = 15;
+    const int PLAYER_DAMAGE = 15;
     int hp = enemy->GetHP();
     hp -= PLAYER_DAMAGE;
     if (hp <= 0) {
-        MAIN_GAME_SCENE->DeleteEnemy(enemy);
+        PacketProcessor::GetInstance()->DeleteObject(enemy, (int)OBJECT_LAYER::Enemy);
         return;
     }
-    enemy->SetHP(hp);*/
+    enemy->SetHP(hp);
 }
 
 void AttackedState::Execute(CEnemy* enemy, float elapsedTime)

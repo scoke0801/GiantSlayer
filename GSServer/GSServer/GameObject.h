@@ -142,6 +142,9 @@ public:
 	virtual void ChangeState(ObjectState stateInfo, void* pData) {}
 	virtual ObjectState GetStateInfo() const { return ObjectState::Wait; }
 	virtual BYTE GetAnimationType() const { return 0;}
+
+	void SetHP(UINT HP) { m_HP = HP; }
+	UINT GetHP() const { return m_HP; }
 public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;

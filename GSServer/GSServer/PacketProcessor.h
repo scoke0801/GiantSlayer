@@ -106,6 +106,7 @@ public:
 
 	void Disconnect(int p_id);
 
+	void DeleteObject(CGameObject* pObject, int layerIdx);
 private:
 	void Update(float elapsedTime);
 	

@@ -309,6 +309,15 @@ void PacketProcessor::Disconnect(int packet_id)
 	ResetPlayer(player_id);
 }
 
+void PacketProcessor::DeleteObject(CGameObject* pObject, int layerIdx)
+{
+	auto res = std::find(m_ObjectLayers[layerIdx].begin(), m_ObjectLayers[layerIdx].end(), pObject);
+	if (res != m_ObjectLayers[layerIdx].end()) {
+		//cout << " 객체 삭제\n";
+		m_ObjectLayers[layerIdx].erase(res);
+	}
+}
+
 void PacketProcessor::Update(float elapsedTime)
 {
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
@@ -339,12 +348,18 @@ void PacketProcessor::Update(float elapsedTime)
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) { 
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			if (m_Players[i]->IsExist() == false) continue;
+			if (pEnemy->CollisionCheck(m_Players[i])) {
+				if (m_Players[i]->Attacked(pEnemy)) {
+					if (false == m_Players[i]->IsCanAttack()) {
+						pEnemy->ChangeState(ObjectState::Attacked, m_Players[i]);
+						//cout << "플레이어 공격 - 몬스터\n";
+					}
+					else {
+						//m_CurrentCamera->SetShake(true, 0.5f, 15);
 
-			if (pEnemy->CollisionCheck(m_Players[i])) { 
-				//if (m_Players[i]->Attacked(pEnemy)) 
-				{
-					m_Players[i]->FixCollision();
-					cout << "충돌 : 플레이어 - 적\n";
+						m_Players[i]->FixCollision();
+						//cout << "충돌 : 플레이어 - 적\n";
+					}
 				}
 			}
 		}
@@ -375,7 +390,7 @@ void PacketProcessor::Update(float elapsedTime)
 				pEnemy->ChangeState(ObjectState::Attacked, pArrow);
 				pArrow->SetIsUsable(true);
 
-				cout << "충돌 : 플레이어 화살 - 적\n";
+				//cout << "충돌 : 플레이어 화살 - 적\n";
 				break;
 			}
 		}
@@ -1111,7 +1126,8 @@ void PacketProcessor::SendSyncUpdatePacket()
 
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		p_syncUpdate.id[i] = i;// static_cast<char>(m_Players[i]->GetId());
-
+		p_syncUpdate.hp[i] = m_Players[i]->GetHP();
+		//p_syncUpdate.Sp[i] = m_Players[i]->GetSP();
 		XMFLOAT3 pos = m_Players[i]->GetPosition();
 		XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
 		p_syncUpdate.posX[i] = FloatToInt(pos.x);
