@@ -34,7 +34,7 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	if (false == m_IsCanAttack) {
 		m_AttackWaitingTime -= fTimeElapsed;
-		SetAnimationSet(2);
+		SetAnimationSet(AnimationType::ATTACK);
 		if (m_AttackWaitingTime < 0.0f){
 			m_AttackWaitingTime = 0.0f;
 			m_IsCanAttack = true;
@@ -55,9 +55,9 @@ void CPlayer::Update(float fTimeElapsed)
 	}
 	else {
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
-			SetAnimationSet(0);
+			SetAnimationSet(AnimationType::IDLE);
 		else
-			SetAnimationSet(1);
+			SetAnimationSet(AnimationType::RUN);
 	}
 	// ÇÇ°Ý
 	if (m_AttackedDelay > 0.0f) {
@@ -77,7 +77,6 @@ void CPlayer::Update(float fTimeElapsed)
 		else {
 			y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
 		}
-		//SetAnimationSet(2);
 		Move({ 0,y,0 });
 		m_JumpTime += fTimeElapsed;
 		if (m_JumpTime > TO_JUMP_TIME) {
@@ -212,7 +211,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 void CPlayer::Attack()
 {
 	SetCanAttack(false);
-	IncreaseAttackWaitingTime(1.4f);
+	IncreaseAttackWaitingTime(1.03f);
 	SetVelocityToZero();
 
 	auto temp = m_Colliders[0];

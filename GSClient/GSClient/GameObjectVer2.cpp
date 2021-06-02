@@ -797,7 +797,23 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 				if (!strcmp(pstrToken, "<AnimationSet>:"))
 				{
 					haveToRead = false;
-					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 1];
+					// 더미 프레임 추가
+					pAnimationSet->m_pfKeyFrameTransformTimes[i] = pAnimationSet->m_pfKeyFrameTransformTimes[i - 1]; // 트랜스폼 적용되는 시간
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 1]; // 트랜스폼
+					
+					/*
+					2안, 배열 크기를 m_nKeyFrameTransforms - 1 로 아예 재할당하는 방안, 깜박임 문제 있음
+					XMFLOAT4X4* tempMatrix = new XMFLOAT4X4[pAnimationSet->m_nKeyFrameTransforms - 1];
+					memcpy(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[0], tempMatrix, sizeof(pAnimationSet->m_ppxmf4x4KeyFrameTransforms[0]) - sizeof(XMFLOAT4X4**));
+
+					float* tempTimes = new float[pAnimationSet->m_nKeyFrameTransforms - 1];
+					memcpy(pAnimationSet->m_pfKeyFrameTransformTimes, tempTimes, sizeof(pAnimationSet->m_pfKeyFrameTransformTimes) - sizeof(float*));
+
+					pAnimationSet->m_nKeyFrameTransforms -= 1;
+					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[0] = tempMatrix;
+					//pAnimationSet->m_pfKeyFrameTransformTimes = tempTimes;
+					*/
+
 					break;
 				}
 				if (!strcmp(pstrToken, "<Transforms>:"))

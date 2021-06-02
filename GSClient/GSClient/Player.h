@@ -17,6 +17,15 @@ enum class PlayerWeaponType
 	Sword = 0x01,
 	Bow = 0x02
 };
+enum AnimationType
+{
+	IDLE,
+	WALK,
+	RUN,
+	ATTACK,
+	DAMAGED,
+	DEATH
+};
 
 class CTerrain; 
 
