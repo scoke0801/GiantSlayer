@@ -234,6 +234,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pTerrainWater->SetPosition(XMFLOAT3(5450.0f, -1300.0f, 16500.0f)); 
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater].push_back(pTerrainWater);
 
+	//FbxLoader(m_pfbxManager, "tree", false, 1);
+
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
 	BuildMapSector1(pd3dDevice, pd3dCommandList);
@@ -1419,7 +1421,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_F5)
 	{ 
-		m_Player->SetPosition({ 16749.9,  -6000, 9171.78 });
+		m_Player->SetPosition({ 16749.9,  -6000, 8500.78 });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F6)
@@ -1443,8 +1445,8 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_O)
 	{
-		DisplayVector3(m_Player->GetPosition());
-		//gbBoundaryOn = true;
+		//DisplayVector3(m_Player->GetPosition());
+		gbBoundaryOn = true;
 	}
 	if (keyInput.KEY_P)
 	{

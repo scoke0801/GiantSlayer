@@ -70,7 +70,7 @@ bool CEnemy::IsEnemyInSight() // Chase State
 		for (auto plAABB : plAABBs) {
 			if (ret = m_SightAABB.Intersects(plAABB->GetBox())) {
 				// 해당 플레이어를 공격하도록 설정하자
-				cout << "공격할 대상을 찾았습니다.\n";
+				//cout << "공격할 대상을 찾았습니다.\n";
 				 
 				//m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.5f; 
 				m_TargetPlayer = player;
