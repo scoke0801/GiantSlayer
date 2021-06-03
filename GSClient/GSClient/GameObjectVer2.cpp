@@ -1042,8 +1042,11 @@ void CGameObjectVer2::SetTextureIndexFindByName(string fileName)
 	else if (fileName == "Skeleton_D") {
 		SetTextureIndex(0x20);
 	}
-	else if (fileName == "DemoSkeleton") {
+	else if (fileName == "DS_skeleton_standard") {
 		SetTextureIndex(0x40);
+	}
+	else if (fileName == "DS_equipment_standard") {
+		SetTextureIndex(0x80);
 	}
 }
 

@@ -291,7 +291,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Rain",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
-		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
+		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll"
 	};
 
 	const wchar_t* address[] =
@@ -315,7 +315,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Rain.dds",
 		L"resources/Textures/Body_D.dds",L"resources/Textures/Body_C.dds",L"resources/Textures/Body_E.dds",L"resources/Textures/Body_N.dds",
 		L"resources/Textures/Skeleton_D.dds",
-		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds"
+		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",
+		L"resources/Textures/DS_equipment_standard.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -369,6 +370,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
+		"MeleeSkeleton_02_EquipAll"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -452,7 +454,7 @@ void CSceneJH::Update(float elapsedTime)
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
-			cout << "충돌 : 플레이어 - 장애물\n";
+			//cout << "충돌 : 플레이어 - 장애물\n";
 		}
 	}
 
@@ -465,7 +467,7 @@ void CSceneJH::Update(float elapsedTime)
 			if (false == m_Player->IsCanAttack()) {
 				if (false == m_Player->IsAleradyAttack()) {
 					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					cout << "플레이어 공격 - 몬스터\n";
+					//cout << "플레이어 공격 - 몬스터\n";
 					m_Player->SetAleradyAttack(true);
 				}
 			}
@@ -473,7 +475,7 @@ void CSceneJH::Update(float elapsedTime)
 			{
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
 				m_Player->FixCollision(); 
-				cout << "충돌 : 플레이어 - 적\n";
+				//cout << "충돌 : 플레이어 - 적\n";
 			}
 
 		}
@@ -484,7 +486,7 @@ void CSceneJH::Update(float elapsedTime)
 				CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
 				thisEnemy->FixCollision(pObstacle);
 				thisEnemy->CollideToObstacle();
-				cout << "충돌 : 몬스터 - 장애물 재탐색 수행\n";
+				//cout << "충돌 : 몬스터 - 장애물 재탐색 수행\n";
 			}
 		}
 	}
@@ -497,7 +499,7 @@ void CSceneJH::Update(float elapsedTime)
 			if (m_Player->Attacked(pArrow)) { 
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
 				pArrow->SetDrawable(true); 
-				cout << "충돌 : 플레이어 - 적\n";
+				//cout << "충돌 : 플레이어 - 적\n";
 			}
 		}
 	}
@@ -1921,12 +1923,12 @@ void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 { 
 	CGameObjectVer2* pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
 
 	CEnemy* pEnemy;
-	XMFLOAT3 scale = { 600.0f,600.0f,600.0f };
-	{	// Monster Area1
-		pEnemy = new CMeleeEnemy();
+	XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
+	{	// Monster Area1 
+		pEnemy = new CMeleeEnemy(); 
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
@@ -1941,7 +1943,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy))); 
 		
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -1957,7 +1959,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/DungeonSkeleton_demo.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -1973,7 +1975,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/DungeonSkeleton_demo.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -1991,7 +1993,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	{	// Monster Area1-2
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -2007,7 +2009,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/MaceSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -2023,7 +2025,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/StrongSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -2039,7 +2041,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/ExeSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -2056,7 +2058,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	}
 	{// Monster Area2-1
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/ExeSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -2072,7 +2074,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/MaceSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -2088,7 +2090,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/MaceSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -2105,7 +2107,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	}
 	{// Monster Area2-2
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/StrongSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -2121,7 +2123,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/StrongSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -2137,7 +2139,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/StrongSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
@@ -2154,6 +2156,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	}
 
 	{// Monster Area3
+		scale = { 600.0f,600.0f,600.0f };
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
@@ -3104,7 +3107,7 @@ void CSceneJH::DeleteEnemy(CEnemy* pEmeny)
 {
 	auto res = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Enemy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end(), pEmeny);
 	if (res != m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end()) {
-		cout << " 몬스터 삭제\n";
+	//	cout << " 몬스터 삭제\n";
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].erase(res);
 	}
 }

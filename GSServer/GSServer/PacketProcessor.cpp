@@ -440,7 +440,7 @@ void PacketProcessor::InitCameras()
 void PacketProcessor::InitMonsters()
 {
 	CEnemy* pEnemy;
-	XMFLOAT3 scale ={ 600.0f,600.0f,600.0f };
+	XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
 	{	// Monster Area1
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
@@ -579,6 +579,8 @@ void PacketProcessor::InitMonsters()
 	}
 
 	{// Monster Area3
+
+		scale = { 600.0f,600.0f,600.0f };
 		pEnemy = new CMeleeEnemy();
 		//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 		pEnemy->Scale(scale.x, scale.y, scale.z);
