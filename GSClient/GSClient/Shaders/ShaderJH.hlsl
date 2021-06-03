@@ -1241,6 +1241,18 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		cColor = gtxtBossD.Sample(gssWrap, input.uv);
 		cColor += gtxtBossC.Sample(gssWrap, input.uv);
 		cColor += gtxtBossE.Sample(gssWrap, input.uv);
+
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	} 
 	else if (gnTexturesMask & 0x20)
 	{

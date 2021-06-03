@@ -91,6 +91,9 @@ public:
 	CPlayer* GetTargetPlayer() const { return m_TargetPlayer; }
 
 	ObjectState GetStateInfo() const override{ return m_State->GetStatename(); }
+
+	// 장애물과 충돌하였으므로 특정 상태에서 상태 재검색을 수행하라
+	void CollideToObstacle();
 };
 
 class CMeleeEnemy : public CEnemy

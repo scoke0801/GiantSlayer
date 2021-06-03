@@ -238,6 +238,22 @@ void CEnemy::ChangeState(ObjectState stateInfo, void* pData)
 		break;
 	}
 }
+void CEnemy::CollideToObstacle()
+{
+	auto stateName = m_State->GetStatename();
+	switch (stateName)
+	{ 
+	case ObjectState::Patrol: 
+	case ObjectState::Trace: 
+	case ObjectState::RunAway:
+		FindNextPosition();
+		SetIsOnMoving(true);
+		break;
+	default:
+		break;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 

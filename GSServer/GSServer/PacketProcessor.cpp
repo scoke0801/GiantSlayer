@@ -697,7 +697,7 @@ void PacketProcessor::ReadObstaclesPosition()
 		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_1 + i),
 			GetPosition(str, d));
 	}
-	for (int i = 0; i < 15; ++i) {
+	for (int i = 0; i < 10; ++i) {
 		string str = "DESERT_ROCK_" + to_string(i + 1);
 		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DESERT_ROCK_1 + i),
 			GetPosition(str, d));
@@ -882,19 +882,16 @@ void PacketProcessor::InitObstacle()
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 
-	for (int i = 0; i < 6; ++i) {
+	for (int i = 0; i < 5; ++i) {
 		if (i == 0) {
-			pObject->Scale(3.0f, 3.0f, 3.0f);
-		}
-		else if (i == 3) { 
-			pObject->Rotate({ 0,1,0 }, 270);
-			pObject->Scale(3.0f, 3.0f, 3.0f); 
-		}
-		else if (i == 1) { 
 			pObject->Rotate({ 0,1,0 }, 90);
 			pObject->Scale(1.5f, 1.5f, 1.5f);
 		}
-		else if (i == 5) { 
+		else if (i == 2) { 
+			pObject->Rotate({ 0,1,0 }, 270);
+			pObject->Scale(3.0f, 3.0f, 3.0f);
+		}
+		else if (i == 4) { 
 			pObject->Rotate({ 0,1,0 }, 135);
 			pObject->Scale(1.5f, 1.5f, 1.5f);
 		} 
@@ -905,15 +902,7 @@ void PacketProcessor::InitObstacle()
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
-
-	for (int i = 0; i < 4; ++i) {
-		pObject->Scale(0.5f, 0.5f, 0.5f);
-
-		pObject = new CGameObject();
-		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_12 + i)]);
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
-		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
-	}
+	 
 	int stop = 3;
 }
 

@@ -236,9 +236,9 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
-	//BuildMapSector1(pd3dDevice, pd3dCommandList);
-	//BuildMapSector2(pd3dDevice, pd3dCommandList);
-	//BuildMapSector3(pd3dDevice, pd3dCommandList); 
+	BuildMapSector1(pd3dDevice, pd3dCommandList);
+	BuildMapSector2(pd3dDevice, pd3dCommandList);
+	BuildMapSector3(pd3dDevice, pd3dCommandList); 
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
 	//BuildMapSector5(pd3dDevice, pd3dCommandList); 
 
@@ -471,6 +471,16 @@ void CSceneJH::Update(float elapsedTime)
 					m_Player->FixCollision(); 
 					cout << "충돌 : 플레이어 - 적\n";
 				}
+			}
+		}
+	}
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
+		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+			if (pObstacle->CollisionCheck(pEnemy)) { 
+				CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
+				thisEnemy->FixCollision(pObstacle);
+				thisEnemy->CollideToObstacle();
+				cout << "충돌 : 몬스터 - 장애물 재탐색 수행\n";
 			}
 		}
 	}
@@ -2716,7 +2726,7 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		z_Pos = 18500.0f;
 
 		if (i == 0)
-		{
+		{ 
 			z_Pos = 19500;
 			pObject->Scale(4.0f, 4.0f, 4.0f);
 		}
@@ -2748,13 +2758,13 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 
-	for (int i = 0; i < 6; i++)
+	for (int i = 1; i < 6; i++)
 	{
 		pObject = new CGameObject();
 
 		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock]);
 
-		x_Pos = 11000.0f;
+		x_Pos = 9700.0f;
 		z_Pos = 19000 - 2000.0f * i;
 		if (i == 0)
 		{
@@ -2770,26 +2780,26 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		}
 		else if (i == 1)
 		{
-			x_Pos = 11000 + 500 * i;
+			x_Pos = 9700.0f + 500 * i;
 			z_Pos = 13900;
 			pObject->Rotate({ 0,1,0 }, 90);
 			pObject->Scale(1.5f, 1.5f, 1.5f);
 		}
 		else if (i == 5)
 		{
-			x_Pos = 12300;
-			z_Pos = 13300;
+			x_Pos = 13000;
+			z_Pos = 11700;
 			pObject->Rotate({ 0,1,0 }, 135);
 			pObject->Scale(1.5f, 1.5f, 1.5f);
 		}
 		else if (i == 4)
 		{
-			x_Pos = 13000;
+			x_Pos = 13200;
 			z_Pos = 15300;
 		}
 		else
 		{
-			x_Pos = 11000 + 500 * i;
+			x_Pos = 9700.0f + 500 * i;
 			z_Pos = 13900;
 		}
 		 
@@ -2801,7 +2811,8 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 600, 250, 600, { 0, 220, 0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
-
+	
+	return;
 	for (int i = 0; i < 4; i++)
 	{
 		pObject = new CGameObject();
@@ -2842,18 +2853,12 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
 	  
 
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree"); 
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
- 
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
- 
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree"); 
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow"); 
 }
 
