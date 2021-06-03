@@ -211,7 +211,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 void CPlayer::Attack()
 {
 	SetCanAttack(false);
-	IncreaseAttackWaitingTime(1.03f);
+	IncreaseAttackWaitingTime(1.033333f);
 	SetVelocityToZero();
 
 	auto temp = m_Colliders[0];

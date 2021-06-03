@@ -104,9 +104,11 @@ Texture2D gtxtBossN		   : register(t42);
 
 Texture2D gtxtMeleeSkeleton_01_D: register(t43);
 
-Texture2D gtxtMap		   : register(t44);
-Texture2D gtxtMirror	   : register(t45);
-Texture2D gtxtShadowMap	   : register(t46);
+Texture2D gtxtGreenTree		: register(t44);
+
+Texture2D gtxtMap		   : register(t45);
+Texture2D gtxtMirror	   : register(t46);
+Texture2D gtxtShadowMap	   : register(t47);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -962,7 +964,7 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	if (gnTexturesMask & 0x20)
 	{
 		cColor = gtxtDoor.Sample(gssWrap, input.uv);
-	} 
+	}
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
@@ -1111,7 +1113,11 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	if (gnTexturesMask & 0x100)
 	{
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
-	} 
+	}
+	if (gnTexturesMask & 0x200)
+	{
+		cColor = gtxtGreenTree.Sample(gssWrap, input.uv);
+	}
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor(input.shadowPosH);
 
