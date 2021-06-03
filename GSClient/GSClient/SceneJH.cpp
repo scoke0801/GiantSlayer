@@ -2457,7 +2457,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
 	}
 #pragma endregion 
-	 
+	
 	CGameObject* pObject;
 	
 	for (int i = 0; i < 2; i++)
@@ -2468,7 +2468,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x200);
 		pObject->Scale(100, 100, 100);
-		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+		//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 
 	for (int i = 0; i < 2; i++)
