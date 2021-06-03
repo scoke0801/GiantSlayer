@@ -290,7 +290,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"TerrainWater",
 		"Rain",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
-		"MeleeSkeleton_01_D"
+		"MeleeSkeleton_01_D",
+		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
 	};
 
 	const wchar_t* address[] =
@@ -313,8 +314,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Water.dds",
 		L"resources/OBJ/Rain.dds",
 		L"resources/Textures/Body_D.dds",L"resources/Textures/Body_C.dds",L"resources/Textures/Body_E.dds",L"resources/Textures/Body_N.dds",
-		L"resources/Textures/Skeleton_D.dds"
-	
+		L"resources/Textures/Skeleton_D.dds",
+		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -366,7 +367,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"TerrainWater",
 		"Rain",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
-		"MeleeSkeleton_01_D"
+		"MeleeSkeleton_01_D",
+		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -460,18 +462,20 @@ void CSceneJH::Update(float elapsedTime)
 			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
 			//	
 			//}
-			if (m_Player->Attacked(pEnemy)) {
-				if (false == m_Player->IsCanAttack()) { 
+			if (false == m_Player->IsCanAttack()) {
+				if (false == m_Player->IsAleradyAttack()) {
 					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
 					cout << "플레이어 공격 - 몬스터\n";
-				}
-				else {
-					m_CurrentCamera->SetShake(true, 0.5f, 15);
-
-					m_Player->FixCollision(); 
-					cout << "충돌 : 플레이어 - 적\n";
+					m_Player->SetAleradyAttack(true);
 				}
 			}
+			else if(m_Player->Attacked(pEnemy))
+			{
+				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				m_Player->FixCollision(); 
+				cout << "충돌 : 플레이어 - 적\n";
+			}
+
 		}
 	}
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
@@ -663,7 +667,7 @@ void CSceneJH::Update(float elapsedTime)
 		
 		m_pLightCamera->LookAt(LightPos,
 			{ TempPlayerPosition },
-			m_Player->GetReflectLook_P()
+			m_Player->GetUp()
 		);
 		
 		//m_pLightCamera->SetPosition(LightPos); 
@@ -1402,18 +1406,23 @@ void CSceneJH::ProcessInput()
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F3)
-	{
-		m_Player->SetPosition({ 12000,  -2000, 13500 });
+	{ 
+		m_Player->SetPosition({ 11965.7,  -1980.56, 13493 });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F4)
-	{ 
-		m_Player->SetPosition({ 12500,  -3000, 2500 });
+	{
+		m_Player->SetPosition({ 17000,  -6000, 5500 });
 		m_Player->FixPositionByTerrain(m_Terrain); 
 	}
 	if (keyInput.KEY_F5)
-	{
-		m_Player->SetPosition({ 17000,  -6000, 5500 });
+	{ 
+		m_Player->SetPosition({ 16749.9,  -6000, 9171.78 });
+		m_Player->FixPositionByTerrain(m_Terrain);
+	}
+	if (keyInput.KEY_F6)
+	{ 
+		m_Player->SetPosition({ 16958.4,  -6000, 14861.1 });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_U)
@@ -1432,7 +1441,8 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_O)
 	{
-		gbBoundaryOn = true;
+		DisplayVector3(m_Player->GetPosition());
+		//gbBoundaryOn = true;
 	}
 	if (keyInput.KEY_P)
 	{
@@ -1947,12 +1957,12 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/DungeonSkeleton_demo.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
-		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetTextureInedxToAll(0x40);
 		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
 		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
@@ -1963,12 +1973,12 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/DungeonSkeleton_demo.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
-		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetTextureInedxToAll(0x40);
 		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
 		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
@@ -2670,7 +2680,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	z_Tree = 18000;
 
 	pObject->Scale(20.0f, 20.0f, 20.0f); 
-	pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 100.0f, z_Tree });
+	pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree), z_Tree });
 	pObject->SetTextureIndex(0x08); 
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(15 * 0.5f, 10 * 0.5f, 15 * 0.5f)));

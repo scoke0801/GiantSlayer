@@ -36,6 +36,7 @@ void CPlayer::Update(float fTimeElapsed)
 		m_AttackWaitingTime -= fTimeElapsed;
 		SetAnimationSet(AnimationType::ATTACK);
 		if (m_AttackWaitingTime < 0.0f){
+			m_IsAlreadyAttack = false;
 			m_AttackWaitingTime = 0.0f;
 			m_IsCanAttack = true;
 
@@ -207,7 +208,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 		return false;
 	}
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
-	m_AttackedDelay += 1.5f;
+	m_AttackedDelay += 0.6666667f;
 	m_HP -= 5;
 	SetAnimationSet(AnimationType::DAMAGED);
 	if (m_HP <= 5) {

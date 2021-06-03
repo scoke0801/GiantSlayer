@@ -205,6 +205,7 @@ void CEnemy::LookTarget(bool rotatedModel)
 
 void CEnemy::FixCollision(CGameObject* pCollideObject)
 {
+	SetPosition(m_xmf3PrevPosition);
 }
 
 void CEnemy::Attack(float elapsedTime)

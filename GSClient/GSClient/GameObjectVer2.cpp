@@ -268,7 +268,10 @@ void CGameObjectVer2::SetShadertoAll(CShader* pShader)
 
 void CGameObjectVer2::SetTextureInedxToAll(UINT index)
 {
-	SetTextureIndex(index);
+	if (m_nTextureIndex == 0)
+	{
+		SetTextureIndex(index);
+	}
 	if (m_pSibling) m_pSibling->SetTextureInedxToAll(index);
 	if (m_pChild) m_pChild->SetTextureInedxToAll(index);
 }
@@ -798,9 +801,12 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 				{
 					haveToRead = false;
 					// 더미 프레임 추가
-					pAnimationSet->m_pfKeyFrameTransformTimes[i] = pAnimationSet->m_pfKeyFrameTransformTimes[i - 1]; // 트랜스폼 적용되는 시간
+					pAnimationSet->m_pfKeyFrameTransformTimes[i] = pAnimationSet->m_pfKeyFrameTransformTimes[i - 1] +
+						(pAnimationSet->m_pfKeyFrameTransformTimes[i - 1] - pAnimationSet->m_pfKeyFrameTransformTimes[i - 2]); // 트랜스폼 적용되는 시간 
 					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 1]; // 트랜스폼
 					
+					
+
 					/*
 					2안, 배열 크기를 m_nKeyFrameTransforms - 1 로 아예 재할당하는 방안, 깜박임 문제 있음
 					XMFLOAT4X4* tempMatrix = new XMFLOAT4X4[pAnimationSet->m_nKeyFrameTransforms - 1];
@@ -1036,7 +1042,9 @@ void CGameObjectVer2::SetTextureIndexFindByName(string fileName)
 	else if (fileName == "Skeleton_D") {
 		SetTextureIndex(0x20);
 	}
-	int stop = 3;
+	else if (fileName == "DemoSkeleton") {
+		SetTextureIndex(0x40);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

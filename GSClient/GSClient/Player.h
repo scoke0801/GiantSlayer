@@ -23,6 +23,8 @@ class CTerrain;
 class CPlayer : public CGameObjectVer2
 {    
 private:
+	bool m_IsAlreadyAttack = false;
+private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
 	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
 
@@ -72,4 +74,7 @@ public:
 
 	bool Attacked(CGameObject* pObject);
 	void Attack();
+
+	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
+	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
 };
