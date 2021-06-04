@@ -841,7 +841,6 @@ void CSceneJH::FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
 {
-	//return;
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
 	if (m_MinimapCamera)
@@ -874,9 +873,23 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 
 	m_Skybox->Draw(pd3dCommandList, m_MinimapCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
-	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
-		for (auto pObject : m_ObjectLayers[i]) {
-			pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	auto cameraPos = m_MinimapCamera->GetPosition3f();
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) { 
+		if (i == (int)OBJECT_LAYER::TerrainWater) {
+			m_ObjectLayers[i][0]->Draw(pd3dCommandList, m_CurrentCamera);
+		}
+		else if (i == (int)OBJECT_LAYER::Puzzle) {
+			for (auto pObject : m_ObjectLayers[i]) { 
+				pObject->Draw(pd3dCommandList, m_CurrentCamera);
+			}
+		}
+		else {
+			for (auto pObject : m_ObjectLayers[i]) {
+				auto objPos = pObject->GetPosition();
+				if (abs(objPos.x - cameraPos.x) > 3000) continue;
+				if (abs(objPos.z - cameraPos.z) > 3000) continue;
+				pObject->Draw(pd3dCommandList, m_CurrentCamera);
+			}
 		}
 	} 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
@@ -902,8 +915,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 }
 
 void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
-{
-	//return;
+{ 
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature); 
 
 	if (m_MirrorCamera)
@@ -936,6 +948,9 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		if (i == (int)OBJECT_LAYER::MirrorBox) {
+			continue;
+		}
+		if (i == (int)OBJECT_LAYER::Enemy) {
 			continue;
 		}
 		for (auto pObject : m_ObjectLayers[i]) {
@@ -985,11 +1000,24 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 
 		pd3dCommandList->OMSetRenderTargets(0, NULL, FALSE, &m_d3dDsvShadowMapCPUHandle);
 
+		//for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+		//	for (auto pObject : m_ObjectLayers[i]) {
+		//		pObject->Draw_Shadow(pd3dCommandList, m_pLightCamera);
+		//	}
+		//} 
+		
+		auto playerPos = m_Player->GetPosition();
 		for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 			for (auto pObject : m_ObjectLayers[i]) {
+				auto objPos = pObject->GetPosition();
+				if (abs(objPos.x - playerPos.x) > 3000) continue;
+				if (abs(objPos.z - playerPos.z) > 3000) continue;
 				pObject->Draw_Shadow(pd3dCommandList, m_pLightCamera);
 			}
-		} 
+		}
+
+
+
 
 		for (auto player : m_Players) {
 			if (!player->IsDrawable()) continue;
@@ -1411,7 +1439,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_F3)
 	{ 
-		m_Player->SetPosition({ 11965.7,  -1980.56, 13493 });
+		m_Player->SetPosition({ 11838.8,  -1000, 10428.2 });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F4)

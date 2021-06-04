@@ -93,6 +93,7 @@ void CPuzzle::SetPosition(XMFLOAT3 pos)
 	{
 		pObj->SetPositionPlus(pos);
 	}
+	//CGameObject::SetPosition(pos);
 }
 
 CPlate::CPlate(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
@@ -248,4 +249,5 @@ void CPlate::SetPosition(XMFLOAT3 pos)
 	{
 		pObj->SetPositionPlus(pos);
 	}
+	//CGameObject::SetPosition(pos);
 }

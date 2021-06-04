@@ -284,6 +284,7 @@ void CDoorWall::SetPosition(XMFLOAT3 xmf3Position)
 	{
 		pWall->SetPositionPlus(xmf3Position);
 	}
+	CGameObject::SetPosition(xmf3Position);
 }
 
 void CDoorWall::SetTextureIndexes(int idx)
