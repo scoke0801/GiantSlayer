@@ -1015,9 +1015,7 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 				pObject->Draw_Shadow(pd3dCommandList, m_pLightCamera);
 			}
 		}
-
-
-
+		 
 
 		for (auto player : m_Players) {
 			if (!player->IsDrawable()) continue;
@@ -1171,6 +1169,8 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 		reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id])->SetAnimationSet(p_monsterUpdate->state);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition(pos);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
 	}
 	break;
 	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:

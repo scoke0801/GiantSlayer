@@ -179,7 +179,7 @@ void CEnemy::MoveToNextPosition(float elapsedTime)
 	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ENEMY_SPEED_TEMP * elapsedTime)));
 	m_ToMovePosition.y = m_xmf3Position.y;
 	XMFLOAT3 gap = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
-	if (Vector3::Length(gap) < 10) {
+	if (Vector3::Length(gap) < 10.0f) {
 		SetPosition(m_ToMovePosition);
 		SetIsOnMoving(false);
 	}
@@ -293,7 +293,7 @@ void CMeleeEnemy::Attack(float elapsedTime)
 	// 공격관련 애니메이션 수행
 	// 현재는 임시코드
 	{
-		float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
+		//float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
 
 		//Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
 	}
@@ -305,7 +305,6 @@ void CMeleeEnemy::Attack(float elapsedTime)
 
 void CMeleeEnemy::FindNextPosition()
 {
-	m_xmf3ActivityScope;
 	m_ToMovePosition.x = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.x * 2)) + m_xmf3ActivityScopeCenter.x - m_xmf3ActivityScope.x;
 	m_ToMovePosition.y = m_xmf3Position.y;
 	m_ToMovePosition.z = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.z * 2)) + m_xmf3ActivityScopeCenter.z - m_xmf3ActivityScope.z;
@@ -337,7 +336,9 @@ void CMeleeEnemy::FindClosePositionToTarget()
 
 	XMFLOAT3 targetVec = Vector3::Subtract(playerPos, m_xmf3Position);
 	targetVec = Vector3::Multifly(Vector3::Normalize(targetVec), -1);
-	 
+
+	XMFLOAT3 lookAt = Vector3::Normalize(GetLook());
+
 	m_ToMovePosition = Vector3::Subtract(m_TargetPlayer->GetPosition(),
 		Vector3::Multifly(targetVec, m_AttackRange * 1.5f));
 

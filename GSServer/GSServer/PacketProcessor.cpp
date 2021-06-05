@@ -320,6 +320,9 @@ void PacketProcessor::DeleteObject(CGameObject* pObject, int layerIdx)
 
 void PacketProcessor::Update(float elapsedTime)
 {
+	if (m_CurrentPlayerNum == 0) {
+		return;
+	}
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
 			pObject->Update(elapsedTime);
@@ -492,7 +495,7 @@ void PacketProcessor::InitMonsters()
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetPosition({ 7800.0f, GetDetailHeight(m_Heights,7800.0f,  11450.0f),  11450.0f });
-		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, GetDetailHeight(m_Heights, 800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, GetDetailHeight(m_Heights, 7800.0f,  11450.0f),  11450.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
 		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
@@ -500,20 +503,20 @@ void PacketProcessor::InitMonsters()
 
 		pEnemy = new CMeleeEnemy(); 
 		pEnemy->Scale(scale.x, scale.y, scale.z); 
-		pEnemy->SetPosition({ 2005.0f, GetDetailHeight(m_Heights, 2005.0f, 11650.0f), 11650.0f });
-		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, GetDetailHeight(m_Heights,2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetPosition({ 7800.0f, GetDetailHeight(m_Heights, 7800.0f, 11450.0f), 11450.0f });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, GetDetailHeight(m_Heights,7800.0f, 11450.0f), 11450.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum); 
 		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
-		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z }); 
+		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetPosition({ 2005.0f, GetDetailHeight(m_Heights, 2005.0f, 11650.0f), 11650.0f });
-		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, GetDetailHeight(m_Heights,2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetPosition({ 7800.0f, GetDetailHeight(m_Heights,  7800.0f, 11450.0f), 11450.0f });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, GetDetailHeight(m_Heights,7800.0f, 11450.0f), 11450.0f });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.4f, 0.3125f, 0.3f)));
-		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
+		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 	} 
 	{// Monster Area2-1

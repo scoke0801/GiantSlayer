@@ -324,8 +324,7 @@ void CMeleeEnemy::Attack(float elapsedTime)
 }
 
 void CMeleeEnemy::FindNextPosition()
-{
-	m_xmf3ActivityScope;
+{ 
 	m_ToMovePosition.x = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.x * 2)) + m_xmf3ActivityScopeCenter.x - m_xmf3ActivityScope.x;
 	m_ToMovePosition.y = m_xmf3Position.y;
 	m_ToMovePosition.z = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.z * 2)) + m_xmf3ActivityScopeCenter.z - m_xmf3ActivityScope.z;
