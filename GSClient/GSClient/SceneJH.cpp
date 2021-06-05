@@ -1195,6 +1195,11 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 						m_CurrentCamera->SetShake(true, 0.5f, 15);
 					}
 				}
+				else if (p_syncUpdate.states[i] == AnimationType::ATTACK) {
+					if (m_Players[i]->GetAnimationSet() != AnimationType::ATTACK) {
+						m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+					}
+				}
 			}
 			m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
 		}
