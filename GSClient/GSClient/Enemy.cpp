@@ -10,6 +10,7 @@ CEnemy::CEnemy() : CGameObjectVer2()
 
 	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this); 
+
 }
   
 CEnemy::~CEnemy()

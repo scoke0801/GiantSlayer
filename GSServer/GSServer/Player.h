@@ -10,6 +10,9 @@ enum class Player_Move_Type
 };
 class CPlayer : public CGameObject
 { 
+public:
+	AnimationType m_StateName;
+
 private:
 	Player_Move_Type m_MovingType = Player_Move_Type::Run;
 
@@ -24,7 +27,10 @@ private:
 	bool m_IsCanAttack = true;
 
 	float m_AttackedDelay = 0.0f;
+	bool m_IsAlreadyAttack = false;
 
+	BoundingBox m_SpareCollisionBox;
+	BoundingBox m_SpareAABB;
 public:
 	CPlayer();
 	~CPlayer();	
@@ -62,4 +68,9 @@ public:
 public:
 	bool Attacked(CGameObject* pObject);
 	void Attack();
+
+	AnimationType GetStateName() const { return m_StateName; }
+	  
+	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
+	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
 };

@@ -5,6 +5,9 @@ CPlayer::CPlayer()
 {
 	m_HP = 100;
 	m_SP = 100;
+
+	m_SpareCollisionBox = BoundingBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4));
+	m_SpareAABB = BoundingBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4));
 }
 
 CPlayer::~CPlayer()
@@ -16,18 +19,34 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	if (false == m_IsCanAttack) {
 		m_AttackWaitingTime -= fTimeElapsed;
-
-		if (m_AttackWaitingTime < 0.0f) {
+		m_StateName = AnimationType::ATTACK;
+		if (m_AttackWaitingTime < 0.0f) { 
+			m_IsAlreadyAttack = false;
 			m_AttackWaitingTime = 0.0f;
-			m_IsCanAttack = true;
+			m_IsCanAttack = true; 
+
+			auto temp = m_SpareCollisionBox;
+			m_SpareCollisionBox = m_BoundingBox[0];
+			m_BoundingBox[0] = temp;
+
+			temp = m_SpareAABB;
+			m_SpareAABB = m_AABB[0];
+			m_AABB[0] = temp;
+
+			UpdateColliders();
 		}
 	}
 
 	// ÇÇ°Ý
-	if (m_AttackedDelay > 0.0f) {
+	else if (m_AttackedDelay > 0.0f) {
 		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
 	}
-
+	else {
+		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
+			m_StateName = AnimationType::IDLE;
+		else
+			m_StateName = AnimationType::RUN;
+	}
 	float Friction = (m_MovingType == Player_Move_Type::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 	
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
@@ -40,7 +59,7 @@ void CPlayer::Update(float fTimeElapsed)
 	float fDeceleration = (Friction * fTimeElapsed); 
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-
+	//m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
 }
 
 void CPlayer::UpdateCamera()
@@ -111,8 +130,9 @@ bool CPlayer::Attacked(CGameObject* pObject)
 		return false;
 	}
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
-	m_AttackedDelay += 1.5f;
+	m_AttackedDelay += 0.6666667f;
 	m_HP -= 5;
+	m_StateName = AnimationType::DAMAGED;
 	if (m_HP <= 5) {
 		m_HP = 0;
 	}
@@ -124,4 +144,14 @@ void CPlayer::Attack()
 	SetCanAttack(false);
 	IncreaseAttackWaitingTime(PLAYER_SWORD_ATTACK_TIME);
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
+	 
+	auto temp = m_BoundingBox[0];
+	m_BoundingBox[0] = m_SpareCollisionBox;
+	m_SpareCollisionBox = temp;
+
+	temp = m_AABB[0];
+	m_AABB[0] = m_SpareAABB;
+	m_SpareAABB = temp; 
+
+	UpdateColliders();
 }

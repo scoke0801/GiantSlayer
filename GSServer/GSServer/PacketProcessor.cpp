@@ -351,20 +351,22 @@ void PacketProcessor::Update(float elapsedTime)
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) { 
 		for (int i = 0; i < MAX_PLAYER; ++i) {
 			if (m_Players[i]->IsExist() == false) continue;
-			if (pEnemy->CollisionCheck(m_Players[i])) {
-				if (m_Players[i]->Attacked(pEnemy)) {
-					if (false == m_Players[i]->IsCanAttack()) {
-						pEnemy->ChangeState(ObjectState::Attacked, m_Players[i]);
-						//cout << "플레이어 공격 - 몬스터\n";
-					}
-					else {
-						//m_CurrentCamera->SetShake(true, 0.5f, 15);
-
-						m_Players[i]->FixCollision();
-						//cout << "충돌 : 플레이어 - 적\n";
-					}
+			if (false == pEnemy->CollisionCheck(m_Players[i])) {
+				continue;
+			}
+			if (false == m_Players[i]->IsCanAttack()) {
+				if (false == m_Players[i]->IsAleradyAttack()) {
+					pEnemy->ChangeState(ObjectState::Attacked, m_Players[i]);
+					cout << "플레이어 공격 - 몬스터\n";
+					m_Players[i]->SetAleradyAttack(true);
 				}
 			}
+			else if (m_Players[i]->Attacked(pEnemy))
+			{
+				//m_CurrentCamera->SetShake(true, 0.5f, 15);
+				m_Players[i]->FixCollision();
+				cout << "충돌 : 플레이어 - 적\n";
+			} 
 		}
 	}
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
@@ -1132,7 +1134,8 @@ void PacketProcessor::SendSyncUpdatePacket()
 		p_syncUpdate.lookY[i] = FloatToInt(look.y);
 		p_syncUpdate.lookZ[i] = FloatToInt(look.z);
 
-		if (false == m_Players[i]->IsCanAttack())
+		p_syncUpdate.states[i] = m_Players[i]->GetStateName();
+		/*if (false == m_Players[i]->IsCanAttack())
 		{
 			p_syncUpdate.states[i] = AnimationType::ATTACK;
 		}
@@ -1141,7 +1144,7 @@ void PacketProcessor::SendSyncUpdatePacket()
 		}
 		else {
 			p_syncUpdate.states[i] = AnimationType::IDLE;
-		}
+		}*/
 	}
 	for (int i = 0; i < MAX_PLAYER; ++i) {
 		p_syncUpdate.existance[i] = m_Players[i]->IsExist();

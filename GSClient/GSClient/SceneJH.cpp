@@ -479,7 +479,6 @@ void CSceneJH::Update(float elapsedTime)
 				m_Player->FixCollision(); 
 				//cout << "충돌 : 플레이어 - 적\n";
 			}
-
 		}
 	}
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
