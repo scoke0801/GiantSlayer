@@ -291,7 +291,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Rain",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
-		"GreenTree"
+		"GreenTree",
+		"Bow"
 	};
 
 	const wchar_t* address[] =
@@ -315,7 +316,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Rain.dds",
 		L"resources/Textures/Body_D.dds",L"resources/Textures/Body_C.dds",L"resources/Textures/Body_E.dds",L"resources/Textures/Body_N.dds",
 		L"resources/Textures/Skeleton_D.dds",
-		L"resources/OBJ/GreenTree.dds"
+		L"resources/OBJ/GreenTree.dds",
+		L"resources/Textures/bow_texture.dds",
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -368,7 +370,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"Rain",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
-		"GreenTree"
+		"GreenTree",
+		"Bow"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -1341,6 +1344,22 @@ void CSceneJH::ProcessInput()
 	{
 		m_isPlayerSelected = false;
 		//m_CurrentCamera = m_Cameras[3];
+	}
+	if (keyInput.KEY_9)
+	{
+		if (m_Player->GetWeapon() == PlayerWeaponType::Sword) {
+			m_Player->SetWeapon(PlayerWeaponType::Bow);
+			m_Player->DisableSword();
+			m_Player->AnimationChange(PlayerWeaponType::Bow);
+		}
+		else if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
+			m_Player->SetWeapon(PlayerWeaponType::Sword);
+			m_Player->DisableBow();
+			m_Player->AnimationChange(PlayerWeaponType::Sword);
+		}
+		else {
+			cout << "...?" << endl;
+		}
 	}
 	if (keyInput.KEY_SPACE)
 	{
@@ -2977,9 +2996,12 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true); 
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true); 
 	
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
+	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
+	m_Players[0]->DisableBow();
+	m_Players[0]->AnimationChange(PlayerWeaponType::Sword);
 	m_Player = m_Players[0];
 
 	m_Players[0]->SetChild(pPlayerModel, true);

@@ -34,7 +34,7 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	if (false == m_IsCanAttack) {
 		m_AttackWaitingTime -= fTimeElapsed;
-		SetAnimationSet(AnimationType::ATTACK);
+		SetAnimationSet(ATK);
 		if (m_AttackWaitingTime < 0.0f){
 			m_AttackWaitingTime = 0.0f;
 			m_IsCanAttack = true;
@@ -55,9 +55,9 @@ void CPlayer::Update(float fTimeElapsed)
 	}
 	else {
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
-			SetAnimationSet(AnimationType::IDLE);
+			SetAnimationSet(IDLE);
 		else
-			SetAnimationSet(AnimationType::RUN);
+			SetAnimationSet(RUN);
 	}
 	// ÇÇ°Ý
 	if (m_AttackedDelay > 0.0f) {
@@ -211,7 +211,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 void CPlayer::Attack()
 {
 	SetCanAttack(false);
-	IncreaseAttackWaitingTime(1.033333f);
+	IncreaseAttackWaitingTime(m_AttackAnimLength);
 	SetVelocityToZero();
 
 	auto temp = m_Colliders[0];
@@ -227,4 +227,37 @@ void CPlayer::Attack()
 	m_SpareBoundingBox = tempMesh;
 	UpdateColliders();
 }
+
+void CPlayer::AnimationChange(PlayerWeaponType weapon)
+{
+	if (weapon == PlayerWeaponType::Sword) {
+		IDLE = AnimationType::SWORD_IDLE;
+		RUN = AnimationType::SWORD_RUN;
+		ATK = AnimationType::SWORD_ATK;
+		DEATH = AnimationType::SWORD_DEATH;
+
+		m_AttackAnimLength = 1.033333f;
+	}
+	else if (weapon == PlayerWeaponType::Bow) {
+		IDLE = AnimationType::BOW_IDLE;
+		RUN = AnimationType::BOW_RUN;
+		ATK = AnimationType::BOW_ATK;
+		DEATH = AnimationType::BOW_DEATH;
+
+		m_AttackAnimLength = 1.533333f;
+	}
+}
  
+void CPlayer::DisableSword()
+{
+	SetDrawableRecursively("sword1", false);
+	SetDrawableRecursively("bow_LeftHand", true);
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+}
+
+void CPlayer::DisableBow()
+{
+	SetDrawableRecursively("sword1", true);
+	SetDrawableRecursively("bow_LeftHand", false);
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+}

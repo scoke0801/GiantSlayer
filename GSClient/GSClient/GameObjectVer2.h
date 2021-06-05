@@ -203,6 +203,9 @@ public:
 	static void PrintFrameInfo(CGameObjectVer2* pGameObject, CGameObjectVer2* pParent);
 
 	void SetTextureIndexFindByName(string fileName);
+
+	void SetDrawableRecursively(char* name, bool draw);
+	void PrintPartNames();
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
