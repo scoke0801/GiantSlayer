@@ -148,7 +148,7 @@ public:
 	bool isSkinned = false;
 
 	CAnimationController* m_pAnimationController = NULL;
-
+	int	m_AnimationSet = 0;
 public:
 	//void SetShader(CShader* pShader) override;
 	//void SetShader(int nMaterial, CShader* pShader);
@@ -192,6 +192,7 @@ public:
 	CGameObjectVer2* GetRootSkinnedGameObject();
 
 public:
+	int GetAnimationSet()const { return m_AnimationSet; }
 	void SetAnimationSet(int nAnimationSet);
 	void CacheSkinningBoneFrames(CGameObjectVer2* pRootFrame);
 

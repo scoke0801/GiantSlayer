@@ -547,6 +547,7 @@ CGameObjectVer2* CGameObjectVer2::GetRootSkinnedGameObject()
 
 void CGameObjectVer2::SetAnimationSet(int nAnimationSet)
 {
+	m_AnimationSet = nAnimationSet;
 	if (m_pAnimationController) m_pAnimationController->SetAnimationSet(nAnimationSet);
 
 	if (m_pSibling) m_pSibling->SetAnimationSet(nAnimationSet);

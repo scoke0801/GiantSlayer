@@ -103,23 +103,26 @@ Texture2D gtxtBossE		   : register(t41);
 Texture2D gtxtBossN		   : register(t42);
 
 Texture2D gtxtMeleeSkeleton_01_D: register(t43);
+Texture2D gtxtMeleeSkeleton_02: register(t44);
+Texture2D gtxtMeleeSkeleton_02_Equip: register(t45);
+Texture2D gtxtMeleeSkeleton_02_EquipAll: register(t46);
 
-Texture2D gtxtMap		   : register(t44);
-Texture2D gtxtMirror	   : register(t45);
-Texture2D gtxtShadowMap	   : register(t46);
+Texture2D gtxtMap		   : register(t47);
+Texture2D gtxtMirror	   : register(t48);
+Texture2D gtxtShadowMap	   : register(t49);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
-	f4ShadowPos.xyz /= f4ShadowPos.w;
+    f4ShadowPos.xyz /= f4ShadowPos.w;
 
 	float fDepth = f4ShadowPos.z;
 
 	uint nWidth, nHeight, nMips;
 	gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
 
-	float dx = 1.0f / (float)nWidth;
-
-	float percentLit = 0.0f;
+    float dx = 1.0f / (float) nWidth ;
+  
+	float percentLit = 0.3f;
 
 	const float2 offsets[9] =
 	{
@@ -135,6 +138,7 @@ float CalcShadowFactor(float4 f4ShadowPos)
 	}
 
 	return (percentLit / 9.0f) + 0.3f;
+
 }
 
 float CalcShadowFactor_t(float4 f4ShadowPos)
@@ -163,7 +167,37 @@ float CalcShadowFactor_t(float4 f4ShadowPos)
 		percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
 	}
 
-	return (percentLit / 9.0f) + 0.4f;
+	return (percentLit / 9.0f) + 0.3f;
+}
+
+float CalcShadowFactor_P(float4 f4ShadowPos)
+{
+    f4ShadowPos.xyz /= f4ShadowPos.w;
+
+    float fDepth = f4ShadowPos.z;
+
+    uint nWidth, nHeight, nMips;
+    gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
+
+    float dx = 1.0f / (float) nWidth;
+  
+    float percentLit = 0.3f;
+
+    const float2 offsets[9] =
+    {
+        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
+		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
+		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
+    };
+
+	[unroll]
+    for (int i = 0; i < 9; i++)
+    {
+        percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
+    }
+
+    return (percentLit / 9.0f) + 1.0f;
+
 }
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
 struct VS_COLOR_INPUT
@@ -1168,6 +1202,7 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 	output.uv = input.uv;
 
 	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+
 	return(output);
 }
 
@@ -1209,10 +1244,32 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		cColor = gtxtBossD.Sample(gssWrap, input.uv);
 		cColor += gtxtBossC.Sample(gssWrap, input.uv);
 		cColor += gtxtBossE.Sample(gssWrap, input.uv);
+
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	} 
 	else if (gnTexturesMask & 0x20)
 	{
 		cColor = gtxtMeleeSkeleton_01_D.Sample(gssWrap, input.uv);
+	}
+	else if (gnTexturesMask & 0x40)
+	{
+		cColor = gtxtMeleeSkeleton_02.Sample(gssWrap, input.uv);
+		cColor += gtxtMeleeSkeleton_02_Equip.Sample(gssWrap, input.uv);
+	}
+	else if (gnTexturesMask & 0x80)
+	{
+		cColor = gtxtMeleeSkeleton_02.Sample(gssWrap, input.uv);
+		cColor += gtxtMeleeSkeleton_02_EquipAll.Sample(gssWrap, input.uv); 
 	}
 	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	//{
@@ -1227,7 +1284,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	//float4 cIllumination = Lighting(input.positionW, normalW, gnMaterialID);
 
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-	shadowFactor = CalcShadowFactor(input.shadowPosH);
+    shadowFactor = CalcShadowFactor_P(input.shadowPosH);
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 	
@@ -1272,6 +1329,6 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv; 
-	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+	output.shadowPosH = mul(float4(output.positionW, 0.5f), gmtxShadowTransform);
 	return(output);
 }
