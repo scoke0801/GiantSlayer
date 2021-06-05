@@ -461,7 +461,7 @@ bool CPuzzle::CollisionCheck(const BoundingBox& aabb)
 	for (auto pObj : m_Objects) {
 		if (pObj->CollisionCheck(aabb)) return true;
 	}
-	return false;
+	return false; 
 }
 
 void CPuzzle::UpdateColliders()
@@ -476,37 +476,51 @@ CPlate::CPlate(OBJECT_ID id)
 	CGameObject* pObject = new CGameObject();
 	pObject->SetPosition({ 1250.0f, 120.f, 900.0f });
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 2500 * 0.5f, 240 * 0.5f, 1800 * 0.5f }));
+	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On); 
+	pObject->SetSize({ 1, 240 * 0.5f, 1 });
 	m_Objects.emplace_back(std::move(pObject));
 
 	pObject = new CGameObject();
 	pObject->SetPosition(XMFLOAT3(1250.0f, 40.0f, -150.0f));
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 300 * 0.5f }));
-	m_Objects.emplace_back(std::move(pObject)); 
+	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On); 
+	pObject->SetSize({ 1, 80 * 0.5f, 1 });
+	m_Objects.emplace_back(std::move(pObject));
 
 	pObject = new CGameObject();
 	pObject->SetPosition(XMFLOAT3(1250.0f, 40.0f, 150.0f + 1800.0f));
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 300 * 0.5f }));
+	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
+	pObject->SetSize({ 1, 40.0f * 0.5f, 1 });
 	m_Objects.emplace_back(std::move(pObject));
 
 	pObject = new CGameObject();
 	pObject->SetPosition(XMFLOAT3(1250.0f, 120.0f, -100.0f));
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 200 * 0.5f }));
+	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
+	pObject->SetSize({ 1, 80 * 0.5f, 1 });
 	m_Objects.emplace_back(std::move(pObject));
 
 	pObject = new CGameObject();
 	pObject->SetPosition(XMFLOAT3(1250.0f, 120.0f, 100.0f + 1800.0f));
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 200 * 0.5f }));
+	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
+	pObject->SetSize({ 1, 80 * 0.5f, 1 });
 	m_Objects.emplace_back(std::move(pObject));
 
 	pObject = new CGameObject();
 	pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f, -50.0f));
+	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 100 * 0.5f }));
+	pObject->SetSize({ 1, 80 * 0.5f, 1 });
 	m_Objects.emplace_back(std::move(pObject));
 	 
 	pObject = new CGameObject();
 	pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f, 50.0f + 1800.0f));
+	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 100 * 0.5f }));
-	m_Objects.emplace_back(std::move(pObject)); 
+	pObject->SetSize({ 1, 80 * 0.5f, 1 });
+	m_Objects.emplace_back(std::move(pObject));
 }
 
 CPlate::~CPlate()
@@ -546,7 +560,7 @@ bool CPlate::CollisionCheck(CGameObject* other)
 	for (int i = 0; i < otherAABB.size(); ++i) {
 		bool result = CollisionCheck(otherAABB[i]);
 		if (result) {
-			//other->FixCollision(m_CollideObject);
+			other->FixCollision(m_CollideObject);
 			//return true;
 			res = true;
 		}
