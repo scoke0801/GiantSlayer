@@ -38,16 +38,16 @@
 #define USE_CAPTIONFPS_ALWAYS	 0
 
 #if USE_CAPTIONFPS_ALWAYS
-	#define SHOW_CAPTIONFPS 
+	//#define SHOW_CAPTIONFPS 
 #elif _DEBUG	// Debug에서는 항상 실행
-	#define SHOW_CAPTIONFPS 
+	//#define SHOW_CAPTIONFPS 
 #endif
 
+#define SHOW_CAPTIONFPS
 #if defined(SHOW_CAPTIONFPS)
 	#define MAX_UPDATE_FPS 1.0f / 5.0f
 #endif 
 
-#define SHOW_CAPTIONFPS
 //-------------------------------------------------------------------
 //
 

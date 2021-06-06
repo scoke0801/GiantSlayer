@@ -56,7 +56,7 @@ FbxLoader::FbxLoader(FbxManager* pfbxSdkManager, string fileName, bool hasAnim, 
 	}
 
 	cout << "-최적화 작업 중..." << endl;
-	Optimize();
+	//Optimize();
 	cout << "-최적화 작업 완료!" << endl;
 
 	string outPath = "resources/FbxExported/" + fileName + ".bin";
