@@ -269,8 +269,8 @@ void PacketProcessor::ProcessPacket(int p_id, unsigned char* p_buf)
 			}
 			else if (p_mouse.InputType[i] == MOUSE_INPUT_TYPE::M_RMOVE) {
 				float offset = IntToFloat(p_mouse.yInput[i]);
-				cameraOffset += offset * 0.125f;
-				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset * 0.125f));
+				cameraOffset += offset * 0.25f;
+				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset * 0.25f));
 			}
 		}
 
@@ -628,6 +628,17 @@ void PacketProcessor::InitMonsters()
 		auto pEnemy = reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][i]);
 		pEnemy->ConnectPlayer(m_Players, MAX_PLAYER);
 	} 
+
+
+	CGameObject* pBoss = new CGameObject();
+	pBoss->SetPosition({ 16800,  -7023.2950, 16500 }); 
+	pBoss->Scale(120, 120, 120);
+	pBoss->Rotate({ 0,1,0 }, 180);    
+	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.5, 5, 3.5))); 
+	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3(2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3))); 
+	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3(-2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3))); 
+	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5)));
+	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pBoss);
 }
 
 void PacketProcessor::InitArrows()

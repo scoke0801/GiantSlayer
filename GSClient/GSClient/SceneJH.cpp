@@ -1145,7 +1145,7 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			float rotateY = IntToFloat(p_mouseProcess.playerRotateY);
 			//cout << "playerRotateY : " << rotateY << "\n";
 			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY);
-			m_MinimapArrow->Rotate(-rotateY);
+			//m_MinimapArrow->Rotate(-rotateY * 0.1f);
 		}
 		/*if (p_mouseProcess.playerRotateZ != 0) {
 			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ);
