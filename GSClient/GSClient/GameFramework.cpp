@@ -23,10 +23,10 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 
 	_tcscpy_s(m_pszFrameRate, _T("Giant Slayer"));
 	LoadString(m_hInst, IDS_APP_TITLE, m_captionTitle, TITLE_LENGTH);
-//
-//#if defined(SHOW_CAPTIONFPS)
-//	lstrcat(m_captionTitle, TEXT(" ("));
-//#endif
+
+#if defined(SHOW_CAPTIONFPS)
+	lstrcat(m_captionTitle, TEXT(" ("));
+#endif
 	m_titleLength = lstrlen(m_captionTitle);
 	SetWindowText(m_hWnd, m_captionTitle);
 
@@ -342,24 +342,24 @@ void CFramework::SinglePlayUpdate()
 
 	Draw();
 
-//#if defined(SHOW_CAPTIONFPS)
-//
-//	std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();
-//
-//	double updateElapsed = m_FPSTimer.GetElapsedTime(lastUpdateTime);
-//
-//	if (updateElapsed > MAX_UPDATE_FPS)
-//		m_FPSTimer.UpdateCurrentTime();
-//	else
-//		return;
-//	fps = 1.0 / m_GameTimer.GetElapsedTime();
-//
-//	_itow_s(fps + 0.1f,
-//		m_captionTitle + m_titleLength,
-//		TITLE_LENGTH - m_titleLength, 10);
-//	wcscat_s(m_captionTitle + m_titleLength, TITLE_LENGTH - m_titleLength, TEXT(" FPS)"));
-//	SetWindowText(m_hWnd, m_captionTitle);
-//#endif
+#if defined(SHOW_CAPTIONFPS)
+
+	std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();
+
+	double updateElapsed = m_FPSTimer.GetElapsedTime(lastUpdateTime);
+
+	if (updateElapsed > MAX_UPDATE_FPS)
+		m_FPSTimer.UpdateCurrentTime();
+	else
+		return;
+	fps = 1.0 / m_GameTimer.GetElapsedTime();
+
+	_itow_s(fps + 0.1f,
+		m_captionTitle + m_titleLength,
+		TITLE_LENGTH - m_titleLength, 10);
+	wcscat_s(m_captionTitle + m_titleLength, TITLE_LENGTH - m_titleLength, TEXT(" FPS)"));
+	SetWindowText(m_hWnd, m_captionTitle);
+#endif
 }
 
 void CFramework::MultiplayUpdate()
@@ -404,25 +404,25 @@ void CFramework::SceneUpdate()
 		Draw();
 		m_FrameDirtyFlag = false;
 	}
-//
-//#if defined(SHOW_CAPTIONFPS)
-//
-//	std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();
-//
-//	double updateElapsed = m_FPSTimer.GetElapsedTime(lastUpdateTime);
-//
-//	if (updateElapsed > MAX_UPDATE_FPS)
-//		m_FPSTimer.UpdateCurrentTime();
-//	else
-//		return;
-//	fps = 1.0 / m_GameTimer.GetElapsedTime();
-//
-//	_itow_s(fps + 0.1f,
-//		m_captionTitle + m_titleLength,
-//		TITLE_LENGTH - m_titleLength, 10);
-//	wcscat_s(m_captionTitle + m_titleLength, TITLE_LENGTH - m_titleLength, TEXT(" FPS)"));
-//	SetWindowText(m_hWnd, m_captionTitle);
-//#endif
+
+#if defined(SHOW_CAPTIONFPS)
+
+	std::chrono::system_clock::time_point lastUpdateTime = m_FPSTimer.CurrentTime();
+
+	double updateElapsed = m_FPSTimer.GetElapsedTime(lastUpdateTime);
+
+	if (updateElapsed > MAX_UPDATE_FPS)
+		m_FPSTimer.UpdateCurrentTime();
+	else
+		return;
+	fps = 1.0 / m_GameTimer.GetElapsedTime();
+
+	_itow_s(fps + 0.1f,
+		m_captionTitle + m_titleLength,
+		TITLE_LENGTH - m_titleLength, 10);
+	wcscat_s(m_captionTitle + m_titleLength, TITLE_LENGTH - m_titleLength, TEXT(" FPS)"));
+	SetWindowText(m_hWnd, m_captionTitle);
+#endif
 }
 
 void CFramework::Animate()

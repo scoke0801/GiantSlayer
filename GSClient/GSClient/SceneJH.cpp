@@ -142,7 +142,9 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 		m_isPlayerSelected = true;
 	}
 	else {
-		m_CurrentCamera = m_Cameras[2];
+		m_isPlayerSelected = true;
+		m_CurrentCamera = m_PlayerCameras[0];
+		//m_CurrentCamera = m_Cameras[2];
 	}
 }
 
@@ -805,6 +807,31 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 			pObject->Draw(pd3dCommandList, m_CurrentCamera);
 		}
 	} 
+
+	auto playerPos = m_Player->GetPosition();
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+		if (i == (int)OBJECT_LAYER::TerrainWater) {
+			m_ObjectLayers[i][0]->Draw(pd3dCommandList, m_CurrentCamera);
+		}
+		else if (i == (int)OBJECT_LAYER::Puzzle) {
+			for (auto pObject : m_ObjectLayers[i]) {
+				pObject->Draw(pd3dCommandList, m_CurrentCamera);
+			}
+		}
+		else {
+			for (auto pObject : m_ObjectLayers[i]) {
+				auto objPos = pObject->GetPosition();
+				if (abs(objPos.x - playerPos.x) > 3000) continue;
+				if (abs(objPos.z - playerPos.z) > 3000) continue;
+				pObject->Draw(pd3dCommandList, m_CurrentCamera);
+			}
+		}
+	}
+
+
+
+
+
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->Draw(pd3dCommandList, m_CurrentCamera);

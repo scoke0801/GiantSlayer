@@ -43,10 +43,10 @@
 	//#define SHOW_CAPTIONFPS 
 #endif
 
-#define SHOW_CAPTIONFPS
-#if defined(SHOW_CAPTIONFPS)
-	#define MAX_UPDATE_FPS 1.0f / 5.0f
-#endif 
+//#define SHOW_CAPTIONFPS
+//#if defined(SHOW_CAPTIONFPS)
+//	#define MAX_UPDATE_FPS 1.0f / 5.0f
+//#endif 
 
 //-------------------------------------------------------------------
 //
