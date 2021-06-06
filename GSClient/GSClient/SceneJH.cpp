@@ -799,14 +799,14 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	m_Particles->Draw(pd3dCommandList, m_CurrentCamera); 
 
-	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
-		//if (i == (int)OBJECT_LAYER::Enemy) {
-		//	continue;
-		//}
-		for (auto pObject : m_ObjectLayers[i]) { 
-			pObject->Draw(pd3dCommandList, m_CurrentCamera);
-		}
-	} 
+	//for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+	//	//if (i == (int)OBJECT_LAYER::Enemy) {
+	//	//	continue;
+	//	//}
+	//	for (auto pObject : m_ObjectLayers[i]) { 
+	//		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	//	}
+	//} 
 
 	auto playerPos = m_Player->GetPosition();
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
@@ -821,16 +821,13 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		else {
 			for (auto pObject : m_ObjectLayers[i]) {
 				auto objPos = pObject->GetPosition();
-				if (abs(objPos.x - playerPos.x) > 3000) continue;
-				if (abs(objPos.z - playerPos.z) > 3000) continue;
+				if (abs(objPos.x - playerPos.x) > 10000) continue;
+				if (abs(objPos.z - playerPos.z) > 10000) continue;
 				pObject->Draw(pd3dCommandList, m_CurrentCamera);
 			}
 		}
 	}
-
-
-
-
+	 
 
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
