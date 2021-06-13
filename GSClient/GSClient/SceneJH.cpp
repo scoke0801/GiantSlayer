@@ -1428,7 +1428,10 @@ void CSceneJH::ProcessInput()
 		if (m_Player->IsCanAttack()) {
 			m_Player->Attack();
 			m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
-			//ShotPlayerArrow();
+
+			if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
+				ShotPlayerArrow();
+			}
 		}
 	}
 	if (keyInput.KEY_K)
@@ -3073,11 +3076,11 @@ void CSceneJH::ShotPlayerArrow()
 			if (-1 != idx) {
 				cout << "파티클 인덱스 " << idx << " 화살 인덱스 : " << i << " \n";
 				pArrow->SetUseable(false);
-				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
+				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,150,0 });
 				pArrow->SetPosition(pos);
-				pArrow->SetTargetVector(Vector3::Multifly(m_Player->GetLook(), -1));
+				pArrow->SetTargetVector(Vector3::Multifly(m_Player->GetLook(), 1));
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
-				m_Particles->SetDirection(idx,  Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()),1));
+				m_Particles->SetDirection(idx,  Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()),-1));
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
 				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 			}

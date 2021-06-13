@@ -96,6 +96,8 @@ public:
 	bool IsCanAttack() const { return m_IsCanAttack; }
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
 
+	float GetAttackWaitTime() const { return m_AttackWaitingTime; }
+
 	void Jump();
 
 	bool Attacked(CGameObject* pObject);
