@@ -1864,7 +1864,7 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pDoorWall->SetTextureIndexes(0x08);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pDoorWall);
 
-	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5800 * MAP_SCALE_SIZE, 4500, 800, pShader);
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5800 * MAP_SCALE_SIZE, 4500, 800 * MAP_SCALE_SIZE, pShader);
 	pDoorWall->SetPosition({ 14000 * MAP_SCALE_SIZE, -7050, 13650 * MAP_SCALE_SIZE });
 	pDoorWall->SetTextureIndexes(0x08);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pDoorWall);
