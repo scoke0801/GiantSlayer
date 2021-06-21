@@ -96,7 +96,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	for (int i = 0; i < nCameras; ++i)
 	{
 		CCamera* pCamera = new CCamera;
-		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 60000.0f);
+		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 20000.0f);
 		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
 		pCamera->SetScissorRect(0, 0, width, height);
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -232,8 +232,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 
 	CTerrainWater* pTerrainWater = new CTerrainWater(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, 257 * 35, 257 * 32);
-	pTerrainWater->SetPosition(XMFLOAT3(5450.0f, -1300.0f, 16500.0f)); 
+		m_pd3dGraphicsRootSignature, 257 * 35 * MAP_SCALE_SIZE, 257 * 32 * MAP_SCALE_SIZE);
+	pTerrainWater->SetPosition(XMFLOAT3(5450.0f * MAP_SCALE_SIZE, -1300.0f, 16500.0f * MAP_SCALE_SIZE));
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater].push_back(pTerrainWater);
 
 	//FbxLoader(m_pfbxManager, "tree", false, 1);
@@ -1469,7 +1469,8 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_F2)
 	{
-		m_Player->SetPosition({ 2800 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
+		// 2800
+		m_Player->SetPosition({ 8800 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F3)
@@ -1785,22 +1786,58 @@ void CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ 8000.0f * MAP_SCALE_SIZE,  -1301.0f,  18100.0f * MAP_SCALE_SIZE });
+	pBridge->SetPosition({ 8000.0f * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);  
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ 10000.0f * MAP_SCALE_SIZE,  -1301.0f,  18100.0f * MAP_SCALE_SIZE });
+	pBridge->SetPosition({ (10000.0f - 680) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ 9000.0f * MAP_SCALE_SIZE,  -1301.0f,  18100.0f * MAP_SCALE_SIZE });
+	pBridge->SetPosition({ (9000.0f - 340) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ (11000.0f - 680 - 340) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ 8000.0f * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);  
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ (10000.0f - 680) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ (9000.0f - 340) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ (11000.0f - 680 - 340) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+
 }
 
 void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
