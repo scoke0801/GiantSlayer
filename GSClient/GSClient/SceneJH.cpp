@@ -295,7 +295,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Rain",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
-		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll"
+		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
 		"GreenTree",
 		"Bow"
 	};
@@ -322,7 +322,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/Body_D.dds",L"resources/Textures/Body_C.dds",L"resources/Textures/Body_E.dds",L"resources/Textures/Body_N.dds",
 		L"resources/Textures/Skeleton_D.dds",
 		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",
-		L"resources/Textures/DS_equipment_standard.dds"
+		L"resources/Textures/DS_equipment_standard.dds",
 		L"resources/OBJ/GreenTree.dds",
 		L"resources/Textures/bow_texture.dds",
 	};
@@ -378,7 +378,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
-		"MeleeSkeleton_02_EquipAll"
+		"MeleeSkeleton_02_EquipAll",
 		"GreenTree",
 		"Bow"
 	};
@@ -1219,7 +1219,7 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
 				look, -PLAYER_RUN_SPEED));
-			if (m_Player == m_Players[i]) {
+			/*if (m_Player == m_Players[i]) {
 				if (p_syncUpdate.states[i] == AnimationType::DAMAGED) {
 					if (m_Players[i]->GetAnimationSet() != AnimationType::DAMAGED) {
 						m_CurrentCamera->SetShake(true, 0.5f, 15);
@@ -1230,7 +1230,7 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 						m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 					}
 				}
-			}
+			}*/
 			m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
 		}
 

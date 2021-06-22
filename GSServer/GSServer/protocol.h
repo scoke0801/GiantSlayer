@@ -38,12 +38,23 @@ constexpr float PLAYER_SWORD_ATTACK_TIME = 1.033333f;
 
 enum AnimationType
 {
+	// 기본==========
 	IDLE,
 	WALK,
-	RUN,
-	ATTACK,
 	DAMAGED,
-	DEATH
+	// 한손검========
+	SWORD_GET,
+	SWORD_IDLE,
+	SWORD_RUN,
+	SWORD_ATK,
+	SWORD_DEATH,
+	// 활 ===========
+	BOW_GET,
+	BOW_IDLE,
+	BOW_RUN,
+	BOW_ATK,
+	BOW_DEATH
+	// ==============
 };
 // x,y,z 크기를 short로 보내면 맵 크기 20000에서 
 // int, float 형 변환 계산하기에 크기가 작아서 int형으로 사용

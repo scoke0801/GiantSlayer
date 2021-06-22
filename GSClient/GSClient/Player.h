@@ -18,27 +18,6 @@ enum class PlayerWeaponType
 	Bow = 0x02
 };
 
-enum AnimationType
-{
-// 기본==========
-	IDLE,
-	WALK,
-	DAMAGED,
-// 한손검========
-	SWORD_GET,
-	SWORD_IDLE,
-	SWORD_RUN,
-	SWORD_ATK,
-	SWORD_DEATH,
-// 활 ===========
-	BOW_GET,
-	BOW_IDLE,
-	BOW_RUN,
-	BOW_ATK,
-	BOW_DEATH
-// ==============
-};
-
 class CTerrain; 
 
 class CPlayer : public CGameObjectVer2
