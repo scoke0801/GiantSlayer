@@ -296,7 +296,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
-		"Mat01_mummy_A",
+		"Mat01_mummy_A","Mat01_mummy_M",
 		"GreenTree",
 		"Bow",
 		
@@ -326,7 +326,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",
 		L"resources/Textures/DS_equipment_standard.dds",
-		L"resources/Textures/Mat01_mummy_A.dds",
+		L"resources/Textures/Mat01_mummy_A.dds",L"resources/Textures/Mat01_mummy_M.dds",
 		L"resources/OBJ/GreenTree.dds",
 		L"resources/Textures/bow_texture.dds",
 	};
@@ -383,7 +383,7 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
 		"MeleeSkeleton_02_EquipAll",
-		"Mat01_mummy_A",
+		"Mat01_mummy_A","Mat01_mummy_M",
 		"GreenTree",
 		"Bow"
 	

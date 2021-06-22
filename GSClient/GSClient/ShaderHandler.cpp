@@ -335,8 +335,11 @@ void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 		pStandardShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSStandard");
 		pStandardShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSStandard");
 	}
-	else
-	{
+	else if (m_UserID == ShaderHandlerUser::YJ) {
+		pStandardShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSStandard");
+		pStandardShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSStandard");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
 		pStandardShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSStandard");
 		pStandardShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
@@ -354,11 +357,15 @@ void CShaderHandler::CreateSkinnedShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSSkinnedAnimationStandard");
 		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSStandard");
 	}
-	else
-	{
+	else if (m_UserID == ShaderHandlerUser::YJ) {
+		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSSkinnedAnimationStandard");
+		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSStandard");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
 		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSSkinnedAnimationStandard");
 		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
+	
 
 	pSkinnedShader->CreateInputLayout(ShaderTypes::Skinned);
 	pSkinnedShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);

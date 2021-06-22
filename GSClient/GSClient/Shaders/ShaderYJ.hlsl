@@ -109,12 +109,13 @@ Texture2D gtxtMeleeSkeleton_02_EquipAll : register(t46);
 
 
 Texture2D gtxtMummy : register(t47);
-Texture2D gtxtGreenTree : register(t48);
-Texture2D gtxtBow : register(t49);
+Texture2D gtxtMummy_M : register(t48);
+Texture2D gtxtGreenTree : register(t49);
+Texture2D gtxtBow : register(t50);
 
-Texture2D gtxtMap : register(t50);
-Texture2D gtxtMirror : register(t51);
-Texture2D gtxtShadowMap : register(t52);
+Texture2D gtxtMap : register(t51);
+Texture2D gtxtMirror : register(t52);
+Texture2D gtxtShadowMap : register(t53);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -1284,6 +1285,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     else if (gnTexturesMask & 0x100)
     {
         cColor = gtxtMummy.Sample(gssWrap, input.uv);
+        cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
     }
 	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	//{
