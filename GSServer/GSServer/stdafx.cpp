@@ -1,6 +1,13 @@
 #include "stdafx.h" 
 
 int* g_GridHeights[25][25] = { nullptr, };
+XMFLOAT3 PLAYER_START_POSITIONS[MAX_PLAYER] = {
+   { 550.0f,   230.0f,  1850.0f },
+   { 850.0f,   230.0f,  1850.0f },
+   { 1250.0f,  230.0f,  1850.0f },
+   { 850.0f,   230.0f,  2200.0f },
+   { 850.0f,   230.0f,  1500.0f }
+};
 void BernsteinCoeffcient5x5(float t, float fBernstein[5])
 {
 	float tInv = 1.0f - t;
