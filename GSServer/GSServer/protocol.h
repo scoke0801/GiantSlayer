@@ -3,7 +3,9 @@
 constexpr int FRAME_BUFFER_WIDTH = 1280;
 constexpr int FRAME_BUFFER_HEIGHT = 768;
 
-constexpr int MAX_PLAYER = 5; 
+constexpr int MAX_ROOM_PLAYER = 5; 
+
+constexpr int MAX_PLAYER = 500;
 
 constexpr int MAX_BUFFER = 1024;
 constexpr int MAX_NAME = 200;
@@ -259,7 +261,7 @@ struct P_S2C_PROCESS_LOGIN {
 	bool isSuccess;
 	int x, y, z;
 
-	bool existPlayer[MAX_PLAYER];
+	bool existPlayer[MAX_ROOM_PLAYER];
 };
 struct P_S2C_ADD_PLAYER {
 	BYTE size;
@@ -304,23 +306,23 @@ struct P_S2C_UPDATE_SYNC {
 	PACKET_PROTOCOL type;
 	char playerNum;
 	 
-	char id[MAX_PLAYER]; 
+	char id[MAX_ROOM_PLAYER]; 
 
-	int posX[MAX_PLAYER];
-	int posY[MAX_PLAYER];
-	int posZ[MAX_PLAYER];
+	int posX[MAX_ROOM_PLAYER];
+	int posY[MAX_ROOM_PLAYER];
+	int posZ[MAX_ROOM_PLAYER];
 
-	int lookX[MAX_PLAYER];
-	int lookY[MAX_PLAYER];
-	int lookZ[MAX_PLAYER];
+	int lookX[MAX_ROOM_PLAYER];
+	int lookY[MAX_ROOM_PLAYER];
+	int lookZ[MAX_ROOM_PLAYER];
 	 
-	char hp[MAX_PLAYER];
-	char sp[MAX_PLAYER];
+	char hp[MAX_ROOM_PLAYER];
+	char sp[MAX_ROOM_PLAYER];
 
-	BYTE states[MAX_PLAYER];
-	bool existance[MAX_PLAYER];
+	BYTE states[MAX_ROOM_PLAYER];
+	bool existance[MAX_ROOM_PLAYER];
 
-	WEAPON_TYPE weaponType[MAX_PLAYER];  
+	WEAPON_TYPE weaponType[MAX_ROOM_PLAYER];  
 };
 
 struct P_S2C_MONSTERS_UPDATE_SYNC {

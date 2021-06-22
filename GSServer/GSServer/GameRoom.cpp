@@ -4,9 +4,10 @@
 #include "MapObjects.h"
 #include "Enemy.h"
 #include "Arrow.h"
+#include "PacketProcessor.h"
 
 int g_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
-XMFLOAT3 PLAYER_START_POSITIONS[MAX_PLAYER];
+//XMFLOAT3 PLAYER_START_POSITIONS[5];
 
 void CGameRoom::Update(float elapsedTime)
 {
@@ -19,7 +20,7 @@ void CGameRoom::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	}
-	for (int i = 0; i < MAX_PLAYER; ++i) {
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Players[i]->IsExist()) {
 			m_Players[i]->Update(elapsedTime);
 			m_Players[i]->UpdateColliders();
@@ -28,7 +29,7 @@ void CGameRoom::Update(float elapsedTime)
 		}
 	}
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
-		for (int i = 0; i < MAX_PLAYER; ++i) {
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			if (m_Players[i]->IsExist() == false) continue;
 
 			if (pObstacle->CollisionCheck(m_Players[i])) {
@@ -39,7 +40,7 @@ void CGameRoom::Update(float elapsedTime)
 	}
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
-		for (int i = 0; i < MAX_PLAYER; ++i) {
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			if (m_Players[i]->IsExist() == false) continue;
 			if (false == pEnemy->CollisionCheck(m_Players[i])) {
 				continue;
@@ -65,7 +66,7 @@ void CGameRoom::Update(float elapsedTime)
 			continue;
 		}
 
-		for (int i = 0; i < MAX_PLAYER; ++i) {
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			if (m_Players[i]->IsExist() == false) continue;
 			if (pArrow->CollisionCheck(m_Players[i])) {
 				if (m_Players[i]->Attacked(pArrow)) {
@@ -92,7 +93,7 @@ void CGameRoom::Update(float elapsedTime)
 	}
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
 
-		for (int i = 0; i < MAX_PLAYER; ++i) {
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			if (m_Players[i]->IsExist() == false) continue;
 			if (pPuzzle->CollisionCheck(m_Players[i])) {
 				m_Players[i]->FixCollision(pPuzzle);
@@ -100,6 +101,9 @@ void CGameRoom::Update(float elapsedTime)
 			}
 		}
 	}
+}
+void CGameRoom::EnterPlayer(CLIENT* client, int id)
+{
 }
 void CGameRoom::InitAll()
 { 
@@ -122,7 +126,7 @@ void CGameRoom::InitAll()
  
 void CGameRoom::InitPlayers()
 {
-	for (int i = 0; i < MAX_PLAYER; ++i) {
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		m_Players[i] = new CPlayer();
 		m_Players[i]->Scale(200, 200, 200);
 		m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
@@ -133,7 +137,7 @@ void CGameRoom::InitPlayers()
 
 void CGameRoom::InitCameras()
 {
-	int nCameras = MAX_PLAYER;
+	int nCameras = MAX_ROOM_PLAYER;
 	const float PI = 3.141592;
 	FRAME_BUFFER_WIDTH;
 	for (int i = 0; i < nCameras; ++i)
@@ -334,7 +338,7 @@ void CGameRoom::InitMonsters()
 	}
 	for (int i = 0; i < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++i) {
 		auto pEnemy = reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][i]);
-		pEnemy->ConnectPlayer(m_Players, MAX_PLAYER);
+		pEnemy->ConnectPlayer(m_Players, MAX_ROOM_PLAYER);
 	}
 
 
@@ -750,7 +754,7 @@ void CGameRoom::ResetPlayer(int player_id)
 	m_Players[player_id]->SetPosition(PLAYER_START_POSITIONS[player_id]);
 	m_Players[player_id]->SetExistence(false);
 	m_Players[player_id]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
-	int nCameras = MAX_PLAYER;
+	int nCameras = MAX_ROOM_PLAYER;
 	const float PI = 3.141592;
 
 	CCamera* pCamera = new CCamera;
@@ -775,7 +779,7 @@ void CGameRoom::SendPacket(int p_id, void* p)
 	s_over->m_wsabuf.buf = reinterpret_cast<CHAR*>(s_over->m_packetbuf);
 	s_over->m_wsabuf.len = p_size;
 
-	auto ret = WSASend(m_Clients[p_id].m_socket, &s_over->m_wsabuf, 1, NULL, 0, &s_over->m_over, NULL);
+	auto ret = WSASend(m_Clients[p_id]->m_socket, &s_over->m_wsabuf, 1, NULL, 0, &s_over->m_over, NULL);
 	if (0 != ret) {
 		auto err_no = WSAGetLastError();
 		if (WSA_IO_PENDING != err_no) {
@@ -793,7 +797,7 @@ void CGameRoom::SendSyncUpdatePacket()
 
 	p_syncUpdate.playerNum = m_CurrentPlayerNum;
 
-	for (int i = 0; i < MAX_PLAYER; ++i) {
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		p_syncUpdate.id[i] = i;// static_cast<char>(m_Players[i]->GetId());
 		p_syncUpdate.hp[i] = m_Players[i]->GetHP();
 		//p_syncUpdate.Sp[i] = m_Players[i]->GetSP();
@@ -819,11 +823,11 @@ void CGameRoom::SendSyncUpdatePacket()
 			p_syncUpdate.states[i] = AnimationType::IDLE;
 		}*/
 	}
-	for (int i = 0; i < MAX_PLAYER; ++i) {
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		p_syncUpdate.existance[i] = m_Players[i]->IsExist();
 	}
-	for (int i = SERVER_ID + 1; i <= MAX_PLAYER; ++i) {
-		if (m_Clients[i].m_state == PL_STATE::PLST_CONNECTED) {
+	for (int i = 0; i <= MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i]->m_state == PL_STATE::PLST_CONNECTED) {
 			SendPacket(i, &p_syncUpdate);
 		}
 	}
@@ -855,8 +859,8 @@ void CGameRoom::SendMonsterActPacket()
 		p_monsterUpdate[i].lookZ = FloatToInt(look.z);
 		p_monsterUpdate[i].state = mon->GetAnimationType();
 	}
-	for (int i = 0; i <= MAX_PLAYER; ++i) {
-		if (m_Clients[i].m_state != PL_STATE::PLST_CONNECTED) {
+	for (int i = 0; i <= MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
 			continue;
 		}
 		for (int j = 0; j < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++j) {
@@ -867,18 +871,37 @@ void CGameRoom::SendMonsterActPacket()
 
 void CGameRoom::Disconnect(int packet_id)
 {
-	cout << "·Î±× ¾Æ¿ô\n";
-	int player_id = packet_id - 1;
+	cout << "·Î±× ¾Æ¿ô\n"; 
+	m_Players[packet_id]->SetExistence(false);
+	m_Clients[packet_id]->m_state = PLST_FREE;
+
+	P_S2C_DELETE_PLAYER p_deletePlayer;
+	p_deletePlayer.type = PACKET_PROTOCOL::S2C_DELETE_PLAYER;
+	p_deletePlayer.size = sizeof(P_S2C_DELETE_PLAYER);
+	p_deletePlayer.id = packet_id;
+
+	for (int i = 1; i <= MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i]->m_state != PLST_FREE) {
+			SendPacket(i, &p_deletePlayer);
+		}
+	}
+	m_CurrentPlayerNum--;
+	ResetPlayer(packet_id);
+}
+ 
+void CGameRoom::Disconnect(CLIENT& client)
+{
+	int player_id = client.id;
 	m_Players[player_id]->SetExistence(false);
-	m_Clients[packet_id].m_state = PLST_FREE;
+	m_Clients[player_id]->m_state = PLST_FREE;
 
 	P_S2C_DELETE_PLAYER p_deletePlayer;
 	p_deletePlayer.type = PACKET_PROTOCOL::S2C_DELETE_PLAYER;
 	p_deletePlayer.size = sizeof(P_S2C_DELETE_PLAYER);
 	p_deletePlayer.id = player_id;
 
-	for (int i = 1; i <= MAX_PLAYER; ++i) {
-		if (m_Clients[i].m_state != PLST_FREE) {
+	for (int i = 1; i <= MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i]->m_state != PLST_FREE) {
 			SendPacket(i, &p_deletePlayer);
 		}
 	}
@@ -898,12 +921,12 @@ void CGameRoom::DeleteObject(CGameObject* pObject, int layerIdx)
 
 int CGameRoom::GetNewPlayerId(SOCKET socket)
 {
-	for (int i = SERVER_ID + 1; i <= MAX_PLAYER; ++i) {
-		if (PLST_FREE == m_Clients[i].m_state) {
-			m_Clients[i].m_state = PLST_CONNECTED;
-			m_Clients[i].m_socket = socket;
-			m_Clients[i].m_name[0] = 0;
-			m_Clients[i].id = i;
+	for (int i = 0; i <= MAX_ROOM_PLAYER; ++i) {
+		if (PLST_FREE == m_Clients[i]->m_state) {
+			m_Clients[i]->m_state = PLST_CONNECTED;
+			m_Clients[i]->m_socket = socket;
+			m_Clients[i]->m_name[0] = 0;
+			m_Clients[i]->id = i;
 			return i;
 		}
 	}
@@ -912,19 +935,19 @@ int CGameRoom::GetNewPlayerId(SOCKET socket)
 
 void CGameRoom::InitPrevUserData(int c_id)
 {
-	m_Clients[c_id].m_prev_size = 0;
+	m_Clients[c_id]->m_prev_size = 0;
 }
 
 void CGameRoom::DoRecv(int s_id)
 {
-	m_Clients[s_id].m_recv_over.m_wsabuf.buf = reinterpret_cast<char*>(m_Clients[s_id].m_recv_over.m_packetbuf) + m_Clients[s_id].m_prev_size;
-	m_Clients[s_id].m_recv_over.m_wsabuf.len = MAX_BUFFER - m_Clients[s_id].m_prev_size;
+	m_Clients[s_id]->m_recv_over.m_wsabuf.buf = reinterpret_cast<char*>(m_Clients[s_id]->m_recv_over.m_packetbuf) + m_Clients[s_id]->m_prev_size;
+	m_Clients[s_id]->m_recv_over.m_wsabuf.len = MAX_BUFFER - m_Clients[s_id]->m_prev_size;
 
-	memset(&m_Clients[s_id].m_recv_over.m_over, 0, sizeof(m_Clients[s_id].m_recv_over.m_over));
+	memset(&m_Clients[s_id]->m_recv_over.m_over, 0, sizeof(m_Clients[s_id]->m_recv_over.m_over));
 
 	DWORD r_flag = 0;
-	auto ret = WSARecv(m_Clients[s_id].m_socket, &m_Clients[s_id].m_recv_over.m_wsabuf, 1, NULL,
-		&r_flag, &m_Clients[s_id].m_recv_over.m_over, recv_callback);
+	auto ret = WSARecv(m_Clients[s_id]->m_socket, &m_Clients[s_id]->m_recv_over.m_wsabuf, 1, NULL,
+		&r_flag, &m_Clients[s_id]->m_recv_over.m_over, recv_callback);
 
 	if (0 != ret) {
 		auto err_no = WSAGetLastError();
@@ -953,7 +976,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 		// p_id mean packet_id...
 		int player_id = p_id - 1;
 		cout << "player_id : " << player_id << " p_id : " << p_id << endl;
-		if (m_CurrentPlayerNum > MAX_PLAYER) {
+		if (m_CurrentPlayerNum > MAX_ROOM_PLAYER) {
 			p_processLogin.isSuccess = false;
 		}
 		else {
@@ -968,7 +991,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 			p_processLogin.z = FloatToInt(pos.z);
 		}
 		p_processLogin.id = player_id;
-		for (int i = 0; i < MAX_PLAYER; ++i) {
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			p_processLogin.existPlayer[i] = m_Players[i]->IsExist();
 		}
 		SendPacket(p_id, &p_processLogin);
@@ -1056,7 +1079,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 
 		p_syncUpdate.playerNum = m_CurrentPlayerNum;
 
-		for (int i = 0; i < MAX_PLAYER; ++i) {
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			p_syncUpdate.id[i] = i;// static_cast<char>(m_Players[i]->GetId());
 
 			XMFLOAT3 pos = m_Players[i]->GetPosition();
@@ -1069,7 +1092,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 			p_syncUpdate.lookY[i] = FloatToInt(look.y);
 			p_syncUpdate.lookZ[i] = FloatToInt(look.z);
 		}
-		for (int i = 0; i < MAX_PLAYER; ++i) {
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			p_syncUpdate.existance[i] = m_Players[i]->IsExist();
 		}
 		SendPacket(p_id, &p_syncUpdate);

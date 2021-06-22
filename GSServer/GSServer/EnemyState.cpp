@@ -151,7 +151,7 @@ void AttackedState::Enter(CEnemy* enemy)
     int hp = enemy->GetHP();
     hp -= PLAYER_DAMAGE;
     if (hp <= 0) {
-        PacketProcessor::GetInstance()->DeleteObject(enemy, (int)OBJECT_LAYER::Enemy);
+        //PacketProcessor::GetInstance()->DeleteObject(enemy, (int)OBJECT_LAYER::Enemy);
         return;
     }
     enemy->SetHP(hp);

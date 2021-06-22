@@ -41,17 +41,18 @@ struct CLIENT {
 
 	char		m_name[200];
 	int			m_prev_size;
+	short		m_RoomIndex;
 };
 
 
 class CGameRoom
 {
-	array <CLIENT, MAX_PLAYER + 1> m_Clients;
-	CPlayer* m_Players[MAX_PLAYER];
-	CCamera* m_Cameras[MAX_PLAYER];
-	int							m_CurrentPlayerNum = 0;
+	array <CLIENT*, MAX_ROOM_PLAYER + 1>	m_Clients;
+	CPlayer*								m_Players[MAX_ROOM_PLAYER];
+	CCamera*								m_Cameras[MAX_ROOM_PLAYER];
+	int										m_CurrentPlayerNum = 0;
 
-	int							m_CurrentlyDeletedPlayerId;
+	int										m_CurrentlyDeletedPlayerId;
 	 
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
 	 
@@ -64,6 +65,14 @@ class CGameRoom
 	 
 public:
 	void Update(float elapsedTime);
+
+	void EnterPlayer(CLIENT* client, int id);
+	void Disconnect(CLIENT& client); 
+	void Disconnect(int id);
+
+	void ProcessPacket(int p_id, unsigned char* p_buf);
+
+	void DeleteObject(CGameObject* pObject, int layerIdx);
 
 private:
 	void InitAll();
@@ -93,11 +102,5 @@ private:
 	void SendPacket(int p_id, void* p);
 	void SendSyncUpdatePacket();
 	void SendMonsterActPacket();
-	 
-	void ProcessPacket(int p_id, unsigned char* p_buf);
-
-	void Disconnect(int p_id);
-
-	void DeleteObject(CGameObject* pObject, int layerIdx); 
 }; 
 

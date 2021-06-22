@@ -19,7 +19,7 @@ void CPlayer::Update(float fTimeElapsed)
 {
 	if (false == m_IsCanAttack) {
 		m_AttackWaitingTime -= fTimeElapsed;
-		m_StateName = AnimationType::ATTACK;
+		m_StateName = AnimationType::SWORD_ATK;
 		if (m_AttackWaitingTime < 0.0f) { 
 			m_IsAlreadyAttack = false;
 			m_AttackWaitingTime = 0.0f;
@@ -45,7 +45,7 @@ void CPlayer::Update(float fTimeElapsed)
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
 			m_StateName = AnimationType::IDLE;
 		else
-			m_StateName = AnimationType::RUN;
+			m_StateName = AnimationType::SWORD_RUN;
 	}
 	float Friction = (m_MovingType == Player_Move_Type::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 	
