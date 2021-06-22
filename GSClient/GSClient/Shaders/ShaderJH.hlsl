@@ -107,13 +107,12 @@ Texture2D gtxtMeleeSkeleton_02: register(t44);
 Texture2D gtxtMeleeSkeleton_02_Equip: register(t45);
 Texture2D gtxtMeleeSkeleton_02_EquipAll: register(t46);
 
-Texture2D gtxtMap		   : register(t47);
-Texture2D gtxtMirror	   : register(t48);
-Texture2D gtxtShadowMap	   : register(t49);
+Texture2D gtxtGreenTree		: register(t47);
+Texture2D gtxtBow			: register(t48);
 
-Texture2D gtxtGreenTree		: register(t50);
-Texture2D gtxtBow			: register(t51);
-
+Texture2D gtxtMap		   : register(t49);
+Texture2D gtxtMirror	   : register(t50);
+Texture2D gtxtShadowMap	   : register(t51);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
