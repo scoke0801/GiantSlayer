@@ -17,7 +17,28 @@ enum class PlayerWeaponType
 	Sword = 0x01,
 	Bow = 0x02
 };
- 
+
+enum AnimationType
+{
+// 기본==========
+	IDLE,
+	WALK,
+	DAMAGED,
+// 한손검========
+	SWORD_GET,
+	SWORD_IDLE,
+	SWORD_RUN,
+	SWORD_ATK,
+	SWORD_DEATH,
+// 활 ===========
+	BOW_GET,
+	BOW_IDLE,
+	BOW_RUN,
+	BOW_ATK,
+	BOW_DEATH
+// ==============
+};
+
 class CTerrain; 
 
 class CPlayer : public CGameObjectVer2
@@ -28,10 +49,17 @@ private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
 	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
 
+	AnimationType IDLE = AnimationType::SWORD_IDLE;
+	AnimationType RUN = AnimationType::SWORD_RUN;
+	AnimationType ATK = AnimationType::SWORD_ATK;
+	AnimationType DEATH = AnimationType::SWORD_DEATH;
+
+
 	bool m_isOnGround = true;
 	float m_JumpTime = 0.0f;
 
 private:
+	float m_AttackAnimLength = 0.0f;
 	float m_AttackWaitingTime = 0.0f;
 	bool m_IsCanAttack = true;
 
@@ -64,11 +92,14 @@ public:
 	bool IsMoving() const { return Vector3::Length(m_xmf3Velocity) > 0.01f; }
 
 	void SetWeapon(PlayerWeaponType weaponID) { m_WeaponType = weaponID; }
+	PlayerWeaponType GetWeapon() { return m_WeaponType; }
 	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; } 
 
 	void SetCanAttack(bool info) { m_IsCanAttack = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
+
+	float GetAttackWaitTime() const { return m_AttackWaitingTime; }
 
 	void Jump();
 
@@ -77,4 +108,9 @@ public:
 
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
+
+	void AnimationChange(PlayerWeaponType weapon);
+	void DisableSword();
+	void DisableBow();
+
 };

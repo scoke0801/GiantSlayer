@@ -243,8 +243,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildMapSector1(pd3dDevice, pd3dCommandList);
 	BuildMapSector2(pd3dDevice, pd3dCommandList);
 	BuildMapSector3(pd3dDevice, pd3dCommandList); 
-	//BuildMapSector4(pd3dDevice, pd3dCommandList);
-	//BuildMapSector5(pd3dDevice, pd3dCommandList); 
+	BuildMapSector4(pd3dDevice, pd3dCommandList);
+	BuildMapSector5(pd3dDevice, pd3dCommandList); 
 
 	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 	
@@ -296,6 +296,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll"
+		"GreenTree",
+		"Bow"
 	};
 
 	const wchar_t* address[] =
@@ -321,6 +323,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/Skeleton_D.dds",
 		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",
 		L"resources/Textures/DS_equipment_standard.dds"
+		L"resources/OBJ/GreenTree.dds",
+		L"resources/Textures/bow_texture.dds",
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -375,6 +379,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
 		"MeleeSkeleton_02_EquipAll"
+		"GreenTree",
+		"Bow"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -1447,6 +1453,22 @@ void CSceneJH::ProcessInput()
 		m_isPlayerSelected = false;
 		//m_CurrentCamera = m_Cameras[3];
 	}
+	if (keyInput.KEY_9)
+	{
+		if (m_Player->GetWeapon() == PlayerWeaponType::Sword) {
+			m_Player->SetWeapon(PlayerWeaponType::Bow);
+			m_Player->DisableSword();
+			m_Player->AnimationChange(PlayerWeaponType::Bow);
+		}
+		else if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
+			m_Player->SetWeapon(PlayerWeaponType::Sword);
+			m_Player->DisableBow();
+			m_Player->AnimationChange(PlayerWeaponType::Sword);
+		}
+		else {
+			cout << "...?" << endl;
+		}
+	}
 	if (keyInput.KEY_SPACE)
 	{
 		m_Player->Jump();
@@ -1520,7 +1542,10 @@ void CSceneJH::ProcessInput()
 		if (m_Player->IsCanAttack()) {
 			m_Player->Attack();
 			m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
-			//ShotPlayerArrow();
+
+			if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
+				ShotPlayerArrow();
+			}
 		}
 	}
 	if (keyInput.KEY_K)
@@ -2562,8 +2587,20 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
 	}
 #pragma endregion 
-	 
+	
 	CGameObject* pObject;
+	
+	for (int i = 0; i < 2; i++)
+	{
+		pObject = new CGameObject();
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree]);
+		pObject->SetPosition({ 1000.0f + i * 1000.0f, 100, 850 });
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+		pObject->SetTextureIndex(0x200);
+		pObject->Scale(100, 100, 100);
+		//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	}
+
 	for (int i = 0; i < 2; i++)
 	{
 		pObject = new CGameObject();
@@ -2932,10 +2969,15 @@ void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree"); 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree] = new CFixedMesh(pd3dDevice, pd3dCommandList, "GreenTree");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow"); 
 }
 
@@ -3064,9 +3106,12 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true); 
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true); 
 	
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
+	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
+	m_Players[0]->DisableBow();
+	m_Players[0]->AnimationChange(PlayerWeaponType::Sword);
 	m_Player = m_Players[0];
 
 	m_Players[0]->SetChild(pPlayerModel, true);
@@ -3138,11 +3183,11 @@ void CSceneJH::ShotPlayerArrow()
 			if (-1 != idx) {
 				cout << "파티클 인덱스 " << idx << " 화살 인덱스 : " << i << " \n";
 				pArrow->SetUseable(false);
-				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
+				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,150,0 });
 				pArrow->SetPosition(pos);
-				pArrow->SetTargetVector(Vector3::Multifly(m_Player->GetLook(), -1));
+				pArrow->SetTargetVector(Vector3::Multifly(m_Player->GetLook(), 1));
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
-				m_Particles->SetDirection(idx,  Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()),1));
+				m_Particles->SetDirection(idx,  Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()),-1));
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
 				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 			}

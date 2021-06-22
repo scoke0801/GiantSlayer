@@ -427,7 +427,7 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 {
 	OnPrepareRender();
 
-	if (m_pMesh)
+	if (m_pMesh && IsDrawable())
 	{
 		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World); 
 
@@ -802,8 +802,8 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 				{
 					haveToRead = false;
 					// 더미 프레임 추가
-					pAnimationSet->m_pfKeyFrameTransformTimes[i] = pAnimationSet->m_pfKeyFrameTransformTimes[i - 1] +
-						(pAnimationSet->m_pfKeyFrameTransformTimes[i - 1] - pAnimationSet->m_pfKeyFrameTransformTimes[i - 2]); // 트랜스폼 적용되는 시간 
+					pAnimationSet->m_pfKeyFrameTransformTimes[i] = pAnimationSet->m_pfKeyFrameTransformTimes[i - 1] + 
+						(pAnimationSet->m_pfKeyFrameTransformTimes[i - 1] - pAnimationSet->m_pfKeyFrameTransformTimes[i - 2]); // 트랜스폼 적용되는 시간
 					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 1]; // 트랜스폼
 					
 					
@@ -894,6 +894,7 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 			nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
 			nReads = (UINT)::fread(pGameObject->m_pstrFrameName, sizeof(char), nStrLength, pInFile);
 			pGameObject->m_pstrFrameName[nStrLength] = '\0';
+			//cout << pGameObject->m_pstrFrameName << endl;
 		}
 		else if (!strcmp(pstrToken, "<Transform>:"))
 		{
@@ -1049,6 +1050,26 @@ void CGameObjectVer2::SetTextureIndexFindByName(string fileName)
 	else if (fileName == "DS_equipment_standard") {
 		SetTextureIndex(0x80);
 	}
+	else if (fileName == "bow_texture") {
+		SetTextureIndex(0x40);
+	}
+	int stop = 3;
+}
+
+void CGameObjectVer2::SetDrawableRecursively(char* name, bool draw)
+{
+	if (!strcmp(m_pstrFrameName, name)) SetDrawable(draw);
+
+	if (m_pSibling) m_pSibling->SetDrawableRecursively(name, draw);
+	if (m_pChild) m_pChild->SetDrawableRecursively(name, draw);
+}
+
+void CGameObjectVer2::PrintPartNames()
+{
+	cout << m_pstrFrameName << endl;
+
+	if (m_pSibling) m_pSibling->PrintPartNames();
+	if (m_pChild) m_pChild->PrintPartNames();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -23,6 +23,7 @@ enum class FBX_MESH_TYPE : UINT {
 	Player,
 	Enemy_01,
 	Enemy_02,
+	GreenTree,
 	COUNT
 };
 

@@ -32,8 +32,8 @@ public:
 	int								m_nAnimationBoneFrames = 0;
 
 	int								m_nKeyFrameTransforms = 0;
-	float* m_pfKeyFrameTransformTimes = NULL;
-	XMFLOAT4X4** m_ppxmf4x4KeyFrameTransforms = NULL;
+	float*							m_pfKeyFrameTransformTimes = NULL;
+	XMFLOAT4X4**					m_ppxmf4x4KeyFrameTransforms = NULL;
 
 #ifdef _WITH_ANIMATION_SRT
 	int								m_nKeyFrameScales = 0;
@@ -97,19 +97,19 @@ public:
 	float 							m_fTime = 0.0f;
 
 	int								m_nAnimationSets = 0;
-	CAnimationSet* m_pAnimationSets = NULL;
+	CAnimationSet*					m_pAnimationSets = NULL;
 
 	int								m_nAnimationSet = 0;
 
 	int								m_nAnimationBoneFrames = 0;
-	CGameObjectVer2** m_ppAnimationBoneFrameCaches = NULL;
+	CGameObjectVer2**				m_ppAnimationBoneFrameCaches = NULL;
 
 	int 							m_nAnimationTracks = 0;
-	CAnimationTrack* m_pAnimationTracks = NULL;
+	CAnimationTrack*				m_pAnimationTracks = NULL;
 
 	int  				 			m_nAnimationTrack = 0;
 
-	CGameObjectVer2* m_pRootFrame = NULL;
+	CGameObjectVer2*				m_pRootFrame = NULL;
 
 public:
 	void SetAnimationSet(int nAnimationSet);
@@ -204,6 +204,9 @@ public:
 	static void PrintFrameInfo(CGameObjectVer2* pGameObject, CGameObjectVer2* pParent);
 
 	void SetTextureIndexFindByName(string fileName);
+
+	void SetDrawableRecursively(char* name, bool draw);
+	void PrintPartNames();
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

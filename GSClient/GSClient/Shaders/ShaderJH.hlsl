@@ -111,6 +111,10 @@ Texture2D gtxtMap		   : register(t47);
 Texture2D gtxtMirror	   : register(t48);
 Texture2D gtxtShadowMap	   : register(t49);
 
+Texture2D gtxtGreenTree		: register(t50);
+Texture2D gtxtBow			: register(t51);
+
+
 float CalcShadowFactor(float4 f4ShadowPos)
 {
     f4ShadowPos.xyz /= f4ShadowPos.w;
@@ -965,7 +969,7 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	if (gnTexturesMask & 0x20)
 	{
 		cColor = gtxtDoor.Sample(gssWrap, input.uv);
-	} 
+	}
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
@@ -1114,7 +1118,11 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	if (gnTexturesMask & 0x100)
 	{
 		cColor = gtxtWood.Sample(gssWrap, input.uv);
-	} 
+	}
+	if (gnTexturesMask & 0x200)
+	{
+		cColor = gtxtGreenTree.Sample(gssWrap, input.uv);
+	}
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor(input.shadowPosH);
 
@@ -1268,8 +1276,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 	else if (gnTexturesMask & 0x80)
 	{
-		cColor = gtxtMeleeSkeleton_02.Sample(gssWrap, input.uv);
-		cColor += gtxtMeleeSkeleton_02_EquipAll.Sample(gssWrap, input.uv); 
+		cColor = gtxtBow.Sample(gssWrap, input.uv);
 	}
 	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	//{
