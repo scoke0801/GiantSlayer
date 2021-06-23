@@ -196,6 +196,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             gFramework->SetFocus(false);
         } 
         break;
+
+    case WM_KEYDOWN:
+        gFramework->ProcessWindowKeyboard(wParam, false);
+        break;
+    case WM_KEYUP: 
+        gFramework->ProcessWindowKeyboard(wParam, true);
+        break;
+
     case WM_DESTROY:
         PostQuitMessage(0);
         break;

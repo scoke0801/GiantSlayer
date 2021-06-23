@@ -1053,10 +1053,13 @@ void CGameObjectVer2::SetTextureIndexFindByName(string fileName)
 		SetTextureIndex(0x40);
 	}
 	else if (fileName == "DS_equipment_standard") {
-		SetTextureIndex(0x80);
+		SetTextureIndex(0x40);
 	}
 	else if (fileName == "bow_texture") {
-		SetTextureIndex(0x40);
+		SetTextureIndex(0x80);
+	}
+	else if (fileName == "Mat01_mummy_A") {
+		SetTextureIndex(0x100);
 	}
 	int stop = 3;
 }

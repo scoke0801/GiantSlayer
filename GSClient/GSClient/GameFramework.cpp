@@ -129,10 +129,14 @@ void CFramework::CreateDirect3DDevice()
 	{
 		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
 		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
-		if (lstrcmp(dxgiAdapterDesc.Description, L"AMD Radeon(TM) Vega 8 Graphics") == 0)
+		if (lstrcmp(dxgiAdapterDesc.Description, L"AMD Radeon(TM) Vega 8 Graphics") == 0) {
+#define NOTEBOOK_DEV
 			continue;
-		if (lstrcmp(dxgiAdapterDesc.Description, L"AMD Radeon(TM) Graphics") == 0)
+		}
+		if (lstrcmp(dxgiAdapterDesc.Description, L"AMD Radeon(TM) Graphics") == 0) {
+#define NOTEBOOK_DEV
 			continue;
+		}
 		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
 		if (SUCCEEDED(D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), (void**)&m_pd3dDevice))) break;
 	}
@@ -528,6 +532,11 @@ void CFramework::Draw()
 	MoveToNextFrame();
 
 	LeaveCriticalSection(&m_cs);
+}
+
+void CFramework::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
+{
+	m_CurrentScene->ProcessWindowKeyboard(wParam, isKeyUp);
 }
 
 void CFramework::OnHandleSocketMessage(WPARAM wParam, LPARAM lParam)
