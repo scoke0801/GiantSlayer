@@ -8,6 +8,7 @@ XMFLOAT3 PLAYER_START_POSITIONS[5] = {
    { 850.0f,   230.0f,  2200.0f },
    { 850.0f,   230.0f,  1500.0f }
 }; 
+unordered_map<OBJECT_ID, XMFLOAT3>		g_ObjectPositions;
 void BernsteinCoeffcient5x5(float t, float fBernstein[5])
 {
 	float tInv = 1.0f - t;

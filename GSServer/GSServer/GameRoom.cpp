@@ -9,6 +9,11 @@
 int g_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 //XMFLOAT3 PLAYER_START_POSITIONS[5];
 
+CGameRoom::CGameRoom()
+{
+	InitAll();
+}
+
 void CGameRoom::Update(float elapsedTime)
 {
 	if (m_CurrentPlayerNum == 0) {
@@ -102,13 +107,8 @@ void CGameRoom::Update(float elapsedTime)
 		}
 	}
 }
-void CGameRoom::EnterPlayer(CLIENT* client, int id)
-{
-}
 void CGameRoom::InitAll()
-{ 
-	ReadObstaclesPosition();
-
+{  
 	InitPlayers();
 	InitCameras();
 	InitMonsters();
@@ -373,100 +373,24 @@ void CGameRoom::InitArrows()
 		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
 	}
 }
-
-void CGameRoom::ReadObstaclesPosition()
-{
-	FILE* fp = fopen("resources/ObjectPositionData.json", "rb"); // non-Windows use "r"
-	char readBuffer[4096];
-	FileReadStream is(fp, readBuffer, sizeof(readBuffer));
-	Document d;
-	d.ParseStream(is);	//==d.Parse(is);
-	fclose(fp);
-
-	for (int i = 0; i < 3; ++i) {
-		string str = "BRIDEGE_SEC2_SEC3_" + to_string(i + 1);
-		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::BRIDEGE_SEC2_SEC3_1 + i),
-			GetPosition(str, d));
-	}
-
-	m_ObjectPositions.emplace(OBJECT_ID::SIGN_SCROLL,
-		GetPosition("SIGN_SCROLL", d));
-	m_ObjectPositions.emplace(OBJECT_ID::SIGN_PUZZLE,
-		GetPosition("SIGN_PUZZLE", d));
-	m_ObjectPositions.emplace(OBJECT_ID::SIGN_MEDUSA,
-		GetPosition("SIGN_MEDUSA", d));
-	m_ObjectPositions.emplace(OBJECT_ID::SIGN_BOSS,
-		GetPosition("SIGN_BOSS", d));
-
-	for (int i = 0; i < 2; ++i) {
-		string str = "PUZZLE_" + to_string(i + 1);
-		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::PUZZLE_1 + i),
-			GetPosition(str, d));
-	}
-
-	for (int i = 0; i < 5; ++i) {
-		string str = "DOOR_WALL_SEC" + to_string(i + 1);
-		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DOOR_WALL_SEC1 + i),
-			GetPosition(str, d));
-	}
-	m_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_ROCK_1,
-		GetPosition("DRY_FOREST_ROCK_1", d));
-	m_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_ROCK_2,
-		GetPosition("DRY_FOREST_ROCK_2", d));
-
-	for (int i = 0; i < 4; ++i) {
-		string str = "DRY_FOREST_DRY_TREE_" + to_string(i + 1);
-		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DRY_FOREST_DRY_TREE_1 + i),
-			GetPosition(str, d));
-	}
-	m_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_STUMP_1,
-		GetPosition("DRY_FOREST_STUMP_1", d));
-
-	for (int i = 0; i < 3; ++i) {
-		string str = "DRY_FOREST_DEAD_TREE_" + to_string(i + 1);
-		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_1 + i),
-			GetPosition(str, d));
-	}
-	for (int i = 0; i < 10; ++i) {
-		string str = "DESERT_ROCK_" + to_string(i + 1);
-		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DESERT_ROCK_1 + i),
-			GetPosition(str, d));
-	}
-
-	for (int i = 0; i < 10; ++i) {
-		string str = "PUZZLE_BOX_" + to_string(i + 1);
-		m_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::PUZZLE_BOX_1 + i),
-			GetPosition(str, d));
-	}
-}
-
-XMFLOAT3 CGameRoom::GetPosition(const string& name, const Document& document)
-{
-	XMFLOAT3 pos;
-	pos.x = document[name.c_str()].GetArray()[0].GetInt();
-	pos.y = document[name.c_str()].GetArray()[1].GetInt();
-	pos.z = document[name.c_str()].GetArray()[2].GetInt();
-
-	return pos;
-}
-
+  
 void CGameRoom::InitObstacle()
 {
 	// Bridge --------------------------------------------------------------------
 	CGameObject* pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_1]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_1]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	pObject->UpdateColliders();
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_2]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_2]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	pObject->UpdateColliders();
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
 	pObject->Rotate({ 0, 1, 0 }, 90);
 	pObject->UpdateColliders();
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
@@ -474,10 +398,10 @@ void CGameRoom::InitObstacle()
 
 	// PUZZLE----------------------------------------------------------------------
 	pObject = new CPuzzle(OBJECT_ID::PUZZLE_1);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::PUZZLE_1]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::PUZZLE_1]);
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
 
-	XMFLOAT3 tempPos = m_ObjectPositions[OBJECT_ID::PUZZLE_1];
+	XMFLOAT3 tempPos = g_ObjectPositions[OBJECT_ID::PUZZLE_1];
 	tempPos.x += 100;
 	pObject = new CPlate(OBJECT_ID::PUZZLE_1_PLATE);
 	pObject->SetPosition(tempPos);
@@ -485,72 +409,72 @@ void CGameRoom::InitObstacle()
 
 	for (int i = 0; i < 10; ++i) {
 		pObject = new CPuzzleBox((OBJECT_ID)((int)OBJECT_ID::PUZZLE_BOX_1 + i));
-		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::PUZZLE_BOX_1 + i)]);
+		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::PUZZLE_BOX_1 + i)]);
 		m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox].push_back(pObject);
 	}
 	//pObject = new CPuzzle(OBJECT_ID::PUZZLE_2);
-	//pObject->SetPosition(m_ObjectPositions[OBJECT_ID::PUZZLE_2]);
+	//pObject->SetPosition(g_ObjectPositions[OBJECT_ID::PUZZLE_2]);
 	//m_Objects.push_back(std::move(pObject));
 /////////////////////////////////////////////////////////////////////////////////
 
 // DoorWall----------------------------------------------------------------------
 	m_DoorStartIndex = m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].size();
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC1);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC1]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC1]);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC2);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC2]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC2]);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC3);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC3]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC3]);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC4);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC4]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC4]);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC5);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC5]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC5]);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->Rotate({ 0,1,0 }, 90);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::WALL_1]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::WALL_1]);
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->Rotate({ 0,1,0 }, 90);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::WALL_2]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::WALL_2]);
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	////////////////////////////////////////////////////////////////////////////////
 
 	// Sign-------------------------------------------------------------------------
 	pObject = new CSign(OBJECT_ID::SIGN_SCROLL);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_SCROLL]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::SIGN_SCROLL]);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CSign(OBJECT_ID::SIGN_PUZZLE);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_PUZZLE]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::SIGN_PUZZLE]);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CSign(OBJECT_ID::SIGN_MEDUSA);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::SIGN_MEDUSA]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::SIGN_MEDUSA]);
 	pObject->Rotate({ 0,1,0 }, 90.0f);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	//pObject = new CSign(OBJECT_ID::BOSS);
-	//pObject->SetPosition(m_ObjectPositions[OBJECT_ID::BOSS]);
+	//pObject->SetPosition(g_ObjectPositions[OBJECT_ID::BOSS]);
 	//m_Objects.push_back(std::move(pObject));
 ////////////////////////////////////////////////////////////////////////////////
 // FBX Models
 //
 	for (int i = 0; i < 2; ++i) {
 		pObject = new CGameObject();
-		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_ROCK_1 + i)]);
+		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_ROCK_1 + i)]);
 		pObject->Scale(50, 50, 50);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5 * 0.5f, 7 * 0.5f, 3 * 0.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
@@ -560,7 +484,7 @@ void CGameRoom::InitObstacle()
 		pObject = new CGameObject();
 		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
 		pObject->Rotate({ 0,1,0 }, 60 + 30 * i);
-		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_1 + i)]);
+		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_1 + i)]);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
@@ -568,27 +492,27 @@ void CGameRoom::InitObstacle()
 		pObject = new CGameObject();
 		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
 		pObject->Rotate({ 0,1,0 }, 0 + 15 * i);
-		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_3 + i)]);
+		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_3 + i)]);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 
 	pObject = new CGameObject();
 	pObject->Scale(20.0f, 20.0f, 20.0f);
-	pObject->SetPosition(m_ObjectPositions[OBJECT_ID::DRY_FOREST_STUMP_1]);
+	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DRY_FOREST_STUMP_1]);
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(15 * 0.5f, 10 * 0.5f, 15 * 0.5f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->Scale(150.0f, 150.0f, 150.0f);
-	pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_1)]);
+	pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_1)]);
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	for (int i = 0; i < 2; ++i) {
 		pObject = new CGameObject();
 		pObject->Scale(150.0f + 50 * i, 150.0f + 50 * i, 150.0f + 50 * i);
-		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_2 + i)]);
+		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_2 + i)]);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
@@ -607,7 +531,7 @@ void CGameRoom::InitObstacle()
 		pObject->Scale(0.5f, 0.5f, 0.5f);
 
 		pObject = new CGameObject();
-		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_1 + i)]);
+		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_1 + i)]);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
@@ -628,16 +552,14 @@ void CGameRoom::InitObstacle()
 		pObject->Scale(0.5f, 0.5f, 0.5f);
 
 		pObject = new CGameObject();
-		pObject->SetPosition(m_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_6 + i)]);
+		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_6 + i)]);
 		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 
 	int stop = 3;
 }
-
-
-
+ 
 void CGameRoom::BuildBlockingRegionOnMap()
 {
 	CGameObject* pObject = new CGameObject();
@@ -766,8 +688,7 @@ void CGameRoom::ResetPlayer(int player_id)
 	m_Cameras[player_id]->SetTarget(m_Players[player_id]);
 	m_Players[player_id]->SetCamera(m_Cameras[player_id]);
 }
-
-
+ 
 void CGameRoom::SendPacket(int p_id, void* p)
 {
 	unsigned char p_size = reinterpret_cast<unsigned char*>(p)[0];
@@ -887,6 +808,10 @@ void CGameRoom::Disconnect(int packet_id)
 	}
 	m_CurrentPlayerNum--;
 	ResetPlayer(packet_id);
+
+	if (m_CurrentPlayerNum <= 0) {
+		m_IsActive = false;
+	}
 }
  
 void CGameRoom::Disconnect(CLIENT& client)
@@ -907,6 +832,10 @@ void CGameRoom::Disconnect(CLIENT& client)
 	}
 	m_CurrentPlayerNum--;
 	ResetPlayer(player_id);
+
+	if (m_CurrentPlayerNum <= 0) {
+		m_IsActive = false;
+	}
 }
 
 void CGameRoom::DeleteObject(CGameObject* pObject, int layerIdx)
@@ -917,8 +846,7 @@ void CGameRoom::DeleteObject(CGameObject* pObject, int layerIdx)
 		m_ObjectLayers[layerIdx].erase(res);
 	}
 }
-
-
+ 
 int CGameRoom::GetNewPlayerId(SOCKET socket)
 {
 	for (int i = 0; i <= MAX_ROOM_PLAYER; ++i) {
@@ -931,6 +859,18 @@ int CGameRoom::GetNewPlayerId(SOCKET socket)
 		}
 	}
 	return -1;
+}
+
+void CGameRoom::EnterPlayer(CLIENT& client)
+{
+	for (int i = 0; i <= MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			client = client;
+			client.id = i;
+			m_IsActive = true;
+			return;
+		} 
+	}
 }
 
 void CGameRoom::InitPrevUserData(int c_id)
@@ -973,24 +913,23 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 		p_processLogin.size = sizeof(p_processLogin);
 		p_processLogin.type = PACKET_PROTOCOL::S2C_LOGIN_HANDLE;
 
-		// p_id mean packet_id...
-		int player_id = p_id - 1;
-		cout << "player_id : " << player_id << " p_id : " << p_id << endl;
+		// p_id mean packet_id... 
+		cout << "player_id : " << p_id << " p_id : " << p_id << endl;
 		if (m_CurrentPlayerNum > MAX_ROOM_PLAYER) {
 			p_processLogin.isSuccess = false;
 		}
 		else {
 			p_processLogin.isSuccess = true;
 
-			m_Players[player_id]->SetExistence(true);
-			m_Players[player_id]->SetId(player_id);
-			XMFLOAT3 pos = m_Players[player_id]->GetPosition();
+			m_Players[p_id]->SetExistence(true);
+			m_Players[p_id]->SetId(p_id);
+			XMFLOAT3 pos = m_Players[p_id]->GetPosition();
 
 			p_processLogin.x = FloatToInt(pos.x);
 			p_processLogin.y = FloatToInt(pos.y);
 			p_processLogin.z = FloatToInt(pos.z);
 		}
-		p_processLogin.id = player_id;
+		p_processLogin.id = p_id;
 		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			p_processLogin.existPlayer[i] = m_Players[i]->IsExist();
 		}

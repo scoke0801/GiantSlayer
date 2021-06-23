@@ -1258,9 +1258,9 @@ void CSceneJH::LoginToServer()
 	P_C2S_LOGIN p_login;
 	p_login.size = sizeof(p_login);
 	p_login.type = PACKET_PROTOCOL::C2S_LOGIN; 
+	p_login.roomIndex = 0;
 	strcpy_s(p_login.name, CFramework::GetInstance().GetPlayerName().c_str());
-
-	int retVal;
+	 
 	SendPacket(&p_login); 
 }
 
@@ -3208,7 +3208,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//pBox->SetPosition({ 550.0f,  m_Terrain->GetDetailHeight(550.0f, 1850.0f) + 82.5f,  1850.0f }); 
 	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
 
-	for (int i = 1; i < MAX_PLAYER; ++i) {
+	for (int i = 1; i < MAX_ROOM_PLAYER; ++i) {
 		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
 

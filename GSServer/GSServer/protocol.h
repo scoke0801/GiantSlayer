@@ -181,7 +181,7 @@ enum class WEAPON_TYPE : short {
 };
 enum class PACKET_PROTOCOL : short
 {
-	//CLIENT 
+	//CLIENT  
 	C2S_LOGIN = 1,
 
 	C2S_INGAME_KEYBOARD_INPUT, 
@@ -214,11 +214,13 @@ enum class PACKET_PROTOCOL : short
 #pragma pack (push, 1)
 
 /////////////////////////////////////////////////////////////////
-// client protocol packet  
+// client protocol packet   
+
 struct P_C2S_LOGIN {
 	BYTE size;
 	PACKET_PROTOCOL type;
 	char name[MAX_NAME];
+	short roomIndex;
 };
 
 struct P_C2S_LOGOUT {

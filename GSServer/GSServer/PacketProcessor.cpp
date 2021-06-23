@@ -18,9 +18,7 @@ void PacketProcessor::UpdateLoop()
 		dLag += timeElapsed.count();
 		for (int i = 0; dLag > FPS && i < MAX_LOOP_TIME; ++i)
 		{
-			Update(FPS);
-			//SendSyncUpdatePacket();
-			//SendMonsterActPacket();
+			Update(FPS); 
 			dLag -= FPS;
 		}
 	}
@@ -29,9 +27,14 @@ void PacketProcessor::UpdateLoop()
 	}
 }
  
-bool PacketProcessor::ProcessLogin(SOCKET& socket)
+int PacketProcessor::IsCanLogin()
 {
-	return false;
+	for (int i = 0; i <= MAX_PLAYER; ++i) {
+		if (PLST_FREE == m_Clients[i].m_state) { 
+			return i;
+		}
+	}
+	return -1; 
 }
 
 int PacketProcessor::GetNewPlayerId(SOCKET socket)
@@ -41,7 +44,7 @@ int PacketProcessor::GetNewPlayerId(SOCKET socket)
 			m_Clients[i].m_state = PLST_CONNECTED;
 			m_Clients[i].m_socket = socket;
 			m_Clients[i].m_name[0] = 0;
-			m_Clients[i].id = i;
+			m_Clients[i].id = -1;
 			return i;
 		}
 	}
@@ -50,6 +53,13 @@ int PacketProcessor::GetNewPlayerId(SOCKET socket)
 
 void PacketProcessor::Update(float elapsedTime)
 {
+	for (int i = 0; i < m_Rooms.size(); ++i) {
+		if (m_Rooms[i].IsActive()) {
+			m_Rooms[i].Update(elapsedTime);
+			m_Rooms[i].SendSyncUpdatePacket();
+			m_Rooms[i].SendMonsterActPacket();
+		}  
+	}
 }
 
 void PacketProcessor::InitPrevUserData(int c_id)
@@ -126,6 +136,82 @@ void PacketProcessor::InitTerrainHeightMap()
 
 }
 
+void PacketProcessor::ReadObstaclesPosition()
+{
+	FILE* fp = fopen("resources/ObjectPositionData.json", "rb"); // non-Windows use "r"
+	char readBuffer[4096];
+	FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+	Document d;
+	d.ParseStream(is);	//==d.Parse(is);
+	fclose(fp);
+
+	for (int i = 0; i < 3; ++i) {
+		string str = "BRIDEGE_SEC2_SEC3_" + to_string(i + 1);
+		g_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::BRIDEGE_SEC2_SEC3_1 + i),
+			GetPosition(str, d));
+	}
+
+	g_ObjectPositions.emplace(OBJECT_ID::SIGN_SCROLL,
+		GetPosition("SIGN_SCROLL", d));
+	g_ObjectPositions.emplace(OBJECT_ID::SIGN_PUZZLE,
+		GetPosition("SIGN_PUZZLE", d));
+	g_ObjectPositions.emplace(OBJECT_ID::SIGN_MEDUSA,
+		GetPosition("SIGN_MEDUSA", d));
+	g_ObjectPositions.emplace(OBJECT_ID::SIGN_BOSS,
+		GetPosition("SIGN_BOSS", d));
+
+	for (int i = 0; i < 2; ++i) {
+		string str = "PUZZLE_" + to_string(i + 1);
+		g_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::PUZZLE_1 + i),
+			GetPosition(str, d));
+	}
+
+	for (int i = 0; i < 5; ++i) {
+		string str = "DOOR_WALL_SEC" + to_string(i + 1);
+		g_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DOOR_WALL_SEC1 + i),
+			GetPosition(str, d));
+	}
+	g_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_ROCK_1,
+		GetPosition("DRY_FOREST_ROCK_1", d));
+	g_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_ROCK_2,
+		GetPosition("DRY_FOREST_ROCK_2", d));
+
+	for (int i = 0; i < 4; ++i) {
+		string str = "DRY_FOREST_DRY_TREE_" + to_string(i + 1);
+		g_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DRY_FOREST_DRY_TREE_1 + i),
+			GetPosition(str, d));
+	}
+	g_ObjectPositions.emplace(OBJECT_ID::DRY_FOREST_STUMP_1,
+		GetPosition("DRY_FOREST_STUMP_1", d));
+
+	for (int i = 0; i < 3; ++i) {
+		string str = "DRY_FOREST_DEAD_TREE_" + to_string(i + 1);
+		g_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_1 + i),
+			GetPosition(str, d));
+	}
+	for (int i = 0; i < 10; ++i) {
+		string str = "DESERT_ROCK_" + to_string(i + 1);
+		g_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::DESERT_ROCK_1 + i),
+			GetPosition(str, d));
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		string str = "PUZZLE_BOX_" + to_string(i + 1);
+		g_ObjectPositions.emplace(OBJECT_ID((int)OBJECT_ID::PUZZLE_BOX_1 + i),
+			GetPosition(str, d));
+	}
+}
+
+XMFLOAT3 PacketProcessor::GetPosition(const string& name, const Document& document)
+{
+	XMFLOAT3 pos;
+	pos.x = document[name.c_str()].GetArray()[0].GetInt();
+	pos.y = document[name.c_str()].GetArray()[1].GetInt();
+	pos.z = document[name.c_str()].GetArray()[2].GetInt();
+
+	return pos;
+}
+
 void PacketProcessor::Disconnect(CLIENT& client)
 {
 	cout << "로그 아웃\n";
@@ -134,8 +220,21 @@ void PacketProcessor::Disconnect(CLIENT& client)
 }
 
 void PacketProcessor::ProcessPacket(CLIENT& client, unsigned char* p_buf)
-{
-	m_Rooms[client.m_RoomIndex].ProcessPacket(client.id, p_buf);
+{  
+	// buffer[0]의 값은 packet protocol size
+	// buffer[1]의 값은 packet protocol type
+	PACKET_PROTOCOL type = (PACKET_PROTOCOL)p_buf[1];
+	switch (type) {
+	case PACKET_PROTOCOL::C2S_LOGIN:
+	{ 
+		P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(p_buf);
+		client.m_RoomIndex = p_login.roomIndex; 
+		m_Rooms[client.m_RoomIndex].EnterPlayer(client);
+	} 
+	// break; 안해요
+	default:
+		m_Rooms[client.m_RoomIndex].ProcessPacket(client.id, p_buf); 
+	}
 }
  
 void recv_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags)

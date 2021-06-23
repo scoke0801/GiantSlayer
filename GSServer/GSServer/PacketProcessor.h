@@ -26,7 +26,9 @@ private:
 	{
 		currentTime = std::chrono::system_clock::now();
 		InitializeCriticalSection(&m_cs);  
-		InitTerrainHeightMap();
+		InitTerrainHeightMap(); 
+		ReadObstaclesPosition();
+		cout << " 서버 열렸어요 \n";
 		//ZeroMemory(m_Players, sizeof(m_Players)); 
 	}
 	~PacketProcessor() { DeleteCriticalSection(&m_cs); }
@@ -44,8 +46,7 @@ public:
 
 	void RegistSocket(SOCKET& socket, int id) { m_SocketRegister[socket] = id; }
 	  
-	bool ProcessLogin(SOCKET& socket);
-
+	int IsCanLogin(); 
 
 	int GetNewPlayerId(SOCKET socket);
 
@@ -58,7 +59,8 @@ public:
 private:
 	void Update(float elapsedTime);
 	void InitTerrainHeightMap();  
-
+	void ReadObstaclesPosition();
+	XMFLOAT3 GetPosition(const string& name, const Document& document);
 };
 
 void CALLBACK recv_callback(DWORD Error, DWORD dataBytes, LPWSAOVERLAPPED overlapped, DWORD lnFlags);

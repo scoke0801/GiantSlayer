@@ -47,26 +47,32 @@ struct CLIENT {
 
 class CGameRoom
 {
-	array <CLIENT*, MAX_ROOM_PLAYER + 1>	m_Clients;
-	CPlayer*								m_Players[MAX_ROOM_PLAYER];
-	CCamera*								m_Cameras[MAX_ROOM_PLAYER];
+	array <CLIENT*, MAX_ROOM_PLAYER>		m_Clients;
+	CPlayer* m_Players[MAX_ROOM_PLAYER];
+	CCamera* m_Cameras[MAX_ROOM_PLAYER];
 	int										m_CurrentPlayerNum = 0;
 
 	int										m_CurrentlyDeletedPlayerId;
-	 
+
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
-	 
+
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
 	unordered_map<int, CGameObject*>		m_BlockingPlateToPreviousSector;
-
-	unordered_map<OBJECT_ID, XMFLOAT3>		m_ObjectPositions;
-	int										m_DoorStartIndex;
 	 
+	int										m_DoorStartIndex;
+
+	bool									m_IsActive = false;
+
+public:
+	CGameRoom();
+	~CGameRoom() {}
 public:
 	void Update(float elapsedTime);
 
-	void EnterPlayer(CLIENT* client, int id);
+	void SendSyncUpdatePacket();
+	void SendMonsterActPacket();
+
 	void Disconnect(CLIENT& client); 
 	void Disconnect(int id);
 
@@ -74,15 +80,18 @@ public:
 
 	void DeleteObject(CGameObject* pObject, int layerIdx);
 
+	int GetNewPlayerId(SOCKET socket);
+	void EnterPlayer(CLIENT& client);
+
+
+	bool IsActive() { return m_IsActive; }
 private:
 	void InitAll();
 	void InitPlayers();
 	void InitCameras();
 	void InitMonsters();
 	void InitArrows();
-
-	void ReadObstaclesPosition();
-	XMFLOAT3 GetPosition(const string& name, const Document& document);
+	 
 
 	void InitObstacle();
 	 
@@ -94,13 +103,10 @@ private:
 	void ResetPlayer(int player_id);
 
 private: 
-	int GetNewPlayerId(SOCKET socket);
 
 	void InitPrevUserData(int c_id);
 	void DoRecv(int c_id);
 
 	void SendPacket(int p_id, void* p);
-	void SendSyncUpdatePacket();
-	void SendMonsterActPacket();
 }; 
 
