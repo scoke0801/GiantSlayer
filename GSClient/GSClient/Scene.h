@@ -85,6 +85,7 @@ public:
 public:
 	// about Keyboard process
 	virtual void ProcessInput() {}
+	virtual void ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp) {}
 
 	// about Mouse process
 	virtual void OnMouseDown(WPARAM btnState, int x, int y) { }

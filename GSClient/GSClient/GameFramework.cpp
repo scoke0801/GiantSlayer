@@ -534,6 +534,11 @@ void CFramework::Draw()
 	LeaveCriticalSection(&m_cs);
 }
 
+void CFramework::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
+{
+	m_CurrentScene->ProcessWindowKeyboard(wParam, isKeyUp);
+}
+
 void CFramework::OnHandleSocketMessage(WPARAM wParam, LPARAM lParam)
 {
 	if (WSAGETSELECTERROR(lParam)) {

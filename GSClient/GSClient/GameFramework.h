@@ -110,6 +110,9 @@ public:	// about Update
 	void Animate();
 	void Draw();
 
+public:
+	void ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp);
+
 public: // about Mouse process
 	void OnMouseDown(WPARAM btnState, int x, int y) { if (m_CurrentScene) m_CurrentScene->OnMouseDown(btnState, x, y); }
 	void OnMouseUp(WPARAM btnState, int x, int y) { if (m_CurrentScene) m_CurrentScene->OnMouseUp(btnState, x, y); }
