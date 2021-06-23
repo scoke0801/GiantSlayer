@@ -3,7 +3,6 @@
 
 class CShader;
 class CGameObject;
-class CGameObjectVer2;
 class CCamera;
 class CPlayer;
 class UI;
@@ -11,14 +10,19 @@ class HelpTextUI;
 class CTerrain;
 class CParticle;
 class CLightCamera;
-class ExportedObject;
+class CEnemy;
+class CFbxObject2;
 
 class CSceneTH : public CScene
 {
-	ExportedObject* test;
+private:
+	CFbxObject2* pfbxTestObject;
+
 private:
 	bool						m_isPlayerSelected = true;
-
+	bool						m_isPlayerBoxCollide = false;
+	bool						m_isBoxDown = false;
+	bool						m_PuzzleNumSelect[9] = { false };
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
 	array<CMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -27,17 +31,17 @@ private:
 
 	CParticle* m_Particles;
 
-
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
 	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;
 
-	CGameObject* m_Mirror = nullptr;
+	CGameObject* m_Mirror[1] = { nullptr };
 	CPlayer* m_Player = nullptr;
 
 	int							m_CurrentPlayerNum = 0;
 	//vector<CPlayer*>			m_Players[MAX_PLAYER];
 	CPlayer* m_Players[MAX_PLAYER];
+	CBox* m_PuzzleBox[8];
 
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
@@ -58,6 +62,9 @@ private:
 	CLightCamera* m_pLightCamera = nullptr;
 
 	short						m_DoorIdx = 0;
+	int							m_PuzzleNum[4];
+	bool						m_PuzzleBoxCount = false;
+
 private:
 	POINT						m_LastMousePos;
 
@@ -99,6 +106,7 @@ private:	// about SceneInfo
 
 private: // for server mouse input process
 	vector<POINTF>				m_MousePositions;
+	vector<MOUSE_INPUT_TYPE>    m_MouseInputTypes;
 	MOUSE_INPUT_TYPE			m_prevMouseInputType;
 
 private:
@@ -121,7 +129,8 @@ public:
 
 	void ReleaseObjects();
 public:
-	virtual void Update(float elapsedTime) override;
+	void Update(float elapsedTime) override;
+	void UpdateForMultiplay(float elapsedTime)override;
 	void AnimateObjects(float fTimeElapsed);
 
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
@@ -133,26 +142,32 @@ public:
 	void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
-	virtual void Communicate(SOCKET& sock) override;
+	void Communicate(SOCKET& sock) override;
 
-	virtual void LoginToServer()  override;
-	virtual void LogoutToServer() override;
+	void ProcessPacket(unsigned char* p_buf) override;
 
-	virtual void DeletePlayer(int playerId) override {}
-	virtual void AddPlayer(int palyerId) override {}
+	void LoginToServer()  override;
+	void LogoutToServer() override;
+
+	void DeletePlayer(int playerId) override {}
+	void AddPlayer(int palyerId) override {}
 public:
-	virtual void ProcessInput();
+	void ProcessInput() override;
 
-	virtual void OnMouseDown(WPARAM btnState, int x, int y) override;
-	virtual void OnMouseUp(WPARAM btnState, int x, int y)	override;
-	virtual void OnMouseMove(WPARAM btnState, int x, int y) override;
-
+	void OnMouseDown(WPARAM btnState, int x, int y) override;
+	void OnMouseUp(WPARAM btnState, int x, int y)	override;
+	void OnMouseMove(WPARAM btnState, int x, int y) override;
 public:
 	virtual void ReleaseUploadBuffers() override;
 
 	//그래픽 루트 시그너쳐를 생성한다.
 	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
+
+public:
+	void ShotPlayerArrow();
+	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
+	void DeleteEnemy(CEnemy* pEmeny);
 
 private:
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
@@ -188,8 +203,6 @@ private:
 	void BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void EnterNewSector(int sectorNum);
-
-	void ShotArrow();
 
 	void MakingFog();
 	void MakingRain();

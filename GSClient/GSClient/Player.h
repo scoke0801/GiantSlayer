@@ -32,7 +32,7 @@ private:
 	AnimationType RUN = AnimationType::SWORD_RUN;
 	AnimationType ATK = AnimationType::SWORD_ATK;
 	AnimationType DEATH = AnimationType::SWORD_DEATH;
-
+	AnimationType CHANGEWEAPON = AnimationType::BOW_GET;
 
 	bool m_isOnGround = true;
 	float m_JumpTime = 0.0f;
@@ -40,6 +40,7 @@ private:
 private:
 	float m_AttackAnimLength = 0.0f;
 	float m_AttackWaitingTime = 0.0f;
+	float m_AttackAnimPauseTime = 0.0f;
 	bool m_IsCanAttack = true;
 
 	float m_AttackedDelay = 0.0f;
@@ -47,6 +48,8 @@ private:
 	CMesh* m_SpareBoundingBox;
 	Collider* m_SpareCollisionBox;
 	Collider* m_SpareAABB;
+
+	bool keydown = false;
 
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -92,4 +95,7 @@ public:
 	void DisableSword();
 	void DisableBow();
 
+	void PullBowString(bool pull) {
+		keydown = pull;
+	}
 };

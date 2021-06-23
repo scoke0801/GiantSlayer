@@ -35,6 +35,14 @@ void CPlayer::Update(float fTimeElapsed)
 	if (false == m_IsCanAttack) {
 		m_AttackWaitingTime -= fTimeElapsed;
 		SetAnimationSet(ATK);
+
+		if (GetWeapon() == PlayerWeaponType::Bow) {
+			if (m_AttackWaitingTime < 1.0f) {
+				//m_pAnimationController->PauseAnimation(false);
+				pause = true;
+			}
+		}
+
 		if (m_AttackWaitingTime < 0.0f){
 			m_IsAlreadyAttack = false;
 			m_AttackWaitingTime = 0.0f;
@@ -54,6 +62,10 @@ void CPlayer::Update(float fTimeElapsed)
 
 			UpdateColliders(); 
 			//SetAnimationSet(AnimationType::IDLE);
+
+			if (GetWeapon() == PlayerWeaponType::Bow) {
+				pause = false;
+			}
 		}
 	}
 	// ÇÇ°Ý
@@ -256,6 +268,7 @@ void CPlayer::AnimationChange(PlayerWeaponType weapon)
 		DEATH = AnimationType::BOW_DEATH;
 
 		m_AttackAnimLength = 1.533333f;
+		m_AttackAnimPauseTime = 1.0f;
 	}
 }
  

@@ -111,6 +111,8 @@ public:
 
 	CGameObjectVer2*				m_pRootFrame = NULL;
 
+	bool pause = false;
+
 public:
 	void SetAnimationSet(int nAnimationSet);
 
@@ -120,6 +122,10 @@ public:
 	void AdvanceTime(float fElapsedTime, CAnimationCallbackHandler* pCallbackHandler);
 
 	int GetAnimationSet() { return m_nAnimationSet; }
+
+	void PauseAnimation(bool animstop) {
+		pause = animstop;
+	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,6 +152,7 @@ public:
 	CMaterial**		m_ppMaterials = NULL;
 
 	bool isSkinned = false;
+	bool pause = false;
 
 	CAnimationController* m_pAnimationController = NULL;
 	int	m_AnimationSet = 0;

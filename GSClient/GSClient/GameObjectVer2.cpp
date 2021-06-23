@@ -150,6 +150,9 @@ void CAnimationController::SetAnimationSet(int nAnimationSet)
 
 void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHandler* pCallbackHandler)
 {
+	if (pause)
+		fTimeElapsed = 0.0f;
+
 	m_fTime += fTimeElapsed;
 	if (m_pAnimationSets)
 	{
@@ -417,6 +420,8 @@ void CGameObjectVer2::UpdateOnServer(float fTimeElapsed)
 
 void CGameObjectVer2::Animate(float fTimeElapsed)
 {
+	if (pause)
+		return;
 	if (m_pAnimationController) m_pAnimationController->AdvanceTime(fTimeElapsed, NULL);
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
