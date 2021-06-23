@@ -29,7 +29,7 @@ private:
 		InitTerrainHeightMap(); 
 		ReadObstaclesPosition();
 		for (int i = 0; i < MAX_PLAYER; ++i) {
-			m_Rooms[i].InitRoom();
+			m_Rooms[i].InitRoom(i);
 		}
 		cout << " 서버 열렸어요 \n";
 		//ZeroMemory(m_Players, sizeof(m_Players)); 

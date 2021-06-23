@@ -329,9 +329,11 @@ void Adjust_Number_Of_Client()
 	P_C2S_LOGIN loginPacket; 
 
 	int temp = num_connections;
+
 	sprintf_s(loginPacket.name, "%d", temp);
 	loginPacket.size = sizeof(loginPacket);
 	loginPacket.type = PACKET_PROTOCOL::C2S_LOGIN;
+	loginPacket.roomIndex = (int)(num_connections / 5);
 	SendPacket(num_connections, &loginPacket);
 
 
@@ -367,7 +369,7 @@ void Test_Thread()
 			P_C2S_KEYBOARD_INPUT my_packet;
 			my_packet.size = sizeof(my_packet);
 			my_packet.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
-			
+			my_packet.id = i;
 			// 장애물을 피하가기 위한 부분이 들어갈 영역
 				// 단 현재는 장애물이 없기에 랜덤하게 설정
 			//switch (rand() % 4) {

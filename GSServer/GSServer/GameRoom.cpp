@@ -699,12 +699,13 @@ void CGameRoom::SendPacket(int p_id, void* p)
 	s_over->m_wsabuf.buf = reinterpret_cast<CHAR*>(s_over->m_packetbuf);
 	s_over->m_wsabuf.len = p_size;
 
-	auto ret = WSASend(m_Clients[p_id]->m_socket, &s_over->m_wsabuf, 1, NULL, 0, &s_over->m_over, NULL);
+	int id = m_IdIndexMatcher[p_id];
+	auto ret = WSASend(m_Clients[id]->m_socket, &s_over->m_wsabuf, 1, NULL, 0, &s_over->m_over, NULL);
 	if (0 != ret) {
 		auto err_no = WSAGetLastError();
 		if (WSA_IO_PENDING != err_no) {
 			error_display("WSASend : ");
-			Disconnect(p_id);
+			Disconnect(id);
 		}
 	}
 }
@@ -731,8 +732,7 @@ void CGameRoom::SendSyncUpdatePacket()
 		p_syncUpdate.lookY[i] = FloatToInt(look.y);
 		p_syncUpdate.lookZ[i] = FloatToInt(look.z);
 
-		p_syncUpdate.states[i] = m_Players[i]->GetStateName(); 
-		cout << "i " << i << " state : " << (int)p_syncUpdate.states[i] << "\n";
+		p_syncUpdate.states[i] = m_Players[i]->GetStateName();  
 	}
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		p_syncUpdate.existance[i] = m_Players[i]->IsExist();
@@ -787,7 +787,7 @@ void CGameRoom::SendMonsterActPacket()
 }
 
 void CGameRoom::Disconnect(int packet_id)
-{
+{ 
 	cout << "·Î±× ¾Æ¿ô\n"; 
 	m_Players[packet_id]->SetExistence(false);
 	m_Clients[packet_id]->m_state = PLST_FREE;
@@ -808,11 +808,12 @@ void CGameRoom::Disconnect(int packet_id)
 	if (m_CurrentPlayerNum <= 0) {
 		m_IsActive = false;
 	}
+	m_IdIndexMatcher.erase(packet_id);
 }
  
 void CGameRoom::Disconnect(CLIENT& client)
 {
-	int player_id = client.id;
+	int player_id = m_IdIndexMatcher[client.id];
 	if (player_id == -1) {
 		return;
 	}
@@ -838,6 +839,7 @@ void CGameRoom::Disconnect(CLIENT& client)
 	if (m_CurrentPlayerNum <= 0) {
 		m_IsActive = false;
 	}
+	m_IdIndexMatcher.erase(client.id);
 }
 
 void CGameRoom::DeleteObject(CGameObject* pObject, int layerIdx)
@@ -848,27 +850,13 @@ void CGameRoom::DeleteObject(CGameObject* pObject, int layerIdx)
 		m_ObjectLayers[layerIdx].erase(res);
 	}
 }
- 
-int CGameRoom::GetNewPlayerId(SOCKET socket)
-{
-	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
-		if (PLST_FREE == m_Clients[i]->m_state) {
-			m_Clients[i]->m_state = PLST_CONNECTED;
-			m_Clients[i]->m_socket = socket;
-			m_Clients[i]->m_name[0] = 0;
-			m_Clients[i]->id = i;
-			return i;
-		}
-	}
-	return -1;
-}
-
+   
 void CGameRoom::EnterPlayer(CLIENT& client)
 {
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i] == nullptr) {
 			m_Clients[i] = &client;
-			client.id = i;
+			m_IdIndexMatcher.emplace(client.id, i); 
 			m_IsActive = true;
 			return;
 		} 
@@ -876,32 +864,35 @@ void CGameRoom::EnterPlayer(CLIENT& client)
 }
 
 void CGameRoom::InitPrevUserData(int c_id)
-{
-	m_Clients[c_id]->m_prev_size = 0;
+{ 
+	m_Clients[m_IdIndexMatcher[c_id]]->m_prev_size = 0;
 }
 
 void CGameRoom::DoRecv(int s_id)
 {
-	m_Clients[s_id]->m_recv_over.m_wsabuf.buf = reinterpret_cast<char*>(m_Clients[s_id]->m_recv_over.m_packetbuf) + m_Clients[s_id]->m_prev_size;
-	m_Clients[s_id]->m_recv_over.m_wsabuf.len = MAX_BUFFER - m_Clients[s_id]->m_prev_size;
+	int id = m_IdIndexMatcher[s_id];
 
-	memset(&m_Clients[s_id]->m_recv_over.m_over, 0, sizeof(m_Clients[s_id]->m_recv_over.m_over));
+	m_Clients[id]->m_recv_over.m_wsabuf.buf = reinterpret_cast<char*>(m_Clients[id]->m_recv_over.m_packetbuf) + m_Clients[id]->m_prev_size;
+	m_Clients[id]->m_recv_over.m_wsabuf.len = MAX_BUFFER - m_Clients[id]->m_prev_size;
+
+	memset(&m_Clients[id]->m_recv_over.m_over, 0, sizeof(m_Clients[id]->m_recv_over.m_over));
 
 	DWORD r_flag = 0;
-	auto ret = WSARecv(m_Clients[s_id]->m_socket, &m_Clients[s_id]->m_recv_over.m_wsabuf, 1, NULL,
-		&r_flag, &m_Clients[s_id]->m_recv_over.m_over, recv_callback);
+	auto ret = WSARecv(m_Clients[id]->m_socket, &m_Clients[id]->m_recv_over.m_wsabuf, 1, NULL,
+		&r_flag, &m_Clients[id]->m_recv_over.m_over, recv_callback);
 
 	if (0 != ret) {
 		auto err_no = WSAGetLastError();
 		if (WSA_IO_PENDING != err_no) {
 			error_display("Error in RecvPacket: ");
-			Disconnect(s_id);
+			Disconnect(id);
 		}
 	}
 }
 
 void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 {
+	int id = m_IdIndexMatcher[p_id];
 	char buf[10000];
 	int copyPos = 0;
 	int retval;
@@ -923,9 +914,9 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 		else {
 			p_processLogin.isSuccess = true;
 
-			m_Players[p_id]->SetExistence(true);
-			m_Players[p_id]->SetId(p_id);
-			XMFLOAT3 pos = m_Players[p_id]->GetPosition();
+			m_Players[id]->SetExistence(true);
+			m_Players[id]->SetId(p_id);
+			XMFLOAT3 pos = m_Players[id]->GetPosition();
 
 			p_processLogin.x = FloatToInt(pos.x);
 			p_processLogin.y = FloatToInt(pos.y);
@@ -953,31 +944,31 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 		P_C2S_KEYBOARD_INPUT p_keyboard =
 			*reinterpret_cast<P_C2S_KEYBOARD_INPUT*>(p_buf);
 
-		XMFLOAT3 pos = m_Players[p_keyboard.id]->GetPosition();
+		XMFLOAT3 pos = m_Players[id]->GetPosition();
 		XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
 		float distance = PLAYER_RUN_SPEED;
 
 		switch (p_keyboard.keyInput)
 		{
 		case VK_W:
-			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift,
-				m_Cameras[p_keyboard.id]->GetLook3f(), distance));
+			m_Players[id]->SetVelocity(Vector3::Add(shift,
+				m_Cameras[id]->GetLook3f(), distance));
 			break;
 		case VK_S:
-			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift,
-				m_Cameras[p_keyboard.id]->GetLook3f(), -distance));
+			m_Players[id]->SetVelocity(Vector3::Add(shift,
+				m_Cameras[id]->GetLook3f(), -distance));
 			break;
 		case VK_A:
-			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift,
-				m_Cameras[p_keyboard.id]->GetRight3f(), -distance));
+			m_Players[id]->SetVelocity(Vector3::Add(shift,
+				m_Cameras[id]->GetRight3f(), -distance));
 			break;
 		case VK_D:
-			m_Players[p_keyboard.id]->SetVelocity(Vector3::Add(shift,
-				m_Cameras[p_keyboard.id]->GetRight3f(), distance));
+			m_Players[id]->SetVelocity(Vector3::Add(shift,
+				m_Cameras[id]->GetRight3f(), distance));
 			break;
 		case VK_J:
-			if (m_Players[p_keyboard.id]->IsCanAttack()) {
-				m_Players[p_keyboard.id]->Attack();
+			if (m_Players[id]->IsCanAttack()) {
+				m_Players[id]->Attack();
 			}
 			break;
 		case VK_U:
@@ -1004,7 +995,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 		p_keyboardProcess.posY = FloatToInt(pos.y);
 		p_keyboardProcess.posZ = FloatToInt(pos.z);
 
-		XMFLOAT3 look = Vector3::Normalize(m_Players[p_keyboard.id]->GetLook());
+		XMFLOAT3 look = Vector3::Normalize(m_Players[id]->GetLook());
 		//DisplayVector3(look);
 		p_keyboardProcess.lookX = FloatToInt(look.x);
 		p_keyboardProcess.lookY = FloatToInt(look.y);
