@@ -151,10 +151,13 @@
       <Filter>GameObject\Arrow</Filter>
     </ClCompile>
     <ClCompile Include="FbxObject2.cpp">
-		<Filter>GameObject</Filter>
-	</ClCompile>
+      <Filter>GameObject</Filter>
+    </ClCompile>
     <ClCompile Include="GameObjectVer2.cpp">
       <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="MummyLaser.cpp">
+      <Filter>GameObject\MummyLaser</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -304,10 +307,13 @@
       <Filter>GameObject\Arrow</Filter>
     </ClInclude>
     <ClInclude Include="FbxObject2.h">
-		<Filter>GameObject</Filter>
-	</ClInclude>
+      <Filter>GameObject</Filter>
+    </ClInclude>
     <ClInclude Include="GameObjectVer2.h">
       <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="MummyLaser.h">
+      <Filter>GameObject\MummyLaser</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -417,6 +423,9 @@
     </Filter>
     <Filter Include="GameObject\Arrow">
       <UniqueIdentifier>{13df2e8a-dd14-4fee-86b7-3f08fd19b807}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\MummyLaser">
+      <UniqueIdentifier>{092adec7-9cc3-486c-bcc4-02c1d10527ec}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

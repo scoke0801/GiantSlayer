@@ -11,6 +11,7 @@ class CTerrain;
 class CParticle;
 class CLightCamera;
 class CEnemy;
+
 class CFbxObject2;
 
 class CSceneYJ : public CScene
@@ -37,6 +38,7 @@ private:
 
 	CGameObject* m_Mirror[1] = { nullptr };
 	CPlayer* m_Player = nullptr;
+	CEnemy* m_Mummy = nullptr;
 
 	int							m_CurrentPlayerNum = 0;
 	//vector<CPlayer*>			m_Players[MAX_PLAYER];
@@ -167,7 +169,9 @@ public:
 public:
 	void ShotPlayerArrow();
 	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
+	void ShotMummyLaser(CEnemy* pEmeny, const XMFLOAT3& lookVector);
 	void DeleteEnemy(CEnemy* pEmeny);
+
 
 private:
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
@@ -180,6 +184,7 @@ private:
 
 	void BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);

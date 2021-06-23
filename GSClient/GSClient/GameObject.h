@@ -17,6 +17,7 @@ enum class OBJ_TYPE
 	Object = 0,
 	Player,
 	Enemy,
+	Mummy,
 	Obstacle,
 };
 enum class OBJ_NAME

@@ -12,6 +12,7 @@ enum class FBX_MESH_TYPE : UINT {
 	DryForestRock,
 	DesertRock,
 	Arrow,
+	Mummylaser,
 	Human,
 	DeadTree_01,
 	DeadTree_02,
@@ -23,6 +24,7 @@ enum class FBX_MESH_TYPE : UINT {
 	Player,
 	Enemy_01,
 	Enemy_02,
+	Mummy,
 	GreenTree,
 	COUNT
 };
@@ -36,10 +38,12 @@ enum class OBJECT_LAYER : int {
 	Obstacle,
 	MirrorBox,
 	Enemy,
+	Mummy,
 	Boss,
 	Arrow,
 	PlayerArrow,
 	MonsterArrow,
+	Mummylaser,
 	Billboard,
 	Fog,
 	Count,

@@ -31,6 +31,16 @@ void ParticleObject::Update(float fTimeElapsed)
 			m_elapsedTime = 0.0f;
 		}
 	}
+	else if (m_Type == PARTICLE_TYPE::MummyLaserParticle) {
+		if (m_elapsedTime > Laser_PARTICLE_LIFE_TIME) {
+			m_IsCanUse = false;
+			m_elapsedTime = 0.0f;
+			SetParticleParameter(0, -1.0f);
+		}
+		else {
+			SetParticleParameter(0, m_elapsedTime);
+		}
+	}
 }
 
 void ParticleObject::SetSpeedVector(const XMFLOAT3& speed)
@@ -122,9 +132,17 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->SetMesh(pMesh);
 		pObject->SetType(type);
 		m_ParticleObjs.push_back(std::move(pObject));
-
 	}
-	
+	else if (type == PARTICLE_TYPE::MummyLaserParticle)
+	{
+		CMummyLaserParticleMesh* pMesh = new CMummyLaserParticleMesh(pd3dDevice, pd3dCommandList, count);
+
+		ParticleObject* pObject = new ParticleObject();
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("MummyLaserParticle"));
+		pObject->SetMesh(pMesh);
+		pObject->SetType(type);
+		m_ParticleObjs.push_back(std::move(pObject));
+	}
 }
 
 void CParticle::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

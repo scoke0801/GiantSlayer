@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "SceneYJ.h"
 
-#include "stdafx.h" 
 #include "GameFramework.h"
 #include "Shader.h"
 #include "UI.h"
@@ -14,6 +13,7 @@
 #include "Puzzle.h" 
 #include "Particle.h"
 #include "Arrow.h"
+#include "MummyLaser.h"
 #include "Enemy.h"
 #include "Sound.h"
 #include "FbxObject.h"
@@ -257,6 +257,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	BuildParticles(pd3dDevice, pd3dCommandList);
 	BuildArrows(pd3dDevice, pd3dCommandList);
+	BuildMummyLaser(pd3dDevice, pd3dCommandList);
 
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
@@ -1555,7 +1556,9 @@ void CSceneYJ::ProcessInput()
 		if (m_Player->IsCanAttack()) {
 			m_Player->Attack();
 			m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
-
+		
+			//ShotPlayerArrow();
+			
 			if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
 				ShotPlayerArrow();
 			}
@@ -1572,6 +1575,7 @@ void CSceneYJ::ProcessInput()
 	if (keyInput.KEY_T)
 	{
 		gbShadowOn = true;
+		
 	}
 	if (keyInput.KEY_Y)
 	{
@@ -2097,19 +2101,22 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			scale = { 600.0f,600.0f,600.0f };
 			pMummyModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 				m_pd3dGraphicsRootSignature, "resources/FbxExported/Mummy.bin", NULL, true);
-			pEnemy = new CMeleeEnemy();
-			pEnemy->Scale(scale.x, scale.y, scale.z);
-			pEnemy->SetChild(pMummyModel, true);
-			pEnemy->SetShadertoAll();
-			pEnemy->SetTextureInedxToAll(0x40);
-			pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
-			pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
-			pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-			pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
-			pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
-			pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 3, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
-			m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+			m_Mummy = new CMummy();
+			m_Mummy->Scale(scale.x, scale.y, scale.z);
+			m_Mummy->SetChild(pMummyModel, true);
+			m_Mummy->SetShadertoAll();
+			m_Mummy->SetTextureInedxToAll(0x40);
+			
+			m_Mummy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+			m_Mummy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+
+
+			m_Mummy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+			m_Mummy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
+			m_Mummy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
+			m_Mummy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
+			m_Mummy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+			m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy)));
 		}
 
 		return;
@@ -3170,6 +3177,12 @@ void CSceneYJ::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// 비
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 100000, PARTICLE_TYPE::RainParticle);
 
+	for (int i = 0; i < 10; ++i) {
+		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle);
+		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+	}
+	
+
 	//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 
 
@@ -3216,6 +3229,21 @@ void CSceneYJ::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
 	}
 }
+void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	for (int i = 0; i < 10; ++i) {
+		CMummyLaser* pMummyLaser = new CMummyLaser();
+		pMummyLaser->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Mummylaser]);
+		pMummyLaser->SetPosition({ 500.0f,  100.0f, 1500.0f });
+		pMummyLaser->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
+		pMummyLaser->SetTextureIndex(0x20);
+		pMummyLaser->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		pMummyLaser->Scale(25.0f, 25.0f, 25.0f);
+		pMummyLaser->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
+		pMummyLaser->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(pMummyLaser);
+	}
+}
 void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
@@ -3256,7 +3284,6 @@ void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
 
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
-
 
 		m_Players[i]->SetCamera(m_PlayerCameras[i]);
 
@@ -3302,6 +3329,30 @@ void CSceneYJ::ShotPlayerArrow()
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), -1));
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+			}
+			break;
+		}
+		++i;
+	}
+}
+
+void CSceneYJ::ShotMummyLaser(CEnemy* pEmeny, const XMFLOAT3& lookVector)
+{
+	int i = 0;
+	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		CMummyLaser* pMummyLaser = reinterpret_cast<CMummyLaser*>(pObj);
+		if (pMummyLaser->IsCanUse()) {
+			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle);
+			if (-1 != idx) {
+				cout << "파티클 인덱스 " << idx << " 레이저 인덱스 : " << i << " \n";
+				pMummyLaser->SetUseable(false);
+				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy->GetPosition() }, { 0,200,0 });
+				pMummyLaser->SetPosition(pos);
+				pMummyLaser->SetTargetVector(Vector3::Multifly(m_Mummy->GetLook(), 1));
+				m_Particles->UseParticle(idx, pMummyLaser->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Mummy->GetLook()), -1));
+				pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
 				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 			}
 			break;

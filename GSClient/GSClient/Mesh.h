@@ -360,6 +360,28 @@ public:
 	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
+class CMummyLaserParticleMesh : public CMesh
+{
+private:
+	CParticleVertex* m_Vertices;
+	int					m_CurrentVertexIndex = 0;
+
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CMummyLaserParticleMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		int particleCount);
+
+	virtual ~CMummyLaserParticleMesh();
+
+public:
+	void CreateMeshes(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList, int count);
+
+	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+};
+
 
 class CTexParticleMesh : public CMesh
 {
