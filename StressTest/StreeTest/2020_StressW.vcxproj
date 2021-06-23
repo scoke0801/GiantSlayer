@@ -24,6 +24,7 @@
     <ProjectGuid>{906a6c38-9254-47e4-8420-3ebff7a77584}</ProjectGuid>
     <RootNamespace>My2020StressW</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>StressTest</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -139,7 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Server\TP_Server\protocol.h" />
+    <ClInclude Include="..\..\GSServer\GSServer\protocol.h" />
     <ClInclude Include="NetworkModule.h" />
   </ItemGroup>
   <ItemGroup>
