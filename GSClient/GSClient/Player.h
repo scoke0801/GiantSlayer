@@ -22,18 +22,18 @@ class CTerrain;
 
 class CPlayer : public CGameObjectVer2
 {    
-private:
-	bool m_IsAlreadyAttack = false;
-private:
-	PlayerMoveType m_MovingType = PlayerMoveType::Run;
-	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
-
+public: 
 	AnimationType IDLE = AnimationType::SWORD_IDLE;
 	AnimationType RUN = AnimationType::SWORD_RUN;
 	AnimationType ATK = AnimationType::SWORD_ATK;
 	AnimationType DEATH = AnimationType::SWORD_DEATH;
 
-
+private:
+	bool m_IsAlreadyAttack = false;
+private:
+	PlayerMoveType m_MovingType = PlayerMoveType::Run;
+	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
+	 
 	bool m_isOnGround = true;
 	float m_JumpTime = 0.0f;
 

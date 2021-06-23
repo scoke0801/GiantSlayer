@@ -1231,7 +1231,32 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 					}
 				}
 			}*/
-			m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
+			switch (p_syncUpdate.states[i]) {
+			case IDLE:
+			case SWORD_IDLE:
+			case BOW_IDLE:
+				m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
+				break;
+			case SWORD_RUN:
+			case BOW_RUN:
+				m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
+				break; 
+			case SWORD_ATK:
+			case BOW_ATK:
+				m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
+				break;
+			case SWORD_DEATH:
+			case BOW_DEATH: 
+				m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
+				break;
+
+			case WALK: break;
+			case DAMAGED: break;
+			case SWORD_GET:break; 
+			case BOW_GET:break;
+			default:
+				break;
+			} 
 		}
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
@@ -3210,10 +3235,13 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	for (int i = 1; i < MAX_ROOM_PLAYER; ++i) {
 		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
 
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);   
 
+		m_Players[i]->SetWeapon(PlayerWeaponType::Sword);
+		m_Players[i]->DisableBow();
+		m_Players[i]->AnimationChange(PlayerWeaponType::Sword);
 		
 		m_Players[i]->SetCamera(m_PlayerCameras[i]);
 

@@ -731,17 +731,8 @@ void CGameRoom::SendSyncUpdatePacket()
 		p_syncUpdate.lookY[i] = FloatToInt(look.y);
 		p_syncUpdate.lookZ[i] = FloatToInt(look.z);
 
-		p_syncUpdate.states[i] = m_Players[i]->GetStateName();
-		/*if (false == m_Players[i]->IsCanAttack())
-		{
-			p_syncUpdate.states[i] = AnimationType::ATTACK;
-		}
-		else if (m_Players[i]->IsMoving()) {
-			p_syncUpdate.states[i] = AnimationType::RUN;
-		}
-		else {
-			p_syncUpdate.states[i] = AnimationType::IDLE;
-		}*/
+		p_syncUpdate.states[i] = m_Players[i]->GetStateName(); 
+		cout << "i " << i << " state : " << (int)p_syncUpdate.states[i] << "\n";
 	}
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		p_syncUpdate.existance[i] = m_Players[i]->IsExist();
