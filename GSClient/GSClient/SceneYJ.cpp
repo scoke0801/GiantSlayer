@@ -117,7 +117,7 @@ void CSceneYJ::BuildCamera(ID3D12Device* pd3dDevice,
 	m_MirrorCamera = m_Cameras[3];
 	m_MinimapCamera = m_Cameras[1];
 
-	for (int i = 0; i < MAX_PLAYER; ++i) {
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		CCamera* pCamera = new CCamera;
 		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 60000.0f);
 		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
@@ -986,7 +986,7 @@ void CSceneYJ::LoginToServer()
 
 		m_MinimapCamera->SetTarget(m_Players[p_processLogin.id]);
 
-		for (int i = 0; i < MAX_PLAYER; ++i) {
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
 		}
 
@@ -2597,7 +2597,7 @@ void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_MinimapCamera->SetTarget(m_Players[0]);
 
-	for (int i = 1; i < MAX_PLAYER; ++i) {
+	for (int i = 1; i < MAX_ROOM_PLAYER; ++i) {
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 
 		/*m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList,

@@ -67,6 +67,8 @@ class CGameRoom
 public:
 	CGameRoom();
 	~CGameRoom() {}
+
+	void InitRoom() { InitAll(); }
 public:
 	void Update(float elapsedTime);
 

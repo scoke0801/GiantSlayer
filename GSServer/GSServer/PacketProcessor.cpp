@@ -5,6 +5,8 @@
 #include "Enemy.h"
 #include "Arrow.h"
 
+extern int g_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
+
 void PacketProcessor::UpdateLoop()
 {	 
 	timeElapsed = std::chrono::system_clock::now() - currentTime;
@@ -132,8 +134,7 @@ void PacketProcessor::InitTerrainHeightMap()
 
 			g_GridHeights[i][j] = copyHeights;
 		}
-	}
-
+	} 
 }
 
 void PacketProcessor::ReadObstaclesPosition()

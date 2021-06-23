@@ -123,7 +123,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	m_MirrorCamera->SetScissorRect(0, 0, width, height);
 	m_MirrorCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	for (int i = 0; i < MAX_PLAYER; ++i) {
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		CCamera* pCamera = new CCamera;
 		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 60000.0f);
 		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
@@ -1109,7 +1109,7 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 				CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
 				p->OpenDoor();
 			}
-			//for (int i = 0; i < MAX_PLAYER; ++i) {
+			//for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			//	m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
 			//}
 		}
@@ -1206,7 +1206,7 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 		P_S2C_UPDATE_SYNC p_syncUpdate;
 		memcpy(&p_syncUpdate, p_buf, p_buf[0]);
 		m_CurrentPlayerNum = p_syncUpdate.playerNum;
-		for (int i = 0; i < MAX_PLAYER; ++i) {
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			m_Players[i]->SetDrawable(p_syncUpdate.existance[i]);
 			if (m_Players[i]->IsDrawable() == false) continue;
 
