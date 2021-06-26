@@ -1455,7 +1455,7 @@ void CSceneTH::ProcessInput()
 	}
 	if (keyInput.KEY_9)
 	{
-		if (m_Player->GetWeapon() == PlayerWeaponType::Sword) {
+		/*if (m_Player->GetWeapon() == PlayerWeaponType::Sword) {
 			m_Player->SetWeapon(PlayerWeaponType::Bow);
 			m_Player->DisableSword();
 			m_Player->AnimationChange(PlayerWeaponType::Bow);
@@ -1467,7 +1467,7 @@ void CSceneTH::ProcessInput()
 		}
 		else {
 			cout << "...?" << endl;
-		}
+		}*/
 	}
 	if (keyInput.KEY_SPACE)
 	{
@@ -1539,14 +1539,14 @@ void CSceneTH::ProcessInput()
 	}
 	if (keyInput.KEY_J)
 	{
-		if (m_Player->IsCanAttack()) {
+		/*if (m_Player->IsCanAttack()) {
 			m_Player->Attack();
 			m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 
 			if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
 				ShotPlayerArrow();
 			}
-		}
+		}*/
 	}
 	if (keyInput.KEY_K)
 	{
@@ -1565,6 +1565,63 @@ void CSceneTH::ProcessInput()
 		gbShadowOn = false;
 	}
 	m_CurrentCamera->UpdateViewMatrix();
+}
+
+void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
+{
+	if (isKeyUp == false)
+	{
+		if (wParam == VK_9) {
+			if (m_Player->GetWeapon() == PlayerWeaponType::Sword) {
+				m_Player->SetWeapon(PlayerWeaponType::Bow);
+				m_Player->DisableSword();
+				m_Player->AnimationChange(PlayerWeaponType::Bow);
+			}
+			else if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
+				m_Player->SetWeapon(PlayerWeaponType::Sword);
+				m_Player->DisableBow();
+				m_Player->AnimationChange(PlayerWeaponType::Sword);
+			}
+			else {
+				cout << "...?" << endl;
+			}
+		}
+		if (wParam == VK_J) {
+			if (m_Player->IsCanAttack()) {
+				switch (m_Player->GetWeapon())
+				{
+				case PlayerWeaponType::Sword:
+					m_Player->Attack();
+					break;
+				case PlayerWeaponType::Bow:
+					m_Player->Attack();
+					m_Player->pullString = true;
+					//m_Player->pause = true;
+					//m_Player->PullBowString(true);
+					cout << "던질까말까" << endl;
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		if (wParam == VK_J) {
+			switch (m_Player->GetWeapon())
+			{
+			case PlayerWeaponType::Sword:
+				break;
+			case PlayerWeaponType::Bow:
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+				m_Player->pullString = false;
+				m_Player->pause = false;
+				//m_Player->PullBowString(false);
+				ShotPlayerArrow();
+				cout << "던져!" << endl;
+				break;
+			}
+		}
+	}
 }
 
 void CSceneTH::OnMouseDown(WPARAM btnState, int x, int y)

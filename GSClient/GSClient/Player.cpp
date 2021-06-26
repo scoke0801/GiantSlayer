@@ -33,15 +33,19 @@ CPlayer::~CPlayer()
 void CPlayer::Update(float fTimeElapsed)
 {
 	if (false == m_IsCanAttack) {
-		m_AttackWaitingTime -= fTimeElapsed;
-		SetAnimationSet(ATK);
-
 		if (GetWeapon() == PlayerWeaponType::Bow) {
-			if (m_AttackWaitingTime < 1.0f) {
-				//m_pAnimationController->PauseAnimation(false);
+			if (pullString && m_AttackWaitingTime < 0.6f) {
 				pause = true;
 			}
 		}
+
+		/*if (pullString && pause)
+			m_AttackWaitingTime += fTimeElapsed;
+		else */
+		if (!pause)
+			m_AttackWaitingTime -= fTimeElapsed;
+
+		SetAnimationSet(ATK);
 
 		if (m_AttackWaitingTime < 0.0f){
 			m_IsAlreadyAttack = false;
@@ -65,6 +69,7 @@ void CPlayer::Update(float fTimeElapsed)
 
 			if (GetWeapon() == PlayerWeaponType::Bow) {
 				pause = false;
+				pausedTime = 0;
 			}
 		}
 	}

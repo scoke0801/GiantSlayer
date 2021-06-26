@@ -153,6 +153,7 @@ public:
 	void AddPlayer(int palyerId) override {}
 public:
 	void ProcessInput() override;
+	void ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp) override;
 
 	void OnMouseDown(WPARAM btnState, int x, int y) override;
 	void OnMouseUp(WPARAM btnState, int x, int y)	override;

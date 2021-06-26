@@ -49,9 +49,9 @@ private:
 	Collider* m_SpareCollisionBox;
 	Collider* m_SpareAABB;
 
-	bool keydown = false;
-
 public:
+	bool pullString = false;
+
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
@@ -94,8 +94,4 @@ public:
 	void AnimationChange(PlayerWeaponType weapon);
 	void DisableSword();
 	void DisableBow();
-
-	void PullBowString(bool pull) {
-		keydown = pull;
-	}
 };
