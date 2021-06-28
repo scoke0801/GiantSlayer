@@ -130,11 +130,15 @@ void CFramework::CreateDirect3DDevice()
 		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
 		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
 		if (lstrcmp(dxgiAdapterDesc.Description, L"AMD Radeon(TM) Vega 8 Graphics") == 0) {
-#define NOTEBOOK_DEV
+#ifdef _DEBUG
+			g_IsNotebookDev = true;
+#endif 
 			continue;
 		}
 		if (lstrcmp(dxgiAdapterDesc.Description, L"AMD Radeon(TM) Graphics") == 0) {
-#define NOTEBOOK_DEV
+#ifdef _DEBUG
+			g_IsNotebookDev = true;
+#endif 
 			continue;
 		}
 		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
