@@ -235,6 +235,11 @@ struct P_C2S_KEYBOARD_INPUT {
 	PACKET_PROTOCOL type;
 	short keyInput;
 	short id;
+
+#ifdef _DEBUG 
+	int move_time;			// Stress Test 프로그램에서 delay를 측정할 때 사용, 
+							// 서버는 해당 id가 접속한 클라이언트에서 보내온 최신 값을 return 해야 한다.
+#endif
 };
 
 struct P_C2S_MOUSE_INPUT {
@@ -269,7 +274,7 @@ struct P_S2C_ADD_PLAYER {
 	BYTE size;
 	PACKET_PROTOCOL type;
 
-	char id;
+	short id;
 	
 	int x, y, z;
 	short angle;
@@ -290,6 +295,12 @@ struct P_S2C_PROCESS_KEYBOARD {
 	int lookX, lookY, lookZ;
 
 	WEAPON_TYPE weaponType;
+	 
+#ifdef _DEBUG 
+	short id;
+	int move_time;			// Stress Test 프로그램에서 delay를 측정할 때 사용, 
+							// 서버는 해당 id가 접속한 클라이언트에서 보내온 최신 값을 return 해야 한다.
+#endif
 };
 
 struct P_S2C_PROCESS_MOUSE {
@@ -308,7 +319,7 @@ struct P_S2C_UPDATE_SYNC {
 	PACKET_PROTOCOL type;
 	char playerNum;
 	 
-	char id[MAX_ROOM_PLAYER]; 
+	short id[MAX_ROOM_PLAYER];
 
 	int posX[MAX_ROOM_PLAYER];
 	int posY[MAX_ROOM_PLAYER];

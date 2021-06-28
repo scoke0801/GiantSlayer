@@ -46,7 +46,7 @@ int PacketProcessor::GetNewPlayerId(SOCKET socket)
 			m_Clients[i].m_state = PLST_CONNECTED;
 			m_Clients[i].m_socket = socket;
 			m_Clients[i].m_name[0] = 0;
-			m_Clients[i].id = -1;
+			m_Clients[i].id = i;
 			return i;
 		}
 	}

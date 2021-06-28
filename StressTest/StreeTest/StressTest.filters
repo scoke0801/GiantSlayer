@@ -18,7 +18,7 @@
     <ClInclude Include="NetworkModule.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Server\TP_Server\protocol.h">
+    <ClInclude Include="..\..\GSServer\GSServer\protocol.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

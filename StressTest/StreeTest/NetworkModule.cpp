@@ -12,14 +12,13 @@
 #include <chrono>
 #include <queue>
 #include <array>
-#include <memory>
-
+#include <memory> 
 using namespace std;
 using namespace chrono;
 
 extern HWND		hWnd;
 
-const static int MAX_TEST = 3000;
+const static int MAX_TEST = 500;
 const static int MAX_CLIENTS = MAX_TEST * 2;
 const static int INVALID_ID = -1;
 const static int MAX_PACKET_SIZE = 255;
@@ -27,7 +26,7 @@ const static int MAX_BUFF_SIZE = 255;
 
 #pragma comment (lib, "ws2_32.lib")
 
-#include "../../Server/TP_Server/protocol.h"
+#include "../../GSServer/GSServer/protocol.h"
 HANDLE g_hiocp;
 
 enum OPTYPE { OP_SEND, OP_RECV, OP_DO_MOVE };
@@ -78,8 +77,7 @@ struct ALIEN {
 	int id;
 	int x, y;
 	int visible_count;
-};
-
+}; 
 void error_display(const char* msg, int err_no)
 {
 	WCHAR* lpMsgBuf;
@@ -128,53 +126,59 @@ void SendPacket(int cl, void* packet)
 }
 
 void ProcessPacket(int ci, unsigned char packet[])
-{
-	switch (packet[1]) {
-	case SC_POSITION: {
-		sc_packet_position* move_packet = reinterpret_cast<sc_packet_position*>(packet);
-		if (move_packet->id < MAX_CLIENTS) {
-			int my_id = client_map[move_packet->id];
+{ 
+	switch ((PACKET_PROTOCOL)packet[1]) {
+	case PACKET_PROTOCOL::S2C_LOGIN_HANDLE:	
+		g_clients[ci].connected = true;
+		active_clients++;
+		P_S2C_PROCESS_LOGIN p_processLogin; //= *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&p_buf);
+		memcpy(&p_processLogin, packet, packet[0]); 
+		if (p_processLogin.isSuccess)
+		{
+			int my_id = ci;
+			client_map[p_processLogin.id] = my_id;
+			g_clients[my_id].id = p_processLogin.id;
+			g_clients[my_id].x  = p_processLogin.x;
+			g_clients[my_id].y  = p_processLogin.y;
+		}
+		 
+		//cs_packet_teleport t_packet;
+		//t_packet.size = sizeof(t_packet);
+		//t_packet.type = CS_TELEPORT;
+		//SendPacket(my_id, &t_packet); 
+
+
+		break; 
+	case PACKET_PROTOCOL::S2C_NEW_PLAYER: break;
+	case PACKET_PROTOCOL::S2C_DELETE_PLAYER: break;
+	case PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT:
+	{
+		P_S2C_PROCESS_KEYBOARD p_keyboard;
+		memcpy(&p_keyboard, packet, packet[0]);
+
+		if (p_keyboard.id < MAX_PLAYER) {
+			int my_id = client_map[p_keyboard.id];
 			if (-1 != my_id) {
-				g_clients[my_id].x = move_packet->x;
-				g_clients[my_id].y = move_packet->y;
+				g_clients[my_id].x = IntToFloat(p_keyboard.posX);
+				g_clients[my_id].y = IntToFloat(p_keyboard.posY);
 			}
 			if (ci == my_id) {
-				if (0 != move_packet->move_time) {
-					auto d_ms = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count() - move_packet->move_time;
-
+				if (0 != p_keyboard.move_time) {
+					auto d_ms = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count() - p_keyboard.move_time;
+		
 					if (global_delay < d_ms) global_delay++;
 					else if (global_delay > d_ms) global_delay--;
 				}
 			}
 		}
 	}
-	break;
-	case SC_ADD_OBJECT: break;
-	case SC_REMOVE_OBJECT: break;
-	case SC_LOGIN_OK:
-	{
-		g_clients[ci].connected = true;
-		active_clients++;
-		sc_packet_login_ok* login_packet = reinterpret_cast<sc_packet_login_ok*>(packet);
-		int my_id = ci;
-		client_map[login_packet->id] = my_id;
-		g_clients[my_id].id = login_packet->id;
-		g_clients[my_id].x = login_packet->x;
-		g_clients[my_id].y = login_packet->y;
-
-		//cs_packet_teleport t_packet;
-		//t_packet.size = sizeof(t_packet);
-		//t_packet.type = CS_TELEPORT;
-		//SendPacket(my_id, &t_packet);
-	}
-	case SC_CHAT:
 		break;
-	case SC_LOGIN_FAIL:
-		break;
-	case SC_STAT_CHANGE:
-		break;
-
-
+	case PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT :break;
+	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT :break;
+	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:  break;
+	case PACKET_PROTOCOL::S2C_INGAME_DOOR_EVENT :break;
+	case PACKET_PROTOCOL::S2C_INGAME_PUZZLE_EVENT :break;
+	case PACKET_PROTOCOL::S2C_INGAME_END:break; 
 	default: MessageBox(hWnd, L"Unknown Packet Type", L"ERROR", 0);
 		while (true);
 	}
@@ -303,7 +307,7 @@ void Adjust_Number_Of_Client()
 	SOCKADDR_IN ServerAddr;
 	ZeroMemory(&ServerAddr, sizeof(SOCKADDR_IN));
 	ServerAddr.sin_family = AF_INET;
-	ServerAddr.sin_port = htons(SERVER_PORT);
+	ServerAddr.sin_port = htons(SERVERPORT);
 	ServerAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
 	// 서버와의 연결은 여기에서!
@@ -323,14 +327,15 @@ void Adjust_Number_Of_Client()
 	DWORD recv_flag = 0;
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_clients[num_connections].client_socket), g_hiocp, num_connections, 0);
 
-	
-	cs_packet_login l_packet;
+	P_C2S_LOGIN loginPacket; 
 
 	int temp = num_connections;
-	sprintf_s(l_packet.player_id, "%d", temp);
-	l_packet.size = sizeof(l_packet);
-	l_packet.type = CS_LOGIN;
-	SendPacket(num_connections, &l_packet);
+
+	sprintf_s(loginPacket.name, "%d", temp);
+	loginPacket.size = sizeof(loginPacket);
+	loginPacket.type = PACKET_PROTOCOL::C2S_LOGIN;
+	loginPacket.roomIndex = (int)(num_connections / 5);
+	SendPacket(num_connections, &loginPacket);
 
 
 	int ret = WSARecv(g_clients[num_connections].client_socket, &g_clients[num_connections].recv_over.wsabuf, 1,
@@ -361,18 +366,19 @@ void Test_Thread()
 		for (int i = 0; i < num_connections; ++i) {
 			if (false == g_clients[i].connected) continue;
 			if (g_clients[i].last_move_time + 1s > high_resolution_clock::now()) continue;
-			g_clients[i].last_move_time = high_resolution_clock::now();
-			cs_packet_move my_packet;
+			g_clients[i].last_move_time = high_resolution_clock::now(); 
+			P_C2S_KEYBOARD_INPUT my_packet;
 			my_packet.size = sizeof(my_packet);
-			my_packet.type = CS_MOVE;
+			my_packet.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
+			my_packet.id = i;
 			// 장애물을 피하가기 위한 부분이 들어갈 영역
 				// 단 현재는 장애물이 없기에 랜덤하게 설정
-			switch (rand() % 4) {
-			case 0: my_packet.direction = D_N; break;
-			case 1: my_packet.direction = D_S; break;
-			case 2: my_packet.direction = D_W; break;
-			case 3: my_packet.direction = D_E; break;
-			}
+			//switch (rand() % 4) {
+			//case 0: my_packet.direction = D_N; break;
+			//case 1: my_packet.direction = D_S; break;
+			//case 2: my_packet.direction = D_W; break;
+			//case 3: my_packet.direction = D_E; break;
+			//}
 			my_packet.move_time = static_cast<unsigned>(
 				duration_cast<milliseconds>(
 					high_resolution_clock::now().time_since_epoch())
@@ -423,19 +429,7 @@ void Do_Network()
 }
 
 void GetPointCloud(int* size, float** points)
-{
-	//int index = 0;
-	//for (int i = 0; i < num_connections; ++i)
-	//	if (true == g_clients[i].connected) {
-	//		point_cloud[index * 2] = static_cast<float>(g_clients[i].x);
-	//		point_cloud[index * 2 + 1] = static_cast<float>(g_clients[i].y);
-	//		index++;
-	//	}
-
-	//*size = index;
-	//*points = point_cloud;
-
-
+{  
 	for (int i = 0; i < num_connections; ++i) {
 		point_cloud[i * 2] = static_cast<float>(g_clients[i].x);
 		point_cloud[i * 2 + 1] = static_cast<float>(g_clients[i].y);

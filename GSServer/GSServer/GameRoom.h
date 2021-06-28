@@ -60,15 +60,17 @@ class CGameRoom
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
 	unordered_map<int, CGameObject*>		m_BlockingPlateToPreviousSector;
 	 
+	unordered_map<int, int>					m_IdIndexMatcher;
+
 	int										m_DoorStartIndex;
 
 	bool									m_IsActive = false;
-
+	int										m_RoomIndex = -1;
 public:
 	CGameRoom();
 	~CGameRoom() {}
 
-	void InitRoom() { InitAll(); }
+	void InitRoom(int roomIndex) { InitAll(); m_RoomIndex = roomIndex; }
 public:
 	void Update(float elapsedTime);
 
@@ -82,9 +84,7 @@ public:
 
 	void DeleteObject(CGameObject* pObject, int layerIdx);
 
-	int GetNewPlayerId(SOCKET socket);
 	void EnterPlayer(CLIENT& client);
-
 
 	bool IsActive() { return m_IsActive; }
 private:
