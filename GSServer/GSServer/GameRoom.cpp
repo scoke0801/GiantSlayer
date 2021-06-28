@@ -746,7 +746,7 @@ void CGameRoom::SendSyncUpdatePacket()
 			continue;
 		}
 		if (m_Clients[i]->m_state == PL_STATE::PLST_CONNECTED) {
-			SendPacket(i, &p_syncUpdate);
+			SendPacket(m_Clients[i]->id, &p_syncUpdate);
 		}
 	}
 }
@@ -785,7 +785,7 @@ void CGameRoom::SendMonsterActPacket()
 			continue;
 		}
 		for (int j = 0; j < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++j) {
-			SendPacket(i, &p_monsterUpdate[j]);
+			SendPacket(m_Clients[i]->id, &p_monsterUpdate[j]);
 		}
 	}
 }
@@ -803,7 +803,7 @@ void CGameRoom::Disconnect(int packet_id)
 
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i]->m_state != PLST_FREE) {
-			SendPacket(i, &p_deletePlayer);
+			SendPacket(m_Clients[i]->id, &p_deletePlayer);
 		}
 	}
 	m_CurrentPlayerNum--;
@@ -834,7 +834,7 @@ void CGameRoom::Disconnect(CLIENT& client)
 			continue;
 		}
 		if (m_Clients[i]->m_state != PLST_FREE) {
-			SendPacket(i, &p_deletePlayer);
+			SendPacket(m_Clients[i]->id, &p_deletePlayer);
 		}
 	}
 	m_CurrentPlayerNum--;
