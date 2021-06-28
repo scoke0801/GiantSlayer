@@ -129,8 +129,8 @@ void CGameRoom::InitPlayers()
 		float x = float(rand() % 5000);
 		float z = float(rand() % 5000);
 		float y = GetDetailHeight(g_Heights, x, z);
-		m_Players[i]->SetPosition({x,y,z });
-		//m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
+		//m_Players[i]->SetPosition({x,y,z });
+		m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
 		m_Players[i]->SetExistence(false);
 		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 	}
