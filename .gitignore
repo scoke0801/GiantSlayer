@@ -31,3 +31,6 @@
 /GSClient/x64/Debug/Shaders
 /FbxExporter/lib/libfbxsdk-md.lib
 /FbxExporter/Debug/Resources
+StressTest/.vs/StressTest/v16/Browse.VC.opendb
+StressTest/.vs/StressTest/v16/Browse.VC.db-wal
+StressTest/.vs/StressTest/v16/Browse.VC.db-shm

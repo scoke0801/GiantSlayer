@@ -126,7 +126,11 @@ void CGameRoom::InitPlayers()
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		m_Players[i] = new CPlayer();
 		m_Players[i]->Scale(200, 200, 200);
-		m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
+		float x = float(rand() % 5000);
+		float z = float(rand() % 5000);
+		float y = GetDetailHeight(g_Heights, x, z);
+		m_Players[i]->SetPosition({x,y,z });
+		//m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
 		m_Players[i]->SetExistence(false);
 		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 	}
@@ -947,7 +951,10 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 		XMFLOAT3 pos = m_Players[id]->GetPosition();
 		XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
 		float distance = PLAYER_RUN_SPEED;
-
+		
+#ifdef _DEBUG 
+		m_Players[id]->m_moveTime = p_keyboard.move_time;
+#endif
 		switch (p_keyboard.keyInput)
 		{
 		case VK_W:
@@ -1000,6 +1007,11 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 		p_keyboardProcess.lookX = FloatToInt(look.x);
 		p_keyboardProcess.lookY = FloatToInt(look.y);
 		p_keyboardProcess.lookZ = FloatToInt(look.z);
+
+#ifdef _DEBUG 
+		p_keyboardProcess.id = p_id;
+		p_keyboardProcess.move_time = m_Players[id]->m_moveTime;
+#endif
 		SendPacket(p_id, &p_keyboardProcess);
 	}
 	break;

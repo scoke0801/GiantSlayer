@@ -12,8 +12,7 @@
 #include <chrono>
 #include <queue>
 #include <array>
-#include <memory>
-
+#include <memory> 
 using namespace std;
 using namespace chrono;
 
@@ -78,8 +77,7 @@ struct ALIEN {
 	int id;
 	int x, y;
 	int visible_count;
-};
-
+}; 
 void error_display(const char* msg, int err_no)
 {
 	WCHAR* lpMsgBuf;
@@ -148,33 +146,36 @@ void ProcessPacket(int ci, unsigned char packet[])
 		//t_packet.size = sizeof(t_packet);
 		//t_packet.type = CS_TELEPORT;
 		//SendPacket(my_id, &t_packet); 
+
+
 		break; 
 	case PACKET_PROTOCOL::S2C_NEW_PLAYER: break;
 	case PACKET_PROTOCOL::S2C_DELETE_PLAYER: break;
-	case PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT:break;
+	case PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT:
+	{
+		P_S2C_PROCESS_KEYBOARD p_keyboard;
+		memcpy(&p_keyboard, packet, packet[0]);
+
+		if (p_keyboard.id < MAX_PLAYER) {
+			int my_id = client_map[p_keyboard.id];
+			if (-1 != my_id) {
+				g_clients[my_id].x = IntToFloat(p_keyboard.posX);
+				g_clients[my_id].y = IntToFloat(p_keyboard.posY);
+			}
+			if (ci == my_id) {
+				if (0 != p_keyboard.move_time) {
+					auto d_ms = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count() - p_keyboard.move_time;
+		
+					if (global_delay < d_ms) global_delay++;
+					else if (global_delay > d_ms) global_delay--;
+				}
+			}
+		}
+	}
+		break;
 	case PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT :break;
 	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT :break;
-	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:
-		P_S2C_UPDATE_SYNC p_syncUpdate;
-		memcpy(&p_syncUpdate, packet, packet[0]);
-
-
-		//if (move_packet->id < MAX_CLIENTS) {
-		//	int my_id = client_map[move_packet->id];
-		//	if (-1 != my_id) {
-		//		g_clients[my_id].x = move_packet->x;
-		//		g_clients[my_id].y = move_packet->y;
-		//	}
-		//	if (ci == my_id) {
-		//		if (0 != move_packet->move_time) {
-		//			auto d_ms = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count() - move_packet->move_time;
-		//
-		//			if (global_delay < d_ms) global_delay++;
-		//			else if (global_delay > d_ms) global_delay--;
-		//		}
-		//	}
-		//}
-		break;
+	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:  break;
 	case PACKET_PROTOCOL::S2C_INGAME_DOOR_EVENT :break;
 	case PACKET_PROTOCOL::S2C_INGAME_PUZZLE_EVENT :break;
 	case PACKET_PROTOCOL::S2C_INGAME_END:break; 
