@@ -165,6 +165,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\GSServer\GSServer\protocol.h" />
     <ClInclude Include="Arrow.h" />
+    <ClInclude Include="Boss.h" />
     <ClInclude Include="Bridge.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Effect.h" />
@@ -225,6 +226,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Arrow.cpp" />
+    <ClCompile Include="Boss.cpp" />
     <ClCompile Include="Bridge.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Effect.cpp" />
