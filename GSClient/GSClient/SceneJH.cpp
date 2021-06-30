@@ -2074,9 +2074,9 @@ void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	if (g_IsNotebookDev) {
-		return;
-	}
+	//if (g_IsNotebookDev) {
+	//	return;
+	//}
 	{ 
 		// boss
 	CGameObjectVer2* pBossParent = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
@@ -2088,7 +2088,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pBoss->Scale(120, 120, 120);
 	pBoss->Rotate({ 0,1,0 }, 180);
 	pBoss->SetChild(pBossParent, true);
-	pBoss->SetAnimationSet(1);
+	pBoss->SetAnimationSet(4);
 	//pBoss->Scale(200, 200, 200);
 	pBoss->SetShadertoAll();
 	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 11, 10, 7, XMFLOAT3{ 0,0,0 });
