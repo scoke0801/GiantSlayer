@@ -162,6 +162,14 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHan
 				CAnimationSet* pAnimationSet = m_pAnimationTracks[i].m_pAnimationSet;
 				pAnimationSet->m_fPosition += (fTimeElapsed * pAnimationSet->m_fSpeed);
 
+				if (repeat == false)
+				{
+					if (pAnimationSet->m_fPosition > pAnimationSet->m_fLength - 0.1f)
+					{
+						pAnimationSet->m_fPosition = pAnimationSet->m_fLength - 0.1f;
+					}
+				}
+
 				if (pCallbackHandler)
 				{
 					void* pCallbackData = pAnimationSet->GetCallback(pAnimationSet->m_fPosition);
@@ -172,28 +180,16 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHan
 				for (int i = 0; i < m_nAnimationBoneFrames; i++)
 				{
 					m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent = pAnimationSet->GetSRT(i, fPositon);
-					//cout << " TransformMatrix : ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._11 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._12 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._13 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._14 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._21 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._22 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._23 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._24 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._31 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._32 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._33 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._34 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._41 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._42 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._43 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._44 << "\n";
 				}
 			
 			}
 		}
 	}
+}
+
+void CAnimationController::ResetAnimation()
+{
+	m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet = &m_pAnimationSets[m_nAnimationSet];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

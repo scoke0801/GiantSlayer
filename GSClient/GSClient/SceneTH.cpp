@@ -1612,12 +1612,14 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 			case PlayerWeaponType::Sword:
 				break;
 			case PlayerWeaponType::Bow:
-				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
-				m_Player->pullString = false;
-				m_Player->pause = false;
-				//m_Player->PullBowString(false);
-				ShotPlayerArrow();
-				cout << "던져!" << endl;
+				if (m_Player->pause) {
+					ShotPlayerArrow();
+					m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+					m_Player->pullString = false;
+					m_Player->pause = false;
+
+					cout << "던져!" << endl;
+				}
 				break;
 			}
 		}

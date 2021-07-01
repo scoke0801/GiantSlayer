@@ -39,11 +39,10 @@ void CPlayer::Update(float fTimeElapsed)
 			}
 		}
 
-		/*if (pullString && pause)
-			m_AttackWaitingTime += fTimeElapsed;
-		else */
 		if (!pause)
 			m_AttackWaitingTime -= fTimeElapsed;
+
+		//m_pAnimationController->repeat = false;
 
 		SetAnimationSet(ATK);
 
@@ -65,11 +64,11 @@ void CPlayer::Update(float fTimeElapsed)
 			m_BoundingObjectMeshes[0] = tempMesh;
 
 			UpdateColliders(); 
-			//SetAnimationSet(AnimationType::IDLE);
 
 			if (GetWeapon() == PlayerWeaponType::Bow) {
 				pause = false;
 				pausedTime = 0;
+				//m_pAnimationController->repeat = true;
 			}
 		}
 	}
@@ -80,8 +79,9 @@ void CPlayer::Update(float fTimeElapsed)
 			SetAnimationSet(AnimationType::IDLE);
 		}*/
 	}
-	
 	else {
+		//m_pAnimationController->repeat = true;
+
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
 			SetAnimationSet(IDLE);
 		else

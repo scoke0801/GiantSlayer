@@ -37,14 +37,14 @@ public:
 
 #ifdef _WITH_ANIMATION_SRT
 	int								m_nKeyFrameScales = 0;
-	float* m_pfKeyFrameScaleTimes = NULL;
-	XMFLOAT3** m_ppxmf3KeyFrameScales = NULL;
+	float*							m_pfKeyFrameScaleTimes = NULL;
+	XMFLOAT3**						m_ppxmf3KeyFrameScales = NULL;
 	int								m_nKeyFrameRotations = 0;
-	float* m_pfKeyFrameRotationTimes = NULL;
-	XMFLOAT4** m_ppxmf4KeyFrameRotations = NULL;
+	float*							m_pfKeyFrameRotationTimes = NULL;
+	XMFLOAT4**						m_ppxmf4KeyFrameRotations = NULL;
 	int								m_nKeyFrameTranslations = 0;
-	float* m_pfKeyFrameTranslationTimes = NULL;
-	XMFLOAT3** m_ppxmf3KeyFrameTranslations = NULL;
+	float*							m_pfKeyFrameTranslationTimes = NULL;
+	XMFLOAT3**						m_ppxmf3KeyFrameTranslations = NULL;
 #endif
 
 	float 							m_fSpeed = 1.0f;
@@ -54,7 +54,7 @@ public:
 	int								m_nCurrentKey = -1;
 
 	int 							m_nCallbackKeys = 0;
-	CALLBACKKEY* m_pCallbackKeys = NULL;
+	CALLBACKKEY*					m_pCallbackKeys = NULL;
 
 public:
 	float GetPosition(float fPosition);
@@ -78,7 +78,7 @@ public:
 	float 							m_fPosition = 0.0f;
 	float 							m_fWeight = 1.0f;
 
-	CAnimationSet* m_pAnimationSet = NULL;
+	CAnimationSet*					m_pAnimationSet = NULL;
 };
 
 class CAnimationCallbackHandler
@@ -111,6 +111,8 @@ public:
 
 	CGameObjectVer2*				m_pRootFrame = NULL;
 
+	bool							repeat = true;
+
 public:
 	void SetAnimationSet(int nAnimationSet);
 
@@ -120,6 +122,8 @@ public:
 	void AdvanceTime(float fElapsedTime, CAnimationCallbackHandler* pCallbackHandler);
 
 	int GetAnimationSet() { return m_nAnimationSet; }
+
+	void ResetAnimation();
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
