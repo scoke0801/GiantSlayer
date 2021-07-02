@@ -1497,6 +1497,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_SPACE)
 	{
+		DisplayVector3(m_Player->GetPosition());
 		m_Player->Jump();
 	}
 
@@ -2078,30 +2079,28 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	//if (g_IsNotebookDev) {
 	//	return;
 	//}
-	{ 
-		// boss
-	CGameObjectVer2* pBossParent = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Boss.bin", NULL, true);
+	{
+		XMFLOAT3 scale = { 120.0f, 120.0f, 120.0f };
+		m_Boss = new CBoss(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+		
+		//x: 25592.2 y : -6962.67 z : 25934.3
+		//z : 21800.0 14533
+		//z : 29700.0 19800
+		//x : 29700.0 19800
+		//x : 21800.0 14533
+		m_Boss->SetPosition({ 17166 * MAP_SCALE_SIZE,  -6070, 17166 * MAP_SCALE_SIZE });
+		m_Boss->FixPositionByTerrain(m_Terrain);
+		m_Boss->Scale(120, 120, 120);
+		m_Boss->Rotate({ 0,1,0 }, 180); 
+		m_Boss->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 
-	m_Boss = new CBoss();
-	m_Boss->SetPosition({ 16800 * MAP_SCALE_SIZE,  -6070, 16500 * MAP_SCALE_SIZE });
-	m_Boss->FixPositionByTerrain(m_Terrain);
-	m_Boss->Scale(120, 120, 120);
-	m_Boss->Rotate({ 0,1,0 }, 180);
-	m_Boss->SetChild(pBossParent, true);
-	m_Boss->SetAnimationSet((int)BOSS_ANIMATION::Idle);
-	//pBoss->Scale(200, 200, 200);
-	m_Boss->SetShadertoAll();
-	m_Boss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 11, 10, 7, XMFLOAT3{ 0,0,0 });
-	m_Boss->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.5, 5, 3.5)));
-	m_Boss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ 2.5, 3, 7 });
-	m_Boss->AddColider(new ColliderBox(XMFLOAT3(2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
-	m_Boss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ -2.5, 3, 7 });
-	m_Boss->AddColider(new ColliderBox(XMFLOAT3(-2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
-	m_Boss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 3, 3, 5, XMFLOAT3{ 0,3,-7 });
-	m_Boss->AddColider(new ColliderBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5))); 
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(m_Boss);
-	return;
+		XMFLOAT3 centerPos = m_Boss->GetPosition();
+		XMFLOAT3 scopeSize = { 4100*2, 0, 4100 * 2 };
+		m_Boss->SetActivityScope({ scopeSize.x, 0, scopeSize.z }, { centerPos });
+		m_Boss->SetSightBoundingBox({ scopeSize.x / scale.x, 15, scopeSize.z / scale.z });
+		m_Boss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, scopeSize.x  / scale.x, 15, scopeSize.z / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(m_Boss);
+		return;
 	}
 
 	CGameObjectVer2* pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
