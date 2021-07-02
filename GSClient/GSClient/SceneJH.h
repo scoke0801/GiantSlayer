@@ -12,6 +12,7 @@ class CParticle;
 class CLightCamera;
 class CEnemy;
 class CFbxObject2;
+class CBoss;
 
 class CSceneJH : public CScene
 {
@@ -28,7 +29,8 @@ private:
 	array<CMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
 
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
-	 
+	CBoss*						m_Boss = nullptr;
+
 	CParticle*					m_Particles;
 	 
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성

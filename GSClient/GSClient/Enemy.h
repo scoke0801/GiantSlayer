@@ -17,7 +17,7 @@ enum class EnemyAttackType {
 	Ranged
 };
 class CEnemy : public CGameObjectVer2
-{
+{ 
 protected:
 	EnemyAttackType			m_AttackType;
 	CState<CEnemy>*			m_State;
@@ -49,7 +49,7 @@ public:
 	CEnemy(); 
 	~CEnemy();
 	  
-	virtual void Update(float elapsedTime) override;
+	void Update(float elapsedTime) override;
 	void UpdateOnServer(float fTimeElapsed) override;
 
 	// 활동범위 설정
