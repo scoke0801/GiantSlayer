@@ -97,3 +97,16 @@ public:
 
     virtual void Exit(CEnemy* enemy);
 };
+ 
+class BornState : public CState<CEnemy>
+{ 
+public:
+    BornState(CEnemy* enemy) { Enter(enemy); }
+
+public:
+    virtual void Enter(CEnemy* enemy);
+
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
+
+    virtual void Exit(CEnemy* enemy);
+};

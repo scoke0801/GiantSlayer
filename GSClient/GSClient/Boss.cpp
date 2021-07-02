@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Boss.h"
 #include "State.h"
-
 CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dRootSignature)
 {
 	CGameObjectVer2* pBossParent = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
@@ -20,7 +19,7 @@ CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 	BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 3, 3, 5, XMFLOAT3{ 0,3,-7 });
 	AddColider(new ColliderBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5)));
 
-	m_State = new IdleState(this);
+	m_State = new WaitState(this);
 }
 
 CBoss::~CBoss()
@@ -46,7 +45,7 @@ void CBoss::UpdateOnServer(float fTimeElapsed)
 	CGameObjectVer2::Animate(fTimeElapsed);
 	UpdateTransform(NULL);
 }
-
+ 
 void CBoss::PlayerEnter(CPlayer* target)
 {
 	if (m_isOnAwaken == false) {
@@ -66,10 +65,13 @@ void CBoss::ChangeAnimation(ObjectState stateInfo)
 		SetAnimationSet((int)BOSS_ANIMATION::Idle);
 		break;
 	case ObjectState::Patrol:
+		SetAnimationSet((int)BOSS_ANIMATION::Run);
 		break;
 	case ObjectState::Trace:
+		SetAnimationSet((int)BOSS_ANIMATION::Run);
 		break;
-	case ObjectState::Attack:
+	case ObjectState::Attack: 
+		SetAnimationSet((int)BOSS_ANIMATION::Skill_1);
 		break;
 	case ObjectState::Attacked:
 		break;

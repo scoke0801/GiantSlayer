@@ -266,9 +266,11 @@ void CEnemy::ChangeAnimation(ObjectState stateInfo)
 	case ObjectState::Idle:
 		SetAnimationSet(1);
 		break;
-	case ObjectState::Patrol:
+	case ObjectState::Patrol: 
+		SetAnimationSet(1);
 		break;
 	case ObjectState::Trace:
+		SetAnimationSet(1);
 		break;
 	case ObjectState::Attack:
 		break;

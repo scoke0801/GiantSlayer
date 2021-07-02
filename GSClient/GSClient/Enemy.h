@@ -75,6 +75,7 @@ public:
 
 	void FixCollision(CGameObject* pCollideObject) override;
 
+	virtual void Search(float elapsedTime) {}
 	virtual void Attack(float elapsedTime);
 	 
 	void ChangeState(ObjectState stateInfo, void* pData) override;

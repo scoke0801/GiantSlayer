@@ -3,19 +3,24 @@
 #include "Enemy.h"
 #include "Player.h"
 #include "SceneJH.h"
+#include "Boss.h"
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
   // 0 idle, 1run 2attack, 3attacked, 4Death 
 void WaitState::Enter(CEnemy* pEnemy)
 {
-    pEnemy->SetAnimationSet(1);
+    pEnemy->ChangeAnimation(ObjectState::Idle);
     m_StateName = ObjectState::Wait;
     //cout << "WaitState::Enter" << endl;
 }
 
 void WaitState::Execute(CEnemy* pEnemy, float elapsedTime)
-{ 
+{
+    if (pEnemy->IsEnemyInSight())
+    { 
+        pEnemy->ChangeState(new BornState(pEnemy));
+    }
 }
 
 void WaitState::Exit(CEnemy* pEnemy)
@@ -35,6 +40,7 @@ void IdleState::Enter(CEnemy* pEnemy)
 
 void IdleState::Execute(CEnemy* pEnemy, float elapsedTime)
 { 
+   
 }
 
 void IdleState::Exit(CEnemy* pEnemy)
@@ -113,7 +119,7 @@ void AttackState::Exit(CEnemy* enemy)
 
 void TraceState::Enter(CEnemy* enemy)
 {
-    enemy->SetAnimationSet(1);
+    enemy->ChangeAnimation(ObjectState::Patrol);
     m_StateName = ObjectState::Trace;
     m_LifeTime = 0.5f;
  //   cout << "TraceState::Enter \n";
@@ -167,8 +173,27 @@ void AttackedState::Enter(CEnemy* enemy)
 
 void AttackedState::Execute(CEnemy* enemy, float elapsedTime)
 {
+   
 }
 
 void AttackedState::Exit(CEnemy* enemy)
+{
+}
+
+void BornState::Enter(CEnemy* enemy)
+{
+    m_LifeTime = BOSS_BORN1_ANIMATION_LENGTH;
+    enemy->ChangeAnimation(ObjectState::BossBorn);
+}
+
+void BornState::Execute(CEnemy* enemy, float elapsedTime)
+{
+    m_ElapsedTime += elapsedTime;
+    if (m_ElapsedTime > m_LifeTime) {  
+        enemy->ChangeState(new IdleState(enemy));
+    }
+}
+
+void BornState::Exit(CEnemy* enemy)
 {
 }

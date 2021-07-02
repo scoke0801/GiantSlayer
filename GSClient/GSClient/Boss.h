@@ -1,6 +1,12 @@
 #pragma once
 #include "Enemy.h"
 
+constexpr float BOSS_BORN1_ANIMATION_LENGTH = 7.333333;
+constexpr float BOSS_BORN2_ANIMATION_LENGTH = 7;
+constexpr float BOSS_DEAD_ANIMATION_LENGTH = 7;
+constexpr float BOSS_IDLE_ANIMATION_LENGTH = 3;
+constexpr float BOSS_RUN_ANIMATION_LENGTH = 0.5666667;
+
 enum class BOSS_ANIMATION
 {
     Born_1 = 0,
@@ -29,6 +35,7 @@ public:
     void Update(float elapsedTime) override;
     void UpdateOnServer(float fTimeElapsed) override;
 
+     
 public:
     void PlayerEnter(CPlayer* target); 
 
