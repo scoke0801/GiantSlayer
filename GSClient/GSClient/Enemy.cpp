@@ -256,6 +256,45 @@ void CEnemy::CollideToObstacle()
 	}
 }
 
+void CEnemy::ChangeAnimation(ObjectState stateInfo)
+{
+	switch (stateInfo)
+	{
+	case ObjectState::Wait:
+		SetAnimationSet(1);
+		break;
+	case ObjectState::Idle:
+		SetAnimationSet(1);
+		break;
+	case ObjectState::Patrol:
+		break;
+	case ObjectState::Trace:
+		break;
+	case ObjectState::Attack:
+		break;
+	case ObjectState::Attacked:
+		break;
+	case ObjectState::Die:
+		break;
+	case ObjectState::RunAway:
+		break;
+	case ObjectState::BossSkill_1:
+		break;
+	case ObjectState::BossSkill_2:
+		break;
+	case ObjectState::BossSkill_3:
+		break;
+	case ObjectState::BossSkill_4:
+		break;
+	case ObjectState::BossSkill_5:
+		break;
+	case ObjectState::BossBorn:
+		break;
+	default:
+		break;
+	}
+}
+ 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 

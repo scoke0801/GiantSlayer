@@ -61,7 +61,13 @@ enum class ObjectState {
 	Attack,		// °ø°Ý
 	Attacked,	// ÇÇ°Ý
 	Die,		// »ç¸Á
-	RunAway		// µµ¸Á
+	RunAway,	// µµ¸Á
+	BossSkill_1,
+	BossSkill_2,
+	BossSkill_3,
+	BossSkill_4,
+	BossSkill_5,
+	BossBorn
 };
 
 class CGameObject

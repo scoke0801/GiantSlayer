@@ -27,8 +27,8 @@ void WaitState::Exit(CEnemy* pEnemy)
 //////////////////////////////////////////////////////////////////////
   
 void IdleState::Enter(CEnemy* pEnemy)
-{
-    pEnemy->SetAnimationSet(1);
+{ 
+    pEnemy->ChangeAnimation(ObjectState::Idle);
     m_StateName = ObjectState::Idle;
    // cout << " IdleState::Enter" << endl;
 }
@@ -90,7 +90,6 @@ void PatrolState::Exit(CEnemy* enemy)
 void AttackState::Enter(CEnemy* enemy)
 {
     m_StateName = ObjectState::Attack;
-  //  cout << "AttackState::Enter \n";
     m_LifeTime = MELLE_ENEMY_ATTACK_TIME; 
 }
 

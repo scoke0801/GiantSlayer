@@ -11,7 +11,7 @@
 // :: if(공격 대상이 활동 범위 안에 존재하면) 계속 공격
 // :: else toState(탐색)
 class CPlayer;
-
+ 
 enum class EnemyAttackType {
 	Melee,
 	Ranged
@@ -94,6 +94,8 @@ public:
 
 	// 장애물과 충돌하였으므로 특정 상태에서 상태 재검색을 수행하라
 	void CollideToObstacle();
+
+	virtual void ChangeAnimation(ObjectState stateInfo);
 };
 
 class CMeleeEnemy : public CEnemy

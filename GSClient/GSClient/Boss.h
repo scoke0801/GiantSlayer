@@ -10,7 +10,8 @@ enum class BOSS_ANIMATION
     Run,
     Skill_1,
     Skill_2,
-    Skile_3, 
+    Skill_3,
+    Skill_4
 };
 
 class CPlayer;
@@ -31,6 +32,7 @@ public:
 public:
     void PlayerEnter(CPlayer* target); 
 
+    void ChangeAnimation(ObjectState stateInfo) override;
 private:
     // 시야 범위 안에 플레이어가 없으면 깨어있지 않은 상태
     bool m_isOnAwaken = false; 
