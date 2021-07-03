@@ -35,6 +35,7 @@ float CAnimationSet::GetPosition(float fPosition)
 		break;
 	}
 	case ANIMATION_TYPE_ONCE:
+		
 		break;
 	case ANIMATION_TYPE_PINGPONG:
 		break;

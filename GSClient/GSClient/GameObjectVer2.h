@@ -54,7 +54,7 @@ public:
 	int								m_nCurrentKey = -1;
 
 	int 							m_nCallbackKeys = 0;
-	CALLBACKKEY* m_pCallbackKeys = NULL;
+	CALLBACKKEY*					m_pCallbackKeys = NULL;
 
 public:
 	float GetPosition(float fPosition);
@@ -64,6 +64,8 @@ public:
 	void SetCallbackKey(int nKeyIndex, float fTime, void* pData);
 
 	void* GetCallback(float fPosition) { return(NULL); }
+
+	void SetAniamtionType(int type) { m_nType = type; }
 };
 
 class CAnimationTrack
