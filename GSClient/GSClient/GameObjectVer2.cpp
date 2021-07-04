@@ -147,6 +147,8 @@ void CAnimationController::SetAnimationSet(int nAnimationSet)
 {
 	if (m_pAnimationSets && (nAnimationSet < m_nAnimationSets))
 	{
+		m_fTime = 0.0f; 
+		m_pAnimationTracks[m_nAnimationSet].m_fPosition = 0.0f;
 		m_nAnimationSet = nAnimationSet;
 		m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet = &m_pAnimationSets[m_nAnimationSet];
 	}
@@ -823,9 +825,10 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 					// 더미 프레임 추가
 					pAnimationSet->m_pfKeyFrameTransformTimes[i] = pAnimationSet->m_pfKeyFrameTransformTimes[i - 1] + 
 						(pAnimationSet->m_pfKeyFrameTransformTimes[i - 1] - pAnimationSet->m_pfKeyFrameTransformTimes[i - 2]); // 트랜스폼 적용되는 시간
+					//pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 1]; // 트랜스폼
+					 
+					//pAnimationSet->m_pfKeyFrameTransformTimes[i] = pAnimationSet->m_fLength - pAnimationSet->m_pfKeyFrameTransformTimes[i - 1]; 
 					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 1]; // 트랜스폼
-					
-					
 
 					/*
 					2안, 배열 크기를 m_nKeyFrameTransforms - 1 로 아예 재할당하는 방안, 깜박임 문제 있음
