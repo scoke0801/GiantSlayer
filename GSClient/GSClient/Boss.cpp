@@ -20,6 +20,8 @@ CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 	AddColider(new ColliderBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5)));
 
 	m_State = new WaitState(this);
+	m_EnemyType = EnemyType::Boss;
+	m_AttackRange = 1000.0f;
 }
 
 CBoss::~CBoss()

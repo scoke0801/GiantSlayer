@@ -16,12 +16,19 @@ enum class EnemyAttackType {
 	Melee,
 	Ranged
 };
+
+enum class EnemyType {
+	None = 0,
+	Skeleton,
+	Mummy,
+	Boss
+};
 class CEnemy : public CGameObjectVer2
 { 
 protected:
 	EnemyAttackType			m_AttackType;
 	CState<CEnemy>*			m_State;
-
+	EnemyType				m_EnemyType;
 	vector<CPlayer*>		m_ConnectedPlayers;
 	CPlayer*				m_TargetPlayer;
 
@@ -64,6 +71,8 @@ public:
 
 	void ConnectPlayer(CPlayer** pPlayers, int playerCount); 
 
+	virtual void ChangeAnimation(ObjectState stateInfo);
+
 	void ChangeState(CState<CEnemy>* nextState);
 
 	virtual void FindNextPosition(); 
@@ -79,6 +88,10 @@ public:
 	virtual void Attack(float elapsedTime);
 	 
 	void ChangeState(ObjectState stateInfo, void* pData) override;
+
+	// 장애물과 충돌하였으므로 특정 상태에서 상태 재검색을 수행하라
+	void CollideToObstacle();
+
 public:
 	bool IsOnMoving() const { return m_IsOnMoving; }
 	void SetIsOnMoving(bool info) { m_IsOnMoving = info; }
@@ -92,11 +105,9 @@ public:
 	CPlayer* GetTargetPlayer() const { return m_TargetPlayer; }
 
 	ObjectState GetStateInfo() const override{ return m_State->GetStatename(); }
-
-	// 장애물과 충돌하였으므로 특정 상태에서 상태 재검색을 수행하라
-	void CollideToObstacle();
-
-	virtual void ChangeAnimation(ObjectState stateInfo);
+	 
+	EnemyType GetEnemyType() const { return m_EnemyType; }
+	void SetEnemyType(EnemyType enemyType) { m_EnemyType = enemyType; } 
 };
 
 class CMeleeEnemy : public CEnemy

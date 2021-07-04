@@ -7,6 +7,7 @@
 CEnemy::CEnemy() : CGameObjectVer2()
 {
 	m_Type = OBJ_TYPE::Enemy;
+	m_EnemyType = EnemyType::Skeleton;
 
 	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this); 
@@ -305,6 +306,8 @@ CRangedEnemy::CRangedEnemy()
 	m_Type = OBJ_TYPE::Enemy;
 	m_AttackType = EnemyAttackType::Ranged;
 
+	m_EnemyType = EnemyType::Skeleton;
+
 	m_AttackRange = 1200.0f;
 	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this);
@@ -341,6 +344,8 @@ CMeleeEnemy::CMeleeEnemy()
 	m_Type = OBJ_TYPE::Enemy;
 	m_AttackType = EnemyAttackType::Melee;
 	m_AttackRange = 320.0f;
+
+	m_EnemyType = EnemyType::Skeleton;
 
 	//m_HeightFromTerrain = 150.0f;
 	m_State = new PatrolState(this);

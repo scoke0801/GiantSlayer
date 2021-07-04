@@ -7,7 +7,7 @@
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-  // 0 idle, 1run 2attack, 3attacked, 4Death 
+// 0 idle, 1run 2attack, 3attacked, 4Death 
 void WaitState::Enter(CEnemy* pEnemy)
 {
     pEnemy->ChangeAnimation(ObjectState::Idle);
@@ -40,7 +40,23 @@ void IdleState::Enter(CEnemy* pEnemy)
 
 void IdleState::Execute(CEnemy* pEnemy, float elapsedTime)
 { 
-   
+    EnemyType type = pEnemy->GetEnemyType();
+    switch (type)
+    {
+    case EnemyType::None:
+        break;
+    case EnemyType::Skeleton:
+        break;
+    case EnemyType::Mummy:
+        break;
+    case EnemyType::Boss:
+    {
+
+    } 
+    break;
+    default:
+        break;
+    }
 }
 
 void IdleState::Exit(CEnemy* pEnemy)
@@ -69,13 +85,14 @@ void RunAwayState::Exit(CEnemy* pEnemy)
 
 void PatrolState::Enter(CEnemy* enemy)
 {
-    enemy->SetAnimationSet(1);
+    enemy->ChangeAnimation(ObjectState::Patrol);
+    //enemy->SetAnimationSet(1);
     m_StateName = ObjectState::Patrol;
 }
 
 void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
 {
-    enemy->SetAnimationSet(1);
+    enemy->ChangeAnimation(ObjectState::Patrol);
 	if (false == enemy->IsOnMoving()) {
 		enemy->FindNextPosition();
 		enemy->SetIsOnMoving(true);
@@ -106,7 +123,7 @@ void AttackState::Execute(CEnemy* enemy, float elapsedTime)
         enemy->ChangeState(new PatrolState(enemy)); 
     }
     else {
-        enemy->SetAnimationSet(2);
+        enemy->ChangeAnimation(ObjectState::Attack);
         enemy->Attack(elapsedTime);
     }
 }
@@ -158,7 +175,7 @@ void TraceState::Exit(CEnemy* enemy)
 
 void AttackedState::Enter(CEnemy* enemy)
 {
-    enemy->SetAnimationSet(3);
+    enemy->ChangeAnimation(ObjectState::Attacked); 
     const int PLAYER_DAMAGE = 15;
     int hp = enemy->GetHP();
     hp -= PLAYER_DAMAGE;
@@ -190,7 +207,8 @@ void BornState::Execute(CEnemy* enemy, float elapsedTime)
 {
     m_ElapsedTime += elapsedTime;
     if (m_ElapsedTime > m_LifeTime) {  
-        enemy->ChangeState(new IdleState(enemy));
+        //enemy->ChangeState(new IdleState(enemy));
+        enemy->ChangeState(new PatrolState(enemy));
     }
 }
 
