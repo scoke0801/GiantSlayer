@@ -59,43 +59,54 @@ void CBoss::ChangeAnimation(ObjectState stateInfo)
 	switch (stateInfo)
 	{
 	case ObjectState::Wait:
-		SetAnimationSet((int)BOSS_ANIMATION::Idle);
+		SetAnimationSet((int)BOSS_ANIMATION::Idle); 
+		SetAnimationType(ANIMATION_TYPE_LOOP);
 		break;
 	case ObjectState::Idle:
 		SetAnimationSet((int)BOSS_ANIMATION::Idle);
+		SetAnimationType(ANIMATION_TYPE_LOOP);
 		break;
 	case ObjectState::Patrol:
 		SetAnimationSet((int)BOSS_ANIMATION::Run);
+		SetAnimationType(ANIMATION_TYPE_LOOP);
 		break;
 	case ObjectState::Trace:
 		SetAnimationSet((int)BOSS_ANIMATION::Run);
+		SetAnimationType(ANIMATION_TYPE_LOOP);
 		break;
 	case ObjectState::Attack: 
 		SetAnimationSet((int)BOSS_ANIMATION::Skill_1);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
 		break;
 	case ObjectState::Attacked:
 		break;
 	case ObjectState::Die: 
 		SetAnimationSet((int)BOSS_ANIMATION::Dead);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
 		break;
 	case ObjectState::RunAway:
 		break;
 	case ObjectState::BossSkill_1: 
 		SetAnimationSet((int)BOSS_ANIMATION::Skill_1);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
 		break;
 	case ObjectState::BossSkill_2:
 		SetAnimationSet((int)BOSS_ANIMATION::Skill_2);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
 		break;
 	case ObjectState::BossSkill_3:
 		SetAnimationSet((int)BOSS_ANIMATION::Skill_3);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
 		break;
 	case ObjectState::BossSkill_4:
 		SetAnimationSet((int)BOSS_ANIMATION::Skill_4);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
 		break;
 	case ObjectState::BossSkill_5:
 		break;
 	case ObjectState::BossBorn: 
 		SetAnimationSet((int)BOSS_ANIMATION::Born_1);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
 		break;
 	default:
 		break;

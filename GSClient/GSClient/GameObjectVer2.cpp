@@ -34,8 +34,11 @@ float CAnimationSet::GetPosition(float fPosition)
 #endif
 		break;
 	}
-	case ANIMATION_TYPE_ONCE:
-		
+	case ANIMATION_TYPE_ONCE: 
+		fGetPosition = fPosition;
+		if (fGetPosition >= m_pfKeyFrameTransformTimes[m_nKeyFrameTransforms - 1]) {
+			fGetPosition = m_pfKeyFrameTransformTimes[m_nKeyFrameTransforms - 1];
+		}
 		break;
 	case ANIMATION_TYPE_PINGPONG:
 		break;
@@ -149,6 +152,13 @@ void CAnimationController::SetAnimationSet(int nAnimationSet)
 	}
 }
 
+void CAnimationController::SetAnimationType(int nType)
+{
+	if (m_pAnimationSets != nullptr) {
+		m_pAnimationSets->SetAniamtionType(nType);
+	}
+}
+
 void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHandler* pCallbackHandler)
 {
 	m_fTime += fTimeElapsed;
@@ -178,7 +188,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHan
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._12 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._13 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._14 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._21 << " ";
+					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4	ToParent._21 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._22 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._23 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._24 << " ";
@@ -553,6 +563,14 @@ void CGameObjectVer2::SetAnimationSet(int nAnimationSet)
 
 	if (m_pSibling) m_pSibling->SetAnimationSet(nAnimationSet);
 	if (m_pChild) m_pChild->SetAnimationSet(nAnimationSet);
+}
+
+void CGameObjectVer2::SetAnimationType(int nType)
+{
+	if (m_pAnimationController) m_pAnimationController->SetAnimationType(nType);
+
+	if (m_pSibling) m_pSibling->SetAnimationType(nType);
+	if (m_pChild) m_pChild->SetAnimationType(nType);
 }
 
 void CGameObjectVer2::CacheSkinningBoneFrames(CGameObjectVer2* pRootFrame)

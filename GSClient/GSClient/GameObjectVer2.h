@@ -6,8 +6,7 @@
 //
 #define ANIMATION_TYPE_ONCE			0
 #define ANIMATION_TYPE_LOOP			1
-#define ANIMATION_TYPE_PINGPONG		2
-
+#define ANIMATION_TYPE_PINGPONG		2 
 struct CALLBACKKEY
 {
 	float  							m_fTime = 0.0f;
@@ -115,6 +114,7 @@ public:
 
 public:
 	void SetAnimationSet(int nAnimationSet);
+	void SetAnimationType(int nType);
 
 	void SetCallbackKeys(int nAnimationSet, int nCallbackKeys);
 	void SetCallbackKey(int nAnimationSet, int nKeyIndex, float fTime, void* pData);
@@ -196,6 +196,7 @@ public:
 public:
 	int GetAnimationSet()const { return m_AnimationSet; }
 	void SetAnimationSet(int nAnimationSet);
+	void SetAnimationType(int nType);
 	void CacheSkinningBoneFrames(CGameObjectVer2* pRootFrame);
 
 	void LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObjectVer2* pParent, FILE* pInFile, CShader* pShader);
