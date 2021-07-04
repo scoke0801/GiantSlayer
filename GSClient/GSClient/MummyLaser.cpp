@@ -35,7 +35,8 @@ void CMummyLaser::Update(float fTimeElapsed)
 			m_ConnectedParticle->SetPosition(m_xmf3Position);
 		}
 		m_ElapsedTime += fTimeElapsed;
-		if (m_ElapsedTime > ARROW_LIFE_TIME) {
+		if (m_ElapsedTime > 3.0f) {
+			//m_ConnectedParticle->SetDrawable(false);
 			m_ElapsedTime = 0.0f;
 			m_isDrawbale = true;
 			//m_ConnectedParticle = nullptr;

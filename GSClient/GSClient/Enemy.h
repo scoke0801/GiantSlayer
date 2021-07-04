@@ -45,7 +45,8 @@ protected:
 	BoundingBox				m_SightAABB;
 
 	float					m_AttackDelayTime = 0.0f;
-
+	float					m_LaserAttackDelayTime[3] = { 3.0f,5.0f,7.0f };
+	bool					m_LaserAttack[3] = { false,false,false };
 public:
 	CEnemy(); 
 	~CEnemy();
@@ -127,5 +128,8 @@ public:
 	~CMummy();
 
 	void Attack(float elapsedTime) override;
-	//void Update(float elapsedTime) override {}
+	void Update(float elapsedTime) override;
+	bool isAttack0() const { return m_LaserAttack[0]; }
+	bool isAttack1() const { return m_LaserAttack[1]; }
+	bool isAttack2() const { return m_LaserAttack[2]; }
 };

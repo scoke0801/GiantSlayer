@@ -24,9 +24,18 @@ void CEnemy::Update(float elapsedTime)
 
 	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
 
+	
 	if (m_AttackDelayTime > 0.0f) {
 		m_AttackDelayTime = max(m_AttackDelayTime - elapsedTime, 0.0f); 
 	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (m_LaserAttackDelayTime[i] > 0.0f) {
+			m_LaserAttackDelayTime[i] = max(m_LaserAttackDelayTime[i] - elapsedTime, 0.0f);
+		}
+	}
+	
 	//if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
 	//	SetAnimationSet(0);
 	//else
@@ -400,6 +409,32 @@ CMummy::~CMummy()
 
 }
 
+void CMummy::Update(float elapsedTime)
+{
+	m_State->Execute(this, elapsedTime);
+	
+	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
+
+
+	if (m_AttackDelayTime > 0.0f) {
+		m_AttackDelayTime = max(m_AttackDelayTime - elapsedTime, 0.0f);
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (m_LaserAttackDelayTime[i] > 0.0f) {
+			m_LaserAttackDelayTime[i] = max(m_LaserAttackDelayTime[i] - elapsedTime, 0.0f);
+		}
+	}
+
+	//if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
+	//	SetAnimationSet(0);
+	//else
+	//	SetAnimationSet(1);
+	CGameObjectVer2::Animate(elapsedTime);
+	UpdateTransform(NULL);
+}
+
 void CMummy::Attack(float elapsedTime)
 {
 	// 공격관련 애니메이션 수행
@@ -410,10 +445,45 @@ void CMummy::Attack(float elapsedTime)
 		//Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
 	}
 
-	if (m_AttackDelayTime <= 0.0f) {
+	
+	if (m_LaserAttackDelayTime[0] <= 0.0f && m_LaserAttack[0]==false) {
 		// 실제 공격!
-		cout << "원거리 몬스터 화살 발사\n";
-		m_AttackDelayTime = RANGED_ENEMY_ATTACK_TIME + 1.0f;
+		m_LaserAttack[0] = true;
+
+		m_LaserAttackDelayTime[0] = RANGED_ENEMY_ATTACK_TIME + 5.0f;
 		MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
+		
+		
 	}
+	else if (m_LaserAttackDelayTime[0] > 1.0f)
+	{
+	
+		m_LaserAttack[0] = false;
+	}
+	
+	if (m_LaserAttackDelayTime[1] <= 0.0f && m_LaserAttack[1] == false)
+	{
+		m_LaserAttack[1] = true;
+		m_LaserAttackDelayTime[1] = RANGED_ENEMY_ATTACK_TIME + 7.0f;
+		MAIN_GAME_SCENE_Y->ShotMummyLaser2(this, GetLook());
+		
+	}
+	else if (m_LaserAttackDelayTime[1] > 1.0f)
+	{
+		m_LaserAttack[1] = false;
+	}
+
+	if (m_LaserAttackDelayTime[2] <= 0.0f && m_LaserAttack[2] == false)
+	{
+		m_LaserAttack[2] = true;
+		m_LaserAttackDelayTime[2] = RANGED_ENEMY_ATTACK_TIME + 10.0f;
+		MAIN_GAME_SCENE_Y->ShotMummyLaser3(this, GetLook());
+		//cout << "몇번?" << endl;
+	}
+	else if (m_LaserAttackDelayTime[2] > 1.0f)
+	{
+		m_LaserAttack[2] = false;
+	}
+	
+	
 }
