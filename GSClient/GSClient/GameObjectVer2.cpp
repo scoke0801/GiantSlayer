@@ -143,14 +143,19 @@ void CAnimationController::SetAnimationSet(int nAnimationSet)
 {
 	if (m_pAnimationSets && (nAnimationSet < m_nAnimationSets))
 	{
+		m_fTime = 0.0f;
+		m_pAnimationTracks[nAnimationSet].m_fPosition = 0.0f;
 		m_nAnimationSet = nAnimationSet;
 		m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet = &m_pAnimationSets[m_nAnimationSet];
+		// ¼öÁ¤
+		//m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet->m_fPosition = 0.0f;
 	}
 }
 
 void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHandler* pCallbackHandler)
 {
 	m_fTime += fTimeElapsed;
+
 	if (m_pAnimationSets)
 	{
 		for (int i = 0; i < m_nAnimationTracks; i++)

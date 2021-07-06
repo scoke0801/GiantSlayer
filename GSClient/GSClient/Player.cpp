@@ -32,6 +32,7 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
+
 	if (false == m_IsCanAttack) {
 		if (GetWeapon() == PlayerWeaponType::Bow) {
 			if (pullString && m_AttackWaitingTime < 0.6f) {
@@ -39,8 +40,9 @@ void CPlayer::Update(float fTimeElapsed)
 			}
 		}
 
-		if (!pause)
+		if (!pause) {
 			m_AttackWaitingTime -= fTimeElapsed;
+		}
 
 		//m_pAnimationController->repeat = false;
 
@@ -54,11 +56,11 @@ void CPlayer::Update(float fTimeElapsed)
 			auto temp = m_SpareCollisionBox;
 			m_SpareCollisionBox = m_Colliders[0];
 			m_Colliders[0] = temp;
-
+			
 			temp = m_SpareAABB;
 			m_SpareAABB = m_AABB[0];
 			m_AABB[0] = temp;
-			 
+			
 			auto tempMesh = m_SpareBoundingBox;
 			m_SpareBoundingBox = m_BoundingObjectMeshes[0];
 			m_BoundingObjectMeshes[0] = tempMesh;
@@ -88,7 +90,7 @@ void CPlayer::Update(float fTimeElapsed)
 			SetAnimationSet(RUN);
 	}
 
-	 
+	
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed); 
@@ -171,7 +173,7 @@ void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
 
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
-	if (m_isOnGround) { 
+	if (m_isOnGround) {
 		m_xmf3Position = GetPosition();
 		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_HeightFromTerrain;
 		m_xmf4x4ToParent._41 = m_xmf3Position.x;
@@ -289,4 +291,25 @@ void CPlayer::DisableBow()
 	SetDrawableRecursively("sword1", true);
 	SetDrawableRecursively("bow_LeftHand", false);
 	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+}
+
+void CPlayer::PullString()
+{
+	/*
+	atk disable
+	set stop time
+
+	*/
+	SetCanAttack(false);
+
+	IncreaseAttackWaitingTime(m_AttackAnimLength);
+
+	SetVelocityToZero();
+}
+
+void CPlayer::ReleaseString()
+{
+	//SetCanAttack(true);
+	//
+	//
 }

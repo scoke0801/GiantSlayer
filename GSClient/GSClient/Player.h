@@ -94,4 +94,7 @@ public:
 	void AnimationChange(PlayerWeaponType weapon);
 	void DisableSword();
 	void DisableBow();
+
+	void PullString();
+	void ReleaseString();
 };
