@@ -22,6 +22,7 @@ CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 	m_State = new WaitState(this);
 	m_EnemyType = EnemyType::Boss;
 	m_AttackRange = 1000.0f;
+	m_Speed = 165.0f * 10.0f;
 }
 
 CBoss::~CBoss()
@@ -46,6 +47,25 @@ void CBoss::UpdateOnServer(float fTimeElapsed)
 {
 	CGameObjectVer2::Animate(fTimeElapsed);
 	UpdateTransform(NULL);
+}
+
+void CBoss::Attack(float elapsedTime)
+{
+	if (m_AttackDelayTime <= 0.0f) {
+		// 실제 공격!  
+		if (m_AttackType == EnemyAttackType::BossSkill_1) {
+			m_AttackDelayTime = BOSS_ATTACK_1_ANIMATION_LENGTH + 1.0f;
+		}
+		else if (m_AttackType == EnemyAttackType::BossSkill_2) {
+			m_AttackDelayTime = BOSS_ATTACK_2_ANIMATION_LENGTH + 1.0f;
+		}
+		else if (m_AttackType == EnemyAttackType::BossSkill_3) {
+			m_AttackDelayTime = BOSS_ATTACK_3_ANIMATION_LENGTH + 1.0f;
+		}
+		else if (m_AttackType == EnemyAttackType::BossSkill_4) {
+
+		}
+	}
 }
  
 void CBoss::PlayerEnter(CPlayer* target)
@@ -77,7 +97,20 @@ void CBoss::ChangeAnimation(ObjectState stateInfo)
 		SetAnimationType(ANIMATION_TYPE_LOOP);
 		break;
 	case ObjectState::Attack: 
-		SetAnimationSet((int)BOSS_ANIMATION::Skill_1);
+	{
+		if (m_AttackType == EnemyAttackType::BossSkill_1) {
+			SetAnimationSet((int)BOSS_ANIMATION::Skill_1);
+		}
+		else if (m_AttackType == EnemyAttackType::BossSkill_2) {
+			SetAnimationSet((int)BOSS_ANIMATION::Skill_2);
+		}
+		else if (m_AttackType == EnemyAttackType::BossSkill_3) {
+			SetAnimationSet((int)BOSS_ANIMATION::Skill_3);
+		}
+		else if (m_AttackType == EnemyAttackType::BossSkill_4) {
+
+		}
+	}
 		SetAnimationType(ANIMATION_TYPE_ONCE);
 		break;
 	case ObjectState::Attacked:

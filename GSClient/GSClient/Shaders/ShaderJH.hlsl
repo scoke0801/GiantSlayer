@@ -634,7 +634,7 @@ float3 CubicBezierNormalSum5x5(OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> p
 float CalculateTessFactor(float3 f3Position)
 {
 	float fDistToCamera = distance(f3Position, gvCameraPosition);
-	float s = saturate((fDistToCamera - 10.0f) / (10000.0f - 10.0f));
+	float s = saturate((fDistToCamera - 10.0f) / (20000.0f - 10.0f));
 
 	return(lerp(64.0f, 1.0f, s));
 }

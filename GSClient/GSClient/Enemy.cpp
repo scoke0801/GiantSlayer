@@ -11,7 +11,7 @@ CEnemy::CEnemy() : CGameObjectVer2()
 
 	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this); 
-
+	m_Speed = 165.0f * 2.5f;
 }
   
 CEnemy::~CEnemy()
@@ -175,9 +175,8 @@ void CEnemy::FindClosePositionToTarget()
 }
 
 void CEnemy::MoveToNextPosition(float elapsedTime)
-{
-	const float ENEMY_SPEED_TEMP = 165.0f * 2.5f;
-	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ENEMY_SPEED_TEMP * elapsedTime)));
+{ 
+	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, m_Speed * elapsedTime)));
 	m_ToMovePosition.y = m_xmf3Position.y;
 	XMFLOAT3 gap = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
 	if (Vector3::Length(gap) < 10.0f) {
@@ -311,6 +310,7 @@ CRangedEnemy::CRangedEnemy()
 	m_AttackRange = 1200.0f;
 	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this);
+	m_Speed = 165.0f * 2.5f;
 }
  
 CRangedEnemy::~CRangedEnemy()
@@ -320,14 +320,6 @@ CRangedEnemy::~CRangedEnemy()
 
 void CRangedEnemy::Attack(float elapsedTime)
 {
-	// 공격관련 애니메이션 수행
-	// 현재는 임시코드
-	{
-		float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
-
-		//Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
-	}
-	
 	if (m_AttackDelayTime <= 0.0f) {
 		// 실제 공격!
 		cout << "원거리 몬스터 화살 발사\n"; 
@@ -349,6 +341,7 @@ CMeleeEnemy::CMeleeEnemy()
 
 	//m_HeightFromTerrain = 150.0f;
 	m_State = new PatrolState(this);
+	m_Speed = 165.0f * 2.5f;
 } 
 
 CMeleeEnemy::~CMeleeEnemy()
@@ -357,13 +350,6 @@ CMeleeEnemy::~CMeleeEnemy()
 }
 void CMeleeEnemy::Attack(float elapsedTime)
 {
-	// 공격관련 애니메이션 수행
-	// 현재는 임시코드
-	{
-		float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
-
-		//Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
-	}
 	if (m_AttackDelayTime <= 0.0f) {
 		// 실제 공격!  
 		m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.0f; 

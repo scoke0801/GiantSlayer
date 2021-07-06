@@ -14,7 +14,11 @@ class CPlayer;
  
 enum class EnemyAttackType {
 	Melee,
-	Ranged
+	Ranged,
+	BossSkill_1,
+	BossSkill_2,
+	BossSkill_3,
+	BossSkill_4
 };
 
 enum class EnemyType {
@@ -25,7 +29,7 @@ enum class EnemyType {
 };
 class CEnemy : public CGameObjectVer2
 { 
-protected:
+protected: 
 	EnemyAttackType			m_AttackType;
 	CState<CEnemy>*			m_State;
 	EnemyType				m_EnemyType;
@@ -51,7 +55,7 @@ protected:
 	BoundingBox				m_SightAABB;
 
 	float					m_AttackDelayTime = 0.0f;
-
+	float					m_Speed;
 public:
 	CEnemy(); 
 	~CEnemy();
@@ -98,6 +102,7 @@ public:
 	 
 	void SetAttackDelayTime(float delayTime) { m_AttackDelayTime = delayTime; }
 
+	void SetEnemyAttackType(EnemyAttackType attackType) { m_AttackType = attackType; }
 	EnemyAttackType GetEnemyAttackType() const { return m_AttackType; } 
 
 	float GetAttackRange() const { return m_AttackRange; }

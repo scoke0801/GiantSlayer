@@ -57,7 +57,10 @@ public:
 };
 
 class AttackState : public CState<CEnemy>
-{
+{ 
+private:
+    int     m_AttackType;
+
 public:
     AttackState(CEnemy* enemy) { Enter(enemy); }
 
@@ -81,6 +84,7 @@ public:
 
     virtual void Exit(CEnemy* enemy);
 };
+
 class TraceState : public CState<CEnemy>
 {
 private:

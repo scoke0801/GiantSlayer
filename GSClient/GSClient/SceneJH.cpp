@@ -946,6 +946,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 
 void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
 { 
+	return;
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature); 
 
 	if (m_MirrorCamera)
@@ -1010,7 +1011,7 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 }
 
 void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
-{
+{ 
 	if (m_isPlayerSelected == true)
 	{
 		pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
@@ -2076,9 +2077,6 @@ void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//if (g_IsNotebookDev) {
-	//	return;
-	//}
 	{
 		XMFLOAT3 scale = { 120.0f, 120.0f, 120.0f };
 		m_Boss = new CBoss(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -2088,7 +2086,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		//z : 29700.0 19800
 		//x : 29700.0 19800
 		//x : 21800.0 14533
-		m_Boss->SetPosition({ 17166 * MAP_SCALE_SIZE,  -6070, 17166 * MAP_SCALE_SIZE });
+		m_Boss->SetPosition({ 17166 * MAP_SCALE_SIZE, -6070, 17166 * MAP_SCALE_SIZE });
 		m_Boss->FixPositionByTerrain(m_Terrain);
 		m_Boss->Scale(120, 120, 120);
 		m_Boss->Rotate({ 0,1,0 }, 180); 

@@ -6,6 +6,10 @@ constexpr float BOSS_BORN2_ANIMATION_LENGTH = 7;
 constexpr float BOSS_DEAD_ANIMATION_LENGTH = 7;
 constexpr float BOSS_IDLE_ANIMATION_LENGTH = 3;
 constexpr float BOSS_RUN_ANIMATION_LENGTH = 0.5666667;
+constexpr float BOSS_ATTACK_1_ANIMATION_LENGTH = 3;
+constexpr float BOSS_ATTACK_2_ANIMATION_LENGTH = 3;
+constexpr float BOSS_ATTACK_3_ANIMATION_LENGTH = 3.333333; 
+// constexpr float BOSS_ATTACK_4_ANIMATION_LENGTH = 3.333333;
 
 enum class BOSS_ANIMATION
 {
@@ -34,8 +38,8 @@ public:
 public:
     void Update(float elapsedTime) override;
     void UpdateOnServer(float fTimeElapsed) override;
-
      
+    void Attack(float elapsedTime) override;
 public:
     void PlayerEnter(CPlayer* target); 
 

@@ -85,6 +85,7 @@ void RunAwayState::Exit(CEnemy* pEnemy)
 
 void PatrolState::Enter(CEnemy* enemy)
 {
+    cout << " PatrolState::Enter\n";
     enemy->ChangeAnimation(ObjectState::Patrol);
     //enemy->SetAnimationSet(1);
     m_StateName = ObjectState::Patrol;
@@ -112,8 +113,42 @@ void PatrolState::Exit(CEnemy* enemy)
 
 void AttackState::Enter(CEnemy* enemy)
 {
+    cout << " AttackState::Enter\n";
     m_StateName = ObjectState::Attack;
-    m_LifeTime = MELLE_ENEMY_ATTACK_TIME; 
+    auto enemyType = enemy->GetEnemyType();
+    switch (enemyType)
+    {
+    case EnemyType::None:
+        break;
+    case EnemyType::Skeleton:
+        m_AttackType = (int)EnemyAttackType::Melee;
+        m_LifeTime = MELLE_ENEMY_ATTACK_TIME;
+        break;
+    case EnemyType::Mummy:
+        break;
+    case EnemyType::Boss: 
+        // 일단 랜덤하게 테스트를 해보는 방향으로
+    {
+        int randVal = rand() % 3 + (int)EnemyAttackType::BossSkill_1;
+        m_AttackType = randVal;
+        enemy->SetEnemyAttackType((EnemyAttackType)m_AttackType);
+        if (m_AttackType == (int)EnemyAttackType::BossSkill_1) { 
+            m_LifeTime = BOSS_ATTACK_1_ANIMATION_LENGTH;
+        }
+        else if (m_AttackType == (int)EnemyAttackType::BossSkill_2) { 
+            m_LifeTime = BOSS_ATTACK_2_ANIMATION_LENGTH;
+        }
+        else if (m_AttackType == (int)EnemyAttackType::BossSkill_3) { 
+            m_LifeTime = BOSS_ATTACK_3_ANIMATION_LENGTH;
+        }
+        else if (m_AttackType == (int)EnemyAttackType::BossSkill_4) {
+
+        }
+    } 
+        break;
+    default:
+        break;
+    }
 }
 
 void AttackState::Execute(CEnemy* enemy, float elapsedTime)
@@ -136,6 +171,8 @@ void AttackState::Exit(CEnemy* enemy)
 
 void TraceState::Enter(CEnemy* enemy)
 {
+    cout << " TraceState::Enter\n";
+
     enemy->ChangeAnimation(ObjectState::Patrol);
     m_StateName = ObjectState::Trace;
     m_LifeTime = 0.5f;
@@ -206,9 +243,15 @@ void BornState::Enter(CEnemy* enemy)
 void BornState::Execute(CEnemy* enemy, float elapsedTime)
 {
     m_ElapsedTime += elapsedTime;
-    if (m_ElapsedTime > m_LifeTime) {  
-        //enemy->ChangeState(new IdleState(enemy));
-        enemy->ChangeState(new PatrolState(enemy));
+    if (m_ElapsedTime > m_LifeTime) { 
+        if (enemy->IsEnemyInSight()) {
+            // 공격할 대상이 존재하는 경우 해당 대상에게로
+            enemy->ChangeState(new TraceState(enemy));
+        }
+        else {
+            // 공격할 대상이 존재하지 않는다면 랜덤하게 이동하도록
+            enemy->ChangeState(new PatrolState(enemy));
+        }
     }
 }
 
