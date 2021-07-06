@@ -1596,9 +1596,10 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 				case PlayerWeaponType::Bow:
 					m_Player->Attack();
 					m_Player->pullString = true;
+
+					//m_Player->PullString();
 					//m_Player->pause = true;
 					//m_Player->PullBowString(true);
-					cout << "던질까말까" << endl;
 					break;
 				}
 			}
@@ -1615,9 +1616,9 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 				m_Player->pullString = false;
 				m_Player->pause = false;
+				m_Player->ReleaseString();
 				//m_Player->PullBowString(false);
 				ShotPlayerArrow();
-				cout << "던져!" << endl;
 				break;
 			}
 		}
