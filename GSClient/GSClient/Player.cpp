@@ -32,6 +32,7 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	cout << m_pChild->m_pAnimationController->m_pAnimationTracks[m_pChild->m_pAnimationController->m_nAnimationTrack].m_pAnimationSet->m_fPosition << endl;
 
 	if (false == m_IsCanAttack) {
 		if (GetWeapon() == PlayerWeaponType::Bow) {

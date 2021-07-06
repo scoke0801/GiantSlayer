@@ -145,6 +145,7 @@ void CAnimationController::SetAnimationSet(int nAnimationSet)
 	{
 		m_fTime = 0.0f;
 		m_pAnimationTracks[nAnimationSet].m_fPosition = 0.0f;
+		m_pAnimationTracks->m_fPosition = 0;
 		m_nAnimationSet = nAnimationSet;
 		m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet = &m_pAnimationSets[m_nAnimationSet];
 		// ¼öÁ¤
