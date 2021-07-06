@@ -144,11 +144,14 @@ void CAnimationController::SetCallbackKey(int nAnimationSet, int nKeyIndex, floa
 }
 
 void CAnimationController::SetAnimationSet(int nAnimationSet)
-{
+{ 
 	if (m_pAnimationSets && (nAnimationSet < m_nAnimationSets))
 	{
-		m_fTime = 0.0f; 
-		m_pAnimationTracks[m_nAnimationSet].m_fPosition = 0.0f;
+		m_fTime = 0.0f;  
+		for (int i = 0; i < m_nAnimationTracks; ++i) {
+			m_pAnimationTracks[i].m_fPosition = 0.0f;
+		}
+
 		m_nAnimationSet = nAnimationSet;
 		m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet = &m_pAnimationSets[m_nAnimationSet];
 	}
