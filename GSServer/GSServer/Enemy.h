@@ -102,6 +102,9 @@ public:
 	ObjectState GetStateInfo() const override { return m_State->GetStatename(); }
 
 	BYTE GetAnimationType() const override;
+
+	EnemyType GetEnemyType() const { return m_EnemyType; }
+	void SetEnemyType(EnemyType enemyType) { m_EnemyType = enemyType; }
 };
 
 class CMeleeEnemy : public CEnemy
