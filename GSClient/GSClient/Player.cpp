@@ -9,7 +9,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_Type = OBJ_TYPE::Player;
 
 	m_HP = 100;
-	m_SP = 100; 
+	m_SP = 100;
 
 	m_SpareBoundingBox = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 1.4, XMFLOAT3{ 0,0.6, 0.2f });
 	m_SpareCollisionBox = new ColliderBox(ColliderBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4)));
@@ -32,7 +32,7 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
-	cout << m_pChild->m_pAnimationController->m_pAnimationTracks[m_pChild->m_pAnimationController->m_nAnimationTrack].m_pAnimationSet->m_fPosition << endl;
+	//cout << m_pChild->m_pAnimationController->m_pAnimationTracks[m_pChild->m_pAnimationController->m_nAnimationTrack].m_pAnimationSet->m_fPosition << endl;
 
 	if (false == m_IsCanAttack) {
 		if (GetWeapon() == PlayerWeaponType::Bow) {
@@ -71,6 +71,7 @@ void CPlayer::Update(float fTimeElapsed)
 			if (GetWeapon() == PlayerWeaponType::Bow) {
 				pause = false;
 				pausedTime = 0;
+				//m_pChild->m_pAnimationController->m_pAnimationTracks[m_pChild->m_pAnimationController->m_nAnimationTrack].m_pAnimationSet->m_fPosition = 0;
 				//m_pAnimationController->repeat = true;
 			}
 		}
@@ -135,9 +136,18 @@ void CPlayer::UpdateOnServer(float fTimeElapsed)
 void CPlayer::UpdateCamera()
 {
 	if (m_Camera != nullptr) {
-		m_Camera->Update(m_xmf3Position);
-		m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
-		m_Camera->UpdateViewMatrix(); 
+		if (pullString)
+		{
+			//m_Camera->UpdateAimMode(m_xmf3Position);
+			//m_Camera->LookAt(m_Camera->GetPosition3f(), Vector3::Add(m_xmf3Position, {0, 0, 3}), GetUp());
+			m_Camera->UpdateViewMatrix();
+		}
+		else
+		{
+			m_Camera->Update(m_xmf3Position);
+			m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
+			m_Camera->UpdateViewMatrix();
+		}
 	}
 }
 

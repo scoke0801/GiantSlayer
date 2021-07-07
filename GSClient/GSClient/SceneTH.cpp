@@ -1595,11 +1595,12 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 					break;
 				case PlayerWeaponType::Bow:
 					m_Player->Attack();
-					m_Player->pullString = true;
 
-					//m_Player->PullString();
-					//m_Player->pause = true;
-					//m_Player->PullBowString(true);
+					if (m_CurrentCamera->GetTarget() == m_Player) {
+						m_CurrentCamera->AimOn(true);
+					}
+
+					m_Player->pullString = true;
 					break;
 				}
 			}
@@ -1618,6 +1619,10 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 					m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 					m_Player->pullString = false;
 					m_Player->pause = false;
+					if (m_CurrentCamera->GetTarget() == m_Player) {
+						m_CurrentCamera->AimOn(false);
+					}
+					/*m_Player->BowAimOff();*/
 				}
 				break;
 			}
@@ -2070,7 +2075,7 @@ void CSceneTH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	return;
+	//return;
 
 	CGameObjectVer2* pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
@@ -2107,6 +2112,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		return;
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);

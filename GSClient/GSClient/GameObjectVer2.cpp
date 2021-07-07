@@ -143,13 +143,17 @@ void CAnimationController::SetAnimationSet(int nAnimationSet)
 {
 	if (m_pAnimationSets && (nAnimationSet < m_nAnimationSets))
 	{
-		m_fTime = 0.0f;
-		m_pAnimationTracks[nAnimationSet].m_fPosition = 0.0f;
-		m_pAnimationTracks->m_fPosition = 0;
+		//m_fTime = 0.0f;
+		//m_pAnimationTracks[nAnimationSet].m_fPosition = 0.0f;
+		//m_pAnimationTracks->m_fPosition = 0;
+		if (m_nAnimationSet != nAnimationSet) {
+			m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet->m_fPosition = 0;
+		}
 		m_nAnimationSet = nAnimationSet;
 		m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet = &m_pAnimationSets[m_nAnimationSet];
+		//m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet->m_fPosition = 0;
 		// ¼öÁ¤
-		//m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet->m_fPosition = 0.0f;
+		//m_pAnimationController->m_pAnimationTracks[m_pChild->m_pAnimationController->m_nAnimationTrack].m_pAnimationSet->m_fPosition
 	}
 }
 

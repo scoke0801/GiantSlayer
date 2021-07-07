@@ -64,7 +64,9 @@ void CCamera::Update(const XMFLOAT3& xmf3LookAt)
 	XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
 
 	XMFLOAT3 xmf3Position = Vector3::Add(m_TargetPlayer->GetPosition(), xmf3Offset);
+
 	XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
+
 	float fLength = Vector3::Length(xmf3Direction);
 	xmf3Direction = Vector3::Normalize(xmf3Direction);
 
@@ -78,6 +80,19 @@ void CCamera::Update(const XMFLOAT3& xmf3LookAt)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
 		LookAt(xmf3LookAt, { 0,1,0 });
 	}
+
+	/*cout << m_xmf3Position.x << " " << m_xmf3Position.y << " " << m_xmf3Position.z << " | " <<
+		xmf3Direction.x << " " << xmf3Direction.y << " " << xmf3Direction.z << " | " <<
+		fDistance << endl;*/
+}
+
+void CCamera::UpdateAimMode(const XMFLOAT3& xmf3LookAt)
+{
+	if (m_TargetPlayer == nullptr) return;
+
+	m_xmf3Position = Vector3::Add(m_TargetPlayer->GetPosition(), {30, 0, 50});
+
+	
 }
 
 void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
