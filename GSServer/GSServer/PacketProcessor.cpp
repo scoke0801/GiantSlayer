@@ -206,9 +206,9 @@ void PacketProcessor::ReadObstaclesPosition()
 XMFLOAT3 PacketProcessor::GetPosition(const string& name, const Document& document)
 {
 	XMFLOAT3 pos;
-	pos.x = document[name.c_str()].GetArray()[0].GetInt();
+	pos.x = document[name.c_str()].GetArray()[0].GetInt() * MAP_SCALE_SIZE;
 	pos.y = document[name.c_str()].GetArray()[1].GetInt();
-	pos.z = document[name.c_str()].GetArray()[2].GetInt();
+	pos.z = document[name.c_str()].GetArray()[2].GetInt() * MAP_SCALE_SIZE;
 
 	return pos;
 }

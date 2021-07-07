@@ -19,6 +19,7 @@ constexpr int MAX_MOUSE_INPUT = 30;
 
 constexpr int MAX_MONSTER_COUNT = 20;
 
+constexpr float MAP_SCALE_SIZE = 1.5f;
 // 뛰기 : 100미터 16초, 1초에 6.25미터를 달린다. 625 
 // 걷기 : 100미터 60초, 1초에 1.66미터를 걷는다. 166
 // 게임이니까 1.5배정도 빠르게하자

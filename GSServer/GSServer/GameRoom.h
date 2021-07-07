@@ -93,8 +93,7 @@ private:
 	void InitCameras();
 	void InitMonsters();
 	void InitArrows();
-	 
-
+	  
 	void InitObstacle();
 	 
 	void BuildBlockingRegionOnMap();
