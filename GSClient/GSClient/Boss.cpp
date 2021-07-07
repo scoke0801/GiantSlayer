@@ -62,9 +62,30 @@ void CBoss::Attack(float elapsedTime)
 		else if (m_AttackType == EnemyAttackType::BossSkill_3) {
 			m_AttackDelayTime = BOSS_ATTACK_3_ANIMATION_LENGTH + 1.0f;
 		}
-		else if (m_AttackType == EnemyAttackType::BossSkill_4) {
-
+		else if (m_AttackType == EnemyAttackType::BossSkill_4) { 
+			m_AttackDelayTime = BOSS_ATTACK_4_ANIMATION_LENGTH + 1.0f;
 		}
+	}
+}
+
+void CBoss::CalcNextAttackType()
+{
+	m_AttackType = (EnemyAttackType)(rand() % 4 + (int)EnemyAttackType::BossSkill_1);
+	if (m_AttackType == EnemyAttackType::BossSkill_1) {
+		m_AttackRange = 1000.0f;
+		m_AttackDelayTime = BOSS_ATTACK_1_ANIMATION_LENGTH + 1.0f;
+	}
+	else if (m_AttackType == EnemyAttackType::BossSkill_2) {
+		m_AttackRange = 1000.0f;
+		m_AttackDelayTime = BOSS_ATTACK_2_ANIMATION_LENGTH + 1.0f;
+	}
+	else if (m_AttackType == EnemyAttackType::BossSkill_3) {
+		m_AttackRange = 3000.0f;
+		m_AttackDelayTime = BOSS_ATTACK_3_ANIMATION_LENGTH + 1.0f;
+	}
+	else if (m_AttackType == EnemyAttackType::BossSkill_4) {
+		m_AttackRange = 16000.0f;
+		m_AttackDelayTime = BOSS_ATTACK_3_ANIMATION_LENGTH + 1.0f;
 	}
 }
  
@@ -108,7 +129,7 @@ void CBoss::ChangeAnimation(ObjectState stateInfo)
 			SetAnimationSet((int)BOSS_ANIMATION::Skill_3);
 		}
 		else if (m_AttackType == EnemyAttackType::BossSkill_4) {
-
+			SetAnimationSet((int)BOSS_ANIMATION::Born_2);
 		}
 	}
 		SetAnimationType(ANIMATION_TYPE_ONCE);
@@ -134,7 +155,7 @@ void CBoss::ChangeAnimation(ObjectState stateInfo)
 		SetAnimationType(ANIMATION_TYPE_ONCE);
 		break;
 	case ObjectState::BossSkill_4:
-		SetAnimationSet((int)BOSS_ANIMATION::Skill_4);
+		SetAnimationSet((int)BOSS_ANIMATION::Born_2);
 		SetAnimationType(ANIMATION_TYPE_ONCE);
 		break;
 	case ObjectState::BossSkill_5:

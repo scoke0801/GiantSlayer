@@ -102,6 +102,10 @@ void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
         enemy->MoveToNextPosition(elapsedTime);
 	}
     if (enemy->IsEnemyInSight()) {
+        if (enemy->GetEnemyType() == EnemyType::Boss) {
+            CBoss* pBoss = reinterpret_cast<CBoss*>(enemy);
+            pBoss->CalcNextAttackType();
+        }
         enemy->ChangeState(new TraceState(enemy));
     }
 }
@@ -129,20 +133,22 @@ void AttackState::Enter(CEnemy* enemy)
     case EnemyType::Boss: 
         // 일단 랜덤하게 테스트를 해보는 방향으로
     {
-        int randVal = rand() % 3 + (int)EnemyAttackType::BossSkill_1;
-        m_AttackType = randVal;
-        enemy->SetEnemyAttackType((EnemyAttackType)m_AttackType);
+        m_AttackType = (int)enemy->GetEnemyAttackType(); 
         if (m_AttackType == (int)EnemyAttackType::BossSkill_1) { 
             m_LifeTime = BOSS_ATTACK_1_ANIMATION_LENGTH;
+            cout << "Atk - 1\n";
         }
         else if (m_AttackType == (int)EnemyAttackType::BossSkill_2) { 
             m_LifeTime = BOSS_ATTACK_2_ANIMATION_LENGTH;
+            cout << "Atk - 2\n";
         }
         else if (m_AttackType == (int)EnemyAttackType::BossSkill_3) { 
             m_LifeTime = BOSS_ATTACK_3_ANIMATION_LENGTH;
+            cout << "Atk - 3\n";
         }
         else if (m_AttackType == (int)EnemyAttackType::BossSkill_4) {
-
+            m_LifeTime = BOSS_ATTACK_4_ANIMATION_LENGTH;
+            cout << "Atk - 4\n";
         }
     } 
         break;
