@@ -54,16 +54,16 @@ void CBoss::Attack(float elapsedTime)
 	if (m_AttackDelayTime <= 0.0f) {
 		// 실제 공격!  
 		if (m_AttackType == EnemyAttackType::BossSkill_1) {
-			m_AttackDelayTime = BOSS_ATTACK_1_ANIMATION_LENGTH + 1.0f;
+			m_AttackDelayTime = BOSS_ATTACK_1_ANIMATION_LENGTH + 0.3f;
 		}
 		else if (m_AttackType == EnemyAttackType::BossSkill_2) {
-			m_AttackDelayTime = BOSS_ATTACK_2_ANIMATION_LENGTH + 1.0f;
+			m_AttackDelayTime = BOSS_ATTACK_2_ANIMATION_LENGTH + 0.3f;
 		}
 		else if (m_AttackType == EnemyAttackType::BossSkill_3) {
-			m_AttackDelayTime = BOSS_ATTACK_3_ANIMATION_LENGTH + 1.0f;
+			m_AttackDelayTime = BOSS_ATTACK_3_ANIMATION_LENGTH + 0.5f;
 		}
 		else if (m_AttackType == EnemyAttackType::BossSkill_4) { 
-			m_AttackDelayTime = BOSS_ATTACK_4_ANIMATION_LENGTH + 1.0f;
+			m_AttackDelayTime = BOSS_ATTACK_4_ANIMATION_LENGTH + 0.7f;
 		}
 	}
 }

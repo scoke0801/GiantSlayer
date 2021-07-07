@@ -3,6 +3,7 @@
 #include "protocol.h" 
 #include "MapObjects.h"
 #include "Enemy.h"
+#include "Boss.h"
 #include "Arrow.h"
 #include "PacketProcessor.h"
 
@@ -232,12 +233,19 @@ void CGameRoom::InitMonsters()
 		auto pEnemy = reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][i]);
 		pEnemy->ConnectPlayer(m_Players, MAX_ROOM_PLAYER);
 	}
-
-
-	CGameObject* pBoss = new CGameObject();
-	pBoss->SetPosition({ 16800 * MAP_SCALE_SIZE,  -7023.2950, 16500 * MAP_SCALE_SIZE });
+	 
+	CBoss* pBoss = new CBoss();
+	pBoss->SetPosition({ 17166 * MAP_SCALE_SIZE, -6983.47559, 17166 * MAP_SCALE_SIZE });
 	pBoss->Scale(120, 120, 120);
 	pBoss->Rotate({ 0,1,0 }, 180);
+	pBoss->ConnectPlayer(m_Players, MAX_ROOM_PLAYER);
+
+	XMFLOAT3 centerPos = pBoss->GetPosition();
+	XMFLOAT3 scopeSize = { 4100 * 2, 0, 4100 * 2 };
+	pBoss->SetActivityScope({ scopeSize.x, 0, scopeSize.z }, { centerPos });
+	pBoss->SetSightBoundingBox({ scopeSize.x / scale.x, 15, scopeSize.z / scale.z });
+	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3{ scopeSize.x / scale.x, 15, scopeSize.z / scale.z }, XMFLOAT3{ 0, 0.0f,0 }));
+
 	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.5, 5, 3.5)));
 	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3(2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
 	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3(-2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));

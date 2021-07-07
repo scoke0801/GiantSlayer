@@ -70,6 +70,7 @@
     <ClCompile Include="GameRoom.cpp">
       <Filter>Communicates\GameRoom</Filter>
     </ClCompile>
+    <ClCompile Include="Boss.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PacketProcessor.h">
@@ -109,6 +110,7 @@
     <ClInclude Include="GameRoom.h">
       <Filter>Communicates\GameRoom</Filter>
     </ClInclude>
+    <ClInclude Include="Boss.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\ObjectPositionData.json" />

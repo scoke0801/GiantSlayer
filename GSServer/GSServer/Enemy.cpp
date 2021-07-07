@@ -6,6 +6,8 @@
 CEnemy::CEnemy() 
 {
 	m_State = new PatrolState(this);
+	m_EnemyType = EnemyType::Skeleton;
+	m_Speed = 165.0f * 2.5f;
 }
 
 CEnemy::~CEnemy()
@@ -248,6 +250,8 @@ CRangedEnemy::CRangedEnemy()
 
 	m_AttackRange = 1200.0f;
 	m_State = new PatrolState(this);
+	m_EnemyType = EnemyType::Skeleton;
+	m_Speed = 165.0f * 2.5f;
 }
 
 CRangedEnemy::~CRangedEnemy()
@@ -282,6 +286,8 @@ CMeleeEnemy::CMeleeEnemy()
 	m_AttackRange = 320.0f;
 
 	m_State = new PatrolState(this);
+	m_EnemyType = EnemyType::Skeleton;
+	m_Speed = 165.0f * 2.5f;
 }
 
 CMeleeEnemy::~CMeleeEnemy()
