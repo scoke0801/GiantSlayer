@@ -111,8 +111,6 @@ public:
 
 	CGameObjectVer2*				m_pRootFrame = NULL;
 
-	bool							repeat = true;
-
 public:
 	void SetAnimationSet(int nAnimationSet);
 

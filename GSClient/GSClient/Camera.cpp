@@ -80,19 +80,14 @@ void CCamera::Update(const XMFLOAT3& xmf3LookAt)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
 		LookAt(xmf3LookAt, { 0,1,0 });
 	}
-
-	/*cout << m_xmf3Position.x << " " << m_xmf3Position.y << " " << m_xmf3Position.z << " | " <<
-		xmf3Direction.x << " " << xmf3Direction.y << " " << xmf3Direction.z << " | " <<
-		fDistance << endl;*/
 }
 
 void CCamera::UpdateAimMode(const XMFLOAT3& xmf3LookAt)
 {
 	if (m_TargetPlayer == nullptr) return;
 
-	m_xmf3Position = Vector3::Add(m_TargetPlayer->GetPosition(), {30, 0, 50});
-
-	
+	if(GetPosition3f().z <= m_TargetPlayer->GetPosition().z)
+		m_xmf3Position = Vector3::Add(GetPosition3f(), {0, 0, 5.0f});
 }
 
 void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
@@ -128,7 +123,6 @@ void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		LookAt(xmf3LookAt, m_TargetPlayer->GetUp());
 	}
 	//m_xmf4x4ViewProjection = Matrix4x4::Multiply(xmf4x4Rotate, m_xmf4x4Proj);
-
 }
 
 void CCamera::UpdateLights(float elapsedTime)
@@ -365,7 +359,7 @@ void CCamera::SetOffset(XMFLOAT3 offset)
 
 void CCamera::MoveOffset(XMFLOAT3 shift)
 {
-	m_xmf3Offset = Vector3::Add(m_xmf3Offset, shift);	 
+	m_xmf3Offset = Vector3::Add(m_xmf3Offset, shift);
 }
 
 void CCamera::Strafe(float d)

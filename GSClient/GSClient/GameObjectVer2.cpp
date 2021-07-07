@@ -172,14 +172,6 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHan
 				CAnimationSet* pAnimationSet = m_pAnimationTracks[i].m_pAnimationSet;
 				pAnimationSet->m_fPosition += (fTimeElapsed * pAnimationSet->m_fSpeed);
 
-				if (repeat == false)
-				{
-					if (pAnimationSet->m_fPosition > pAnimationSet->m_fLength - 0.1f)
-					{
-						pAnimationSet->m_fPosition = pAnimationSet->m_fLength - 0.1f;
-					}
-				}
-
 				if (pCallbackHandler)
 				{
 					void* pCallbackData = pAnimationSet->GetCallback(pAnimationSet->m_fPosition);

@@ -36,6 +36,9 @@ constexpr float RANGED_ENEMY_ATTACK_TIME = 2.0f;
 
 constexpr float PLAYER_SWORD_ATTACK_TIME = 1.033333f;
 
+constexpr float AIR_RESISTANCE = 1.0f;
+constexpr float GRAVITY = 1.0f;
+
 enum AnimationType
 {
 	// ±âº»==========

@@ -32,11 +32,9 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
-	//cout << m_pChild->m_pAnimationController->m_pAnimationTracks[m_pChild->m_pAnimationController->m_nAnimationTrack].m_pAnimationSet->m_fPosition << endl;
-
 	if (false == m_IsCanAttack) {
 		if (GetWeapon() == PlayerWeaponType::Bow) {
-			if (pullString && m_AttackWaitingTime < 0.6f) {
+			if (pullString && m_AttackWaitingTime < m_AttackAnimPauseTime) {
 				pause = true;
 			}
 		}
@@ -44,8 +42,6 @@ void CPlayer::Update(float fTimeElapsed)
 		if (!pause) {
 			m_AttackWaitingTime -= fTimeElapsed;
 		}
-
-		//m_pAnimationController->repeat = false;
 
 		SetAnimationSet(ATK);
 
@@ -71,8 +67,6 @@ void CPlayer::Update(float fTimeElapsed)
 			if (GetWeapon() == PlayerWeaponType::Bow) {
 				pause = false;
 				pausedTime = 0;
-				//m_pChild->m_pAnimationController->m_pAnimationTracks[m_pChild->m_pAnimationController->m_nAnimationTrack].m_pAnimationSet->m_fPosition = 0;
-				//m_pAnimationController->repeat = true;
 			}
 		}
 	}
@@ -84,8 +78,6 @@ void CPlayer::Update(float fTimeElapsed)
 		}*/
 	}
 	else {
-		//m_pAnimationController->repeat = true;
-
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
 			SetAnimationSet(IDLE);
 		else
@@ -138,8 +130,10 @@ void CPlayer::UpdateCamera()
 	if (m_Camera != nullptr) {
 		if (pullString)
 		{
-			//m_Camera->UpdateAimMode(m_xmf3Position);
-			//m_Camera->LookAt(m_Camera->GetPosition3f(), Vector3::Add(m_xmf3Position, {0, 0, 3}), GetUp());
+			m_Camera->UpdateAimMode(m_xmf3Position);
+			//m_Camera->Update(m_xmf3Position);
+			//m_Camera->Update( Vector3::Add(m_Camera->GetPosition3f(), ) );
+			m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
 			m_Camera->UpdateViewMatrix();
 		}
 		else
@@ -286,7 +280,7 @@ void CPlayer::AnimationChange(PlayerWeaponType weapon)
 		DEATH = AnimationType::BOW_DEATH;
 
 		m_AttackAnimLength = 1.533333f;
-		m_AttackAnimPauseTime = 1.0f;
+		m_AttackAnimPauseTime = 0.6f;
 	}
 }
  
