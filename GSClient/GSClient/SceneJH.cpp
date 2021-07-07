@@ -3329,7 +3329,7 @@ void CSceneJH::MakingFog()
 	if (-1 != idx)
 	{
 		XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
-		m_Particles->UseParticle(idx, XMFLOAT3(16800.f, -5070.f, 17500.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		m_Particles->UseParticle(idx, XMFLOAT3(16800.f * MAP_SCALE_SIZE, -5070.f, 17500.f * MAP_SCALE_SIZE), XMFLOAT3(0.0f, 0.0f, -1.0f));
 		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
 	}
 }
@@ -3342,7 +3342,7 @@ void CSceneJH::MakingRain()
 	if (-1 != idx)
 	{
 		XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
-		m_Particles->UseParticle(idx, XMFLOAT3(5000.f, 0.f, 17500.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		m_Particles->UseParticle(idx, XMFLOAT3(5000.f * MAP_SCALE_SIZE, 0.f, 17500.f * MAP_SCALE_SIZE), XMFLOAT3(0.0f, 0.0f, -1.0f));
 		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
 	}
 }
