@@ -319,6 +319,39 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 	return cColor;
 }
 
+
+/////////////////////////////////////////////////////////////////
+///// 
+struct VS_EFFECT_IN
+{
+	float3 position : POSITION;
+	float2 uv		: TEXCOORD;
+};
+struct VS_EFFECT_OUT
+{
+	float4 position : SV_POSITION;
+	float2 uv		: TEXCOORD;
+};
+
+VS_EFFECT_OUT VSEffect(VS_EFFECT_IN input)
+{
+	VS_EFFECT_OUT outRes;
+	outRes.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	outRes.uv = input.uv;
+	return outRes;
+}
+
+float4 PSEffect(VS_EFFECT_OUT input) : SV_TARGET
+{ 
+	float4 cColor;
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtForest.Sample(gssClamp, input.uv);
+	}
+	return cColor;
+}
+
 /////////////////////////////////////////////////////////////////
 /////
 

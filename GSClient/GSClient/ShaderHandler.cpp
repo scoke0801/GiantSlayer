@@ -309,6 +309,22 @@ void CShaderHandler::CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 
 void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
+	CShader* pMinimapShader = new CShader();
+	if (m_UserID == ShaderHandlerUser::JH) {
+		pMinimapShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSEffect");
+		pMinimapShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSEffect");
+	}
+	else if (m_UserID == ShaderHandlerUser::YJ) {
+		//pMinimapShader->CreateVertexShader(L"Shaders/ShaderYJ.hlsl", "VSMinimap");
+		//pMinimapShader->CreatePixelShader(L"Shaders/ShaderYJ.hlsl", "PSMinimap");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		//pMinimapShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VSMinimap");
+		//pMinimapShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PSMinimap");
+	}
+	pMinimapShader->CreateInputLayout(ShaderTypes::Effect);
+	pMinimapShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("Effect", pMinimapShader);
 }
 
 void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
