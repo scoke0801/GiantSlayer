@@ -31,6 +31,7 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateTerrainWaterShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateEffectShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateStandardShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateSkinnedShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -304,6 +305,10 @@ void CShaderHandler::CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("RainParticle", pParticleShader);
 
+}
+
+void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
 }
 
 void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)

@@ -153,7 +153,7 @@ public:
 	CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT2& xmf2Time,
  UINT textureCode);
 	~CParticleTextureVertex() { } 
-};
+}; 
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -292,7 +292,6 @@ public:
 		ID3D12GraphicsCommandList* pd3dCommandList, int count);
 
 	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	 
 };
 
 class CFogParticleMesh : public CMesh
@@ -360,7 +359,21 @@ public:
 	void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
+//////////////////////////////////////////////////////////////////////////////
+//
+class CEffectMesh : public CMesh
+{ 
+public:
+	//직사각형의 가로, 세로 길이를 지정하여 직사각형 메쉬를 생성한다. 
+	CEffectMesh(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		const XMFLOAT3& pos, const XMFLOAT3& shift, const XMFLOAT3& size);
 
+	virtual ~CEffectMesh(); 
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//
 class CTexParticleMesh : public CMesh
 {
 private:

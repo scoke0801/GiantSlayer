@@ -15,6 +15,7 @@ enum class ShaderTypes
 	Standard,
 	Skinned,
 	Particle,
+	Effect,
 	TexParticle,
 	TerrainWater,  
 	Shadow,

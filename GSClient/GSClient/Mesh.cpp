@@ -10,6 +10,12 @@ CParticleVertex::CParticleVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& x
 	m_xmf2Time = xmf2Time;
 }
 
+CEffectVertex::CEffectVertex(const XMFLOAT3& xmf3Position, const XMFLOAT2& xmf2TexCoord, UINT frameCount)
+{
+	m_xmf3Position = xmf3Position;
+	m_xmf2TexCoord = xmf2TexCoord;
+	m_nFrameCount = frameCount;
+}
 CParticleTextureVertex::CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT2& xmf2Time,
  UINT textureCode)
 {
