@@ -230,6 +230,14 @@ void PacketProcessor::ProcessPacket(CLIENT& client, unsigned char* p_buf)
 	{ 
 		P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(p_buf);
 		client.m_RoomIndex = p_login.roomIndex; 
+		if (client.m_RoomIndex == -1) {
+			for (int i = 0; i < MAX_PLAYER; ++i) {
+				if (m_Rooms[i].CanEnter()) {
+					client.m_RoomIndex = i;
+					break;
+				}
+			}
+		}
 		m_Rooms[client.m_RoomIndex].EnterPlayer(client);
 	} 
 	// break; ¾ÈÇØ¿ä

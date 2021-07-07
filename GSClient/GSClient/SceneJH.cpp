@@ -1285,7 +1285,7 @@ void CSceneJH::LoginToServer()
 	P_C2S_LOGIN p_login;
 	p_login.size = sizeof(p_login);
 	p_login.type = PACKET_PROTOCOL::C2S_LOGIN; 
-	p_login.roomIndex = 0;
+	p_login.roomIndex = -1;
 	strcpy_s(p_login.name, CFramework::GetInstance().GetPlayerName().c_str());
 	 
 	SendPacket(&p_login); 

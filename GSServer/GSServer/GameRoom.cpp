@@ -766,6 +766,16 @@ void CGameRoom::EnterPlayer(CLIENT& client)
 	}
 }
 
+bool CGameRoom::CanEnter()
+{
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) { 
+			return true;
+		}
+	}
+	return false;
+}
+
 void CGameRoom::InitPrevUserData(int c_id)
 { 
 	m_Clients[m_IdIndexMatcher[c_id]]->m_prev_size = 0;
