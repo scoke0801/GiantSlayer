@@ -1614,16 +1614,27 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 			case PlayerWeaponType::Sword:
 				break;
 			case PlayerWeaponType::Bow:
-				if (m_Player->pause) {
+				if (m_Player->ShotAble()) {
 					ShotPlayerArrow();
 					m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
-					m_Player->pullString = false;
-					m_Player->pause = false;
-					if (m_CurrentCamera->GetTarget() == m_Player) {
-						m_CurrentCamera->AimOn(false);
-					}
-					/*m_Player->BowAimOff();*/
 				}
+				else {
+					m_Player->IncreaseAttackWaitingTime(0);
+					m_Player->SetAnimationSet(IDLE);
+				}
+				m_Player->pullString = false;
+				m_Player->pause = false;
+
+				//if (m_Player->pause) {
+				//	ShotPlayerArrow();
+				//	m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+				//	m_Player->pullString = false;
+				//	m_Player->pause = false;
+				//	if (m_CurrentCamera->GetTarget() == m_Player) {
+				//		m_CurrentCamera->AimOn(false);
+				//	}
+				//	/*m_Player->BowAimOff();*/
+				//}
 				break;
 			}
 		}
@@ -3252,6 +3263,8 @@ void CSceneTH::ShotPlayerArrow()
 				pArrow->SetUseable(false);
 				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,150,0 });
 				pArrow->SetPosition(pos);
+				pArrow->m_startPos = pos;
+				//pArrow->Rotate();
 				pArrow->SetTargetVector(Vector3::Multifly(m_Player->GetLook(), 1));
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), -1));

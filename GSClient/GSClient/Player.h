@@ -104,4 +104,6 @@ public:
 
 	void PullString();
 	void ReleaseString();
+
+	bool ShotAble();
 };

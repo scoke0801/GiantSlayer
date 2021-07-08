@@ -86,8 +86,12 @@ void CCamera::UpdateAimMode(const XMFLOAT3& xmf3LookAt)
 {
 	if (m_TargetPlayer == nullptr) return;
 
-	if(GetPosition3f().z <= m_TargetPlayer->GetPosition().z)
-		m_xmf3Position = Vector3::Add(GetPosition3f(), {0, 0, 5.0f});
+
+	m_xmf3Position = Vector3::Add(m_TargetPlayer->GetPosition(), { -15.0f, 200.0f, -2.0f });
+
+	//if(GetPosition3f().z <= m_TargetPlayer->GetPosition().z)
+	//	m_xmf3Position = Vector3::Add(GetPosition3f(), {-15.0f, 200.0f, -2.0f});
+
 }
 
 void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)

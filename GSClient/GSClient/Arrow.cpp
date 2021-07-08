@@ -30,6 +30,7 @@ void CArrow::Update(float fTimeElapsed)
 {
 	if (false == m_isDrawbale) {
 		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ARROW_SPEED * fTimeElapsed)));
+
 		Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 360.0f * fTimeElapsed);
 		if (m_ConnectedParticle != nullptr) {
 			m_ConnectedParticle->SetPosition(m_xmf3Position);
@@ -40,6 +41,21 @@ void CArrow::Update(float fTimeElapsed)
 			m_isDrawbale = true;
 			//m_ConnectedParticle = nullptr;
 		}
+
+		if (m_xmf3Position.y >= m_startPos.y + 50) {
+			falldown = true;
+		}
+
+		if (!falldown) {
+			m_xmf3Position.y += 3.0f;
+		}
+		else {
+
+		}
+
+		m_xmf3Position = Vector3::Add(m_xmf3Position, { 0.0f, -1.0f, 0.0f });
+		m_xmf3Velocity.z += AIR_RESISTANCE;
+		//Rotate(XMFLOAT3(0.0f, 1.0f, 0.0f), -90.0f * fTimeElapsed);
 	}
 	else return; 
 }
@@ -48,7 +64,7 @@ void CArrow::SetTargetPosition(const XMFLOAT3& targetPos)
 {	
 	XMFLOAT3 dirVector = Vector3::Normalize(Vector3::Subtract(targetPos, m_xmf3Position));
 
-	m_xmf3TargetPosition = targetPos;  
+	m_xmf3TargetPosition = targetPos;
 	m_xmf3Velocity = dirVector; 
 }
 

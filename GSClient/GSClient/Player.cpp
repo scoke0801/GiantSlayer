@@ -83,7 +83,6 @@ void CPlayer::Update(float fTimeElapsed)
 		else
 			SetAnimationSet(RUN);
 	}
-
 	
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
@@ -131,9 +130,9 @@ void CPlayer::UpdateCamera()
 		if (pullString)
 		{
 			m_Camera->UpdateAimMode(m_xmf3Position);
+			m_Camera->LookAt(m_Camera->GetPosition3f(), { m_Camera->GetPosition3f().x, m_Camera->GetPosition3f().y, m_xmf3Position.z }, GetUp());
 			//m_Camera->Update(m_xmf3Position);
-			//m_Camera->Update( Vector3::Add(m_Camera->GetPosition3f(), ) );
-			m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
+			//m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
 			m_Camera->UpdateViewMatrix();
 		}
 		else
@@ -190,7 +189,7 @@ void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 	}
 	
 }
- 
+
 void CPlayer::SetVelocity(XMFLOAT3 dir)
 {
 	if (false == IsCanAttack()) {
@@ -317,4 +316,12 @@ void CPlayer::ReleaseString()
 	//SetCanAttack(true);
 	//
 	//
+}
+
+bool CPlayer::ShotAble()
+{
+	if (pullString && m_AttackWaitingTime < m_AttackAnimPauseTime)
+		return true;
+
+	return false;
 }

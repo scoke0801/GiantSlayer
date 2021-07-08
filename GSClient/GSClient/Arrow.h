@@ -27,5 +27,9 @@ private:
 
 	float m_ElapsedTime = 0.0f; 
 	ParticleObject* m_ConnectedParticle = nullptr;
+
+public:
+	XMFLOAT3 m_startPos;
+	bool falldown = false;
 };
 
