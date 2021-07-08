@@ -110,7 +110,7 @@ protected: // 렌더링 관련 변수
 
 	CCamera*			m_Camera = nullptr;
 
-	bool				m_isDrawbale = true;
+	bool				m_isDrawable = true;
 protected:	// 객체 관련 속성 변수
 	int					m_HP = 0;
 	int					m_SP = 0;
@@ -243,8 +243,8 @@ public:
 	void SetSize(const XMFLOAT3& size) { m_xmf3Size = size; }
 	XMFLOAT3 GetSize()const { return m_xmf3Size; }
 	 
-	virtual void SetDrawable(bool drawable) { m_isDrawbale = drawable; }
-	bool IsDrawable() const { return m_isDrawbale; }
+	virtual void SetDrawable(bool drawable) { m_isDrawable = drawable; }
+	bool IsDrawable() const { return m_isDrawable; }
 
 	void SetHegithFromTerrain(float height) { m_HeightFromTerrain = height; }
 	float GetHeightFromTerrain() const { return m_HeightFromTerrain; }

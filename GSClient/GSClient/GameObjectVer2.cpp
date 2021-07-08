@@ -396,7 +396,7 @@ void CGameObjectVer2::UpdateColliders()
 
 void CGameObjectVer2::Update(float fTimeElapsed)
 {
-	//if (!m_isDrawbale) return;
+	//if (!m_isDrawable) return;
 	//static float MaxVelocityXZ = 120.0f;
 	//static float MaxVelocityY = 120.0f;
 	//static float Friction = 50.0f;

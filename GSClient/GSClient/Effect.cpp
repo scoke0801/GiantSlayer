@@ -2,14 +2,19 @@
 #include "Effect.h"
 #include "Shader.h"
 #include "Player.h"
-
-CEffect::CEffect(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float x, float z)
-{ 
-	CTexturedRectMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, x, z, 0.0f);
+ 
+CEffect::CEffect(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	CPlayer* targetPlayer, const XMFLOAT3& size)
+{
+	CTexturedRectMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, size.x, size.y, size.z);
 	SetMesh(pMesh);
 	SetShader(CShaderHandler::GetInstance().GetData("Effect"));
-	m_isDrawbale = false; 
+	m_isDrawable = false;
 	m_xmf3Size = { 1,1,1 };
+	m_Targetplayer = targetPlayer;
+	m_ElapsedTime = 0.0f;
+	m_LifeTime = 0.0f; 
+	m_EffectType = EffectTypes::None;
 }
 
 CEffect::~CEffect()
@@ -18,11 +23,35 @@ CEffect::~CEffect()
 
 void CEffect::Update(float elapsedTime)
 {
+	if (false == m_isDrawable) {
+		return;
+	}
+	XMFLOAT3 playerLook = m_Targetplayer->GetLook();
+	XMFLOAT3 playerPos = m_Targetplayer->GetPosition();
+	playerPos.y = m_xmf3Position.y;
+
+	XMFLOAT3 targetVec = Vector3::Subtract(m_xmf3Position, playerPos);
+	targetVec = Vector3::Normalize(targetVec);
+
+	XMFLOAT3 toMovePosition = Vector3::Subtract(m_Targetplayer->GetPosition(),
+		Vector3::Multifly(targetVec, 3000.0f));
+
+	toMovePosition.y = m_xmf3Position.y;
+
+	Vector3::Subtract(toMovePosition, m_xmf3Position);
+
+	LookAt(m_xmf3Position, toMovePosition, { 0,1,0 });
+
+	m_ElapsedTime += elapsedTime;
+	if (m_ElapsedTime > m_LifeTime) {
+		m_ElapsedTime = 0.0f;
+		m_isDrawable = false;
+	}
 }
 
 void CEffect::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	if (!m_isDrawbale) return;
+	if (!m_isDrawable) return;
 	OnPrepareRender();
 
 	if (m_pShader)
@@ -36,21 +65,62 @@ void CEffect::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 	}
 }
 
-void CEffect::LookPlayer(CPlayer* player)
+void CEffect::SetEffectType(EffectTypes effectType)
 {
-	XMFLOAT3 playerLook = player->GetLook();
-	XMFLOAT3 playerPos = player->GetPosition();
-	playerPos.y = m_xmf3Position.y;
+	switch (effectType)
+	{
+	case EffectTypes::None:
+		break;
+	case EffectTypes::BossAttacked:
+		SetTextureIndex(0x01);
+		m_LifeTime = 0.16f * 15;
+		break;
+	case EffectTypes::Thunder:
+		SetTextureIndex(0x02);
+		m_LifeTime = 0.16f * 12;
+		break;
+	default:
+		break;
+	}
+	m_EffectType = effectType;
+}
 
-	XMFLOAT3 targetVec = Vector3::Subtract(m_xmf3Position, playerPos);
-	targetVec = Vector3::Normalize(targetVec);
+void CEffectHandler::Update(float elapsedTime)
+{
+	for (auto& pEffect : m_Effects) {
+		pEffect->Update(elapsedTime);
+	}
+}
 
-	XMFLOAT3 toMovePosition = Vector3::Subtract(player->GetPosition(),
-		Vector3::Multifly(targetVec, 3000.0f));
+void CEffectHandler::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	for (auto& pEffect : m_Effects) {
+		pEffect->Draw(pd3dCommandList, pCamera);
+	}
+}
 
-	toMovePosition.y = m_xmf3Position.y;
-	 
-	Vector3::Subtract(toMovePosition, m_xmf3Position);
-	  
-	LookAt(m_xmf3Position, toMovePosition, { 0,1,0 });
+void CEffectHandler::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CPlayer* targetPlayer)
+{
+	for (int i = 0; i < 5; ++i) {
+		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 192.0f, 1500.0f, 0.0f });
+		pTempEffect->SetEffectType(EffectTypes::Thunder);
+		m_Effects.emplace_back(std::move(pTempEffect));
+	}
+
+	for (int i = 0; i < 5; ++i) {
+		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 192.0f, 0.0f, 192.0f });
+		pTempEffect->SetEffectType(EffectTypes::BossAttacked);
+		m_Effects.emplace_back(std::move(pTempEffect));
+	}
+}
+
+CEffect* CEffectHandler::RecycleEffect(EffectTypes effectType)
+{
+	for (auto& pEffect : m_Effects) {
+		if (pEffect->IsDrawable() == false &&
+			pEffect->GetEffectType() == effectType) {
+			return pEffect;
+		}
+	}
+	return nullptr;
 }

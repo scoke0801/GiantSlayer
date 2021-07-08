@@ -42,7 +42,6 @@ enum class OBJECT_LAYER : int {
 	MonsterArrow,
 	Billboard,
 	Fog,
-	Effect,
 	Count,
 };
 

@@ -5,7 +5,7 @@
 
 void CArrow::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	if (true == m_isDrawbale) return;
+	if (true == m_isDrawable) return;
 	OnPrepareRender();
 
 	if (m_pShader)
@@ -28,7 +28,7 @@ void CArrow::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 
 void CArrow::Update(float fTimeElapsed)
 {
-	if (false == m_isDrawbale) {
+	if (false == m_isDrawable) {
 		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ARROW_SPEED * fTimeElapsed)));
 		Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 360.0f * fTimeElapsed);
 		if (m_ConnectedParticle != nullptr) {
@@ -37,7 +37,7 @@ void CArrow::Update(float fTimeElapsed)
 		m_ElapsedTime += fTimeElapsed;
 		if (m_ElapsedTime > ARROW_LIFE_TIME) {
 			m_ElapsedTime = 0.0f;
-			m_isDrawbale = true;
+			m_isDrawable = true;
 			//m_ConnectedParticle = nullptr;
 		}
 	}
@@ -61,7 +61,7 @@ void CArrow::SetTargetVector(const XMFLOAT3& playerLookAt)
 }
 void CArrow::SetDrawable(bool drawable)
 {  
-	m_isDrawbale = drawable; 
+	m_isDrawable = drawable; 
 	if (drawable) {
 		if (m_ConnectedParticle != nullptr) {
 			m_ConnectedParticle->SetDrawable(false);

@@ -271,13 +271,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pfbxTestObject->SetPosition({ 1000,  150, 1000 });
 	pfbxTestObject->SetTextureIndex(0x01);*/
 
-	float height = 1500.0f;
-	pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, 192, height);
-	pTempEffect->SetPosition({ 1000, height * 0.5f, 1000 });
-	pTempEffect->SetTextureIndex(0x02); 
-	pTempEffect->SetDrawable(true);
-	
-	m_ObjectLayers[(int)OBJECT_LAYER::Effect].push_back(pTempEffect);
+	m_EffectsHandler = new CEffectHandler();
+	m_EffectsHandler->Init(pd3dDevice, pd3dCommandList, m_Player);
 
 	auto end_t = chrono::high_resolution_clock::now();
 
@@ -463,6 +458,12 @@ void CSceneJH::Update(float elapsedTime)
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) { 
 		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
+	m_EffectsHandler->Update(elapsedTime);
+	auto res1 = m_EffectsHandler->RecycleEffect(EffectTypes::Thunder);
+	if (res1 != nullptr) {
+		res1->SetPosition({ 1000.0f, 200.0f, 1000.0f });
+		res1->SetDrawable(true);
+	}
 	m_Particles->Update(elapsedTime); 
 
 	m_HelpTextUI->Update(elapsedTime);
@@ -480,8 +481,7 @@ void CSceneJH::Update(float elapsedTime)
 			m_Player->FixCollision(pObstacle);
 			//cout << "충돌 : 플레이어 - 장애물\n";
 		}
-	}
-	pTempEffect->LookPlayer(m_Player);
+	} 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		if (pEnemy->CollisionCheck(m_Player)) {
 			// 공격 상태일 때만 체력이 닳는것이 맞을까...
@@ -818,7 +818,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	//pfbxTestObject->Draw(pd3dCommandList, m_CurrentCamera);
 
 	m_Particles->Draw(pd3dCommandList, m_CurrentCamera); 
-
+	m_EffectsHandler->Draw(pd3dCommandList, m_CurrentCamera);
 	//for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 	//	//if (i == (int)OBJECT_LAYER::Enemy) {
 	//	//	continue;
