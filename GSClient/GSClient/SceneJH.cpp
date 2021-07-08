@@ -273,6 +273,26 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_EffectsHandler = new CEffectHandler();
 	m_EffectsHandler->Init(pd3dDevice, pd3dCommandList, m_Player);
+	 
+	auto resEffect = m_EffectsHandler->RecycleEffect(EffectTypes::Thunder);
+	if (resEffect != nullptr) {
+		resEffect->SetPosition({ 1000.0f, 0.0f, 1000.0f });
+		resEffect->FixPositionByTerrain(m_Terrain);
+		resEffect->SetDrawable(true);
+	}
+
+	auto resEffect2 = m_EffectsHandler->RecycleEffect(EffectTypes::BossAttacked);
+	if (resEffect2 != nullptr) {
+		resEffect2->SetPosition({ 500.0f, 0.0f, 500.0f });
+		resEffect2->FixPositionByTerrain(m_Terrain);
+		resEffect2->SetDrawable(true);
+	}
+	auto resEffect3 = m_EffectsHandler->RecycleEffect(EffectTypes::WarnningCircle);
+	if (resEffect3 != nullptr) {
+		resEffect3->SetPosition({ 500.0f, 103.0f, 500.0f });
+		resEffect3->FixPositionByTerrain(m_Terrain);
+		resEffect3->SetDrawable(true);
+	}
 
 	auto end_t = chrono::high_resolution_clock::now();
 
@@ -303,7 +323,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
 		"GreenTree",
 		"Bow",
-		"Effect_1", "Effect_2"
+		"Effect_1", "Effect_2", "Effect_3"
 	};
 
 	const wchar_t* address[] =
@@ -331,7 +351,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/DS_equipment_standard.dds",
 		L"resources/OBJ/GreenTree.dds",
 		L"resources/Textures/bow_texture.dds",
-		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",
+		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -388,7 +408,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"MeleeSkeleton_02_EquipAll",
 		"GreenTree",
 		"Bow",
-		"Effect_1", "Effect_2"
+		"Effect_1", "Effect_2", "Effect_3"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -459,11 +479,7 @@ void CSceneJH::Update(float elapsedTime)
 		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
 	m_EffectsHandler->Update(elapsedTime);
-	auto res1 = m_EffectsHandler->RecycleEffect(EffectTypes::Thunder);
-	if (res1 != nullptr) {
-		res1->SetPosition({ 1000.0f, 200.0f, 1000.0f });
-		res1->SetDrawable(true);
-	}
+	
 	m_Particles->Update(elapsedTime); 
 
 	m_HelpTextUI->Update(elapsedTime);

@@ -1,11 +1,13 @@
 #pragma once
 
 class CPlayer;
+class CTerrain;
 
 enum class EffectTypes {
 	None,
 	BossAttacked,
-	Thunder
+	Thunder,
+	WarnningCircle
 };
 class CEffect : public CGameObject
 {
@@ -17,7 +19,8 @@ public:
 public:
 	void Update(float elapsedTime) override;
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
-	 
+
+	void FixPositionByTerrain(CTerrain* pTerrain) override;
 public:
 	void SetEffectType(EffectTypes effectType);
 	EffectTypes GetEffectType() const { return m_EffectType; }

@@ -2,7 +2,8 @@
 #include "Effect.h"
 #include "Shader.h"
 #include "Player.h"
- 
+#include "Terrain.h"
+
 CEffect::CEffect(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
 	CPlayer* targetPlayer, const XMFLOAT3& size)
 {
@@ -15,6 +16,8 @@ CEffect::CEffect(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_ElapsedTime = 0.0f;
 	m_LifeTime = 0.0f; 
 	m_EffectType = EffectTypes::None;
+	
+	m_HeightFromTerrain = 3.0f + size.y * 0.5f;
 }
 
 CEffect::~CEffect()
@@ -45,7 +48,7 @@ void CEffect::Update(float elapsedTime)
 	m_ElapsedTime += elapsedTime;
 	if (m_ElapsedTime > m_LifeTime) {
 		m_ElapsedTime = 0.0f;
-		m_isDrawable = false;
+		//m_isDrawable = false;
 	}
 }
 
@@ -65,6 +68,12 @@ void CEffect::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 	}
 }
 
+void CEffect::FixPositionByTerrain(CTerrain* pTerrain)
+{
+	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_HeightFromTerrain;
+	SetPosition(m_xmf3Position);
+}
+
 void CEffect::SetEffectType(EffectTypes effectType)
 {
 	switch (effectType)
@@ -73,11 +82,15 @@ void CEffect::SetEffectType(EffectTypes effectType)
 		break;
 	case EffectTypes::BossAttacked:
 		SetTextureIndex(0x01);
-		m_LifeTime = 0.16f * 15;
+		m_LifeTime = 1.5f;
 		break;
 	case EffectTypes::Thunder:
 		SetTextureIndex(0x02);
-		m_LifeTime = 0.16f * 12;
+		m_LifeTime = 1.2f;
+		break;
+	case EffectTypes::WarnningCircle:
+		SetTextureIndex(0x04);
+		m_LifeTime = 1.2f;
 		break;
 	default:
 		break;
@@ -101,15 +114,21 @@ void CEffectHandler::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 void CEffectHandler::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CPlayer* targetPlayer)
 {
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 10; ++i) {
 		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 192.0f, 1500.0f, 0.0f });
 		pTempEffect->SetEffectType(EffectTypes::Thunder);
 		m_Effects.emplace_back(std::move(pTempEffect));
 	}
 
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 10; ++i) {
 		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 192.0f, 0.0f, 192.0f });
 		pTempEffect->SetEffectType(EffectTypes::BossAttacked);
+		m_Effects.emplace_back(std::move(pTempEffect));
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 300.0f, 0.0f, 300.0f });
+		pTempEffect->SetEffectType(EffectTypes::WarnningCircle);
 		m_Effects.emplace_back(std::move(pTempEffect));
 	}
 }
