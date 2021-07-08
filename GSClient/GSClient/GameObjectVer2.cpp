@@ -909,23 +909,6 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 		else if (!strcmp(pstrToken, "<TransformMatrix>:"))
 		{
 			nReads = (UINT)::fread(&pGameObject->m_xmf4x4ToParent, sizeof(float), 16, pInFile);
-			//cout << " TransformMatrix : ";
-			//cout << pGameObject->m_xmf4x4ToParent._11 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._12 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._13 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._14 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._21 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._22 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._23 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._24 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._31 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._32 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._33 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._34 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._41 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._42 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._43 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._44 << "\n";
 		}
 		else if (!strcmp(pstrToken, "<Mesh>:"))
 		{

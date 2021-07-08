@@ -37,6 +37,10 @@ void CPlayer::Update(float fTimeElapsed)
 			if (pullString && m_AttackWaitingTime < m_AttackAnimPauseTime) {
 				pause = true;
 			}
+
+			if (pullString && m_AttackWaitingTime < 1.2f) {
+				SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+			}
 		}
 
 		if (!pause) {
@@ -131,8 +135,11 @@ void CPlayer::UpdateCamera()
 		{
 			m_Camera->UpdateAimMode(m_xmf3Position);
 			m_Camera->LookAt(m_Camera->GetPosition3f(), { m_Camera->GetPosition3f().x, m_Camera->GetPosition3f().y, m_xmf3Position.z }, GetUp());
+			
 			//m_Camera->Update(m_xmf3Position);
 			//m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
+			//XMFLOAT3 dirVector = Vector3::Normalize(Vector3::Subtract(targetPos, m_xmf3Position));
+
 			m_Camera->UpdateViewMatrix();
 		}
 		else
@@ -287,7 +294,7 @@ void CPlayer::DisableSword()
 {
 	SetDrawableRecursively("sword1", false);
 	SetDrawableRecursively("bow_LeftHand", true);
-	SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
 }
 
 void CPlayer::DisableBow()

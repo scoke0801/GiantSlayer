@@ -33,7 +33,6 @@ protected:
 	float						m_FarWindowHeight = 0.0f;
 
 	bool						m_ViewDirty = true;
-	bool						m_BowAim = false;
 
 	// Cache View/Proj matrices.
 public:
@@ -170,8 +169,6 @@ public:
 	XMFLOAT3 CalcTargetRight();
 	XMFLOAT3 CalcTargetUp();
 	XMFLOAT3 CalcTargetLook();
-
-	void AimOn(bool aim) { m_BowAim = aim; }
 };
 
 struct VS_CB_LIGHT_CAMERA_INFO

@@ -1595,11 +1595,6 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 					break;
 				case PlayerWeaponType::Bow:
 					m_Player->Attack();
-
-					if (m_CurrentCamera->GetTarget() == m_Player) {
-						m_CurrentCamera->AimOn(true);
-					}
-
 					m_Player->pullString = true;
 					break;
 				}
@@ -1622,19 +1617,9 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 					m_Player->IncreaseAttackWaitingTime(0);
 					m_Player->SetAnimationSet(IDLE);
 				}
+				m_Player->SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
 				m_Player->pullString = false;
 				m_Player->pause = false;
-
-				//if (m_Player->pause) {
-				//	ShotPlayerArrow();
-				//	m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
-				//	m_Player->pullString = false;
-				//	m_Player->pause = false;
-				//	if (m_CurrentCamera->GetTarget() == m_Player) {
-				//		m_CurrentCamera->AimOn(false);
-				//	}
-				//	/*m_Player->BowAimOff();*/
-				//}
 				break;
 			}
 		}
@@ -3188,7 +3173,6 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
-	m_Players[0]->DisableBow();
 	m_Players[0]->AnimationChange(PlayerWeaponType::Sword);
 	m_Player = m_Players[0];
 
@@ -3196,6 +3180,7 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 	m_Players[0]->Scale(200, 200, 200);
 	m_Players[0]->SetShadertoAll();
+	m_Players[0]->DisableBow();
 
 	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 	m_PlayerCameras[0]->SetTarget(m_Players[0]);
@@ -3237,6 +3222,7 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
 		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
+		m_Players[i]->DisableBow();
 	}
 }
 
@@ -3261,7 +3247,7 @@ void CSceneTH::ShotPlayerArrow()
 			if (-1 != idx) {
 				cout << "파티클 인덱스 " << idx << " 화살 인덱스 : " << i << " \n";
 				pArrow->SetUseable(false);
-				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,150,0 });
+				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,180,0 });
 				pArrow->SetPosition(pos);
 				pArrow->m_startPos = pos;
 				//pArrow->Rotate();

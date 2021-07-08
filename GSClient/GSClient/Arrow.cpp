@@ -55,7 +55,6 @@ void CArrow::Update(float fTimeElapsed)
 
 		m_xmf3Position = Vector3::Add(m_xmf3Position, { 0.0f, -1.0f, 0.0f });
 		m_xmf3Velocity.z += AIR_RESISTANCE;
-		//Rotate(XMFLOAT3(0.0f, 1.0f, 0.0f), -90.0f * fTimeElapsed);
 	}
 	else return; 
 }

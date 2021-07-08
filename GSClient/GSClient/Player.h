@@ -95,13 +95,6 @@ public:
 	void DisableSword();
 	void DisableBow();
 
-	/*void BowAimOn() { 
-		m_Camera->SetOffset(Vector3::Add(m_Camera->GetOffset(), { 0, 0, 3 })); 
-	};
-	void BowAimOff() { 
-		m_Camera->SetOffset(Vector3::Add(m_Camera->GetOffset(), { 0, 0, -3 })); 
-	};*/
-
 	void PullString();
 	void ReleaseString();
 
