@@ -13,6 +13,7 @@ class CLightCamera;
 class CEnemy;
 class CFbxObject2;
 class CBoss;
+class CEffect;
 
 class CSceneJH : public CScene
 {
@@ -113,6 +114,10 @@ private: // for server mouse input process
 
 private:
 	CSoundManager*				m_SoundManager;
+
+////////////////////////////////////////////////////////
+	CEffect*					pTempEffect;
+///////////////////////////////////////////////////////
 public:
 	CSceneJH();
 	~CSceneJH(); 

@@ -323,7 +323,7 @@ void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		//pMinimapShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PSMinimap");
 	}
 	pMinimapShader->CreateInputLayout(ShaderTypes::Effect);
-	pMinimapShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pMinimapShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, true, true);
 	m_Data.emplace("Effect", pMinimapShader);
 }
 

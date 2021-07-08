@@ -85,6 +85,7 @@ public:
 	void DeleteObject(CGameObject* pObject, int layerIdx);
 
 	void EnterPlayer(CLIENT& client);
+	bool CanEnter();
 
 	bool IsActive() { return m_IsActive; }
 private:

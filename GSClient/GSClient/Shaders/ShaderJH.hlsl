@@ -109,10 +109,12 @@ Texture2D gtxtMeleeSkeleton_02_EquipAll: register(t46);
 
 Texture2D gtxtGreenTree		: register(t47);
 Texture2D gtxtBow			: register(t48);
+Texture2D gtxtEffect_1		: register(t49);
+Texture2D gtxtEffect_2		: register(t50);
 
-Texture2D gtxtMap		   : register(t49);
-Texture2D gtxtMirror	   : register(t50);
-Texture2D gtxtShadowMap	   : register(t51);
+Texture2D gtxtMap			: register(t51);
+Texture2D gtxtMirror		: register(t52);
+Texture2D gtxtShadowMap		: register(t53);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -338,6 +340,14 @@ VS_EFFECT_OUT VSEffect(VS_EFFECT_IN input)
 	VS_EFFECT_OUT outRes;
 	outRes.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
 	outRes.uv = input.uv;
+	
+	float frameCount = 0;
+	if (gnTexturesMask & 0x01) { frameCount = 15; }
+	if (gnTexturesMask & 0x02) { frameCount = 12; }
+	 
+	float newTime = fmod(gfTime * 10.0f, frameCount); 
+	outRes.uv.x /= frameCount;
+	outRes.uv.x += (1.0f / frameCount) * (int)newTime;
 	return outRes;
 }
 
@@ -347,7 +357,11 @@ float4 PSEffect(VS_EFFECT_OUT input) : SV_TARGET
 
 	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtForest.Sample(gssClamp, input.uv);
+		cColor = gtxtEffect_1.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtEffect_2.Sample(gssClamp, input.uv);
 	}
 	return cColor;
 }

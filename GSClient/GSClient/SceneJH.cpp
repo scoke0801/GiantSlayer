@@ -20,6 +20,7 @@
 #include "FbxObject2.h"
 #include "FbxLoader.h"
 #include "Boss.h"
+#include "Effect.h"
 #define ROOT_PARAMETER_OBJECT				0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA		1
 #define ROOT_PARAMETER_CAMERA				2
@@ -270,6 +271,13 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pfbxTestObject->SetPosition({ 1000,  150, 1000 });
 	pfbxTestObject->SetTextureIndex(0x01);*/
 
+	float height = 1500.0f;
+	pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, 192, height);
+	pTempEffect->SetPosition({ 1000, height * 0.5f, 1000 });
+	pTempEffect->SetTextureIndex(0x02); 
+	pTempEffect->SetDrawable(true);
+	m_ObjectLayers[(int)OBJECT_LAYER::Effect].push_back(pTempEffect);
+
 	auto end_t = chrono::high_resolution_clock::now();
 
 	auto elasepsed_t = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start_t);
@@ -298,7 +306,8 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
 		"GreenTree",
-		"Bow"
+		"Bow",
+		"Effect_1", "Effect_2"
 	};
 
 	const wchar_t* address[] =
@@ -326,6 +335,7 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/DS_equipment_standard.dds",
 		L"resources/OBJ/GreenTree.dds",
 		L"resources/Textures/bow_texture.dds",
+		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -381,7 +391,8 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
 		"MeleeSkeleton_02_EquipAll",
 		"GreenTree",
-		"Bow"
+		"Bow",
+		"Effect_1", "Effect_2"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -890,7 +901,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	m_pcbMappedSceneFrameData->m_PlayerWeapon = m_Player->GetSelectedWeapon();
 	auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
 		chrono::high_resolution_clock::now() - m_CreatedTime);
-	m_pcbMappedSceneFrameData->m_Time = timeElapsed.count() * 0.001f;
+	m_pcbMappedSceneFrameData->m_Time = timeElapsed.count() * 0.001f; 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress(); 
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
 
