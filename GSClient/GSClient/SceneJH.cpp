@@ -272,27 +272,11 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pfbxTestObject->SetTextureIndex(0x01);*/
 
 	m_EffectsHandler = new CEffectHandler();
-	m_EffectsHandler->Init(pd3dDevice, pd3dCommandList, m_Player);
-	 
-	auto resEffect = m_EffectsHandler->RecycleEffect(EffectTypes::Thunder);
-	if (resEffect != nullptr) {
-		resEffect->SetPosition({ 1000.0f, 0.0f, 1000.0f });
-		resEffect->FixPositionByTerrain(m_Terrain);
-		resEffect->SetDrawable(true);
-	}
+	m_EffectsHandler->Init(pd3dDevice, pd3dCommandList, m_Player); 
 
-	auto resEffect2 = m_EffectsHandler->RecycleEffect(EffectTypes::BossAttacked);
-	if (resEffect2 != nullptr) {
-		resEffect2->SetPosition({ 500.0f, 0.0f, 500.0f });
-		resEffect2->FixPositionByTerrain(m_Terrain);
-		resEffect2->SetDrawable(true);
-	}
-	auto resEffect3 = m_EffectsHandler->RecycleEffect(EffectTypes::WarnningCircle);
-	if (resEffect3 != nullptr) {
-		resEffect3->SetPosition({ 500.0f, 103.0f, 500.0f });
-		resEffect3->FixPositionByTerrain(m_Terrain);
-		resEffect3->SetDrawable(true);
-	}
+	UseEffects((int)EffectTypes::Thunder, { 1000.0f, 0.0f, 1000.0f });
+	UseEffects((int)EffectTypes::BossAttacked, { 500.0f, 0.0f, 500.0f });
+	UseEffects((int)EffectTypes::WarnningCircle, { 500.0f, 0.0f, 500.0f }); 
 
 	auto end_t = chrono::high_resolution_clock::now();
 
@@ -3374,6 +3358,16 @@ void CSceneJH::MakingRain()
 		m_Particles->UseParticle(idx, XMFLOAT3(5000.f * MAP_SCALE_SIZE, 0.f, 17500.f * MAP_SCALE_SIZE), XMFLOAT3(0.0f, 0.0f, -1.0f));
 		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
 	}
+}
+
+void CSceneJH::UseEffects(int effectType, const XMFLOAT3& xmf3Position)
+{
+	auto effect = m_EffectsHandler->RecycleEffect((EffectTypes)effectType);
+	if (effect != nullptr) {
+		effect->SetPosition(xmf3Position);
+		effect->FixPositionByTerrain(m_Terrain);
+		effect->SetDrawable(true);
+	} 
 }
 
 void CSceneJH::SendMouseInputPacket()

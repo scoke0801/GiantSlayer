@@ -212,6 +212,7 @@ private:
 	void MakingFog();
 	void MakingRain();
 
+	void UseEffects(int effectType, const XMFLOAT3& xmf3Position);
 private:
 	void SendMouseInputPacket();
 	void RecvMouseProcessPacket();
