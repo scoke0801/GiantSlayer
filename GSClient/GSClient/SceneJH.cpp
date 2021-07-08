@@ -276,6 +276,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pTempEffect->SetPosition({ 1000, height * 0.5f, 1000 });
 	pTempEffect->SetTextureIndex(0x02); 
 	pTempEffect->SetDrawable(true);
+	
 	m_ObjectLayers[(int)OBJECT_LAYER::Effect].push_back(pTempEffect);
 
 	auto end_t = chrono::high_resolution_clock::now();
@@ -471,15 +472,16 @@ void CSceneJH::Update(float elapsedTime)
 		player->Update(elapsedTime);
 		player->UpdateColliders();
 		player->FixPositionByTerrain(m_Terrain);
-		player->FixCameraByTerrain(m_Terrain);
+		player->FixCameraByTerrain(m_Terrain); 
 	}
+
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
 			//cout << "충돌 : 플레이어 - 장애물\n";
 		}
 	}
-
+	pTempEffect->LookPlayer(m_Player);
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		if (pEnemy->CollisionCheck(m_Player)) {
 			// 공격 상태일 때만 체력이 닳는것이 맞을까...

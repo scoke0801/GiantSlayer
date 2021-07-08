@@ -348,6 +348,7 @@ VS_EFFECT_OUT VSEffect(VS_EFFECT_IN input)
 	float newTime = fmod(gfTime * 10.0f, frameCount); 
 	outRes.uv.x /= frameCount;
 	outRes.uv.x += (1.0f / frameCount) * (int)newTime;
+
 	return outRes;
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+class CPlayer;
+
 class CEffect : public CGameObject
 {
 public:
@@ -9,5 +11,7 @@ public:
 public:
 	void Update(float elapsedTime) override;
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+
+	void LookPlayer(CPlayer* player);
 };
 
