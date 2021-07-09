@@ -44,6 +44,7 @@ private:
 	bool m_IsCanAttack = true;
 
 	float m_AttackedDelay = 0.0f;
+	float m_StringPullTime = 0.0f;
 
 	CMesh* m_SpareBoundingBox;
 	Collider* m_SpareCollisionBox;
@@ -82,6 +83,7 @@ public:
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
 
 	float GetAttackWaitTime() const { return m_AttackWaitingTime; }
+	float GetStringPullTime() const { return m_StringPullTime; }
 
 	void Jump();
 

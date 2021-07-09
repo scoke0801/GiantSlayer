@@ -3250,7 +3250,7 @@ void CSceneTH::ShotPlayerArrow()
 				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,180,0 });
 				pArrow->SetPosition(pos);
 				pArrow->m_startPos = pos;
-				//pArrow->Rotate();
+				pArrow->SetStringPower(m_Player->GetStringPullTime());
 				pArrow->SetTargetVector(Vector3::Multifly(m_Player->GetLook(), 1));
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), -1));

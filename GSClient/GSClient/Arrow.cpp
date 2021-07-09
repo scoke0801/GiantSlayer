@@ -29,9 +29,11 @@ void CArrow::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 void CArrow::Update(float fTimeElapsed)
 {
 	if (false == m_isDrawbale) {
-		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ARROW_SPEED * fTimeElapsed)));
+		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, TEST_ARROW_SPEED * fTimeElapsed)));
 
-		Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 360.0f * fTimeElapsed);
+		//cout << m_xmf3Velocity.x << " " << m_xmf3Velocity.y << " " << m_xmf3Velocity.z << endl;
+
+		//Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 360.0f * fTimeElapsed);
 		if (m_ConnectedParticle != nullptr) {
 			m_ConnectedParticle->SetPosition(m_xmf3Position);
 		}
@@ -42,19 +44,20 @@ void CArrow::Update(float fTimeElapsed)
 			//m_ConnectedParticle = nullptr;
 		}
 
+		// 
 		if (m_xmf3Position.y >= m_startPos.y + 50) {
 			falldown = true;
 		}
-
 		if (!falldown) {
-			m_xmf3Position.y += 3.0f;
+			m_xmf3Position = Vector3::Add(m_xmf3Position, { 0.0f, 5.0f, 0.0f });
+			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), -30.0f * fTimeElapsed);
 		}
 		else {
-
+			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), 30.0f * fTimeElapsed);
 		}
 
-		m_xmf3Position = Vector3::Add(m_xmf3Position, { 0.0f, -1.0f, 0.0f });
-		m_xmf3Velocity.z += AIR_RESISTANCE;
+		m_xmf3Velocity = Vector3::Subtract(m_xmf3Velocity, Vector3::Multifly(m_xmf3Velocity, AIR_RESISTANCE));
+		m_xmf3Position = Vector3::Subtract(m_xmf3Position, { 0.0f, GRAVITY, 0.0f });
 	}
 	else return; 
 }
@@ -71,7 +74,8 @@ void CArrow::SetTargetVector(const XMFLOAT3& playerLookAt)
 {
 	XMFLOAT3 dirVector = Vector3::Normalize(playerLookAt);
 	XMFLOAT3 targetPos = Vector3::Multifly(dirVector, 150000);
-	m_xmf3Velocity = dirVector;
+	//m_xmf3Velocity = dirVector;
+	m_xmf3Velocity = Vector3::Multifly(dirVector, stringPower);
 	LookAt(m_xmf3Position, targetPos, XMFLOAT3(0, 1, 0));
 }
 void CArrow::SetDrawable(bool drawable)

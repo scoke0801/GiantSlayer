@@ -38,6 +38,11 @@ void CPlayer::Update(float fTimeElapsed)
 				pause = true;
 			}
 
+			if (pullString) {
+				m_StringPullTime += fTimeElapsed;
+				m_SP -= fTimeElapsed;
+			}
+
 			if (pullString && m_AttackWaitingTime < 1.2f) {
 				SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
 			}
@@ -71,6 +76,7 @@ void CPlayer::Update(float fTimeElapsed)
 			if (GetWeapon() == PlayerWeaponType::Bow) {
 				pause = false;
 				pausedTime = 0;
+				m_StringPullTime = 0;
 			}
 		}
 	}
@@ -134,7 +140,8 @@ void CPlayer::UpdateCamera()
 		if (pullString)
 		{
 			m_Camera->UpdateAimMode(m_xmf3Position);
-			m_Camera->LookAt(m_Camera->GetPosition3f(), { m_Camera->GetPosition3f().x, m_Camera->GetPosition3f().y, m_xmf3Position.z }, GetUp());
+			auto lookVec = GetLook();
+			m_Camera->LookAt(m_Camera->GetPosition3f(), Vector3::Multifly(lookVec, 15000.0f) , GetUp());
 			
 			//m_Camera->Update(m_xmf3Position);
 			//m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
