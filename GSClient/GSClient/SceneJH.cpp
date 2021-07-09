@@ -266,7 +266,7 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_EffectsHandler = new CEffectHandler();
 	m_EffectsHandler->Init(pd3dDevice, pd3dCommandList, m_Player); 
 
-	//UseEffects((int)EffectTypes::Thunder, { 1000.0f, 0.0f, 1000.0f });
+	//UseEffects((int)EffectTypes::Thunder, { 1000.0f, 0.0f, 1000.0f }); 
 	//UseEffects((int)EffectTypes::BossAttacked, { 500.0f, 0.0f, 500.0f });
 	//UseEffects((int)EffectTypes::WarnningCircle, { 500.0f, 0.0f, 500.0f }); 
 
@@ -2086,7 +2086,7 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		XMFLOAT3 scale = { 120.0f, 120.0f, 120.0f };
 		m_Boss = new CBoss(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 		
-		//x: 25592.2 y : -6962.67 z : 25934.3
+		//x : 25592.2 y : -6962.67 z : 25934.3
 		//z : 21800.0 14533
 		//z : 29700.0 19800
 		//x : 29700.0 19800

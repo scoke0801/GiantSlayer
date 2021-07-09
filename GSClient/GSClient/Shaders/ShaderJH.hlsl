@@ -1304,7 +1304,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
 		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
 
-		cColor = lerp(cColor, FogColor, 1 - fogAmount);
+		//cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	} 
 	else if (gnTexturesMask & 0x20)
 	{

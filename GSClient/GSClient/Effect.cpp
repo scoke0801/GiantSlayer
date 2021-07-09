@@ -60,7 +60,7 @@ void CEffect::Update(float elapsedTime)
 	m_ElapsedTime += elapsedTime;
 	if (m_ElapsedTime > m_LifeTime) {
 		m_ElapsedTime = 0.0f;
-		m_isDrawable = false;
+		//m_isDrawable = false;
 	}
 }
 
@@ -83,7 +83,7 @@ void CEffect::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 
 void CEffect::FixPositionByTerrain(CTerrain* pTerrain)
 {
-	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_HeightFromTerrain;
+	m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_HeightFromTerrain * m_xmf3Size.y;
 	SetPosition(m_xmf3Position);
 }
 
@@ -128,14 +128,15 @@ void CEffectHandler::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 void CEffectHandler::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CPlayer* targetPlayer)
 {
 	for (int i = 0; i < 10; ++i) {
-		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 192.0f, 1500.0f, 0.0f });
+		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 192.0f, 192.0f, 0.0f });
 		pTempEffect->SetEffectType(EffectTypes::Thunder);
+		pTempEffect->Scale(4, 6, 4, true);
 		m_Effects.emplace_back(std::move(pTempEffect));
 	}
 
 	for (int i = 0; i < 10; ++i) {
 		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 192.0f, 0.0f, 192.0f });
-		pTempEffect->SetEffectType(EffectTypes::BossAttacked);
+		pTempEffect->SetEffectType(EffectTypes::BossAttacked);  
 		m_Effects.emplace_back(std::move(pTempEffect));
 	}
 
