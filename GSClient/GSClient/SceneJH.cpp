@@ -262,21 +262,13 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
-	  
-	/*pfbxTestObject = new CFbxObject2(pd3dDevice, pd3dCommandList, 
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
-	pfbxTestObject->SetAnimationStack(2);
-	pfbxTestObject->m_pAnimationController->SetPosition(0, 0.0f);
-	pfbxTestObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pfbxTestObject->SetPosition({ 1000,  150, 1000 });
-	pfbxTestObject->SetTextureIndex(0x01);*/
-
+	   
 	m_EffectsHandler = new CEffectHandler();
 	m_EffectsHandler->Init(pd3dDevice, pd3dCommandList, m_Player); 
 
-	UseEffects((int)EffectTypes::Thunder, { 1000.0f, 0.0f, 1000.0f });
-	UseEffects((int)EffectTypes::BossAttacked, { 500.0f, 0.0f, 500.0f });
-	UseEffects((int)EffectTypes::WarnningCircle, { 500.0f, 0.0f, 500.0f }); 
+	//UseEffects((int)EffectTypes::Thunder, { 1000.0f, 0.0f, 1000.0f });
+	//UseEffects((int)EffectTypes::BossAttacked, { 500.0f, 0.0f, 500.0f });
+	//UseEffects((int)EffectTypes::WarnningCircle, { 500.0f, 0.0f, 500.0f }); 
 
 	auto end_t = chrono::high_resolution_clock::now();
 
@@ -3368,6 +3360,16 @@ void CSceneJH::UseEffects(int effectType, const XMFLOAT3& xmf3Position)
 		effect->FixPositionByTerrain(m_Terrain);
 		effect->SetDrawable(true);
 	} 
+}
+
+void CSceneJH::UseEffects(int effectType, const XMFLOAT3& xmf3Position, float wakeupTime)
+{
+	auto effect = m_EffectsHandler->RecycleEffect((EffectTypes)effectType);
+	if (effect != nullptr) {
+		effect->SetPosition(xmf3Position);
+		effect->FixPositionByTerrain(m_Terrain);
+		effect->WakeUpAfterTime(wakeupTime);
+	}
 }
 
 void CSceneJH::SendMouseInputPacket()

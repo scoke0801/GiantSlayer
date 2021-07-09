@@ -174,6 +174,11 @@ public:
 	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
 	void DeleteEnemy(CEnemy* pEmeny);
 
+	// 이펙트 재사용 함수
+	void UseEffects(int effectType, const XMFLOAT3& xmf3Position);
+	// 이펙트 재사용 함수, 대기 시간 설정하는 경우
+	void UseEffects(int effectType, const XMFLOAT3& xmf3Position, float wakeupTime);
+
 private: 
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
@@ -212,7 +217,6 @@ private:
 	void MakingFog();
 	void MakingRain();
 
-	void UseEffects(int effectType, const XMFLOAT3& xmf3Position);
 private:
 	void SendMouseInputPacket();
 	void RecvMouseProcessPacket();

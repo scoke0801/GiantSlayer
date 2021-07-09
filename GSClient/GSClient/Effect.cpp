@@ -13,8 +13,11 @@ CEffect::CEffect(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_isDrawable = false;
 	m_xmf3Size = { 1,1,1 };
 	m_Targetplayer = targetPlayer;
+
 	m_ElapsedTime = 0.0f;
 	m_LifeTime = 0.0f; 
+	m_WakeUpTime = 0.0f;
+
 	m_EffectType = EffectTypes::None;
 	
 	m_HeightFromTerrain = 3.0f + size.y * 0.5f;
@@ -27,6 +30,15 @@ CEffect::~CEffect()
 void CEffect::Update(float elapsedTime)
 {
 	if (false == m_isDrawable) {
+		// 작업 알림이 걸려있는 경우
+		if (m_WakeUpTime > 0.0f) {
+			m_WakeUpTime -= elapsedTime;
+			if (m_WakeUpTime <= 0.0f) {
+				// 설정된 시간이 경과하면 일어나서 작업하도록 설정
+				m_WakeUpTime = 0.0f;
+				m_isDrawable = true;
+			}
+		}
 		return;
 	}
 	XMFLOAT3 playerLook = m_Targetplayer->GetLook();
@@ -48,13 +60,14 @@ void CEffect::Update(float elapsedTime)
 	m_ElapsedTime += elapsedTime;
 	if (m_ElapsedTime > m_LifeTime) {
 		m_ElapsedTime = 0.0f;
-		//m_isDrawable = false;
+		m_isDrawable = false;
 	}
 }
 
 void CEffect::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	if (!m_isDrawable) return;
+	if (m_WakeUpTime > 0.0f) return;
 	OnPrepareRender();
 
 	if (m_pShader)
@@ -135,11 +148,14 @@ void CEffectHandler::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 CEffect* CEffectHandler::RecycleEffect(EffectTypes effectType)
 {
+	int i = 0;
 	for (auto& pEffect : m_Effects) {
-		if (pEffect->IsDrawable() == false &&
+		if (pEffect->IsCanUse() == true &&
 			pEffect->GetEffectType() == effectType) {
+			cout << i << "번째 이펙트 사용\n";
 			return pEffect;
 		}
+		++i;
 	}
 	return nullptr;
 }

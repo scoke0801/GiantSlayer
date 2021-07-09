@@ -129,3 +129,5 @@ constexpr float HIT_PARTICLE_LIFE_TIME = 10.0f;
 constexpr float RADIAL_PARTICLE_LIFE_TIME = 6.0f;
 
 constexpr float STRAIGHT_PARTICLE_LIFE_TIME = 10.0f;
+
+constexpr int MAX_THUNDER_CREATE_COUNT = 10;

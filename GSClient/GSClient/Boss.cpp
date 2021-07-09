@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "Boss.h"
 #include "State.h"
+#include "Effect.h"
+
+#include "SceneJH.h"
+
 CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dRootSignature)
 {
 	CGameObjectVer2* pBossParent = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
@@ -64,6 +68,36 @@ void CBoss::Attack(float elapsedTime)
 		}
 		else if (m_AttackType == EnemyAttackType::BossSkill_4) { 
 			m_AttackDelayTime = BOSS_ATTACK_4_ANIMATION_LENGTH + 0.7f;
+			// 랜덤한 개수 랜덤 위치에 번개 떨어지도록 하기
+			// MAIN_GAME_SCENE->CreateThunder,,, 
+			// warnningCircle 몇 초? 1.5초 동안 
+			// Thunder 몇 초 ?	1.5
+			// 두 번 방방뛰는 애니메이션 -> 2번 사이클 돌면 좋을듯
+
+			XMFLOAT3 targetPosition;
+			
+			int thunderCount = rand() % 5 + 5;
+			auto workScene = MAIN_GAME_SCENE;
+			for (int i = 0; i < thunderCount; ++i) {
+				targetPosition.x = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.x)) + m_xmf3ActivityScopeCenter.x - m_xmf3ActivityScope.x;
+				targetPosition.y = m_xmf3Position.y;
+				targetPosition.z = (((float)rand() / (RAND_MAX)) * (m_xmf3ActivityScope.z)) + m_xmf3ActivityScopeCenter.z - m_xmf3ActivityScope.z;
+
+				workScene->UseEffects((int)EffectTypes::WarnningCircle, targetPosition);
+				workScene->UseEffects((int)EffectTypes::Thunder, targetPosition, 1.5f);
+			}
+			cout << "공격 이펙트 생성 테스트\n";
+
+			// UseWarnningCircle();
+			// ~~~
+			// ~~~
+			// ~~~
+			// if warnningCircles.lifeTime < elapsedTime
+			// then 
+			// UseThunderEffects();
+			// message handler
+			// 1. 우선순위 큐
+			// 2. 타이머 객체
 		}
 	}
 }
