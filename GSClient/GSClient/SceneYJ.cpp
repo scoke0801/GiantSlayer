@@ -563,7 +563,6 @@ void CSceneYJ::Update(float elapsedTime)
 	}
 
 
-
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		if (pEnemy->CollisionCheck(m_Player)) {
 			// 공격 상태일 때만 체력이 닳는것이 맞을까...
@@ -640,10 +639,79 @@ void CSceneYJ::Update(float elapsedTime)
 				CEnemy* thisLaser = reinterpret_cast<CEnemy*>(pLaser);
 				XMFLOAT3 pos2 = Vector3::Add(XMFLOAT3{ m_Mummy->GetPosition() }, { 0,200,0 });
 				//thisLaser->SetPosition(pos2);
-				//thisLaser->SetDrawable(false);
+				thisLaser->SetDrawable(false);
 				//thisLaser->FixCollision(pObstacle);
 				//thisLaser->CollideToObstacle();
 				cout << "충돌 : 화살\n";
+			}
+		}
+	}
+
+	for (auto pLaser : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
+		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+			if (pObstacle->CollisionCheck(pLaser)) {
+				CEnemy* thisLaser = reinterpret_cast<CEnemy*>(pLaser);
+				XMFLOAT3 pos2 = Vector3::Add(XMFLOAT3{ m_Mummy2->GetPosition() }, { 0,200,0 });
+				//thisLaser->SetPosition(pos2);
+
+				thisLaser->SetDrawable(false);
+				//thisLaser->FixCollision(pObstacle);
+				//thisLaser->CollideToObstacle();
+				cout << "충돌 : 화살2\n";
+			}
+		}
+	}
+
+	for (auto pLaser : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
+		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+			if (pObstacle->CollisionCheck(pLaser)) {
+				CEnemy* thisLaser = reinterpret_cast<CEnemy*>(pLaser);
+				XMFLOAT3 pos2 = Vector3::Add(XMFLOAT3{ m_Mummy3->GetPosition() }, { 0,200,0 });
+				//thisLaser->SetPosition(pos2);
+				thisLaser->SetDrawable(false);
+				//thisLaser->FixCollision(pObstacle);
+				//thisLaser->CollideToObstacle();
+				cout << "충돌 : 화살3\n";
+			}
+		}
+	}
+
+	for (auto pLaser : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox]) {
+			if (pObstacle->CollisionCheck(pLaser)) {
+				CMummy* thisLaser = reinterpret_cast<CMummy*>(pLaser);
+				XMFLOAT3 pos2 = Vector3::Add(XMFLOAT3{ m_Mummy->GetPosition() }, { 0,200,0 });
+				//thisLaser->SetPosition(pos2);
+				thisLaser->SetDrawable(false);
+				//thisLaser->FixCollision(pObstacle);
+				//thisLaser->CollideToObstacle();
+				cout << "충돌 : 거울\n";
+			}
+		}
+	}
+	for (auto pLaser : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
+		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox]) {
+			if (pObstacle->CollisionCheck(pLaser)) {
+				CMummy* thisLaser = reinterpret_cast<CMummy*>(pLaser);
+				XMFLOAT3 pos2 = Vector3::Add(XMFLOAT3{ m_Mummy2->GetPosition() }, { 0,200,0 });
+				//thisLaser->SetPosition(pos2);
+				thisLaser->SetDrawable(false);
+				//thisLaser->FixCollision(pObstacle);
+				//thisLaser->CollideToObstacle();
+				cout << "충돌 : 거울2\n";
+			}
+		}
+	}
+	for (auto pLaser : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
+		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox]) {
+			if (pObstacle->CollisionCheck(pLaser)) {
+				CMummy* thisLaser = reinterpret_cast<CMummy*>(pLaser);
+				XMFLOAT3 pos2 = Vector3::Add(XMFLOAT3{ m_Mummy3->GetPosition() }, { 0,200,0 });
+				//thisLaser->SetPosition(pos2);
+				thisLaser->SetDrawable(false);
+				//thisLaser->FixCollision(pObstacle);
+				//thisLaser->CollideToObstacle();
+				cout << "충돌 : 거울3\n";
 			}
 		}
 	}
@@ -1546,6 +1614,8 @@ void CSceneYJ::ProcessInput()
 		{
 			cout << "박스를 이동합니다";
 
+			m_Player->Box_Picked();
+
 			m_PuzzleBoxCount = TRUE;
 
 			m_PuzzleBox[i]->SetGripBox(!m_isBoxDown);
@@ -1556,7 +1626,11 @@ void CSceneYJ::ProcessInput()
 	{
 		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox() && m_PuzzleBoxCount)
 		{
+			m_Player->Box_Down();
+
 			m_PuzzleBoxCount = FALSE;
+
+			cout << "박스를 내려놓니다";
 
 			m_PuzzleBox[i]->SetGripBox(false);
 
@@ -2197,7 +2271,6 @@ void CSceneYJ::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	
-
 #ifdef NOTEBOOK_DEV
 	return;
 #endif 
@@ -3359,10 +3432,17 @@ void CSceneYJ::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 100000, PARTICLE_TYPE::RainParticle);
 
 	for (int i = 0; i < 10; ++i) {
-		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle);
+		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle,3);
 		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 	}
-	
+	for (int i = 0; i < 10; ++i) {
+		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle2, 1);
+		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+	}
+	for (int i = 0; i < 10; ++i) {
+		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle3, 2);
+		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+	}
 
 	//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 
@@ -3454,7 +3534,7 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player3.bin", NULL, true);
 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
@@ -3550,7 +3630,8 @@ void CSceneYJ::ShotMummyLaser(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
 		CMummyLaser* pMummyLaser = reinterpret_cast<CMummyLaser*>(pObj);
 		if (pMummyLaser->IsCanUse()) {
-			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle);
+			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle,1);
+		
 			if (-1 != idx) {
 				cout << "레이저" << endl;
 				pMummyLaser->SetUseable(false);
@@ -3560,7 +3641,8 @@ void CSceneYJ::ShotMummyLaser(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 				m_Mummy->SetTargetVector(Vector3::Multifly(XMFLOAT3(15,0,-150), 1));
 				//pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(90.0f, 0.0f, 90.0f), 1));
 				pMummyLaser->SetTargetVector(Vector3::Multifly(m_Mummy->GetLook(), 1));
-				m_Particles->UseParticle(idx, pMummyLaser->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+				
+				m_Particles->UseParticle(idx, pMummyLaser->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f),1);
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Mummy->GetLook()), -1));
 				pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
 		
@@ -3583,7 +3665,7 @@ void CSceneYJ::ShotMummyLaser2(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
 		CMummyLaser* pMummyLaser2 = reinterpret_cast<CMummyLaser*>(pObj);
 		if (pMummyLaser2->IsCanUse()) {
-			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle);
+			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle2,2);
 			if (-1 != idx) {
 				//cout << "레이저2" << endl;
 				pMummyLaser2->SetUseable(false);
@@ -3593,7 +3675,7 @@ void CSceneYJ::ShotMummyLaser2(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 				m_Mummy2->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -90), 1));
 				//pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(90.0f, 0.0f, 90.0f), 1));
 				pMummyLaser2->SetTargetVector(Vector3::Multifly(m_Mummy2->GetLook(), 1));
-				m_Particles->UseParticle(idx, pMummyLaser2->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+				m_Particles->UseParticle(idx, pMummyLaser2->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f),2);
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Mummy2->GetLook()), -1));
 				pMummyLaser2->ConnectParticle(m_Particles->GetParticleObj(idx));
 
@@ -3617,7 +3699,7 @@ void CSceneYJ::ShotMummyLaser3(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
 		CMummyLaser* pMummyLaser3 = reinterpret_cast<CMummyLaser*>(pObj);
 		if (pMummyLaser3->IsCanUse()) {
-			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle);
+			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle3,3);
 			if (-1 != idx) {
 				cout << "레이저3" << endl;
 				pMummyLaser3->SetUseable(false);
@@ -3627,7 +3709,7 @@ void CSceneYJ::ShotMummyLaser3(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 				//pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(-270.0f, 0.0f, -180.0f), 1));
 				m_Mummy3->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -90), 1));
 				pMummyLaser3->SetTargetVector(Vector3::Multifly(m_Mummy3->GetLook(), 1));
-				m_Particles->UseParticle(idx, pMummyLaser3->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+				m_Particles->UseParticle(idx, pMummyLaser3->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f),3);
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Mummy3->GetLook()), -1));
 				pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
 

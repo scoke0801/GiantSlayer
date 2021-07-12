@@ -3049,7 +3049,7 @@ CMeshFbxTextured::~CMeshFbxTextured()
 
 CMummyLaserParticleMesh::CMummyLaserParticleMesh(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
-	int particleCount) : CMesh(pd3dDevice, pd3dCommandList)
+	int particleCount,int idx) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = particleCount * 6;
 	m_Vertices = new CParticleVertex[m_nVertices];
@@ -3058,7 +3058,7 @@ CMummyLaserParticleMesh::CMummyLaserParticleMesh(ID3D12Device* pd3dDevice,
 	m_nStride = sizeof(CParticleVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-	CreateMeshes(pd3dDevice, pd3dCommandList, particleCount);
+	CreateMeshes(pd3dDevice, pd3dCommandList, particleCount,idx);
 	CreateVertexBuffer(pd3dDevice, pd3dCommandList);
 }
 
@@ -3066,78 +3066,231 @@ CMummyLaserParticleMesh::~CMummyLaserParticleMesh()
 {
 }
 
-void CMummyLaserParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count)
+void CMummyLaserParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count,int idx)
 {
-	const float PARTICLE_SIZE = 20.0f;
+	if (idx == 1)
+	{
+		const float PARTICLE_SIZE = 20.0f;
 
-	float goalSize = 10.0f;
-	float perSize = goalSize / count;
+		float goalSize = 10.0f;
+		float perSize = goalSize / count;
 
-	float goalSpeed = 30.0f;
-	float perSpeed = goalSpeed / count;
-	for (int i = 0; i < count; ++i) {
-		XMFLOAT3 pos = GetRandomVector3(1000, 1, 0);
-		pos.x = 0.0f;
-		pos.y = 0.0f;
-		pos.z = 0.0f;
-		XMFLOAT4 color = XMFLOAT4(0.9, 0.1, 0, 1);
+		float goalSpeed = 30.0f;
+		float perSpeed = goalSpeed / count;
+		for (int i = 0; i < count; ++i) {
+			XMFLOAT3 pos = GetRandomVector3(1000, 1, 0);
+			pos.x = 0.0f;
+			pos.y = 0.0f;
+			pos.z = 0.0f;
+			XMFLOAT4 color = XMFLOAT4(0.1, 0.9, 0, 1);
 
-		/*XMFLOAT4 color = XMFLOAT4(GetRandomValue(1.0f, 0.7f, 0.7f),
-			GetRandomValue(1.0f, 0.7f, 0.7f), 0.3f, 1.0f);*/
-		XMFLOAT3 speed = GetRandomVector3(200.0f, -400.0f, -200.0f);
-		speed.z = perSpeed * (count - i);
+			/*XMFLOAT4 color = XMFLOAT4(GetRandomValue(1.0f, 0.7f, 0.7f),
+				GetRandomValue(1.0f, 0.7f, 0.7f), 0.3f, 1.0f);*/
+			XMFLOAT3 speed = GetRandomVector3(200.0f, -400.0f, -200.0f);
+			speed.z = perSpeed * (count - i);
 
-		XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f));
-		// 매개변수 방정식 값, 원 크기, 원 주기
-		//XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(1.0f, 0.0f, 0.0f), perSize * (count - i), GetRandomValue(10.0f, 0.0f, 0.0f));
-		XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(0.2f, 0.0f, 0.0f), perSize * (count - i), 10.0f);
-		// v0 
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
-		++m_CurrentVertexIndex;
+			XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f));
+			// 매개변수 방정식 값, 원 크기, 원 주기
+			//XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(1.0f, 0.0f, 0.0f), perSize * (count - i), GetRandomValue(10.0f, 0.0f, 0.0f));
+			XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(0.2f, 0.0f, 0.0f), perSize * (count - i), 10.0f);
+			// v0 
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
 
-		// v1
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
-		++m_CurrentVertexIndex;
+			// v1
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
 
-		// v2
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
-		++m_CurrentVertexIndex;
+			// v2
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
 
-		// v3
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
-		++m_CurrentVertexIndex;
+			// v3
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
 
-		// v4
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
-		++m_CurrentVertexIndex;
+			// v4
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
 
-		// v5
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
-		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
-		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
-		++m_CurrentVertexIndex;
+			// v5
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+		}
+	}
+
+	if (idx == 2)
+	{
+		const float PARTICLE_SIZE = 5.0f;
+
+		float goalSize = 10.0f;
+		float perSize = goalSize / count;
+
+		float goalSpeed = 30.0f;
+		float perSpeed = goalSpeed / count;
+		for (int i = 0; i < count; ++i) {
+			XMFLOAT3 pos = GetRandomVector3(1000, 1, 0);
+			pos.x = 0.0f;
+			pos.y = 0.0f;
+			pos.z = 0.0f;
+			XMFLOAT4 color = XMFLOAT4(0.1, 0.1, 0.9, 1);
+
+			/*XMFLOAT4 color = XMFLOAT4(GetRandomValue(1.0f, 0.7f, 0.7f),
+				GetRandomValue(1.0f, 0.7f, 0.7f), 0.3f, 1.0f);*/
+			XMFLOAT3 speed = GetRandomVector3(200.0f, -400.0f, -200.0f);
+			speed.z = perSpeed * (count - i);
+
+			XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f));
+			// 매개변수 방정식 값, 원 크기, 원 주기
+			//XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(1.0f, 0.0f, 0.0f), perSize * (count - i), GetRandomValue(10.0f, 0.0f, 0.0f));
+			XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(0.2f, 0.0f, 0.0f), perSize * (count - i), 10.0f);
+			// v0 
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+
+			// v1
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+
+			// v2
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+
+			// v3
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+
+			// v4
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+
+			// v5
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+		}
+	}
+
+	if (idx == 3)
+	{
+		const float PARTICLE_SIZE = 50.0f;
+
+		float goalSize = 10.0f;
+		float perSize = goalSize / count;
+
+		float goalSpeed = 30.0f;
+		float perSpeed = goalSpeed / count;
+		for (int i = 0; i < count; ++i) {
+			XMFLOAT3 pos = GetRandomVector3(1000, 1, 0);
+			pos.x = 0.0f;
+			pos.y = 0.0f;
+			pos.z = 0.0f;
+			XMFLOAT4 color = XMFLOAT4(0.9, 0.1, 0, 1);
+
+			/*XMFLOAT4 color = XMFLOAT4(GetRandomValue(1.0f, 0.7f, 0.7f),
+				GetRandomValue(1.0f, 0.7f, 0.7f), 0.3f, 1.0f);*/
+			XMFLOAT3 speed = GetRandomVector3(200.0f, -400.0f, -200.0f);
+			speed.z = perSpeed * (count - i);
+
+			XMFLOAT2 time = XMFLOAT2(0.0f, GetRandomValue(ARROW_PARTICLE_LIFE_TIME, ARROW_PARTICLE_LIFE_TIME * 0.5f, ARROW_PARTICLE_LIFE_TIME * 0.5f));
+			// 매개변수 방정식 값, 원 크기, 원 주기
+			//XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(1.0f, 0.0f, 0.0f), perSize * (count - i), GetRandomValue(10.0f, 0.0f, 0.0f));
+			XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(0.2f, 0.0f, 0.0f), perSize * (count - i), 10.0f);
+			// v0 
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+
+			// v1
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+
+			// v2
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+
+			// v3
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+
+			// v4
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+
+			// v5
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
+			m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
+			m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
+			m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
+			++m_CurrentVertexIndex;
+		}
 	}
 }
 

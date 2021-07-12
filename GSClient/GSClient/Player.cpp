@@ -32,6 +32,7 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	
 	if (false == m_IsCanAttack) {
 		m_AttackWaitingTime -= fTimeElapsed;
 		SetAnimationSet(ATK);
@@ -64,14 +65,64 @@ void CPlayer::Update(float fTimeElapsed)
 		}*/
 	}
 	
-	else {
+	else if(m_IsBox==false && m_HaveBox==false && m_DownBox==false){
+
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
 			SetAnimationSet(IDLE);
 		else
 			SetAnimationSet(RUN);
 	}
 
-	 
+	else if (m_IsBox == true)
+	{
+		SetAnimationSet(BOX_DOWN);
+		/*if (m_HaveBox == false)
+		{
+			SetAnimationSet(BOX_DOWN);
+			m_BoxDownWaitingTime -= fTimeElapsed;
+			if (m_BoxDownWaitingTime < 0.0f)
+			{
+				m_BoxDownWaitingTime = 0.0f;
+			}
+		}*/
+		m_BoxPickWaitingTime -= fTimeElapsed;
+		if (m_BoxPickWaitingTime < 0.0f)
+		{
+			m_HaveBox = true;
+			m_IsBox = false;
+
+			m_BoxPickWaitingTime = 0.0f;
+		}
+	}
+	
+	else if (m_DownBox == true)
+	{
+		SetAnimationSet(BOX_DOWN);
+		/*if (m_HaveBox == false)
+		{
+			SetAnimationSet(BOX_DOWN);
+			m_BoxDownWaitingTime -= fTimeElapsed;
+			if (m_BoxDownWaitingTime < 0.0f)
+			{
+				m_BoxDownWaitingTime = 0.0f;
+			}
+		}*/
+		m_BoxDownWaitingTime -= fTimeElapsed;
+		if (m_BoxDownWaitingTime < 0.0f)
+		{
+			m_HaveBox = false;
+			m_IsBox = false;
+			m_DownBox = false;
+
+			m_BoxDownWaitingTime = 0.0f;
+		}
+	}
+
+	if (m_HaveBox == true && m_DownBox==false)
+	{
+		SetAnimationSet(BOX_IDLE);
+	}
+	
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed); 
@@ -238,6 +289,23 @@ void CPlayer::Attack()
 	m_SpareBoundingBox = tempMesh;
 	UpdateColliders();
 }
+
+void CPlayer::Box_Picked()
+{
+	SetPickBox(true);
+
+	IncreaseBoxPickWaitingTime(m_BoxPickAnimLength);
+
+}
+
+void CPlayer::Box_Down()
+{
+	SetDownBox(true);
+
+	IncreaseBoxDownWaitingTime(m_BoxDownAnimLength);
+}
+
+
 
 void CPlayer::AnimationChange(PlayerWeaponType weapon)
 {
