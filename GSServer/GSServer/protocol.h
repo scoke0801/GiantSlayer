@@ -28,8 +28,9 @@ constexpr float PLAYER_WALK_SPEED = 250.0f;
 
 // 화살 속도, 시속 235000m, 분속 3916.66m, 391666cm, 초속 6527
 // 너무 빠르니 절반 속도로..
-constexpr float ARROW_LIFE_TIME = 5.0f;
+constexpr float ARROW_LIFE_TIME = 3.0f;
 constexpr float ARROW_SPEED = 3263.0f;
+constexpr float TEST_ARROW_SPEED = ARROW_SPEED / 3;
 
 constexpr float PLAYER_JUMP_HEIGHT = 165.0 * 1.75f;
 constexpr float TO_JUMP_TIME = 1.0f;
@@ -38,6 +39,9 @@ constexpr float MELLE_ENEMY_ATTACK_TIME = 2.7f;
 constexpr float RANGED_ENEMY_ATTACK_TIME = 2.0f;
 
 constexpr float PLAYER_SWORD_ATTACK_TIME = 1.033333f;
+
+constexpr float AIR_RESISTANCE = 0.007f;
+constexpr float GRAVITY = 1.0f;
 
 enum AnimationType
 {

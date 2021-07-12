@@ -146,13 +146,19 @@ void CAnimationController::SetCallbackKey(int nAnimationSet, int nKeyIndex, floa
 void CAnimationController::SetAnimationSet(int nAnimationSet)
 { 
 	if (m_pAnimationSets && (nAnimationSet < m_nAnimationSets))
-	{ 
+ 
+	{
+		//m_fTime = 0.0f;
+		//m_pAnimationTracks[nAnimationSet].m_fPosition = 0.0f;
+		//m_pAnimationTracks->m_fPosition = 0;
 		if (m_nAnimationSet != nAnimationSet) {
-			m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet->m_fPosition = 0.0f;
-		}
-
+			m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet->m_fPosition = 0;
+		} 
 		m_nAnimationSet = nAnimationSet;
 		m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet = &m_pAnimationSets[m_nAnimationSet];
+		//m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet->m_fPosition = 0;
+		// ¼öÁ¤
+		//m_pAnimationController->m_pAnimationTracks[m_pChild->m_pAnimationController->m_nAnimationTrack].m_pAnimationSet->m_fPosition
 	}
 }
 
@@ -166,6 +172,7 @@ void CAnimationController::SetAnimationType(int nType)
 void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHandler* pCallbackHandler)
 {
 	m_fTime += fTimeElapsed;
+
 	if (m_pAnimationSets)
 	{
 		for (int i = 0; i < m_nAnimationTracks; i++)
@@ -186,7 +193,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHan
 				float fPositon = pAnimationSet->GetPosition(pAnimationSet->m_fPosition);
 				for (int i = 0; i < m_nAnimationBoneFrames; i++)
 				{
-					m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent = pAnimationSet->GetSRT(i, fPositon);
+					m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent = pAnimationSet->GetSRT(i, fPositon); 
 					//cout << " TransformMatrix : ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._11 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._12 << " ";
@@ -204,11 +211,17 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHan
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._42 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._43 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._44 << "\n";
+ 
 				}
 			
 			}
 		}
 	}
+}
+
+void CAnimationController::ResetAnimation()
+{
+	m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet = &m_pAnimationSets[m_nAnimationSet];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -432,6 +445,9 @@ void CGameObjectVer2::UpdateOnServer(float fTimeElapsed)
 
 void CGameObjectVer2::Animate(float fTimeElapsed)
 {
+	if (pause)
+		return;
+
 	if (m_pAnimationController) m_pAnimationController->AdvanceTime(fTimeElapsed, NULL);
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
@@ -932,23 +948,6 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 		else if (!strcmp(pstrToken, "<TransformMatrix>:"))
 		{
 			nReads = (UINT)::fread(&pGameObject->m_xmf4x4ToParent, sizeof(float), 16, pInFile);
-			//cout << " TransformMatrix : ";
-			//cout << pGameObject->m_xmf4x4ToParent._11 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._12 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._13 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._14 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._21 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._22 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._23 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._24 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._31 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._32 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._33 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._34 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._41 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._42 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._43 << " ";
-			//cout << pGameObject->m_xmf4x4ToParent._44 << "\n";
 		}
 		else if (!strcmp(pstrToken, "<Mesh>:"))
 		{

@@ -9,7 +9,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_Type = OBJ_TYPE::Player;
 
 	m_HP = 100;
-	m_SP = 100; 
+	m_SP = 100;
 
 	m_SpareBoundingBox = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 1.4, XMFLOAT3{ 0,0.6, 0.2f });
 	m_SpareCollisionBox = new ColliderBox(ColliderBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4)));
@@ -27,43 +27,43 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 CPlayer::~CPlayer()
 {
-
 }
 
 void CPlayer::Update(float fTimeElapsed)
 {
-	if (false == m_IsCanAttack) {
-		m_AttackWaitingTime -= fTimeElapsed;
-		SetAnimationSet(ATK);
-		if (m_AttackWaitingTime < 0.0f){
-			m_IsAlreadyAttack = false;
-			m_AttackWaitingTime = 0.0f;
-			m_IsCanAttack = true;
+	if (m_IsCanAttack == false) {
+		if (!pause)
+			m_AttackWaitingTime -= fTimeElapsed;
 
-			auto temp = m_SpareCollisionBox;
-			m_SpareCollisionBox = m_Colliders[0];
-			m_Colliders[0] = temp;
+		switch (m_WeaponType)
+		{
+		case PlayerWeaponType::Sword:
+		break;
 
-			temp = m_SpareAABB;
-			m_SpareAABB = m_AABB[0];
-			m_AABB[0] = temp;
-			 
-			auto tempMesh = m_SpareBoundingBox;
-			m_SpareBoundingBox = m_BoundingObjectMeshes[0];
-			m_BoundingObjectMeshes[0] = tempMesh;
+		case PlayerWeaponType::Bow: {
+			if (pullString) {
+				if (m_AttackWaitingTime < 1.2f)
+					SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
 
-			UpdateColliders(); 
-			//SetAnimationSet(AnimationType::IDLE);
+				if (m_AttackWaitingTime < m_AttackAnimPauseTime)
+					pause = true;
+
+				m_StringPullTime += fTimeElapsed;
+				m_SP -= fTimeElapsed;
+			}
 		}
+		break;
+		}
+
+		if (m_AttackWaitingTime < 0.0f)
+			ResetAttack();
 	}
-	// ÇÇ°Ý
 	else if (m_AttackedDelay > 0.0f) {
 		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
 		/*if (m_AttackedDelay == 0.0f) {
 			SetAnimationSet(AnimationType::IDLE);
 		}*/
 	}
-	
 	else {
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
 			SetAnimationSet(IDLE);
@@ -71,10 +71,9 @@ void CPlayer::Update(float fTimeElapsed)
 			SetAnimationSet(RUN);
 	}
 
-	 
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
-	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed); 
+	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 	Move(vel);
 
 	if (false == m_isOnGround) {
@@ -93,15 +92,15 @@ void CPlayer::Update(float fTimeElapsed)
 		}
 	}
 
-	UpdateCamera(); 
+	UpdateCamera();
 
 	float fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = (Friction * fTimeElapsed); 
-	if (fDeceleration > fLength) fDeceleration = fLength; 
+	float fDeceleration = (Friction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
 
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true)); 
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 	m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
-	 
+
 	CGameObjectVer2::Animate(fTimeElapsed);
 	UpdateTransform(NULL);
 }
@@ -115,9 +114,19 @@ void CPlayer::UpdateOnServer(float fTimeElapsed)
 void CPlayer::UpdateCamera()
 {
 	if (m_Camera != nullptr) {
-		m_Camera->Update(m_xmf3Position);
-		m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
-		m_Camera->UpdateViewMatrix(); 
+		if (pullString)
+		{
+			m_Camera->UpdateAimMode(m_xmf3Position);
+			auto lookVec = GetLook();
+			m_Camera->LookAt(m_Camera->GetPosition3f(), Vector3::Multifly(lookVec, 15000.0f) , GetUp());
+		}
+		else
+		{
+			m_Camera->Update(m_xmf3Position);
+			m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
+		}
+
+		m_Camera->UpdateViewMatrix();
 	}
 }
 
@@ -154,7 +163,7 @@ void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
 
 void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 {
-	if (m_isOnGround) { 
+	if (m_isOnGround) {
 		m_xmf3Position = GetPosition();
 		m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z) + m_HeightFromTerrain;
 		m_xmf4x4ToParent._41 = m_xmf3Position.x;
@@ -164,9 +173,8 @@ void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 		//CGameObjectVer2::SetPosition(m_xmf3Position);
 		//m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z); 
 	}
-	
 }
- 
+
 void CPlayer::SetVelocity(XMFLOAT3 dir)
 {
 	if (false == IsCanAttack()) {
@@ -237,6 +245,37 @@ void CPlayer::Attack()
 	m_BoundingObjectMeshes[0] = m_SpareBoundingBox;
 	m_SpareBoundingBox = tempMesh;
 	UpdateColliders();
+
+	SetAnimationSet(ATK);
+}
+
+void CPlayer::ResetAttack()
+{
+	m_IsAlreadyAttack = false;
+	m_AttackWaitingTime = 0.0f;
+	m_IsCanAttack = true;
+
+	auto temp = m_SpareCollisionBox;
+	m_SpareCollisionBox = m_Colliders[0];
+	m_Colliders[0] = temp;
+
+	temp = m_SpareAABB;
+	m_SpareAABB = m_AABB[0];
+	m_AABB[0] = temp;
+
+	auto tempMesh = m_SpareBoundingBox;
+	m_SpareBoundingBox = m_BoundingObjectMeshes[0];
+	m_BoundingObjectMeshes[0] = tempMesh;
+
+	UpdateColliders();
+}
+
+void CPlayer::ResetBow()
+{
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+	pullString = false;
+	pause = false;
+	m_StringPullTime = 0;
 }
 
 void CPlayer::AnimationChange(PlayerWeaponType weapon)
@@ -256,6 +295,7 @@ void CPlayer::AnimationChange(PlayerWeaponType weapon)
 		DEATH = AnimationType::BOW_DEATH;
 
 		m_AttackAnimLength = 1.533333f;
+		m_AttackAnimPauseTime = 0.6f;
 	}
 }
  
@@ -263,7 +303,7 @@ void CPlayer::DisableSword()
 {
 	SetDrawableRecursively("sword1", false);
 	SetDrawableRecursively("bow_LeftHand", true);
-	SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
 }
 
 void CPlayer::DisableBow()
@@ -271,4 +311,12 @@ void CPlayer::DisableBow()
 	SetDrawableRecursively("sword1", true);
 	SetDrawableRecursively("bow_LeftHand", false);
 	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+}
+
+bool CPlayer::ShotAble()
+{
+	if (pullString && m_AttackWaitingTime < m_AttackAnimPauseTime)
+		return true;
+
+	return false;
 }

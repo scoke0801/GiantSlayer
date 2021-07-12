@@ -11,6 +11,7 @@ enum class PlayerMoveType
 	Walk,
 	Run
 };
+
 enum class PlayerWeaponType
 {
 	None = 0x00,
@@ -27,12 +28,14 @@ public:
 	AnimationType RUN = AnimationType::SWORD_RUN;
 	AnimationType ATK = AnimationType::SWORD_ATK;
 	AnimationType DEATH = AnimationType::SWORD_DEATH;
+	AnimationType CHANGEWEAPON = AnimationType::BOW_GET; 
 
 private:
 	bool m_IsAlreadyAttack = false;
+
 private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
-	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
+	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword; 
 	 
 	bool m_isOnGround = true;
 	float m_JumpTime = 0.0f;
@@ -40,6 +43,7 @@ private:
 private:
 	float m_AttackAnimLength = 0.0f;
 	float m_AttackWaitingTime = 0.0f;
+	float m_AttackAnimPauseTime = 0.0f;
 	bool m_IsCanAttack = true;
 
 	float m_AttackedDelay = 0.0f;
@@ -49,6 +53,9 @@ private:
 	Collider* m_SpareAABB;
 
 public:
+	bool pullString = false;
+	float m_StringPullTime = 0.0f;
+
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
@@ -79,11 +86,14 @@ public:
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
 
 	float GetAttackWaitTime() const { return m_AttackWaitingTime; }
+	float GetStringPullTime() const { return m_StringPullTime; }
 
 	void Jump();
 
 	bool Attacked(CGameObject* pObject);
 	void Attack();
+	void ResetAttack();
+	void ResetBow();
 
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
@@ -92,4 +102,5 @@ public:
 	void DisableSword();
 	void DisableBow();
 
+	bool ShotAble();
 };
