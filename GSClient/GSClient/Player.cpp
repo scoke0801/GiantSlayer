@@ -38,7 +38,7 @@ void CPlayer::Update(float fTimeElapsed)
 		switch (m_WeaponType)
 		{
 		case PlayerWeaponType::Sword:
-		break;
+			break;
 
 		case PlayerWeaponType::Bow: {
 			if (pullString) {
@@ -52,7 +52,7 @@ void CPlayer::Update(float fTimeElapsed)
 				m_SP -= fTimeElapsed;
 			}
 		}
-		break;
+								  break;
 		}
 
 		if (m_AttackWaitingTime < 0.0f)
@@ -63,43 +63,45 @@ void CPlayer::Update(float fTimeElapsed)
 		/*if (m_AttackedDelay == 0.0f) {
 			SetAnimationSet(AnimationType::IDLE);
 		}*/
-	}
-
+	} 
 	else {
-
-		float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
-
-		XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
-		Move(vel);
-
-		if (false == m_isOnGround) {
-			float y;
-			if (m_JumpTime > 0.5f) {
-				y = -PLAYER_JUMP_HEIGHT * fTimeElapsed;
-			}
-			else {
-				y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
-			}
-			Move({ 0,y,0 });
-			m_JumpTime += fTimeElapsed;
-			if (m_JumpTime > TO_JUMP_TIME) {
-				m_JumpTime = 0.0f;
-				m_isOnGround = true;
-			}
-		}
-
-		UpdateCamera();
-
-		float fLength = Vector3::Length(m_xmf3Velocity);
-		float fDeceleration = (Friction * fTimeElapsed);
-		if (fDeceleration > fLength) fDeceleration = fLength;
-
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-		m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
-
-		CGameObjectVer2::Animate(fTimeElapsed);
-		UpdateTransform(NULL);
+		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
+			SetAnimationSet(IDLE);
+		else
+			SetAnimationSet(RUN);
 	}
+	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
+
+	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
+	Move(vel);
+
+	if (false == m_isOnGround) {
+		float y;
+		if (m_JumpTime > 0.5f) {
+			y = -PLAYER_JUMP_HEIGHT * fTimeElapsed;
+		}
+		else {
+			y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
+		}
+		Move({ 0,y,0 });
+		m_JumpTime += fTimeElapsed;
+		if (m_JumpTime > TO_JUMP_TIME) {
+			m_JumpTime = 0.0f;
+			m_isOnGround = true;
+		}
+	}
+	UpdateCamera();
+
+	float fLength = Vector3::Length(m_xmf3Velocity);
+	float fDeceleration = (Friction * fTimeElapsed);
+	if (fDeceleration > fLength) fDeceleration = fLength;
+
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
+
+
+	CGameObjectVer2::Animate(fTimeElapsed);
+	UpdateTransform(NULL);
 }
 
 void CPlayer::UpdateOnServer(float fTimeElapsed)
