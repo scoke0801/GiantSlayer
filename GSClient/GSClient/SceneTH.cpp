@@ -73,6 +73,7 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::JH);
+	//CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::TH);
 	CShaderHandler::GetInstance().CreateAllShaders(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	BuildMaterials(pd3dDevice, pd3dCommandList);
@@ -297,7 +298,8 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
 		"GreenTree",
-		"Bow"
+		"Bow",
+		"Effect_1", "Effect_2", "Effect_3"
 	};
 
 	const wchar_t* address[] =
@@ -325,6 +327,7 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/DS_equipment_standard.dds",
 		L"resources/OBJ/GreenTree.dds",
 		L"resources/Textures/bow_texture.dds",
+		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -361,26 +364,25 @@ void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	const char* keyNames[] =
 	{
 		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain","BossWall",
-		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
+		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
 		"Box","Wood", "WoodSignBoard",
 		"GrassWall", "SandWall","RockyWall",
 		"Door",
-		"HP_SP","HP_SP_PER",
-		"Minimap",
-		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
+		"HP_SP", "Minimap", "WeaponUI",
+		"HP_SP_PER",
+		"Flower_Red", "Flower_White", "Grass_1", "Grass_2", "Tree", "NoLeafTree", "Leaves", "Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
-		"Dry_Tree","Stump","Dead_Tree",
+		"Dry_Tree", "Stump", "Dead_Tree",
 		"Desert_Rock",
 		"TerrainWater",
 		"Rain",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
-		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
-		"MeleeSkeleton_02_EquipAll",
+		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
 		"GreenTree",
-		"Bow"
+		"Bow",
+		"Effect_1", "Effect_2", "Effect_3"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
