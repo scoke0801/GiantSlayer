@@ -31,6 +31,7 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateTerrainWaterShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateEffectShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateStandardShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateSkinnedShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -304,6 +305,27 @@ void CShaderHandler::CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("RainParticle", pParticleShader);
 
+}
+
+void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CShader* pEffectShader = new CShader();
+	if (m_UserID == ShaderHandlerUser::JH) {
+		pEffectShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSEffect");
+		pEffectShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSEffect"); 
+		//pEffectShader->CreateGeometryShader(L"Shaders/ShaderJH.hlsl", "GSEffect");
+	}
+	else if (m_UserID == ShaderHandlerUser::YJ) {
+		//pEffectShader->CreateVertexShader(L"Shaders/ShaderYJ.hlsl", "VSMinimap");
+		//pEffectShader->CreatePixelShader(L"Shaders/ShaderYJ.hlsl", "PSMinimap");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		//pEffectShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VSMinimap");
+		//pEffectShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PSMinimap");
+	}
+	pEffectShader->CreateInputLayout(ShaderTypes::Effect);
+	pEffectShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, true, true);
+	m_Data.emplace("Effect", pEffectShader);
 }
 
 void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)

@@ -48,7 +48,6 @@
 	#define MAX_UPDATE_FPS 1.0f / 5.0f
 #endif 
 
-#define MAP_SCALE_SIZE 1.5f
 //-------------------------------------------------------------------
 //
 
@@ -130,3 +129,5 @@ constexpr float HIT_PARTICLE_LIFE_TIME = 10.0f;
 constexpr float RADIAL_PARTICLE_LIFE_TIME = 6.0f;
 
 constexpr float STRAIGHT_PARTICLE_LIFE_TIME = 10.0f;
+
+constexpr int MAX_THUNDER_CREATE_COUNT = 10;

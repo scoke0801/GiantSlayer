@@ -6,13 +6,26 @@ class CPlayer;
 
 enum class EnemyAttackType {
 	Melee,
-	Ranged
+	Ranged,
+	BossSkill_1,
+	BossSkill_2,
+	BossSkill_3,
+	BossSkill_4
+};
+
+enum class EnemyType {
+	None = 0,
+	Skeleton,
+	Mummy,
+	Boss
 };
 class CEnemy : public CGameObject
 {
 protected:
 	EnemyAttackType			m_AttackType;
 	CState<CEnemy>*			m_State;
+
+	EnemyType				m_EnemyType;
 
 	vector<CPlayer*>		m_ConnectedPlayers;
 	CPlayer* m_TargetPlayer;
@@ -36,6 +49,8 @@ protected:
 	BoundingBox				m_SightAABB;
 
 	float					m_AttackDelayTime = 0.0f;
+
+	float					m_Speed;
 
 public:
 	CEnemy();
@@ -87,6 +102,9 @@ public:
 	ObjectState GetStateInfo() const override { return m_State->GetStatename(); }
 
 	BYTE GetAnimationType() const override;
+
+	EnemyType GetEnemyType() const { return m_EnemyType; }
+	void SetEnemyType(EnemyType enemyType) { m_EnemyType = enemyType; }
 };
 
 class CMeleeEnemy : public CEnemy

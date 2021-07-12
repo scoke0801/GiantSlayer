@@ -9,7 +9,6 @@ CParticleVertex::CParticleVertex(const XMFLOAT3& xmf3Position, const XMFLOAT4& x
 	m_xmf4Diffuse = xmf4Diffuse;
 	m_xmf2Time = xmf2Time;
 }
-
 CParticleTextureVertex::CParticleTextureVertex(const XMFLOAT3& xmf3Position, const XMFLOAT2& xmf2Time,
  UINT textureCode)
 {

@@ -11,17 +11,28 @@
 // :: if(공격 대상이 활동 범위 안에 존재하면) 계속 공격
 // :: else toState(탐색)
 class CPlayer;
-
+ 
 enum class EnemyAttackType {
 	Melee,
-	Ranged
+	Ranged,
+	BossSkill_1,
+	BossSkill_2,
+	BossSkill_3,
+	BossSkill_4
+};
+
+enum class EnemyType {
+	None = 0,
+	Skeleton,
+	Mummy,
+	Boss
 };
 class CEnemy : public CGameObjectVer2
-{
-protected:
+{ 
+protected: 
 	EnemyAttackType			m_AttackType;
 	CState<CEnemy>*			m_State;
-
+	EnemyType				m_EnemyType;
 	vector<CPlayer*>		m_ConnectedPlayers;
 	CPlayer*				m_TargetPlayer;
 
@@ -44,12 +55,12 @@ protected:
 	BoundingBox				m_SightAABB;
 
 	float					m_AttackDelayTime = 0.0f;
-
+	float					m_Speed;
 public:
 	CEnemy(); 
 	~CEnemy();
 	  
-	virtual void Update(float elapsedTime) override;
+	void Update(float elapsedTime) override;
 	void UpdateOnServer(float fTimeElapsed) override;
 
 	// 활동범위 설정
@@ -64,6 +75,8 @@ public:
 
 	void ConnectPlayer(CPlayer** pPlayers, int playerCount); 
 
+	virtual void ChangeAnimation(ObjectState stateInfo);
+
 	void ChangeState(CState<CEnemy>* nextState);
 
 	virtual void FindNextPosition(); 
@@ -75,15 +88,21 @@ public:
 
 	void FixCollision(CGameObject* pCollideObject) override;
 
+	virtual void Search(float elapsedTime) {}
 	virtual void Attack(float elapsedTime);
 	 
 	void ChangeState(ObjectState stateInfo, void* pData) override;
+
+	// 장애물과 충돌하였으므로 특정 상태에서 상태 재검색을 수행하라
+	void CollideToObstacle();
+
 public:
 	bool IsOnMoving() const { return m_IsOnMoving; }
 	void SetIsOnMoving(bool info) { m_IsOnMoving = info; }
 	 
 	void SetAttackDelayTime(float delayTime) { m_AttackDelayTime = delayTime; }
 
+	void SetEnemyAttackType(EnemyAttackType attackType) { m_AttackType = attackType; }
 	EnemyAttackType GetEnemyAttackType() const { return m_AttackType; } 
 
 	float GetAttackRange() const { return m_AttackRange; }
@@ -91,9 +110,9 @@ public:
 	CPlayer* GetTargetPlayer() const { return m_TargetPlayer; }
 
 	ObjectState GetStateInfo() const override{ return m_State->GetStatename(); }
-
-	// 장애물과 충돌하였으므로 특정 상태에서 상태 재검색을 수행하라
-	void CollideToObstacle();
+	 
+	EnemyType GetEnemyType() const { return m_EnemyType; }
+	void SetEnemyType(EnemyType enemyType) { m_EnemyType = enemyType; } 
 };
 
 class CMeleeEnemy : public CEnemy

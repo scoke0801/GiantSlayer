@@ -109,6 +109,8 @@ extern XMFLOAT3 GetRandomVector3(float scale, float min, float correctionValue);
 extern XMFLOAT2 GetRandomVector2(float scale, float min, float correctionValue);
 extern float Wrap(float data, float min, float max);
 
+extern bool g_IsNotebookDev;
+
 #define EPSILON					1.0e-10f
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }

@@ -61,7 +61,13 @@ enum class ObjectState {
 	Attack,		// °ø°Ý
 	Attacked,	// ÇÇ°Ý
 	Die,		// »ç¸Á
-	RunAway		// µµ¸Á
+	RunAway,	// µµ¸Á
+	BossSkill_1,
+	BossSkill_2,
+	BossSkill_3,
+	BossSkill_4,
+	BossSkill_5,
+	BossBorn
 };
 
 class CGameObject
@@ -104,7 +110,7 @@ protected: // ·»´õ¸µ °ü·Ã º¯¼ö
 
 	CCamera*			m_Camera = nullptr;
 
-	bool				m_isDrawbale = true;
+	bool				m_isDrawable = true;
 protected:	// °´Ã¼ °ü·Ã ¼Ó¼º º¯¼ö
 	int					m_HP = 0;
 	int					m_SP = 0;
@@ -237,8 +243,8 @@ public:
 	void SetSize(const XMFLOAT3& size) { m_xmf3Size = size; }
 	XMFLOAT3 GetSize()const { return m_xmf3Size; }
 	 
-	virtual void SetDrawable(bool drawable) { m_isDrawbale = drawable; }
-	bool IsDrawable() const { return m_isDrawbale; }
+	virtual void SetDrawable(bool drawable) { m_isDrawable = drawable; }
+	bool IsDrawable() const { return m_isDrawable; }
 
 	void SetHegithFromTerrain(float height) { m_HeightFromTerrain = height; }
 	float GetHeightFromTerrain() const { return m_HeightFromTerrain; }

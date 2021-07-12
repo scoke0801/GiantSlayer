@@ -3,7 +3,9 @@
 constexpr int FRAME_BUFFER_WIDTH = 1280;
 constexpr int FRAME_BUFFER_HEIGHT = 768;
 
-constexpr int MAX_PLAYER = 5; 
+constexpr int MAX_ROOM_PLAYER = 5; 
+
+constexpr int MAX_PLAYER = 500;
 
 constexpr int MAX_BUFFER = 1024;
 constexpr int MAX_NAME = 200;
@@ -17,6 +19,7 @@ constexpr int MAX_MOUSE_INPUT = 30;
 
 constexpr int MAX_MONSTER_COUNT = 20;
 
+constexpr float MAP_SCALE_SIZE = 1.5f;
 // 뛰기 : 100미터 16초, 1초에 6.25미터를 달린다. 625 
 // 걷기 : 100미터 60초, 1초에 1.66미터를 걷는다. 166
 // 게임이니까 1.5배정도 빠르게하자
@@ -179,7 +182,7 @@ enum class WEAPON_TYPE : short {
 };
 enum class PACKET_PROTOCOL : short
 {
-	//CLIENT 
+	//CLIENT  
 	C2S_LOGIN = 1,
 
 	C2S_INGAME_KEYBOARD_INPUT, 
@@ -212,11 +215,13 @@ enum class PACKET_PROTOCOL : short
 #pragma pack (push, 1)
 
 /////////////////////////////////////////////////////////////////
-// client protocol packet  
+// client protocol packet   
+
 struct P_C2S_LOGIN {
 	BYTE size;
 	PACKET_PROTOCOL type;
 	char name[MAX_NAME];
+	short roomIndex;
 };
 
 struct P_C2S_LOGOUT {
@@ -231,6 +236,11 @@ struct P_C2S_KEYBOARD_INPUT {
 	PACKET_PROTOCOL type;
 	short keyInput;
 	short id;
+
+#ifdef _DEBUG 
+	int move_time;			// Stress Test 프로그램에서 delay를 측정할 때 사용, 
+							// 서버는 해당 id가 접속한 클라이언트에서 보내온 최신 값을 return 해야 한다.
+#endif
 };
 
 struct P_C2S_MOUSE_INPUT {
@@ -259,13 +269,13 @@ struct P_S2C_PROCESS_LOGIN {
 	bool isSuccess;
 	int x, y, z;
 
-	bool existPlayer[MAX_PLAYER];
+	bool existPlayer[MAX_ROOM_PLAYER];
 };
 struct P_S2C_ADD_PLAYER {
 	BYTE size;
 	PACKET_PROTOCOL type;
 
-	char id;
+	short id;
 	
 	int x, y, z;
 	short angle;
@@ -286,6 +296,12 @@ struct P_S2C_PROCESS_KEYBOARD {
 	int lookX, lookY, lookZ;
 
 	WEAPON_TYPE weaponType;
+	 
+#ifdef _DEBUG 
+	short id;
+	int move_time;			// Stress Test 프로그램에서 delay를 측정할 때 사용, 
+							// 서버는 해당 id가 접속한 클라이언트에서 보내온 최신 값을 return 해야 한다.
+#endif
 };
 
 struct P_S2C_PROCESS_MOUSE {
@@ -304,23 +320,23 @@ struct P_S2C_UPDATE_SYNC {
 	PACKET_PROTOCOL type;
 	char playerNum;
 	 
-	char id[MAX_PLAYER]; 
+	short id[MAX_ROOM_PLAYER];
 
-	int posX[MAX_PLAYER];
-	int posY[MAX_PLAYER];
-	int posZ[MAX_PLAYER];
+	int posX[MAX_ROOM_PLAYER];
+	int posY[MAX_ROOM_PLAYER];
+	int posZ[MAX_ROOM_PLAYER];
 
-	int lookX[MAX_PLAYER];
-	int lookY[MAX_PLAYER];
-	int lookZ[MAX_PLAYER];
+	int lookX[MAX_ROOM_PLAYER];
+	int lookY[MAX_ROOM_PLAYER];
+	int lookZ[MAX_ROOM_PLAYER];
 	 
-	char hp[MAX_PLAYER];
-	char sp[MAX_PLAYER];
+	char hp[MAX_ROOM_PLAYER];
+	char sp[MAX_ROOM_PLAYER];
 
-	BYTE states[MAX_PLAYER];
-	bool existance[MAX_PLAYER];
+	BYTE states[MAX_ROOM_PLAYER];
+	bool existance[MAX_ROOM_PLAYER];
 
-	WEAPON_TYPE weaponType[MAX_PLAYER];  
+	WEAPON_TYPE weaponType[MAX_ROOM_PLAYER];  
 };
 
 struct P_S2C_MONSTERS_UPDATE_SYNC {

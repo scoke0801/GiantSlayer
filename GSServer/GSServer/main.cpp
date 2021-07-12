@@ -56,8 +56,8 @@ int main(int argc, char* argv[])
 		}
 
 		int c_id = PacketProcessor::GetInstance()->GetNewPlayerId(client_sock);
-
-		if (-1 != c_id) {
+		 
+		if (-1 != c_id) { 
 			cout << "\n[TCP 서버] 클라이언트 접속 : IP 주소 = " << inet_ntoa(clientAddr.sin_addr)
 				<< ", 포트 번호 = " << ntohs(clientAddr.sin_port) << endl;
 			PacketProcessor::GetInstance()->RegistSocket(client_sock, registIndex++);

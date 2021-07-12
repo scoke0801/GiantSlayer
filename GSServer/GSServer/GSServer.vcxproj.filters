@@ -26,6 +26,9 @@
     <Filter Include="State">
       <UniqueIdentifier>{de84c23c-083f-4cb5-8d36-240e570c9265}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Communicates\GameRoom">
+      <UniqueIdentifier>{8b1eb388-d53d-417f-83fb-38d669000641}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PacketProcessor.cpp">
@@ -64,6 +67,10 @@
     <ClCompile Include="MapObjects.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
+    <ClCompile Include="GameRoom.cpp">
+      <Filter>Communicates\GameRoom</Filter>
+    </ClCompile>
+    <ClCompile Include="Boss.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PacketProcessor.h">
@@ -100,6 +107,10 @@
     <ClInclude Include="MapObjects.h">
       <Filter>GameObject</Filter>
     </ClInclude>
+    <ClInclude Include="GameRoom.h">
+      <Filter>Communicates\GameRoom</Filter>
+    </ClInclude>
+    <ClInclude Include="Boss.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\ObjectPositionData.json" />

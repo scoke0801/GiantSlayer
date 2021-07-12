@@ -14,7 +14,7 @@ bool gbBlurOn = false;
 bool gbBoundaryOn = false;
 bool gbWireframeOn = false;
 bool gbShadowOn = false;
-
+bool g_IsNotebookDev = false;
 UINT gnRtvDescriptorIncrementSize = 0;
 UINT gnDsvDescriptorIncrementSize = 0;
 UINT gnCbvSrvDescriptorIncrementSize = 0;

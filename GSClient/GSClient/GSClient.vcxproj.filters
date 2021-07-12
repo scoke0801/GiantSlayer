@@ -151,10 +151,13 @@
       <Filter>GameObject\Arrow</Filter>
     </ClCompile>
     <ClCompile Include="FbxObject2.cpp">
-		<Filter>GameObject</Filter>
-	</ClCompile>
+      <Filter>GameObject</Filter>
+    </ClCompile>
     <ClCompile Include="GameObjectVer2.cpp">
       <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Boss.cpp">
+      <Filter>GameObject\Enemy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -304,10 +307,13 @@
       <Filter>GameObject\Arrow</Filter>
     </ClInclude>
     <ClInclude Include="FbxObject2.h">
-		<Filter>GameObject</Filter>
-	</ClInclude>
+      <Filter>GameObject</Filter>
+    </ClInclude>
     <ClInclude Include="GameObjectVer2.h">
       <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Boss.h">
+      <Filter>GameObject\Enemy</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

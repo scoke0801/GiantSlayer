@@ -116,14 +116,14 @@ void CSceneYJ::BuildCamera(ID3D12Device* pd3dDevice,
 
 	//m_MirrorCamera = m_Cameras[3];
 	m_MinimapCamera = m_Cameras[1];
-
+	 
 	m_MirrorCamera = new CCamera;
 	m_MirrorCamera->SetLens(0.45f * PI, width, height, 1.0f, 60000.0f);
 	m_MirrorCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
 	m_MirrorCamera->SetScissorRect(0, 0, width, height);
 	m_MirrorCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	for (int i = 0; i < MAX_PLAYER; ++i) {
+	 
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) { 
 		CCamera* pCamera = new CCamera;
 		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 60000.0f);
 		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
@@ -1272,8 +1272,56 @@ void CSceneYJ::LoginToServer()
 	p_login.type = PACKET_PROTOCOL::C2S_LOGIN;
 	strcpy_s(p_login.name, CFramework::GetInstance().GetPlayerName().c_str());
 
-	int retVal;
-	SendPacket(&p_login);
+	int retVal; 
+	SendPacket(CFramework::GetInstance().GetSocket(), reinterpret_cast<char*>(&p_login), p_login.size, retVal);
+
+	char buffer[BUFSIZE + 1] = {};
+	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+
+	P_S2C_PROCESS_LOGIN p_processLogin = *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&buffer);
+	if (p_processLogin.isSuccess)
+	{
+		XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_processLogin.x),
+			IntToFloat(p_processLogin.y), IntToFloat(p_processLogin.z) };
+
+		CFramework::GetInstance().SetPlayerId(p_processLogin.id);
+
+		cout << "Login id = " << p_processLogin.id << "\n";
+
+		m_Players[p_processLogin.id]->SetDrawable(true);
+
+		m_Player = m_Players[p_processLogin.id];
+		m_CurrentCamera = m_PlayerCameras[p_processLogin.id];
+		//m_Player->SetCamera(m_CurrentCamera); 
+		//m_CurrentCamera->SetTarget(m_Player);
+
+		m_MinimapCamera->SetTarget(m_Players[p_processLogin.id]);
+
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+			m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
+		}
+
+		// Sync Data
+		ZeroMemory(buffer, sizeof(buffer));
+		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
+
+		P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&buffer);
+
+		m_CurrentPlayerNum = p_syncUpdate.playerNum;
+
+		for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
+			if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
+
+			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
+			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
+
+			m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
+			m_Players[p_syncUpdate.id[i]]->UpdateCamera();
+			m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+
+			m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
+		}
+	} 
 }
 
 void CSceneYJ::LogoutToServer()
@@ -3250,11 +3298,11 @@ void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//pBox->SetTextureIndex(0x100); 
 	//pBox->SetPosition({ 550.0f,  m_Terrain->GetDetailHeight(550.0f, 1850.0f) + 82.5f,  1850.0f }); 
 	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
-
-	for (int i = 1; i < MAX_PLAYER; ++i) {
+	 
+	for (int i = 1; i < MAX_ROOM_PLAYER; ++i) {
 		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
-
+		 
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 
 

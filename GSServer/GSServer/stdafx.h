@@ -53,9 +53,7 @@ using namespace DirectX::PackedVector;
 using namespace rapidjson;
 
 #define EPSILON					1.0e-10f
-
-extern int* g_GridHeights[25][25];
-
+ 
 inline float Lerp(float a, float b, float t) { return (1.0f - t) * a + (b * t); }
 inline float InvLerp(float a, float b, float v) { return (v - a) / (b - a); }
 
@@ -329,3 +327,9 @@ namespace Matrix4x4
 #define VK_K 0x4B
 #define VK_L 0x4C 
 #include "protocol.h"
+
+extern int* g_GridHeights[25][25]; 
+extern int g_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
+// 플레이어 시작 위치..
+extern XMFLOAT3 PLAYER_START_POSITIONS[5];
+extern unordered_map<OBJECT_ID, XMFLOAT3>		g_ObjectPositions;

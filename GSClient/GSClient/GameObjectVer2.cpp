@@ -34,7 +34,11 @@ float CAnimationSet::GetPosition(float fPosition)
 #endif
 		break;
 	}
-	case ANIMATION_TYPE_ONCE:
+	case ANIMATION_TYPE_ONCE: 
+		fGetPosition = fPosition;
+		if (fGetPosition >= m_pfKeyFrameTransformTimes[m_nKeyFrameTransforms - 1]) {
+			fGetPosition = m_pfKeyFrameTransformTimes[m_nKeyFrameTransforms - 1];
+		}
 		break;
 	case ANIMATION_TYPE_PINGPONG:
 		break;
@@ -140,11 +144,22 @@ void CAnimationController::SetCallbackKey(int nAnimationSet, int nKeyIndex, floa
 }
 
 void CAnimationController::SetAnimationSet(int nAnimationSet)
-{
+{ 
 	if (m_pAnimationSets && (nAnimationSet < m_nAnimationSets))
-	{
+	{ 
+		if (m_nAnimationSet != nAnimationSet) {
+			m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet->m_fPosition = 0.0f;
+		}
+
 		m_nAnimationSet = nAnimationSet;
 		m_pAnimationTracks[m_nAnimationTrack].m_pAnimationSet = &m_pAnimationSets[m_nAnimationSet];
+	}
+}
+
+void CAnimationController::SetAnimationType(int nType)
+{
+	if (m_pAnimationSets != nullptr) {
+		m_pAnimationSets->SetAniamtionType(nType);
 	}
 }
 
@@ -177,7 +192,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHan
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._12 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._13 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._14 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._21 << " ";
+					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4	ToParent._21 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._22 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._23 << " ";
 					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._24 << " ";
@@ -381,7 +396,7 @@ void CGameObjectVer2::UpdateColliders()
 
 void CGameObjectVer2::Update(float fTimeElapsed)
 {
-	//if (!m_isDrawbale) return;
+	//if (!m_isDrawable) return;
 	//static float MaxVelocityXZ = 120.0f;
 	//static float MaxVelocityY = 120.0f;
 	//static float Friction = 50.0f;
@@ -552,6 +567,14 @@ void CGameObjectVer2::SetAnimationSet(int nAnimationSet)
 
 	if (m_pSibling) m_pSibling->SetAnimationSet(nAnimationSet);
 	if (m_pChild) m_pChild->SetAnimationSet(nAnimationSet);
+}
+
+void CGameObjectVer2::SetAnimationType(int nType)
+{
+	if (m_pAnimationController) m_pAnimationController->SetAnimationType(nType);
+
+	if (m_pSibling) m_pSibling->SetAnimationType(nType);
+	if (m_pChild) m_pChild->SetAnimationType(nType);
 }
 
 void CGameObjectVer2::CacheSkinningBoneFrames(CGameObjectVer2* pRootFrame)
@@ -804,9 +827,10 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 					// 더미 프레임 추가
 					pAnimationSet->m_pfKeyFrameTransformTimes[i] = pAnimationSet->m_pfKeyFrameTransformTimes[i - 1] + 
 						(pAnimationSet->m_pfKeyFrameTransformTimes[i - 1] - pAnimationSet->m_pfKeyFrameTransformTimes[i - 2]); // 트랜스폼 적용되는 시간
+					//pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 1]; // 트랜스폼
+					 
+					//pAnimationSet->m_pfKeyFrameTransformTimes[i] = pAnimationSet->m_fLength - pAnimationSet->m_pfKeyFrameTransformTimes[i - 1]; 
 					pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i] = pAnimationSet->m_ppxmf4x4KeyFrameTransforms[i - 1]; // 트랜스폼
-					
-					
 
 					/*
 					2안, 배열 크기를 m_nKeyFrameTransforms - 1 로 아예 재할당하는 방안, 깜박임 문제 있음

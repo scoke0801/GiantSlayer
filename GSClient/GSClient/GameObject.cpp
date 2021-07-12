@@ -124,7 +124,7 @@ void CGameObject::Animate(float fTimeElapsed)
 
 void CGameObject::Update(float fTimeElapsed)
 {
-	if (!m_isDrawbale) return;
+	if (!m_isDrawable) return;
 	static float MaxVelocityXZ = 120.0f;
 	static float MaxVelocityY = 120.0f;
 	static float Friction = 50.0f;	
@@ -162,7 +162,7 @@ void CGameObject::OnPrepareRender()
 
 void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	if (!m_isDrawbale) return;
+	if (!m_isDrawable) return;
 	OnPrepareRender();
 
 	if (m_pShader)

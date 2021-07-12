@@ -11,6 +11,9 @@ enum class Player_Move_Type
 class CPlayer : public CGameObject
 { 
 public:
+#ifdef _DEBUG
+	int		m_moveTime;
+#endif
 	AnimationType m_StateName;
 
 private:

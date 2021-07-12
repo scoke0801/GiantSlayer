@@ -109,10 +109,13 @@ Texture2D gtxtMeleeSkeleton_02_EquipAll: register(t46);
 
 Texture2D gtxtGreenTree		: register(t47);
 Texture2D gtxtBow			: register(t48);
+Texture2D gtxtEffect_1		: register(t49);
+Texture2D gtxtEffect_2		: register(t50);
+Texture2D gtxtEffect_3		: register(t51);
 
-Texture2D gtxtMap		   : register(t49);
-Texture2D gtxtMirror	   : register(t50);
-Texture2D gtxtShadowMap	   : register(t51);
+Texture2D gtxtMap			: register(t52);
+Texture2D gtxtMirror		: register(t53);
+Texture2D gtxtShadowMap		: register(t54);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -315,6 +318,57 @@ float4 PSTextured(VS_TEXTURE_OUT input) : SV_TARGET
 	if (gnTexturesMask & 0x200)
 	{
 		cColor = gtxtGrassWall.Sample(gssWrap, input.uv);
+	}
+	return cColor;
+}
+
+
+/////////////////////////////////////////////////////////////////
+///// 
+struct VS_EFFECT_IN
+{
+	float3 position : POSITION;
+	float2 uv		: TEXCOORD;
+};
+struct VS_EFFECT_OUT
+{
+	float4 position : SV_POSITION;
+	float2 uv		: TEXCOORD;
+};
+
+VS_EFFECT_OUT VSEffect(VS_EFFECT_IN input)
+{
+	VS_EFFECT_OUT outRes;
+	outRes.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	outRes.uv = input.uv;
+	
+	float frameCount = 0;
+	if (gnTexturesMask & 0x01) { frameCount = 15; }
+	if (gnTexturesMask & 0x02) { frameCount = 10; }
+	if (gnTexturesMask & 0x04) { frameCount = 10; }
+
+	float newTime = fmod(gfTime * 10.0f, frameCount); 
+	outRes.uv.x /= frameCount;
+	outRes.uv.x += (1.0f / frameCount) * (int)newTime;
+
+	return outRes;
+}
+
+float4 PSEffect(VS_EFFECT_OUT input) : SV_TARGET
+{ 
+	float4 cColor;
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtEffect_1.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gtxtEffect_2.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gtxtEffect_3.Sample(gssClamp, input.uv);
 	}
 	return cColor;
 }
@@ -634,7 +688,7 @@ float3 CubicBezierNormalSum5x5(OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> p
 float CalculateTessFactor(float3 f3Position)
 {
 	float fDistToCamera = distance(f3Position, gvCameraPosition);
-	float s = saturate((fDistToCamera - 10.0f) / (10000.0f - 10.0f));
+	float s = saturate((fDistToCamera - 10.0f) / (20000.0f - 10.0f));
 
 	return(lerp(64.0f, 1.0f, s));
 }
@@ -757,8 +811,8 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	{
 		cColor = gtxtRocky_Terrain.Sample(gssWrap, input.uv0);
 		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-		float FogStart = 10000.0f;
-		float FogRange = 20000.0f;
+		float FogStart = 10000.0f * 1.5f;
+		float FogRange = 20000.0f * 1.5f;
 
 		float3 toEyeW = gvCameraPosition + input.position.xyz;
 		float distToEye = length(toEyeW);
@@ -773,8 +827,8 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		cColor = gtxtBossWall.Sample(gssWrap, input.uv0);
 
 		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-		float FogStart = 10000.0f;
-		float FogRange = 20000.0f;
+		float FogStart = 10000.0f * 1.5f;
+		float FogRange = 20000.0f * 1.5f;
 
 		float3 toEyeW = gvCameraPosition + input.position.xyz;
 		float distToEye = length(toEyeW);
@@ -907,19 +961,7 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	}
 	if (gnTexturesMask & 0x80)
 	{
-		cColor = gtxtBox.Sample(gssWrap, input.uv);
-
-		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-		float FogStart = 10000.0f;
-		float FogRange = 20000.0f;
-
-		float3 toEyeW = gvCameraPosition + input.position.xyz;
-		float distToEye = length(toEyeW);
-		toEyeW /= distToEye; // normalize
-
-		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
-
-		cColor = lerp(cColor, FogColor, 1 - fogAmount);
+		cColor = gtxtBox.Sample(gssWrap, input.uv); 
 	}
 	if (gnTexturesMask & 0x100)
 	{
@@ -1253,8 +1295,8 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		cColor += gtxtBossE.Sample(gssWrap, input.uv);
 
 		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
-		float FogStart = 10000.0f;
-		float FogRange = 20000.0f;
+		float FogStart = 10000.0f * 1.5f;
+		float FogRange = 20000.0f * 1.5f;
 
 		float3 toEyeW = gvCameraPosition + input.position.xyz;
 		float distToEye = length(toEyeW);
@@ -1262,7 +1304,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
 		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
 
-		cColor = lerp(cColor, FogColor, 1 - fogAmount);
+		//cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	} 
 	else if (gnTexturesMask & 0x20)
 	{
