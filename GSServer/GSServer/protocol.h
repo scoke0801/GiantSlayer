@@ -38,6 +38,9 @@ constexpr float TO_JUMP_TIME = 1.0f;
 constexpr float MELLE_ENEMY_ATTACK_TIME = 2.7f;
 constexpr float RANGED_ENEMY_ATTACK_TIME = 2.0f;
 
+constexpr float MELLE_MUMMY_ATTACK_TIME = 2.7f;
+constexpr float LASER_MUMMY_ATTACK_TIME = 2.0f;
+
 constexpr float PLAYER_SWORD_ATTACK_TIME = 1.033333f;
 
 constexpr float AIR_RESISTANCE = 0.007f;
@@ -60,8 +63,13 @@ enum AnimationType
 	BOW_IDLE,
 	BOW_RUN,
 	BOW_ATK,
-	BOW_DEATH
-	// ==============
+	BOW_DEATH,
+	// 박스==============
+	BOX_IDLE,
+	BOX_WALK,
+	BOX_PICK,
+	BOX_DOWN
+
 };
 // x,y,z 크기를 short로 보내면 맵 크기 20000에서 
 // int, float 형 변환 계산하기에 크기가 작아서 int형으로 사용

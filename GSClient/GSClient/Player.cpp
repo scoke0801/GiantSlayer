@@ -64,12 +64,8 @@ void CPlayer::Update(float fTimeElapsed)
 			SetAnimationSet(AnimationType::IDLE);
 		}*/
 	}
+
 	else {
-		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
-			SetAnimationSet(IDLE);
-		else
-			SetAnimationSet(RUN);
-	}
 
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
@@ -277,6 +273,23 @@ void CPlayer::ResetBow()
 	pause = false;
 	m_StringPullTime = 0;
 }
+
+void CPlayer::Box_Picked()
+{
+	SetPickBox(true);
+
+	IncreaseBoxPickWaitingTime(m_BoxPickAnimLength);
+
+}
+
+void CPlayer::Box_Down()
+{
+	SetDownBox(true);
+
+	IncreaseBoxDownWaitingTime(m_BoxDownAnimLength);
+}
+
+
 
 void CPlayer::AnimationChange(PlayerWeaponType weapon)
 {

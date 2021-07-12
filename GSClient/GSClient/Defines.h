@@ -119,15 +119,23 @@ enum class PARTICLE_TYPE : UINT {
 	ArrowParticle,	// 화살 뒤에 사용할 파티클
 	RadialParitcle, // 전방향으로 퍼지는 파티클
 	StraightParticle, // 직선으로 퍼지는 파티클
-	RainParticle,
-	SandParticle,
+	RainParticle,		// 비 파티클
+	SandParticle,		// 모래파티클
+	MummyLaserParticle,	// 레이저파티클
+	MummyLaserParticle2,// 레이저파티클
+	MummyLaserParticle3,// 레이저파티클
+
 };
 constexpr float ARROW_PARTICLE_LIFE_TIME = 10.0f;
 
 constexpr float HIT_PARTICLE_LIFE_TIME = 10.0f;
 
-constexpr float RADIAL_PARTICLE_LIFE_TIME = 6.0f;
+constexpr float RADIAL_PARTICLE_LIFE_TIME = 10.0f;
 
 constexpr float STRAIGHT_PARTICLE_LIFE_TIME = 10.0f;
 
+
 constexpr int MAX_THUNDER_CREATE_COUNT = 10;
+
+constexpr float Laser_PARTICLE_LIFE_TIME = 10.0f;
+

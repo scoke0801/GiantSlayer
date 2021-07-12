@@ -25,7 +25,9 @@ enum class EnemyType {
 	None = 0,
 	Skeleton,
 	Mummy,
-	Boss
+	Boss,
+	Mummy,
+
 };
 class CEnemy : public CGameObjectVer2
 { 
@@ -55,7 +57,12 @@ protected:
 	BoundingBox				m_SightAABB;
 
 	float					m_AttackDelayTime = 0.0f;
+
 	float					m_Speed;
+
+	float					m_LaserAttackDelayTime[3] = { 3.0f,5.0f,7.0f };
+	bool					m_LaserAttack[3] = { false,false,false };
+
 public:
 	CEnemy(); 
 	~CEnemy();
@@ -136,4 +143,17 @@ public:
 
 	void Attack(float elapsedTime) override;
 	//void Update(float elapsedTime) override {}
+};
+
+class CMummy :public CEnemy
+{
+public:
+	CMummy();
+	~CMummy();
+
+	void Attack(float elapsedTime) override;
+	void Update(float elapsedTime) override;
+	bool isAttack0() const { return m_LaserAttack[0]; }
+	bool isAttack1() const { return m_LaserAttack[1]; }
+	bool isAttack2() const { return m_LaserAttack[2]; }
 };

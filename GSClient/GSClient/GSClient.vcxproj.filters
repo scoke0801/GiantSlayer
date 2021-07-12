@@ -159,6 +159,9 @@
     <ClCompile Include="Boss.cpp">
       <Filter>GameObject\Enemy</Filter>
     </ClCompile>
+    <ClCompile Include="MummyLaser.cpp">
+      <Filter>GameObject\MummyLaser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -315,6 +318,9 @@
     <ClInclude Include="Defines.h">
       <Filter>Main</Filter> 
     </ClInclude>
+    <ClInclude Include="MummyLaser.h">
+      <Filter>GameObject\MummyLaser</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="GiantSlayer.ico">
@@ -423,6 +429,9 @@
     </Filter>
     <Filter Include="GameObject\Arrow">
       <UniqueIdentifier>{13df2e8a-dd14-4fee-86b7-3f08fd19b807}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\MummyLaser">
+      <UniqueIdentifier>{092adec7-9cc3-486c-bcc4-02c1d10527ec}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

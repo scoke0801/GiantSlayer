@@ -4,6 +4,7 @@
 
 class CCamera;
 class CSceneJH;
+class CSceneYJ;
 
 class CFramework
 {
@@ -87,6 +88,7 @@ public: // about GetInstance , init framework
 	CScene* GetScene() { return m_CurrentScene; }
 	// 메인 게임씬에 접근이 필요할 때
 	CSceneJH* GetMainGameScene() { return reinterpret_cast<CSceneJH*>(m_CurrentScene); }
+	CSceneYJ* GetMainGameScene_Y() { return reinterpret_cast<CSceneYJ*>(m_CurrentScene); }
 
 private:
 	void CreateSwapChain();
@@ -176,3 +178,4 @@ public:	// about scene change
 };
 
 #define MAIN_GAME_SCENE CFramework::GetInstance().GetMainGameScene()
+#define MAIN_GAME_SCENE_Y CFramework::GetInstance().GetMainGameScene_Y()

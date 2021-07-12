@@ -43,8 +43,16 @@ private:
 private:
 	float m_AttackAnimLength = 0.0f;
 	float m_AttackWaitingTime = 0.0f;
+
 	float m_AttackAnimPauseTime = 0.0f;
+
 	bool m_IsCanAttack = true;
+
+	bool m_IsBox = false;
+	bool m_DownBox = false;
+	bool m_HaveBox = false;
+	
+	
 
 	float m_AttackedDelay = 0.0f;
 
@@ -82,8 +90,14 @@ public:
 	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; } 
 
 	void SetCanAttack(bool info) { m_IsCanAttack = info; }
+	void SetPickBox(bool info ) { m_IsBox = info; }
+	void SetDownBox(bool info) { m_DownBox = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }
+	bool IsBox() const { return m_IsCanAttack; }
+
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
+	void IncreaseBoxPickWaitingTime(float time) { m_BoxPickWaitingTime = time; }
+	void IncreaseBoxDownWaitingTime(float time) { m_BoxDownWaitingTime = time; }
 
 	float GetAttackWaitTime() const { return m_AttackWaitingTime; }
 	float GetStringPullTime() const { return m_StringPullTime; }
@@ -94,6 +108,9 @@ public:
 	void Attack();
 	void ResetAttack();
 	void ResetBow();
+
+	void Box_Picked();
+	void Box_Down();
 
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }

@@ -305,6 +305,14 @@ void CShaderHandler::CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("RainParticle", pParticleShader);
 
+	pParticleShader = new CShader();
+	pParticleShader->CreateVertexShader(L"Shaders\\ParticleShader.hlsl", "VSMummyLaserParticle");
+	pParticleShader->CreatePixelShader(L"Shaders\\ParticleShader.hlsl", "PSParticle");
+
+	pParticleShader->CreateInputLayout(ShaderTypes::Particle);
+	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("MummyLaserParticle", pParticleShader);
+
 }
 
 void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -357,8 +365,11 @@ void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 		pStandardShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSStandard");
 		pStandardShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSStandard");
 	}
-	else
-	{
+	else if (m_UserID == ShaderHandlerUser::YJ) {
+		pStandardShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSStandard");
+		pStandardShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSStandard");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
 		pStandardShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSStandard");
 		pStandardShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
@@ -376,11 +387,15 @@ void CShaderHandler::CreateSkinnedShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSSkinnedAnimationStandard");
 		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSStandard");
 	}
-	else
-	{
+	else if (m_UserID == ShaderHandlerUser::YJ) {
+		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSSkinnedAnimationStandard");
+		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSStandard");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
 		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSSkinnedAnimationStandard");
 		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
+	
 
 	pSkinnedShader->CreateInputLayout(ShaderTypes::Skinned);
 	pSkinnedShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
