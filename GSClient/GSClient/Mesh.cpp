@@ -3045,7 +3045,7 @@ CMeshFbxTextured::~CMeshFbxTextured()
 
 }
 
-}
+
 
 
 

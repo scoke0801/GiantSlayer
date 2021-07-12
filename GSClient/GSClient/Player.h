@@ -96,8 +96,8 @@ public:
 	bool IsBox() const { return m_IsCanAttack; }
 
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
-	void IncreaseBoxPickWaitingTime(float time) { m_BoxPickWaitingTime = time; }
-	void IncreaseBoxDownWaitingTime(float time) { m_BoxDownWaitingTime = time; }
+	//void IncreaseBoxPickWaitingTime(float time) { m_BoxPickWaitingTime = time; }
+	//void IncreaseBoxDownWaitingTime(float time) { m_BoxDownWaitingTime = time; }
 
 	float GetAttackWaitTime() const { return m_AttackWaitingTime; }
 	float GetStringPullTime() const { return m_StringPullTime; }

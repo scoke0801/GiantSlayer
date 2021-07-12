@@ -6,7 +6,7 @@ class ParticleObject;
 class CMummyLaser : public CGameObject
 {
 public:
-	CMummyLaser() { m_isDrawbale = true; }
+	CMummyLaser() { m_isDrawable = true; }
 	virtual ~CMummyLaser() {}
 
 public:
@@ -18,8 +18,8 @@ public:
 	void SetTargetPosition(const XMFLOAT3& targetPos);
 	void SetTargetVector(const XMFLOAT3& playerLookAt);
 
-	bool IsCanUse() const { return m_isDrawbale; }
-	void SetUseable(bool data) { m_isDrawbale = data; }
+	bool IsCanUse() const { return m_isDrawable; }
+	void SetUseable(bool data) { m_isDrawable = data; }
 	void SetDrawable(bool drawable);
 
 	void ConnectParticle(ParticleObject* particle) { m_ConnectedParticle = particle; }

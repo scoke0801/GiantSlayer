@@ -15,6 +15,7 @@ class CPlayer;
 enum class EnemyAttackType {
 	Melee,
 	Ranged,
+	Mummy,
 	BossSkill_1,
 	BossSkill_2,
 	BossSkill_3,
@@ -26,8 +27,6 @@ enum class EnemyType {
 	Skeleton,
 	Mummy,
 	Boss,
-	Mummy,
-
 };
 class CEnemy : public CGameObjectVer2
 { 
