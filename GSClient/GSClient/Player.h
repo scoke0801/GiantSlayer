@@ -11,6 +11,7 @@ enum class PlayerMoveType
 	Walk,
 	Run
 };
+
 enum class PlayerWeaponType
 {
 	None = 0x00,
@@ -44,7 +45,6 @@ private:
 	bool m_IsCanAttack = true;
 
 	float m_AttackedDelay = 0.0f;
-	float m_StringPullTime = 0.0f;
 
 	CMesh* m_SpareBoundingBox;
 	Collider* m_SpareCollisionBox;
@@ -52,6 +52,7 @@ private:
 
 public:
 	bool pullString = false;
+	float m_StringPullTime = 0.0f;
 
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -89,6 +90,8 @@ public:
 
 	bool Attacked(CGameObject* pObject);
 	void Attack();
+	void ResetAttack();
+	void ResetBow();
 
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
@@ -96,9 +99,6 @@ public:
 	void AnimationChange(PlayerWeaponType weapon);
 	void DisableSword();
 	void DisableBow();
-
-	void PullString();
-	void ReleaseString();
 
 	bool ShotAble();
 };

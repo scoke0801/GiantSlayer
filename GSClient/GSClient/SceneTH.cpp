@@ -1617,9 +1617,7 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 					m_Player->IncreaseAttackWaitingTime(0);
 					m_Player->SetAnimationSet(IDLE);
 				}
-				m_Player->SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
-				m_Player->pullString = false;
-				m_Player->pause = false;
+				m_Player->ResetBow();
 				break;
 			}
 		}
