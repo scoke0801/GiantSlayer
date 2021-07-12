@@ -60,7 +60,7 @@ void CEffect::Update(float elapsedTime)
 	m_ElapsedTime += elapsedTime;
 	if (m_ElapsedTime > m_LifeTime) {
 		m_ElapsedTime = 0.0f;
-		//m_isDrawable = false;
+		m_isDrawable = false;
 	}
 }
 
