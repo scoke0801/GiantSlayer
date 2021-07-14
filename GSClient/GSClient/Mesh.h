@@ -692,6 +692,8 @@ protected:
 	ID3D12Resource* m_pd3dBoneWeightUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dBoneWeightBufferView;
 
+	bool		m_HasBoundingInfo = false;
+
 public:
 	int								m_nSkinningBones = 0;
 
@@ -718,6 +720,9 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet) override;
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
+
+	BoundingBox GetBoundigBox() const;
+	bool HasBoundingBox() const { return m_HasBoundingInfo; }
 };
 
 //////////////////////////////////////////////////////////////////////////////

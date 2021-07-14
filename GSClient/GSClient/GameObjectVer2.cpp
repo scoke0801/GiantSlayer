@@ -967,6 +967,11 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 			pSkinnedMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 
 			pGameObject->SetMesh(pSkinnedMesh);
+			if (pSkinnedMesh->HasBoundingBox()) {
+				auto boundingBox = pSkinnedMesh->GetBoundigBox(); 
+				pGameObject->AddColider(new ColliderBox(boundingBox.Center, boundingBox.Extents));
+			}
+
 			pGameObject->isSkinned = true;
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
