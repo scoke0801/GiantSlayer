@@ -446,7 +446,6 @@ void CSceneYJ::Update(float elapsedTime)
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
-	
 	// 플레이어 4스테이지 진입할때 체크용 
 	if (m_Player->GetPosition().x > 20600.0f && m_Player->GetPosition().z > 2400.0f)
 	{
@@ -500,37 +499,6 @@ void CSceneYJ::Update(float elapsedTime)
 			}
 		}
 	}
-
-
-	
-	//for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
-	//	if (pEnemy->CollisionCheck(m_Player)) {
-	//		// 공격 상태일 때만 체력이 닳는것이 맞을까...
-	//		//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-	//		//	
-	//		//}
-	//		if (false == m_Player->IsCanAttack()) {
-	//			if (false == m_Player->IsAleradyAttack()) {
-	//				pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-	//				cout << "플레이어 공격 - 몬스터\n";
-
-	//				m_Player->SetAleradyAttack(true);
-	//			}
-	//		}
-	//		else if (m_Player->Attacked(pEnemy))
-	//		{
-	//			m_CurrentCamera->SetShake(true, 0.5f, 15);
-	//			m_Player->FixCollision();
-	//			//cout << "충돌 : 플레이어 - 적\n";
-	//		}
-	//	}
-	//}
-	
-
-	/*for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
-		pEnemy->FixPositionByTerrain(m_Terrain);
-	}*/
-
 	/////////////////////////////////////////////////////// 
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
@@ -558,10 +526,15 @@ void CSceneYJ::Update(float elapsedTime)
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
-			//cout << "충돌 : 플레이어 - 장애물\n";
+			cout << "충돌 : 플레이어 - 장애물\n";
 		}
 	}
-
+	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox]) {
+		if (pObstacle->CollisionCheck(m_Player)) {
+			m_Player->FixCollision(pObstacle);
+			cout << "충돌 : 플레이어 - 퍼즐박스\n";
+		}
+	}
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		if (pEnemy->CollisionCheck(m_Player)) {
@@ -763,19 +736,67 @@ void CSceneYJ::Update(float elapsedTime)
 		}
 	}
 
+	// 퍼즐 위치 선정
+	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
+	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 10.0f);
+	XMFLOAT3 Speed = { 0.3f,0.3f,0.3f };
+
+
 	// 퍼즐 상자하고 충돌처리
 	for (int i = 0; i < 8; i++)
 	{
-		if (m_PuzzleBox[i]->CollisionCheck(m_Player))
+		if (
+			(
+			(m_PuzzleBox[i]->GetPosition().x+135.0f > m_Player->GetPosition().x)
+			&& (m_PuzzleBox[i]->GetPosition().x-135.0f < m_Player->GetPosition().x )
+			)
+			&&
+			(
+			(m_PuzzleBox[i]->GetPosition().z+135.0f > m_Player->GetPosition().z )
+			&& (m_PuzzleBox[i]->GetPosition().z-135.0f < m_Player->GetPosition().z )
+				)
+		
+			)
 		{
 			m_PuzzleBox[i]->SetSelectBox(true);
 		}
-		else
+		else 
 		{
+			m_PuzzleBoxCount = false;
 			m_PuzzleBox[i]->SetSelectBox(false);
 		}
+		
 	}
-
+	for (int i = 0; i < 8; i++)
+	{
+		if (m_PuzzleBox[i]->GetSelectBox())
+		{
+			{
+				m_Player->Box_Pull(TRUE);
+				m_PuzzleBox[i]->SetPosition(
+					{
+						m_PuzzleBox[i]->GetPosition().x + Final_Vec.x,
+						m_PuzzleBox[i]->GetPosition().y ,
+						m_PuzzleBox[i]->GetPosition().z + Final_Vec.z
+					}
+				);
+			}
+		}
+		else if (m_PuzzleBox[0]->GetSelectBox()==0
+			&& m_PuzzleBox[1]->GetSelectBox() == 0
+			&& m_PuzzleBox[2]->GetSelectBox() == 0
+			&& m_PuzzleBox[3]->GetSelectBox() == 0
+			&& m_PuzzleBox[4]->GetSelectBox() == 0
+			&& m_PuzzleBox[5]->GetSelectBox() == 0
+			&& m_PuzzleBox[6]->GetSelectBox() == 0
+			&& m_PuzzleBox[7]->GetSelectBox() == 0)
+		{
+			m_Player->Box_Pull(FALSE);
+			m_PuzzleBox[i]->SetSelectBox(false);
+		}
+		
+	}
+	
 	// 퍼즐 범위 내일 작업할때 사용 
 
 	/*x축 12450 12150   11950 11650  11450 11150
@@ -841,23 +862,7 @@ void CSceneYJ::Update(float elapsedTime)
 		p->OpenDoor();
 	}
 
-	// 퍼즐 위치 선정
-	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
-	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 100.0f);
-
-	for (int i = 0; i < 8; i++)
-	{
-		if (m_PuzzleBox[i]->GetGriptBox())
-		{
-			m_PuzzleBox[i]->SetPosition(
-				{
-					Final_Vec.x + m_Player->GetPosition().x,Final_Vec.y + m_Player->GetPosition().y + 100.0f ,Final_Vec.z + m_Player->GetPosition().z
-				}
-			);
-		}
-
-	}
-
+	
 	//m_PlayerCameras[CFramework::GetInstance().GetPlayerId()]->Update(elapsedTime);
 
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
@@ -1655,41 +1660,51 @@ void CSceneYJ::ProcessInput()
 		else
 			m_CurrentCamera->Strafe(cameraSpeed);
 	}
+	
 
-	for (int i = 0; i < 8; i++)
-	{
-		if (keyInput.KEY_C && m_PuzzleBox[i]->GetSelectBox() && !m_PuzzleBoxCount)
-		{
-			cout << "박스를 이동합니다";
+	//for (int i = 0; i < 8; i++)
+	//{
+	//	//KEY_DOWN(0x43)
+	//	if (keyInput.KEY_C && m_PuzzleBox[i]->GetSelectBox() && !m_PuzzleBoxCount)
+	//	{
+	//		cout << "박스를 이동합니다";
 
-			m_Player->Box_Picked();
+	//		//m_Player->Box_Picked();
 
-			m_PuzzleBoxCount = TRUE;
+	//		m_PuzzleBoxCount = TRUE;
 
-			m_PuzzleBox[i]->SetGripBox(!m_isBoxDown);
+	//		m_PuzzleBox[i]->SetGripBox(!m_isBoxDown);
+	//	}
+	//	else if (m_PuzzleBox[i]->GetSelectBox() && !m_PuzzleBoxCount)
+	//	{
+	//		cout << "박스를 멈춥니다";
 
-		}
-	}
-	for (int i = 0; i < 8; i++)
-	{
-		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox() && m_PuzzleBoxCount)
-		{
-			m_Player->Box_Down();
+	//		m_PuzzleBoxCount = FALSE;
 
-			m_PuzzleBoxCount = FALSE;
+	//		m_PuzzleBox[i]->SetGripBox(!m_isBoxDown);
+	//	}
+	//
+	//}
+	//for (int i = 0; i < 8; i++)
+	//{
+	//	if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox() && m_PuzzleBoxCount)
+	//	{
+	//		m_Player->Box_Down();
 
-			cout << "박스를 내려놓니다";
+	//		m_PuzzleBoxCount = FALSE;
 
-			m_PuzzleBox[i]->SetGripBox(false);
+	//		cout << "박스를 내려놓니다";
 
-			cout << " x축 : " << m_PuzzleBox[i]->GetPosition().x << " y축 :" << m_PuzzleBox[i]->GetPosition().z << endl;
+	//		m_PuzzleBox[i]->SetGripBox(false);
 
-			//-1760
+	//		cout << " x축 : " << m_PuzzleBox[i]->GetPosition().x << " y축 :" << m_PuzzleBox[i]->GetPosition().z << endl;
 
-			m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
+	//		//-1760
 
-		}
-	}
+	//		m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
+
+	//	}
+	//}
 
 	if (keyInput.KEY_1)
 	{
@@ -1833,6 +1848,62 @@ void CSceneYJ::ProcessInput()
 		gbShadowOn = false;
 	}
 	m_CurrentCamera->UpdateViewMatrix();
+}
+
+void CSceneYJ::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
+{
+
+	/*for (int i = 0; i < 8; i++)
+	{
+		if (m_PuzzleBox[i]->GetGriptBox())
+		{
+			m_PuzzleBox[i]->SetPosition(
+				{
+					m_PuzzleBox[i]->GetPosition().x + lookVec.x + Speed.x,
+					m_PuzzleBox[i]->GetPosition().y ,
+					m_PuzzleBox[i]->GetPosition().z + lookVec.z + Speed.z
+				}
+			);
+
+		}
+	}*/
+	
+	//if (isKeyUp == false)
+	//{
+	//	for (int i = 0; i < 8; i++)
+	//		if (wParam == VK_C && m_PuzzleBox[i]->GetSelectBox() && !m_PuzzleBoxCount) {
+
+	//			cout << "박스를 이동합니다";
+
+	//			for (int i = 0; i < 8; i++)
+	//			{
+	//				cout << i << m_PuzzleBox[i]->GetSelectBox() << endl;
+	//			}
+
+	//			m_Player->Box_Pull(TRUE);
+
+	//			m_PuzzleBoxCount = TRUE;
+
+	//			//m_PuzzleBox[i]->SetGripBox(TRUE);
+	//		}
+	//}
+	//	
+	//else
+	//{
+	//	for (int i = 0; i < 8; i++)
+	//	{
+	//		if (wParam == VK_C && m_PuzzleBox[i]->GetSelectBox() && m_PuzzleBoxCount)
+	//		{
+	//			
+	//			m_Player->Box_Pull(FALSE);
+	//			cout << "박스를 멈춥니다";
+	//			m_PuzzleBoxCount = FALSE;
+
+	//			//m_PuzzleBox[i]->SetGripBox(FALSE);
+	//		}
+	//	}
+
+	//}
 }
 
 void CSceneYJ::OnMouseDown(WPARAM btnState, int x, int y)
@@ -3582,7 +3653,7 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player3.bin", NULL, true);
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player5.bin", NULL, true);
 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);

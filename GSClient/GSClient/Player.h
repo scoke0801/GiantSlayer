@@ -48,11 +48,7 @@ private:
 
 	bool m_IsCanAttack = true;
 
-	bool m_IsBox = false;
-	bool m_DownBox = false;
-	bool m_HaveBox = false;
-	
-	
+	bool m_PullBox = false;
 
 	float m_AttackedDelay = 0.0f;
 
@@ -90,10 +86,8 @@ public:
 	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; } 
 
 	void SetCanAttack(bool info) { m_IsCanAttack = info; }
-	void SetPickBox(bool info ) { m_IsBox = info; }
-	void SetDownBox(bool info) { m_DownBox = info; }
+	void SetPullBox(bool info ) { m_PullBox = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }
-	bool IsBox() const { return m_IsCanAttack; }
 
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
 	//void IncreaseBoxPickWaitingTime(float time) { m_BoxPickWaitingTime = time; }
@@ -109,9 +103,8 @@ public:
 	void ResetAttack();
 	void ResetBow();
 
-	void Box_Picked();
-	void Box_Down();
-
+	void Box_Pull(bool Pull_State);
+	
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
 

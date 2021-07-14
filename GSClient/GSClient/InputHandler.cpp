@@ -42,7 +42,8 @@ void CInputHandler::ProcessInput()
 	if (GetAsyncKeyState(VK_SUBTRACT) & 0x8000) m_Inputs.KEY_SUBTRACT = true;
 
 	if (GetAsyncKeyState(VK_B) & 0x8000)		m_Inputs.KEY_B = true;
-	if (GetAsyncKeyState(VK_C) & 0x8000)		m_Inputs.KEY_C = true;
+	if (GetAsyncKeyState(VK_C) & 0x8001)		m_Inputs.KEY_C = true;
+	//if(GetAsyncKeyState(VK_C)&0x)
 
 	if (GetAsyncKeyState(VK_U) & 0x8000)		m_Inputs.KEY_U = true;
 	if (GetAsyncKeyState(VK_I) & 0x8000)		m_Inputs.KEY_I = true;

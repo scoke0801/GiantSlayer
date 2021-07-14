@@ -76,8 +76,8 @@ private:
 
 	short						m_DoorIdx = 0;
 	int							m_PuzzleNum[4];
-	
-	
+
+
 	bool						m_PuzzleBoxCount = false;
 
 private:
@@ -168,6 +168,7 @@ public:
 	void AddPlayer(int palyerId) override {}
 public:
 	void ProcessInput() override;
+	void ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp) override;
 
 	void OnMouseDown(WPARAM btnState, int x, int y) override;
 	void OnMouseUp(WPARAM btnState, int x, int y)	override;

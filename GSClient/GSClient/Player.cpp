@@ -67,6 +67,11 @@ void CPlayer::Update(float fTimeElapsed)
 	else {
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
 			SetAnimationSet(IDLE);
+
+		else if (m_PullBox == TRUE)
+		{
+			SetAnimationSet(13);
+		}
 		else
 			SetAnimationSet(RUN);
 	}
@@ -277,19 +282,9 @@ void CPlayer::ResetBow()
 	m_StringPullTime = 0;
 }
 
-void CPlayer::Box_Picked()
+void CPlayer::Box_Pull(bool Pull_State)
 {
-	SetPickBox(true);
-
-	//IncreaseBoxPickWaitingTime(m_BoxPickAnimLength);
-
-}
-
-void CPlayer::Box_Down()
-{
-	SetDownBox(true);
-
-	//IncreaseBoxDownWaitingTime(m_BoxDownAnimLength);
+	SetPullBox(Pull_State);
 }
 
 

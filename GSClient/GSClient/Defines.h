@@ -97,6 +97,10 @@ inline UINT CalcCBufferSize(unsigned long long size) { return ((size + 255) & ~2
 #endif
 
 #define PI 3.1415926535897
+#define KEY_DOWN(vk_code) ((GetAsyncKeyState(vk_code) & 0x8000) ? 1 : 0)
+#define KEY_UP(vk_code)       ((GetAsyncKeyState(vk_code) & 0x8000) ? 0 : 1)
+
+
 
 inline double GetRadian(int num)
 {
