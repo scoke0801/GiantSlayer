@@ -1349,6 +1349,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 		if (!strcmp(pstrToken, "<Bounds>:"))
 		{
+			m_HasBoundingInfo = true; 
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
 		}
@@ -1505,6 +1506,16 @@ void CStandardMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void
 {
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[5] = { m_d3dPositionBufferView, m_d3dTextureCoord0BufferView, m_d3dNormalBufferView, m_d3dTangentBufferView, m_d3dBiTangentBufferView };
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 5, pVertexBufferViews);
+}
+
+BoundingBox CStandardMesh::GetBoundigBox() const
+{
+	if (m_HasBoundingInfo) {
+		return BoundingBox(m_xmf3AABBCenter, m_xmf3AABBExtents);
+	}
+	else {
+		return BoundingBox({ 0,0,0 }, { -1,-1,-1 });
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////

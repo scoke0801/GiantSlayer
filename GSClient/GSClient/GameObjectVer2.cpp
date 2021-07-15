@@ -974,6 +974,14 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 			CStandardMesh* pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
 			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 			pGameObject->SetMesh(pMesh);
+			if (pMesh->HasBoundingBox()) {
+				auto boundingBox = pMesh->GetBoundigBox();
+				pGameObject->AddColider(new ColliderBox(boundingBox.Center, boundingBox.Extents));
+
+				//boundingBox.Transform(boundingBox, XMLoadFloat4x4(&pGameObject->m_xmf4x4ToParent));
+				pGameObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center,
+					boundingBox.Extents.x, boundingBox.Extents.y, boundingBox.Extents.z, boundingBox.Center);
+			}
 		}
 		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
 		{
