@@ -938,6 +938,8 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 
 	CGameObjectVer2* pGameObject = NULL;
 
+	XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
+	XMFLOAT4 xmf4Rotation;
 	for (; ; )
 	{
 		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
@@ -958,8 +960,6 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 		}
 		else if (!strcmp(pstrToken, "<Transform>:"))
 		{
-			XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
-			XMFLOAT4 xmf4Rotation;
 			nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pInFile);
 			nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, pInFile); //Euler Angle
 			nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pInFile);
@@ -991,10 +991,9 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 				auto boundingBox = pSkinnedMesh->GetBoundigBox(); 
 				pGameObject->AddColider(new ColliderBox(boundingBox.Center, boundingBox.Extents));
 
-				pGameObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top,
-					boundingBox.Extents.x, boundingBox.Extents.y, boundingBox.Extents.z, XMFLOAT3{ 0, 0.0f,0 });
-
-				cout << "Cur Count : " << count++ << endl;
+				//boundingBox.Transform(boundingBox, XMLoadFloat4x4(&pGameObject->m_xmf4x4ToParent));
+				pGameObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center,
+					boundingBox.Extents.x, boundingBox.Extents.y, boundingBox.Extents.z, boundingBox.Center);
 			}
 
 			pGameObject->isSkinned = true;
