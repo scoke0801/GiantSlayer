@@ -75,6 +75,39 @@ void CArrow::SetTargetVector(const XMFLOAT3& playerLookAt)
 	m_xmf3Velocity = Vector3::Multifly(dirVector, stringPower);
 	LookAt(m_xmf3Position, targetPos, XMFLOAT3(0, 1, 0));
 }
+
+void CArrow::SetArrow(CGameObject* owner)
+{
+	m_pOwner = owner;
+
+	SetUseable(false);
+
+	/*
+	int i = 0;
+	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
+		CArrow* pArrow = reinterpret_cast<CArrow*>(pObj);
+		if (pArrow->IsCanUse()) {
+			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
+			if (-1 != idx) {
+				cout << "파티클 인덱스 " << idx << " 화살 인덱스 : " << i << " \n";
+				pArrow->SetUseable(false);
+				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,180,0 });
+				pArrow->SetPosition(pos);
+				pArrow->m_startPos = pos;
+				pArrow->SetStringPower(m_Player->GetStringPullTime());
+				pArrow->SetTargetVector(Vector3::Multifly(m_Player->GetLook(), 1));
+				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), -1));
+				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+			}
+			break;
+		}
+		++i;
+	}
+	*/
+}
+
 void CArrow::SetDrawable(bool drawable)
 {  
 	m_isDrawable = drawable; 

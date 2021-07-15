@@ -17,6 +17,8 @@ public:
 	void SetTargetPosition(const XMFLOAT3& targetPos);
 	void SetTargetVector(const XMFLOAT3& playerLookAt); 
 
+	void SetArrow(CGameObject* owner);
+
 	bool IsCanUse() const { return m_isDrawable; }
 	void SetUseable(bool data) { m_isDrawable = data;  }
 	void SetDrawable(bool drawable);
@@ -31,6 +33,8 @@ private:
 	ParticleObject* m_ConnectedParticle = nullptr;
 
 	float stringPower = 0.0f;
+
+	CGameObject* m_pOwner;
 
 public:
 	XMFLOAT3 m_startPos;
