@@ -197,6 +197,10 @@ public:
 
 	CGameObjectVer2* GetRootSkinnedGameObject();
 
+	// about collision 
+
+	//bool CollisionCheck(Collider* pCollider) override;
+	bool CollisionCheck(CGameObject* other) override;
 public:
 	int GetAnimationSet()const { return m_AnimationSet; }
 	void SetAnimationSet(int nAnimationSet);

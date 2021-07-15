@@ -400,11 +400,16 @@ void CGameObjectVer2::ReleaseUploadBuffers()
 	if (m_pChild) m_pChild->ReleaseUploadBuffers();
 }
 
+
+
 void CGameObjectVer2::UpdateColliders()
 {
 	for (int i = 0; i < m_Colliders.size(); ++i) {
-		m_Colliders[i]->GetBox().Transform(m_AABB[i]->GetBox(), XMLoadFloat4x4(&m_xmf4x4ToParent));
+		//m_Colliders[i]->GetBox().Transform(m_AABB[i]->GetBox(), XMLoadFloat4x4(&m_xmf4x4ToParent));
+		m_Colliders[i]->GetBox().Transform(m_AABB[i]->GetBox(), XMLoadFloat4x4(&m_xmf4x4World));
 	}
+	if (m_pSibling) m_pSibling->UpdateColliders();
+	if (m_pChild) m_pChild->UpdateColliders();
 }
 
 void CGameObjectVer2::Update(float fTimeElapsed)
@@ -483,7 +488,8 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 	{
 		if (m_pShader)
 		{
-			m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4ToParent, m_nTextureIndex, 0);
+			//m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4ToParent, m_nTextureIndex, 0);
+			m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
 			m_pShader->RenderBoundary(pd3dCommandList, pCamera);
 			for (auto pBoundingMesh : m_BoundingObjectMeshes)
 			{
@@ -574,6 +580,19 @@ CGameObjectVer2* CGameObjectVer2::GetRootSkinnedGameObject()
 	if (m_pChild) if (pRootSkinnedGameObject = m_pChild->GetRootSkinnedGameObject()) return(pRootSkinnedGameObject);
 
 	return(NULL);
+}
+
+bool CGameObjectVer2::CollisionCheck(CGameObject* other)
+{
+	auto otherAABB = other->GetAABB();
+	for (int i = 0; i < otherAABB.size(); ++i) {
+		bool result = CGameObject::CollisionCheck(otherAABB[i]);
+		if (result) return true;
+	}
+
+	if (m_pSibling) return(m_pSibling->CollisionCheck(other));
+	if (m_pChild) return(m_pChild->CollisionCheck(other));
+	return false; 
 }
 
 void CGameObjectVer2::SetAnimationSet(int nAnimationSet)
@@ -909,6 +928,7 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 
 CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObjectVer2* pParent, FILE* pInFile, CShader* pShader)
 {
+	static int count = 0;
 	char pstrToken[64] = { '\0' };
 
 	BYTE nStrLength = 0;
@@ -970,6 +990,11 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 			if (pSkinnedMesh->HasBoundingBox()) {
 				auto boundingBox = pSkinnedMesh->GetBoundigBox(); 
 				pGameObject->AddColider(new ColliderBox(boundingBox.Center, boundingBox.Extents));
+
+				pGameObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top,
+					boundingBox.Extents.x, boundingBox.Extents.y, boundingBox.Extents.z, XMFLOAT3{ 0, 0.0f,0 });
+
+				cout << "Cur Count : " << count++ << endl;
 			}
 
 			pGameObject->isSkinned = true;
