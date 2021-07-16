@@ -198,7 +198,7 @@ public:
 	CGameObjectVer2* GetRootSkinnedGameObject();
 
 	// about collision 
-
+	
 	//bool CollisionCheck(Collider* pCollider) override;
 	bool CollisionCheck(CGameObject* other) override;
 public:
@@ -219,6 +219,11 @@ public:
 
 	void SetDrawableRecursively(char* name, bool draw);
 	void PrintPartNames();
+
+	void GetAABBToBuffer(vector<Collider*>& buffer);
+	void CollectAABBFromChilds();
+
+	void SetAABB(vector<Collider*>& buffer) { m_AABB = buffer; buffer.clear(); }
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

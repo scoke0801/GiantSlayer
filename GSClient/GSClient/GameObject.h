@@ -182,8 +182,8 @@ public:
 	void AddAABB(Collider* pCollider);
 
 	int GetColliderCount() const { return m_Colliders.size(); }
-	vector<Collider*>& GetColliders() { return m_Colliders; }
-	vector<Collider*>& GetAABB() { return m_AABB; }
+	virtual vector<Collider*>& GetColliders() { return m_Colliders; }
+	virtual vector<Collider*>& GetAABB() { return m_AABB; }
 
 	virtual void FixPositionByTerrain(CTerrain* pTerrain);
 	 

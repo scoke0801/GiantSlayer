@@ -265,7 +265,9 @@ void CGameObjectVer2::SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate)
 	if (pChild)
 	{
 		pChild->m_pParent = this;
-		if (bReferenceUpdate) pChild->AddRef();
+		if (bReferenceUpdate) { 
+			pChild->AddRef(); 
+		}
 	}
 	if (m_pChild)
 	{
@@ -581,7 +583,7 @@ CGameObjectVer2* CGameObjectVer2::GetRootSkinnedGameObject()
 
 	return(NULL);
 }
-
+ 
 bool CGameObjectVer2::CollisionCheck(CGameObject* other)
 {
 	auto otherAABB = other->GetAABB();
@@ -590,8 +592,8 @@ bool CGameObjectVer2::CollisionCheck(CGameObject* other)
 		if (result) return true;
 	}
 
-	if (m_pSibling) return(m_pSibling->CollisionCheck(other));
-	if (m_pChild) return(m_pChild->CollisionCheck(other));
+	//if (m_pSibling) return(m_pSibling->CollisionCheck(other));
+	//if (m_pChild) return(m_pChild->CollisionCheck(other));
 	return false; 
 }
 
@@ -1044,6 +1046,7 @@ CGameObjectVer2* CGameObjectVer2::LoadGeometryAndAnimationFromFile(ID3D12Device*
 		pGameObject->m_pAnimationController->SetAnimationSet(0);
 	}
 
+	pGameObject->CollectAABBFromChilds();
 	return(pGameObject);
 }
 
@@ -1116,6 +1119,21 @@ void CGameObjectVer2::PrintPartNames()
 
 	if (m_pSibling) m_pSibling->PrintPartNames();
 	if (m_pChild) m_pChild->PrintPartNames();
+}
+
+void CGameObjectVer2::GetAABBToBuffer(vector<Collider*>& buffer)
+{
+	for (int i = 0; i < m_AABB.size(); ++i) {
+		buffer.push_back(m_AABB[i]);
+	}
+	if (m_pSibling) m_pSibling->GetAABBToBuffer(buffer);
+	if (m_pChild) m_pChild->GetAABBToBuffer(buffer);
+}
+
+void CGameObjectVer2::CollectAABBFromChilds()
+{
+	if (m_pSibling) m_pSibling->GetAABBToBuffer(m_AABB);
+	if (m_pChild) m_pChild->GetAABBToBuffer(m_AABB);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

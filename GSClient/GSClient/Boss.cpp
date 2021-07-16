@@ -217,6 +217,7 @@ CGameObjectVer2* CBoss::LoadGeometryAndAnimationFromFileForBoss(ID3D12Device* pd
 		pGameObject->m_pAnimationController->SetAnimationSet(0);
 	}
 
+	pGameObject->CollectAABBFromChilds();
 	return(pGameObject);
 }
 

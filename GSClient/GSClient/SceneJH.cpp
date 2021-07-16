@@ -468,43 +468,43 @@ void CSceneJH::Update(float elapsedTime)
 		player->FixCameraByTerrain(m_Terrain); 
 	}
 
-	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
-		if (pObstacle->CollisionCheck(m_Player)) {
-			m_Player->FixCollision(pObstacle);
-			//cout << "충돌 : 플레이어 - 장애물\n";
-		}
-	} 
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					//cout << "플레이어 공격 - 몬스터\n";
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if(m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision(); 
-				//cout << "충돌 : 플레이어 - 적\n";
-			}
-		}
-	}
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
-		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
-			if (pObstacle->CollisionCheck(pEnemy)) { 
-				CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
-				thisEnemy->FixCollision(pObstacle);
-				thisEnemy->CollideToObstacle();
-				//cout << "충돌 : 몬스터 - 장애물 재탐색 수행\n";
-			}
-		}
-	}
+	//for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+	//	if (pObstacle->CollisionCheck(m_Player)) {
+	//		m_Player->FixCollision(pObstacle);
+	//		//cout << "충돌 : 플레이어 - 장애물\n";
+	//	}
+	//} 
+	//for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
+	//	if (pEnemy->CollisionCheck(m_Player)) {
+	//		// 공격 상태일 때만 체력이 닳는것이 맞을까...
+	//		//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+	//		//	
+	//		//}
+	//		if (false == m_Player->IsCanAttack()) {
+	//			if (false == m_Player->IsAleradyAttack()) {
+	//				pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+	//				//cout << "플레이어 공격 - 몬스터\n";
+	//				m_Player->SetAleradyAttack(true);
+	//			}
+	//		}
+	//		else if(m_Player->Attacked(pEnemy))
+	//		{
+	//			m_CurrentCamera->SetShake(true, 0.5f, 15);
+	//			m_Player->FixCollision(); 
+	//			//cout << "충돌 : 플레이어 - 적\n";
+	//		}
+	//	}
+	//}
+	//for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
+	//	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+	//		if (pObstacle->CollisionCheck(pEnemy)) { 
+	//			CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
+	//			thisEnemy->FixCollision(pObstacle);
+	//			thisEnemy->CollideToObstacle();
+	//			//cout << "충돌 : 몬스터 - 장애물 재탐색 수행\n";
+	//		}
+	//	}
+	//}
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
 		// 변수명 변경으로 인한 true/false 반전..
 		if (true == pArrow->IsDrawable()) {
@@ -3217,6 +3217,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Player = m_Players[0];
 
 	m_Players[0]->SetChild(pPlayerModel, true);
+	m_Players[0]->SetAABB(pPlayerModel->GetAABB());
 	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 	m_Players[0]->Scale(200, 200, 200);
 	m_Players[0]->SetShadertoAll();
@@ -3312,7 +3313,7 @@ void CSceneJH::ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 		if (pArrow->IsCanUse()) { 
 			pArrow->SetUseable(false);
 			XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ pEmeny->GetPosition() }, { 0,150,0 });
-			pArrow->SetPosition(pos);
+		pArrow->SetPosition(pos);
 			pArrow->SetTargetVector(lookVector);
 			//m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT); 
 			break;
