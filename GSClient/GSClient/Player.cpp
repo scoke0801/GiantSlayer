@@ -52,7 +52,11 @@ void CPlayer::Update(float fTimeElapsed)
 				m_SP -= fTimeElapsed;
 			}
 		}
-								  break;
+			break;
+		case PlayerWeaponType::Staff: {
+			
+		}
+			break;
 		}
 
 		if (m_AttackWaitingTime < 0.0f)

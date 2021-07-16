@@ -13,8 +13,8 @@ public:
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
 	void Update(float fTimeElapsed) override;
 
-	void SetTarget();
-	void TrackingTarget();
+	void SetTarget(const XMFLOAT3& targetPos);
+	void TrackingTarget(CGameObject target);
 
 protected:
 	CGameObject* caster;

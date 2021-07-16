@@ -29,8 +29,8 @@ void CArrow::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 void CArrow::Update(float fTimeElapsed)
 { 
 	if (false == m_isDrawable) {
-		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ARROW_SPEED * fTimeElapsed)));
-		Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 360.0f * fTimeElapsed); 
+		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, TEST_ARROW_SPEED * fTimeElapsed)));
+		//Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 360.0f * fTimeElapsed); 
 		if (m_ConnectedParticle != nullptr) {
 			m_ConnectedParticle->SetPosition(m_xmf3Position);
 		}
@@ -46,15 +46,15 @@ void CArrow::Update(float fTimeElapsed)
 			falldown = true;
 		}
 		if (!falldown) {
-			m_xmf3Position = Vector3::Add(m_xmf3Position, { 0.0f, 5.0f, 0.0f });
-			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), -30.0f * fTimeElapsed);
+			m_xmf3Position = Vector3::Add(m_xmf3Position, { 0.0f, 3.0f, 0.0f });
+			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), -10.0f * fTimeElapsed);
 		}
 		else {
-			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), 30.0f * fTimeElapsed);
+			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), 20.0f * fTimeElapsed);
 		}
 
 		m_xmf3Velocity = Vector3::Subtract(m_xmf3Velocity, Vector3::Multifly(m_xmf3Velocity, AIR_RESISTANCE));
-		m_xmf3Position = Vector3::Subtract(m_xmf3Position, { 0.0f, GRAVITY, 0.0f });
+		m_xmf3Position = Vector3::Subtract(m_xmf3Position, { 0.0f, GRAVITY * m_ElapsedTime, 0.0f });
 	}
 	else return; 
 }
@@ -81,31 +81,6 @@ void CArrow::SetArrow(CGameObject* owner)
 	m_pOwner = owner;
 
 	SetUseable(false);
-
-	/*
-	int i = 0;
-	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
-		CArrow* pArrow = reinterpret_cast<CArrow*>(pObj);
-		if (pArrow->IsCanUse()) {
-			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
-			if (-1 != idx) {
-				cout << "파티클 인덱스 " << idx << " 화살 인덱스 : " << i << " \n";
-				pArrow->SetUseable(false);
-				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,180,0 });
-				pArrow->SetPosition(pos);
-				pArrow->m_startPos = pos;
-				pArrow->SetStringPower(m_Player->GetStringPullTime());
-				pArrow->SetTargetVector(Vector3::Multifly(m_Player->GetLook(), 1));
-				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
-				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), -1));
-				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
-				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
-			}
-			break;
-		}
-		++i;
-	}
-	*/
 }
 
 void CArrow::SetDrawable(bool drawable)

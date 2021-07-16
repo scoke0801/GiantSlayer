@@ -14,9 +14,10 @@ enum class PlayerMoveType
 
 enum class PlayerWeaponType
 {
-	None = 0x00,
-	Sword = 0x01,
-	Bow = 0x02
+	None	= 0x00,
+	Sword	= 0x01,
+	Bow		= 0x02,
+	Staff	= 0x03
 };
 
 class CTerrain; 
