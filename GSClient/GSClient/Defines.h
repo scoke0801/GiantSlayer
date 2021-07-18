@@ -124,7 +124,7 @@ enum class PARTICLE_TYPE : UINT {
 	MummyLaserParticle,	// 레이저파티클
 	MummyLaserParticle2,// 레이저파티클
 	MummyLaserParticle3,// 레이저파티클
-
+	MagicFireball,	// 마법 - 파이어볼
 };
 constexpr float ARROW_PARTICLE_LIFE_TIME = 10.0f;
 

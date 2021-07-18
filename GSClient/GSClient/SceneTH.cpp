@@ -3288,6 +3288,15 @@ void CSceneTH::EnterNewSector(int sectorNum)
 	EnterNewSector(sectorNum - 1);
 }
 
+void CSceneTH::ShotPlayerMagic(PARTICLE_TYPE type)
+{
+	int idx = m_Particles->GetCanUseableParticle(type);
+
+	m_Particles->UseParticle(idx, m_Player->GetPosition(), XMFLOAT3(0.0f, 180.0f, 0.0f));
+	m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), -1));
+	//Fireball connect paricle(idx)
+}
+
 void CSceneTH::ShotPlayerArrow()
 {
 	int i = 0;

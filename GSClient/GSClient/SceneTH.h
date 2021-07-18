@@ -166,6 +166,7 @@ public:
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
 
 public:
+	void ShotPlayerMagic(PARTICLE_TYPE type);
 	void ShotPlayerArrow();
 	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
 	void DeleteEnemy(CEnemy* pEmeny);
