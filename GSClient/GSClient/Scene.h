@@ -36,6 +36,7 @@ enum class OBJECT_LAYER : int {
 	Puzzle,
 	PuzzleBox,
 	Obstacle,
+	TerrainBoundary,
 	MirrorBox,
 	Enemy,
 	Mummy,

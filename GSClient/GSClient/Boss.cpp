@@ -27,6 +27,7 @@ CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 	m_EnemyType = EnemyType::Boss;
 	m_AttackRange = 1000.0f;
 	m_Speed = 0.0f * 10.0f;
+	m_ExistingSector = SECTOR_POSITION::SECTOR_5;
 }
 
 CBoss::~CBoss()
@@ -279,9 +280,13 @@ CGameObjectVer2* CBoss::LoadFrameHierarchyFromFileForBoss(ID3D12Device* pd3dDevi
 			else {
 				boundingBox = BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.5, 1.5, 1.5));
 			}
-			  
+
+			// pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
+			// pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
+
 			if (true == isMainPart) {
-				pGameObject->AddColider(new ColliderBox(boundingBox.Center, boundingBox.Extents)); 
+				XMFLOAT3 half = Vector3::Multifly(boundingBox.Extents, 0.5f);
+				pGameObject->AddColider(new ColliderBox(boundingBox.Center, half));
 				pGameObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center,
 					boundingBox.Extents.x, boundingBox.Extents.y, boundingBox.Extents.z, boundingBox.Center);
 			}
@@ -304,7 +309,8 @@ CGameObjectVer2* CBoss::LoadFrameHierarchyFromFileForBoss(ID3D12Device* pd3dDevi
 			pGameObject->SetMesh(pMesh);
 			if (pMesh->HasBoundingBox()) {
 				auto boundingBox = pMesh->GetBoundigBox();
-				pGameObject->AddColider(new ColliderBox(boundingBox.Center, boundingBox.Extents));
+				XMFLOAT3 half = Vector3::Multifly(boundingBox.Extents, 0.5f);
+				pGameObject->AddColider(new ColliderBox(boundingBox.Center, half));
 				 
 				pGameObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center,
 					boundingBox.Extents.x, boundingBox.Extents.y, boundingBox.Extents.z, boundingBox.Center);
@@ -324,7 +330,8 @@ CGameObjectVer2* CBoss::LoadFrameHierarchyFromFileForBoss(ID3D12Device* pd3dDevi
 			pGameObject->SetMesh(pSkinnedMesh);
 			if (pSkinnedMesh->HasBoundingBox()) {
 				auto boundingBox = pSkinnedMesh->GetBoundigBox();
-				pGameObject->AddColider(new ColliderBox(boundingBox.Center, boundingBox.Extents));
+				XMFLOAT3 half = Vector3::Multifly(boundingBox.Extents, 0.5f);
+				pGameObject->AddColider(new ColliderBox(boundingBox.Center, half));
 
 				//boundingBox.Transform(boundingBox, XMLoadFloat4x4(&pGameObject->m_xmf4x4ToParent));
 				pGameObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center,

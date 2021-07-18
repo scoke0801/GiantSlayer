@@ -79,8 +79,8 @@ public:
 
 	void FixPositionByTerrain(CTerrain* pTerrain) override;
 	 
-public:
-
+public: 
+	int GetPlayerExistingSector() const;
 	virtual void SetVelocity(XMFLOAT3 dir) override;
 
 	bool IsMoving() const { return Vector3::Length(m_xmf3Velocity) > 0.01f; }

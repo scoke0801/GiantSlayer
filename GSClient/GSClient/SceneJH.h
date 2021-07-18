@@ -46,6 +46,8 @@ private:
 	//vector<CPlayer*>			m_Players[MAX_ROOM_PLAYER];
 	CPlayer*					m_Players[MAX_ROOM_PLAYER];
 	CBox*						m_PuzzleBox[8];
+	bool						m_PlayerExistingSector[MAX_ROOM_PLAYER];
+
 
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;

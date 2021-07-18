@@ -266,6 +266,8 @@ void CGameObjectVer2::SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate)
 	{
 		pChild->m_pParent = this;
 		if (bReferenceUpdate) { 
+
+			SetAABB(pChild->GetAABB());
 			pChild->AddRef(); 
 		}
 	}
@@ -961,7 +963,8 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 			pGameObject->SetMesh(pMesh);
 			if (pMesh->HasBoundingBox()) {
 				auto boundingBox = pMesh->GetBoundigBox();
-				pGameObject->AddColider(new ColliderBox(boundingBox.Center, boundingBox.Extents));
+				XMFLOAT3 half = Vector3::Multifly(boundingBox.Extents, 0.5f);
+				pGameObject->AddColider(new ColliderBox(boundingBox.Center, half)); 
 
 				//boundingBox.Transform(boundingBox, XMLoadFloat4x4(&pGameObject->m_xmf4x4ToParent));
 				pGameObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center,
@@ -981,8 +984,9 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 
 			pGameObject->SetMesh(pSkinnedMesh);
 			if (pSkinnedMesh->HasBoundingBox()) {
-				auto boundingBox = pSkinnedMesh->GetBoundigBox(); 
-				pGameObject->AddColider(new ColliderBox(boundingBox.Center, boundingBox.Extents));
+				auto boundingBox = pSkinnedMesh->GetBoundigBox();
+				XMFLOAT3 half = Vector3::Multifly(boundingBox.Extents, 0.5f);
+				pGameObject->AddColider(new ColliderBox(boundingBox.Center, half)); 
 
 				//boundingBox.Transform(boundingBox, XMLoadFloat4x4(&pGameObject->m_xmf4x4ToParent));
 				pGameObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center,
