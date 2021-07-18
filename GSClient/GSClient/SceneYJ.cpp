@@ -1721,13 +1721,12 @@ void CSceneYJ::ProcessInput()
 	{
 		if (m_Player->GetWeapon() == PlayerWeaponType::Sword) {
 			m_Player->SetWeapon(PlayerWeaponType::Bow);
-			m_Player->DisableSword();
-			m_Player->AnimationChange(PlayerWeaponType::Bow);
 		}
 		else if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
+			m_Player->SetWeapon(PlayerWeaponType::Staff);
+		}
+		else if (m_Player->GetWeapon() == PlayerWeaponType::Staff) {
 			m_Player->SetWeapon(PlayerWeaponType::Sword);
-			m_Player->DisableBow();
-			m_Player->AnimationChange(PlayerWeaponType::Sword);
 		}
 		else {
 			cout << "...?" << endl;
@@ -3585,9 +3584,6 @@ void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player3.bin", NULL, true);
 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
-	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
-	m_Players[0]->DisableBow();
-	m_Players[0]->AnimationChange(PlayerWeaponType::Sword);
 	m_Player = m_Players[0];
 
 	m_Players[0]->SetChild(pPlayerModel, true);
@@ -3600,6 +3596,7 @@ void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->SetCamera(m_PlayerCameras[0]);
 
 	m_Players[0]->SetDrawable(true);
+	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
 	//m_Players[0]->SetTextureIndex(0x400); 
 
 	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });

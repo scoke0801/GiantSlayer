@@ -299,7 +299,8 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
 		"GreenTree",
 		"Bow",
-		"Effect_1", "Effect_2", "Effect_3"
+		"Effect_1", "Effect_2", "Effect_3",
+		"Staff"
 	};
 
 	const wchar_t* address[] =
@@ -327,7 +328,8 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/DS_equipment_standard.dds",
 		L"resources/OBJ/GreenTree.dds",
 		L"resources/Textures/bow_texture.dds",
-		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds"
+		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds",
+		L"resources/Textures/twoHandedStaff_texture.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -382,7 +384,8 @@ void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
 		"GreenTree",
 		"Bow",
-		"Effect_1", "Effect_2", "Effect_3"
+		"Effect_1", "Effect_2", "Effect_3",
+		"Staff"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -1624,13 +1627,12 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 		if (wParam == VK_9) {
 			if (m_Player->GetWeapon() == PlayerWeaponType::Sword) {
 				m_Player->SetWeapon(PlayerWeaponType::Bow);
-				m_Player->DisableSword();
-				m_Player->AnimationChange(PlayerWeaponType::Bow);
 			}
 			else if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
+				m_Player->SetWeapon(PlayerWeaponType::Staff);
+			}
+			else if (m_Player->GetWeapon() == PlayerWeaponType::Staff) {
 				m_Player->SetWeapon(PlayerWeaponType::Sword);
-				m_Player->DisableBow();
-				m_Player->AnimationChange(PlayerWeaponType::Sword);
 			}
 			else {
 				cout << "...?" << endl;
@@ -1646,6 +1648,9 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 				case PlayerWeaponType::Bow:
 					m_Player->Attack();
 					m_Player->pullString = true;
+					break;
+				case PlayerWeaponType::Staff:
+					m_Player->Attack();
 					break;
 				}
 			}
@@ -3221,21 +3226,19 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
-	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
-	m_Players[0]->AnimationChange(PlayerWeaponType::Sword);
 	m_Player = m_Players[0];
 
 	m_Players[0]->SetChild(pPlayerModel, true);
 	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 	m_Players[0]->Scale(200, 200, 200);
 	m_Players[0]->SetShadertoAll();
-	m_Players[0]->DisableBow();
 
 	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 	m_PlayerCameras[0]->SetTarget(m_Players[0]);
 	m_Players[0]->SetCamera(m_PlayerCameras[0]);
 
 	m_Players[0]->SetDrawable(true);
+	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
 	//m_Players[0]->SetTextureIndex(0x400); 
 
 	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
@@ -3271,7 +3274,6 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
 		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
-		m_Players[i]->DisableBow();
 	}
 }
 

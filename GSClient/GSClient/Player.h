@@ -86,7 +86,10 @@ public:
 
 	bool IsMoving() const { return Vector3::Length(m_xmf3Velocity) > 0.01f; }
 
-	void SetWeapon(PlayerWeaponType weaponID) { m_WeaponType = weaponID; }
+	void SetWeapon(PlayerWeaponType weaponType);
+	void SetDrawSword();
+	void SetDrawBow();
+	void SetDrawStaff();
 	PlayerWeaponType GetWeapon() { return m_WeaponType; }
 	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; } 
 
@@ -115,10 +118,6 @@ public:
 
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
-
-	void AnimationChange(PlayerWeaponType weapon);
-	void DisableSword();
-	void DisableBow();
 
 	bool ShotAble();
 };
