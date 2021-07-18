@@ -443,6 +443,9 @@ void CSceneJH::Update(float elapsedTime)
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i){
 		for (auto pObject : m_ObjectLayers[i]) {
+			if (false == pObject->IsInNearSector(m_PlayerExistingSector)) {
+				continue;
+			}
 			pObject->Update(elapsedTime);
 			pObject->UpdateColliders();
 		}
@@ -1959,7 +1962,7 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pWall->SetShader(pShader); 
 	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 1500, 2500, 500, XMFLOAT3{ 0,0,0 });
 	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
-	pWall->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	pWall->SetExistingSector(SECTOR_POSITION::SECTOR_4);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pWall);
 
 	pWall = new CWall(pd3dDevice, pd3dCommandList, 1500 * MAP_SCALE_SIZE, 2500, 500);
@@ -1969,7 +1972,7 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pWall->SetShader(pShader); 
 	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 1500, 2500, 500, XMFLOAT3{ 0,0,0 });
 	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f))); 
-	pWall->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	pWall->SetExistingSector(SECTOR_POSITION::SECTOR_4);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pWall);
 }
 
