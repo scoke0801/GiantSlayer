@@ -105,13 +105,11 @@ public:
 	virtual void Move(XMFLOAT3 shift);
 	void Move();
 
-	//void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	virtual void Rotate(const XMFLOAT3& pxmf3Axis, float fAngle);
-	//void Rotate(float x, float y, float z); 
 
-	void Scale(float x, float y, float z, bool setSize = true);
+	virtual void Scale(float x, float y, float z, bool setSize = true);
 
-	void LookAt(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& target, const DirectX::XMFLOAT3& up);
+	virtual void LookAt(const XMFLOAT3& pos, const XMFLOAT3& target, const XMFLOAT3& up);
 
 public:
 	XMFLOAT3 GetPosition() { return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43)); }
