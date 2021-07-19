@@ -50,7 +50,14 @@ enum class ObjectState {
 	BossSkill_5,
 	BossBorn
 };
-
+ 
+enum class SECTOR_POSITION {
+	SECTOR_1,
+	SECTOR_2,
+	SECTOR_3,
+	SECTOR_4,
+	SECTOR_5,
+};
 class CGameObject
 {
 private:
@@ -76,6 +83,8 @@ protected:
 
 	// 재활용 처리를 위한 변수
 	bool				m_isUsing = true;
+
+	SECTOR_POSITION		m_ExistingSector = SECTOR_POSITION::SECTOR_1;
 
 protected:// 충돌처리 관련 변수
 	vector<BoundingBox>	m_BoundingBox;
@@ -119,6 +128,17 @@ public:
 
 	virtual void SetIsUsable(bool drawable) { m_isUsing = drawable; }
 	bool IsUsable() const { return m_isUsing; }
+
+public: // about sectoring for updates
+	// 플레이어가 위치한 영역과, 객체들이 위치한 영역을 비교하여
+	// 인접한 영역에 있는지 확인한다. 
+	bool IsInNearSector(bool* playerSector) const;
+	bool IsInSameSector(bool* playerSector) const;
+	bool IsInSameSector(SECTOR_POSITION sectorPos) const;
+
+	SECTOR_POSITION GetExistingSector() const { return m_ExistingSector; }
+	void SetExistingSector(SECTOR_POSITION sectorPos) { m_ExistingSector = sectorPos; }
+
 public:
 	// about collision
 	virtual bool CollisionCheck(const BoundingBox& pCollider);

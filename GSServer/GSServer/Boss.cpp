@@ -8,6 +8,8 @@ CBoss::CBoss()
 	AddBoundingBox(BoundingBox(XMFLOAT3(-2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
 	AddBoundingBox(BoundingBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5)));
 
+	m_ExistingSector = SECTOR_POSITION::SECTOR_5;
+
 	m_State = new WaitState(this);
 	m_EnemyType = EnemyType::Boss;
 	m_AttackRange = 1000.0f;

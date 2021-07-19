@@ -98,6 +98,32 @@ void CPlayer::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1]
 	//SetPosition(m_xmf3Position);
 }
 
+int CPlayer::GetPlayerExistingSector() const
+{
+	if (m_xmf3Position.x < 14379 && m_xmf3Position.z < 22824) {
+		return 0;
+	}
+	if (m_xmf3Position.x < 14379 && m_xmf3Position.z >= 22824) {
+		return 1;
+	}
+	if (m_xmf3Position.x >= 14379 && m_xmf3Position.x < 20422 &&
+		(m_xmf3Position.z > 10764)) {
+		return 2;
+	}
+	if ((m_xmf3Position.x >= 14379 && m_xmf3Position.x < 20422) &&
+		m_xmf3Position.z <= 10764) {
+		return 3;
+	}
+
+	if (m_xmf3Position.x >= 20422 && m_xmf3Position.z < 12077) {
+		return 3;
+	}
+	if (m_xmf3Position.x >= 20422 && m_xmf3Position.z >= 12077) {
+		return 4;
+	}
+	return -1;
+}
+
 void CPlayer::SetVelocity(const XMFLOAT3& dir)
 {
 	if (false == IsCanAttack()) {

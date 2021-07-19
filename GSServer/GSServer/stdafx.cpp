@@ -39,7 +39,7 @@ float GetDetailHeight(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIG
 	// 1. center
 	// 2. left end
 	// 3. right end
-	const float SCALE_SIZE = 200.0f;
+	const float SCALE_SIZE = 300.0f;
 	float fx = xPosition / SCALE_SIZE;
 	float fz = zPosition / SCALE_SIZE;
 

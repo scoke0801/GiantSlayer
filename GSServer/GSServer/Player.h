@@ -45,6 +45,7 @@ public:
 	void FixCameraByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]);
 	void FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]) override;
 
+	int GetPlayerExistingSector() const;
 public:
 	virtual void SetVelocity(const XMFLOAT3& dir) override;
 

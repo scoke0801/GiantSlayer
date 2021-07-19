@@ -18,6 +18,7 @@ enum class OBJECT_LAYER : int {
 	Puzzle,
 	PuzzleBox,
 	Obstacle,
+	TerrainBoundary,
 	MirrorBox,
 	Enemy,
 	PlayerArrow,
@@ -48,9 +49,12 @@ struct CLIENT {
 class CGameRoom
 {
 	array <CLIENT*, MAX_ROOM_PLAYER>		m_Clients;
-	CPlayer* m_Players[MAX_ROOM_PLAYER];
-	CCamera* m_Cameras[MAX_ROOM_PLAYER];
+	CPlayer*								m_Players[MAX_ROOM_PLAYER];
+	CCamera*								m_Cameras[MAX_ROOM_PLAYER];
+
 	int										m_CurrentPlayerNum = 0;
+
+	bool									m_PlayerExistingSector[MAX_ROOM_PLAYER];
 
 	int										m_CurrentlyDeletedPlayerId;
 

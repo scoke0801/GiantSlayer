@@ -101,6 +101,32 @@ void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
 
 }
 
+bool CGameObject::IsInNearSector(bool* playerSector) const
+{
+	int prev = max((int)m_ExistingSector - 1, 0);
+	int next = min((int)m_ExistingSector + 1, (int)SECTOR_POSITION::SECTOR_5);
+
+	if (playerSector[(int)m_ExistingSector]) {
+		return true;
+	}
+	if (playerSector[(int)prev]) {
+		return true;
+	}
+	if (playerSector[(int)next]) {
+		return true;
+	}
+}
+
+bool CGameObject::IsInSameSector(bool* playerSector) const
+{
+	return playerSector[(int)m_ExistingSector];
+}
+
+bool CGameObject::IsInSameSector(SECTOR_POSITION sectorPos) const
+{
+	return m_ExistingSector == sectorPos;
+}
+
 bool CGameObject::CollisionCheck(const BoundingBox& pAABB)
 {
 	for (int i = 0; i < m_AABB.size(); ++i) {

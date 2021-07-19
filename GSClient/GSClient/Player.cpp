@@ -175,10 +175,7 @@ void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 }
 
 int CPlayer::GetPlayerExistingSector() const
-{
-	//0 - 1 : 4800, 15900;
-	//1 - 2 :
-	// x: 14586.1 y : -1509.91 z : 27086.6
+{ 
 	if (m_xmf3Position.x < 14379 && m_xmf3Position.z < 22824) {
 		return 0;
 	}
