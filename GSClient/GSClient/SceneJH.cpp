@@ -749,13 +749,16 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 
 	m_HelpTextUI->Update(elapsedTime);
 
+	ZeroMemory(m_PlayerExistingSector, sizeof(m_PlayerExistingSector));
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->UpdateOnServer(elapsedTime);
 		player->UpdateColliders();
 		//player->FixPositionByTerrain(m_Terrain);
 		//player->FixCameraByTerrain(m_Terrain);
-	}
+		m_PlayerExistingSector[player->GetPlayerExistingSector()] = true;
+	} 
+
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
 	if (m_MirrorCamera)
