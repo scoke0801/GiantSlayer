@@ -2,8 +2,11 @@
 #include "Boss.h" 
 #include "AnimationController.h"
 
-CBoss::CBoss()
+CBoss::CBoss()  
 {
+	m_xmf4x4ToParent = Matrix4x4::Identity();
+	m_xmf4x4World = Matrix4x4::Identity();
+
 	CAnimationObject* pBossModel = LoadGeometryAndAnimationFromFileForBoss(
 		"resources/FbxExported/Boss.bin", true);
 	SetChild(pBossModel);

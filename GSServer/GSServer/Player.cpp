@@ -1,13 +1,10 @@
 #include "stdafx.h"
 #include "Player.h" 
 
-CPlayer::CPlayer()
+CPlayer::CPlayer() :CAnimationObject()
 {
 	m_HP = 100;
-	m_SP = 100;
-
-	m_SpareCollisionBox = BoundingBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4));
-	m_SpareAABB = BoundingBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4));
+	m_SP = 100; 
 }
 
 CPlayer::~CPlayer()
@@ -23,17 +20,7 @@ void CPlayer::Update(float fTimeElapsed)
 		if (m_AttackWaitingTime < 0.0f) { 
 			m_IsAlreadyAttack = false;
 			m_AttackWaitingTime = 0.0f;
-			m_IsCanAttack = true; 
-
-			auto temp = m_SpareCollisionBox;
-			m_SpareCollisionBox = m_BoundingBox[0];
-			m_BoundingBox[0] = temp;
-
-			temp = m_SpareAABB;
-			m_SpareAABB = m_AABB[0];
-			m_AABB[0] = temp;
-
-			UpdateColliders();
+			m_IsCanAttack = true;  
 		}
 	}
 
@@ -60,6 +47,8 @@ void CPlayer::Update(float fTimeElapsed)
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 	//m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
+	CAnimationObject::Animate(fTimeElapsed);
+	UpdateTransform(NULL);
 }
 
 void CPlayer::UpdateCamera()
@@ -169,15 +158,5 @@ void CPlayer::Attack()
 {
 	SetCanAttack(false);
 	IncreaseAttackWaitingTime(PLAYER_SWORD_ATTACK_TIME);
-	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
-	 
-	auto temp = m_BoundingBox[0];
-	m_BoundingBox[0] = m_SpareCollisionBox;
-	m_SpareCollisionBox = temp;
-
-	temp = m_AABB[0];
-	m_AABB[0] = m_SpareAABB;
-	m_SpareAABB = temp; 
-
-	UpdateColliders();
+	m_xmf3Velocity = XMFLOAT3(0, 0, 0); 
 }

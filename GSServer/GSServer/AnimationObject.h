@@ -9,6 +9,9 @@ class CAnimationController;
 // 해당 클래스를 상속받는 객체로 정의하거나 직접 사용하도록 합니다.
 class CAnimationObject : public CGameObject
 {
+public: 
+	CAnimationObject();
+
 public:
 	void Update(float fTimeElapsed) override;
 	void Animate(float fTimeElapsed);

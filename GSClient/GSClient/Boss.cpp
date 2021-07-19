@@ -5,7 +5,8 @@
 
 #include "SceneJH.h"
 
-CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dRootSignature)
+CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	ID3D12RootSignature* pd3dRootSignature)
 {
 	CGameObjectVer2* pBossParent = LoadGeometryAndAnimationFromFileForBoss(pd3dDevice, pd3dCommandList,
 		pd3dRootSignature, "resources/FbxExported/Boss.bin", NULL, true);

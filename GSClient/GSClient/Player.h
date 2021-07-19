@@ -52,13 +52,7 @@ private:
 	bool m_DownBox = false;
 	bool m_HaveBox = false;
 	
-	
-
 	float m_AttackedDelay = 0.0f;
-
-	CMesh* m_SpareBoundingBox;
-	Collider* m_SpareCollisionBox;
-	Collider* m_SpareAABB;
 
 public:
 	bool pullString = false;

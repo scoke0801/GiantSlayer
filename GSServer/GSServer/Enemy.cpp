@@ -3,7 +3,7 @@
  
 #include "Player.h"
 #include "State.h"
-CEnemy::CEnemy() 
+CEnemy::CEnemy() :CAnimationObject()
 {
 	m_State = new PatrolState(this);
 	m_EnemyType = EnemyType::Skeleton;

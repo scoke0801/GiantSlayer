@@ -32,8 +32,6 @@ private:
 	float m_AttackedDelay = 0.0f;
 	bool m_IsAlreadyAttack = false;
 
-	BoundingBox m_SpareCollisionBox;
-	BoundingBox m_SpareAABB;
 public:
 	CPlayer();
 	~CPlayer();	

@@ -2,6 +2,12 @@
 #include "AnimationObject.h"
 #include "AnimationController.h"
 
+CAnimationObject::CAnimationObject()
+{
+	m_xmf4x4ToParent = Matrix4x4::Identity();
+	m_xmf4x4World = Matrix4x4::Identity();
+}
+
 void CAnimationObject::Update(float fTimeElapsed)
 {
 	//CGameObject::Update(fTimeElapsed);

@@ -10,10 +10,6 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_HP = 100;
 	m_SP = 100;
-
-	m_SpareBoundingBox = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 1.4, XMFLOAT3{ 0,0.6, 0.2f });
-	m_SpareCollisionBox = new ColliderBox(ColliderBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4)));
-	m_SpareAABB = new ColliderBox(ColliderBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4))); 
 }
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -73,6 +69,7 @@ void CPlayer::Update(float fTimeElapsed)
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
+
 	Move(vel);
 
 	if (false == m_isOnGround) {
