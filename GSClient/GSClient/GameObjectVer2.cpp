@@ -736,8 +736,6 @@ void CGameObjectVer2::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 			break;
 		}
 	}
-	
-	int stop = 3;
 }
 
 void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)

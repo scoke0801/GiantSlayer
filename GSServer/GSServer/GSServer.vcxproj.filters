@@ -100,7 +100,9 @@
     <ClCompile Include="Communicates.cpp">
       <Filter>Communicates\Base</Filter>
     </ClCompile>
-    <ClCompile Include="AnimationController.cpp" />
+    <ClCompile Include="AnimationController.cpp">
+      <Filter>GameObject\AnimationObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PacketProcessor.h">
@@ -148,7 +150,9 @@
     <ClInclude Include="Communicates.h">
       <Filter>Communicates\Base</Filter>
     </ClInclude>
-    <ClInclude Include="AnimationController.h" />
+    <ClInclude Include="AnimationController.h">
+      <Filter>GameObject\AnimationObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\ObjectPositionData.json">
