@@ -186,7 +186,6 @@
     <ClInclude Include="Skill.h" />
     <ClInclude Include="MummyLaser.h" />
     <ClInclude Include="Particle.h" />
-    <ClInclude Include="SceneExport.h" />
     <ClInclude Include="ShaderHandler.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Light.h" />
@@ -243,7 +242,6 @@
     <ClCompile Include="Skill.cpp" />
     <ClCompile Include="MummyLaser.cpp" />
     <ClCompile Include="Particle.cpp" />
-    <ClCompile Include="SceneExport.cpp" />
     <ClCompile Include="ShaderHandler.cpp" />
     <ClCompile Include="Sign.cpp" />
     <ClCompile Include="Terrain.cpp" />

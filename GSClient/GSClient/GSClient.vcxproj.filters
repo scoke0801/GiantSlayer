@@ -138,9 +138,6 @@
     <ClCompile Include="FbxObject.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
-    <ClCompile Include="SceneExport.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Particle.cpp">
       <Filter>Particle</Filter>
     </ClCompile>
@@ -296,9 +293,6 @@
     </ClInclude>
     <ClInclude Include="FbxObject.h">
       <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneExport.h">
-      <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Particle.h">
       <Filter>Particle</Filter>

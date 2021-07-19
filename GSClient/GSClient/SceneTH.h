@@ -12,6 +12,8 @@ class CParticle;
 class CLightCamera;
 class CEnemy;
 class CFbxObject2;
+class CBoss;
+class CEffectHandler;
 
 class CSceneTH : public CScene
 {
@@ -28,9 +30,11 @@ private:
 	array<CMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
 
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
+	CBoss* m_Boss = nullptr;
 
 	CParticle* m_Particles;
 
+	CEffectHandler* m_EffectsHandler;
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
 	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;
@@ -170,6 +174,11 @@ public:
 	void ShotPlayerArrow();
 	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
 	void DeleteEnemy(CEnemy* pEmeny);
+
+	// 이펙트 재사용 함수
+	void UseEffects(int effectType, const XMFLOAT3& xmf3Position);
+	// 이펙트 재사용 함수, 대기 시간 설정하는 경우
+	void UseEffects(int effectType, const XMFLOAT3& xmf3Position, float wakeupTime);
 
 private:
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);

@@ -85,44 +85,41 @@ Texture2D gtxtPlayerClothes: register(t23);
 Texture2D gtxtPlayerFace   : register(t24);
 Texture2D gtxtPlayerHair   : register(t25);
 Texture2D gtxtPlayerSword  : register(t26);
-Texture2D gtxtPlayerBow    : register(t27);
-Texture2D gtxtPlayerStaff  : register(t28);
 
-Texture2D gtxtTree         : register(t29);
-Texture2D gtxtNoLeafTrees  : register(t30);
-Texture2D gtxtLeaves       : register(t31);
-Texture2D gtxtMoss_Rock    : register(t32);
+Texture2D gtxtTree         : register(t27);
+Texture2D gtxtNoLeafTrees  : register(t28);
+Texture2D gtxtLeaves       : register(t29);
+Texture2D gtxtMoss_Rock    : register(t30);
 
-Texture2D gtxtPuzzleBoard  : register(t33);
-Texture2D gtxtHelpText     : register(t34);
-Texture2D gtxtDry_Tree	   : register(t35);
-Texture2D gtxtStump		   : register(t36);
-Texture2D gtxtDead_Tree	   : register(t37);
-Texture2D gtxtDesert_Rock  : register(t38);
-Texture2D gtxtWater		   : register(t39);
-Texture2D gtxtRain		   : register(t40);
+Texture2D gtxtPuzzleBoard  : register(t31);
+Texture2D gtxtHelpText     : register(t32);
+Texture2D gtxtDry_Tree	   : register(t33);
+Texture2D gtxtStump		   : register(t34);
+Texture2D gtxtDead_Tree	   : register(t35);
+Texture2D gtxtDesert_Rock  : register(t36);
+Texture2D gtxtWater		   : register(t37);
+Texture2D gtxtRain		   : register(t38);
 
-Texture2D gtxtBossD		   : register(t41);
-Texture2D gtxtBossC		   : register(t42);
-Texture2D gtxtBossE		   : register(t43);
-Texture2D gtxtBossN		   : register(t44);
+Texture2D gtxtBossD		   : register(t39);
+Texture2D gtxtBossC		   : register(t40);
+Texture2D gtxtBossE		   : register(t41);
+Texture2D gtxtBossN		   : register(t42);
 
-Texture2D gtxtMeleeSkeleton_01_D: register(t45);
-Texture2D gtxtMeleeSkeleton_02: register(t46);
-Texture2D gtxtMeleeSkeleton_02_Equip: register(t47);
-Texture2D gtxtMeleeSkeleton_02_EquipAll: register(t48);
+Texture2D gtxtMeleeSkeleton_01_D		: register(t43);
+Texture2D gtxtMeleeSkeleton_02			: register(t44);
+Texture2D gtxtMeleeSkeleton_02_Equip	: register(t45);
+Texture2D gtxtMeleeSkeleton_02_EquipAll	: register(t46);
 
-Texture2D gtxtGreenTree		: register(t49);
-Texture2D gtxtEffect_1		: register(t50);
-Texture2D gtxtEffect_2		: register(t51);
-Texture2D gtxtEffect_3		: register(t52);
+Texture2D gtxtGreenTree		: register(t47);
+Texture2D gtxtPlayerBow			: register(t48);
+Texture2D gtxtEffect_1		: register(t49);
+Texture2D gtxtEffect_2		: register(t50);
+Texture2D gtxtEffect_3		: register(t51);
+Texture2D gtxtPlayerStaff   : register(t52);
 
 Texture2D gtxtMap			: register(t53);
 Texture2D gtxtMirror		: register(t54);
 Texture2D gtxtShadowMap		: register(t55);
-
-Texture2D gtxtPlayerBowAndArrow  : register(t56);
-Texture2D gtxtPlayerStaff  : register(t57);
 
 // ±×¸²ÀÚ
 float CalcShadowFactor(float4 f4ShadowPos)
@@ -1460,10 +1457,6 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		cColor += gtxtMeleeSkeleton_02_Equip.Sample(gssWrap, input.uv);
 	}
 	else if (gnTexturesMask & 0x80)
-	{
-		cColor = gtxtBow.Sample(gssWrap, input.uv);
-	}
-	else if (gnTexturesMask & 0x100)
 	{
 		cColor = gtxtPlayerBow.Sample(gssWrap, input.uv);
 	}

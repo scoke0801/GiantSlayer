@@ -1076,6 +1076,9 @@ void CGameObjectVer2::SetTextureIndexFindByName(string fileName)
 	else if (fileName == "bow_texture") {
 		SetTextureIndex(0x80);
 	}
+	else if (fileName == "@bow_texture") {
+		SetTextureIndex(0x80);
+	}
 	else if (fileName == "Mat01_mummy_A") {
 		SetTextureIndex(0x100);
 	}
