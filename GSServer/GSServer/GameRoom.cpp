@@ -11,14 +11,7 @@
 int g_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]; 
 
 CGameRoom::CGameRoom()
-{
-	CAnimationObject* pPlayerModel = CAnimationObject::LoadGeometryAndAnimationFromFile("resources/FbxExported/Player2.bin", true);
-
-	int stop = 3;
-	//m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
-	//m_Player = m_Players[0];
-	//
-	//m_Players[0]->SetChild(pPlayerModel, true);
+{ 
 }
 
 void CGameRoom::Update(float elapsedTime)
@@ -160,8 +153,12 @@ void CGameRoom::InitAll()
  
 void CGameRoom::InitPlayers()
 {
+	CAnimationObject* pPlayerModel;
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		pPlayerModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
+			"resources/FbxExported/Player2.bin", true);
 		m_Players[i] = new CPlayer();
+		m_Players[i]->SetChild(pPlayerModel, true);
 		m_Players[i]->Scale(200, 200, 200);
 		float x = float(rand() % 5000);
 		float z = float(rand() % 5000);
@@ -195,10 +192,14 @@ void CGameRoom::InitCameras()
 void CGameRoom::InitMonsters()
 {
 	CEnemy* pEnemy;
+	CAnimationObject* pMonsterModel;
 	XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
 	{	// Monster Area1
 		for (int i = 0; i < 4; ++i) {
+			pMonsterModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
+				"resources/FbxExported/BasicSkeleton.bin", true);
 			pEnemy = new CMeleeEnemy();
+			pEnemy->SetChild(pMonsterModel, true);
 			pEnemy->Scale(scale.x, scale.y, scale.z);
 			pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 2005.0f * MAP_SCALE_SIZE, 11650.0f * MAP_SCALE_SIZE), 11650.0f * MAP_SCALE_SIZE });
 			pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 2005.0f * MAP_SCALE_SIZE, 11650.0f * MAP_SCALE_SIZE), 11650.0f * MAP_SCALE_SIZE });
@@ -212,8 +213,18 @@ void CGameRoom::InitMonsters()
 
 	{	
 		// Monster Area1-2
+		string fileNames[4] = {
+			"resources/FbxExported/BasicSkeleton.bin",
+			"resources/FbxExported/MaceSkeleton.bin",
+			"resources/FbxExported/StrongSkeleton.bin",
+			"resources/FbxExported/ExeSkeleton.bin"
+		};
+
 		for (int i = 0; i < 4; ++i) {
+			pMonsterModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
+				fileNames[i].c_str(), true);
 			pEnemy = new CMeleeEnemy();
+			pEnemy->SetChild(pMonsterModel, true);
 			pEnemy->Scale(scale.x, scale.y, scale.z);
 			pEnemy->SetPosition({ 7800.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights,7800.0f * MAP_SCALE_SIZE,  11450.0f * MAP_SCALE_SIZE),  11450.0f * MAP_SCALE_SIZE });
 			pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 7800.0f * MAP_SCALE_SIZE,  11450.0f * MAP_SCALE_SIZE),  11450.0f * MAP_SCALE_SIZE });
@@ -226,8 +237,16 @@ void CGameRoom::InitMonsters()
 		} 
 	}
 	{// Monster Area2-1
-		for (int i = 0; i < 4; ++i) {
+		string fileNames[3] = {
+			"resources/FbxExported/ExeSkeleton.bin",
+			"resources/FbxExported/MaceSkeleton.bin",
+			"resources/FbxExported/MaceSkeleton.bin", 
+		};
+		for (int i = 0; i < 3; ++i) {
+			pMonsterModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
+				fileNames[i].c_str(), true);
 			pEnemy = new CMeleeEnemy();
+			pEnemy->SetChild(pMonsterModel, true);
 			//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 			pEnemy->Scale(scale.x, scale.y, scale.z);
 			pEnemy->SetPosition({ 12100.0f * MAP_SCALE_SIZE,GetDetailHeight(g_Heights,12100.0f * MAP_SCALE_SIZE, 17950.0f * MAP_SCALE_SIZE), 17950.0f * MAP_SCALE_SIZE });
@@ -241,8 +260,16 @@ void CGameRoom::InitMonsters()
 	}
 
 	{// Monster Area2-2
+		string fileNames[3] = {
+			"resources/FbxExported/StrongSkeleton.bin",
+			"resources/FbxExported/StrongSkeleton.bin",
+			"resources/FbxExported/StrongSkeleton.bin",
+		};
 		for (int i = 0; i < 3; ++i) {
+			pMonsterModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
+				fileNames[i].c_str(), true);
 			pEnemy = new CMeleeEnemy();
+			pEnemy->SetChild(pMonsterModel, true);
 			pEnemy->Scale(scale.x, scale.y, scale.z);
 			pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE,GetDetailHeight(g_Heights,11900.0f * MAP_SCALE_SIZE, 13300.0f * MAP_SCALE_SIZE), 13300.0f * MAP_SCALE_SIZE });
 			pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f * MAP_SCALE_SIZE,GetDetailHeight(g_Heights,11900.0f * MAP_SCALE_SIZE, 13300.0f * MAP_SCALE_SIZE), 13300.0f * MAP_SCALE_SIZE });
@@ -257,7 +284,10 @@ void CGameRoom::InitMonsters()
 	{// Monster Area3 
 		scale = { 600.0f,600.0f,600.0f }; 
 		for (int i = 0; i < 4; ++i) {
+			pMonsterModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
+				"resources/FbxExported/Skeleton.bin", true);
 			pEnemy = new CMeleeEnemy();
+			pEnemy->SetChild(pMonsterModel, true);
 			//pEnemy->Rotate(XMFLOAT3(1, 0, 0), -90.0f);
 			pEnemy->Scale(scale.x, scale.y, scale.z);
 			pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE,GetDetailHeight(g_Heights,11900.0f * MAP_SCALE_SIZE, 3250.0f * MAP_SCALE_SIZE), 3250.0f * MAP_SCALE_SIZE });
@@ -275,7 +305,7 @@ void CGameRoom::InitMonsters()
 		pEnemy->ConnectPlayer(m_Players, MAX_ROOM_PLAYER);
 	}
 	 
-	CBoss* pBoss = new CBoss();
+	CBoss* pBoss = new CBoss(); 
 	pBoss->SetPosition({ 17166 * MAP_SCALE_SIZE, -6983.47559, 17166 * MAP_SCALE_SIZE });
 	pBoss->Scale(120, 120, 120);
 	pBoss->Rotate({ 0,1,0 }, 180);
@@ -285,12 +315,7 @@ void CGameRoom::InitMonsters()
 	XMFLOAT3 scopeSize = { 4100 * 2, 0, 4100 * 2 };
 	pBoss->SetActivityScope({ scopeSize.x, 0, scopeSize.z }, { centerPos });
 	pBoss->SetSightBoundingBox({ scopeSize.x / scale.x, 15, scopeSize.z / scale.z });
-	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3{ scopeSize.x / scale.x, 15, scopeSize.z / scale.z }, XMFLOAT3{ 0, 0.0f,0 }));
-
-	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.5, 5, 3.5)));
-	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3(2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
-	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3(-2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
-	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5)));
+	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3{ scopeSize.x / scale.x, 15, scopeSize.z / scale.z }, XMFLOAT3{ 0, 0.0f,0 })); 
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pBoss);
 }
 

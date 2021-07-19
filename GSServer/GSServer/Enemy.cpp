@@ -24,6 +24,9 @@ void CEnemy::Update(float elapsedTime)
 	if (m_AttackDelayTime > 0.0f) {
 		m_AttackDelayTime = max(m_AttackDelayTime - elapsedTime, 0.0f);
 	}
+
+	CAnimationObject::Animate(elapsedTime);
+	UpdateTransform(NULL);
 }
 
 bool CEnemy::IsEnemyInSight() // Chase State

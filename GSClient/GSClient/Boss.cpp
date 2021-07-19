@@ -12,16 +12,7 @@ CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 
 	SetChild(pBossParent, true);
 	SetAnimationSet((int)BOSS_ANIMATION::Idle);
-	SetShadertoAll();
-
-	//BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 11, 10, 7, XMFLOAT3{ 0,0,0 });
-	//AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.5, 5, 3.5)));
-	//BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ 2.5, 3, 7 });
-	//AddColider(new ColliderBox(XMFLOAT3(2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
-	//BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ -2.5, 3, 7 });
-	//AddColider(new ColliderBox(XMFLOAT3(-2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
-	//BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 3, 3, 5, XMFLOAT3{ 0,3,-7 });
-	//AddColider(new ColliderBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5)));
+	SetShadertoAll(); 
 
 	m_State = new WaitState(this);
 	m_EnemyType = EnemyType::Boss;
@@ -253,11 +244,8 @@ CGameObjectVer2* CBoss::LoadFrameHierarchyFromFileForBoss(ID3D12Device* pd3dDevi
 			nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
 			nReads = (UINT)::fread(pGameObject->m_pstrFrameName, sizeof(char), nStrLength, pInFile);
 			pGameObject->m_pstrFrameName[nStrLength] = '\0';
-			//cout << pGameObject->m_pstrFrameName << endl;
+			//cout << pGameObject->m_pstrFrameName << endl; 
 
-		//------------------------------------
-		// for test
-		//------------------------------------
 			BoundingBox boundingBox;
 			bool isMainPart = true;
 			vector<string> frames = {

@@ -1,5 +1,5 @@
 #pragma once
-#include "GameObject.h"  
+#include "AnimationObject.h"
 #include "Camera.h"
 
 enum class Player_Move_Type
@@ -8,7 +8,7 @@ enum class Player_Move_Type
 	Walk,
 	Run
 };
-class CPlayer : public CGameObject
+class CPlayer : public CAnimationObject
 { 
 public:
 #ifdef _DEBUG

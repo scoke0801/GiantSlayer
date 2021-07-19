@@ -34,7 +34,7 @@ public: // about collision
 
 public: // about read
 	static CAnimationObject* LoadFrameHierarchyFromFile(CAnimationObject* pParent, FILE* pInFile);
-	static CAnimationObject* LoadGeometryAndAnimationFromFile(char* pstrFileName, bool bHasAnimation); 
+	static CAnimationObject* LoadGeometryAndAnimationFromFile(const char* pstrFileName, bool bHasAnimation); 
 	static bool LoadMeshInfoFromFile(FILE* pInFile, XMFLOAT3& center, XMFLOAT3& extents);
 	static bool LoadSkinInfoFromFile(FILE* pInFile, XMFLOAT3& center, XMFLOAT3& extents);
 	static void LoadMaterialsFromFile(CAnimationObject* pParent, FILE* pInFile);
@@ -43,12 +43,12 @@ public: // about read
 	void LoadAnimationFromFile(FILE* pInFile);
 
 	CAnimationObject* FindFrame(char* pstrFrameName);
+
 public:
 	XMFLOAT4X4					m_xmf4x4ToParent;
 
-private:
 	char						m_pstrFrameName[64];
-
+	 
 	CAnimationObject*			m_pParent = nullptr;
 	CAnimationObject*			m_pChild = nullptr;
 	CAnimationObject*			m_pSibling = nullptr;

@@ -240,7 +240,7 @@ CAnimationObject* CAnimationObject::LoadFrameHierarchyFromFile(CAnimationObject*
 	return(pGameObject);
 }
 
-CAnimationObject* CAnimationObject::LoadGeometryAndAnimationFromFile(char* pstrFileName, bool bHasAnimation)
+CAnimationObject* CAnimationObject::LoadGeometryAndAnimationFromFile(const char* pstrFileName, bool bHasAnimation)
 {
 	FILE* pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");
