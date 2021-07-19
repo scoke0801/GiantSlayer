@@ -6,11 +6,19 @@
 #include "Boss.h"
 #include "Arrow.h"
 #include "PacketProcessor.h"
+#include "AnimationObject.h"
 
 int g_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]; 
 
 CGameRoom::CGameRoom()
 {
+	CAnimationObject* pPlayerModel = CAnimationObject::LoadGeometryAndAnimationFromFile("resources/FbxExported/Player2.bin", true);
+
+	int stop = 3;
+	//m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
+	//m_Player = m_Players[0];
+	//
+	//m_Players[0]->SetChild(pPlayerModel, true);
 }
 
 void CGameRoom::Update(float elapsedTime)

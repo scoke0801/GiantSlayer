@@ -282,6 +282,7 @@ bool CAnimationObject::LoadMeshInfoFromFile(FILE* pInFile, XMFLOAT3& center, XMF
 	nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
 	nReads = (UINT)::fread(pstrMeshName, sizeof(char), nStrLength, pInFile);
 	pstrMeshName[nStrLength] = '\0';
+
 	bool			HasBoundingInfo = false;
 	UINT			nType = 0x00;
 
@@ -398,6 +399,82 @@ bool CAnimationObject::LoadMeshInfoFromFile(FILE* pInFile, XMFLOAT3& center, XMF
 bool CAnimationObject::LoadSkinInfoFromFile(FILE* pInFile, XMFLOAT3& center, XMFLOAT3& extents)
 {
 	bool			HasBoundingInfo = false;
+
+
+	char			pstrSkinnedMeshName[64] = { 0 };
+	char			pstrToken[64] = { '\0' };
+	BYTE			nStrLength = 0;
+
+	UINT			nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
+	nReads = (UINT)::fread(pstrSkinnedMeshName, sizeof(char), nStrLength, pInFile);
+	pstrSkinnedMeshName[nStrLength] = '\0';
+
+	for (; ; )
+	{
+		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
+		nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pInFile);
+		pstrToken[nStrLength] = '\0';
+
+		if (!strcmp(pstrToken, "<BonesPerVertex>:"))
+		{
+			int nBonesPerVertex;
+			nReads = (UINT)::fread(&nBonesPerVertex, sizeof(int), 1, pInFile);
+		}
+		else if (!strcmp(pstrToken, "<Bounds>:"))
+		{
+			HasBoundingInfo = true;
+			nReads = (UINT)::fread(&center, sizeof(XMFLOAT3), 1, pInFile);
+			nReads = (UINT)::fread(&extents, sizeof(XMFLOAT3), 1, pInFile);
+		}
+		else if (!strcmp(pstrToken, "<BoneNames>:"))
+		{
+			int nSkinningBones;
+			nReads = (UINT)::fread(&nSkinningBones, sizeof(int), 1, pInFile);
+			if (nSkinningBones > 0)
+			{
+				char(*ppstrSkinningBoneNames)[64];
+				ppstrSkinningBoneNames = new char[nSkinningBones][64]; 
+				for (int i = 0; i < nSkinningBones; i++)
+				{
+					nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
+					nReads = (UINT)::fread(ppstrSkinningBoneNames[i], sizeof(char), nStrLength, pInFile);
+					ppstrSkinningBoneNames[i][nStrLength] = '\0'; 
+				}
+			} 
+		}
+		else if (!strcmp(pstrToken, "<BoneOffsets>:"))
+		{
+			int nSkinningBones;
+			nReads = (UINT)::fread(&nSkinningBones, sizeof(int), 1, pInFile);
+			if (nSkinningBones > 0)
+			{
+				XMFLOAT4X4* pxmf4x4BindPoseBoneOffsets;
+				pxmf4x4BindPoseBoneOffsets = new XMFLOAT4X4[nSkinningBones];
+				nReads = (UINT)::fread(pxmf4x4BindPoseBoneOffsets, sizeof(float), 16 * nSkinningBones, pInFile);
+			}
+		}
+		else if (!strcmp(pstrToken, "<BoneWeights>:"))
+		{ 
+			int nVertices;
+			nReads = (UINT)::fread(&nVertices, sizeof(int), 1, pInFile);
+			if (nVertices > 0)
+			{
+				XMUINT4* pxmu4BoneIndices;
+				XMFLOAT4* pxmf4BoneWeights;
+				pxmu4BoneIndices = new XMUINT4[nVertices];
+				pxmf4BoneWeights = new XMFLOAT4[nVertices];
+
+				nReads = (UINT)::fread(pxmu4BoneIndices, sizeof(XMUINT4), nVertices, pInFile); 
+				nReads = (UINT)::fread(pxmf4BoneWeights, sizeof(XMFLOAT4), nVertices, pInFile); 
+			}
+		}
+		else if (!strcmp(pstrToken, "</SkinningInfo>"))
+		{
+			break;
+		}
+	}
+
+
 	return HasBoundingInfo;
 }
 
