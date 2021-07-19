@@ -162,8 +162,8 @@
     <ClCompile Include="MummyLaser.cpp">
       <Filter>GameObject\MummyLaser</Filter>
     </ClCompile>
-    <ClCompile Include="Magic.cpp">
-      <Filter>GameObject\Magic</Filter>
+    <ClCompile Include="Skill.cpp">
+      <Filter>GameObject\Skill</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -324,8 +324,8 @@
     <ClInclude Include="MummyLaser.h">
       <Filter>GameObject\MummyLaser</Filter>
     </ClInclude>
-    <ClInclude Include="Magic.h">
-      <Filter>GameObject\Magic</Filter>
+    <ClInclude Include="Skill.h">
+      <Filter>GameObject\Skill</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -439,7 +439,7 @@
     <Filter Include="GameObject\MummyLaser">
       <UniqueIdentifier>{092adec7-9cc3-486c-bcc4-02c1d10527ec}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GameObject\Magic">
+    <Filter Include="GameObject\Skill">
       <UniqueIdentifier>{b4b216eb-730a-45f0-9923-13f9c60ad9d6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
