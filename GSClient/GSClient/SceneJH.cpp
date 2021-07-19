@@ -441,7 +441,7 @@ void CSceneJH::Update(float elapsedTime)
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
-	for (int i = 0; i < m_ObjectLayers.size(); ++i){
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
 			if (false == pObject->IsInNearSector(m_PlayerExistingSector)) {
 				continue;
@@ -449,31 +449,32 @@ void CSceneJH::Update(float elapsedTime)
 			pObject->Update(elapsedTime);
 			pObject->UpdateColliders();
 		}
-	} 
+	}
 	//pfbxTestObject->Update(elapsedTime);
 
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) { 
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
 	m_EffectsHandler->Update(elapsedTime);
-	
-	m_Particles->Update(elapsedTime); 
+
+	m_Particles->Update(elapsedTime);
 
 	m_HelpTextUI->Update(elapsedTime);
 
 	ZeroMemory(m_PlayerExistingSector, sizeof(m_PlayerExistingSector));
-	for(auto player : m_Players){
+	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->Update(elapsedTime);
 		player->UpdateColliders();
 		player->FixPositionByTerrain(m_Terrain);
 		player->FixCameraByTerrain(m_Terrain);
-		m_PlayerExistingSector[player->GetPlayerExistingSector()] = true;
+		//m_PlayerExistingSector[player->GetPlayerExistingSector()] = true;
 	}
+	m_PlayerExistingSector[m_Player->GetPlayerExistingSector()] = true;
 
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
-			m_Player->FixCollision(pObstacle); 
+			m_Player->FixCollision(pObstacle);
 		}
 	}
 
@@ -485,7 +486,7 @@ void CSceneJH::Update(float elapsedTime)
 			m_Player->FixCollision(pObstacle);
 			//cout << "충돌 : 플레이어 - 장애물\n";
 		}
-	} 
+	}
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
@@ -502,10 +503,10 @@ void CSceneJH::Update(float elapsedTime)
 					m_Player->SetAleradyAttack(true);
 				}
 			}
-			else if(m_Player->Attacked(pEnemy))
+			else if (m_Player->Attacked(pEnemy))
 			{
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision(); 
+				m_Player->FixCollision();
 				//cout << "충돌 : 플레이어 - 적\n";
 			}
 		}
@@ -515,7 +516,7 @@ void CSceneJH::Update(float elapsedTime)
 			if (false == pEnemy->IsInSameSector(pObstacle->GetExistingSector())) {
 				continue;
 			}
-			if (pObstacle->CollisionCheck(pEnemy)) { 
+			if (pObstacle->CollisionCheck(pEnemy)) {
 				CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
 				thisEnemy->FixCollision(pObstacle);
 				thisEnemy->CollideToObstacle();
@@ -529,9 +530,9 @@ void CSceneJH::Update(float elapsedTime)
 			continue;
 		}
 		if (pArrow->CollisionCheck(m_Player)) {
-			if (m_Player->Attacked(pArrow)) { 
+			if (m_Player->Attacked(pArrow)) {
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				pArrow->SetDrawable(true); 
+				pArrow->SetDrawable(true);
 				//cout << "충돌 : 플레이어 - 적\n";
 			}
 		}
@@ -541,30 +542,31 @@ void CSceneJH::Update(float elapsedTime)
 		if (true == pArrow->IsDrawable()) {
 			continue;
 		}
-		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy])
-		{
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 			if (false == pEnemy->IsInSameSector(pArrow->GetExistingSector())) {
 				continue;
 			}
 			if (pArrow->CollisionCheck(pEnemy)) {
 				pEnemy->ChangeState(ObjectState::Attacked, pArrow);
-				pArrow->SetDrawable(true); 
-				
-				cout << "충돌 : 플레이어 화살 - 적\n"; 
+				pArrow->SetDrawable(true);
+
+				cout << "충돌 : 플레이어 화살 - 적\n";
 				break;
 			}
 		}
 	}
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
+		if (false == pPuzzle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
 		if (pPuzzle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pPuzzle);
 			m_isPlayerBoxCollide = true;
-			 
 		}
-	} 
-	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
-		for (int i = 0; i < 1; i++)
-		{
+	}
+
+	/*for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
+		for (int i = 0; i < 1; i++) {
 			if (pArrow->CollisionCheck(m_Mirror[i])) {
 				m_Mirror[i]->FixCollision();
 				if (i == 0)
@@ -584,21 +586,22 @@ void CSceneJH::Update(float elapsedTime)
 				}
 			}
 		} 
-	}
+	}*/
 	 
-	// 퍼즐 상자하고 충돌처리
-	for (int i = 0; i < 8; i++)
-	{
-		if (m_PuzzleBox[i]->CollisionCheck(m_Player))
+	if (m_Player->GetPlayerExistingSector() == (int)SECTOR_POSITION::SECTOR_3) {
+		// 퍼즐 상자하고 충돌처리
+		for (int i = 0; i < 8; i++)
 		{
-			m_PuzzleBox[i]->SetSelectBox(true);
-		}
-		else
-		{
-			m_PuzzleBox[i]->SetSelectBox(false);
+			if (m_PuzzleBox[i]->CollisionCheck(m_Player))
+			{
+				m_PuzzleBox[i]->SetSelectBox(true);
+			}
+			else
+			{
+				m_PuzzleBox[i]->SetSelectBox(false);
+			}
 		}
 	}
-
 	// 퍼즐 범위 내일 작업할때 사용 
 
 	/*x축 12450 12150   11950 11650  11450 11150
@@ -2470,6 +2473,7 @@ void CSceneJH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 		m_Mirror[i]->SetMesh(pMirrorMesh);
 		m_Mirror[i]->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
+		m_Mirror[i]->SetExistingSector(SECTOR_POSITION::SECTOR_4);
 		if (i == 1 || i == 2)
 		{
 			m_Mirror[i]->Rotate({ 0,1,0 }, 90);
