@@ -287,7 +287,8 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Door",
 		"HP_SP", "Minimap", "WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red", "Flower_White", "Grass_1", "Grass_2", "Tree", "NoLeafTree", "Leaves", "Moss_Rock",
+		"Player_Clothes","Player_Face","Player_Hair","Player_Sword", "Player_Bow", "Player_Staff",
+		"Tree", "NoLeafTree", "Leaves", "Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
 		"Dry_Tree", "Stump", "Dead_Tree",
@@ -297,10 +298,7 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
-		"GreenTree",
-		"Player_Bow",
-		"Effect_1", "Effect_2", "Effect_3",
-		"Player_Staff"
+		"Effect_1", "Effect_2", "Effect_3"
 	};
 
 	const wchar_t* address[] =
@@ -313,8 +311,7 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
 		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
-		//L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds",
-		L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds",
+		L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds", L"resources/Textures/bow_texture.dds", L"resources/Textures/twoHandedStaff_texture.dds",
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board.dds",
 		L"resources/UI/HelpText.dds",
@@ -326,10 +323,7 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/Skeleton_D.dds",
 		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",
 		L"resources/Textures/DS_equipment_standard.dds",
-		L"resources/OBJ/GreenTree.dds",
-		L"resources/Textures/bow_texture.dds",
-		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds",
-		L"resources/Textures/twoHandedStaff_texture.dds"
+		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -373,7 +367,8 @@ void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"HP_SP","HP_SP_PER",
 		"Minimap",
 		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
+		"Player_Clothes","Player_Face","Player_Hair","Player_Sword", "Player_Bow", "Player_Staff",
+		"Tree","NoLeafTree","Leaves","Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
 		"Dry_Tree","Stump","Dead_Tree",
@@ -384,10 +379,7 @@ void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
 		"MeleeSkeleton_02_EquipAll",
-		"GreenTree",
-		"Player_Bow",
-		"Effect_1", "Effect_2", "Effect_3",
-		"Player_Staff"
+		"Effect_1", "Effect_2", "Effect_3"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};

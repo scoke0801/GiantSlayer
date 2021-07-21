@@ -53,8 +53,6 @@ private:
 	bool m_DownBox = false;
 	bool m_HaveBox = false;
 	
-	
-
 	float m_AttackedDelay = 0.0f;
 
 	CMesh* m_SpareBoundingBox;
