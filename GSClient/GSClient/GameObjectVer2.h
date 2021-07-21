@@ -151,7 +151,7 @@ public:
 
 	bool isSkinned = false;
 
-	bool pause = false;
+	bool m_AnimationPaused = false;
 
 	CAnimationController* m_pAnimationController = NULL;
 	int	m_AnimationSet = 0;

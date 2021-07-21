@@ -148,6 +148,23 @@ void CAnimationObject::CollectAABBFromChilds()
 	if (m_pChild) m_pChild->GetAABBToBuffer(m_AABB);
 }
 
+void CAnimationObject::SetAnimationSet(int nAnimationSet)
+{
+	m_AnimationSet = nAnimationSet;
+	if (m_pAnimationController) m_pAnimationController->SetAnimationSet(nAnimationSet);
+
+	if (m_pSibling) m_pSibling->SetAnimationSet(nAnimationSet);
+	if (m_pChild) m_pChild->SetAnimationSet(nAnimationSet);
+}
+
+void CAnimationObject::SetAnimationType(int nType)
+{
+	if (m_pAnimationController) m_pAnimationController->SetAnimationType(nType);
+
+	if (m_pSibling) m_pSibling->SetAnimationType(nType);
+	if (m_pChild) m_pChild->SetAnimationType(nType);
+}
+
 CAnimationObject* CAnimationObject::LoadFrameHierarchyFromFile(CAnimationObject* pParent, FILE* pInFile)
 {
 	static int count = 0;
@@ -707,7 +724,7 @@ CAnimationObject* CAnimationObject::FindFrame(char* pstrFrameName)
 	if (m_pChild) if (pFrameObject = m_pChild->FindFrame(pstrFrameName)) return(pFrameObject);
 
 	return(NULL);
-}
+} 
 
 void ReadExtradataAboutTexture(FILE* pInFile)
 {

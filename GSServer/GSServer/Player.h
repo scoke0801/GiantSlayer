@@ -8,6 +8,13 @@ enum class Player_Move_Type
 	Walk,
 	Run
 };
+enum class PlayerWeaponType
+{
+	None = 0x00,
+	Sword = 0x01,
+	Bow = 0x02
+};
+
 class CPlayer : public CAnimationObject
 { 
 public:
@@ -16,8 +23,15 @@ public:
 #endif
 	AnimationType m_StateName;
 
+	AnimationType IDLE = AnimationType::SWORD_IDLE;
+	AnimationType RUN = AnimationType::SWORD_RUN;
+	AnimationType ATK = AnimationType::SWORD_ATK;
+	AnimationType DEATH = AnimationType::SWORD_DEATH;
+	AnimationType CHANGEWEAPON = AnimationType::BOW_GET;
+
 private:
-	Player_Move_Type m_MovingType = Player_Move_Type::Run;
+	Player_Move_Type m_MovingType = Player_Move_Type::Run; 
+	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
 
 	short	m_Id;
 	string	m_Name;
@@ -26,12 +40,21 @@ private:
 	CCamera* m_Camera = nullptr;
 
 private:
+	float m_AttackAnimLength = 0.0f;
 	float m_AttackWaitingTime = 0.0f;
+
+	float m_AttackAnimPauseTime = 0.0f;
+	 
 	bool m_IsCanAttack = true;
 
 	float m_AttackedDelay = 0.0f;
 	bool m_IsAlreadyAttack = false;
 
+public:
+	bool pullString = false;
+	float m_StringPullTime = 0.0f;
+
+	bool m_AnimationPaused = false;
 public:
 	CPlayer();
 	~CPlayer();	
@@ -44,6 +67,7 @@ public:
 	void FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]) override;
 
 	int GetPlayerExistingSector() const;
+
 public:
 	virtual void SetVelocity(const XMFLOAT3& dir) override;
 
@@ -60,19 +84,23 @@ public:
 	 
 	void SetCamera(CCamera* camera) { m_Camera = camera; }
 	CCamera* GetCamera() const { return m_Camera; }
-	 
-
+	  
 public:
 	void SetCanAttack(bool info) { m_IsCanAttack = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
 
-public:
-	bool Attacked(CGameObject* pObject);
-	void Attack();
-
-	AnimationType GetStateName() const { return m_StateName; }
-	  
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
+
+	void AnimationChange(PlayerWeaponType weapon); 
+
+	bool ShotAble();
+
+public:
+	bool Attacked(CGameObject* pObject);
+	void Attack(); 
+	void ResetAttack();
+
+	AnimationType GetStateName() const { return m_StateName; } 
 };

@@ -35,6 +35,11 @@ public: // about collision
 
 	void SetAABB(vector<BoundingBox>& buffer) { m_AABB = buffer; buffer.clear(); }
 
+public: // about animation
+	int GetAnimationSet()const { return m_AnimationSet; }
+	void SetAnimationSet(int nAnimationSet);
+	void SetAnimationType(int nType);
+	
 public: // about read
 	static CAnimationObject* LoadFrameHierarchyFromFile(CAnimationObject* pParent, FILE* pInFile);
 	static CAnimationObject* LoadGeometryAndAnimationFromFile(const char* pstrFileName, bool bHasAnimation); 
@@ -45,7 +50,7 @@ public: // about read
 	void CacheSkinningBoneFrames(CAnimationObject* pRootFrame);
 	void LoadAnimationFromFile(FILE* pInFile);
 
-	CAnimationObject* FindFrame(char* pstrFrameName);
+	CAnimationObject* FindFrame(char* pstrFrameName); 
 
 public:
 	XMFLOAT4X4					m_xmf4x4ToParent;

@@ -254,20 +254,7 @@ void CPlayer::Attack()
 	IncreaseAttackWaitingTime(m_AttackAnimLength);
 
 	SetVelocityToZero();
-
-	//auto temp = m_Colliders[0];
-	//m_Colliders[0] = m_SpareCollisionBox;
-	//m_SpareCollisionBox = temp;
-
-	//temp = m_AABB[0];
-	//m_AABB[0] = m_SpareAABB;
-	//m_SpareAABB = temp;
-
-	//auto tempMesh = m_BoundingObjectMeshes[0];
-	//m_BoundingObjectMeshes[0] = m_SpareBoundingBox;
-	//m_SpareBoundingBox = tempMesh;
-	//UpdateColliders();
-
+	 
 	SetAnimationSet(ATK);
 }
 
@@ -275,21 +262,7 @@ void CPlayer::ResetAttack()
 {
 	m_IsAlreadyAttack = false;
 	m_AttackWaitingTime = 0.0f;
-	m_IsCanAttack = true;
-
-	//auto temp = m_SpareCollisionBox;
-	//m_SpareCollisionBox = m_Colliders[0];
-	//m_Colliders[0] = temp;
-
-	//temp = m_SpareAABB;
-	//m_SpareAABB = m_AABB[0];
-	//m_AABB[0] = temp;
-
-	//auto tempMesh = m_SpareBoundingBox;
-	//m_SpareBoundingBox = m_BoundingObjectMeshes[0];
-	//m_BoundingObjectMeshes[0] = tempMesh;
-
-	UpdateColliders();
+	m_IsCanAttack = true; 
 }
 
 void CPlayer::ResetBow()
@@ -304,8 +277,7 @@ void CPlayer::Box_Picked()
 {
 	SetPickBox(true);
 
-	//IncreaseBoxPickWaitingTime(m_BoxPickAnimLength);
-
+	//IncreaseBoxPickWaitingTime(m_BoxPickAnimLength); 
 }
 
 void CPlayer::Box_Down()
@@ -313,9 +285,7 @@ void CPlayer::Box_Down()
 	SetDownBox(true);
 
 	//IncreaseBoxDownWaitingTime(m_BoxDownAnimLength);
-}
-
-
+} 
 
 void CPlayer::AnimationChange(PlayerWeaponType weapon)
 {
