@@ -19,6 +19,7 @@ enum class ShaderTypes
 	TexParticle,
 	TerrainWater,  
 	Shadow,
+	Text,
 	Count
 };
 

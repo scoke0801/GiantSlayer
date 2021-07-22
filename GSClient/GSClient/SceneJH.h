@@ -14,6 +14,7 @@ class CEnemy;
 class CFbxObject2;
 class CBoss;
 class CEffectHandler;
+class Font;
 
 class CSceneJH : public CScene
 {
@@ -148,6 +149,13 @@ public:
 	void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 	void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
+//-------------------------------------------------------------------------------
+// --------------!!!!!!!!!!!!!!!!!!!Test!!!!!!!!!!!!!!!!-------------------------
+//-------------------------------------------------------------------------------
+	void RenderText(ID3D12GraphicsCommandList* pd3dCommandList, const string& text,
+		const XMFLOAT2& pos, const XMFLOAT2& scale, const XMFLOAT2& padding, const XMFLOAT4& color);
+//-------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 public:
 	void Communicate(SOCKET& sock) override;
 

@@ -230,6 +230,7 @@
     <ClCompile Include="Boss.cpp" />
     <ClCompile Include="Bridge.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Font.cpp" />
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="Colider.cpp" />
     <ClCompile Include="FbxLoader.cpp">

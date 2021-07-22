@@ -157,6 +157,20 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 //
+class CTextVertex : public CVertex {
+public:
+	CTextVertex() {}
+	CTextVertex(float r, float g, float b, float a, float u, float v, float tw, float th, float x, float y, float w, float h)
+		: m_Color(r, g, b, a), m_TexCoord(u, v, tw, th), m_Pos(x, y, w, h) {}
+	
+public:
+	XMFLOAT4 m_Pos;
+	XMFLOAT4 m_TexCoord;
+	XMFLOAT4 m_Color;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//
 
 class CMesh
 {

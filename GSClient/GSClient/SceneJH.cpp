@@ -21,6 +21,8 @@
 #include "FbxLoader.h"
 #include "Boss.h"
 #include "Effect.h"
+#include "Font.h"
+
 #define ROOT_PARAMETER_OBJECT				0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA		1
 #define ROOT_PARAMETER_CAMERA				2
@@ -692,8 +694,7 @@ void CSceneJH::Update(float elapsedTime)
 	{
 		m_MirrorCamera->UpdateViewMatrix();
 	}
-
-
+	 
 	if (m_pLightCamera)
 	{
 		LightPos = m_Player->GetPosition();
@@ -934,25 +935,17 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 
 	m_Skybox->Draw(pd3dCommandList, m_MinimapCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
-	auto cameraPos = m_MinimapCamera->GetPosition3f();
-	for (int i = 0; i < m_ObjectLayers.size(); ++i) { 
-		if (i == (int)OBJECT_LAYER::TerrainWater) {
-			m_ObjectLayers[i][0]->Draw(pd3dCommandList, m_CurrentCamera);
-		}
-		else if (i == (int)OBJECT_LAYER::Puzzle) {
-			for (auto pObject : m_ObjectLayers[i]) { 
-				pObject->Draw(pd3dCommandList, m_CurrentCamera);
-			}
-		}
-		else {
-			for (auto pObject : m_ObjectLayers[i]) {
-				if (false == pObject->IsInNearSector(m_PlayerExistingSector)) {
-					continue;
-				} 
-				pObject->Draw(pd3dCommandList, m_CurrentCamera);
-			}
-		}
-	} 
+
+	//for (auto pObject : m_ObjectLayers[(int)OBJECT_LAYER::Skybox]) {
+	//	pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	//} 
+	for (auto pObject : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+	for (auto pObject : m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater]) {
+		pObject->Draw(pd3dCommandList, m_CurrentCamera);
+	}
+
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
 
@@ -976,8 +969,7 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 }
 
 void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
-{ 
-	return;
+{  
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature); 
 
 	if (m_MirrorCamera)
@@ -1003,8 +995,7 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
-
-
+	 
 	m_Skybox->Draw(pd3dCommandList, m_MirrorCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
@@ -1097,6 +1088,13 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 	}*/
 }
  
+void CSceneJH::RenderText(ID3D12GraphicsCommandList* pd3dCommandList, const string& text, const XMFLOAT2& pos, const XMFLOAT2& scale, const XMFLOAT2& padding, const XMFLOAT4& color)
+{
+	auto shader = CShaderHandler::GetInstance().GetData("Text");
+	shader->Render(pd3dCommandList, m_CurrentCamera);
+	
+}
+
 void CSceneJH::Communicate(SOCKET& sock)
 {
 	P_C2S_UPDATE_SYNC_REQUEST p_syncUpdateRequest;

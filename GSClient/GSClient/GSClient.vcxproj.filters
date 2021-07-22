@@ -162,6 +162,9 @@
     <ClCompile Include="MummyLaser.cpp">
       <Filter>GameObject\MummyLaser</Filter>
     </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Font</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -257,7 +260,6 @@
     <ClInclude Include="Bridge.h">
       <Filter>GameObject\Bridge</Filter>
     </ClInclude>
-    <ClInclude Include="Font.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="Communicates.h">
       <Filter>Communicate</Filter>
@@ -311,15 +313,18 @@
     </ClInclude>
     <ClInclude Include="GameObjectVer2.h">
       <Filter>GameObject</Filter>
-    </ClInclude> 
+    </ClInclude>
     <ClInclude Include="Boss.h">
       <Filter>GameObject\Enemy</Filter>
     </ClInclude>
     <ClInclude Include="Defines.h">
-      <Filter>Main</Filter> 
+      <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="MummyLaser.h">
       <Filter>GameObject\MummyLaser</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Font</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -432,6 +437,9 @@
     </Filter>
     <Filter Include="GameObject\MummyLaser">
       <UniqueIdentifier>{092adec7-9cc3-486c-bcc4-02c1d10527ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Font">
+      <UniqueIdentifier>{a6ace682-ef0d-41fc-a40f-b9384dc3cc30}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

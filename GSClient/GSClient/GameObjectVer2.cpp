@@ -435,7 +435,7 @@ void CGameObjectVer2::UpdateOnServer(float fTimeElapsed)
 
 void CGameObjectVer2::Animate(float fTimeElapsed)
 {
-	if (pause)
+	if (m_AnimationPaused)
 		return;
 
 	if (m_pAnimationController) m_pAnimationController->AdvanceTime(fTimeElapsed, NULL);

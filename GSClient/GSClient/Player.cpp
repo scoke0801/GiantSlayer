@@ -28,7 +28,7 @@ CPlayer::~CPlayer()
 void CPlayer::Update(float fTimeElapsed)
 {
 	if (m_IsCanAttack == false) {
-		if (!pause)
+		if (!m_AnimationPaused)
 			m_AttackWaitingTime -= fTimeElapsed;
 
 		switch (m_WeaponType)
@@ -42,7 +42,7 @@ void CPlayer::Update(float fTimeElapsed)
 					SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
 
 				if (m_AttackWaitingTime < m_AttackAnimPauseTime)
-					pause = true;
+					m_AnimationPaused = true;
 
 				m_StringPullTime += fTimeElapsed;
 				m_SP -= fTimeElapsed;
@@ -269,7 +269,7 @@ void CPlayer::ResetBow()
 {
 	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
 	pullString = false;
-	pause = false;
+	m_AnimationPaused = false;
 	m_StringPullTime = 0;
 }
 
