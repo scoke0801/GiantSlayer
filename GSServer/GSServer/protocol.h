@@ -57,6 +57,8 @@ enum AnimationType
 	SWORD_IDLE,
 	SWORD_RUN,
 	SWORD_ATK,
+	//SWORD_ATK2,
+	//SWORD_ATK3,
 	SWORD_DEATH,
 	// Ȱ ===========
 	BOW_GET,

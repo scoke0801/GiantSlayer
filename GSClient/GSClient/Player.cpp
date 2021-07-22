@@ -35,6 +35,8 @@ void CPlayer::Update(float fTimeElapsed)
 		if (!pause)
 			m_AttackWaitingTime -= fTimeElapsed;
 
+		m_AttackTimer -= fTimeElapsed;
+
 		switch (m_WeaponType)
 		{
 		case PlayerWeaponType::Sword:
@@ -53,14 +55,14 @@ void CPlayer::Update(float fTimeElapsed)
 			}
 		}
 			break;
-		case PlayerWeaponType::Staff: {
-			
-		}
+		case PlayerWeaponType::Staff:
 			break;
 		}
 
-		if (m_AttackWaitingTime < 0.0f)
+		if (m_AttackWaitingTime < 0.0f) {
 			ResetAttack();
+			m_AttackTimer = 0.5f;
+		}
 	}
 	else if (m_AttackedDelay > 0.0f) {
 		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
@@ -102,7 +104,6 @@ void CPlayer::Update(float fTimeElapsed)
 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 	m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
-
 
 	CGameObjectVer2::Animate(fTimeElapsed);
 	UpdateTransform(NULL);
@@ -235,7 +236,6 @@ void CPlayer::SetWeapon(PlayerWeaponType weaponType)
 		DEATH = AnimationType::STAFF_DEATH;
 
 		m_AttackAnimLength = 1.433333f;
-		m_AttackAnimPauseTime = 0.6f;
 
 		SetDrawStaff();
 	}
@@ -312,7 +312,13 @@ void CPlayer::Attack()
 	m_SpareBoundingBox = tempMesh;
 	UpdateColliders();
 
-	SetAnimationSet(ATK);
+	if (m_AttackTimer >= 1.0f) {
+		// 공격-2 SetAnimationSet(ATK2);
+		//if current atkanim = 공격-2 : setAA(ATK3) 
+	}
+	else {
+		SetAnimationSet(ATK);
+	}
 }
 
 void CPlayer::ResetAttack()

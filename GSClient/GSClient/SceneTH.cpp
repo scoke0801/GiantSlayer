@@ -14,6 +14,7 @@
 #include "Puzzle.h" 
 #include "Particle.h"
 #include "Arrow.h"
+#include "Skill.h"
 #include "Enemy.h"
 #include "Sound.h"
 #include "FbxObject.h"
@@ -258,7 +259,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildPlayers(pd3dDevice, pd3dCommandList);
 
 	BuildParticles(pd3dDevice, pd3dCommandList);
-	BuildArrows(pd3dDevice, pd3dCommandList);
+	BuildProjectiles(pd3dDevice, pd3dCommandList);
 
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
@@ -1608,6 +1609,7 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 					break;
 				case PlayerWeaponType::Staff:
 					m_Player->Attack();
+					ActiveSkill(OBJECT_LAYER::FireBall, m_Player);
 					break;
 				}
 			}
@@ -3118,6 +3120,7 @@ void CSceneTH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
 }
 
 void CSceneTH::BuildShadowResource(ID3D12Device* pd3dDevice)
@@ -3189,6 +3192,7 @@ void CSceneTH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	for (int i = 0; i < 10; ++i) {
 		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::ArrowParticle);
 		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::FireBallParticle);
 	}
 	// ¾È°³
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::RadialParitcle);
@@ -3214,8 +3218,9 @@ void CSceneTH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	MakingFog();
 	MakingRain();
 }
-void CSceneTH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneTH::BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	// PlayerArrow
 	for (int i = 0; i < 10; ++i) {
 		CArrow* pArrow = new CArrow();
 		pArrow->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow]);
@@ -3229,6 +3234,7 @@ void CSceneTH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow].push_back(pArrow);
 	}
 
+	// EnemyArrow
 	for (int i = 0; i < 10; ++i) {
 		CArrow* pArrow = new CArrow();
 		pArrow->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow]);
@@ -3240,6 +3246,20 @@ void CSceneTH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pArrow->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
 		pArrow->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
+	}
+
+	// FireBall
+	for (int i = 0; i < 5; ++i) {
+		CFireBall* pFireb = new CFireBall();
+		pFireb->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall]);
+		pFireb->SetPosition({ 500.0f,  100.0f, 1500.0f });
+		pFireb->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
+		pFireb->SetTextureIndex(0x20);
+		pFireb->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		pFireb->Scale(10.0f, 10.0f, 10.0f);
+		pFireb->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
+		pFireb->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::FireBall].push_back(pFireb);
 	}
 }
 void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -3309,6 +3329,24 @@ void CSceneTH::EnterNewSector(int sectorNum)
 
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(obj);
 	EnterNewSector(sectorNum - 1);
+}
+
+void CSceneTH::ActiveSkill(OBJECT_LAYER type, CGameObject* user)
+{
+	if (type == OBJECT_LAYER::FireBall) {
+		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
+			CFireBall* pFireb = reinterpret_cast<CFireBall*>(pObj);
+			if (pFireb->IsCanUse()) {
+				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::FireBallParticle);
+				if (-1 != idx) {
+					pFireb->SetUseable(false);
+					pFireb->SetSkill(user);
+					cout << "shot fb" << endl;
+				}
+				break;
+			}
+		}
+	}
 }
 
 void CSceneTH::ShotPlayerArrow()

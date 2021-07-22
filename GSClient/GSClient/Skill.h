@@ -1,18 +1,13 @@
 #pragma once
 #include "GameObject.h"
 
-enum class SKtype {
-	SK_Sword,
-	SK_Arrow,
-	MG_1,
-	MG_2,
-};
+class ParticleObject;
 
-class CSkill : public CGameObject
+class CFireBall : public CGameObject
 {
 public:
-	CSkill(SKtype type);
-	virtual ~CSkill();
+	CFireBall();
+	virtual ~CFireBall();
 
 public:
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
@@ -20,10 +15,19 @@ public:
 
 	void SetSkill(CGameObject* owner);
 	void TrackingTarget(CGameObject target);
+	void SetTargetPosition(const XMFLOAT3& targetPos);
+
+	bool IsCanUse() const { return m_isDrawable; }
+	void SetUseable(bool data) { m_isDrawable = data; }
+	void SetDrawable(bool drawable);
 
 protected:
 	CGameObject* m_Owner;
 	CGameObject* target;
 
 	float damage;
+
+	XMFLOAT3 m_xmf3TargetPosition;
+
+	ParticleObject* m_ConnectedParticle = nullptr;
 };

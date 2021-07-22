@@ -41,6 +41,16 @@ void ParticleObject::Update(float fTimeElapsed)
 			SetParticleParameter(0, m_elapsedTime);
 		}
 	}
+	else if (m_Type == PARTICLE_TYPE::FireBallParticle) {
+		if (m_elapsedTime > FIREBALL_PARTICLE_LIFE_TIME) {
+			m_IsCanUse = false;
+			m_elapsedTime = 0.0f;
+			SetParticleParameter(0, -1.0f);
+		}
+		else {
+			SetParticleParameter(0, m_elapsedTime);
+		}
+	}
 }
 
 void ParticleObject::SetSpeedVector(const XMFLOAT3& speed)
@@ -143,6 +153,16 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->SetType(type);
 		m_ParticleObjs.push_back(std::move(pObject));
 	}
+	else if (type == PARTICLE_TYPE::FireBallParticle)
+	{
+		CFireBallParticleMesh* pMesh = new CFireBallParticleMesh(pd3dDevice, pd3dCommandList, count);
+
+		ParticleObject* pObject = new ParticleObject();
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("ArrowParticle"));
+		pObject->SetMesh(pMesh);
+		pObject->SetType(type);
+		m_ParticleObjs.push_back(std::move(pObject));
+	}
 }
 
 void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count, PARTICLE_TYPE type, int idx)
@@ -217,6 +237,14 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		CMummyLaserParticleMesh* pMesh = new CMummyLaserParticleMesh(pd3dDevice, pd3dCommandList, count, 3);
 		ParticleObject* pObject = new ParticleObject();
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("MummyLaserParticle"));
+		pObject->SetMesh(pMesh);
+		pObject->SetType(type);
+		m_ParticleObjs.push_back(std::move(pObject));
+	}
+	else if (type == PARTICLE_TYPE::FireBallParticle) {
+		CFireBallParticleMesh* pMesh = new CFireBallParticleMesh(pd3dDevice, pd3dCommandList, count);
+		ParticleObject* pObject = new ParticleObject();
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("ArrowParticle"));
 		pObject->SetMesh(pMesh);
 		pObject->SetType(type);
 		m_ParticleObjs.push_back(std::move(pObject));

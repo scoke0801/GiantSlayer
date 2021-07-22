@@ -37,7 +37,7 @@ private:
 private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
 	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword; 
-	 
+	
 	bool m_isOnGround = true;
 	float m_JumpTime = 0.0f;
 
@@ -54,6 +54,8 @@ private:
 	bool m_HaveBox = false;
 	
 	float m_AttackedDelay = 0.0f;
+	float m_SkillCoolTime = 0.0f;
+	float m_AttackTimer = 1.0f;
 
 	CMesh* m_SpareBoundingBox;
 	Collider* m_SpareCollisionBox;

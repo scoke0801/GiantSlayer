@@ -170,7 +170,7 @@ public:
 	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
 
 public:
-	void ShotPlayerMagic(PARTICLE_TYPE type);
+	void ActiveSkill(OBJECT_LAYER type, CGameObject* user);
 	void ShotPlayerArrow();
 	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
 	void DeleteEnemy(CEnemy* pEmeny);
@@ -190,7 +190,7 @@ private:
 	void BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	void BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);

@@ -1,28 +1,21 @@
 #include "stdafx.h"
 #include "Skill.h"
 #include "Shader.h"
+#include "Particle.h"
 
-CSkill::CSkill(SKtype type)
+CFireBall::CFireBall()
 {
-	switch (type) {
-	case SKtype::SK_Sword:
-		SetTextureIndex(0x00);
-		damage = 10;
-		break;
-	case SKtype::MG_1:
-		SetTextureIndex(0x00);
-		damage = 30;
-		break;
-	}
+	m_isDrawable = true;
 }
 
-CSkill::~CSkill()
+CFireBall::~CFireBall()
 {
 
 }
 
-void CSkill::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CFireBall::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	if (true == m_isDrawable) return;
 	OnPrepareRender();
 
 	if (m_pShader)
@@ -42,12 +35,12 @@ void CSkill::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 	}
 }
 
-void CSkill::Update(float fTimeElapsed)
+void CFireBall::Update(float fTimeElapsed)
 {
 	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, TEST_ARROW_SPEED * fTimeElapsed)));
 }
 
-void CSkill::SetSkill(CGameObject* owner)
+void CFireBall::SetSkill(CGameObject* owner)
 {
 	m_Owner = owner;
 
@@ -59,10 +52,27 @@ void CSkill::SetSkill(CGameObject* owner)
 	XMFLOAT3 targetPos = Vector3::Multifly(dirVector, 150000);
 	m_xmf3Velocity = dirVector;
 	LookAt(m_xmf3Position, targetPos, XMFLOAT3(0, 1, 0));
+}
+
+void CFireBall::SetTargetPosition(const XMFLOAT3& targetPos)
+{
+	XMFLOAT3 dirVector = Vector3::Normalize(Vector3::Subtract(targetPos, m_xmf3Position));
+
+	m_xmf3TargetPosition = targetPos;
+	m_xmf3Velocity = dirVector;
+}
+
+void CFireBall::TrackingTarget(CGameObject target)
+{
 
 }
 
-void CSkill::TrackingTarget(CGameObject target)
+void CFireBall::SetDrawable(bool drawable)
 {
-
+	m_isDrawable = drawable;
+	if (drawable) {
+		if (m_ConnectedParticle != nullptr) {
+			m_ConnectedParticle->SetDrawable(false);
+		}
+	}
 }
