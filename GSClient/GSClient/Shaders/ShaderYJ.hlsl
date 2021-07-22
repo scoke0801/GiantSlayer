@@ -1284,9 +1284,31 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     }
     else if (gnTexturesMask & 0x100)
     {
+        float4 Color = { 0.5f, 0.0f, 0.0f, 1.0f };
         cColor = gtxtMummy.Sample(gssWrap, input.uv);
+        
         cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
     }
+    else if (gnTexturesMask & 0x200)
+    {
+
+        cColor = gtxtMummy.Sample(gssWrap, input.uv);
+    
+        cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
+        
+    }
+    // // 분노 2스택
+    //else if (gnTexturesMask & 0x400)
+    //{
+    //    float4 Color = { 1.0f, 0.0f, 0.0f, 1.0f };
+    //    cColor = gtxtMummy.Sample(gssWrap, input.uv);
+        
+    //    cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
+        
+    //    cColor = lerp(cColor, Color, 0.5);
+    //}
 	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	//{
 	//	float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));

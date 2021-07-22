@@ -33,7 +33,8 @@ void ParticleObject::Update(float fTimeElapsed)
 	}
 	else if (m_Type == PARTICLE_TYPE::MummyLaserParticle) {
 		if (m_elapsedTime > Laser_PARTICLE_LIFE_TIME) {
-			m_IsCanUse = false;
+			//m_IsCanUse = false;
+			
 			m_elapsedTime = 0.0f;
 			SetParticleParameter(0, -1.0f);
 		}

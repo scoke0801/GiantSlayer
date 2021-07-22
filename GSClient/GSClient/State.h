@@ -6,6 +6,7 @@ class CState
 protected:
     float m_ElapsedTime = 0.0f; // 스테이트 진입 후 시간
     float m_LifeTime = 0.0f;    // 스테이트 생존 시간
+    float m_transformTime = 0.0f; // 폭주 변신시간
 
     ObjectState m_StateName;
 

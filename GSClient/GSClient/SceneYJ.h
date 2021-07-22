@@ -11,6 +11,7 @@ class CTerrain;
 class CParticle;
 class CLightCamera;
 class CEnemy;
+class CMummy;
 
 
 class CFbxObject2;
@@ -26,7 +27,6 @@ private:
 	bool						m_isBoxDown = false;
 	bool						m_PuzzleNumSelect[9] = { false };
 
-
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
 	array<CMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -41,16 +41,10 @@ private:
 
 	CGameObject* m_Mirror[1] = { nullptr };
 	CPlayer* m_Player = nullptr;
-	CEnemy* m_Mummy = nullptr;
-	CEnemy* m_Mummy2 = nullptr;
-	CEnemy* m_Mummy3 = nullptr;
-
-	bool m_Player_in_Stage4_Check = false;
-
+	
 	float					m_AttackDelayTime;
-	bool m_LaserCount = false;
-
-
+	bool					m_LaserCount = false;
+	
 	int							m_CurrentPlayerNum = 0;
 	//vector<CPlayer*>			m_Players[MAX_PLAYER];
 	CPlayer* m_Players[MAX_ROOM_PLAYER];
@@ -63,6 +57,9 @@ private:
 
 	CSkyBox* m_Skybox;
 	CTerrain* m_Terrain;
+
+	CMummy* m_Mummy[3];
+	
 
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 
@@ -77,9 +74,11 @@ private:
 	short						m_DoorIdx = 0;
 	int							m_PuzzleNum[4];
 
-
 	bool						m_PuzzleBoxCount = false;
-
+	bool						m_Mira[3] = { TRUE,TRUE,TRUE };
+	bool						m_Mira_Anger[3] = { FALSE,FALSE,FALSE };
+	
+	
 private:
 	POINT						m_LastMousePos;
 
@@ -183,13 +182,14 @@ public:
 public:
 	void ShotPlayerArrow();
 	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
-	void ShotMummyLaser(CEnemy* pEmeny, const XMFLOAT3& lookVector);
-	void ShotMummyLaser2(CEnemy* pEmeny, const XMFLOAT3& lookVector);
-	void ShotMummyLaser3(CEnemy* pEmeny, const XMFLOAT3& lookVector);
 	
 	void DeleteEnemy(CEnemy* pEmeny);
 
+	void ShotMummyLaser(CEnemy* pEmeny, const XMFLOAT3& lookVector);
+	void ShotMummyLaser2(CEnemy* pEmeny, const XMFLOAT3& lookVector);
+	void ShotMummyLaser3(CEnemy* pEmeny, const XMFLOAT3& lookVector);
 
+	
 private:
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);

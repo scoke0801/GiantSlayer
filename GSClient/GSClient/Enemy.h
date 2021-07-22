@@ -3,6 +3,10 @@
 #include "StateMachine.h"
 #include "EnemyState.h"
 #include "GameObjectVer2.h"
+#include "SceneYJ.h"
+#include "Player.h"
+#include "MummyLaser.h"
+#include "Particle.h"
 // 에너미의 상태..
 // 탐색 - 활동 범위를 탐색
 // :: if(탐색 성공) toState(공격)
@@ -11,11 +15,16 @@
 // :: if(공격 대상이 활동 범위 안에 존재하면) 계속 공격
 // :: else toState(탐색)
 class CPlayer;
+class CSceneYJ;
+class CParticle;
+
  
 enum class EnemyAttackType {
 	Melee,
 	Ranged,
-	Mummy,
+	Mummy1,
+	Mummy2,
+	Mummy3,
 	BossSkill_1,
 	BossSkill_2,
 	BossSkill_3,
@@ -36,8 +45,10 @@ protected:
 	EnemyType				m_EnemyType;
 	vector<CPlayer*>		m_ConnectedPlayers;
 	CPlayer*				m_TargetPlayer;
+	CPlayer*				m_TargetPlay=nullptr;
 
 	bool					m_IsOnMoving = false;
+	bool					m_Dying = FALSE;
 
 	XMFLOAT3				m_ToMovePosition;
 
@@ -59,7 +70,7 @@ protected:
 
 	float					m_Speed;
 
-	float					m_LaserAttackDelayTime[3] = { 3.0f,5.0f,7.0f };
+	float					m_LaserAttackDelayTime[3] = { 5.0f,7.0f,9.0f };
 	bool					m_LaserAttack[3] = { false,false,false };
 
 public:
@@ -78,6 +89,10 @@ public:
 
 	// 공격 대상 탐색 
 	bool IsEnemyInSight();
+
+	bool isAttack0() const { return m_LaserAttack[0]; }
+	bool isAttack1() const { return m_LaserAttack[1]; }
+	bool isAttack2() const { return m_LaserAttack[2]; }
 
 	void ConnectPlayer(CPlayer** pPlayers, int playerCount); 
 
@@ -146,13 +161,34 @@ public:
 
 class CMummy :public CEnemy
 {
+private:
+	vector<CMummy*> m_Friends;
+	bool PlayerCheck = false;
+	bool LaserDelayTime[3] = { false,false,false };
+	bool shotLaser[3] = { false,false,false };
+	float					dir[3] = { 15.0f,15.0f,15.0f };
+
 public:
+
+	CParticle* m_Particles;
+
+	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
+public:
+
 	CMummy();
 	~CMummy();
 
 	void Attack(float elapsedTime) override;
 	void Update(float elapsedTime) override;
+	void AddFriends(CMummy* mummy);
+	void SendDieInfotoFriends();
+	void RemoveFriends(CMummy* mummy);
+	void DeleteEnemy(CMummy* mummy);
+	
 	bool isAttack0() const { return m_LaserAttack[0]; }
 	bool isAttack1() const { return m_LaserAttack[1]; }
 	bool isAttack2() const { return m_LaserAttack[2]; }
+
+	
 };
+

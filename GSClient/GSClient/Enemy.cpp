@@ -25,22 +25,6 @@ void CEnemy::Update(float elapsedTime)
 
 	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
 
-	
-	if (m_AttackDelayTime > 0.0f) {
-		m_AttackDelayTime = max(m_AttackDelayTime - elapsedTime, 0.0f); 
-	}
-
-	for (int i = 0; i < 3; i++)
-	{
-		if (m_LaserAttackDelayTime[i] > 0.0f) {
-			m_LaserAttackDelayTime[i] = max(m_LaserAttackDelayTime[i] - elapsedTime, 0.0f);
-		}
-	}
-	
-	//if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
-	//	SetAnimationSet(0);
-	//else
-	//	SetAnimationSet(1);
 	CGameObjectVer2::Animate(elapsedTime);
 	UpdateTransform(NULL);
 }
@@ -241,6 +225,12 @@ void CEnemy::ChangeState(ObjectState stateInfo, void* pData)
 	case ObjectState::Attacked:
 		ChangeState(new AttackedState(this));
 		break;
+	case ObjectState::Mummy_1_Die_Anger:
+		ChangeState(new Mummy_1_Die_Anger_State(this));
+		break;
+	case ObjectState::Mummy_2_Die_Anger:
+		//ChangeState(new AttackedState(this));
+		break;
 	case ObjectState::Die:
 		break;
 	case ObjectState::RunAway:
@@ -345,6 +335,7 @@ CMeleeEnemy::CMeleeEnemy()
 	m_Type = OBJ_TYPE::Enemy;
 	m_AttackType = EnemyAttackType::Melee;
 	m_AttackRange = 320.0f;
+	
 
 	m_EnemyType = EnemyType::Skeleton;
 
@@ -429,10 +420,12 @@ void CMeleeEnemy::FindClosePositionToTarget()
 CMummy::CMummy()
 {
 	m_Type = OBJ_TYPE::Mummy;
-	m_AttackType = EnemyAttackType::Mummy;
+	m_AttackType = EnemyAttackType::Mummy1;
 
+	m_HP = 15.0f;
 	m_AttackRange = 1200.0f;
 	//m_HeightFromTerrain = 150.0f; 
+
 	m_State = new PatrolState(this);
 }
 
@@ -441,81 +434,223 @@ CMummy::~CMummy()
 
 }
 
+void CMummy::AddFriends(CMummy* mummy)
+{
+	m_Friends.push_back(mummy);
+}
+
+void CMummy::SendDieInfotoFriends()
+{
+	for (auto& mummy : m_Friends)
+	{
+		mummy->ChangeState(new Mummy_1_Die_Anger_State(this));
+		mummy->RemoveFriends(mummy);
+	}
+}
+void CMummy::RemoveFriends(CMummy* mummy)
+{
+	auto res2 = std::find(m_Friends.begin(), m_Friends.end(), mummy);
+	m_Friends.erase(res2);
+}
+
+
 void CMummy::Update(float elapsedTime)
 {
 	m_State->Execute(this, elapsedTime);
 	
 	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
 
-
-	if (m_AttackDelayTime > 0.0f) {
-		m_AttackDelayTime = max(m_AttackDelayTime - elapsedTime, 0.0f);
+	// 4스테이지 플레이어 진입 체크
+	for (auto player : m_ConnectedPlayers)
+	{
+		if (player->GetPosition().x > 20600.0f && player->GetPosition().z > 2400.0f)
+		{
+			PlayerCheck = true;
+		}
+		else
+		{
+			PlayerCheck = false;
+		}
+	}
+	// 머미가 플레이어가 스테이지에 들어온 순간 부터 레이저 공격 시간 감소
+	if (PlayerCheck == true)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			if (m_LaserAttackDelayTime[i] > 0.0f) {
+				m_LaserAttackDelayTime[i] = max(m_LaserAttackDelayTime[i] - elapsedTime, 0.0f);
+			}
+		}
+	}
+	
+	// 만약 레이저발사시간이 됬으면 발사 하고 시간을 다시 초기화
+	if (m_LaserAttack[0] == false && m_LaserAttackDelayTime[0] < 1.0f)
+	{
+		if (shotLaser[0] == false)
+		{
+			shotLaser[0] = true;
+			if (this->GetEnemyAttackType()==EnemyAttackType::Mummy1)
+			{
+				this->SetAnimationSet(2);
+				MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
+			}
+		}
+		m_LaserAttackDelayTime[0] = 5.0f;
+		m_LaserAttack[0] = true;
 	}
 
-	for (int i = 0; i < 3; i++)
+	// 발사틈을 줘서 발사하고 나서 방향벡터 다시 원상복귀 
+	if (m_LaserAttack[0] == true)
 	{
-		if (m_LaserAttackDelayTime[i] > 0.0f) {
-			m_LaserAttackDelayTime[i] = max(m_LaserAttackDelayTime[i] - elapsedTime, 0.0f);
+		if (m_LaserAttackDelayTime[0] < 4.7f && m_LaserAttackDelayTime[0]>4.5f)
+		{
+			if (shotLaser[0] == true)
+			{
+				if (this->GetEnemyAttackType() == EnemyAttackType::Mummy1)
+				{
+					dir[0] = -dir[0];
+					this->SetIsOnMoving(false);
+					this->SetTargetVector(Vector3::Multifly(XMFLOAT3(dir[0], 0, 0), 1));
+				}
+			}
+			shotLaser[0] = false;
+			m_LaserAttack[0] = false;
+		}
+		else if ( m_LaserAttackDelayTime[0] < 4.5f)
+		{
+			this->FindNextPosition();
+			this->SetIsOnMoving(true);
+		}
+		else
+		{
+			this->SetAnimationSet(2);
+		}
+	}
+	//////////////// 0번
+	
+	// 만약 레이저발사시간이 됬으면 발사 하고 시간을 다시 초기화
+	if (m_LaserAttack[1] == false && m_LaserAttackDelayTime[1] < 1.0f)
+	{
+		if (shotLaser[1] == false)
+		{
+			shotLaser[1] = true;
+
+			if (this->GetEnemyAttackType() == EnemyAttackType::Mummy2)
+			{
+				this->SetAnimationSet(2);
+				MAIN_GAME_SCENE_Y->ShotMummyLaser2(this, GetLook());
+			}
+			
+		}
+		m_LaserAttackDelayTime[1] = 3.0f;
+		m_LaserAttack[1] = true;
+	}
+
+	// 발사틈을 줘서 발사하고 나서 방향벡터 다시 원상복귀 
+	if (m_LaserAttack[1] == true)
+	{
+		if (m_LaserAttackDelayTime[1] < 2.7f && m_LaserAttackDelayTime[1]>2.5f)
+		{
+			if (shotLaser[1] == true)
+			{
+				if (this->GetEnemyAttackType() == EnemyAttackType::Mummy2)
+				{
+					dir[1] = -dir[1];
+					this->SetIsOnMoving(false);
+					this->SetTargetVector(Vector3::Multifly(XMFLOAT3(dir[1], 0, 0), 1));
+				}
+			}
+			shotLaser[1] = false;
+			m_LaserAttack[1] = false;
+		}
+		else if (m_LaserAttackDelayTime[1] < 2.5f)
+		{
+			
+			this->FindNextPosition();
+			this->SetIsOnMoving(true);
 		}
 	}
 
-	//if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
-	//	SetAnimationSet(0);
-	//else
-	//	SetAnimationSet(1);
+	// 만약 레이저발사시간이 됬으면 발사 하고 시간을 다시 초기화
+	if (m_LaserAttack[2] == false && m_LaserAttackDelayTime[2] < 1.0f)
+	{
+		if (shotLaser[2] == false)
+		{
+			shotLaser[2] = true;
+			if (this->GetEnemyAttackType() == EnemyAttackType::Mummy3)
+			{
+				this->SetAnimationSet(2);
+				MAIN_GAME_SCENE_Y->ShotMummyLaser3(this, GetLook());
+			}
+		}
+		m_LaserAttackDelayTime[2] = 7.0f;
+		m_LaserAttack[2] = true;
+	}
+
+	// 발사틈을 줘서 발사하고 나서 방향벡터 다시 원상복귀 
+	if (m_LaserAttack[2] == true)
+	{
+		if (m_LaserAttackDelayTime[2] < 6.7f && m_LaserAttackDelayTime[2]>6.5f)
+		{
+			if (shotLaser[2] == true)
+			{
+				if (this->GetEnemyAttackType() == EnemyAttackType::Mummy3)
+				{
+					dir[2] = -dir[2];
+					this->SetIsOnMoving(false);
+					this->SetTargetVector(Vector3::Multifly(XMFLOAT3(dir[2], 0, 0), 1));
+				}
+			}
+
+			shotLaser[2] = false;
+			m_LaserAttack[2] = false;
+		}
+		else if (m_LaserAttackDelayTime[2] < 6.5f)
+		{
+			this->FindNextPosition();
+			this->SetIsOnMoving(true);
+		}
+	}
+
+	
 	CGameObjectVer2::Animate(elapsedTime);
 	UpdateTransform(NULL);
 }
 
 void CMummy::Attack(float elapsedTime)
 {
-	// 공격관련 애니메이션 수행
-	// 현재는 임시코드
-	{
-		float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
+}
 
-		//Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
-	}
 
-	
-	if (m_LaserAttackDelayTime[0] <= 0.0f && m_LaserAttack[0]==false) {
-		// 실제 공격!
-		m_LaserAttack[0] = true;
+void CMummy::DeleteEnemy(CMummy* pEmeny)
+{
+	auto res2 = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Mummy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end(), pEmeny);
+	if (res2 != m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end()) {
 
-		m_LaserAttackDelayTime[0] = RANGED_ENEMY_ATTACK_TIME + 5.0f;
-		MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
-		
-		
-	}
-	else if (m_LaserAttackDelayTime[0] > 1.0f)
-	{
-	
-		m_LaserAttack[0] = false;
-	}
-	
-	if (m_LaserAttackDelayTime[1] <= 0.0f && m_LaserAttack[1] == false)
-	{
-		m_LaserAttack[1] = true;
-		m_LaserAttackDelayTime[1] = RANGED_ENEMY_ATTACK_TIME + 7.0f;
-		MAIN_GAME_SCENE_Y->ShotMummyLaser2(this, GetLook());
-		
-	}
-	else if (m_LaserAttackDelayTime[1] > 1.0f)
-	{
-		m_LaserAttack[1] = false;
-	}
+		if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy1)
+		{
+			cout << " 미라 삭제\n";
+			
+			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
+		}
 
-	if (m_LaserAttackDelayTime[2] <= 0.0f && m_LaserAttack[2] == false)
-	{
-		m_LaserAttack[2] = true;
-		m_LaserAttackDelayTime[2] = RANGED_ENEMY_ATTACK_TIME + 10.0f;
-		MAIN_GAME_SCENE_Y->ShotMummyLaser3(this, GetLook());
-		//cout << "몇번?" << endl;
+		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy2)
+		{
+			cout << " 미라2 삭제\n";
+			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
+		}
+
+		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy3)
+		{
+			cout << " 미라3 삭제\n";
+			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
+		}
+
 	}
-	else if (m_LaserAttackDelayTime[2] > 1.0f)
-	{
-		m_LaserAttack[2] = false;
-	}
-	
-	
+	/*
+	auto res = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Enemy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end(), pEmeny);
+	if (res != m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end()) {
+		cout << " 몬스터 삭제\n";
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].erase(res);
+	}*/
 }

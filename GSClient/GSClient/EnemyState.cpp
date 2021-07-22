@@ -3,6 +3,7 @@
 #include "Enemy.h"
 #include "Player.h"
 #include "SceneJH.h"
+#include "SceneYJ.h"
 #include "Boss.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -108,7 +109,17 @@ void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
         }
         enemy->ChangeState(new TraceState(enemy));
     }
-}
+
+    CMummy* pMummy = reinterpret_cast<CMummy*>(enemy);
+    
+    /*enemy->ChangeState(new AttackState(enemy));
+    if (enemy->GetEnemyType() == EnemyType::Mummy) {
+            CMummy* pMummy = reinterpret_cast<CMummy*>(enemy);
+            pMummy->CalcNextAttackType();
+            
+      }*/
+  }
+
 
 void PatrolState::Exit(CEnemy* enemy)
 {
@@ -129,6 +140,19 @@ void AttackState::Enter(CEnemy* enemy)
         m_LifeTime = MELLE_ENEMY_ATTACK_TIME;
         break;
     case EnemyType::Mummy:
+        m_AttackType = (int)enemy->GetEnemyAttackType();
+        if (m_AttackType == (int)EnemyAttackType::Mummy1)
+        {
+            m_LifeTime = 3.0f;
+        }
+        else if (m_AttackType == (int)EnemyAttackType::Mummy2)
+        {
+            m_LifeTime = 5.0f;
+        }
+        else if (m_AttackType == (int)EnemyAttackType::Mummy3)
+        {
+            m_LifeTime = 7.0f;
+        }
         break;
     case EnemyType::Boss: 
         // 일단 랜덤하게 테스트를 해보는 방향으로
@@ -159,6 +183,7 @@ void AttackState::Enter(CEnemy* enemy)
 
 void AttackState::Execute(CEnemy* enemy, float elapsedTime)
 {
+
     m_ElapsedTime += elapsedTime; 
     if (m_LifeTime < m_ElapsedTime) { 
         enemy->ChangeState(new PatrolState(enemy)); 
@@ -223,9 +248,14 @@ void AttackedState::Enter(CEnemy* enemy)
     int hp = enemy->GetHP();
     hp -= PLAYER_DAMAGE;
     enemy->SetHP(hp);
+
+    
+
     if (hp <= 0) {
-       // cout << " 삭제 해 !!\n";
-        MAIN_GAME_SCENE->DeleteEnemy(enemy);
+        cout << " 삭제 해 !!\n";
+        
+        MAIN_GAME_SCENE_Y->DeleteEnemy(enemy);
+        
         return;
     }
     //enemy->SetHP(hp);
@@ -262,5 +292,44 @@ void BornState::Execute(CEnemy* enemy, float elapsedTime)
 }
 
 void BornState::Exit(CEnemy* enemy)
+{
+}
+
+void Mummy_1_Die_Anger_State::Enter(CEnemy* enemy)
+{
+    //enemy->ChangeAnimation(ObjectState::Patrol);
+    //const int PLAYER_DAMAGE = 15;
+
+    cout << "커져라" << endl;
+    enemy->Scale(3.0f, 3.0f, 3.0f);
+    //enemy->SetSize(XMFLOAT3(900.f, 900.f, 900.f));
+    //enemy->Scale(3.0f, 3.0f, 3.0f);
+
+    //m_StateName = ObjectState::Mummy_1_Die_Anger;
+}
+
+void Mummy_1_Die_Anger_State::Execute(CEnemy* enemy, float elapsedTime)
+{
+    m_ElapsedTime += elapsedTime;
+    if (m_ElapsedTime > m_LifeTime) {
+        enemy->ChangeState(new PatrolState(enemy));
+     }
+    
+}
+
+void Mummy_1_Die_Anger_State::Exit(CEnemy* enemy)
+{
+    //enemy->ChangeState(new PatrolState(enemy));
+}
+
+void Mummy_2_Die_Anger_State::Enter(CEnemy* enemy)
+{
+}
+
+void Mummy_2_Die_Anger_State::Execute(CEnemy* enemy, float elapsedTime)
+{
+}
+
+void Mummy_2_Die_Anger_State::Exit(CEnemy* enemy)
 {
 }

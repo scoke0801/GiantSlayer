@@ -3,6 +3,7 @@
 #include "Mesh.h" 
 #include "Colider.h"  
 #include "FbxLoader.h" 
+#include "Enemy.h"
 
 class CShader;
 class CCamera;
@@ -30,6 +31,12 @@ enum class OBJ_NAME
 	Bridge = 11,
 	Wall = 12,
 	Door = 13
+};
+enum class Laser_TYPE
+{
+	Laser1=0,
+	Laser2 = 1,
+	Laser3 = 2
 };
 
 enum class COLLISION_HANDLE_TYPE : int {
@@ -63,6 +70,8 @@ enum class ObjectState {
 	Attacked,	// 피격
 	Die,		// 사망
 	RunAway,	// 도망
+	Mummy_1_Die_Anger,// 미라 한마리 죽었을때 다른 미라들의 폭주상태 
+	Mummy_2_Die_Anger,// 미라 두마리 죽었을때 다른 미라들의 폭주상태 
 	BossSkill_1,
 	BossSkill_2,
 	BossSkill_3,
@@ -110,6 +119,10 @@ protected: // 렌더링 관련 변수
 	MATERIAL*			m_Material;
 
 	CCamera*			m_Camera = nullptr;
+
+	Laser_TYPE m_LaserType = Laser_TYPE::Laser1;
+
+	EnemyAttackType m_EnemyAttackType = EnemyAttackType::Mummy1;
 
 	bool				m_isDrawable = true;
 protected:	// 객체 관련 속성 변수
@@ -188,6 +201,8 @@ public:
 	virtual void FixPositionByTerrain(CTerrain* pTerrain);
 	 
 	virtual void ChangeState(ObjectState stateInfo, void* pData) {}
+
+	
 public:
 	// about bounding box 
 	void BuildBoundigBoxMesh(ID3D12Device* pd3dDevice,
@@ -221,6 +236,13 @@ public:
 	//void SetVelocity(XMFLOAT3 vel); 
 	virtual void SetVelocity(OBJ_DIRECTION direction);
 	virtual void SetVelocity(XMFLOAT3 dir);
+
+	virtual void SetLaserType(Laser_TYPE laser);
+	Laser_TYPE GetLaserType() const { return m_LaserType; };
+
+	virtual void SetMummyType(EnemyAttackType mummy);
+	EnemyAttackType GetMummyType() const { return m_EnemyAttackType; };
+
 	void LookAtDirection(XMFLOAT3 dir, void* pContext);
 	void SetVelocityToZero() { m_xmf3Velocity = XMFLOAT3(0, 0, 0); }
 

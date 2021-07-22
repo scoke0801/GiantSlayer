@@ -60,6 +60,11 @@ class AttackState : public CState<CEnemy>
 { 
 private:
     int     m_AttackType;
+    
+public:
+    float					m_AttackDelayTime = 0.0f;
+    float					m_LaserAttackDelayTime[3] = { 3.0f,5.0f,7.0f };
+    bool					m_LaserAttack[3] = { false,false,false };
 
 public:
     AttackState(CEnemy* enemy) { Enter(enemy); }
@@ -72,10 +77,39 @@ public:
     virtual void Exit(CEnemy* enemy);
 };
 
+
 class AttackedState : public CState<CEnemy>
 {
 public:
     AttackedState(CEnemy* enemy) { Enter(enemy); }
+
+public:
+    virtual void Enter(CEnemy* enemy);
+
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
+
+    virtual void Exit(CEnemy* enemy);
+};
+
+
+// 머미 죽었을때 폭주상태 
+class Mummy_1_Die_Anger_State : public CState<CEnemy>
+{
+public:
+    Mummy_1_Die_Anger_State(CEnemy* enemy) { Enter(enemy); }
+
+public:
+    virtual void Enter(CEnemy* enemy);
+
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
+
+    virtual void Exit(CEnemy* enemy);
+};
+
+class Mummy_2_Die_Anger_State : public CState<CEnemy>
+{
+public:
+    Mummy_2_Die_Anger_State(CEnemy* enemy) { Enter(enemy); }
 
 public:
     virtual void Enter(CEnemy* enemy);

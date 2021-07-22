@@ -39,8 +39,6 @@ enum class OBJECT_LAYER : int {
 	MirrorBox,
 	Enemy,
 	Mummy,
-	Mummy2,
-	Mummy3,
 	Boss,
 	Arrow,
 	PlayerArrow,

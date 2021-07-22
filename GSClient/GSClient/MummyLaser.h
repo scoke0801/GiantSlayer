@@ -6,6 +6,9 @@ class ParticleObject;
 class CMummyLaser : public CGameObject
 {
 public:
+	CMummy* m_mummy=nullptr;
+	bool m_Laser[3] = { true,true,true };
+
 	CMummyLaser() { m_isDrawable = true; }
 	virtual ~CMummyLaser() {}
 

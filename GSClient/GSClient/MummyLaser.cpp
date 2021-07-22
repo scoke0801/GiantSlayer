@@ -36,7 +36,11 @@ void CMummyLaser::Update(float fTimeElapsed)
 		}
 		m_ElapsedTime += fTimeElapsed;
 		if (m_ElapsedTime > 3.0f) {
-			m_ConnectedParticle->SetDrawable(false);
+			
+			if (this->GetLaserType() == Laser_TYPE::Laser1)
+			{
+				m_ConnectedParticle->SetDrawable(false);
+			}
 			m_ElapsedTime = 0.0f;
 			m_isDrawable = true;
 			//m_ConnectedParticle = nullptr;
