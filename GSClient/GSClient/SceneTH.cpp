@@ -299,7 +299,8 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
-		"Effect_1", "Effect_2", "Effect_3"
+		"Effect_1", "Effect_2", "Effect_3",
+		"FireBall"
 	};
 
 	const wchar_t* address[] =
@@ -324,7 +325,8 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/Skeleton_D.dds",
 		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",
 		L"resources/Textures/DS_equipment_standard.dds",
-		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds"
+		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds",
+		L"resources/Textures/FireBall.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -380,7 +382,8 @@ void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
 		"MeleeSkeleton_02_EquipAll",
-		"Effect_1", "Effect_2", "Effect_3"
+		"Effect_1", "Effect_2", "Effect_3",
+		"FireBall"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -3094,10 +3097,12 @@ void CSceneTH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CSceneTH::BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+
 }
 
 void CSceneTH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+
 }
 
 void CSceneTH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -3120,7 +3125,7 @@ void CSceneTH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
 	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall] = new CFixedMesh(pd3dDevice, pd3dCommandList, "FireBall");
 }
 
 void CSceneTH::BuildShadowResource(ID3D12Device* pd3dDevice)
@@ -3254,9 +3259,9 @@ void CSceneTH::BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		pFireb->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall]);
 		pFireb->SetPosition({ 500.0f,  100.0f, 1500.0f });
 		pFireb->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
-		pFireb->SetTextureIndex(0x20);
+		pFireb->SetTextureIndex(0x400);
 		pFireb->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		pFireb->Scale(10.0f, 10.0f, 10.0f);
+		pFireb->Scale(40.0f, 40.0f, 40.0f);
 		pFireb->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
 		pFireb->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::FireBall].push_back(pFireb);

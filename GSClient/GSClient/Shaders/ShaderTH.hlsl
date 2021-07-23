@@ -115,10 +115,11 @@ Texture2D gtxtMeleeSkeleton_02_EquipAll	: register(t48);
 Texture2D gtxtEffect_1		: register(t49);
 Texture2D gtxtEffect_2		: register(t50);
 Texture2D gtxtEffect_3		: register(t51);
+Texture2D gtxtFireBall		: register(t52);
 
-Texture2D gtxtMap			: register(t52);
-Texture2D gtxtMirror		: register(t53);
-Texture2D gtxtShadowMap		: register(t54);
+Texture2D gtxtMap			: register(t53);
+Texture2D gtxtMirror		: register(t54);
+Texture2D gtxtShadowMap		: register(t55);
 
 // ±×¸²ÀÚ
 float CalcShadowFactor(float4 f4ShadowPos)
@@ -992,6 +993,10 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	if (gnTexturesMask & 0x200)
 	{
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x400)
+	{
+		cColor = gtxtFireBall.Sample(gssWrap, input.uv);
 	}
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor_t(input.shadowPosH);

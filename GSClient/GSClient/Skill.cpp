@@ -38,6 +38,7 @@ void CFireBall::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 void CFireBall::Update(float fTimeElapsed)
 {
 	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, TEST_ARROW_SPEED * fTimeElapsed)));
+	Rotate(XMFLOAT3(0.3f, 1.0f, 0.0f), 360.0f * fTimeElapsed);
 }
 
 void CFireBall::SetSkill(CGameObject* owner)
