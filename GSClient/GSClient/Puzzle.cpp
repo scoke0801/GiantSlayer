@@ -23,7 +23,7 @@ CPuzzle::CPuzzle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 			CGameObject* pObject = new CGameObject();
 			pObject->SetMesh(pXMesh);
 			pObject->SetShader(pShader);
-			pObject->SetPosition(XMFLOAT3(500.0f * i + 300.0f, 250.0f, 150.0f + 410.0f + 500.0f * j)); 
+			pObject->SetPosition(XMFLOAT3(600.0f * i + 300.0f, 250.0f, 150.0f + 410.0f + 600.0f * j)); 
 			pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 300, 20, 50, XMFLOAT3{ 0,0,0 });
 			pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 300 * 0.5f, 20 * 0.5f, 50 * 0.5f }));
 			m_Objects.push_back(std::move(pObject));
@@ -31,7 +31,7 @@ CPuzzle::CPuzzle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 			pObject = new CGameObject();
 			pObject->SetMesh(pXMesh);
 			pObject->SetShader(pShader);
-			pObject->SetPosition(XMFLOAT3(500.0f * i + 300.0f, 250.0f, -150.0f + 410.0f + 500.0f * j));			
+			pObject->SetPosition(XMFLOAT3(600.0f * i + 300.0f, 250.0f, -150.0f + 410.0f + 600.0f * j));			
 			pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 300, 20, 50, XMFLOAT3{ 0,0,0 });
 			pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 300 * 0.5f, 20 * 0.5f, 50 * 0.5f }));
 			m_Objects.push_back(std::move(pObject));
@@ -39,7 +39,7 @@ CPuzzle::CPuzzle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 			pObject = new CGameObject();
 			pObject->SetMesh(pYMesh);
 			pObject->SetShader(pShader);
-			pObject->SetPosition(XMFLOAT3(175.0f + 500.0f * i + 300.0f, 250.0f, 0.0f + 410.0f + 500.0f * j));
+			pObject->SetPosition(XMFLOAT3(175.0f + 600.0f * i + 300.0f, 250.0f, 0.0f + 410.0f + 600.0f * j));
 			pObject->Rotate(XMFLOAT3(0, 1, 0), 90);		
 			pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 350, 20, 50, XMFLOAT3{ 0,0,0 }); 
 			pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 350 * 0.5f, 20 * 0.5f, 50 * 0.5f }));
@@ -48,7 +48,7 @@ CPuzzle::CPuzzle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 			pObject = new CGameObject();
 			pObject->SetMesh(pYMesh);
 			pObject->SetShader(pShader);
-			pObject->SetPosition(XMFLOAT3(-175.f + 500.0f * i + 300.0f, 250.0f, 0.0f + 410.0f + 500.0f * j));
+			pObject->SetPosition(XMFLOAT3(-175.f + 600.0f * i + 300.0f, 250.0f, 0.0f + 410.0f + 600.0f * j));
 			pObject->Rotate(XMFLOAT3(0, 1, 0), 90);
 			pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 350, 20, 50, XMFLOAT3{ 0,0,0 });
 			pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 350 * 0.5f, 20 * 0.5f, 50 * 0.5f }));
@@ -98,7 +98,7 @@ void CPuzzle::SetPosition(XMFLOAT3 pos)
 
 CPlate::CPlate(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
-	CMesh* pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 2500, 240, 1800);
+	CMesh* pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 3000, 240, 4000);
 	CGameObject* pObject = new CGameObject();
 	pObject->SetMesh(pMesh);
 	pObject->SetShader(pShader);
@@ -110,11 +110,12 @@ CPlate::CPlate(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	pObject->SetSize({ 1, 240 * 0.5f, 1 });
 	m_Objects.push_back(std::move(pObject));
 
+	// 첫번째 계단
 	pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 700, 80, 600);
 	pObject = new CGameObject();
 	pObject->SetMesh(pMesh);
 	pObject->SetShader(pShader);
-	pObject->SetPosition(XMFLOAT3(1250.0f, 40.0f, -600 * 0.5f));
+	pObject->SetPosition(XMFLOAT3(1250.0f, 40.0f, -1600 ));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 700, 80, 600, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 600 * 0.5f }));
 	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
@@ -124,18 +125,19 @@ CPlate::CPlate(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	pObject = new CGameObject();
 	pObject->SetMesh(pMesh);
 	pObject->SetShader(pShader);
-	pObject->SetPosition(XMFLOAT3(1250.0f, 40.0f, 600 * 0.5f +1800.0f));
+	pObject->SetPosition(XMFLOAT3(1250.0f, 40.0f, 1600  +1800.0f));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 700, 80, 600, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 600 * 0.5f }));
 	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
 	pObject->SetSize({ 1, 40.0f * 0.5f, 1 });
 	m_Objects.push_back(std::move(pObject));
 
+	// 두번째 계단
 	pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 700, 80, 400);
 	pObject = new CGameObject();
 	pObject->SetMesh(pMesh);
 	pObject->SetShader(pShader);
-	pObject->SetPosition(XMFLOAT3(1250.0f, 120.0f, -400 * 0.5f));
+	pObject->SetPosition(XMFLOAT3(1250.0f, 120.0f, -1400 ));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 700, 80, 400, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 400 * 0.5f }));
 	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
@@ -145,18 +147,19 @@ CPlate::CPlate(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	pObject = new CGameObject();
 	pObject->SetMesh(pMesh);
 	pObject->SetShader(pShader);
-	pObject->SetPosition(XMFLOAT3(1250.0f, 120.0f, 400 * 0.5f + 1800.0f));
+	pObject->SetPosition(XMFLOAT3(1250.0f, 120.0f, 1400  + 1800.0f));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 700, 80, 400, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 400 * 0.5f }));
 	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
 	pObject->SetSize({ 1, 80 * 0.5f, 1 });
 	m_Objects.push_back(std::move(pObject));
 
+	// 세번째 계단
 	pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 700, 80, 200);
 	pObject = new CGameObject();
 	pObject->SetMesh(pMesh);
 	pObject->SetShader(pShader);
-	pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f, -200 * 0.5f));
+	pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f, -1200));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 700, 80, 200, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 200 * 0.5f }));
 	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
@@ -166,24 +169,24 @@ CPlate::CPlate(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	pObject = new CGameObject();
 	pObject->SetMesh(pMesh);
 	pObject->SetShader(pShader);
-	pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f, 200 * 0.5f + 1800.0f));
+	pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f, 1200  + 1800.0f));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 700, 80, 200, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 200 * 0.5f }));
 	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
 	pObject->SetSize({ 1, 80 * 0.5f, 1 });
 	m_Objects.push_back(std::move(pObject));
 	 
-	CMesh* pBoard = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 1000, 10, 1000);
-	pObject = new CGameObject();
-	pObject->SetMesh(pBoard);
-	pObject->SetShader(pShader);
-	pObject->Scale(1.5f, 1.5f, 1.5f);
-	pObject->SetPosition(XMFLOAT3(1200.0f, 250.0f, 900.0f));
-	pObject->SetTextureIndex(0x08);	
-	//pObject->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 1000, 10, 1000);
-	m_Objects.push_back(std::move(pObject));
-	 
-	m_CollisionHandleType = COLLISION_HANDLE_TYPE::NotCollide;
+	//CMesh* pBoard = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 1000, 10, 1000);
+	//pObject = new CGameObject();
+	//pObject->SetMesh(pBoard);
+	//pObject->SetShader(pShader);
+	//pObject->Scale(1.5f, 1.5f, 1.5f);
+	//pObject->SetPosition(XMFLOAT3(1200.0f, 250.0f, 900.0f));
+	//pObject->SetTextureIndex(0x08);	
+	////pObject->BuildBoundigMeshes(pd3dDevice, pd3dCommandList, 1000, 10, 1000);
+	//m_Objects.push_back(std::move(pObject));
+	// 
+	//m_CollisionHandleType = COLLISION_HANDLE_TYPE::NotCollide;
 }
 
 CPlate::~CPlate()

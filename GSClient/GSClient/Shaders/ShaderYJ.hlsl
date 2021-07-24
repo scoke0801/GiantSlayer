@@ -1284,19 +1284,19 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     }
     else if (gnTexturesMask & 0x100)
     {
+        cColor = gtxtMummy.Sample(gssWrap, input.uv);
+    
+        cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
+    }
+    else if (gnTexturesMask & 0x200)
+    {
+
         float4 Color = { 0.5f, 0.0f, 0.0f, 1.0f };
         cColor = gtxtMummy.Sample(gssWrap, input.uv);
         
         cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
         
         cColor = lerp(cColor, Color, 0.5);
-    }
-    else if (gnTexturesMask & 0x200)
-    {
-
-        cColor = gtxtMummy.Sample(gssWrap, input.uv);
-    
-        cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
         
     }
     // // 분노 2스택

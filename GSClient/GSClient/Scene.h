@@ -26,6 +26,10 @@ enum class FBX_MESH_TYPE : UINT {
 	Enemy_02,
 	Mummy,
 	GreenTree,
+	Pawn,
+	Knight,
+	Rook,
+	King,
 	COUNT
 };
 
@@ -35,6 +39,7 @@ enum class OBJECT_LAYER : int {
 	TerrainWater,
 	Puzzle,
 	PuzzleBox,
+	ChessPuzzle,
 	Obstacle,
 	MirrorBox,
 	Enemy,

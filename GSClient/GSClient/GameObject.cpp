@@ -246,10 +246,7 @@ void CGameObject::SetLaserType(Laser_TYPE laser)
 	m_LaserType = laser;
 }
 
-void CGameObject::SetMummyType(EnemyAttackType mummy)
-{
-	m_EnemyAttackType = mummy;
-}
+
 
 void CGameObject::LookAtDirection(XMFLOAT3 dir, void* pContext)
 {

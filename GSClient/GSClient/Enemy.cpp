@@ -424,6 +424,7 @@ CMummy::CMummy()
 
 	m_HP = 15.0f;
 	m_AttackRange = 1200.0f;
+	m_Mummy_Die = 0.0f;
 	//m_HeightFromTerrain = 150.0f; 
 
 	m_State = new PatrolState(this);
@@ -441,11 +442,15 @@ void CMummy::AddFriends(CMummy* mummy)
 
 void CMummy::SendDieInfotoFriends()
 {
+	cout << "뭐지" << m_Mummy_Die << endl;
+	m_Mummy_Die+=1.0f;
+
 	for (auto& mummy : m_Friends)
 	{
-		mummy->ChangeState(new Mummy_1_Die_Anger_State(this));
 		mummy->RemoveFriends(mummy);
 	}
+	cout << "뭐지끝" << m_Mummy_Die << endl;
+
 }
 void CMummy::RemoveFriends(CMummy* mummy)
 {
@@ -456,10 +461,24 @@ void CMummy::RemoveFriends(CMummy* mummy)
 
 void CMummy::Update(float elapsedTime)
 {
+
 	m_State->Execute(this, elapsedTime);
 	
 	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
 
+	
+	/*if (this->GetMummyDie() > 0.0f && ScaleCheck == false)
+	{
+		ScaleCheck = true;
+		if (MummyScale[0] == false && ScaleCheck == true)
+		{
+			MummyScale[0] = true;
+			cout << "이게 "<<this->GetMummyDie() << endl;
+			this->Scale(15.f, 15.f, 15.f);
+			ScaleCheck = false;
+		}
+	}*/
+	
 	// 4스테이지 플레이어 진입 체크
 	for (auto player : m_ConnectedPlayers)
 	{
@@ -472,6 +491,7 @@ void CMummy::Update(float elapsedTime)
 			PlayerCheck = false;
 		}
 	}
+
 	// 머미가 플레이어가 스테이지에 들어온 순간 부터 레이저 공격 시간 감소
 	if (PlayerCheck == true)
 	{
@@ -492,17 +512,18 @@ void CMummy::Update(float elapsedTime)
 			if (this->GetEnemyAttackType()==EnemyAttackType::Mummy1)
 			{
 				this->SetAnimationSet(2);
+				this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
 				MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
 			}
 		}
-		m_LaserAttackDelayTime[0] = 5.0f;
+		m_LaserAttackDelayTime[0] = 3.0f;
 		m_LaserAttack[0] = true;
 	}
 
 	// 발사틈을 줘서 발사하고 나서 방향벡터 다시 원상복귀 
 	if (m_LaserAttack[0] == true)
 	{
-		if (m_LaserAttackDelayTime[0] < 4.7f && m_LaserAttackDelayTime[0]>4.5f)
+		if (m_LaserAttackDelayTime[0] < 2.7f && m_LaserAttackDelayTime[0]>2.5f)
 		{
 			if (shotLaser[0] == true)
 			{
@@ -516,7 +537,7 @@ void CMummy::Update(float elapsedTime)
 			shotLaser[0] = false;
 			m_LaserAttack[0] = false;
 		}
-		else if ( m_LaserAttackDelayTime[0] < 4.5f)
+		else if ( m_LaserAttackDelayTime[0] < 2.5f)
 		{
 			this->FindNextPosition();
 			this->SetIsOnMoving(true);
@@ -538,18 +559,19 @@ void CMummy::Update(float elapsedTime)
 			if (this->GetEnemyAttackType() == EnemyAttackType::Mummy2)
 			{
 				this->SetAnimationSet(2);
-				MAIN_GAME_SCENE_Y->ShotMummyLaser2(this, GetLook());
+				this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
+				MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
 			}
 			
 		}
-		m_LaserAttackDelayTime[1] = 3.0f;
+		m_LaserAttackDelayTime[1] = 7.0f;
 		m_LaserAttack[1] = true;
 	}
 
 	// 발사틈을 줘서 발사하고 나서 방향벡터 다시 원상복귀 
 	if (m_LaserAttack[1] == true)
 	{
-		if (m_LaserAttackDelayTime[1] < 2.7f && m_LaserAttackDelayTime[1]>2.5f)
+		if (m_LaserAttackDelayTime[1] < 6.7f && m_LaserAttackDelayTime[1]>6.5f)
 		{
 			if (shotLaser[1] == true)
 			{
@@ -563,7 +585,7 @@ void CMummy::Update(float elapsedTime)
 			shotLaser[1] = false;
 			m_LaserAttack[1] = false;
 		}
-		else if (m_LaserAttackDelayTime[1] < 2.5f)
+		else if (m_LaserAttackDelayTime[1] < 6.5f)
 		{
 			
 			this->FindNextPosition();
@@ -580,17 +602,19 @@ void CMummy::Update(float elapsedTime)
 			if (this->GetEnemyAttackType() == EnemyAttackType::Mummy3)
 			{
 				this->SetAnimationSet(2);
-				MAIN_GAME_SCENE_Y->ShotMummyLaser3(this, GetLook());
+				this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
+				MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
 			}
 		}
-		m_LaserAttackDelayTime[2] = 7.0f;
+		m_LaserAttackDelayTime[2] = 11.0f;
 		m_LaserAttack[2] = true;
+		
 	}
 
 	// 발사틈을 줘서 발사하고 나서 방향벡터 다시 원상복귀 
 	if (m_LaserAttack[2] == true)
 	{
-		if (m_LaserAttackDelayTime[2] < 6.7f && m_LaserAttackDelayTime[2]>6.5f)
+		if (m_LaserAttackDelayTime[2] < 10.7f && m_LaserAttackDelayTime[2]>10.5f)
 		{
 			if (shotLaser[2] == true)
 			{
@@ -605,7 +629,7 @@ void CMummy::Update(float elapsedTime)
 			shotLaser[2] = false;
 			m_LaserAttack[2] = false;
 		}
-		else if (m_LaserAttackDelayTime[2] < 6.5f)
+		else if (m_LaserAttackDelayTime[2] < 10.5f)
 		{
 			this->FindNextPosition();
 			this->SetIsOnMoving(true);
@@ -619,38 +643,4 @@ void CMummy::Update(float elapsedTime)
 
 void CMummy::Attack(float elapsedTime)
 {
-}
-
-
-void CMummy::DeleteEnemy(CMummy* pEmeny)
-{
-	auto res2 = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Mummy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end(), pEmeny);
-	if (res2 != m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end()) {
-
-		if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy1)
-		{
-			cout << " 미라 삭제\n";
-			
-			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
-		}
-
-		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy2)
-		{
-			cout << " 미라2 삭제\n";
-			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
-		}
-
-		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy3)
-		{
-			cout << " 미라3 삭제\n";
-			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
-		}
-
-	}
-	/*
-	auto res = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Enemy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end(), pEmeny);
-	if (res != m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end()) {
-		cout << " 몬스터 삭제\n";
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].erase(res);
-	}*/
 }

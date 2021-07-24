@@ -76,7 +76,12 @@ private:
 
 	bool						m_PuzzleBoxCount = false;
 	bool						m_Mira[3] = { TRUE,TRUE,TRUE };
-	bool						m_Mira_Anger[3] = { FALSE,FALSE,FALSE };
+	bool						m_One_Mira_Die = false;
+	bool						m_One_Mira_Die_Laser = false;
+	bool						m_Two_Mira_Die = false;
+	bool						m_Two_Mira_Die_Laser = false;
+	
+	
 	
 	
 private:
@@ -185,10 +190,7 @@ public:
 	
 	void DeleteEnemy(CEnemy* pEmeny);
 
-	void ShotMummyLaser(CEnemy* pEmeny, const XMFLOAT3& lookVector);
-	void ShotMummyLaser2(CEnemy* pEmeny, const XMFLOAT3& lookVector);
-	void ShotMummyLaser3(CEnemy* pEmeny, const XMFLOAT3& lookVector);
-
+	void ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector);
 	
 private:
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);

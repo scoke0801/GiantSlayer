@@ -3,11 +3,16 @@
 #include "stdafx.h"
 
 class ParticleObject;
+class CMummy;
 class CMummyLaser : public CGameObject
 {
 public:
-	CMummy* m_mummy=nullptr;
+	
 	bool m_Laser[3] = { true,true,true };
+	vector<CMummy*> m_Friends;
+	XMFLOAT3 Mummy_pos[3];
+	float					m_LaserAttackDelayTime[3] = { 5.0f,7.0f,9.0f };
+
 
 	CMummyLaser() { m_isDrawable = true; }
 	virtual ~CMummyLaser() {}
@@ -24,7 +29,9 @@ public:
 	bool IsCanUse() const { return m_isDrawable; }
 	void SetUseable(bool data) { m_isDrawable = data; }
 	void SetDrawable(bool drawable);
-
+	void AddFriends_p(CMummy* mummy);
+	
+	
 	void ConnectParticle(ParticleObject* particle) { m_ConnectedParticle = particle; }
 private:
 	XMFLOAT3 m_xmf3TargetPosition;

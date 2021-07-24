@@ -3,7 +3,6 @@
 #include "Mesh.h" 
 #include "Colider.h"  
 #include "FbxLoader.h" 
-#include "Enemy.h"
 
 class CShader;
 class CCamera;
@@ -36,7 +35,9 @@ enum class Laser_TYPE
 {
 	Laser1=0,
 	Laser2 = 1,
-	Laser3 = 2
+	Laser3 = 2,
+	Laser4 = 3,
+	Laser5 = 4,
 };
 
 enum class COLLISION_HANDLE_TYPE : int {
@@ -122,7 +123,7 @@ protected: // 렌더링 관련 변수
 
 	Laser_TYPE m_LaserType = Laser_TYPE::Laser1;
 
-	EnemyAttackType m_EnemyAttackType = EnemyAttackType::Mummy1;
+	//EnemyAttackType m_EnemyAttackType = EnemyAttackType::Mummy1;
 
 	bool				m_isDrawable = true;
 protected:	// 객체 관련 속성 변수
@@ -238,10 +239,8 @@ public:
 	virtual void SetVelocity(XMFLOAT3 dir);
 
 	virtual void SetLaserType(Laser_TYPE laser);
-	Laser_TYPE GetLaserType() const { return m_LaserType; };
 
-	virtual void SetMummyType(EnemyAttackType mummy);
-	EnemyAttackType GetMummyType() const { return m_EnemyAttackType; };
+	Laser_TYPE GetLaserType() const { return m_LaserType; };
 
 	void LookAtDirection(XMFLOAT3 dir, void* pContext);
 	void SetVelocityToZero() { m_xmf3Velocity = XMFLOAT3(0, 0, 0); }

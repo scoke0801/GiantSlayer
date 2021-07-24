@@ -70,7 +70,9 @@ protected:
 
 	float					m_Speed;
 
-	float					m_LaserAttackDelayTime[3] = { 5.0f,7.0f,9.0f };
+	float					m_Mummy_Die;
+
+	float					m_LaserAttackDelayTime[3] = { 3.0f,7.0f,11.0f };
 	bool					m_LaserAttack[3] = { false,false,false };
 
 public:
@@ -122,6 +124,8 @@ public:
 	void SetIsOnMoving(bool info) { m_IsOnMoving = info; }
 	 
 	void SetAttackDelayTime(float delayTime) { m_AttackDelayTime = delayTime; }
+	void SetMummyDie(float die) { m_Mummy_Die = die; }
+	float GetMummyDie() const { return m_Mummy_Die; }
 
 	void SetEnemyAttackType(EnemyAttackType attackType) { m_AttackType = attackType; }
 	EnemyAttackType GetEnemyAttackType() const { return m_AttackType; } 
@@ -167,11 +171,13 @@ private:
 	bool LaserDelayTime[3] = { false,false,false };
 	bool shotLaser[3] = { false,false,false };
 	float					dir[3] = { 15.0f,15.0f,15.0f };
-
+	bool ScaleCheck = false;
+	bool MummyScale[3] = { false,false,false };
+	
 public:
 
 	CParticle* m_Particles;
-
+	
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
 public:
 
@@ -183,8 +189,9 @@ public:
 	void AddFriends(CMummy* mummy);
 	void SendDieInfotoFriends();
 	void RemoveFriends(CMummy* mummy);
-	void DeleteEnemy(CMummy* mummy);
+
 	
+
 	bool isAttack0() const { return m_LaserAttack[0]; }
 	bool isAttack1() const { return m_LaserAttack[1]; }
 	bool isAttack2() const { return m_LaserAttack[2]; }
