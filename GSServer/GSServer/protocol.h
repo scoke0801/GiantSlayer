@@ -57,6 +57,8 @@ enum AnimationType
 	SWORD_IDLE,
 	SWORD_RUN,
 	SWORD_ATK,
+	//SWORD_ATK2,
+	//SWORD_ATK3,
 	SWORD_DEATH,
 	// 활 ===========
 	BOW_GET,
@@ -64,6 +66,12 @@ enum AnimationType
 	BOW_RUN,
 	BOW_ATK,
 	BOW_DEATH,
+	// 스태프 ===========
+	STAFF_GET,
+	STAFF_IDLE,
+	STAFF_RUN,
+	STAFF_ATK,
+	STAFF_DEATH,
 	// 박스==============
 	BOX_IDLE,
 	BOX_WALK,

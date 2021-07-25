@@ -14,11 +14,14 @@
 #include "Puzzle.h" 
 #include "Particle.h"
 #include "Arrow.h"
+#include "Skill.h"
 #include "Enemy.h"
 #include "Sound.h"
 #include "FbxObject.h"
 #include "FbxObject2.h"
 #include "FbxLoader.h"
+#include "Boss.h"
+#include "Effect.h"
 #define ROOT_PARAMETER_OBJECT				0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA		1
 #define ROOT_PARAMETER_CAMERA				2
@@ -72,8 +75,7 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::JH);
-	//CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::TH);
+	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::TH);
 	CShaderHandler::GetInstance().CreateAllShaders(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	BuildMaterials(pd3dDevice, pd3dCommandList);
@@ -117,14 +119,14 @@ void CSceneTH::BuildCamera(ID3D12Device* pd3dDevice,
 
 	//m_MirrorCamera = m_Cameras[3];
 	m_MinimapCamera = m_Cameras[1];
- 
+
 	m_MirrorCamera = new CCamera;
 	m_MirrorCamera->SetLens(0.45f * PI, width, height, 1.0f, 60000.0f);
 	m_MirrorCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
 	m_MirrorCamera->SetScissorRect(0, 0, width, height);
 	m_MirrorCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) { 
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		CCamera* pCamera = new CCamera;
 		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 60000.0f);
 		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
@@ -233,8 +235,8 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
 
 	CTerrainWater* pTerrainWater = new CTerrainWater(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, 257 * 35, 257 * 32);
-	pTerrainWater->SetPosition(XMFLOAT3(5450.0f, -1300.0f, 16500.0f));
+		m_pd3dGraphicsRootSignature, 257 * 35 * MAP_SCALE_SIZE, 257 * 32 * MAP_SCALE_SIZE);
+	pTerrainWater->SetPosition(XMFLOAT3(5450.0f * MAP_SCALE_SIZE, -1300.0f, 16500.0f * MAP_SCALE_SIZE));
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater].push_back(pTerrainWater);
 
 	//FbxLoader(m_pfbxManager, "tree", false, 1);
@@ -243,9 +245,9 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	BuildMapSector1(pd3dDevice, pd3dCommandList);
 	BuildMapSector2(pd3dDevice, pd3dCommandList);
-	BuildMapSector3(pd3dDevice, pd3dCommandList);
+	BuildMapSector3(pd3dDevice, pd3dCommandList); 
 	BuildMapSector4(pd3dDevice, pd3dCommandList);
-	BuildMapSector5(pd3dDevice, pd3dCommandList);
+	BuildMapSector5(pd3dDevice, pd3dCommandList); 
 
 	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
 
@@ -257,18 +259,17 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildPlayers(pd3dDevice, pd3dCommandList);
 
 	BuildParticles(pd3dDevice, pd3dCommandList);
-	BuildArrows(pd3dDevice, pd3dCommandList);
+	BuildProjectiles(pd3dDevice, pd3dCommandList);
 
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
 
-	/*pfbxTestObject = new CFbxObject2(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
-	pfbxTestObject->SetAnimationStack(2);
-	pfbxTestObject->m_pAnimationController->SetPosition(0, 0.0f);
-	pfbxTestObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	pfbxTestObject->SetPosition({ 1000,  150, 1000 });
-	pfbxTestObject->SetTextureIndex(0x01);*/
+	m_EffectsHandler = new CEffectHandler();
+	m_EffectsHandler->Init(pd3dDevice, pd3dCommandList, m_Player);
+
+	//UseEffects((int)EffectTypes::Thunder, { 1000.0f, 0.0f, 1000.0f }); 
+	//UseEffects((int)EffectTypes::BossAttacked, { 500.0f, 0.0f, 500.0f });
+	//UseEffects((int)EffectTypes::WarnningCircle, { 500.0f, 0.0f, 500.0f }); 
 
 	auto end_t = chrono::high_resolution_clock::now();
 
@@ -287,7 +288,8 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Door",
 		"HP_SP", "Minimap", "WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red", "Flower_White", "Grass_1", "Grass_2", "Tree", "NoLeafTree", "Leaves", "Moss_Rock",
+		"Player_Clothes","Player_Face","Player_Hair","Player_Sword", "Player_Bow", "Player_Staff",
+		"Tree", "NoLeafTree", "Leaves", "Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
 		"Dry_Tree", "Stump", "Dead_Tree",
@@ -297,9 +299,8 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
-		"GreenTree",
-		"Bow",
-		"Effect_1", "Effect_2", "Effect_3"
+		"Effect_1", "Effect_2", "Effect_3",
+		"FireBall"
 	};
 
 	const wchar_t* address[] =
@@ -312,8 +313,7 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
 		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
-		//L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds",
-		L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds",
+		L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds", L"resources/Textures/bow_texture.dds", L"resources/Textures/twoHandedStaff_texture.dds",
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board.dds",
 		L"resources/UI/HelpText.dds",
@@ -325,9 +325,8 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/Skeleton_D.dds",
 		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",
 		L"resources/Textures/DS_equipment_standard.dds",
-		L"resources/OBJ/GreenTree.dds",
-		L"resources/Textures/bow_texture.dds",
-		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds"
+		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds",
+		L"resources/Textures/FireBall.dds"
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -364,25 +363,27 @@ void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	const char* keyNames[] =
 	{
 		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain","BossWall",
-		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
+		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
 		"Box","Wood", "WoodSignBoard",
 		"GrassWall", "SandWall","RockyWall",
 		"Door",
-		"HP_SP", "Minimap", "WeaponUI",
-		"HP_SP_PER",
-		"Flower_Red", "Flower_White", "Grass_1", "Grass_2", "Tree", "NoLeafTree", "Leaves", "Moss_Rock",
+		"HP_SP","HP_SP_PER",
+		"Minimap",
+		"WeaponUI",
+		"Player_Clothes","Player_Face","Player_Hair","Player_Sword", "Player_Bow", "Player_Staff",
+		"Tree","NoLeafTree","Leaves","Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
-		"Dry_Tree", "Stump", "Dead_Tree",
+		"Dry_Tree","Stump","Dead_Tree",
 		"Desert_Rock",
 		"TerrainWater",
 		"Rain",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
-		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
-		"GreenTree",
-		"Bow",
-		"Effect_1", "Effect_2", "Effect_3"
+		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
+		"MeleeSkeleton_02_EquipAll",
+		"Effect_1", "Effect_2", "Effect_3",
+		"FireBall"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -452,6 +453,8 @@ void CSceneTH::Update(float elapsedTime)
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
+	m_EffectsHandler->Update(elapsedTime);
+
 	m_Particles->Update(elapsedTime);
 
 	m_HelpTextUI->Update(elapsedTime);
@@ -463,13 +466,13 @@ void CSceneTH::Update(float elapsedTime)
 		player->FixPositionByTerrain(m_Terrain);
 		player->FixCameraByTerrain(m_Terrain);
 	}
+
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
 			//cout << "충돌 : 플레이어 - 장애물\n";
 		}
 	}
-
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		if (pEnemy->CollisionCheck(m_Player)) {
 			// 공격 상태일 때만 체력이 닳는것이 맞을까...
@@ -806,7 +809,7 @@ void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	//pfbxTestObject->Draw(pd3dCommandList, m_CurrentCamera);
 
 	m_Particles->Draw(pd3dCommandList, m_CurrentCamera);
-
+	m_EffectsHandler->Draw(pd3dCommandList, m_CurrentCamera);
 	//for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 	//	//if (i == (int)OBJECT_LAYER::Enemy) {
 	//	//	continue;
@@ -947,6 +950,7 @@ void CSceneTH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 
 void CSceneTH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
 {
+	return;
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
 	if (m_MirrorCamera)
@@ -1111,7 +1115,7 @@ void CSceneTH::ProcessPacket(unsigned char* p_buf)
 				CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
 				p->OpenDoor();
 			}
-			//for (int i = 0; i < MAX_PLAYER; ++i) {
+			//for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			//	m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
 			//}
 		}
@@ -1208,7 +1212,7 @@ void CSceneTH::ProcessPacket(unsigned char* p_buf)
 		P_S2C_UPDATE_SYNC p_syncUpdate;
 		memcpy(&p_syncUpdate, p_buf, p_buf[0]);
 		m_CurrentPlayerNum = p_syncUpdate.playerNum;
-		for (int i = 0; i < MAX_PLAYER; ++i) {
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			m_Players[i]->SetDrawable(p_syncUpdate.existance[i]);
 			if (m_Players[i]->IsDrawable() == false) continue;
 
@@ -1233,7 +1237,32 @@ void CSceneTH::ProcessPacket(unsigned char* p_buf)
 					}
 				}
 			}*/
-			m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
+			switch (p_syncUpdate.states[i]) {
+			case IDLE:
+			case SWORD_IDLE:
+			case BOW_IDLE:
+				m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
+				break;
+			case SWORD_RUN:
+			case BOW_RUN:
+				m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
+				break;
+			case SWORD_ATK:
+			case BOW_ATK:
+				m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
+				break;
+			case SWORD_DEATH:
+			case BOW_DEATH:
+				m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
+				break;
+
+			case WALK: break;
+			case DAMAGED: break;
+			case SWORD_GET:break;
+			case BOW_GET:break;
+			default:
+				break;
+			}
 		}
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
@@ -1260,58 +1289,10 @@ void CSceneTH::LoginToServer()
 	P_C2S_LOGIN p_login;
 	p_login.size = sizeof(p_login);
 	p_login.type = PACKET_PROTOCOL::C2S_LOGIN;
+	p_login.roomIndex = -1;
 	strcpy_s(p_login.name, CFramework::GetInstance().GetPlayerName().c_str());
 
-	int retVal; 
-	SendPacket(CFramework::GetInstance().GetSocket(), reinterpret_cast<char*>(&p_login), p_login.size, retVal);
-
-	char buffer[BUFSIZE + 1] = {};
-	RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-
-	P_S2C_PROCESS_LOGIN p_processLogin = *reinterpret_cast<P_S2C_PROCESS_LOGIN*>(&buffer);
-	if (p_processLogin.isSuccess)
-	{
-		XMFLOAT3 pos = XMFLOAT3{ IntToFloat(p_processLogin.x),
-			IntToFloat(p_processLogin.y), IntToFloat(p_processLogin.z) };
-
-		CFramework::GetInstance().SetPlayerId(p_processLogin.id);
-
-		cout << "Login id = " << p_processLogin.id << "\n";
-
-		m_Players[p_processLogin.id]->SetDrawable(true);
-
-		m_Player = m_Players[p_processLogin.id];
-		m_CurrentCamera = m_PlayerCameras[p_processLogin.id];
-		//m_Player->SetCamera(m_CurrentCamera); 
-		//m_CurrentCamera->SetTarget(m_Player);
-
-		m_MinimapCamera->SetTarget(m_Players[p_processLogin.id]);
-
-		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
-			m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
-		}
-
-		// Sync Data
-		ZeroMemory(buffer, sizeof(buffer));
-		RecvPacket(CFramework::GetInstance().GetSocket(), buffer, retVal);
-
-		P_S2C_UPDATE_SYNC p_syncUpdate = *reinterpret_cast<P_S2C_UPDATE_SYNC*>(&buffer);
-
-		m_CurrentPlayerNum = p_syncUpdate.playerNum;
-
-		for (int i = 0; i < p_syncUpdate.playerNum; ++i) {
-			if (m_Players[p_syncUpdate.id[i]]->IsDrawable() == false) continue;
-
-			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
-			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
-
-			m_Players[p_syncUpdate.id[i]]->SetPosition(pos);
-			m_Players[p_syncUpdate.id[i]]->UpdateCamera();
-			m_Players[p_syncUpdate.id[i]]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-
-			m_Players[p_syncUpdate.id[i]]->SetDrawable(p_syncUpdate.existance[i]);
-		}
-	} 
+	SendPacket(&p_login);
 }
 
 void CSceneTH::LogoutToServer()
@@ -1505,22 +1486,11 @@ void CSceneTH::ProcessInput()
 	}
 	if (keyInput.KEY_9)
 	{
-		/*if (m_Player->GetWeapon() == PlayerWeaponType::Sword) {
-			m_Player->SetWeapon(PlayerWeaponType::Bow);
-			m_Player->DisableSword();
-			m_Player->AnimationChange(PlayerWeaponType::Bow);
-		}
-		else if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
-			m_Player->SetWeapon(PlayerWeaponType::Sword);
-			m_Player->DisableBow();
-			m_Player->AnimationChange(PlayerWeaponType::Sword);
-		}
-		else {
-			cout << "...?" << endl;
-		}*/
+		
 	}
 	if (keyInput.KEY_SPACE)
 	{
+		DisplayVector3(m_Player->GetPosition());
 		m_Player->Jump();
 	}
 
@@ -1536,32 +1506,33 @@ void CSceneTH::ProcessInput()
 	if (keyInput.KEY_F1)
 	{
 		//m_Player->SetPosition({ 2500,  0, 2500 }); 
-		m_Player->SetPosition({ 1622,  0, 10772 });
+		m_Player->SetPosition({ 1622 * MAP_SCALE_SIZE, 0, 10772 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F2)
 	{
-		m_Player->SetPosition({ 2800,  -1000, 18000 });
+		// 2800
+		m_Player->SetPosition({ 8800 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F3)
 	{
-		m_Player->SetPosition({ 11838.8,  -1000, 10428.2 });
+		m_Player->SetPosition({ 11838.8 * MAP_SCALE_SIZE,  -1000, 10428.2 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F4)
 	{
-		m_Player->SetPosition({ 17000,  -6000, 5500 });
+		m_Player->SetPosition({ 17000 * MAP_SCALE_SIZE,  -6000, 5500 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F5)
 	{
-		m_Player->SetPosition({ 16749.9,  -6000, 8500.78 });
+		m_Player->SetPosition({ 16749.9 * MAP_SCALE_SIZE,  -6000, 8500.78 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F6)
 	{
-		m_Player->SetPosition({ 16958.4,  -6000, 14861.1 });
+		m_Player->SetPosition({ 16958.4 * MAP_SCALE_SIZE,  -6000, 14861.1 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_U)
@@ -1589,14 +1560,7 @@ void CSceneTH::ProcessInput()
 	}
 	if (keyInput.KEY_J)
 	{
-		/*if (m_Player->IsCanAttack()) {
-			m_Player->Attack();
-			m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 
-			if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
-				ShotPlayerArrow();
-			}
-		}*/
 	}
 	if (keyInput.KEY_K)
 	{
@@ -1624,13 +1588,12 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 		if (wParam == VK_9) {
 			if (m_Player->GetWeapon() == PlayerWeaponType::Sword) {
 				m_Player->SetWeapon(PlayerWeaponType::Bow);
-				m_Player->DisableSword();
-				m_Player->AnimationChange(PlayerWeaponType::Bow);
 			}
 			else if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
+				m_Player->SetWeapon(PlayerWeaponType::Staff);
+			}
+			else if (m_Player->GetWeapon() == PlayerWeaponType::Staff) {
 				m_Player->SetWeapon(PlayerWeaponType::Sword);
-				m_Player->DisableBow();
-				m_Player->AnimationChange(PlayerWeaponType::Sword);
 			}
 			else {
 				cout << "...?" << endl;
@@ -1646,6 +1609,10 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 				case PlayerWeaponType::Bow:
 					m_Player->Attack();
 					m_Player->pullString = true;
+					break;
+				case PlayerWeaponType::Staff:
+					m_Player->Attack();
+					ActiveSkill(OBJECT_LAYER::FireBall, m_Player);
 					break;
 				}
 			}
@@ -1668,6 +1635,8 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 					m_Player->SetAnimationSet(IDLE);
 				}
 				m_Player->ResetBow();
+				break;
+			case PlayerWeaponType::Staff:
 				break;
 			}
 		}
@@ -1917,65 +1886,101 @@ void CSceneTH::BuildBridges(ID3D12Device* pd3dDevice,
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ 8000.0f,  -1301.0f,  18100.0f });
+	pBridge->SetPosition({ 8000.0f * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ 10000.0f,  -1301.0f,  18100.0f });
+	pBridge->SetPosition({ (10000.0f - 680) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ 9000.0f,  -1301.0f,  18100.0f });
+	pBridge->SetPosition({ (9000.0f - 340) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ (11000.0f - 680 - 340) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ 8000.0f * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ (10000.0f - 680) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ (9000.0f - 340) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPosition({ (11000.0f - 680 - 340) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+
 }
 
 void CSceneTH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
-	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 1000, 500, pShader);
-	pDoorWall->SetPosition({ 0,0, 7500 });
+	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000 * MAP_SCALE_SIZE, 1000, 500, pShader);
+	pDoorWall->SetPosition({ 0,0, 7500 * MAP_SCALE_SIZE });
 	m_DoorIdx = m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].size();
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pDoorWall);
 
-	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 3300, 1000, 500, pShader);
-	pDoorWall->SetPosition({ 10300, -2000, 7500 });
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 3300 * MAP_SCALE_SIZE, 1000, 500, pShader);
+	pDoorWall->SetPosition({ 10300 * MAP_SCALE_SIZE, -2000, 7500 * MAP_SCALE_SIZE });
 	pDoorWall->SetTextureIndexes(0x02);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pDoorWall);
 
-	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000, 2500, 500, true, pShader);
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000 * MAP_SCALE_SIZE, 2500, 500, true, pShader);
 	pDoorWall->SetTextureIndexes(0x04);
 	//pDoorWall->RotateAll({ 0,1,0 }, 90);
-	pDoorWall->SetPosition({ 13500, -3500, 0 });
+	pDoorWall->SetPosition({ 13500 * MAP_SCALE_SIZE, -3500, 0 });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pDoorWall);
 
-	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500, 2000, 500, pShader);
-	pDoorWall->SetPosition({ 14000,-4500, 8000 });
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5500 * MAP_SCALE_SIZE, 2000, 500, pShader);
+	pDoorWall->SetPosition({ 14000 * MAP_SCALE_SIZE,-4500, 8000 * MAP_SCALE_SIZE });
 	pDoorWall->SetTextureIndexes(0x08);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pDoorWall);
 
-	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5800, 4500, 800, pShader);
-	pDoorWall->SetPosition({ 14000, -7050, 13650 });
+	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 5800 * MAP_SCALE_SIZE, 4500, 800 * MAP_SCALE_SIZE, pShader);
+	pDoorWall->SetPosition({ 14000 * MAP_SCALE_SIZE, -7050, 13650 * MAP_SCALE_SIZE });
 	pDoorWall->SetTextureIndexes(0x08);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pDoorWall);
 
-	CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, 1500, 2500, 500);
+	CWall* pWall = new CWall(pd3dDevice, pd3dCommandList, 1500 * MAP_SCALE_SIZE, 2500, 500);
 	pWall->Rotate({ 0,1,0 }, 90);
-	pWall->SetPosition({ 13750, -3500 + 1250, 4750 });
+	pWall->SetPosition({ 13750 * MAP_SCALE_SIZE, -3500 + 1250, 4750 * MAP_SCALE_SIZE });
 	pWall->SetTextureIndex(0x04);
 	pWall->SetShader(pShader);
 	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 1500, 2500, 500, XMFLOAT3{ 0,0,0 });
 	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pWall);
 
-	pWall = new CWall(pd3dDevice, pd3dCommandList, 1500, 2500, 500);
+	pWall = new CWall(pd3dDevice, pd3dCommandList, 1500 * MAP_SCALE_SIZE, 2500, 500);
 	pWall->Rotate({ 0,1,0 }, 90);
-	pWall->SetPosition({ 13750, -3500 + 1250, 6250 });
+	pWall->SetPosition({ 13750 * MAP_SCALE_SIZE, -3500 + 1250, 6250 * MAP_SCALE_SIZE });
 	pWall->SetTextureIndex(0x04);
 	pWall->SetShader(pShader);
 	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 1500, 2500, 500, XMFLOAT3{ 0,0,0 });
@@ -2058,12 +2063,12 @@ void CSceneTH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	}
 
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
-	pPuzzlePlate->SetPosition({ 10600.0f, -2000.0f, 1500.0f + 8000.0f });
+	pPuzzlePlate->SetPosition({ 10600.0f * MAP_SCALE_SIZE, -2000.0f,(1500.0f + 8000.0f) * MAP_SCALE_SIZE });
 	//m_Objects.push_back(std::move(pPuzzlePlate));
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pPuzzlePlate);
 
 	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
-	pObject->SetPosition({ 10500.0f, -2000.0f, 1500.0f + 8000.0f });
+	pObject->SetPosition({ 10500.0f * MAP_SCALE_SIZE, -2000.0f, (1500.0f + 8000.0f) * MAP_SCALE_SIZE });
 	//m_Objects.push_back(std::move(pObject));
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
 	for (int i = 0; i < 8; ++i)
@@ -2072,11 +2077,11 @@ void CSceneTH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 		if (i > 3)
 		{
-			m_PuzzleBox[i]->SetPosition({ 10900.0f + 1 * 1800.0f,  300 - 2000.0f, 1800.0f + (i - 4) * 300.0f + 8000.0f });
+			m_PuzzleBox[i]->SetPosition({ (10900.0f + 1 * 1800.0f) * MAP_SCALE_SIZE,  300 - 2000.0f, (1800.0f + (i - 4) * 300.0f + 8000.0f) * MAP_SCALE_SIZE });
 		}
 		else
 		{
-			m_PuzzleBox[i]->SetPosition({ 10900.0f + 0 * 1800.0f,  300 - 2000.0f, 1800.0f + i * 300.0f + 8000.0f });
+			m_PuzzleBox[i]->SetPosition({ (10900.0f + 0 * 1800.0f) * MAP_SCALE_SIZE,  300 - 2000.0f, (1800.0f + i * 300.0f + 8000.0f) * MAP_SCALE_SIZE });
 		}
 		m_PuzzleBox[i]->SetTextureIndex(0x200);
 		m_PuzzleBox[i]->SetShader(CShaderHandler::GetInstance().GetData("Object"));
@@ -2096,21 +2101,21 @@ void CSceneTH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	// 첫번째 지형 표지판
 	CSign* pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::Scroll,
 		false, true, CShaderHandler::GetInstance().GetData("Sign"));
-	pSign->SetPosition({ 2700, 200,7000 });
+	pSign->SetPosition({ 2700 * MAP_SCALE_SIZE, 200,7000 * MAP_SCALE_SIZE });
 	//m_Objects.push_back(pSign); 
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pSign);
 
 	// 퍼즐 벽 표지판
 	pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::NumPuzzle,
 		false, false, CShaderHandler::GetInstance().GetData("Sign"));
-	pSign->SetPosition({ 11200.0f, -1800.0f, 8200.0f });
+	pSign->SetPosition({ 11200.0f * MAP_SCALE_SIZE, -1800.0f, 8200.0f * MAP_SCALE_SIZE });
 	//m_Objects.push_back(pSign);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pSign);
 
 	// 메두사 벽 표지판
 	pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::Medusa,
 		true, true, CShaderHandler::GetInstance().GetData("Sign"));
-	pSign->SetPosition({ 13000.0f, -3250.0f, 1300.0f });
+	pSign->SetPosition({ 13000.0f * MAP_SCALE_SIZE, -3250.0f, 1300.0f * MAP_SCALE_SIZE });
 	pSign->RotateAll({ 0,1,0 }, 90.0f);
 
 	//m_Objects.push_back(pSign);
@@ -2119,7 +2124,29 @@ void CSceneTH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//return;
+	{
+		XMFLOAT3 scale = { 120.0f, 120.0f, 120.0f };
+		m_Boss = new CBoss(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
+		//x : 25592.2 y : -6962.67 z : 25934.3
+		//z : 21800.0 14533
+		//z : 29700.0 19800
+		//x : 29700.0 19800
+		//x : 21800.0 14533
+		m_Boss->SetPosition({ 17166 * MAP_SCALE_SIZE, -6070, 17166 * MAP_SCALE_SIZE });
+		m_Boss->FixPositionByTerrain(m_Terrain);
+		m_Boss->Scale(120, 120, 120);
+		m_Boss->Rotate({ 0,1,0 }, 180);
+		m_Boss->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+
+		XMFLOAT3 centerPos = m_Boss->GetPosition();
+		XMFLOAT3 scopeSize = { 4100 * 2, 0, 4100 * 2 };
+		m_Boss->SetActivityScope({ scopeSize.x, 0, scopeSize.z }, { centerPos });
+		m_Boss->SetSightBoundingBox({ scopeSize.x / scale.x, 15, scopeSize.z / scale.z });
+		m_Boss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, scopeSize.x / scale.x, 15, scopeSize.z / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(m_Boss);
+		return;
+	}
 
 	CGameObjectVer2* pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
@@ -2132,8 +2159,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
-		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2148,26 +2175,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
-		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
-		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
-		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-
-		return;
-
-		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
-		pEnemy = new CMeleeEnemy();
-		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetChild(pSkeletonModel, true);
-		pEnemy->SetShadertoAll();
-		pEnemy->SetTextureInedxToAll(0x40);
-		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
-		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2182,8 +2191,24 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x40);
-		pEnemy->SetPosition({ 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
-		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f });
+		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
+		pEnemy = new CMeleeEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x40);
+		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2200,8 +2225,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
-		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetPosition({ 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2216,8 +2241,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
-		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetPosition({ 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2232,8 +2257,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
-		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetPosition({ 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2248,8 +2273,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
-		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f });
+		pEnemy->SetPosition({ 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2265,8 +2290,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
-		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+		pEnemy->SetPosition({ 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2281,8 +2306,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
-		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+		pEnemy->SetPosition({ 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2297,8 +2322,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
-		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f });
+		pEnemy->SetPosition({ 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2314,8 +2339,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
-		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
+		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2330,8 +2355,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
-		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
+		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2346,8 +2371,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
-		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f });
+		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2365,8 +2390,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2381,8 +2406,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2397,8 +2422,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2413,8 +2438,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
 		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
-		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f });
+		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
@@ -2422,27 +2447,6 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 3, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 	}
-	CGameObjectVer2* pBossParent = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Boss.bin", NULL, true);
-
-	CGameObjectVer2* pBoss = new CGameObjectVer2();
-	pBoss->SetPosition({ 16800,  -6070, 16500 });
-	pBoss->FixPositionByTerrain(m_Terrain);
-	pBoss->Scale(120, 120, 120);
-	pBoss->Rotate({ 0,1,0 }, 180);
-	pBoss->SetChild(pBossParent, true);
-	pBoss->SetAnimationSet(1);
-	//pBoss->Scale(200, 200, 200);
-	pBoss->SetShadertoAll();
-	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 11, 10, 7, XMFLOAT3{ 0,0,0 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.5, 5, 3.5)));
-	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ 2.5, 3, 7 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
-	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 4.5f, 5, 6, XMFLOAT3{ -2.5, 3, 7 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(-2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
-	pBoss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 3, 3, 5, XMFLOAT3{ 0,3,-7 });
-	pBoss->AddColider(new ColliderBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5)));
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pBoss);
 }
 
 void CSceneTH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -2453,7 +2457,7 @@ void CSceneTH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 		CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
 
-		m_MirrorCamera->SetPosition({ 17000, -3000, 210 });
+		m_MirrorCamera->SetPosition({ 17000 * MAP_SCALE_SIZE, -3000, 210 * MAP_SCALE_SIZE });
 
 		m_Mirror[i]->SetMesh(pMirrorMesh);
 		m_Mirror[i]->SetShader(CShaderHandler::GetInstance().GetData("Mirror"));
@@ -2463,15 +2467,15 @@ void CSceneTH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		}
 		if (i == 0)
 		{
-			m_Mirror[i]->SetPosition({ float(17000 - (2900 * i)), -2300, 200 });
+			m_Mirror[i]->SetPosition({ float(17000 - (2900 * i)) * MAP_SCALE_SIZE , -2300, 200 * MAP_SCALE_SIZE });
 		}
 		if (i == 1)
 		{
-			m_Mirror[i]->SetPosition({ float(17000 - (2900 * i)), -2300, 3200 });
+			m_Mirror[i]->SetPosition({ float(17000 - (2900 * i)) * MAP_SCALE_SIZE, -2300, 3200 * MAP_SCALE_SIZE });
 		}
 		if (i == 2)
 		{
-			m_Mirror[i]->SetPosition({ float(17000 + 2900), -2300, 3200 });
+			m_Mirror[i]->SetPosition({ float(17000 + 2900) * MAP_SCALE_SIZE, -2300, 3200 * MAP_SCALE_SIZE });
 		}
 		m_Mirror[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000, 2600, 10.0, XMFLOAT3{ 0,0,0 });
 		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f, 2600.0f * 0.5f, 10.0f * 0.5f }));
@@ -2550,7 +2554,7 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 		x_Tree = 3000.0f + 500.0f * i;
 		z_Tree = 4500.0f;
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f , z_Tree });
+		pBillboardObject->SetPosition({ x_Tree * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f , z_Tree * MAP_SCALE_SIZE });
 
 		pBillboardObject->SetTextureIndex(0x010);
 		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
@@ -2567,7 +2571,9 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 		x_Tree = 4000 + 100.0f * i;
 		z_Tree = 4500 + 700.0f * i;
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree });
+		x_Tree *= MAP_SCALE_SIZE;
+		z_Tree *= MAP_SCALE_SIZE;
+		pBillboardObject->SetPosition({ x_Tree * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree * MAP_SCALE_SIZE });
 
 		pBillboardObject->SetTextureIndex(0x010);
 		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
@@ -2582,6 +2588,8 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 		x_Tree = 700.0f + (600 * i);
 		z_Tree = 4000.0f + (600 * i);
+		x_Tree *= MAP_SCALE_SIZE;
+		z_Tree *= MAP_SCALE_SIZE;
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
@@ -2597,6 +2605,8 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 		x_Tree = 4000.0f + (600 * i);
 		z_Tree = 3200.0f;
+		x_Tree *= MAP_SCALE_SIZE;
+		z_Tree *= MAP_SCALE_SIZE;
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
@@ -2612,6 +2622,8 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 		x_Tree = 5500;
 		z_Tree = 4200.0f + (1000 * i);
+		x_Tree *= MAP_SCALE_SIZE;
+		z_Tree *= MAP_SCALE_SIZE;
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
@@ -2637,6 +2649,8 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			x_Tree = 5500.0f;
 			z_Tree = 11000.0f;
 		}
+		x_Tree *= MAP_SCALE_SIZE;
+		z_Tree *= MAP_SCALE_SIZE;
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
@@ -2663,7 +2677,8 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			x_Tree = 5500.0f;
 			z_Tree = 14700.0f;
 		}
-
+		x_Tree *= MAP_SCALE_SIZE;
+		z_Tree *= MAP_SCALE_SIZE;
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 380.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
@@ -2690,7 +2705,8 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			x_Tree = 6500.0f;
 			z_Tree = 9500.0f;
 		}
-
+		x_Tree *= MAP_SCALE_SIZE;
+		z_Tree *= MAP_SCALE_SIZE;
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 380.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
@@ -2717,7 +2733,7 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject = new CGameObject();
 		pObject->Rotate({ 1,0,0 }, 90);
 		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
-		pObject->SetPosition({ 1000.0f + i * 1000.0f, 100, 850 });
+		pObject->SetPosition({ (1000.0f + i * 1000.0f) * MAP_SCALE_SIZE, 100, 850 * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
 		pObject->Scale(50, 50, 50);
@@ -2729,7 +2745,7 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject = new CGameObject();
 		pObject->Rotate({ 1,0,0 }, 90);
 		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
-		pObject->SetPosition({ 1200.0f + i * 1000.0f, 0, 3150 });
+		pObject->SetPosition({ (1200.0f + i * 1000.0f) * MAP_SCALE_SIZE, 0, 3150 * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
 		pObject->Scale(50, 50, 50);
@@ -2741,7 +2757,7 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject = new CGameObject();
 		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->Rotate({ 0,0,1 }, 90);
-		pObject->SetPosition({ 500.0f + i * 2700.0f, 0, 2150 });
+		pObject->SetPosition({ (500.0f + i * 2700.0f) * MAP_SCALE_SIZE, 0, 2150 * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
 		pObject->Scale(50, 50, 50);
@@ -2753,7 +2769,7 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject = new CGameObject();
 		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->Rotate({ 0,0,1 }, 90);
-		pObject->SetPosition({ 2600.0f, 0, 4650 + 500.0f * i });
+		pObject->SetPosition({ 2600.0f * MAP_SCALE_SIZE, 0,(4650 + 500.0f * i) * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
 		pObject->Scale(50, 50, 50);
@@ -2765,7 +2781,7 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject = new CGameObject();
 		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->Rotate({ 0,0,1 }, 90);
-		pObject->SetPosition({ 2600.0f, -200.0f, 4650 + 500.0f * i });
+		pObject->SetPosition({ 2600.0f * MAP_SCALE_SIZE, -200.0f, (4650 + 500.0f * i) * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
 		pObject->Scale(50, 50, 50);
@@ -2800,7 +2816,7 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->Rotate({ 0,0,1 }, 90);
 
-		pObject->SetPosition({ x_bush + 300 * i, 0, z_bush + 700.0f * i });
+		pObject->SetPosition({ (x_bush + 300 * i) * MAP_SCALE_SIZE, 0, (z_bush + 700.0f * i) * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
 
@@ -2810,7 +2826,7 @@ void CSceneTH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
-	pObject->SetPosition({ 2500.0f, 100, 250 });
+	pObject->SetPosition({ 2500.0f * MAP_SCALE_SIZE, 100, 250 * MAP_SCALE_SIZE });
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	pObject->SetTextureIndex(0x01);
 	pObject->Scale(50, 50, 50);
@@ -2829,7 +2845,7 @@ void CSceneTH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		float x = 500.0f + i * 1000.0f;
 		float z = 19500 - 500.0f * i;
 		float y = m_Terrain->GetDetailHeight(x, z);
-		pObject->SetPosition({ x, y, z });
+		pObject->SetPosition({ x * MAP_SCALE_SIZE, y, z * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
 		pObject->SetTextureIndex(0x02);
 		pObject->Scale(50, 50, 50);
@@ -2847,6 +2863,8 @@ void CSceneTH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 		x_Tree = 900 + 6200 * i;
 		z_Tree = 18800;
+		x_Tree *= MAP_SCALE_SIZE;
+		z_Tree *= MAP_SCALE_SIZE;
 		pObject->Scale(1.0f, 1.0f, 1.0f);
 		pObject->Rotate({ 0,1,0 }, 60 + 30 * i);
 		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) - 100.0f , z_Tree });
@@ -2862,6 +2880,8 @@ void CSceneTH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	x_Tree = 900 + 6400;
 	z_Tree = 19300;
+	x_Tree *= MAP_SCALE_SIZE;
+	z_Tree *= MAP_SCALE_SIZE;
 	pObject->Scale(1.0f, 1.0f, 1.0f);
 	pObject->Rotate({ 0,1,0 }, 60 + 30);
 	pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) - 100.0f , z_Tree });
@@ -2878,6 +2898,8 @@ void CSceneTH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 		x_Tree = 200 + 3000 * i;
 		z_Tree = 17000;
+		x_Tree *= MAP_SCALE_SIZE;
+		z_Tree *= MAP_SCALE_SIZE;
 		pObject->Scale(1.0f, 1.0f, 1.0f);
 		pObject->Rotate({ 0,1,0 }, 0 + 15 * i);
 		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) - 100.0f, z_Tree });
@@ -2894,6 +2916,8 @@ void CSceneTH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	x_Tree = 200;
 	z_Tree = 18000;
 
+	x_Tree *= MAP_SCALE_SIZE;
+	z_Tree *= MAP_SCALE_SIZE;
 	pObject->Scale(20.0f, 20.0f, 20.0f);
 	pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree), z_Tree });
 	pObject->SetTextureIndex(0x08);
@@ -2909,6 +2933,8 @@ void CSceneTH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	x_Tree = 3700;
 	z_Tree = 19000;
+	x_Tree *= MAP_SCALE_SIZE;
+	z_Tree *= MAP_SCALE_SIZE;
 	pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 1000.0f,z_Tree });
 	pObject->SetTextureIndex(0x10);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
@@ -2924,6 +2950,8 @@ void CSceneTH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 		x_Tree = 1500 + 5000 * i;
 		z_Tree = 17500;
+		x_Tree *= MAP_SCALE_SIZE;
+		z_Tree *= MAP_SCALE_SIZE;
 		pObject->Scale(150.0f + 50 * i, 150.0f + 50 * i, 150.0f + 50 * i);
 		pObject->Rotate({ 0,1,0 }, 30 + 30 * i);
 		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 1000.0f + 400.0f * i, z_Tree });
@@ -2972,7 +3000,8 @@ void CSceneTH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			x_Pos = 10700.0f - 100.0f * i;
 			z_Pos = 20000.0f - 300.0f * i;
 		}
-
+		x_Pos *= MAP_SCALE_SIZE;
+		z_Pos *= MAP_SCALE_SIZE;
 		pObject->Scale(0.5f, 0.5f, 0.5f);
 
 		pObject->SetPosition({ x_Pos , m_Terrain->GetDetailHeight(x_Pos,z_Pos), z_Pos });
@@ -3028,6 +3057,8 @@ void CSceneTH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			z_Pos = 13900;
 		}
 
+		x_Pos *= MAP_SCALE_SIZE;
+		z_Pos *= MAP_SCALE_SIZE;
 		pObject->Scale(0.5f, 0.5f, 0.5f);
 		pObject->SetPosition({ x_Pos , m_Terrain->GetDetailHeight(x_Pos,z_Pos) , z_Pos });
 		pObject->SetTextureIndex(0x020);
@@ -3052,6 +3083,8 @@ void CSceneTH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			x_Pos += 2000;
 		}
 
+		x_Pos *= MAP_SCALE_SIZE;
+		z_Pos *= MAP_SCALE_SIZE;
 		pObject->Scale(0.5f, 0.5f, 0.5f);
 		pObject->SetPosition({ x_Pos , m_Terrain->GetDetailHeight(x_Pos,z_Pos) - 100.0f, z_Pos });
 		pObject->SetTextureIndex(0x020);
@@ -3064,10 +3097,12 @@ void CSceneTH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CSceneTH::BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+
 }
 
 void CSceneTH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+
 }
 
 void CSceneTH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -3078,19 +3113,19 @@ void CSceneTH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
 
 
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree] = new CFixedMesh(pd3dDevice, pd3dCommandList, "GreenTree");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow");
-	
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree"); 
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree] = new CFixedMesh(pd3dDevice, pd3dCommandList, "GreenTree");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
+	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow"); 
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall] = new CFixedMesh(pd3dDevice, pd3dCommandList, "FireBall"); 
 }
 
 void CSceneTH::BuildShadowResource(ID3D12Device* pd3dDevice)
@@ -3162,6 +3197,7 @@ void CSceneTH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	for (int i = 0; i < 10; ++i) {
 		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::ArrowParticle);
 		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::FireBallParticle);
 	}
 	// 안개
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::RadialParitcle);
@@ -3187,8 +3223,9 @@ void CSceneTH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	MakingFog();
 	MakingRain();
 }
-void CSceneTH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CSceneTH::BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	// PlayerArrow
 	for (int i = 0; i < 10; ++i) {
 		CArrow* pArrow = new CArrow();
 		pArrow->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow]);
@@ -3202,6 +3239,7 @@ void CSceneTH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow].push_back(pArrow);
 	}
 
+	// EnemyArrow
 	for (int i = 0; i < 10; ++i) {
 		CArrow* pArrow = new CArrow();
 		pArrow->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow]);
@@ -3214,6 +3252,20 @@ void CSceneTH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pArrow->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
 	}
+
+	// FireBall
+	for (int i = 0; i < 5; ++i) {
+		CFireBall* pFireb = new CFireBall();
+		pFireb->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall]);
+		pFireb->SetPosition({ 500.0f,  100.0f, 1500.0f });
+		pFireb->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
+		pFireb->SetTextureIndex(0x400);
+		pFireb->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		pFireb->Scale(40.0f, 40.0f, 40.0f);
+		pFireb->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
+		pFireb->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::FireBall].push_back(pFireb);
+	}
 }
 void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -3221,21 +3273,19 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
-	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
-	m_Players[0]->AnimationChange(PlayerWeaponType::Sword);
 	m_Player = m_Players[0];
 
 	m_Players[0]->SetChild(pPlayerModel, true);
 	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 	m_Players[0]->Scale(200, 200, 200);
 	m_Players[0]->SetShadertoAll();
-	m_Players[0]->DisableBow();
 
 	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 	m_PlayerCameras[0]->SetTarget(m_Players[0]);
 	m_Players[0]->SetCamera(m_PlayerCameras[0]);
 
 	m_Players[0]->SetDrawable(true);
+	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
 	//m_Players[0]->SetTextureIndex(0x400); 
 
 	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
@@ -3249,13 +3299,14 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//pBox->SetTextureIndex(0x100); 
 	//pBox->SetPosition({ 550.0f,  m_Terrain->GetDetailHeight(550.0f, 1850.0f) + 82.5f,  1850.0f }); 
 	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
-	 
+
 	for (int i = 1; i < MAX_ROOM_PLAYER; ++i) {
 		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
-		 
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
+
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 
+		m_Players[i]->SetWeapon(PlayerWeaponType::Sword);
 
 		m_Players[i]->SetCamera(m_PlayerCameras[i]);
 
@@ -3271,7 +3322,6 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
 		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
-		m_Players[i]->DisableBow();
 	}
 }
 
@@ -3284,6 +3334,24 @@ void CSceneTH::EnterNewSector(int sectorNum)
 
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(obj);
 	EnterNewSector(sectorNum - 1);
+}
+
+void CSceneTH::ActiveSkill(OBJECT_LAYER type, CGameObject* user)
+{
+	if (type == OBJECT_LAYER::FireBall) {
+		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
+			CFireBall* pFireb = reinterpret_cast<CFireBall*>(pObj);
+			if (pFireb->IsCanUse()) {
+				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::FireBallParticle);
+				if (-1 != idx) {
+					pFireb->SetUseable(false);
+					pFireb->SetSkill(user);
+					cout << "shot fb" << endl;
+				}
+				break;
+			}
+		}
+	}
 }
 
 void CSceneTH::ShotPlayerArrow()
@@ -3300,6 +3368,7 @@ void CSceneTH::ShotPlayerArrow()
 				pArrow->SetPosition(pos);
 				pArrow->m_startPos = pos;
 				pArrow->SetStringPower(m_Player->GetStringPullTime());
+				cout << "string power: " << m_Player->GetStringPullTime() << endl;
 				pArrow->SetTargetVector(Vector3::Multifly(m_Player->GetLook(), 1));
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), -1));
@@ -3344,7 +3413,7 @@ void CSceneTH::MakingFog()
 	if (-1 != idx)
 	{
 		XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
-		m_Particles->UseParticle(idx, XMFLOAT3(16800.f, -5070.f, 17500.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		m_Particles->UseParticle(idx, XMFLOAT3(16800.f * MAP_SCALE_SIZE, -5070.f, 17500.f * MAP_SCALE_SIZE), XMFLOAT3(0.0f, 0.0f, -1.0f));
 		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
 	}
 }
@@ -3357,8 +3426,28 @@ void CSceneTH::MakingRain()
 	if (-1 != idx)
 	{
 		XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,250,0 });
-		m_Particles->UseParticle(idx, XMFLOAT3(5000.f, 0.f, 17500.f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		m_Particles->UseParticle(idx, XMFLOAT3(5000.f * MAP_SCALE_SIZE, 0.f, 17500.f * MAP_SCALE_SIZE), XMFLOAT3(0.0f, 0.0f, -1.0f));
 		//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), 1));
+	}
+}
+
+void CSceneTH::UseEffects(int effectType, const XMFLOAT3& xmf3Position)
+{
+	auto effect = m_EffectsHandler->RecycleEffect((EffectTypes)effectType);
+	if (effect != nullptr) {
+		effect->SetPosition(xmf3Position);
+		effect->FixPositionByTerrain(m_Terrain);
+		effect->SetDrawable(true);
+	}
+}
+
+void CSceneTH::UseEffects(int effectType, const XMFLOAT3& xmf3Position, float wakeupTime)
+{
+	auto effect = m_EffectsHandler->RecycleEffect((EffectTypes)effectType);
+	if (effect != nullptr) {
+		effect->SetPosition(xmf3Position);
+		effect->FixPositionByTerrain(m_Terrain);
+		effect->WakeUpAfterTime(wakeupTime);
 	}
 }
 
@@ -3391,109 +3480,109 @@ void CSceneTH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	// 4개 벽 테두리
 	CGameObject* pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 100, 10000, 20000, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f)));
-	pObject->SetPosition({ 0,-2000,10000 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 100, 10000, 20000 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f * MAP_SCALE_SIZE)));
+	pObject->SetPosition({ 0,-2000,10000 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 100, 10000, 20000, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f)));
-	pObject->SetPosition({ 19950,-2000,10000 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 100, 10000, 20000 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f * MAP_SCALE_SIZE)));
+	pObject->SetPosition({ 19950 * MAP_SCALE_SIZE,-2000,10000 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 20000, 10000, 100, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
-	pObject->SetPosition({ 10000,-2000,00 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 20000 * MAP_SCALE_SIZE, 10000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(20000 * 0.5f * MAP_SCALE_SIZE, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 10000 * MAP_SCALE_SIZE,-2000,00 });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 20000, 10000, 100, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
-	pObject->SetPosition({ 10000,-2000,19950 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 20000 * MAP_SCALE_SIZE, 10000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(20000 * 0.5f * MAP_SCALE_SIZE, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 10000 * MAP_SCALE_SIZE,-2000,19950 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	// Forest to DryDesrt 아래 방향 벽  
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 9600, 800, 100, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(9600 * 0.5f, 800 * 0.5f, 100 * 0.5f)));
-	pObject->SetPosition({ 4800,-1000, 15900 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 9600 * MAP_SCALE_SIZE, 800, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(9600 * 0.5f * MAP_SCALE_SIZE, 800 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 4800 * MAP_SCALE_SIZE,-1000, 15900 * MAP_SCALE_SIZE });
 	m_BlockingPlateToPreviousSector[0] = (std::move(pObject));
 	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 // Forest to Desert 왼쪽 벽
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 15200, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 15200 * 0.5f)));
-	pObject->SetPosition({ 10000,-2000, 7600 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 15200 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 15200 * 0.5f * MAP_SCALE_SIZE)));
+	pObject->SetPosition({ 10000 * MAP_SCALE_SIZE,-2000, 7600 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	// Forest 지역 내 못가는 지형 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2000, 10000, 7000, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2000 * 0.5f, 10000 * 0.5f, 7000 * 0.5f)));
-	pObject->SetPosition({ 4000 + 1000, -2000, 11100 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2000 * MAP_SCALE_SIZE, 10000, 7000 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2000 * 0.5f * MAP_SCALE_SIZE, 10000 * 0.5f, 7000 * 0.5f * MAP_SCALE_SIZE)));
+	pObject->SetPosition({ 5000 * MAP_SCALE_SIZE, -2000, 11100 * MAP_SCALE_SIZE });
 	pObject->UpdateColliders();
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	// Desrt to DryDesrt and Rock 왼쪽 벽
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 400, 10000, 12800, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 12800 * 0.5f)));
-	pObject->SetPosition({ 13800, -2000, 7200 + 6400 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 400, 10000, 12800 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 12800 * 0.5f * MAP_SCALE_SIZE)));
+	pObject->SetPosition({ 13800 * MAP_SCALE_SIZE, -2000, 13600 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	// boss 지역 중간 벽
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 5600, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
-	pObject->SetPosition({ 15200 + 400,-2000, 2800 + 8000 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 5600 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f * MAP_SCALE_SIZE)));
+	pObject->SetPosition({ 15600 * MAP_SCALE_SIZE,-2000, 10800 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 5600, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
-	pObject->SetPosition({ 17600 + 400,-2000, 2800 + 8000 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 5600 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f * MAP_SCALE_SIZE)));
+	pObject->SetPosition({ 18000 * MAP_SCALE_SIZE,-2000, 10800 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	// 사막 지역 가로 벽
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 4000, 1000, 100, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
-	pObject->SetPosition({ 2000 + 9600,-2000, 15600 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 4000 * MAP_SCALE_SIZE, 1000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(4000 * 0.5f * MAP_SCALE_SIZE, 1000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 11600 * MAP_SCALE_SIZE,-2000, 15600 * MAP_SCALE_SIZE });
 	m_BlockingPlateToPreviousSector[1] = (std::move(pObject));
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 4000, 1000, 100, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
-	pObject->SetPosition({ 2000 + 9600,-3000, 3600 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 4000 * MAP_SCALE_SIZE, 1000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(4000 * 0.5f * MAP_SCALE_SIZE, 1000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 11600 * MAP_SCALE_SIZE ,-3000, 3600 * MAP_SCALE_SIZE });
 	m_BlockingPlateToPreviousSector[2] = (std::move(pObject));
 
 	// 보스 지역 입구 가로 벽
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2400, 10000, 100, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
-	pObject->SetPosition({ 1200 + 13600,-2000, 8000 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2400 * MAP_SCALE_SIZE, 10000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2400 * 0.5f * MAP_SCALE_SIZE, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 14800 * MAP_SCALE_SIZE,-2000, 8000 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2400, 10000, 100, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
-	pObject->SetPosition({ 1200 + 13600 + 1600 + 2400,-2000, 8000 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2400 * MAP_SCALE_SIZE, 10000, 100, XMFLOAT3{ 0,0,0 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2400 * 0.5f * MAP_SCALE_SIZE, 10000 * 0.5f, 100 * 0.5f)));
+	pObject->SetPosition({ 18800 * MAP_SCALE_SIZE, -2000, 8000 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 }
 

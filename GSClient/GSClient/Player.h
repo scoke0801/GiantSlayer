@@ -14,9 +14,10 @@ enum class PlayerMoveType
 
 enum class PlayerWeaponType
 {
-	None = 0x00,
-	Sword = 0x01,
-	Bow = 0x02
+	None	= 0x00,
+	Sword	= 0x01,
+	Bow		= 0x02,
+	Staff	= 0x03
 };
 
 class CTerrain; 
@@ -36,7 +37,7 @@ private:
 private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
 	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword; 
-	 
+	
 	bool m_isOnGround = true;
 	float m_JumpTime = 0.0f;
 
@@ -47,10 +48,12 @@ private:
 	float m_AttackAnimPauseTime = 0.0f;
 
 	bool m_IsCanAttack = true;
-
-	bool m_PullBox = false;
+	 
+	bool m_PullBox = false; 
 
 	float m_AttackedDelay = 0.0f;
+	float m_SkillCoolTime = 0.0f;
+	float m_AttackTimer = 1.0f;
 
 	CMesh* m_SpareBoundingBox;
 	Collider* m_SpareCollisionBox;
@@ -81,7 +84,10 @@ public:
 
 	bool IsMoving() const { return Vector3::Length(m_xmf3Velocity) > 0.01f; }
 
-	void SetWeapon(PlayerWeaponType weaponID) { m_WeaponType = weaponID; }
+	void SetWeapon(PlayerWeaponType weaponType);
+	void SetDrawSword();
+	void SetDrawBow();
+	void SetDrawStaff();
 	PlayerWeaponType GetWeapon() { return m_WeaponType; }
 	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; } 
 
@@ -107,10 +113,6 @@ public:
 	
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
-
-	void AnimationChange(PlayerWeaponType weapon);
-	void DisableSword();
-	void DisableBow();
 
 	bool ShotAble();
 };

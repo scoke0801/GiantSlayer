@@ -183,9 +183,9 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameObjectVer2.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="Skill.h" />
     <ClInclude Include="MummyLaser.h" />
     <ClInclude Include="Particle.h" />
-    <ClInclude Include="SceneExport.h" />
     <ClInclude Include="ShaderHandler.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="Light.h" />
@@ -239,9 +239,9 @@
     <ClCompile Include="Communicates.cpp" />
     <ClCompile Include="FbxObject2.cpp" />
     <ClCompile Include="GameObjectVer2.cpp" />
+    <ClCompile Include="Skill.cpp" />
     <ClCompile Include="MummyLaser.cpp" />
     <ClCompile Include="Particle.cpp" />
-    <ClCompile Include="SceneExport.cpp" />
     <ClCompile Include="ShaderHandler.cpp" />
     <ClCompile Include="Sign.cpp" />
     <ClCompile Include="Terrain.cpp" />

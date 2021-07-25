@@ -29,8 +29,8 @@ void CArrow::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 void CArrow::Update(float fTimeElapsed)
 { 
 	if (false == m_isDrawable) {
-		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ARROW_SPEED * fTimeElapsed)));
-		Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 360.0f * fTimeElapsed); 
+		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, TEST_ARROW_SPEED * fTimeElapsed)));
+		//Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 360.0f * fTimeElapsed); 
 		if (m_ConnectedParticle != nullptr) {
 			m_ConnectedParticle->SetPosition(m_xmf3Position);
 		}
@@ -46,15 +46,15 @@ void CArrow::Update(float fTimeElapsed)
 			falldown = true;
 		}
 		if (!falldown) {
-			m_xmf3Position = Vector3::Add(m_xmf3Position, { 0.0f, 5.0f, 0.0f });
-			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), -30.0f * fTimeElapsed);
+			m_xmf3Position = Vector3::Add(m_xmf3Position, { 0.0f, 3.0f, 0.0f });
+			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), -10.0f * fTimeElapsed);
 		}
 		else {
-			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), 30.0f * fTimeElapsed);
+			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), 20.0f * fTimeElapsed);
 		}
 
 		m_xmf3Velocity = Vector3::Subtract(m_xmf3Velocity, Vector3::Multifly(m_xmf3Velocity, AIR_RESISTANCE));
-		m_xmf3Position = Vector3::Subtract(m_xmf3Position, { 0.0f, GRAVITY, 0.0f });
+		m_xmf3Position = Vector3::Subtract(m_xmf3Position, { 0.0f, GRAVITY * m_ElapsedTime, 0.0f });
 	}
 	else return; 
 }
@@ -75,6 +75,14 @@ void CArrow::SetTargetVector(const XMFLOAT3& playerLookAt)
 	m_xmf3Velocity = Vector3::Multifly(dirVector, stringPower);
 	LookAt(m_xmf3Position, targetPos, XMFLOAT3(0, 1, 0));
 }
+
+void CArrow::SetArrow(CGameObject* owner)
+{
+	m_pOwner = owner;
+
+	SetUseable(false);
+}
+
 void CArrow::SetDrawable(bool drawable)
 {  
 	m_isDrawable = drawable; 

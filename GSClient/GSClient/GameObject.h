@@ -7,6 +7,7 @@
 class CShader;
 class CCamera;
 class CTerrain;
+class CSkill;
 
 #define OBJECT_MAX_VELOCITY 120.0f 
 #define PLAYER_RUN_VELOCITY 650.0f
@@ -133,6 +134,7 @@ protected:	// 按眉 包访 加己 函荐
 	OBJ_NAME			m_Name;
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
 	bool				m_isCollidable = true;
+	CSkill*				m_Skill;
 
 	//ObjectState			m_StateType = ObjectState::Idle;
 

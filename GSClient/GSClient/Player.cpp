@@ -35,6 +35,8 @@ void CPlayer::Update(float fTimeElapsed)
 		if (!pause)
 			m_AttackWaitingTime -= fTimeElapsed;
 
+		m_AttackTimer -= fTimeElapsed;
+
 		switch (m_WeaponType)
 		{
 		case PlayerWeaponType::Sword:
@@ -52,11 +54,15 @@ void CPlayer::Update(float fTimeElapsed)
 				m_SP -= fTimeElapsed;
 			}
 		}
-								  break;
+			break;
+		case PlayerWeaponType::Staff:
+			break;
 		}
 
-		if (m_AttackWaitingTime < 0.0f)
+		if (m_AttackWaitingTime < 0.0f) {
 			ResetAttack();
+			m_AttackTimer = 0.5f;
+		}
 	}
 	else if (m_AttackedDelay > 0.0f) {
 		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
@@ -103,7 +109,6 @@ void CPlayer::Update(float fTimeElapsed)
 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 	m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
-
 
 	CGameObjectVer2::Animate(fTimeElapsed);
 	UpdateTransform(NULL);
@@ -204,6 +209,68 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed; 
 }
 
+void CPlayer::SetWeapon(PlayerWeaponType weaponType)
+{
+	m_WeaponType = weaponType;
+
+	if (weaponType == PlayerWeaponType::Sword) {
+		IDLE = AnimationType::SWORD_IDLE;
+		RUN = AnimationType::SWORD_RUN;
+		ATK = AnimationType::SWORD_ATK;
+		DEATH = AnimationType::SWORD_DEATH;
+
+		m_AttackAnimLength = 1.033333f;
+
+		SetDrawSword();
+	}
+	else if (weaponType == PlayerWeaponType::Bow) {
+		IDLE = AnimationType::BOW_IDLE;
+		RUN = AnimationType::BOW_RUN;
+		ATK = AnimationType::BOW_ATK;
+		DEATH = AnimationType::BOW_DEATH;
+
+		m_AttackAnimLength = 1.533333f;
+		m_AttackAnimPauseTime = 0.6f;
+
+		SetDrawBow();
+	}
+	else if (weaponType == PlayerWeaponType::Staff) {
+		IDLE = AnimationType::STAFF_IDLE;
+		RUN = AnimationType::STAFF_RUN;
+		ATK = AnimationType::STAFF_ATK;
+		DEATH = AnimationType::STAFF_DEATH;
+
+		m_AttackAnimLength = 1.433333f;
+
+		SetDrawStaff();
+	}
+}
+
+void CPlayer::SetDrawSword()
+{
+	SetDrawableRecursively("sword1", true);
+	SetDrawableRecursively("bow_LeftHand", false);
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+	SetDrawableRecursively("twoHandedStaff", false);
+}
+
+void CPlayer::SetDrawBow()
+{
+	SetDrawableRecursively("sword1", false);
+	SetDrawableRecursively("bow_LeftHand", true);
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+	SetDrawableRecursively("twoHandedStaff", false);
+}
+
+void CPlayer::SetDrawStaff()
+{
+	SetDrawableRecursively("sword1", false);
+	SetDrawableRecursively("bow_LeftHand", false);
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+	SetDrawableRecursively("twoHandedStaff", true);
+}
+
+
 void CPlayer::Jump()
 {
 	if (false == m_isOnGround) {
@@ -250,7 +317,13 @@ void CPlayer::Attack()
 	m_SpareBoundingBox = tempMesh;
 	UpdateColliders();
 
-	SetAnimationSet(ATK);
+	if (m_AttackTimer >= 1.0f) {
+		// 공격-2 SetAnimationSet(ATK2);
+		//if current atkanim = 공격-2 : setAA(ATK3) 
+	}
+	else {
+		SetAnimationSet(ATK);
+	}
 }
 
 void CPlayer::ResetAttack()
@@ -285,43 +358,6 @@ void CPlayer::ResetBow()
 void CPlayer::Box_Pull(bool Pull_State)
 {
 	SetPullBox(Pull_State);
-}
-
-
-
-void CPlayer::AnimationChange(PlayerWeaponType weapon)
-{
-	if (weapon == PlayerWeaponType::Sword) {
-		IDLE = AnimationType::SWORD_IDLE;
-		RUN = AnimationType::SWORD_RUN;
-		ATK = AnimationType::SWORD_ATK;
-		DEATH = AnimationType::SWORD_DEATH;
-
-		m_AttackAnimLength = 1.033333f;
-	}
-	else if (weapon == PlayerWeaponType::Bow) {
-		IDLE = AnimationType::BOW_IDLE;
-		RUN = AnimationType::BOW_RUN;
-		ATK = AnimationType::BOW_ATK;
-		DEATH = AnimationType::BOW_DEATH;
-
-		m_AttackAnimLength = 1.533333f;
-		m_AttackAnimPauseTime = 0.6f;
-	}
-}
- 
-void CPlayer::DisableSword()
-{
-	SetDrawableRecursively("sword1", false);
-	SetDrawableRecursively("bow_LeftHand", true);
-	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
-}
-
-void CPlayer::DisableBow()
-{
-	SetDrawableRecursively("sword1", true);
-	SetDrawableRecursively("bow_LeftHand", false);
-	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
 }
 
 bool CPlayer::ShotAble()
