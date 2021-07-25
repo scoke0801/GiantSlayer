@@ -3,6 +3,7 @@
 
 CPuzzle::CPuzzle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, PuzzleType type, CShader* pShader)
 {
+	m_ExistingSector = SECTOR_POSITION::SECTOR_3;
 	CMesh* pMesh = nullptr;
 	switch (type)
 	{
@@ -92,13 +93,14 @@ void CPuzzle::SetPosition(XMFLOAT3 pos)
 	for (auto pObj : m_Objects)
 	{
 		pObj->SetPositionPlus(pos);
-	}
+	} 
 	//CGameObject::SetPosition(pos);
 }
 
 CPlate::CPlate(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
-{
-	CMesh* pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 3000, 240, 4000);
+{ 
+	CMesh* pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 3000, 240, 4000); 
+	m_ExistingSector = SECTOR_POSITION::SECTOR_3; 
 	CGameObject* pObject = new CGameObject();
 	pObject->SetMesh(pMesh);
 	pObject->SetShader(pShader);

@@ -43,6 +43,11 @@ public:
     void PlayerEnter(CPlayer* target);
 
 private:
+    static CAnimationObject* LoadGeometryAndAnimationFromFileForBoss(const char* pstrFileName, bool bHasAnimation);
+
+    static CAnimationObject* LoadFrameHierarchyFromFileForBoss(CAnimationObject* pParent, FILE* pInFile);
+
+private:
     // 시야 범위 안에 플레이어가 없으면 깨어있지 않은 상태
     bool m_isOnAwaken = false;
 };

@@ -157,6 +157,20 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 //
+class CTextVertex : public CVertex {
+public:
+	CTextVertex() {}
+	CTextVertex(float r, float g, float b, float a, float u, float v, float tw, float th, float x, float y, float w, float h)
+		: m_Color(r, g, b, a), m_TexCoord(u, v, tw, th), m_Pos(x, y, w, h) {}
+	
+public:
+	XMFLOAT4 m_Pos;
+	XMFLOAT4 m_TexCoord;
+	XMFLOAT4 m_Color;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//
 
 class CMesh
 {
@@ -675,6 +689,7 @@ protected:
 	ID3D12Resource* m_pd3dBiTangentUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dBiTangentBufferView;
 
+	bool		m_HasBoundingInfo = false;
 public:
 	void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 
@@ -683,6 +698,9 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet) override;
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
+	 
+	BoundingBox GetBoundigBox() const;
+	bool HasBoundingBox() const { return m_HasBoundingInfo; }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -713,6 +731,8 @@ protected:
 	ID3D12Resource* m_pd3dBoneWeightUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dBoneWeightBufferView;
 
+	bool		m_HasBoundingInfo = false;
+
 public:
 	int								m_nSkinningBones = 0;
 
@@ -739,6 +759,9 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet) override;
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
+
+	BoundingBox GetBoundigBox() const;
+	bool HasBoundingBox() const { return m_HasBoundingInfo; }
 };
 
 //////////////////////////////////////////////////////////////////////////////

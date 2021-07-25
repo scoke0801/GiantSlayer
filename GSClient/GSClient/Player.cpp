@@ -10,10 +10,6 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_HP = 100;
 	m_SP = 100;
-
-	m_SpareBoundingBox = new CCubeMeshDiffused(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 1.4, XMFLOAT3{ 0,0.6, 0.2f });
-	m_SpareCollisionBox = new ColliderBox(ColliderBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4)));
-	m_SpareAABB = new ColliderBox(ColliderBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4))); 
 }
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -32,7 +28,7 @@ CPlayer::~CPlayer()
 void CPlayer::Update(float fTimeElapsed)
 {
 	if (m_IsCanAttack == false) {
-		if (!pause)
+		if (!m_AnimationPaused)
 			m_AttackWaitingTime -= fTimeElapsed;
 
 		m_AttackTimer -= fTimeElapsed;
@@ -48,7 +44,7 @@ void CPlayer::Update(float fTimeElapsed)
 					SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
 
 				if (m_AttackWaitingTime < m_AttackAnimPauseTime)
-					pause = true;
+					m_AnimationPaused = true;
 
 				m_StringPullTime += fTimeElapsed;
 				m_SP -= fTimeElapsed;
@@ -84,6 +80,7 @@ void CPlayer::Update(float fTimeElapsed)
 	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
 	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
+
 	Move(vel);
 
 	if (false == m_isOnGround) {
@@ -182,6 +179,32 @@ void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 		//CGameObjectVer2::SetPosition(m_xmf3Position);
 		//m_xmf3Position.y = pTerrain->GetDetailHeight(m_xmf3Position.x, m_xmf3Position.z); 
 	}
+}
+
+int CPlayer::GetPlayerExistingSector() const
+{ 
+	if (m_xmf3Position.x < 14379 && m_xmf3Position.z < 22824) {
+		return 0;
+	}
+	if (m_xmf3Position.x < 14379 && m_xmf3Position.z >= 22824) {
+		return 1;
+	}
+	if (m_xmf3Position.x >= 14379 && m_xmf3Position.x < 20422 &&
+		(m_xmf3Position.z > 10764)) {
+		return 2;
+	}
+	if ((m_xmf3Position.x >= 14379 && m_xmf3Position.x < 20422) &&
+		m_xmf3Position.z <= 10764) {
+		return 3;
+	}
+
+	if (m_xmf3Position.x >= 20422 && m_xmf3Position.z < 12077) {
+		return 3;
+	}
+	if (m_xmf3Position.x >= 20422 && m_xmf3Position.z >= 12077) {
+		return 4;
+	}
+	return -1;
 }
 
 void CPlayer::SetVelocity(XMFLOAT3 dir)
@@ -302,20 +325,7 @@ void CPlayer::Attack()
 
 	IncreaseAttackWaitingTime(m_AttackAnimLength);
 
-	SetVelocityToZero();
-
-	auto temp = m_Colliders[0];
-	m_Colliders[0] = m_SpareCollisionBox;
-	m_SpareCollisionBox = temp;
-
-	temp = m_AABB[0];
-	m_AABB[0] = m_SpareAABB;
-	m_SpareAABB = temp;
-
-	auto tempMesh = m_BoundingObjectMeshes[0];
-	m_BoundingObjectMeshes[0] = m_SpareBoundingBox;
-	m_SpareBoundingBox = tempMesh;
-	UpdateColliders();
+	SetVelocityToZero(); 
 
 	if (m_AttackTimer >= 1.0f) {
 		// АјАн-2 SetAnimationSet(ATK2);
@@ -323,41 +333,65 @@ void CPlayer::Attack()
 	}
 	else {
 		SetAnimationSet(ATK);
-	}
+	} 
+	 
+	//SetAnimationSet(ATK); 
 }
 
 void CPlayer::ResetAttack()
 {
 	m_IsAlreadyAttack = false;
 	m_AttackWaitingTime = 0.0f;
-	m_IsCanAttack = true;
-
-	auto temp = m_SpareCollisionBox;
-	m_SpareCollisionBox = m_Colliders[0];
-	m_Colliders[0] = temp;
-
-	temp = m_SpareAABB;
-	m_SpareAABB = m_AABB[0];
-	m_AABB[0] = temp;
-
-	auto tempMesh = m_SpareBoundingBox;
-	m_SpareBoundingBox = m_BoundingObjectMeshes[0];
-	m_BoundingObjectMeshes[0] = tempMesh;
-
-	UpdateColliders();
+	m_IsCanAttack = true; 
 }
 
 void CPlayer::ResetBow()
 {
 	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
 	pullString = false;
-	pause = false;
+	m_AnimationPaused = false;
 	m_StringPullTime = 0;
 }
 
 void CPlayer::Box_Pull(bool Pull_State)
+{ 
+	SetPullBox(Pull_State);  
+}
+ 
+
+void CPlayer::AnimationChange(PlayerWeaponType weapon)
 {
-	SetPullBox(Pull_State);
+	if (weapon == PlayerWeaponType::Sword) {
+		IDLE = AnimationType::SWORD_IDLE;
+		RUN = AnimationType::SWORD_RUN;
+		ATK = AnimationType::SWORD_ATK;
+		DEATH = AnimationType::SWORD_DEATH;
+
+		m_AttackAnimLength = 1.033333f;
+	}
+	else if (weapon == PlayerWeaponType::Bow) {
+		IDLE = AnimationType::BOW_IDLE;
+		RUN = AnimationType::BOW_RUN;
+		ATK = AnimationType::BOW_ATK;
+		DEATH = AnimationType::BOW_DEATH;
+
+		m_AttackAnimLength = 1.533333f;
+		m_AttackAnimPauseTime = 0.6f;
+	}
+}
+ 
+void CPlayer::DisableSword()
+{
+	SetDrawableRecursively("sword1", false);
+	SetDrawableRecursively("bow_LeftHand", true);
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+}
+
+void CPlayer::DisableBow()
+{
+	SetDrawableRecursively("sword1", true);
+	SetDrawableRecursively("bow_LeftHand", false);
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false); 
 }
 
 bool CPlayer::ShotAble()

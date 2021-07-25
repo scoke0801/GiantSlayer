@@ -148,8 +148,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AnimationController.cpp" />
     <ClCompile Include="Arrow.cpp" />
     <ClCompile Include="Boss.cpp" />
+    <ClCompile Include="AnimationObject.cpp" />
     <ClCompile Include="GameRoom.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="EnemyState.cpp" />
@@ -166,6 +168,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnimationController.h" />
+    <ClInclude Include="AnimationObject.h" />
     <ClInclude Include="Arrow.h" />
     <ClInclude Include="Boss.h" />
     <ClInclude Include="Enemy.h" />

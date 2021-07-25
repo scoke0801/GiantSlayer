@@ -1,12 +1,17 @@
 #include "stdafx.h"
-#include "Boss.h"
+#include "Boss.h" 
+#include "AnimationController.h"
 
-CBoss::CBoss()
+CBoss::CBoss()  
 {
-	AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5.5, 5, 3.5)));
-	AddBoundingBox(BoundingBox(XMFLOAT3(2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
-	AddBoundingBox(BoundingBox(XMFLOAT3(-2.5, 5.5, 7), XMFLOAT3(2.25, 2.5, 3)));
-	AddBoundingBox(BoundingBox(XMFLOAT3(0, 4.5, -7), XMFLOAT3(1.5, 1.5, 2.5)));
+	m_xmf4x4ToParent = Matrix4x4::Identity();
+	m_xmf4x4World = Matrix4x4::Identity();
+
+	CAnimationObject* pBossModel = LoadGeometryAndAnimationFromFileForBoss(
+		"resources/FbxExported/Boss.bin", true);
+	SetChild(pBossModel);
+
+	m_ExistingSector = SECTOR_POSITION::SECTOR_5;
 
 	m_State = new WaitState(this);
 	m_EnemyType = EnemyType::Boss;
@@ -28,6 +33,8 @@ void CBoss::Update(float elapsedTime)
 	if (m_AttackDelayTime > 0.0f) {
 		m_AttackDelayTime = max(m_AttackDelayTime - elapsedTime, 0.0f);
 	}
+	CAnimationObject::Animate(elapsedTime);
+	UpdateTransform(NULL);
 }
 
 
@@ -77,6 +84,159 @@ void CBoss::PlayerEnter(CPlayer* target)
 		//SetAnimationSet((int)BOSS_ANIMATION::Born_1);
 		m_isOnAwaken = true;
 	}
+}
+CAnimationObject* CBoss::LoadGeometryAndAnimationFromFileForBoss(const char* pstrFileName, bool bHasAnimation)
+{
+	FILE* pInFile = NULL;
+	::fopen_s(&pInFile, pstrFileName, "rb");
+	::rewind(pInFile);
+
+	CAnimationObject* pGameObject = LoadFrameHierarchyFromFileForBoss( NULL, pInFile);
+
+	pGameObject->CacheSkinningBoneFrames(pGameObject);
+
+#ifdef _WITH_DEBUG_FRAME_HIERARCHY
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, "Frame Hierarchy\n"));
+	OutputDebugString(pstrDebug);
+
+	CGameObjectVer2::PrintFrameInfo(pGameObject, NULL);
+#endif
+
+	if (bHasAnimation)
+	{
+		pGameObject->m_pAnimationController = new CAnimationController(1);
+		pGameObject->LoadAnimationFromFile(pInFile);
+		pGameObject->m_pAnimationController->SetAnimationSet(0);
+	}
+
+	pGameObject->CollectAABBFromChilds();
+	return(pGameObject);
+}
+CAnimationObject* CBoss::LoadFrameHierarchyFromFileForBoss(CAnimationObject* pParent, FILE* pInFile)
+{
+	static int count = 0;
+	char pstrToken[64] = { '\0' };
+
+	BYTE nStrLength = 0;
+	UINT nReads = 0;
+
+	int nFrame = 0, nTextures = 0;
+
+	CAnimationObject* pGameObject = NULL;
+
+	XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
+	XMFLOAT4 xmf4Rotation;
+	for (; ; )
+	{
+		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
+		nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pInFile);
+		pstrToken[nStrLength] = '\0';
+
+		if (!strcmp(pstrToken, "<Frame>:"))
+		{
+			pGameObject = new CAnimationObject();
+
+			nReads = (UINT)::fread(&nFrame, sizeof(int), 1, pInFile);
+			nReads = (UINT)::fread(&nTextures, sizeof(int), 1, pInFile);
+
+			nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
+			nReads = (UINT)::fread(pGameObject->m_pstrFrameName, sizeof(char), nStrLength, pInFile);
+			pGameObject->m_pstrFrameName[nStrLength] = '\0';
+			//cout << pGameObject->m_pstrFrameName << endl;
+
+			BoundingBox boundingBox;
+			bool isMainPart = true;
+			vector<string> frames = {
+				"Orthos",
+				"Bip001",
+				"magmadar",
+				"Bip001_Neck"
+			};
+			for (auto frame : frames) {
+				if (0 == strcmp(pGameObject->m_pstrFrameName, frame.c_str())) {
+					isMainPart = false;
+				}
+			}
+			if (0 == strcmp(pGameObject->m_pstrFrameName, "Bip001_R_Head02")) {
+				boundingBox = BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(6.0, 4.0, 2.0));
+			}
+			else if (0 == strcmp(pGameObject->m_pstrFrameName, "Bip001_L_Head02")) {
+				boundingBox = BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(6.0, 4.0, 2.0));
+			}
+			else {
+				boundingBox = BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.5, 1.5, 1.5));
+			}
+			 
+			if (true == isMainPart) {
+				XMFLOAT3 half = Vector3::Multifly(boundingBox.Extents, 0.5f);
+				pGameObject->AddBoundingBox({ boundingBox.Center, half });
+			}
+		}
+		else if (!strcmp(pstrToken, "<Transform>:"))
+		{
+			nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pInFile);
+			nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, pInFile); //Euler Angle
+			nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pInFile);
+			nReads = (UINT)::fread(&xmf4Rotation, sizeof(float), 4, pInFile); //Quaternion
+		}
+		else if (!strcmp(pstrToken, "<TransformMatrix>:"))
+		{
+			nReads = (UINT)::fread(&pGameObject->m_xmf4x4ToParent, sizeof(float), 16, pInFile);
+		}
+		else if (!strcmp(pstrToken, "<Mesh>:"))
+		{
+			XMFLOAT3 center, extent;
+			bool hasBoundingBox = CAnimationObject::LoadMeshInfoFromFile(pInFile, center, extent);
+			if (hasBoundingBox) {
+				XMFLOAT3 half = Vector3::Multifly(extent, 0.5f);
+				pGameObject->AddBoundingBox({ center, half });
+			}
+		}
+		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
+		{
+			XMFLOAT3 center, extent;
+			bool hasBoundingBox = CAnimationObject::LoadSkinInfoFromFile(pInFile, center, extent);
+
+			nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
+			nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pInFile); //<Mesh>: 
+			hasBoundingBox = CAnimationObject::LoadMeshInfoFromFile(pInFile, center, extent);
+
+			if (hasBoundingBox) {
+				XMFLOAT3 half = Vector3::Multifly(extent, 0.5f);
+				pGameObject->AddBoundingBox({ center, half });
+			}
+
+			//pGameObject->isSkinned = true;
+		}
+		else if (!strcmp(pstrToken, "<Materials>:"))
+		{
+			LoadMaterialsFromFile(pParent, pInFile);
+		}
+		else if (!strcmp(pstrToken, "<Children>:"))
+		{
+			int nChilds = 0;
+			nReads = (UINT)::fread(&nChilds, sizeof(int), 1, pInFile);
+			if (nChilds > 0)
+			{
+				for (int i = 0; i < nChilds; i++)
+				{
+					CAnimationObject* pChild = CAnimationObject::LoadFrameHierarchyFromFile(pGameObject, pInFile);
+					if (pChild) pGameObject->SetChild(pChild);
+#ifdef _WITH_DEBUG_FRAME_HIERARCHY
+					TCHAR pstrDebug[256] = { 0 };
+					_stprintf_s(pstrDebug, 256, "(Frame: %p) (Parent: %p)\n"), pChild, pGameObject);
+					OutputDebugString(pstrDebug);
+#endif
+				}
+			}
+		}
+		else if (!strcmp(pstrToken, "</Frame>"))
+		{
+			break;
+		}
+	}
+	return(pGameObject);
 }
 //
 //void CBoss::ChangeAnimation(ObjectState stateInfo)

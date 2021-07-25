@@ -45,6 +45,14 @@ public:
     void PlayerEnter(CPlayer* target); 
 
     void ChangeAnimation(ObjectState stateInfo) override;
+
+private:
+    static CGameObjectVer2* LoadGeometryAndAnimationFromFileForBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+        ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader, bool bHasAnimation);
+
+    static CGameObjectVer2* LoadFrameHierarchyFromFileForBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+        ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObjectVer2* pParent, FILE* pInFile, CShader* pShader);
+
 private:
     // 시야 범위 안에 플레이어가 없으면 깨어있지 않은 상태
     bool m_isOnAwaken = false; 

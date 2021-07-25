@@ -82,6 +82,14 @@ enum class ObjectState {
 	BossBorn
 };
 
+enum class SECTOR_POSITION {
+	SECTOR_1,
+	SECTOR_2,
+	SECTOR_3,
+	SECTOR_4,
+	SECTOR_5,
+};
+
 class CGameObject
 {
 public:
@@ -93,7 +101,7 @@ public:
 	XMFLOAT4X4			m_xmf4x4World;
 
 protected:	// 좌표 관련 변수
-
+	SECTOR_POSITION		m_ExistingSector = SECTOR_POSITION::SECTOR_1;
 
 	// frame update loop, update 갱신 후의 좌표
 	XMFLOAT3			m_xmf3Position = XMFLOAT3{ 0,0,0 };
@@ -104,6 +112,7 @@ protected:	// 좌표 관련 변수
 	XMFLOAT3			m_xmf3Size = XMFLOAT3{ 0,0,0 };
 	 
 	float				m_HeightFromTerrain = 0.0f;
+
 protected:// 충돌처리 관련 변수
 	vector<Collider*>	m_Colliders;
 	vector<Collider*>	m_AABB; 
@@ -161,6 +170,15 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 public:
+	// 플레이어가 위치한 영역과, 객체들이 위치한 영역을 비교하여
+	// 인접한 영역에 있는지 확인한다. 
+	bool IsInNearSector(bool* playerSector) const;
+	bool IsInSameSector(bool* playerSector) const; 
+	bool IsInSameSector(SECTOR_POSITION sectorPos) const;
+
+	SECTOR_POSITION GetExistingSector() const { return m_ExistingSector; }
+	void SetExistingSector(SECTOR_POSITION sectorPos) { m_ExistingSector = sectorPos; }
+
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
 	virtual void UpdateOnServer(float fTimeElapsed);
@@ -198,8 +216,8 @@ public:
 	void AddAABB(Collider* pCollider);
 
 	int GetColliderCount() const { return m_Colliders.size(); }
-	vector<Collider*>& GetColliders() { return m_Colliders; }
-	vector<Collider*>& GetAABB() { return m_AABB; }
+	virtual vector<Collider*>& GetColliders() { return m_Colliders; }
+	virtual vector<Collider*>& GetAABB() { return m_AABB; }
 
 	virtual void FixPositionByTerrain(CTerrain* pTerrain);
 	 

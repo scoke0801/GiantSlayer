@@ -47,17 +47,13 @@ private:
 
 	float m_AttackAnimPauseTime = 0.0f;
 
-	bool m_IsCanAttack = true;
-	 
-	bool m_PullBox = false; 
+	bool m_IsCanAttack = true; 
+
+	bool m_PullBox = false;  
 
 	float m_AttackedDelay = 0.0f;
 	float m_SkillCoolTime = 0.0f;
 	float m_AttackTimer = 1.0f;
-
-	CMesh* m_SpareBoundingBox;
-	Collider* m_SpareCollisionBox;
-	Collider* m_SpareAABB;
 
 public:
 	bool pullString = false;
@@ -78,8 +74,8 @@ public:
 
 	void FixPositionByTerrain(CTerrain* pTerrain) override;
 	 
-public:
-
+public: 
+	int GetPlayerExistingSector() const;
 	virtual void SetVelocity(XMFLOAT3 dir) override;
 
 	bool IsMoving() const { return Vector3::Length(m_xmf3Velocity) > 0.01f; }

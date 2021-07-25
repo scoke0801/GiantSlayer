@@ -5,6 +5,7 @@
 CBridge::CBridge(OBJECT_ID id)
 {
 	m_CollisionHandleType = COLLISION_HANDLE_TYPE::NotCollide;
+	m_ExistingSector = SECTOR_POSITION::SECTOR_2;
 	CGameObject* pObject;// = new CGameObject();
 	for (int i = 0; i < 10; i += 5) {
 		pObject = new CGameObject();
@@ -415,6 +416,7 @@ void CDoorWall::CloserDoor()
 }
 CPuzzle::CPuzzle(OBJECT_ID id)
 {
+	m_ExistingSector = SECTOR_POSITION::SECTOR_3;
 	for (int i = 1; i <= 3; ++i)
 	{
 		for (int j = 0; j < 3; ++j)
@@ -475,6 +477,7 @@ void CPuzzle::UpdateColliders()
 
 CPlate::CPlate(OBJECT_ID id)
 {
+	m_ExistingSector = SECTOR_POSITION::SECTOR_3;
 	CGameObject* pObject = new CGameObject();
 	pObject->SetPosition({ 1250.0f, 120.f, 900.0f });
 	pObject->AddBoundingBox(BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 2500 * 0.5f, 240 * 0.5f, 1800 * 0.5f }));

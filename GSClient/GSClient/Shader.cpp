@@ -257,6 +257,16 @@ D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout(ShaderTypes type)
 		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
 		m_d3dInputLayoutDesc.NumElements = nInputElementDescs;
 	}
+	else if (type == ShaderTypes::Text) {
+		UINT nInputElementDescs = 3;
+		D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+		pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		pd3dInputElementDescs[2] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+		m_d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+		m_d3dInputLayoutDesc.NumElements = nInputElementDescs;
+	}
 	return m_d3dInputLayoutDesc;
 }
 
@@ -450,7 +460,8 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 		transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
 		transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
-		d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = TRUE;
+		//d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = TRUE;
+		d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = FALSE;
 		d3dPipelineStateDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
 	}	
 

@@ -155,6 +155,33 @@ void CGameObject::UpdateOnServer(float fTimeElapsed)
 {
 }
 
+bool CGameObject::IsInNearSector(bool* playerSector)const
+{
+	int prev = max((int)m_ExistingSector - 1, 0);
+	int next = min((int)m_ExistingSector + 1, (int)SECTOR_POSITION::SECTOR_5);
+
+	if (playerSector[(int)m_ExistingSector]) {
+		return true;
+	}
+	if (playerSector[(int)prev]) {
+		return true;
+	}
+	if (playerSector[(int)next]) {
+		return true;
+	}
+}
+ 
+bool CGameObject::IsInSameSector(bool* playersSector)const
+{
+	return playersSector[(int)m_ExistingSector]; 
+}
+
+ 
+bool CGameObject::IsInSameSector(SECTOR_POSITION sectorPos) const
+{
+	return m_ExistingSector == sectorPos;
+}
+
 void CGameObject::OnPrepareRender()
 {
 

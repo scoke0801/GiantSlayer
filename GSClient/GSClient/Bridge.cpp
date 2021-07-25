@@ -4,6 +4,7 @@
 CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dRootSignature, CShader* pShader)
 {
+	m_ExistingSector = SECTOR_POSITION::SECTOR_2;
 	m_CollisionHandleType = COLLISION_HANDLE_TYPE::NotCollide;
 	m_Name = OBJ_NAME::Bridge;  
 	int idx = -1;

@@ -151,7 +151,7 @@ public:
 
 	bool isSkinned = false;
 
-	bool pause = false;
+	bool m_AnimationPaused = false;
 
 	CAnimationController* m_pAnimationController = NULL;
 	int	m_AnimationSet = 0;
@@ -197,6 +197,10 @@ public:
 
 	CGameObjectVer2* GetRootSkinnedGameObject();
 
+	// about collision 
+	
+	//bool CollisionCheck(Collider* pCollider) override;
+	bool CollisionCheck(CGameObject* other) override;
 public:
 	int GetAnimationSet()const { return m_AnimationSet; }
 	void SetAnimationSet(int nAnimationSet);
@@ -208,12 +212,18 @@ public:
 
 	static CGameObjectVer2* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObjectVer2* pParent, FILE* pInFile, CShader* pShader);
 	static CGameObjectVer2* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader, bool bHasAnimation);
+	
 	static void PrintFrameInfo(CGameObjectVer2* pGameObject, CGameObjectVer2* pParent);
 
 	void SetTextureIndexFindByName(string fileName);
 
 	void SetDrawableRecursively(char* name, bool draw);
 	void PrintPartNames();
+
+	void GetAABBToBuffer(vector<Collider*>& buffer);
+	void CollectAABBFromChilds();
+
+	void SetAABB(vector<Collider*>& buffer) { m_AABB = buffer; buffer.clear(); }
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

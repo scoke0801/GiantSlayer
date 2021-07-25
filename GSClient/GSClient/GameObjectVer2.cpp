@@ -193,27 +193,8 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CAnimationCallbackHan
 				float fPositon = pAnimationSet->GetPosition(pAnimationSet->m_fPosition);
 				for (int i = 0; i < m_nAnimationBoneFrames; i++)
 				{
-					m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent = pAnimationSet->GetSRT(i, fPositon); 
-					//cout << " TransformMatrix : ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._11 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._12 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._13 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._14 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4	ToParent._21 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._22 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._23 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._24 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._31 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._32 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._33 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._34 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._41 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._42 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._43 << " ";
-					//cout << m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent._44 << "\n";
- 
-				}
-			
+					m_ppAnimationBoneFrameCaches[i]->m_xmf4x4ToParent = pAnimationSet->GetSRT(i, fPositon);  
+				} 
 			}
 		}
 	}
@@ -265,7 +246,11 @@ void CGameObjectVer2::SetChild(CGameObjectVer2* pChild, bool bReferenceUpdate)
 	if (pChild)
 	{
 		pChild->m_pParent = this;
-		if (bReferenceUpdate) pChild->AddRef();
+		if (bReferenceUpdate) { 
+
+			SetAABB(pChild->GetAABB());
+			pChild->AddRef(); 
+		}
 	}
 	if (m_pChild)
 	{
@@ -400,11 +385,16 @@ void CGameObjectVer2::ReleaseUploadBuffers()
 	if (m_pChild) m_pChild->ReleaseUploadBuffers();
 }
 
+
+
 void CGameObjectVer2::UpdateColliders()
 {
 	for (int i = 0; i < m_Colliders.size(); ++i) {
-		m_Colliders[i]->GetBox().Transform(m_AABB[i]->GetBox(), XMLoadFloat4x4(&m_xmf4x4ToParent));
+		//m_Colliders[i]->GetBox().Transform(m_AABB[i]->GetBox(), XMLoadFloat4x4(&m_xmf4x4ToParent));
+		m_Colliders[i]->GetBox().Transform(m_AABB[i]->GetBox(), XMLoadFloat4x4(&m_xmf4x4World));
 	}
+	if (m_pSibling) m_pSibling->UpdateColliders();
+	if (m_pChild) m_pChild->UpdateColliders();
 }
 
 void CGameObjectVer2::Update(float fTimeElapsed)
@@ -445,7 +435,7 @@ void CGameObjectVer2::UpdateOnServer(float fTimeElapsed)
 
 void CGameObjectVer2::Animate(float fTimeElapsed)
 {
-	if (pause)
+	if (m_AnimationPaused)
 		return;
 
 	if (m_pAnimationController) m_pAnimationController->AdvanceTime(fTimeElapsed, NULL);
@@ -483,7 +473,8 @@ void CGameObjectVer2::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 	{
 		if (m_pShader)
 		{
-			m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4ToParent, m_nTextureIndex, 0);
+			//m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4ToParent, m_nTextureIndex, 0);
+			m_pShader->UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World, m_nTextureIndex, 0);
 			m_pShader->RenderBoundary(pd3dCommandList, pCamera);
 			for (auto pBoundingMesh : m_BoundingObjectMeshes)
 			{
@@ -575,6 +566,19 @@ CGameObjectVer2* CGameObjectVer2::GetRootSkinnedGameObject()
 
 	return(NULL);
 }
+ 
+bool CGameObjectVer2::CollisionCheck(CGameObject* other)
+{
+	auto otherAABB = other->GetAABB();
+	for (int i = 0; i < otherAABB.size(); ++i) {
+		bool result = CGameObject::CollisionCheck(otherAABB[i]);
+		if (result) return true;
+	}
+
+	//if (m_pSibling) return(m_pSibling->CollisionCheck(other));
+	//if (m_pChild) return(m_pChild->CollisionCheck(other));
+	return false; 
+}
 
 void CGameObjectVer2::SetAnimationSet(int nAnimationSet)
 {
@@ -600,24 +604,7 @@ void CGameObjectVer2::CacheSkinningBoneFrames(CGameObjectVer2* pRootFrame)
 		CSkinnedMesh* pSkinnedMesh = (CSkinnedMesh*)m_pMesh;
 		for (int i = 0; i < pSkinnedMesh->m_nSkinningBones; i++)
 		{
-			pSkinnedMesh->m_ppSkinningBoneFrameCaches[i] = pRootFrame->FindFrame(pSkinnedMesh->m_ppstrSkinningBoneNames[i]);
-
-			//cout << " i " << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._11 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._12 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._13 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._14 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._21 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._22 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._23 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._24 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._31 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._32 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._33 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._34 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._41 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._42 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._43 << " ";
-			//cout << pSkinnedMesh->m_ppSkinningBoneFrameCaches[i]->m_xmf4x4World._44 << "\n";
+			pSkinnedMesh->m_ppSkinningBoneFrameCaches[i] = pRootFrame->FindFrame(pSkinnedMesh->m_ppstrSkinningBoneNames[i]); 
 #ifdef _WITH_DEBUG_SKINNING_BONE
 			TCHAR pstrDebug[256] = { 0 };
 			TCHAR pwstrBoneCacheName[64] = { 0 };
@@ -749,8 +736,6 @@ void CGameObjectVer2::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Grap
 			break;
 		}
 	}
-	
-	int stop = 3;
 }
 
 void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
@@ -909,6 +894,7 @@ void CGameObjectVer2::LoadAnimationFromFile(FILE* pInFile)
 
 CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObjectVer2* pParent, FILE* pInFile, CShader* pShader)
 {
+	static int count = 0;
 	char pstrToken[64] = { '\0' };
 
 	BYTE nStrLength = 0;
@@ -918,6 +904,8 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 
 	CGameObjectVer2* pGameObject = NULL;
 
+	XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
+	XMFLOAT4 xmf4Rotation;
 	for (; ; )
 	{
 		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
@@ -938,8 +926,6 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 		}
 		else if (!strcmp(pstrToken, "<Transform>:"))
 		{
-			XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
-			XMFLOAT4 xmf4Rotation;
 			nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pInFile);
 			nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, pInFile); //Euler Angle
 			nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pInFile);
@@ -954,6 +940,15 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 			CStandardMesh* pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
 			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 			pGameObject->SetMesh(pMesh);
+			if (pMesh->HasBoundingBox()) {
+				auto boundingBox = pMesh->GetBoundigBox();
+				XMFLOAT3 half = Vector3::Multifly(boundingBox.Extents, 0.5f);
+				pGameObject->AddColider(new ColliderBox(boundingBox.Center, half)); 
+
+				//boundingBox.Transform(boundingBox, XMLoadFloat4x4(&pGameObject->m_xmf4x4ToParent));
+				pGameObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center,
+					boundingBox.Extents.x, boundingBox.Extents.y, boundingBox.Extents.z, boundingBox.Center);
+			}
 		}
 		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
 		{
@@ -967,6 +962,16 @@ CGameObjectVer2* CGameObjectVer2::LoadFrameHierarchyFromFile(ID3D12Device* pd3dD
 			pSkinnedMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 
 			pGameObject->SetMesh(pSkinnedMesh);
+			if (pSkinnedMesh->HasBoundingBox()) {
+				auto boundingBox = pSkinnedMesh->GetBoundigBox();
+				XMFLOAT3 half = Vector3::Multifly(boundingBox.Extents, 0.5f);
+				pGameObject->AddColider(new ColliderBox(boundingBox.Center, half)); 
+
+				//boundingBox.Transform(boundingBox, XMLoadFloat4x4(&pGameObject->m_xmf4x4ToParent));
+				pGameObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center,
+					boundingBox.Extents.x, boundingBox.Extents.y, boundingBox.Extents.z, boundingBox.Center);
+			}
+
 			pGameObject->isSkinned = true;
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
@@ -1024,6 +1029,7 @@ CGameObjectVer2* CGameObjectVer2::LoadGeometryAndAnimationFromFile(ID3D12Device*
 		pGameObject->m_pAnimationController->SetAnimationSet(0);
 	}
 
+	pGameObject->CollectAABBFromChilds();
 	return(pGameObject);
 }
 
@@ -1102,6 +1108,21 @@ void CGameObjectVer2::PrintPartNames()
 
 	if (m_pSibling) m_pSibling->PrintPartNames();
 	if (m_pChild) m_pChild->PrintPartNames();
+}
+
+void CGameObjectVer2::GetAABBToBuffer(vector<Collider*>& buffer)
+{
+	for (int i = 0; i < m_AABB.size(); ++i) {
+		buffer.push_back(m_AABB[i]);
+	}
+	if (m_pSibling) m_pSibling->GetAABBToBuffer(buffer);
+	if (m_pChild) m_pChild->GetAABBToBuffer(buffer);
+}
+
+void CGameObjectVer2::CollectAABBFromChilds()
+{
+	if (m_pSibling) m_pSibling->GetAABBToBuffer(m_AABB);
+	if (m_pChild) m_pChild->GetAABBToBuffer(m_AABB);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

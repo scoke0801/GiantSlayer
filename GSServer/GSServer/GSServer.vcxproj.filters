@@ -29,6 +29,30 @@
     <Filter Include="Communicates\GameRoom">
       <UniqueIdentifier>{8b1eb388-d53d-417f-83fb-38d669000641}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameObject\Arrow">
+      <UniqueIdentifier>{02de2330-a747-4ddb-b31a-06918f5695bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Enemy">
+      <UniqueIdentifier>{ef96a398-5666-4e54-b1d8-6f479bcf0ca1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Base">
+      <UniqueIdentifier>{342eaa40-8b6f-4bbf-a1cd-345119b6ee03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\MapObjects">
+      <UniqueIdentifier>{c7e8cf2a-9e31-4ba0-ac8f-e8c23757b5e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Player">
+      <UniqueIdentifier>{171009b9-2b9d-4bf6-9562-00499804c147}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\AnimationObject">
+      <UniqueIdentifier>{3b9497e5-26ce-4d77-a6e4-5eff8fc8a66f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Communicates\Base">
+      <UniqueIdentifier>{17e99309-2720-4203-a1b9-9c356176a46c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JsonFiles">
+      <UniqueIdentifier>{85a628f2-79a5-4a7b-a5cd-e12573f648a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PacketProcessor.cpp">
@@ -40,20 +64,8 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Main\stdafx</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Communicates.cpp">
-      <Filter>Communicates</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="Enemy.cpp">
-      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="EnemyState.cpp">
       <Filter>State</Filter>
@@ -61,16 +73,36 @@
     <ClCompile Include="State.cpp">
       <Filter>State</Filter>
     </ClCompile>
-    <ClCompile Include="Arrow.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
-    <ClCompile Include="MapObjects.cpp">
-      <Filter>GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="GameRoom.cpp">
       <Filter>Communicates\GameRoom</Filter>
     </ClCompile>
-    <ClCompile Include="Boss.cpp" />
+    <ClCompile Include="Arrow.cpp">
+      <Filter>GameObject\Arrow</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>GameObject\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>GameObject\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="MapObjects.cpp">
+      <Filter>GameObject\MapObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>GameObject\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationObject.cpp">
+      <Filter>GameObject\AnimationObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Boss.cpp">
+      <Filter>GameObject\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Communicates.cpp">
+      <Filter>Communicates\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationController.cpp">
+      <Filter>GameObject\AnimationObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PacketProcessor.h">
@@ -79,21 +111,8 @@
     <ClInclude Include="stdafx.h">
       <Filter>Main\stdafx</Filter>
     </ClInclude>
-    <ClInclude Include="GameObject.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Communicates.h">
-      <Filter>Communicates</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="protocol.h" />
     <ClInclude Include="Camera.h">
       <Filter>Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="Enemy.h">
-      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="EnemyState.h">
       <Filter>State</Filter>
@@ -101,18 +120,43 @@
     <ClInclude Include="State.h">
       <Filter>State</Filter>
     </ClInclude>
-    <ClInclude Include="Arrow.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
-    <ClInclude Include="MapObjects.h">
-      <Filter>GameObject</Filter>
-    </ClInclude>
     <ClInclude Include="GameRoom.h">
       <Filter>Communicates\GameRoom</Filter>
     </ClInclude>
-    <ClInclude Include="Boss.h" />
+    <ClInclude Include="Arrow.h">
+      <Filter>GameObject\Arrow</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>GameObject\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>GameObject\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="MapObjects.h">
+      <Filter>GameObject\MapObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>GameObject\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationObject.h">
+      <Filter>GameObject\AnimationObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Boss.h">
+      <Filter>GameObject\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="protocol.h">
+      <Filter>Communicates</Filter>
+    </ClInclude>
+    <ClInclude Include="Communicates.h">
+      <Filter>Communicates\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationController.h">
+      <Filter>GameObject\AnimationObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\ObjectPositionData.json" />
+    <None Include="resources\ObjectPositionData.json">
+      <Filter>JsonFiles</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -1,13 +1,10 @@
 #include "stdafx.h"
 #include "Player.h" 
 
-CPlayer::CPlayer()
+CPlayer::CPlayer() :CAnimationObject()
 {
 	m_HP = 100;
-	m_SP = 100;
-
-	m_SpareCollisionBox = BoundingBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4));
-	m_SpareAABB = BoundingBox(XMFLOAT3(0, 0.6, 0.2f), XMFLOAT3(0.2, 0.6, 1.4));
+	m_SP = 100; 
 }
 
 CPlayer::~CPlayer()
@@ -17,35 +14,39 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
-	if (false == m_IsCanAttack) {
-		m_AttackWaitingTime -= fTimeElapsed;
-		m_StateName = AnimationType::SWORD_ATK;
-		if (m_AttackWaitingTime < 0.0f) { 
-			m_IsAlreadyAttack = false;
-			m_AttackWaitingTime = 0.0f;
-			m_IsCanAttack = true; 
+	if (m_IsCanAttack == false) {
+		if (!m_AnimationPaused)
+			m_AttackWaitingTime -= fTimeElapsed;
 
-			auto temp = m_SpareCollisionBox;
-			m_SpareCollisionBox = m_BoundingBox[0];
-			m_BoundingBox[0] = temp;
+		switch (m_WeaponType)
+		{
+		case PlayerWeaponType::Sword:
+			break;
 
-			temp = m_SpareAABB;
-			m_SpareAABB = m_AABB[0];
-			m_AABB[0] = temp;
+		case PlayerWeaponType::Bow:
+		{
+			if (pullString) {
+				if (m_AttackWaitingTime < m_AttackAnimPauseTime)
+					m_AnimationPaused = true;
 
-			UpdateColliders();
+				m_StringPullTime += fTimeElapsed;
+				m_SP -= fTimeElapsed;
+			}
 		}
-	}
+		break;
+		}
 
-	// ÇÇ°Ý
+		if (m_AttackWaitingTime < 0.0f)
+			ResetAttack();
+	}
 	else if (m_AttackedDelay > 0.0f) {
 		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
 	}
 	else {
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
-			m_StateName = AnimationType::IDLE;
+			SetAnimationSet(IDLE);
 		else
-			m_StateName = AnimationType::SWORD_RUN;
+			SetAnimationSet(RUN);
 	}
 	float Friction = (m_MovingType == Player_Move_Type::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 	
@@ -60,6 +61,8 @@ void CPlayer::Update(float fTimeElapsed)
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 	//m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
+	CAnimationObject::Animate(fTimeElapsed);
+	UpdateTransform(NULL);
 }
 
 void CPlayer::UpdateCamera()
@@ -98,6 +101,32 @@ void CPlayer::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1]
 	//SetPosition(m_xmf3Position);
 }
 
+int CPlayer::GetPlayerExistingSector() const
+{
+	if (m_xmf3Position.x < 14379 && m_xmf3Position.z < 22824) {
+		return 0;
+	}
+	if (m_xmf3Position.x < 14379 && m_xmf3Position.z >= 22824) {
+		return 1;
+	}
+	if (m_xmf3Position.x >= 14379 && m_xmf3Position.x < 20422 &&
+		(m_xmf3Position.z > 10764)) {
+		return 2;
+	}
+	if ((m_xmf3Position.x >= 14379 && m_xmf3Position.x < 20422) &&
+		m_xmf3Position.z <= 10764) {
+		return 3;
+	}
+
+	if (m_xmf3Position.x >= 20422 && m_xmf3Position.z < 12077) {
+		return 3;
+	}
+	if (m_xmf3Position.x >= 20422 && m_xmf3Position.z >= 12077) {
+		return 4;
+	}
+	return -1;
+}
+
 void CPlayer::SetVelocity(const XMFLOAT3& dir)
 {
 	if (false == IsCanAttack()) {
@@ -124,6 +153,35 @@ void CPlayer::SetVelocity(const XMFLOAT3& dir)
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
 }
 
+void CPlayer::AnimationChange(PlayerWeaponType weapon)
+{
+	if (weapon == PlayerWeaponType::Sword) {
+		IDLE = AnimationType::SWORD_IDLE;
+		RUN = AnimationType::SWORD_RUN;
+		ATK = AnimationType::SWORD_ATK;
+		DEATH = AnimationType::SWORD_DEATH;
+
+		m_AttackAnimLength = 1.033333f;
+	}
+	else if (weapon == PlayerWeaponType::Bow) {
+		IDLE = AnimationType::BOW_IDLE;
+		RUN = AnimationType::BOW_RUN;
+		ATK = AnimationType::BOW_ATK;
+		DEATH = AnimationType::BOW_DEATH;
+
+		m_AttackAnimLength = 1.533333f;
+		m_AttackAnimPauseTime = 0.6f;
+	}
+} 
+
+bool CPlayer::ShotAble()
+{
+	if (pullString && m_AttackWaitingTime < m_AttackAnimPauseTime)
+		return true;
+
+	return false;
+}
+
 bool CPlayer::Attacked(CGameObject* pObject)
 {
 	if (m_AttackedDelay > 0.0f) {
@@ -132,7 +190,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 	m_AttackedDelay += 0.6666667f;
 	m_HP -= 5;
-	m_StateName = AnimationType::DAMAGED;
+	SetAnimationSet(AnimationType::DAMAGED);
 	if (m_HP <= 5) {
 		m_HP = 0;
 	}
@@ -144,14 +202,12 @@ void CPlayer::Attack()
 	SetCanAttack(false);
 	IncreaseAttackWaitingTime(PLAYER_SWORD_ATTACK_TIME);
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
-	 
-	auto temp = m_BoundingBox[0];
-	m_BoundingBox[0] = m_SpareCollisionBox;
-	m_SpareCollisionBox = temp;
+	SetAnimationSet(ATK);
+}
 
-	temp = m_AABB[0];
-	m_AABB[0] = m_SpareAABB;
-	m_SpareAABB = temp; 
-
-	UpdateColliders();
+void CPlayer::ResetAttack()
+{
+	m_IsAlreadyAttack = false;
+	m_AttackWaitingTime = 0.0f;
+	m_IsCanAttack = true;
 }

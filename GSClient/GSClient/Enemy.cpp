@@ -272,10 +272,13 @@ void CEnemy::ChangeAnimation(ObjectState stateInfo)
 		SetAnimationSet(1);
 		break;
 	case ObjectState::Attack:
+		SetAnimationSet(2);
 		break;
 	case ObjectState::Attacked:
+		SetAnimationSet(3);
 		break;
 	case ObjectState::Die:
+		SetAnimationSet(4);
 		break;
 	case ObjectState::RunAway:
 		break;

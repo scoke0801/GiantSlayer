@@ -1,6 +1,5 @@
-#pragma once
-#include "GameObject.h"
-
+#pragma once 
+#include "AnimationObject.h"
 #include "EnemyState.h"
 class CPlayer;
 
@@ -19,7 +18,7 @@ enum class EnemyType {
 	Mummy,
 	Boss
 };
-class CEnemy : public CGameObject
+class CEnemy : public CAnimationObject
 {
 protected:
 	EnemyAttackType			m_AttackType;

@@ -340,6 +340,19 @@ void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 	m_Data.emplace("Effect", pEffectShader);
 }
 
+void CShaderHandler::CreateTextRenderShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CShader* pTextShader = new CShader();
+	if (m_UserID == ShaderHandlerUser::JH) {
+		pTextShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSEffect");
+		pTextShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSEffect");
+		//pEffectShader->CreateGeometryShader(L"Shaders/ShaderJH.hlsl", "GSEffect");
+	} 
+	pTextShader->CreateInputLayout(ShaderTypes::Text);
+	pTextShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, true, true);
+	m_Data.emplace("Text", pTextShader);
+}
+
 void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	CShader* pShader = new CShader();	
