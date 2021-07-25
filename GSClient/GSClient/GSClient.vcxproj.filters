@@ -322,10 +322,9 @@
     </ClInclude> 
     <ClInclude Include="Skill.h">
       <Filter>GameObject\Skill</Filter>
-    </ClCompile>
+    </ClInclude> 
     <ClInclude Include="Font.h">
-      <Filter>Font</Filter>
-    </ClCompile>
+      <Filter>Font</Filter> 
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
