@@ -450,6 +450,9 @@ void CSceneYJ::Update(float elapsedTime)
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
+			if (false == pObject->IsInNearSector(m_PlayerExistingSector)) {
+				continue;
+			}
 			pObject->Update(elapsedTime);
 			pObject->UpdateColliders();
 		}
@@ -477,13 +480,14 @@ void CSceneYJ::Update(float elapsedTime)
 			m_Player->FixCollision(pObstacle);
 		}
 	}
+
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
 		}
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
-			cout << "충돌 : 플레이어 - 장애물\n";
+			//cout << "충돌 : 플레이어 - 장애물\n";
 		}
 	}
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox]) {
@@ -2323,7 +2327,7 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 				m_pd3dGraphicsRootSignature, "resources/FbxExported/Mummy.bin", NULL, true);
 
 			m_Mummy[0] = new CMummy();
-			m_Mummy[0]->Scale(scale.x, scale.y, scale.z,true);
+			m_Mummy[0]->Scale(scale.x, scale.y, scale.z);
 			m_Mummy[0]->SetChild(pMummyModel, true);
 			m_Mummy[0]->SetShadertoAll();
 			m_Mummy[0]->SetTextureInedxToAll(0x200);
@@ -2334,7 +2338,7 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 			m_Mummy[0]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 			//m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.0f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-			m_Mummy[0]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
+			//m_Mummy[0]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			m_Mummy[0]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
 			//m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[0])));
@@ -2348,7 +2352,7 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 				m_pd3dGraphicsRootSignature, "resources/FbxExported/Mummy.bin", NULL, true);
 
 			m_Mummy[1] = new CMummy();
-			m_Mummy[1]->Scale(scale.x, scale.y, scale.z, true);
+			m_Mummy[1]->Scale(scale.x, scale.y, scale.z);
 			m_Mummy[1]->SetChild(pMummyModel, true);
 			m_Mummy[1]->SetShadertoAll();
 			m_Mummy[1]->SetTextureInedxToAll(0x200);
@@ -2359,7 +2363,7 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 			m_Mummy[1]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 			//m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-			m_Mummy[1]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
+			//m_Mummy[1]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			m_Mummy[1]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
 			//m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[1])));
@@ -2373,7 +2377,7 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 				m_pd3dGraphicsRootSignature, "resources/FbxExported/Mummy.bin", NULL, true);
 			
 			m_Mummy[2] = new CMummy();
-			m_Mummy[2]->Scale(scale.x, scale.y, scale.z, true);
+			m_Mummy[2]->Scale(scale.x, scale.y, scale.z);
 			m_Mummy[2]->SetChild(pMummyModel, true);
 			m_Mummy[2]->SetShadertoAll();
 			m_Mummy[2]->SetTextureInedxToAll(0x200);
@@ -2384,7 +2388,7 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 			//m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 			m_Mummy[2]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			m_Mummy[2]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
+			//m_Mummy[2]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			m_Mummy[2]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
 
 			//m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
