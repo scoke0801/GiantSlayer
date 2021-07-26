@@ -28,6 +28,9 @@ public:
 	AnimationType IDLE = AnimationType::SWORD_IDLE;
 	AnimationType RUN = AnimationType::SWORD_RUN;
 	AnimationType ATK = AnimationType::SWORD_ATK;
+	AnimationType ATK2 = AnimationType::SWORD_ATK2;
+	AnimationType ATK3 = AnimationType::SWORD_ATK3;
+	AnimationType SKILL = AnimationType::SWORD_SKILL;
 	AnimationType DEATH = AnimationType::SWORD_DEATH;
 	AnimationType CHANGEWEAPON = AnimationType::BOW_GET; 
 
@@ -43,9 +46,14 @@ private:
 
 private:
 	float m_AttackAnimLength = 0.0f;
+	float m_SwordAnim2Length = 0.0f;
+	float m_SwordAnim3Length = 0.0f;
+	float m_SkillAnimLength = 0.0f;
 	float m_AttackWaitingTime = 0.0f;
 
 	float m_AttackAnimPauseTime = 0.0f;
+
+	int m_LastAttackAnim = 1;
 
 	bool m_IsCanAttack = true;
 
@@ -55,7 +63,7 @@ private:
 	
 	float m_AttackedDelay = 0.0f;
 	float m_SkillCoolTime = 0.0f;
-	float m_AttackTimer = 1.0f;
+	float m_ComboTimer = 0.5f;
 
 	CMesh* m_SpareBoundingBox;
 	Collider* m_SpareCollisionBox;
