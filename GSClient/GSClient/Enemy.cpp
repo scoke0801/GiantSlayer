@@ -431,6 +431,7 @@ CMummy::CMummy()
 	//m_HeightFromTerrain = 150.0f; 
 
 	m_State = new PatrolState(this);
+	m_ExistingSector = SECTOR_POSITION::SECTOR_4;
 }
 
 CMummy::~CMummy()

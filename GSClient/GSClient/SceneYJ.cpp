@@ -462,6 +462,7 @@ void CSceneYJ::Update(float elapsedTime)
 
 	m_HelpTextUI->Update(elapsedTime);
 
+	ZeroMemory(m_PlayerExistingSector, sizeof(m_PlayerExistingSector));
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->Update(elapsedTime);
@@ -469,13 +470,26 @@ void CSceneYJ::Update(float elapsedTime)
 		player->FixPositionByTerrain(m_Terrain);
 		player->FixCameraByTerrain(m_Terrain);
 	}
+	m_PlayerExistingSector[m_Player->GetPlayerExistingSector()] = true;
+
+	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary]) {
+		if (pObstacle->CollisionCheck(m_Player)) {
+			m_Player->FixCollision(pObstacle);
+		}
+	}
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
 			cout << "충돌 : 플레이어 - 장애물\n";
 		}
 	}
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox]) {
+		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
 			cout << "충돌 : 플레이어 - 퍼즐박스\n";
@@ -483,6 +497,9 @@ void CSceneYJ::Update(float elapsedTime)
 	}
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
 		if (pEnemy->CollisionCheck(m_Player)) {
 			// 공격 상태일 때만 체력이 닳는것이 맞을까...
 			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
@@ -506,6 +523,9 @@ void CSceneYJ::Update(float elapsedTime)
 	}
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
 		if (pEnemy->CollisionCheck(m_Player)) {
 			// 공격 상태일 때만 체력이 닳는것이 맞을까...
 			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
@@ -533,6 +553,9 @@ void CSceneYJ::Update(float elapsedTime)
 	
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+			if (false == pEnemy->IsInSameSector(pObstacle->GetExistingSector())) {
+				continue;
+			}
 			if (pObstacle->CollisionCheck(pEnemy)) {
 				CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
 				thisEnemy->FixCollision(pObstacle);
@@ -544,6 +567,9 @@ void CSceneYJ::Update(float elapsedTime)
 
 	for (auto pMummy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
 		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+			if (false == pMummy->IsInSameSector(pObstacle->GetExistingSector())) {
+				continue;
+			}
 			if (pObstacle->CollisionCheck(pMummy)) {
 				CMummy* thisEnemy = reinterpret_cast<CMummy*>(pMummy);
 				thisEnemy->FixCollision(pObstacle);
@@ -2307,10 +2333,10 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			m_Mummy[0]->SetEnemyAttackType(EnemyAttackType::Mummy1);
 
 			m_Mummy[0]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.0f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
+			//m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.0f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 			m_Mummy[0]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			m_Mummy[0]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
-			m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+			//m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[0])));
 			m_Mummy[0]->AddFriends(m_Mummy[0]);
 			
@@ -2332,10 +2358,10 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			m_Mummy[1]->SetEnemyAttackType(EnemyAttackType::Mummy2);
 
 			m_Mummy[1]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
+			//m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 			m_Mummy[1]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			m_Mummy[1]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
-			m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+			//m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[1])));
 			m_Mummy[1]->AddFriends(m_Mummy[1]);
 		}
@@ -2356,12 +2382,12 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			m_Mummy[2]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 14900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 			m_Mummy[2]->SetEnemyAttackType(EnemyAttackType::Mummy3);
 
-			m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
+			//m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 			m_Mummy[2]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 			m_Mummy[2]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			m_Mummy[2]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
 
-			m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+			//m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[2])));
 			m_Mummy[2]->AddFriends(m_Mummy[2]);
 			
@@ -4093,28 +4119,28 @@ void CSceneYJ::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 100, 10000, 20000 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f * MAP_SCALE_SIZE)));
 	pObject->SetPosition({ 0,-2000,10000 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 100, 10000, 20000 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f * MAP_SCALE_SIZE)));
 	pObject->SetPosition({ 19950 * MAP_SCALE_SIZE,-2000,10000 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 20000 * MAP_SCALE_SIZE, 10000, 100, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(20000 * 0.5f * MAP_SCALE_SIZE, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 10000 * MAP_SCALE_SIZE,-2000,00 });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 20000 * MAP_SCALE_SIZE, 10000, 100, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(20000 * 0.5f * MAP_SCALE_SIZE, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 10000 * MAP_SCALE_SIZE,-2000,19950 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	// Forest to DryDesrt 아래 방향 벽  
 	pObject = new CGameObject();
@@ -4131,7 +4157,7 @@ void CSceneYJ::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 15200 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 15200 * 0.5f * MAP_SCALE_SIZE)));
 	pObject->SetPosition({ 10000 * MAP_SCALE_SIZE,-2000, 7600 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	// Forest 지역 내 못가는 지형 
 	pObject = new CGameObject();
@@ -4140,7 +4166,7 @@ void CSceneYJ::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2000 * 0.5f * MAP_SCALE_SIZE, 10000 * 0.5f, 7000 * 0.5f * MAP_SCALE_SIZE)));
 	pObject->SetPosition({ 5000 * MAP_SCALE_SIZE, -2000, 11100 * MAP_SCALE_SIZE });
 	pObject->UpdateColliders();
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	// Desrt to DryDesrt and Rock 왼쪽 벽
 	pObject = new CGameObject();
@@ -4148,7 +4174,7 @@ void CSceneYJ::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 400, 10000, 12800 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 12800 * 0.5f * MAP_SCALE_SIZE)));
 	pObject->SetPosition({ 13800 * MAP_SCALE_SIZE, -2000, 13600 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	// boss 지역 중간 벽
 	pObject = new CGameObject();
@@ -4156,14 +4182,14 @@ void CSceneYJ::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 5600 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f * MAP_SCALE_SIZE)));
 	pObject->SetPosition({ 15600 * MAP_SCALE_SIZE,-2000, 10800 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 5600 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f * MAP_SCALE_SIZE)));
 	pObject->SetPosition({ 18000 * MAP_SCALE_SIZE,-2000, 10800 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	// 사막 지역 가로 벽
 	pObject = new CGameObject();
@@ -4186,14 +4212,14 @@ void CSceneYJ::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2400 * MAP_SCALE_SIZE, 10000, 100, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2400 * 0.5f * MAP_SCALE_SIZE, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 14800 * MAP_SCALE_SIZE,-2000, 8000 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2400 * MAP_SCALE_SIZE, 10000, 100, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2400 * 0.5f * MAP_SCALE_SIZE, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 18800 * MAP_SCALE_SIZE, -2000, 8000 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 }
 
 void CSceneYJ::RecvMouseProcessPacket()
