@@ -7,8 +7,7 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateFBXShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateFBXAnimatedShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateBasicObjectShader(pd3dDevice,pd3dGraphicsRootSignature);
-
-
+	 
 	CreateDoorWallShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateBridgeShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreatePuzzleShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -344,8 +343,8 @@ void CShaderHandler::CreateTextRenderShader(ID3D12Device* pd3dDevice, ID3D12Root
 {
 	CShader* pTextShader = new CShader();
 	if (m_UserID == ShaderHandlerUser::JH) {
-		pTextShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSEffect");
-		pTextShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSEffect");
+		pTextShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VS_FONT_MAIN");
+		pTextShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PS_FONT_MAIN");
 		//pEffectShader->CreateGeometryShader(L"Shaders/ShaderJH.hlsl", "GSEffect");
 	} 
 	pTextShader->CreateInputLayout(ShaderTypes::Text);

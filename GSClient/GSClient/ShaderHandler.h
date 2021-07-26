@@ -82,7 +82,7 @@ public:
 
 	void CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
-	void CreateTextRenderShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	void CreateTextRenderShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature); 
 public: 
 	void SetUserID(ShaderHandlerUser user) { m_UserID = user; }
 };

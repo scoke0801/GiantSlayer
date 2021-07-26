@@ -1402,7 +1402,7 @@ struct VS_FONT_OUT
 	float2 texCoord: TEXCOORD;
 };
 
-VS_FONT_OUT main(VS_FONT_IN input, uint vertexID : SV_VertexID)
+VS_FONT_OUT VS_FONT_MAIN(VS_FONT_IN input, uint vertexID : SV_VertexID)
 {
 	VS_FONT_OUT output;
 
