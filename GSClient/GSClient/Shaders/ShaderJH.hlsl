@@ -39,6 +39,12 @@ cbuffer cbBoneTransforms : register(b7)
 	float4x4 gpmtxBoneTransforms[128];
 };
 
+cbuffer cbFontTransform : register(b8)
+{
+	float4x4 wvpMat;
+};
+
+
 #define MATERIAL_ALBEDO_MAP			0x01
 #define MATERIAL_SPECULAR_MAP		0x02
 #define MATERIAL_NORMAL_MAP			0x04
@@ -116,6 +122,7 @@ Texture2D gtxtEffect_3		: register(t51);
 Texture2D gtxtMap			: register(t52);
 Texture2D gtxtMirror		: register(t53);
 Texture2D gtxtShadowMap		: register(t54);
+Texture2D gtxtFont			: register(t55);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -1379,4 +1386,43 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	output.uv = input.uv; 
 	output.shadowPosH = mul(float4(output.positionW, 0.5f), gmtxShadowTransform);
 	return(output);
+}
+
+struct VS_FONT_IN
+{
+	float4 pos : POSITION;
+	float4 texCoord: TEXCOORD;
+	float4 color: COLOR;
+};
+
+struct VS_FONT_OUT
+{
+	float4 pos: SV_POSITION;
+	float4 color: COLOR;
+	float2 texCoord: TEXCOORD;
+};
+
+VS_FONT_OUT main(VS_FONT_IN input, uint vertexID : SV_VertexID)
+{
+	VS_FONT_OUT output;
+
+	// vert id 0 = 0000, uv = (0, 0)
+	// vert id 1 = 0001, uv = (1, 0)
+	// vert id 2 = 0010, uv = (0, 1)
+	// vert id 3 = 0011, uv = (1, 1)
+	float2 uv = float2(vertexID & 1, (vertexID >> 1) & 1);
+
+	// set the position for the vertex based on which vertex it is (uv)
+	output.pos = float4(input.pos.x + (input.pos.z * uv.x), input.pos.y - (input.pos.w * uv.y), 0, 1);
+	output.color = input.color;
+
+	// set the texture coordinate based on which vertex it is (uv)
+	output.texCoord = float2(input.texCoord.x + (input.texCoord.z * uv.x), input.texCoord.y + (input.texCoord.w * uv.y));
+
+	return output;
+}
+ 
+float4 PS_FONT_MAIN(VS_FONT_OUT input) : SV_TARGET
+{
+	return float4(input.color.rgb, input.color.a * gtxtFont.Sample(gssWrap, input.texCoord).a);
 }
