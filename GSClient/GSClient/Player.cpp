@@ -37,8 +37,8 @@ void CPlayer::Update(float fTimeElapsed)
 
 		switch (m_WeaponType)
 		{
-		case PlayerWeaponType::Sword:
-			break;
+		case PlayerWeaponType::Sword: {
+		}break;
 
 		case PlayerWeaponType::Bow: {
 			if (pullString) {
@@ -51,10 +51,11 @@ void CPlayer::Update(float fTimeElapsed)
 				m_StringPullTime += fTimeElapsed;
 				m_SP -= fTimeElapsed;
 			}
-		}
-			break;
-		case PlayerWeaponType::Staff:
-			break;
+		}break;
+
+		case PlayerWeaponType::Staff: {
+
+		}break;
 		}
 
 		if (m_AttackWaitingTime < 0.0f) {
@@ -320,6 +321,7 @@ void CPlayer::Attack()
 	m_BoundingObjectMeshes[0] = m_SpareBoundingBox;
 	m_SpareBoundingBox = tempMesh;
 	UpdateColliders();
+
 	if (m_WeaponType == PlayerWeaponType::Sword && m_ComboTimer > 0.0f) {
 		if (m_LastAttackAnim == 0) {
 			IncreaseAttackWaitingTime(m_SwordAnim2Length);
