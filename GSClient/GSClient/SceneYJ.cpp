@@ -589,15 +589,15 @@ void CSceneYJ::Update(float elapsedTime)
 			}
 		}
 	}
-	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
-		
+	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) { 
 		if (pPuzzle->CollisionCheck(m_Player)) {
+			m_Player->FixCollision(pPuzzle);
 			m_isPlayerBoxCollide = true;
-			m_Player->UpdateCamera();
-			
+			m_Player->UpdateCamera(); 
 			break;
 		}
-	}
+	} 
+
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
 		for (int i = 0; i < 1; i++)
 		{
@@ -3849,8 +3849,8 @@ void CSceneYJ::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
 	//m_Players[0]->SetTextureIndex(0x400); 
 
-	m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
-	m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
+	//m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
+	//m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 
 	++m_CurrentPlayerNum;
 
