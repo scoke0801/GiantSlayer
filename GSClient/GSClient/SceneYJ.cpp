@@ -302,6 +302,8 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Mat01_mummy_A","Mat01_mummy_M",
 		"GreenTree",
 		"Bow",
+		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse",
+
 		
 	};
 
@@ -332,6 +334,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/Mat01_mummy_A.dds",L"resources/Textures/Mat01_mummy_M.dds",
 		L"resources/OBJ/GreenTree.dds",
 		L"resources/Textures/bow_texture.dds",
+		L"resources/Textures/KingDiffuse.dds",L"resources/Textures/KnightDiffuse.dds",L"resources/Textures/PawnDiffuse.dds",L"resources/Textures/RookDiffuse.dds",
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -388,7 +391,8 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"MeleeSkeleton_02_EquipAll",
 		"Mat01_mummy_A","Mat01_mummy_M",
 		"GreenTree",
-		"Bow"
+		"Bow",
+		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse"
 	
 	};
 
@@ -472,7 +476,7 @@ void CSceneYJ::Update(float elapsedTime)
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
-			cout << "충돌 : 플레이어 - 장애물\n";
+			
 		}
 	}
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox]) {
@@ -586,10 +590,12 @@ void CSceneYJ::Update(float elapsedTime)
 		}
 	}
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
+		
 		if (pPuzzle->CollisionCheck(m_Player)) {
-			m_Player->FixCollision(pPuzzle);
 			m_isPlayerBoxCollide = true;
-
+			m_Player->UpdateCamera();
+			
+			break;
 		}
 	}
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
@@ -622,60 +628,76 @@ void CSceneYJ::Update(float elapsedTime)
 	XMFLOAT3 Speed = { 0.3f,0.3f,0.3f };
 
 
-	// 퍼즐 상자하고 충돌처리
-	for (int i = 0; i < 8; i++)
-	{
-		if (
-			(
-			(m_PuzzleBox[i]->GetPosition().x+135.0f > m_Player->GetPosition().x)
-			&& (m_PuzzleBox[i]->GetPosition().x-135.0f < m_Player->GetPosition().x )
-			)
-			&&
-			(
-			(m_PuzzleBox[i]->GetPosition().z+135.0f > m_Player->GetPosition().z )
-			&& (m_PuzzleBox[i]->GetPosition().z-135.0f < m_Player->GetPosition().z )
-				)
-		
-			)
+	/*for (auto pPCP : m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle]) {
+		for (int i = 0; i < 1; i++)
 		{
-			m_PuzzleBox[i]->SetSelectBox(true);
-		}
-		else 
-		{
-			m_PuzzleBoxCount = false;
-			m_PuzzleBox[i]->SetSelectBox(false);
-		}
-		
-	}
-	for (int i = 0; i < 8; i++)
-	{
-		if (m_PuzzleBox[i]->GetSelectBox())
-		{
-			{
+			if (pPCP->CollisionCheck(m_Player)) {
+				m_Player->FixCollision(pPCP);
 				m_Player->Box_Pull(TRUE);
-				m_PuzzleBox[i]->SetPosition(
-					{
-						m_PuzzleBox[i]->GetPosition().x + Final_Vec.x,
-						m_PuzzleBox[i]->GetPosition().y ,
-						m_PuzzleBox[i]->GetPosition().z + Final_Vec.z
-					}
-				);
+				pPCP->SetPosition({
+									pPCP->GetPosition().x + Final_Vec.x,
+									pPCP->GetPosition().y ,
+									pPCP->GetPosition().z + Final_Vec.z
+					});
 			}
 		}
-		else if (m_PuzzleBox[0]->GetSelectBox()==0
-			&& m_PuzzleBox[1]->GetSelectBox() == 0
-			&& m_PuzzleBox[2]->GetSelectBox() == 0
-			&& m_PuzzleBox[3]->GetSelectBox() == 0
-			&& m_PuzzleBox[4]->GetSelectBox() == 0
-			&& m_PuzzleBox[5]->GetSelectBox() == 0
-			&& m_PuzzleBox[6]->GetSelectBox() == 0
-			&& m_PuzzleBox[7]->GetSelectBox() == 0)
-		{
-			m_Player->Box_Pull(FALSE);
-			m_PuzzleBox[i]->SetSelectBox(false);
-		}
-		
-	}
+	}*/
+
+
+	//// 퍼즐 상자하고 충돌처리
+	//for (int i = 0; i < 8; i++)
+	//{
+	//	if (
+	//		(
+	//		(m_PuzzleBox[i]->GetPosition().x+135.0f > m_Player->GetPosition().x)
+	//		&& (m_PuzzleBox[i]->GetPosition().x-135.0f < m_Player->GetPosition().x )
+	//		)
+	//		&&
+	//		(
+	//		(m_PuzzleBox[i]->GetPosition().z+135.0f > m_Player->GetPosition().z )
+	//		&& (m_PuzzleBox[i]->GetPosition().z-135.0f < m_Player->GetPosition().z )
+	//			)
+	//	
+	//		)
+	//	{
+	//		m_PuzzleBox[i]->SetSelectBox(true);
+	//	}
+	//	else 
+	//	{
+	//		m_PuzzleBoxCount = false;
+	//		m_PuzzleBox[i]->SetSelectBox(false);
+	//	}
+	//	
+	//}
+	//for (int i = 0; i < 8; i++)
+	//{
+	//	if (m_PuzzleBox[i]->GetSelectBox())
+	//	{
+	//		{
+	//			m_Player->Box_Pull(TRUE);
+	//			m_PuzzleBox[i]->SetPosition(
+	//				{
+	//					m_PuzzleBox[i]->GetPosition().x + Final_Vec.x,
+	//					m_PuzzleBox[i]->GetPosition().y ,
+	//					m_PuzzleBox[i]->GetPosition().z + Final_Vec.z
+	//				}
+	//			);
+	//		}
+	//	}
+	//	else if (m_PuzzleBox[0]->GetSelectBox()==0
+	//		&& m_PuzzleBox[1]->GetSelectBox() == 0
+	//		&& m_PuzzleBox[2]->GetSelectBox() == 0
+	//		&& m_PuzzleBox[3]->GetSelectBox() == 0
+	//		&& m_PuzzleBox[4]->GetSelectBox() == 0
+	//		&& m_PuzzleBox[5]->GetSelectBox() == 0
+	//		&& m_PuzzleBox[6]->GetSelectBox() == 0
+	//		&& m_PuzzleBox[7]->GetSelectBox() == 0)
+	//	{
+	//		m_Player->Box_Pull(FALSE);
+	//		m_PuzzleBox[i]->SetSelectBox(false);
+	//	}
+	//	
+	//}
 	
 	// 퍼즐 범위 내일 작업할때 사용 
 
@@ -691,57 +713,58 @@ void CSceneYJ::Update(float elapsedTime)
 		10900
 		*/
 		// 1번
-	for (int i = 0; i < 8; i++)
-	{
-		if ((m_PuzzleBox[i]->GetPosition().x > 12150 && m_PuzzleBox[i]->GetPosition().x < 12450) &&
-			(m_PuzzleBox[i]->GetPosition().z > 9800 && m_PuzzleBox[i]->GetPosition().z < 10000) &&
-			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
-			)
-		{
-			m_PuzzleNumSelect[1] = TRUE;
-		}
-	}
+	//for (int i = 0; i < 8; i++)
+	//{
+	//	if ((m_PuzzleBox[i]->GetPosition().x > 12150 && m_PuzzleBox[i]->GetPosition().x < 12450) &&
+	//		(m_PuzzleBox[i]->GetPosition().z > 9800 && m_PuzzleBox[i]->GetPosition().z < 10000) &&
+	//		(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
+	//		)
+	//	{
+	//		m_PuzzleNumSelect[1] = TRUE;
+	//	}
+	//}
 
-	// 3번
-	for (int i = 0; i < 8; i++)
-	{
-		if ((m_PuzzleBox[i]->GetPosition().x > 11150 && m_PuzzleBox[i]->GetPosition().x < 11450) &&
-			(m_PuzzleBox[i]->GetPosition().z > 9800 && m_PuzzleBox[i]->GetPosition().z < 10000) &&
-			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
-			)
-		{
-			m_PuzzleNumSelect[3] = TRUE;
-		}
-	}
+	//// 3번
+	//for (int i = 0; i < 8; i++)
+	//{
+	//	if ((m_PuzzleBox[i]->GetPosition().x > 11150 && m_PuzzleBox[i]->GetPosition().x < 11450) &&
+	//		(m_PuzzleBox[i]->GetPosition().z > 9800 && m_PuzzleBox[i]->GetPosition().z < 10000) &&
+	//		(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
+	//		)
+	//	{
+	//		m_PuzzleNumSelect[3] = TRUE;
+	//	}
+	//}
 
-	// 5번
-	for (int i = 0; i < 8; i++)
-	{
-		if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
-			(m_PuzzleBox[i]->GetPosition().z > 10250 && m_PuzzleBox[i]->GetPosition().z < 10450) &&
-			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
-		{
-			m_PuzzleNumSelect[5] = TRUE;
-		}
-	}
+	//// 5번
+	//for (int i = 0; i < 8; i++)
+	//{
+	//	if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
+	//		(m_PuzzleBox[i]->GetPosition().z > 10250 && m_PuzzleBox[i]->GetPosition().z < 10450) &&
+	//		(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
+	//	{
+	//		m_PuzzleNumSelect[5] = TRUE;
+	//	}
+	//}
 
-	// 8번
-	for (int i = 0; i < 8; i++)
-	{
-		if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
-			(m_PuzzleBox[i]->GetPosition().z > 10700 && m_PuzzleBox[i]->GetPosition().z < 10900) &&
-			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
-		{
-			m_PuzzleNumSelect[7] = TRUE;
-		}
-	}
+	//// 8번
+	//for (int i = 0; i < 8; i++)
+	//{
+	//	if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
+	//		(m_PuzzleBox[i]->GetPosition().z > 10700 && m_PuzzleBox[i]->GetPosition().z < 10900) &&
+	//		(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
+	//	{
+	//		m_PuzzleNumSelect[7] = TRUE;
+	//	}
+	//}
 
-	if (m_PuzzleNumSelect[1] && m_PuzzleNumSelect[5] && m_PuzzleNumSelect[3] && m_PuzzleNumSelect[7])
-	{
-		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
-		p->OpenDoor();
-	}
-
+	//if (m_PuzzleNumSelect[1] && m_PuzzleNumSelect[5] && m_PuzzleNumSelect[3] && m_PuzzleNumSelect[7])
+	//{
+	//	CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
+	//	p->OpenDoor();
+	//}
+	//CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
+	//p->OpenDoor();
 	
 	//m_PlayerCameras[CFramework::GetInstance().GetPlayerId()]->Update(elapsedTime);
 
@@ -2102,11 +2125,6 @@ void CSceneYJ::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	for (int i = 0; i < 4; i++)
-	{
-		m_PuzzleNum[i] = rand() % 9;
-	}
-
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
 
 	pPuzzlePlate->SetPosition({ 11130.0f * MAP_SCALE_SIZE, -2000.0f,(2000.0f + 8000.0f) * MAP_SCALE_SIZE });
@@ -2123,112 +2141,80 @@ void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject2);
 
-	for (int i = 0; i < 8; ++i)
-	{
-		m_PuzzleBox[i] = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
-
-		if (i > 3)
-		{
-			m_PuzzleBox[i]->SetPosition({ (10700.0f + 1 * 1800.0f) * MAP_SCALE_SIZE,  300 - 2000.0f, (1800.0f + (i - 4) * 300.0f + 7800.0f) * MAP_SCALE_SIZE });
-		}
-		else
-		{
-			m_PuzzleBox[i]->SetPosition({ (11200.0f + 0 * 1800.0f) * MAP_SCALE_SIZE,  300 - 2000.0f, (1800.0f + i * 300.0f + 7800.0f) * MAP_SCALE_SIZE });
-		}
-		m_PuzzleBox[i]->SetTextureIndex(0x200);
-		m_PuzzleBox[i]->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		m_PuzzleBox[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f, XMFLOAT3{ 0,0,0 });
-		m_PuzzleBox[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 150.0f * 0.5f, 100.0f * 0.5f, 150.0f * 0.5f }));
-		m_PuzzleBox[i]->SetSelectBox(FALSE);
-		m_PuzzleBox[i]->SetGripBox(FALSE);
-		//m_Objects.push_back(std::move(pObject));
-		m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox].push_back(m_PuzzleBox[i]);
-
-	}
-
-	
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::King]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	pObject->SetPosition({ 11500.0f * MAP_SCALE_SIZE, -1750.0f, (1500.0f + 8000.0f) * MAP_SCALE_SIZE });
-		
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-	pObject->SetTextureIndex(0x80);
+	pObject->SetPosition({ 11550.0f * MAP_SCALE_SIZE, -1750.0f, (1550.0f + 8000.0f) * MAP_SCALE_SIZE });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x400);
 	pObject->Scale(300, 300, 300);
 	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	pObject->SetPosition({ 11800.0f * MAP_SCALE_SIZE, -1750.0f, (1500.0f + 8000.0f) * MAP_SCALE_SIZE });
-
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-	pObject->SetTextureIndex(0x80);
+	pObject->SetPosition({ 11550.0f * MAP_SCALE_SIZE, -1750.0f, (2350.0f + 8000.0f) * MAP_SCALE_SIZE });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x800);
 	pObject->Scale(300, 300, 300);
 	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Pawn]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	pObject->SetPosition({ 12100.0f * MAP_SCALE_SIZE, -1750.0f, (1500.0f + 8000.0f) * MAP_SCALE_SIZE });
-
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-	pObject->SetTextureIndex(0x80);
+	pObject->SetPosition({ 11950.0f * MAP_SCALE_SIZE, -1750.0f, (1950.0f + 8000.0f) * MAP_SCALE_SIZE });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x1000);
 	pObject->Scale(300, 300, 300);
 	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Rook]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	pObject->SetPosition({ 12400.0f * MAP_SCALE_SIZE, -1750.0f, (1500.0f + 8000.0f) * MAP_SCALE_SIZE });
-
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-	pObject->SetTextureIndex(0x80);
+	pObject->SetPosition({ 12350.0f * MAP_SCALE_SIZE, -1750.0f, (2350.0f + 8000.0f) * MAP_SCALE_SIZE });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x2000);
 	pObject->Scale(300, 300, 300);
 	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+
 
 	// 플레이어 퍼즐
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::King]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	pObject->SetPosition({ 11500.0f * MAP_SCALE_SIZE, -1750.0f, (3500.0f + 8000.0f) * MAP_SCALE_SIZE });
-
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-	pObject->SetTextureIndex(0x80);
+	pObject->SetPosition({ 11300.0f * MAP_SCALE_SIZE, -1750.0f, (2800.0f + 8000.0f) * MAP_SCALE_SIZE });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x400);
 	pObject->Scale(300, 300, 300);
-	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	pObject->SetPosition({ 11800.0f * MAP_SCALE_SIZE, -1750.0f, (3500.0f + 8000.0f) * MAP_SCALE_SIZE });
-
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-	pObject->SetTextureIndex(0x80);
+	pObject->SetPosition({ 11300.0f * MAP_SCALE_SIZE, -1750.0f, (3200.0f + 8000.0f) * MAP_SCALE_SIZE });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x800);
 	pObject->Scale(300, 300, 300);
-	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Pawn]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	pObject->SetPosition({ 12100.0f * MAP_SCALE_SIZE, -1750.0f, (3500.0f + 8000.0f) * MAP_SCALE_SIZE });
-
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-	pObject->SetTextureIndex(0x80);
+	pObject->SetPosition({ 12600.0f * MAP_SCALE_SIZE, -1750.0f, (2800.0f + 8000.0f) * MAP_SCALE_SIZE });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x1000);
 	pObject->Scale(300, 300, 300);
-	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Rook]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	pObject->SetPosition({ 12400.0f * MAP_SCALE_SIZE, -1750.0f, (3500.0f + 8000.0f) * MAP_SCALE_SIZE });
-
-	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
-	pObject->SetTextureIndex(0x80);
+	pObject->SetPosition({ 12600.0f * MAP_SCALE_SIZE, -1750.0f, (3200.0f + 8000.0f) * MAP_SCALE_SIZE });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x2000);
 	pObject->Scale(300, 300, 300);
-	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(pObject);
 	
-
 }
 
 void CSceneYJ::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -2307,10 +2293,8 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			m_Mummy[0]->SetEnemyAttackType(EnemyAttackType::Mummy1);
 
 			m_Mummy[0]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.0f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-			m_Mummy[0]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			m_Mummy[0]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
-			m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+			m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[0])));
 			m_Mummy[0]->AddFriends(m_Mummy[0]);
 			
@@ -2332,10 +2316,8 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			m_Mummy[1]->SetEnemyAttackType(EnemyAttackType::Mummy2);
 
 			m_Mummy[1]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-			m_Mummy[1]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			m_Mummy[1]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
-			m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+			m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[1])));
 			m_Mummy[1]->AddFriends(m_Mummy[1]);
 		}
@@ -2356,12 +2338,10 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			m_Mummy[2]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 14900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 			m_Mummy[2]->SetEnemyAttackType(EnemyAttackType::Mummy3);
 
-			m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
 			m_Mummy[2]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			m_Mummy[2]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			m_Mummy[2]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
 
-			m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 10200.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+			m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[2])));
 			m_Mummy[2]->AddFriends(m_Mummy[2]);
 			
@@ -3534,7 +3514,7 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 {
-	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy1)
+	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy1 && m_MummyExist[0]==true)
 	{
 		// 미라가 2마리 남았을때
 		if (m_One_Mira_Die_Laser==true)
@@ -3595,10 +3575,10 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 						m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
 
-						pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x + 90.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), 1));
+						pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x + 180.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), 1));
 
 						m_Particles->UseParticle(idx, pMummyLaser->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f), 1);
-						m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(XMFLOAT3(m_Mummy[0]->GetLook().x + 90.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z)), -1));
+						m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(XMFLOAT3(m_Mummy[0]->GetLook().x + 180.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z)), -1));
 
 						pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
 						pMummyLaser->AddFriends_p(m_Mummy[0]);
@@ -3623,10 +3603,10 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 						m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
 
-						pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x + 180.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), 1));
+						pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x + 360.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), 1));
 
 						m_Particles->UseParticle(idx, pMummyLaser->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f), 1);
-						m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(XMFLOAT3(m_Mummy[0]->GetLook().x + 180.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z)), -1));
+						m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(XMFLOAT3(m_Mummy[0]->GetLook().x + 360.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z)), -1));
 
 						pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
 						pMummyLaser->AddFriends_p(m_Mummy[0]);
@@ -3639,7 +3619,7 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 	}
 
-	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy2)
+	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy2 && m_MummyExist[1] == true)
 	{
 		// 미라가 2마리 남았을때
 		if (m_One_Mira_Die_Laser == true)
@@ -3701,9 +3681,9 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 						m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -90), 1));
 				
-						pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x + 90.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), 1));
+						pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x + 180.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), 1));
 						m_Particles->UseParticle(idx, pMummyLaser2->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f), 1);
-						m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(XMFLOAT3(m_Mummy[1]->GetLook().x + 90.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z)), -1));
+						m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(XMFLOAT3(m_Mummy[1]->GetLook().x + 180.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z)), -1));
 
 						pMummyLaser2->ConnectParticle(m_Particles->GetParticleObj(idx));
 						pMummyLaser2->AddFriends_p(m_Mummy[1]);
@@ -3729,9 +3709,9 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 						pMummyLaser2->SetLaserType(Laser_TYPE::Laser2);
 						m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -90), 1));
 
-						pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x + 180.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), 1));
+						pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x + 360.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), 1));
 						m_Particles->UseParticle(idx, pMummyLaser2->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f), 1);
-						m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(XMFLOAT3(m_Mummy[1]->GetLook().x + 180.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z)), -1));
+						m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(XMFLOAT3(m_Mummy[1]->GetLook().x + 360.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z)), -1));
 
 						pMummyLaser2->ConnectParticle(m_Particles->GetParticleObj(idx));
 						pMummyLaser2->AddFriends_p(m_Mummy[1]);
@@ -3743,7 +3723,7 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 	}
 
-	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy3)
+	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy3 && m_MummyExist[2] == true)
 	{
 		// 미라가 2마리 남았을때
 		if (m_One_Mira_Die_Laser == true)
@@ -3774,9 +3754,9 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 					pMummyLaser3->SetPosition(pos);
 					pMummyLaser3->SetLaserType(Laser_TYPE::Laser3);
 					m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -90), 1));
-					pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x + 90.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), 1));
+					pMummyLaser3->SetTargetVector(Vector3::Multifly(m_Mummy[2]->GetLook(), 1));
 					m_Particles->UseParticle(idx, pMummyLaser3->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f), 1);
-					m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(XMFLOAT3(m_Mummy[2]->GetLook().x + 90.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z)), -1));
+					m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Mummy[2]->GetLook()), -1));
 
 					pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
 					pMummyLaser3->AddFriends_p(m_Mummy[2]);
@@ -3830,9 +3810,10 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 						pMummyLaser3->SetLaserType(Laser_TYPE::Laser3);
 						
 						m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -90), 1));
-						pMummyLaser3->SetTargetVector(Vector3::Multifly(m_Mummy[2]->GetLook(), 1));
-						m_Particles->UseParticle(idx, pMummyLaser3->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f), 3);
-						m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Mummy[2]->GetLook()), -1));
+						pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x + 360.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), 1));
+						m_Particles->UseParticle(idx, pMummyLaser3->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f), 1);
+						m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(XMFLOAT3(m_Mummy[2]->GetLook().x + 360.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z)), -1));
+
 						pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
 						pMummyLaser3->AddFriends_p(m_Mummy[2]);
 					}
@@ -3963,6 +3944,9 @@ void CSceneYJ::DeleteEnemy(CEnemy* pEmeny)
 		if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy1)
 		{
 			cout << " 미라 삭제\n";
+			m_MummyExist[0] = false;
+			pEmeny->SetMummyDie(true);
+
 
 			if (m_One_Mira_Die == true)
 			{
@@ -3985,6 +3969,9 @@ void CSceneYJ::DeleteEnemy(CEnemy* pEmeny)
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy2)
 		{
 			cout << " 미라2 삭제\n";
+			m_MummyExist[1] = false;
+			pEmeny->SetMummyDie2(true);
+
 
 			if (m_One_Mira_Die == true)
 			{
@@ -4007,6 +3994,8 @@ void CSceneYJ::DeleteEnemy(CEnemy* pEmeny)
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy3)
 		{
 			cout << " 미라3 삭제\n";
+			m_MummyExist[2] = false;
+			pEmeny->SetMummyDie3(true);
 
 			if (m_One_Mira_Die == true)
 			{

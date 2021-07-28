@@ -105,9 +105,9 @@ CPlate::CPlate(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	pObject->SetMesh(pMesh);
 	pObject->SetShader(pShader);
 	pObject->SetPosition({ 1250.0f, 120.f, 900.0f });
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2500, 240, 1800, XMFLOAT3{ 0,0,0 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 3000, 240, 4000, XMFLOAT3{ 0,0,0 });
 	//pObject->SetTextureIndex(0x02);
-	pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 2500 * 0.5f, 240 * 0.5f, 1800 * 0.5f }));
+	pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 3000 * 0.5f, 240 * 0.5f, 4000 * 0.5f }));
 	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
 	pObject->SetSize({ 1, 240 * 0.5f, 1 });
 	m_Objects.push_back(std::move(pObject));

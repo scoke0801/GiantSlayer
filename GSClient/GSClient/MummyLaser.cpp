@@ -42,7 +42,7 @@ void CMummyLaser::Update(float fTimeElapsed)
 		if (m_ElapsedTime > 3.0f ) {
 			for (auto& mummy : m_Friends)
 			{
-				if (GetLaserType() == Laser_TYPE::Laser1 && m_ElapsedTime > 3.0f+5.f)
+				if (GetLaserType() == Laser_TYPE::Laser1 && m_ElapsedTime > 3.0f+5.0f)
 				{
 		
 					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ mummy->GetPosition() }, { 0,200,0 });
@@ -52,7 +52,12 @@ void CMummyLaser::Update(float fTimeElapsed)
 					m_ElapsedTime = 0.0f;
 					
 				}
-				if (GetLaserType() == Laser_TYPE::Laser2 && m_ElapsedTime > 3.0f + 3.0f)
+				if (mummy->GetMummyDie() == false)
+				{
+					m_ConnectedParticle->SetDrawable(false);
+				}
+
+				if (GetLaserType() == Laser_TYPE::Laser2 && m_ElapsedTime > 3.0f + 7.0f )
 				{
 					
 					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ mummy->GetPosition() }, { 0,200,0 });
@@ -62,7 +67,12 @@ void CMummyLaser::Update(float fTimeElapsed)
 					m_ElapsedTime = 0.0f;
 					
 				}
-				if (GetLaserType() == Laser_TYPE::Laser3 && m_ElapsedTime > 3.0f + 7.0f)
+				if (mummy->GetMummyDie2() == false)
+				{
+					m_ConnectedParticle->SetDrawable(false);
+				}
+
+				if (GetLaserType() == Laser_TYPE::Laser3 && m_ElapsedTime > 3.0f + 11.0f && mummy->GetMummyDie3() == true)
 				{
 					
 					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ mummy->GetPosition() }, { 0,200,0 });
@@ -71,6 +81,10 @@ void CMummyLaser::Update(float fTimeElapsed)
 					SetPosition(pos);
 					m_ElapsedTime = 0.0f;
 					
+				}
+				if (mummy->GetMummyDie3() == false)
+				{
+					m_ConnectedParticle->SetDrawable(false);
 				}
 			}
 			

@@ -26,6 +26,7 @@ private:
 	bool						m_isPlayerBoxCollide = false;
 	bool						m_isBoxDown = false;
 	bool						m_PuzzleNumSelect[9] = { false };
+	bool						m_MummyExist[3] = { true,true,true };
 
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -46,9 +47,8 @@ private:
 	bool					m_LaserCount = false;
 	
 	int							m_CurrentPlayerNum = 0;
-	//vector<CPlayer*>			m_Players[MAX_PLAYER];
 	CPlayer* m_Players[MAX_ROOM_PLAYER];
-	CBox* m_PuzzleBox[8];
+	
 
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
@@ -72,17 +72,11 @@ private:
 	CLightCamera* m_pLightCamera = nullptr;
 
 	short						m_DoorIdx = 0;
-	int							m_PuzzleNum[4];
-
-	bool						m_PuzzleBoxCount = false;
-	bool						m_Mira[3] = { TRUE,TRUE,TRUE };
+	
 	bool						m_One_Mira_Die = false;
 	bool						m_One_Mira_Die_Laser = false;
 	bool						m_Two_Mira_Die = false;
 	bool						m_Two_Mira_Die_Laser = false;
-	
-	
-	
 	
 private:
 	POINT						m_LastMousePos;

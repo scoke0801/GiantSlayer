@@ -113,9 +113,14 @@ Texture2D gtxtMummy_M : register(t48);
 Texture2D gtxtGreenTree : register(t49);
 Texture2D gtxtBow : register(t50);
 
-Texture2D gtxtMap : register(t51);
-Texture2D gtxtMirror : register(t52);
-Texture2D gtxtShadowMap : register(t53);
+Texture2D KingDiffuse : register(t51);
+Texture2D KnightDiffuse : register(t52);
+Texture2D PawnDiffuse : register(t53);
+Texture2D RookDiffuse : register(t54);
+
+Texture2D gtxtMap : register(t55);
+Texture2D gtxtMirror : register(t56);
+Texture2D gtxtShadowMap : register(t57);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -1126,6 +1131,22 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     if (gnTexturesMask & 0x200)
     {
         cColor = gtxtGreenTree.Sample(gssWrap, input.uv);
+    }
+    if (gnTexturesMask & 0x400)
+    {
+        cColor = KingDiffuse.Sample(gssWrap, input.uv);
+    }
+    if (gnTexturesMask & 0x800)
+    {
+        cColor = KnightDiffuse.Sample(gssWrap, input.uv);
+    }
+    if (gnTexturesMask & 0x1000)
+    {
+        cColor = PawnDiffuse.Sample(gssWrap, input.uv);
+    }
+    if (gnTexturesMask & 0x2000)
+    {
+        cColor = RookDiffuse.Sample(gssWrap, input.uv);
     }
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
     shadowFactor = CalcShadowFactor(input.shadowPosH);
