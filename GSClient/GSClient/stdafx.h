@@ -41,6 +41,7 @@
 #define KFBX_DLLINFO
 #include <fbxsdk.h>
 
+#include <wincodec.h>
 using namespace std;
 
 #include <d3d12.h>

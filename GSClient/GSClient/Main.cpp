@@ -161,6 +161,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     gFramework = &(CFramework::GetInstance());
     gFramework->OnCreate(hWnd, hInst);
 
+
     CInputHandler::GetInstance().SetTargetWND(hWnd);
 
     ShowWindow(hWnd, nCmdShow);

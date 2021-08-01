@@ -33,7 +33,9 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreateEffectShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateStandardShader(pd3dDevice, pd3dGraphicsRootSignature);
-	CreateSkinnedShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateSkinnedShader(pd3dDevice, pd3dGraphicsRootSignature); 
+	 
+	CreateTextRenderShader(pd3dDevice, pd3dGraphicsRootSignature);
 }
 
 void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -348,7 +350,7 @@ void CShaderHandler::CreateTextRenderShader(ID3D12Device* pd3dDevice, ID3D12Root
 		//pEffectShader->CreateGeometryShader(L"Shaders/ShaderJH.hlsl", "GSEffect");
 	} 
 	pTextShader->CreateInputLayout(ShaderTypes::Text);
-	pTextShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, true, true);
+	pTextShader->CreateFontShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Text", pTextShader);
 }
 

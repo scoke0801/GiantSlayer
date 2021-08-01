@@ -56,6 +56,7 @@ CSceneJH::CSceneJH()
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		m_PlayerExistingSector[i] = false;
 	}
+
 }
 
 CSceneJH::~CSceneJH()
@@ -872,6 +873,11 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		if (!player->IsDrawable()) continue;
 		player->Draw(pd3dCommandList, m_CurrentCamera);
 	}
+
+
+	// draw the text
+	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"TEST"), XMFLOAT2(0.02f, 0.01f), XMFLOAT2(2.0f, 2.0f));
+	 
 }
 
 void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)

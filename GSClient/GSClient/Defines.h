@@ -145,3 +145,5 @@ constexpr int MAX_THUNDER_CREATE_COUNT = 10;
 
 constexpr float Laser_PARTICLE_LIFE_TIME = 10.0f;
 
+// number of buffers we want, 2 for double buffering, 3 for tripple buffering
+constexpr int frameBufferCount = 2;

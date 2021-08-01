@@ -78,3 +78,38 @@ struct Font
 };
 
 Font LoadFont(const string& fileName, int width, int height);
+int LoadImageDataFromFile(BYTE** imageData, D3D12_RESOURCE_DESC& resourceDescription, LPCWSTR filename, int& bytesPerRow);
+
+DXGI_FORMAT GetDXGIFormatFromWICFormat(WICPixelFormatGUID& wicFormatGUID);
+WICPixelFormatGUID GetConvertToWICFormat(WICPixelFormatGUID& wicFormatGUID);
+int GetDXGIFormatBitsPerPixel(DXGI_FORMAT& dxgiFormat);
+
+class TextHandler
+{
+private:
+    TextHandler() { TextHandler::Load("resources/Font/Dotum.fnt"); };
+
+    TextHandler(const TextHandler& other) = delete;
+    TextHandler& operator=(const TextHandler& other) = delete;
+
+public:
+    static TextHandler& GetInstance() {
+        static TextHandler self;
+        return self;
+    }
+
+    void Load(const string& fileName);
+
+    void Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring text, XMFLOAT2 pos, 
+        XMFLOAT2 scale = XMFLOAT2(1.0f, 1.0f), XMFLOAT2 padding = XMFLOAT2(0.5f, 0.0f), XMFLOAT4 color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+    bool InitVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+private:
+    Font m_Font;
+     
+    ID3D12Resource* textVertexBuffer;
+    D3D12_VERTEX_BUFFER_VIEW textVertexBufferView; // a view for our text vertex buffer
+    UINT8* textVBGPUAddress; // this is a pointer to each of the text constant buffers
+
+};

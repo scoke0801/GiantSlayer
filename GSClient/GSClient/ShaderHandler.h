@@ -26,6 +26,7 @@ public:
 		static CShaderHandler self;
 		return self;
 	}
+
 public:
 	void AddData(const string& id, CShader* data)
 	{
