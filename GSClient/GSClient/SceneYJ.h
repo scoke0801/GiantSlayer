@@ -16,6 +16,13 @@ class CMummy;
 
 class CFbxObject2;
 
+enum ChessType {
+	King = 0,
+	Knight,
+	Pawn,
+	Rook,
+};
+
 class CSceneYJ : public CScene
 {
 private:
@@ -25,8 +32,9 @@ private:
 	bool						m_isPlayerSelected = true;
 	bool						m_isPlayerBoxCollide = false;
 	bool						m_isBoxDown = false;
-	bool						m_PuzzleNumSelect[9] = { false };
+	bool						m_ChessCheck[4] = { false };
 	bool						m_MummyExist[3] = { true,true,true };
+	XMFLOAT3					Chess_Plate[7][7];
 
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -39,6 +47,7 @@ private:
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
 	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;
+
 
 	CGameObject* m_Mirror[1] = { nullptr };
 	CPlayer* m_Player = nullptr;
@@ -69,6 +78,9 @@ private:
 	CCamera* m_MinimapCamera = nullptr;
 	CCamera* m_MirrorCamera = nullptr;
 
+	CGameObject* m_Chess[4];
+
+
 	CLightCamera* m_pLightCamera = nullptr;
 
 	short						m_DoorIdx = 0;
@@ -77,6 +89,8 @@ private:
 	bool						m_One_Mira_Die_Laser = false;
 	bool						m_Two_Mira_Die = false;
 	bool						m_Two_Mira_Die_Laser = false;
+	bool						m_Chess_Check[4] = { false,false,false,false };
+	
 	
 private:
 	POINT						m_LastMousePos;

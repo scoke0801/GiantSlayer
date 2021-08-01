@@ -72,7 +72,7 @@ protected:
 
 	float					m_Mummy_Die;
 
-	float					m_LaserAttackDelayTime[3] = { 3.0f,7.0f,11.0f };
+	float					m_LaserAttackDelayTime[3] = { 5.0f,7.0f,11.0f };
 	bool					m_LaserAttack[3] = { false,false,false };
 	bool					m_MummyExist[3] = { true,true,true };
 
@@ -170,6 +170,8 @@ class CMummy :public CEnemy
 {
 private:
 	vector<CMummy*> m_Friends;
+	vector<CMummyLaser*> m_Friends_Laser;
+
 	bool PlayerCheck = false;
 	bool LaserDelayTime[3] = { false,false,false };
 	bool shotLaser[3] = { false,false,false };
@@ -190,6 +192,7 @@ public:
 	void Attack(float elapsedTime) override;
 	void Update(float elapsedTime) override;
 	void AddFriends(CMummy* mummy);
+	void AddFriends_Laser(CMummyLaser* Laser);
 	void SendDieInfotoFriends();
 	void RemoveFriends(CMummy* mummy);
 };

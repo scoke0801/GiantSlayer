@@ -9,6 +9,7 @@ void CMummyLaser::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 	if (true == m_isDrawable) return;
 	OnPrepareRender();
 
+	
 	if (m_pShader)
 	{
 		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
@@ -29,75 +30,17 @@ void CMummyLaser::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 
 void CMummyLaser::Update(float fTimeElapsed)
 {
+	
 	if (false == m_isDrawable) {
 		m_ConnectedParticle->SetDrawable(true);
 		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ARROW_SPEED * fTimeElapsed)));
-		Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 360.0f * fTimeElapsed);
+		//Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 60.0f);
 		if (m_ConnectedParticle != nullptr) {
 			m_ConnectedParticle->SetPosition(m_xmf3Position);
 		}
 		m_ElapsedTime += fTimeElapsed;
-
-		
-		if (m_ElapsedTime > 3.0f ) {
-			for (auto& mummy : m_Friends)
-			{
-				if (GetLaserType() == Laser_TYPE::Laser1 && m_ElapsedTime > 3.0f+5.0f)
-				{
-		
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ mummy->GetPosition() }, { 0,200,0 });
-					m_ConnectedParticle->SetPosition(pos);
-					m_ConnectedParticle->SetDrawable(true);
-					SetPosition(pos);
-					m_ElapsedTime = 0.0f;
-					
-				}
-				if (mummy->GetMummyDie() == false)
-				{
-					m_ConnectedParticle->SetDrawable(false);
-				}
-
-				if (GetLaserType() == Laser_TYPE::Laser2 && m_ElapsedTime > 3.0f + 7.0f )
-				{
-					
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ mummy->GetPosition() }, { 0,200,0 });
-					m_ConnectedParticle->SetPosition(pos);
-					m_ConnectedParticle->SetDrawable(true);
-					SetPosition(pos);
-					m_ElapsedTime = 0.0f;
-					
-				}
-				if (mummy->GetMummyDie2() == false)
-				{
-					m_ConnectedParticle->SetDrawable(false);
-				}
-
-				if (GetLaserType() == Laser_TYPE::Laser3 && m_ElapsedTime > 3.0f + 11.0f && mummy->GetMummyDie3() == true)
-				{
-					
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ mummy->GetPosition() }, { 0,200,0 });
-					m_ConnectedParticle->SetPosition(pos);
-					m_ConnectedParticle->SetDrawable(true);
-					SetPosition(pos);
-					m_ElapsedTime = 0.0f;
-					
-				}
-				if (mummy->GetMummyDie3() == false)
-				{
-					m_ConnectedParticle->SetDrawable(false);
-				}
-			}
-			
-			m_ConnectedParticle->SetDrawable(false);
-			
-			
-			
-			//m_ConnectedParticle = nullptr;
-		}
 	}
-	return;
 }
-
 void CMummyLaser::SetTargetPosition(const XMFLOAT3& targetPos)
 {
 	XMFLOAT3 dirVector = Vector3::Normalize(Vector3::Subtract(targetPos, m_xmf3Position));
@@ -127,4 +70,16 @@ void CMummyLaser::SetDrawable(bool drawable)
 void CMummyLaser::AddFriends_p(CMummy* mummy)
 {
 	m_Friends.push_back(mummy);
+}
+
+void CMummyLaser::SetDirecionVector(const XMFLOAT3& direction)
+{
+	
+
+
+	XMFLOAT3 normalVec = Vector3::Normalize(direction);
+	m_xmf4x4World._21 = normalVec.x;
+	m_xmf4x4World._22 = normalVec.y;
+	m_xmf4x4World._23 = normalVec.z;
+	
 }

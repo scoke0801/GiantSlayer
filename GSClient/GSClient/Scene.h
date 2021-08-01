@@ -31,6 +31,7 @@ enum class FBX_MESH_TYPE : UINT {
 	Knight,
 	Rook,
 	King,
+	Laser,
 	COUNT
 };
 

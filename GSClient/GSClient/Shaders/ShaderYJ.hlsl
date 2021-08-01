@@ -118,9 +118,11 @@ Texture2D KnightDiffuse : register(t52);
 Texture2D PawnDiffuse : register(t53);
 Texture2D RookDiffuse : register(t54);
 
-Texture2D gtxtMap : register(t55);
-Texture2D gtxtMirror : register(t56);
-Texture2D gtxtShadowMap : register(t57);
+Texture2D ChessTile : register(t55);
+
+Texture2D gtxtMap : register(t56);
+Texture2D gtxtMirror : register(t57);
+Texture2D gtxtShadowMap : register(t58);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -939,6 +941,32 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     {
         cColor = gtxtBox.Sample(gssWrap, input.uv);
     }
+    if (gnTexturesMask & 0x400)
+    {
+        float4 Color = { 1.0f, 0.0f, 0.0f, 1.0f };
+        
+        cColor = gtxtBox.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
+    }
+    if (gnTexturesMask & 0x800)
+    {
+        float4 Color = { 0.0f, 0.0f, 1.0f, 1.0f };
+        
+        cColor = gtxtBox.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
+    }
+    
+    if (gnTexturesMask & 0x1000)
+    {
+        float4 Color = { 0.0f, 1.0f, 0.0f, 1.0f };
+        
+        cColor = gtxtBox.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
+    }
+    
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
     shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
@@ -1036,6 +1064,7 @@ float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
     }
     if (gnTexturesMask & 0x04)
     {
+        cColor = ChessTile.Sample(gssClamp, uvw);
     }
     if (gnTexturesMask & 0x08)
     {
@@ -1134,20 +1163,70 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     }
     if (gnTexturesMask & 0x400)
     {
+        float4 Color = { 0.0f, 0.0f, 0.0f, 1.0f };
+        
         cColor = KingDiffuse.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
     }
     if (gnTexturesMask & 0x800)
     {
+        float4 Color = { 0.0f, 0.0f, 0.0f, 1.0f };
+        
         cColor = KnightDiffuse.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
     }
     if (gnTexturesMask & 0x1000)
     {
+        float4 Color = { 0.0f, 0.0f, .0f, 1.0f };
+        
         cColor = PawnDiffuse.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
     }
     if (gnTexturesMask & 0x2000)
     {
+        float4 Color = { 0.0f, 0.0f, 0.0f, 1.0f };
+        
         cColor = RookDiffuse.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
     }
+    if (gnTexturesMask & 0x4000)
+    {
+        float4 Color = { 0.7f, 0.5f, 0.5f, 1.0f };
+        
+        cColor = KingDiffuse.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
+    }
+    if (gnTexturesMask & 0x8000)
+    {
+        float4 Color = { 0.8f, 0.5f, 0.5f, 1.0f };
+        
+        cColor = KnightDiffuse.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
+    }
+    if (gnTexturesMask & 0x10000)
+    {
+        float4 Color = { 0.8f, 0.5f, 0.5f, 1.0f };
+        
+        cColor = PawnDiffuse.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
+    }
+    if (gnTexturesMask & 0x20000)
+    {
+        float4 Color = { 0.8f, 0.5f, 0.5f, 1.0f };
+        
+        cColor = RookDiffuse.Sample(gssWrap, input.uv);
+        
+        cColor = lerp(cColor, Color, 0.5);
+    }
+    
+    
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
     shadowFactor = CalcShadowFactor(input.shadowPosH);
 

@@ -166,7 +166,7 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	}
 }
 
-void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count, PARTICLE_TYPE type, int idx)
+void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count, PARTICLE_TYPE type, CMesh* Mesh)
 {
 	if (type == PARTICLE_TYPE::ArrowParticle) {
 		CArrowParticleMesh* pMesh = new CArrowParticleMesh(pd3dDevice, pd3dCommandList, count);
@@ -174,6 +174,7 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		ParticleObject* pObject = new ParticleObject();
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("ArrowParticle"));
 		pObject->SetMesh(pMesh);
+
 		pObject->SetType(type);
 		m_ParticleObjs.push_back(std::move(pObject));
 	}
@@ -220,7 +221,9 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		CMummyLaserParticleMesh* pMesh = new CMummyLaserParticleMesh(pd3dDevice, pd3dCommandList, count, 1);
 		ParticleObject* pObject = new ParticleObject();
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("MummyLaserParticle"));
+		pObject->SetTextureIndex(0x20);
 		pObject->SetMesh(pMesh);
+		pObject->Scale(10.0f, 10.0f, 10.0f);
 		pObject->SetType(type);
 		m_ParticleObjs.push_back(std::move(pObject));
 	}
@@ -250,6 +253,8 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->SetType(type);
 		m_ParticleObjs.push_back(std::move(pObject));
 	}
+
+	
 }
 
 void CParticle::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

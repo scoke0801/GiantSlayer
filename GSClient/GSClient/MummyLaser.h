@@ -11,7 +11,6 @@ public:
 	bool m_Laser[3] = { true,true,true };
 	vector<CMummy*> m_Friends;
 	XMFLOAT3 Mummy_pos[3];
-	float					m_LaserAttackDelayTime[3] = { 5.0f,7.0f,9.0f };
 
 
 	CMummyLaser() { m_isDrawable = true; }
@@ -30,6 +29,9 @@ public:
 	void SetUseable(bool data) { m_isDrawable = data; }
 	void SetDrawable(bool drawable);
 	void AddFriends_p(CMummy* mummy);
+	void SetDirecionVector(const XMFLOAT3& direction);
+	
+
 	
 	
 	void ConnectParticle(ParticleObject* particle) { m_ConnectedParticle = particle; }
@@ -37,6 +39,7 @@ private:
 	XMFLOAT3 m_xmf3TargetPosition;
 
 	float m_ElapsedTime = 0.0f;
+	float m_LaserElapsedTime[3] = { -10.0,0.0f,0.0f };
 	ParticleObject* m_ConnectedParticle = nullptr;
 };
 

@@ -307,9 +307,9 @@ void CShaderHandler::CreateParticleShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 
 	pParticleShader = new CShader();
 	pParticleShader->CreateVertexShader(L"Shaders\\ParticleShader.hlsl", "VSMummyLaserParticle");
-	pParticleShader->CreatePixelShader(L"Shaders\\ParticleShader.hlsl", "PSParticle");
+	pParticleShader->CreatePixelShader(L"Shaders\\ParticleShader.hlsl", "PSTexParticle");
 
-	pParticleShader->CreateInputLayout(ShaderTypes::Particle);
+	pParticleShader->CreateInputLayout(ShaderTypes::TexParticle);
 	pParticleShader->CreateParticleShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("MummyLaserParticle", pParticleShader);
 

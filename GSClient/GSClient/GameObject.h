@@ -40,6 +40,13 @@ enum class Laser_TYPE
 	Laser4 = 3,
 	Laser5 = 4,
 };
+enum class Chess_Type
+{
+	King=0,
+	Knight=1,
+	Pawn=2,
+	Rook=3,
+};
 
 enum class COLLISION_HANDLE_TYPE : int {
 	NotCollide = 0,
@@ -132,6 +139,7 @@ protected: // 렌더링 관련 변수
 	CCamera*			m_Camera = nullptr;
 
 	Laser_TYPE m_LaserType = Laser_TYPE::Laser1;
+	Chess_Type m_ChessType = Chess_Type::King;
 
 	//EnemyAttackType m_EnemyAttackType = EnemyAttackType::Mummy1;
 
@@ -263,6 +271,7 @@ public:
 	Laser_TYPE GetLaserType() const { return m_LaserType; };
 
 	void LookAtDirection(XMFLOAT3 dir, void* pContext);
+	void LookAtDirections(XMFLOAT3 dir);
 	void SetVelocityToZero() { m_xmf3Velocity = XMFLOAT3(0, 0, 0); }
 
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
@@ -273,6 +282,9 @@ public:
 	// Set / Get connected Camera
 	void SetCamera(CCamera* camera) { m_Camera = camera; }
 	CCamera* GetCamera() const { return m_Camera; }
+
+	void SetChess(Chess_Type chess) { m_ChessType = chess; }
+	Chess_Type GetChess() const { return m_ChessType; }
 
 	virtual void SetAnimationStack(int nAnimationStack) { }
 

@@ -442,6 +442,10 @@ void CMummy::AddFriends(CMummy* mummy)
 {
 	m_Friends.push_back(mummy);
 }
+void CMummy::AddFriends_Laser(CMummyLaser* Laser)
+{
+	m_Friends_Laser.push_back(Laser);
+}
 
 void CMummy::SendDieInfotoFriends()
 {
@@ -464,24 +468,11 @@ void CMummy::RemoveFriends(CMummy* mummy)
 
 void CMummy::Update(float elapsedTime)
 {
-
 	m_State->Execute(this, elapsedTime);
 	
 	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
 
-	
-	/*if (this->GetMummyDie() > 0.0f && ScaleCheck == false)
-	{
-		ScaleCheck = true;
-		if (MummyScale[0] == false && ScaleCheck == true)
-		{
-			MummyScale[0] = true;
-			cout << "이게 "<<this->GetMummyDie() << endl;
-			this->Scale(15.f, 15.f, 15.f);
-			ScaleCheck = false;
-		}
-	}*/
-	
+
 	// 4스테이지 플레이어 진입 체크
 	for (auto player : m_ConnectedPlayers)
 	{
@@ -516,15 +507,29 @@ void CMummy::Update(float elapsedTime)
 				shotLaser[0] = true;
 				if (this->GetEnemyAttackType() == EnemyAttackType::Mummy1)
 				{
-					this->SetAnimationSet(2);
-					this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
+					//this->SetAnimationSet(2);
+					//this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
 					MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
 				}
 			}
 			m_LaserAttackDelayTime[0] = 5.0f;
-			m_LaserAttack[0] = true;
-		}
+			for (auto& Laser : m_Friends_Laser)
+			{
+				if (Laser->GetLaserType() == Laser_TYPE::Laser1)
+				{
+					this->SetAnimationSet(2);
+					this->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					Laser->SetPosition(pos);
+				}
+					
+			}
+			m_LaserAttack[0] = true;
+			
+		}
+		
+		
 		// 발사틈을 줘서 발사하고 나서 방향벡터 다시 원상복귀 
 		if (m_LaserAttack[0] == true)
 		{
@@ -562,13 +567,26 @@ void CMummy::Update(float elapsedTime)
 
 				if (this->GetEnemyAttackType() == EnemyAttackType::Mummy2)
 				{
-					this->SetAnimationSet(2);
-					this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
+					//this->SetAnimationSet(2);
+					//this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
 					MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
 				}
 
 			}
 			m_LaserAttackDelayTime[1] = 7.0f;
+			for (auto& Laser : m_Friends_Laser)
+			{
+				if (Laser->GetLaserType() == Laser_TYPE::Laser2)
+				{
+					cout << "레이저2" << endl;
+					this->SetAnimationSet(2);
+					this->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					Laser->SetPosition(pos);
+				}
+
+			}
 			m_LaserAttack[1] = true;
 		}
 
@@ -606,12 +624,26 @@ void CMummy::Update(float elapsedTime)
 				shotLaser[2] = true;
 				if (this->GetEnemyAttackType() == EnemyAttackType::Mummy3)
 				{
-					this->SetAnimationSet(2);
-					this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
+					//this->SetAnimationSet(2);
+					//this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
 					MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
 				}
 			}
 			m_LaserAttackDelayTime[2] = 11.0f;
+			for (auto& Laser : m_Friends_Laser)
+			{
+				if (Laser->GetLaserType() == Laser_TYPE::Laser3)
+				{
+					cout << "레이저3" << endl;
+					//cout << m_Friends_Laser.size();
+					this->SetAnimationSet(2);
+					this->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					Laser->SetPosition(pos);
+				}
+
+			}
 			m_LaserAttack[2] = true;
 
 		}
