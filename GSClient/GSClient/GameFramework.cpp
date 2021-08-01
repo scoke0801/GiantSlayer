@@ -44,9 +44,7 @@ void CFramework::OnCreate(HWND hWnd, HINSTANCE hInst)
 	 
 	BuildScene();
 	
-	InitializeCriticalSection(&m_cs);
-
-	TextHandler::GetInstance();
+	InitializeCriticalSection(&m_cs); 
 }
 
 void CFramework::OnDestroy()
