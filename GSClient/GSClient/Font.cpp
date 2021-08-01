@@ -271,7 +271,7 @@ int GetDXGIFormatBitsPerPixel(DXGI_FORMAT& dxgiFormat)
 int LoadImageDataFromFile(BYTE** imageData, D3D12_RESOURCE_DESC& resourceDescription, LPCWSTR filename, int& bytesPerRow)
 {
     HRESULT hr;
-
+    
     // we only need one instance of the imaging factory to create decoders and frames
     static IWICImagingFactory* wicFactory;
 
@@ -501,7 +501,8 @@ bool TextHandler::InitVertexBuffer(ID3D12Device* pd3dDevice,
     D3D12_RESOURCE_DESC fontTextureDesc;
     int fontImageBytesPerRow;
     BYTE* fontImageData;
-    int fontImageSize = LoadImageDataFromFile(&fontImageData, fontTextureDesc, m_Font.fontImage.c_str(), fontImageBytesPerRow);
+    auto fontImageName = L"Resources/Font/" + m_Font.fontImage;
+    int fontImageSize = LoadImageDataFromFile(&fontImageData, fontTextureDesc, fontImageName.c_str(), fontImageBytesPerRow);
     
     // make sure we have data
     if (fontImageData <= 0)
