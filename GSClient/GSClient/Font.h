@@ -87,7 +87,7 @@ int GetDXGIFormatBitsPerPixel(DXGI_FORMAT& dxgiFormat);
 class TextHandler
 {
 private:
-    TextHandler() { TextHandler::Load("resources/Font/Dotum.fnt"); };
+    TextHandler() {};
 
     TextHandler(const TextHandler& other) = delete;
     TextHandler& operator=(const TextHandler& other) = delete;

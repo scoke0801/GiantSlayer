@@ -494,24 +494,76 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
 // create text vertex buffer committed resources
 bool TextHandler::InitVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-    // create upload heap. We will fill this with data for our text
-    ID3D12Resource* vBufferUploadHeap;
-    HRESULT hr = pd3dDevice->CreateCommittedResource(
-        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
-        D3D12_HEAP_FLAG_NONE, // no flags
-        &CD3DX12_RESOURCE_DESC::Buffer(maxNumTextCharacters * sizeof(CTextVertex)), // resource description for a buffer
-        D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
-        nullptr,
-        IID_PPV_ARGS(&textVertexBuffer));
+    TextHandler::Load("resources/Font/Dotum.fnt");
 
-    if (FAILED(hr))
-    {
+    // Load the image from file
+    D3D12_RESOURCE_DESC fontTextureDesc;
+    int fontImageBytesPerRow;
+    BYTE* fontImageData;
+    int fontImageSize = LoadImageDataFromFile(&fontImageData, fontTextureDesc, m_Font.fontImage.c_str(), fontImageBytesPerRow);
+    
+    // make sure we have data
+    if (fontImageData <= 0)
+    { 
         return false;
     }
-    textVertexBuffer->SetName(L"Text Vertex Buffer Upload Resource Heap");
 
-    CD3DX12_RANGE readRange(0, 0);	// We do not intend to read from this resource on the CPU. (so end is less than or equal to begin)
+    // create the font texture resource
+    HRESULT hr = pd3dDevice->CreateCommittedResource(
+        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+        D3D12_HEAP_FLAG_NONE,
+        &fontTextureDesc,
+        D3D12_RESOURCE_STATE_COPY_DEST,
+        nullptr,
+        IID_PPV_ARGS(&m_Font.textureBuffer));
+    if (FAILED(hr))
+    { 
+        return false;
+    }
+    m_Font.textureBuffer->SetName(L"Font Texture Buffer Resource Heap");
 
-    // map the resource heap to get a gpu virtual address to the beginning of the heap
-    hr = textVertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&textVBGPUAddress));
+    ID3D12Resource* fontTextureBufferUploadHeap;
+    UINT64 fontTextureUploadBufferSize;
+    pd3dDevice->GetCopyableFootprints(&fontTextureDesc, 0, 1, 0, nullptr, nullptr, nullptr, &fontTextureUploadBufferSize);
+
+    // create an upload heap to copy the texture to the gpu
+    hr = pd3dDevice->CreateCommittedResource(
+        &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+        D3D12_HEAP_FLAG_NONE, // no flags
+        &CD3DX12_RESOURCE_DESC::Buffer(fontTextureUploadBufferSize),
+        D3D12_RESOURCE_STATE_GENERIC_READ,
+        nullptr,
+        IID_PPV_ARGS(&fontTextureBufferUploadHeap));
+    if (FAILED(hr))
+    { 
+        return false;
+    }
+    fontTextureBufferUploadHeap->SetName(L"Font Texture Buffer Upload Resource Heap");
+     
+    // store font image in upload heap
+    D3D12_SUBRESOURCE_DATA fontTextureData = {};
+    fontTextureData.pData = &fontImageData[0]; // pointer to our image data
+    fontTextureData.RowPitch = fontImageBytesPerRow; // size of all our triangle vertex data
+    fontTextureData.SlicePitch = fontImageBytesPerRow * fontTextureDesc.Height; // also the size of our triangle vertex data
+
+    // Now we copy the upload buffer contents to the default heap
+    UpdateSubresources(pd3dCommandList, m_Font.textureBuffer, fontTextureBufferUploadHeap, 0, 0, 1, &fontTextureData);
+
+    // transition the texture default heap to a pixel shader resource (we will be sampling from this heap in the pixel shader to get the color of pixels)
+    pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_Font.textureBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
+
+    // create an srv for the font
+    D3D12_SHADER_RESOURCE_VIEW_DESC fontsrvDesc = {};
+    fontsrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    fontsrvDesc.Format = fontTextureDesc.Format;
+    fontsrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    fontsrvDesc.Texture2D.MipLevels = 1;
+
+    // we need to get the next descriptor location in the descriptor heap to store this srv
+    srvHandleSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    m_Font.srvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mainDescriptorHeap->GetGPUDescriptorHandleForHeapStart(), 1, srvHandleSize);
+
+    CD3DX12_CPU_DESCRIPTOR_HANDLE srvHandle(mainDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), 1, srvHandleSize);
+    device->CreateShaderResourceView(arialFont.textureBuffer, &fontsrvDesc, srvHandle);
+
 }

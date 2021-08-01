@@ -56,7 +56,6 @@ CSceneJH::CSceneJH()
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		m_PlayerExistingSector[i] = false;
 	}
-
 }
 
 CSceneJH::~CSceneJH()
