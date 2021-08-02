@@ -496,7 +496,7 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
 bool TextHandler::InitVertexBuffer(ID3D12Device* pd3dDevice,
     ID3D12GraphicsCommandList* pd3dCommandList, ID3D12DescriptorHeap* d3dDescripotrHeap, int handlePosition)
 {
-    TextHandler::Load("resources/Font/Arial.fnt");
+    TextHandler::Load("resources/Font/Dotum.fnt");
 
     // Load the image from file
     D3D12_RESOURCE_DESC fontTextureDesc;
