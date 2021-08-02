@@ -418,7 +418,7 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
     pd3dCommandList->IASetVertexBuffers(0, 1, &textVertexBufferView);
 
     // bind the text srv. We will assume the correct descriptor heap and table are currently bound and set
-    pd3dCommandList->SetGraphicsRootDescriptorTable(1, m_Font.srvHandle);
+    pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_Font.srvHandle);
 
     int numCharacters = 0;
 
@@ -467,6 +467,7 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
             kerning = m_Font.GetKerning(lastChar, c);
 
         vert[numCharacters] = CTextVertex(color.x,
+        //vert = CTextVertex(color.x,
             color.y,
             color.z,
             color.w,
@@ -493,7 +494,7 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
 
 // create text vertex buffer committed resources
 bool TextHandler::InitVertexBuffer(ID3D12Device* pd3dDevice,
-    ID3D12GraphicsCommandList* pd3dCommandList, ID3D12DescriptorHeap* d3dDescripotrHeap)
+    ID3D12GraphicsCommandList* pd3dCommandList, ID3D12DescriptorHeap* d3dDescripotrHeap, int handlePosition)
 {
     TextHandler::Load("resources/Font/Arial.fnt");
 
@@ -564,7 +565,42 @@ bool TextHandler::InitVertexBuffer(ID3D12Device* pd3dDevice,
     // we need to get the next descriptor location in the descriptor heap to store this srv
     auto srvHandleSize = pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     m_Font.srvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(d3dDescripotrHeap->GetGPUDescriptorHandleForHeapStart(), 1, srvHandleSize);
+    //m_Font.srvHandle.ptr += gnCbvSrvDescriptorIncrementSize * handlePosition;
 
     CD3DX12_CPU_DESCRIPTOR_HANDLE srvHandle(d3dDescripotrHeap->GetCPUDescriptorHandleForHeapStart(), 1, srvHandleSize);
+    //srvHandle.ptr += gnCbvSrvDescriptorIncrementSize * handlePosition;
+
     pd3dDevice->CreateShaderResourceView(m_Font.textureBuffer, &fontsrvDesc, srvHandle);
+
+    // create text vertex buffer committed resources 
+    {
+        // create upload heap. We will fill this with data for our text
+        ID3D12Resource* vBufferUploadHeap;
+        hr = pd3dDevice->CreateCommittedResource(
+            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
+            D3D12_HEAP_FLAG_NONE, // no flags
+            &CD3DX12_RESOURCE_DESC::Buffer(maxNumTextCharacters * sizeof(CTextVertex)), // resource description for a buffer
+            D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
+            nullptr,
+            IID_PPV_ARGS(&textVertexBuffer));
+        if (FAILED(hr))
+        { 
+            return false;
+        }
+        textVertexBuffer->SetName(L"Text Vertex Buffer Upload Resource Heap");
+
+        CD3DX12_RANGE readRange(0, 0);	// We do not intend to read from this resource on the CPU. (so end is less than or equal to begin)
+
+        // map the resource heap to get a gpu virtual address to the beginning of the heap
+        hr = textVertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&textVBGPUAddress));
+    }
+
+     
+    // set the text vertex buffer view for each frame
+    {
+        textVertexBufferView.BufferLocation = textVertexBuffer->GetGPUVirtualAddress();
+        textVertexBufferView.StrideInBytes = sizeof(CTextVertex);
+        textVertexBufferView.SizeInBytes = maxNumTextCharacters * sizeof(CTextVertex);
+    }
+     
 }

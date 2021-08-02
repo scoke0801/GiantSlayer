@@ -103,7 +103,7 @@ public:
     void Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring text, XMFLOAT2 pos, 
         XMFLOAT2 scale = XMFLOAT2(1.0f, 1.0f), XMFLOAT2 padding = XMFLOAT2(0.5f, 0.0f), XMFLOAT4 color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
-    bool InitVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12DescriptorHeap* d3dDescripotrHeap);
+    bool InitVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12DescriptorHeap* d3dDescripotrHeap, int handlePosition);
 
 private:
     Font m_Font;
@@ -111,5 +111,5 @@ private:
     ID3D12Resource* textVertexBuffer;
     D3D12_VERTEX_BUFFER_VIEW textVertexBufferView; // a view for our text vertex buffer
     UINT8* textVBGPUAddress; // this is a pointer to each of the text constant buffers
-
+     
 };
