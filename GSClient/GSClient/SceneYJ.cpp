@@ -238,7 +238,7 @@ void CSceneYJ::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pTerrainWater->SetPosition(XMFLOAT3(5450.0f * MAP_SCALE_SIZE, -1300.0f, 16500.0f * MAP_SCALE_SIZE));
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater].push_back(pTerrainWater);
 
-	//FbxLoader(m_pfbxManager, "Laser", false, 1);
+	//FbxLoader(m_pfbxManager, "laser3", false, 1);
 	
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
@@ -313,7 +313,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",
 		L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",L"resources/OBJ/bossWall.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds",
-		L"resources/OBJ/Box.dds",
+		L"resources/Textures/LightningSpriteSheet2.dds",
 		L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
 		L"resources/OBJ/Door.dds",
@@ -3324,7 +3324,7 @@ void CSceneYJ::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Pawn] = new CFixedMesh(pd3dDevice, pd3dCommandList, "pawn");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight] = new CFixedMesh(pd3dDevice, pd3dCommandList, "knight");
 
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser] = new CFixedMesh(pd3dDevice, pd3dCommandList, "MuzzleFlash_mesh");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser] = new CFixedMesh(pd3dDevice, pd3dCommandList, "laser3");
 	
 }
 
@@ -3472,8 +3472,9 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		//pMummyLaser->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
 		pMummyLaser->Rotate(XMFLOAT3(0, 1, 0), 90.0f);
 		pMummyLaser->SetTextureIndex(0x400);
-		pMummyLaser->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		pMummyLaser->Scale(1.0f, 1.0f, 25.0f);
+		
+		pMummyLaser->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		pMummyLaser->Scale(100.0f, 100.0f, 500.0f);
 
 		pMummyLaser->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
 		pMummyLaser->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
@@ -3486,8 +3487,8 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pMummyLaser2->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
 		//pMummyLaser2->SetPosition({ 500.0f,  100.0f, 1500.0f });
 		pMummyLaser2->SetTextureIndex(0x800);
-		pMummyLaser2->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		pMummyLaser2->Scale(1.0f, 1.0f, 25.0f);
+		pMummyLaser2->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		pMummyLaser2->Scale(100.0f, 100.0f, 1000.0f);
 		pMummyLaser2->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
 		pMummyLaser2->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2].push_back(pMummyLaser2);
@@ -3500,8 +3501,8 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		//pMummyLaser3->SetPosition({ 500.0f,  100.0f, 1500.0f });
 
 		pMummyLaser3->SetTextureIndex(0x1000);
-		pMummyLaser3->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		pMummyLaser3->Scale(1.0f, 1.0f, 25.0f);
+		pMummyLaser3->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		pMummyLaser3->Scale(100.0f, 100.0f, 1000.0f);
 		pMummyLaser3->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
 		pMummyLaser3->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3].push_back(pMummyLaser3);

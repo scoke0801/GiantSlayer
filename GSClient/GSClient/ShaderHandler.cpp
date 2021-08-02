@@ -369,7 +369,7 @@ void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12Roo
 		pShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSTexturedLighting");
 	}
 	pShader->CreateInputLayout(ShaderTypes::Textured);
-	pShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,true,true);
 	pShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Object", pShader);
 }

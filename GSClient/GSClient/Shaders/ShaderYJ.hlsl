@@ -874,6 +874,27 @@ VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
     output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxWorld);
     output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
     output.uv = input.uv;
+    
+    float frameCount = 0;
+    if (gnTexturesMask & 0x400)
+    {
+        frameCount = 8;
+    }
+    if (gnTexturesMask & 0x800)
+    {
+        frameCount = 8;
+    }
+    if (gnTexturesMask & 0x1000)
+    {
+        frameCount = 8;
+    }
+
+    float newTime = fmod(gfTime * 10.0f, frameCount);
+    //output.uv.x /= frameCount;
+    output.uv.x += (1.0f / frameCount) * (int) newTime;
+    //output.uv.y /= frameCount;
+    //output.uv.y += (1.0f / frameCount) * (int) newTime;
+    
     output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
 
     return (output);
@@ -943,28 +964,34 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     }
     if (gnTexturesMask & 0x400)
     {
-        float4 Color = { 1.0f, 0.0f, 0.0f, 1.0f };
+        //float4 Color = { 0.1f, 0.1f, 0.1f, 1.0f };
         
         cColor = gtxtBox.Sample(gssWrap, input.uv);
+        cColor.rgb *= 0.1f;
+        cColor.a += 0.5f;
         
-        cColor = lerp(cColor, Color, 0.5);
+        //cColor = lerp(cColor, Color, 0.5);
     }
     if (gnTexturesMask & 0x800)
     {
-        float4 Color = { 0.0f, 0.0f, 1.0f, 1.0f };
+        //float4 Color = { 0.2f, 0.2f, 0.2f, 1.0f };
         
         cColor = gtxtBox.Sample(gssWrap, input.uv);
+        cColor.rgb *= 0.1f;
+        cColor.a += 0.5f;
         
-        cColor = lerp(cColor, Color, 0.5);
+        //cColor = lerp(cColor, Color, 0.5);
     }
     
     if (gnTexturesMask & 0x1000)
     {
-        float4 Color = { 0.0f, 1.0f, 0.0f, 1.0f };
+        //float4 Color = { 0.3f, 0.3f, 0.3f, 1.0f };
         
         cColor = gtxtBox.Sample(gssWrap, input.uv);
+        cColor.rgb *= 0.1f;
+        cColor.a += 0.5f;
         
-        cColor = lerp(cColor, Color, 0.5);
+        //cColor = lerp(cColor, Color, 0.5);
     }
     
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
