@@ -32,7 +32,7 @@ public:
 	AnimationType ATK3 = AnimationType::SWORD_ATK3;
 	AnimationType SKILL = AnimationType::SWORD_SKILL;
 	AnimationType DEATH = AnimationType::SWORD_DEATH;
-	AnimationType CHANGEWEAPON = AnimationType::BOW_GET; 
+	AnimationType CHANGEWEAPON = AnimationType::BOW_GET;
 
 private:
 	bool m_IsAlreadyAttack = false;
@@ -56,6 +56,7 @@ private:
 	int m_LastAttackAnim = 1;
 
 	bool m_IsCanAttack = true;
+	bool m_AttackKeyDown = false;
 
 	bool m_IsBox = false;
 	bool m_DownBox = false;
@@ -106,6 +107,7 @@ public:
 	void SetDownBox(bool info) { m_DownBox = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }
 	bool IsBox() const { return m_IsCanAttack; }
+	void SetSwordAttackKeyDown(bool info) { m_AttackKeyDown = info; }
 
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
 	//void IncreaseBoxPickWaitingTime(float time) { m_BoxPickWaitingTime = time; }
@@ -117,7 +119,7 @@ public:
 	void Jump();
 
 	bool Attacked(CGameObject* pObject);
-	void Attack();
+	void Attack(int type);
 	void ResetAttack();
 	void ResetBow();
 

@@ -1604,17 +1604,34 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 				switch (m_Player->GetWeapon())
 				{
 				case PlayerWeaponType::Sword:
-					m_Player->Attack();
+					m_Player->Attack(0);
 					break;
 				case PlayerWeaponType::Bow:
-					m_Player->Attack();
+					m_Player->Attack(0);
 					m_Player->pullString = true;
 					break;
 				case PlayerWeaponType::Staff:
-					m_Player->Attack();
+					m_Player->Attack(0);
 					ActiveSkill(OBJECT_LAYER::FireBall, m_Player);
 					break;
 				}
+			}
+			else {
+				switch (m_Player->GetWeapon())
+				{
+				case PlayerWeaponType::Sword:
+					if (m_Player->GetAttackWaitTime() < 0.5f) {
+						cout << m_Player->GetAttackWaitTime() << endl;
+						m_Player->SetSwordAttackKeyDown(true);
+					}
+					break;
+				}
+			}
+		}
+		if (wParam == VK_M) {
+			if (m_Player->IsCanAttack()) {
+				m_Player->Attack(1);
+				cout << "SKILLLLL~~" << endl;
 			}
 		}
 	}

@@ -61,6 +61,12 @@ void CPlayer::Update(float fTimeElapsed)
 		if (m_AttackWaitingTime < 0.0f) {
 			ResetAttack();
 			m_ComboTimer = 0.5f;
+			if (m_AttackKeyDown) {
+				SetSwordAttackKeyDown(false);
+				Attack(0);
+			}
+			else
+				m_LastAttackAnim = 0;
 		}
 	}
 	else if (m_AttackedDelay > 0.0f) {
@@ -303,7 +309,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 	return true;
 }
 
-void CPlayer::Attack()
+void CPlayer::Attack(int type)
 {
 	SetCanAttack(false);
 
@@ -322,27 +328,36 @@ void CPlayer::Attack()
 	m_SpareBoundingBox = tempMesh;
 	UpdateColliders();
 
-	if (m_WeaponType == PlayerWeaponType::Sword && m_ComboTimer > 0.0f) {
-		if (m_LastAttackAnim == 0) {
-			IncreaseAttackWaitingTime(m_SwordAnim2Length);
-			SetAnimationSet(ATK2);
-			m_LastAttackAnim = 1;
+	//IncreaseAttackWaitingTime(m_AttackAnimLength);
+	//SetAnimationSet(ATK);
+
+	if (type == 0) {
+		if (m_WeaponType == PlayerWeaponType::Sword && m_ComboTimer > 0.0f) {
+			if (m_LastAttackAnim == 0) {
+				IncreaseAttackWaitingTime(m_SwordAnim2Length);
+				SetAnimationSet(ATK2);
+				m_LastAttackAnim = 1;
+			}
+			else if (m_LastAttackAnim == 1) {
+				IncreaseAttackWaitingTime(m_SwordAnim3Length);
+				SetAnimationSet(ATK3);
+				m_LastAttackAnim = 2;
+			}
+			else if (m_LastAttackAnim == 2) {
+				IncreaseAttackWaitingTime(m_AttackAnimLength);
+				SetAnimationSet(ATK);
+				m_LastAttackAnim = 0;
+			}
 		}
-		else if (m_LastAttackAnim == 1) {
-			IncreaseAttackWaitingTime(m_SwordAnim3Length);
-			SetAnimationSet(ATK3);
-			m_LastAttackAnim = 2;
-		}
-		else if (m_LastAttackAnim == 2) {
+		else {
 			IncreaseAttackWaitingTime(m_AttackAnimLength);
 			SetAnimationSet(ATK);
 			m_LastAttackAnim = 0;
 		}
 	}
-	else {
-		IncreaseAttackWaitingTime(m_AttackAnimLength);
-		SetAnimationSet(ATK);
-		m_LastAttackAnim = 0;
+	else if (type == 1) {
+		IncreaseAttackWaitingTime(m_SkillAnimLength);
+		SetAnimationSet(SKILL);
 	}
 }
 
