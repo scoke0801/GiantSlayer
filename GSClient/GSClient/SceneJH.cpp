@@ -342,7 +342,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = m_Textures.size() + 3;
+	srvHeapDesc.NumDescriptors = m_Textures.size() + 4;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
@@ -426,13 +426,12 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsvDesc.Texture2D.MipSlice = 0;
 
-	pd3dDevice->CreateDepthStencilView(m_pd3dShadowMap, &dsvDesc, CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize));
-
 	TextHandler::GetInstance().InitVertexBuffer(pd3dDevice, pd3dCommandList, m_pd3dSrvDescriptorHeap, m_Textures.size() + 3);
 
+	pd3dDevice->CreateDepthStencilView(m_pd3dShadowMap, &dsvDesc, CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize));
 
 	m_d3dDsvShadowMapCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize);
-	m_d3dSrvShadowMapGPUHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 4, gnCbvSrvDescriptorIncrementSize); 
+	m_d3dSrvShadowMapGPUHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 4, gnCbvSrvDescriptorIncrementSize);
 }
 
 void CSceneJH::ReleaseObjects()
@@ -878,8 +877,8 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 
 	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"TEST"), XMFLOAT2(0.02f, 0.01f), XMFLOAT2(2.0f, 2.0f));
-	 
+	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"TEST"), XMFLOAT2(0.02f, 0.01f), XMFLOAT2(200.0f, 200.0f)); 
+
 }
 
 void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)

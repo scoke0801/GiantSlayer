@@ -122,6 +122,7 @@ Texture2D gtxtEffect_3		: register(t51);
 Texture2D gtxtMap			: register(t52);
 Texture2D gtxtMirror		: register(t53);
 Texture2D gtxtShadowMap		: register(t54);
+
 Texture2D gtxtFont			: register(t55);
 
 float CalcShadowFactor(float4 f4ShadowPos)
@@ -1414,6 +1415,9 @@ VS_FONT_OUT VS_FONT_MAIN(VS_FONT_IN input, uint vertexID : SV_VertexID)
 
 	// set the position for the vertex based on which vertex it is (uv)
 	output.pos = float4(input.pos.x + (input.pos.z * uv.x), input.pos.y - (input.pos.w * uv.y), 0, 1);
+
+	//output.pos = mul(mul(mul(output.pos, gmtxWorld), gmtxView), gmtxProjection);
+
 	output.color = input.color;
 
 	// set the texture coordinate based on which vertex it is (uv)
@@ -1423,6 +1427,7 @@ VS_FONT_OUT VS_FONT_MAIN(VS_FONT_IN input, uint vertexID : SV_VertexID)
 }
  
 float4 PS_FONT_MAIN(VS_FONT_OUT input) : SV_TARGET
-{
-	return float4(input.color.rgb, input.color.a * gtxtFont.Sample(gssWrap, input.texCoord).a);
+{ 
+return float4(input.color.rgb, input.color.a * gtxtWater.Sample(gssWrap, input.texCoord).a);
+	//return float4(input.color.rgb, input.color.a * gtxtFont.Sample(gssWrap, input.texCoord).a);
 }

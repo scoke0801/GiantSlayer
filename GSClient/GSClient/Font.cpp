@@ -496,7 +496,7 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
 bool TextHandler::InitVertexBuffer(ID3D12Device* pd3dDevice,
     ID3D12GraphicsCommandList* pd3dCommandList, ID3D12DescriptorHeap* d3dDescripotrHeap, int handlePosition)
 {
-    TextHandler::Load("resources/Font/Dotum.fnt");
+    TextHandler::Load("resources/Font/Arial.fnt");
 
     // Load the image from file
     D3D12_RESOURCE_DESC fontTextureDesc;
@@ -562,13 +562,15 @@ bool TextHandler::InitVertexBuffer(ID3D12Device* pd3dDevice,
     fontsrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
     fontsrvDesc.Texture2D.MipLevels = 1;
 
+    //pd3dDevice->CreateShaderResourceView(m_pd3dMirrorTex, &srvDesc, hDescriptor);
+     
     // we need to get the next descriptor location in the descriptor heap to store this srv
     auto srvHandleSize = pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    m_Font.srvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(d3dDescripotrHeap->GetGPUDescriptorHandleForHeapStart(), 1, srvHandleSize);
+    m_Font.srvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(d3dDescripotrHeap->GetGPUDescriptorHandleForHeapStart(), handlePosition, srvHandleSize);
     //m_Font.srvHandle.ptr += gnCbvSrvDescriptorIncrementSize * handlePosition;
 
-    CD3DX12_CPU_DESCRIPTOR_HANDLE srvHandle(d3dDescripotrHeap->GetCPUDescriptorHandleForHeapStart(), 1, srvHandleSize);
-    //srvHandle.ptr += gnCbvSrvDescriptorIncrementSize * handlePosition;
+    CD3DX12_CPU_DESCRIPTOR_HANDLE srvHandle(d3dDescripotrHeap->GetCPUDescriptorHandleForHeapStart(), handlePosition, srvHandleSize);
+   // srvHandle.ptr += gnCbvSrvDescriptorIncrementSize * handlePosition;
 
     pd3dDevice->CreateShaderResourceView(m_Font.textureBuffer, &fontsrvDesc, srvHandle);
 
