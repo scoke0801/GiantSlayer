@@ -1576,17 +1576,34 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 				switch (m_Player->GetWeapon())
 				{
 				case PlayerWeaponType::Sword:
-					m_Player->Attack();
+					m_Player->Attack(0);
 					break;
 				case PlayerWeaponType::Bow:
-					m_Player->Attack();
+					m_Player->Attack(0);
 					m_Player->pullString = true;
 					break;
 				case PlayerWeaponType::Staff:
-					m_Player->Attack();
+					m_Player->Attack(0);
 					ActiveSkill(OBJECT_LAYER::FireBall, m_Player);
 					break;
 				}
+			}
+			else {
+				switch (m_Player->GetWeapon())
+				{
+				case PlayerWeaponType::Sword:
+					if (m_Player->GetAttackWaitTime() < 0.5f) {
+						cout << m_Player->GetAttackWaitTime() << endl;
+						m_Player->SetSwordAttackKeyDown(true);
+					}
+					break;
+				}
+			}
+		}
+		if (wParam == VK_M) {
+			if (m_Player->IsCanAttack()) {
+				m_Player->Attack(1);
+				cout << "SKILLLLL~~" << endl;
 			}
 		}
 	}
@@ -3242,7 +3259,7 @@ void CSceneTH::BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player9.bin", NULL, true);
 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
@@ -3274,7 +3291,7 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	for (int i = 1; i < MAX_ROOM_PLAYER; ++i) {
 		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player9.bin", NULL, true);
 
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 

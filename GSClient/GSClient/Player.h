@@ -28,8 +28,11 @@ public:
 	AnimationType IDLE = AnimationType::SWORD_IDLE;
 	AnimationType RUN = AnimationType::SWORD_RUN;
 	AnimationType ATK = AnimationType::SWORD_ATK;
+	AnimationType ATK2 = AnimationType::SWORD_ATK2;
+	AnimationType ATK3 = AnimationType::SWORD_ATK3;
+	AnimationType SKILL = AnimationType::SWORD_SKILL;
 	AnimationType DEATH = AnimationType::SWORD_DEATH;
-	AnimationType CHANGEWEAPON = AnimationType::BOW_GET; 
+	AnimationType CHANGEWEAPON = AnimationType::BOW_GET;
 
 private:
 	bool m_IsAlreadyAttack = false;
@@ -43,17 +46,23 @@ private:
 
 private:
 	float m_AttackAnimLength = 0.0f;
+	float m_SwordAnim2Length = 0.0f;
+	float m_SwordAnim3Length = 0.0f;
+	float m_SkillAnimLength = 0.0f;
 	float m_AttackWaitingTime = 0.0f;
 
 	float m_AttackAnimPauseTime = 0.0f;
 
-	bool m_IsCanAttack = true; 
+	int m_LastAttackAnim = 1;
 
-	bool m_PullBox = false;  
+	bool m_PullBox = false;
+
+	bool m_IsCanAttack = true;
+	bool m_AttackKeyDown = false;
 
 	float m_AttackedDelay = 0.0f;
 	float m_SkillCoolTime = 0.0f;
-	float m_AttackTimer = 1.0f;
+	float m_ComboTimer = 0.5f;
 
 public:
 	bool pullString = false;
@@ -91,6 +100,9 @@ public:
 	void SetPullBox(bool info ) { m_PullBox = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }
 
+	bool IsBox() const { return m_IsCanAttack; }
+	void SetSwordAttackKeyDown(bool info) { m_AttackKeyDown = info; }
+
 	void IncreaseAttackWaitingTime(float time) { m_AttackWaitingTime = time; }
 	//void IncreaseBoxPickWaitingTime(float time) { m_BoxPickWaitingTime = time; }
 	//void IncreaseBoxDownWaitingTime(float time) { m_BoxDownWaitingTime = time; }
@@ -103,7 +115,7 @@ public:
 	void Jump();
 
 	bool Attacked(CGameObject* pObject);
-	void Attack();
+	void Attack(int type);
 	void ResetAttack();
 	void ResetBow();
 

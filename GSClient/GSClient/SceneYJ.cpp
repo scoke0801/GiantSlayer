@@ -1657,7 +1657,7 @@ void CSceneYJ::ProcessInput()
 	if (keyInput.KEY_J)
 	{
 		if (m_Player->IsCanAttack()) {
-			m_Player->Attack();
+			m_Player->Attack(0);
 			m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 		
 			//ShotPlayerArrow();

@@ -57,26 +57,29 @@ enum AnimationType
 	SWORD_IDLE,
 	SWORD_RUN,
 	SWORD_ATK,
-	//SWORD_ATK2,
-	//SWORD_ATK3,
+	SWORD_ATK2,
+	SWORD_ATK3,
+	SWORD_SKILL,
 	SWORD_DEATH,
 	// 활 ===========
 	BOW_GET,
 	BOW_IDLE,
 	BOW_RUN,
 	BOW_ATK,
+	BOW_SKILL,
 	BOW_DEATH,
 	// 스태프 ===========
 	STAFF_GET,
 	STAFF_IDLE,
 	STAFF_RUN,
 	STAFF_ATK,
-	STAFF_DEATH,
+	STAFF_SKILL,
+	STAFF_DEATH
 	// 박스==============
-	BOX_IDLE,
-	BOX_WALK,
-	BOX_PICK,
-	BOX_DOWN
+	//BOX_IDLE,
+	//BOX_WALK,
+	//BOX_PICK,
+	//BOX_DOWN
 
 };
 // x,y,z 크기를 short로 보내면 맵 크기 20000에서 
