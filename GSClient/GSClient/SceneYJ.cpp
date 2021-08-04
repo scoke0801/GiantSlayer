@@ -304,8 +304,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Bow",
 		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse",
 		"ChessTile",
-
-		
+		"Laser",
 	};
 
 	const wchar_t* address[] =
@@ -313,7 +312,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",
 		L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",L"resources/OBJ/bossWall.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds",
-		L"resources/Textures/LightningSpriteSheet2.dds",
+		L"resources/OBJ/Box.dds",
 		L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
 		L"resources/OBJ/Door.dds",
@@ -337,6 +336,7 @@ void CSceneYJ::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/bow_texture.dds",
 		L"resources/Textures/KingDiffuse.dds",L"resources/Textures/KnightDiffuse.dds",L"resources/Textures/PawnDiffuse.dds",L"resources/Textures/RookDiffuse.dds",
 		L"resources/OBJ/ChessTile.dds",
+		L"resources/Textures/LightningSpriteSheet2.dds",
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -395,8 +395,8 @@ void CSceneYJ::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"GreenTree",
 		"Bow",
 		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse",
-		"ChessTile"
-	
+		"ChessTile",
+		"Laser"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -507,7 +507,6 @@ void CSceneYJ::Update(float elapsedTime)
 			{
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
 				m_Player->FixCollision();
-				//cout << "충돌 : 플레이어 - 적\n";
 			}
 		}
 	}
@@ -533,7 +532,6 @@ void CSceneYJ::Update(float elapsedTime)
 			{
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
 				m_Player->FixCollision();
-				//cout << "충돌 : 플레이어 - 적\n";
 			}
 		}
 	}
@@ -544,7 +542,6 @@ void CSceneYJ::Update(float elapsedTime)
 				CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
 				thisEnemy->FixCollision(pObstacle);
 				thisEnemy->CollideToObstacle();
-				//cout << "충돌 : 몬스터 - 장애물 재탐색 수행\n";
 			}
 		}
 	}
@@ -555,7 +552,6 @@ void CSceneYJ::Update(float elapsedTime)
 				CMummy* thisEnemy = reinterpret_cast<CMummy*>(pMummy);
 				thisEnemy->FixCollision(pObstacle);
 				thisEnemy->CollideToObstacle();
-				//cout << "충돌 : 몬스터 - 장애물 재탐색 수행\n";
 			}
 		}
 	}
@@ -570,7 +566,6 @@ void CSceneYJ::Update(float elapsedTime)
 			if (m_Player->Attacked(pArrow)) {
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
 				pArrow->SetDrawable(true);
-				//cout << "충돌 : 플레이어 - 적\n";
 			}
 		}
 	}
@@ -621,17 +616,14 @@ void CSceneYJ::Update(float elapsedTime)
 				if (i == 0)
 				{
 					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_0(), 1));
-					cout << "충돌 : 플레이어 - 거울0\n";
 				}
 				else if (i == 1)
 				{
 					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_1(), 1));
-					cout << "충돌 : 플레이어 - 거울1\n";
 				}
 				else if (i == 2)
 				{
 					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_2(), 1));
-					cout << "충돌 : 플레이어 - 거울2\n";
 				}
 			}
 		}
@@ -642,8 +634,8 @@ void CSceneYJ::Update(float elapsedTime)
 	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 5.0f);
 	XMFLOAT3 Speed = { 0.3f,0.3f,0.3f };
 
+	// 체스 퍼즐 충돌처리
 	for (auto pPlayerChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle]) {
-
 
 		if (pPlayerChessPuzzle->CollisionCheck(m_Player))
 		{
@@ -655,8 +647,8 @@ void CSceneYJ::Update(float elapsedTime)
 		}	
 	}
 	
-	// 체스 퍼즐하고 충돌처리
-	for (int i = 0; i < 4; i++)
+	// 체스 그 자체랑 충돌처리
+	for (int i = 0; i < ChessType::Count; i++)
 	{
 		if (
 			(
@@ -671,17 +663,17 @@ void CSceneYJ::Update(float elapsedTime)
 		
 			)
 		{
-			m_Chess_Check[i] = true;
+			m_ChessCollide_Check[i] = true;
 		}
 		else 
 		{
-			m_Chess_Check[i] = false;
+			m_ChessCollide_Check[i] = false;
 		}
 		
 	}
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < ChessType::Count; i++)
 	{
-		if (m_Chess_Check[i]==true)
+		if (m_ChessCollide_Check[i]==true)
 		{
 			
 			m_Player->Box_Pull(TRUE);
@@ -691,7 +683,7 @@ void CSceneYJ::Update(float elapsedTime)
 									m_Chess[i]->GetPosition().z + Final_Vec.z
 				});
 		}
-		else if(m_Chess_Check[0]==false && m_Chess_Check[1] == false && m_Chess_Check[2] == false && m_Chess_Check[3] == false  )
+		else if(m_ChessCollide_Check[King]==false && m_ChessCollide_Check[Knight] == false && m_ChessCollide_Check[Pawn] == false && m_ChessCollide_Check[Rook] == false  )
 		{
 			m_Player->Box_Pull(FALSE);
 		}
@@ -701,25 +693,25 @@ void CSceneYJ::Update(float elapsedTime)
 	if ((m_Chess[King]->GetPosition().x > 18320.0f && m_Chess[King]->GetPosition().x < 18720.0f)
 		&& (m_Chess[King]->GetPosition().z > 17150.0f && m_Chess[King]->GetPosition().z < 17550.0f))
 	{
-		m_ChessCheck[King] = true;
+		m_ChessPlate_Check[King] = true;
 	}
 	if ((m_Chess[Knight]->GetPosition().x > 18320.0f && m_Chess[Knight]->GetPosition().x < 18720.0f)
 		&& (m_Chess[Knight]->GetPosition().z > 15950.0f && m_Chess[Knight]->GetPosition().z < 16350.0f))
 	{
-		m_ChessCheck[Knight] = true;
+		m_ChessPlate_Check[Knight] = true;
 	}
 	if ((m_Chess[Pawn]->GetPosition().x > 17720.0f && m_Chess[Pawn]->GetPosition().x < 18120.0f)
 		&& (m_Chess[Pawn]->GetPosition().z > 16550.0f && m_Chess[Pawn]->GetPosition().z < 16950.0f))
 	{
-		m_ChessCheck[Pawn] = true;
+		m_ChessPlate_Check[Pawn] = true;
 	}
 	if ((m_Chess[Rook]->GetPosition().x > 17140.0f && m_Chess[Rook]->GetPosition().x < 17520.0f)
 		&& (m_Chess[Rook]->GetPosition().z > 15950.0f && m_Chess[Rook]->GetPosition().z < 16350.0f))
 	{
-		m_ChessCheck[Rook] = true;
+		m_ChessPlate_Check[Rook] = true;
 	}
 
-	if (m_ChessCheck[King] && m_ChessCheck[Knight] && m_ChessCheck[Pawn] && m_ChessCheck[Rook])
+	if (m_ChessPlate_Check[King] && m_ChessPlate_Check[Knight] && m_ChessPlate_Check[Pawn] && m_ChessPlate_Check[Rook])
 	{
 		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
 		p->OpenDoor();
@@ -1653,15 +1645,7 @@ void CSceneYJ::ProcessInput()
 	{
 		gbWireframeOn = false;
 	}
-	if (keyInput.KEY_T)
-	{
-		gbShadowOn = true;
-		
-	}
-	if (keyInput.KEY_Y)
-	{
-		gbShadowOn = false;
-	}
+
 	m_CurrentCamera->UpdateViewMatrix();
 }
 
@@ -2083,13 +2067,13 @@ void CSceneYJ::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < ChessPuzzleSize; i++)
 	{
-		for (int j = 0; j < 7; j++)
+		for (int j = 0; j < ChessPuzzleSize; j++)
 		{
-			Chess_Plate[i][j].x = 16855 + 355 * i;
-			Chess_Plate[i][j].z = 14417 + 450 * j;
-			Chess_Plate[i][j].y = -1750.0f;
+			m_ChessPlate[i][j].x = 16855 + 355 * i;
+			m_ChessPlate[i][j].z = 14417 + 450 * j;
+			m_ChessPlate[i][j].y = -1750.0f;
 		}
 	}
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
@@ -2099,20 +2083,13 @@ void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pPuzzlePlate);
 
 	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
-	//pObject->SetPosition({ 10950.0f * MAP_SCALE_SIZE, -2000.0f, (1300.0f + 8000.0f) * MAP_SCALE_SIZE });
-
 	CGameObject* pObject2 = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
-	//pObject2->SetPosition({ 10950.0f * MAP_SCALE_SIZE, -2000.0f, (2500.0f + 8000.0f) * MAP_SCALE_SIZE });
-
-	////m_Objects.push_back(std::move(pObject));
-	//m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
-	//m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject2);
-
+	
+	// 고정된 체스말
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::King]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	//pObject->SetPosition({ 11550.0f * MAP_SCALE_SIZE, -1750.0f, (1550.0f + 8000.0f) * MAP_SCALE_SIZE });
-	pObject->SetPosition(Chess_Plate[1][0]);
+	pObject->SetPosition(m_ChessPlate[1][0]);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	pObject->SetTextureIndex(0x4000);
 	pObject->Scale(300, 300, 300);
@@ -2120,11 +2097,10 @@ void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
 	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
 
-	
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	pObject->SetPosition(Chess_Plate[0][2]);
+	pObject->SetPosition(m_ChessPlate[0][2]);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	pObject->SetTextureIndex(0x8000);
 	pObject->Scale(300, 300, 300);
@@ -2135,7 +2111,7 @@ void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Pawn]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	pObject->SetPosition(Chess_Plate[3][1]);
+	pObject->SetPosition(m_ChessPlate[3][1]);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	pObject->SetTextureIndex(0x10000);
 	pObject->Scale(300, 300, 300);
@@ -2146,7 +2122,7 @@ void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Rook]);
 	pObject->Rotate({ 1,0,0 }, -90);
-	pObject->SetPosition(Chess_Plate[5][2]);
+	pObject->SetPosition(m_ChessPlate[5][2]);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	pObject->SetTextureIndex(0x20000);
 	pObject->Scale(300, 300, 300);
@@ -2155,54 +2131,54 @@ void CSceneYJ::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
 
 
-	// 플레이어 퍼즐
-	m_Chess[0] = new CGameObject();
-	m_Chess[0]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::King]);
-	m_Chess[0]->Rotate({ 1,0,0 }, -90);
-	m_Chess[0]->SetPosition(Chess_Plate[0][6]);
-	m_Chess[0]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-	m_Chess[0]->SetChess(Chess_Type::King);
-	m_Chess[0]->SetTextureIndex(0x400);
-	m_Chess[0]->Scale(300, 300, 300);
-	m_Chess[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
-	m_Chess[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
-	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[0]);
+	// 플레이어가 움직일수 있는 퍼즐
+	m_Chess[King] = new CGameObject();
+	m_Chess[King]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::King]);
+	m_Chess[King]->Rotate({ 1,0,0 }, -90);
+	m_Chess[King]->SetPosition(m_ChessPlate[0][6]);
+	m_Chess[King]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	m_Chess[King]->SetChess(Chess_Type::King);
+	m_Chess[King]->SetTextureIndex(0x400);
+	m_Chess[King]->Scale(300, 300, 300);
+	m_Chess[King]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	m_Chess[King]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[King]);
 
-	m_Chess[1] = new CGameObject();
-	m_Chess[1]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight]);
-	m_Chess[1]->Rotate({ 1,0,0 }, -90);
-	m_Chess[1]->SetPosition(Chess_Plate[6][3]);
-	m_Chess[1]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-	m_Chess[1]->SetChess(Chess_Type::Knight);
-	m_Chess[1]->SetTextureIndex(0x800);
-	m_Chess[1]->Scale(300, 300, 300);
-	m_Chess[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
-	m_Chess[1]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
-	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[1]);
+	m_Chess[Knight] = new CGameObject();
+	m_Chess[Knight]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight]);
+	m_Chess[Knight]->Rotate({ 1,0,0 }, -90);
+	m_Chess[Knight]->SetPosition(m_ChessPlate[6][3]);
+	m_Chess[Knight]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	m_Chess[Knight]->SetChess(Chess_Type::Knight);
+	m_Chess[Knight]->SetTextureIndex(0x800);
+	m_Chess[Knight]->Scale(300, 300, 300);
+	m_Chess[Knight]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	m_Chess[Knight]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[Knight]);
 
-	m_Chess[2] = new CGameObject();
-	m_Chess[2]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Pawn]);
-	m_Chess[2]->Rotate({ 1,0,0 }, -90);
-	m_Chess[2]->SetPosition(Chess_Plate[3][5]);
-	m_Chess[2]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-	m_Chess[2]->SetChess(Chess_Type::Pawn);
-	m_Chess[2]->SetTextureIndex(0x1000);
-	m_Chess[2]->Scale(300, 300, 300);
-	m_Chess[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
-	m_Chess[2]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
-	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[2]);
+	m_Chess[Pawn] = new CGameObject();
+	m_Chess[Pawn]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Pawn]);
+	m_Chess[Pawn]->Rotate({ 1,0,0 }, -90);
+	m_Chess[Pawn]->SetPosition(m_ChessPlate[3][5]);
+	m_Chess[Pawn]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	m_Chess[Pawn]->SetChess(Chess_Type::Pawn);
+	m_Chess[Pawn]->SetTextureIndex(0x1000);
+	m_Chess[Pawn]->Scale(300, 300, 300);
+	m_Chess[Pawn]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	m_Chess[Pawn]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[Pawn]);
 
-	m_Chess[3] = new CGameObject();
-	m_Chess[3]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Rook]);
-	m_Chess[3]->Rotate({ 1,0,0 }, -90);
-	m_Chess[3]->SetPosition(Chess_Plate[6][6]);
-	m_Chess[3]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
-	m_Chess[3]->SetChess(Chess_Type::Rook);
-	m_Chess[3]->SetTextureIndex(0x2000);
-	m_Chess[3]->Scale(300, 300, 300);
-	m_Chess[3]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
-	m_Chess[3]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
-	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[3]);
+	m_Chess[Rook] = new CGameObject();
+	m_Chess[Rook]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Rook]);
+	m_Chess[Rook]->Rotate({ 1,0,0 }, -90);
+	m_Chess[Rook]->SetPosition(m_ChessPlate[6][6]);
+	m_Chess[Rook]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	m_Chess[Rook]->SetChess(Chess_Type::Rook);
+	m_Chess[Rook]->SetTextureIndex(0x2000);
+	m_Chess[Rook]->Scale(300, 300, 300);
+	m_Chess[Rook]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	m_Chess[Rook]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[Rook]);
 	
 }
 
@@ -2266,17 +2242,18 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		//pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		//pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		
-		{// Monster Area4 임시 여기다 배치
+		// Monster Area4 임시 여기다 배치 // 추후에 리턴 지우고 맨 밑으로 수정
+		{
 			scale = { 600.0f,600.0f,600.0f };
 			CGameObjectVer2* pMummyModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 				m_pd3dGraphicsRootSignature, "resources/FbxExported/Mummy.bin", NULL, true);
 
 			m_Mummy[0] = new CMummy();
-			m_Mummy[0]->Scale(scale.x, scale.y, scale.z,true);
+			m_Mummy[0]->Scale(scale.x, scale.y, scale.z, true);
 			m_Mummy[0]->SetChild(pMummyModel, true);
 			m_Mummy[0]->SetShadertoAll();
 			m_Mummy[0]->SetTextureInedxToAll(0x200);
-				   
+
 			m_Mummy[0]->SetPosition({ 18900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250.0f), 6250.0f * MAP_SCALE_SIZE });
 			m_Mummy[0]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 18900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 			m_Mummy[0]->SetEnemyAttackType(EnemyAttackType::Mummy1);
@@ -2286,10 +2263,8 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[0])));
 			m_Mummy[0]->AddFriends(m_Mummy[0]);
-			
 		}
-
-		{// Monster Area4 임시 여기다 배치
+		{
 			scale = { 600.0f,600.0f,600.0f };
 			CGameObjectVer2* pMummyModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 				m_pd3dGraphicsRootSignature, "resources/FbxExported/Mummy.bin", NULL, true);
@@ -2299,7 +2274,7 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			m_Mummy[1]->SetChild(pMummyModel, true);
 			m_Mummy[1]->SetShadertoAll();
 			m_Mummy[1]->SetTextureInedxToAll(0x200);
-			
+
 			m_Mummy[1]->SetPosition({ 16900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250), 6250 * MAP_SCALE_SIZE });
 			m_Mummy[1]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 16900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 			m_Mummy[1]->SetEnemyAttackType(EnemyAttackType::Mummy2);
@@ -2310,19 +2285,17 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[1])));
 			m_Mummy[1]->AddFriends(m_Mummy[1]);
 		}
-
-		
-		{// Monster Area4 임시 여기다 배치
+		{
 			scale = { 600.0f,600.0f,600.0f };
 			CGameObjectVer2* pMummyModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 				m_pd3dGraphicsRootSignature, "resources/FbxExported/Mummy.bin", NULL, true);
-			
+
 			m_Mummy[2] = new CMummy();
 			m_Mummy[2]->Scale(scale.x, scale.y, scale.z, true);
 			m_Mummy[2]->SetChild(pMummyModel, true);
 			m_Mummy[2]->SetShadertoAll();
 			m_Mummy[2]->SetTextureInedxToAll(0x200);
-				   
+
 			m_Mummy[2]->SetPosition({ 14900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250), 6250 * MAP_SCALE_SIZE });
 			m_Mummy[2]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 14900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 			m_Mummy[2]->SetEnemyAttackType(EnemyAttackType::Mummy3);
@@ -2333,12 +2306,10 @@ void CSceneYJ::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[2])));
 			m_Mummy[2]->AddFriends(m_Mummy[2]);
-			
 		}
 		
-		
-
 		return;
+
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
@@ -3305,7 +3276,6 @@ void CSceneYJ::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
 
-
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
@@ -3324,8 +3294,7 @@ void CSceneYJ::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Pawn] = new CFixedMesh(pd3dDevice, pd3dCommandList, "pawn");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight] = new CFixedMesh(pd3dDevice, pd3dCommandList, "knight");
 
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser] = new CFixedMesh(pd3dDevice, pd3dCommandList, "laser3");
-	
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Laser");
 }
 
 void CSceneYJ::BuildShadowResource(ID3D12Device* pd3dDevice)
@@ -3404,17 +3373,13 @@ void CSceneYJ::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	// 비
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 100000, PARTICLE_TYPE::RainParticle);
 
-	for (int i = 0; i < 6; ++i) {
-		
-		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle, m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
-	}
-	for (int i = 0; i < 6; ++i) {
-		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle2, m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
-	}
 	
-	for (int i = 0; i < 6; ++i) {
-		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle3, m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
-	}
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle, m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+	
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle2, m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+	
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle3, m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+	
 
 	//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 
@@ -3448,19 +3413,6 @@ void CSceneYJ::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pArrow->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow].push_back(pArrow);
 	}
-
-	
-		CArrow* pArrow = new CArrow();
-		pArrow->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
-		pArrow->SetPosition({ 500.0f,  100.0f, 1500.0f });
-		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
-		pArrow->SetTextureIndex(0x20);
-		pArrow->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		pArrow->Scale(100.0f, 100.0f, 50.0f);
-		pArrow->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
-		pArrow->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
-		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
-	
 }
 void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -3468,12 +3420,10 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		CMummyLaser* pMummyLaser = new CMummyLaser();
 		pMummyLaser->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
-		//pMummyLaser->SetPosition({ 500.0f,  100.0f, 1500.0f });
-		//pMummyLaser->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
 		pMummyLaser->Rotate(XMFLOAT3(0, 1, 0), 90.0f);
-		pMummyLaser->SetTextureIndex(0x400);
+		pMummyLaser->SetTextureIndex(0x01);
 		
-		pMummyLaser->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		pMummyLaser->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
 		pMummyLaser->Scale(100.0f, 100.0f, 500.0f);
 
 		pMummyLaser->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
@@ -3485,9 +3435,8 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		CMummyLaser* pMummyLaser2 = new CMummyLaser();
 		pMummyLaser2->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
-		//pMummyLaser2->SetPosition({ 500.0f,  100.0f, 1500.0f });
-		pMummyLaser2->SetTextureIndex(0x800);
-		pMummyLaser2->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		pMummyLaser2->SetTextureIndex(0x02);
+		pMummyLaser2->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
 		pMummyLaser2->Scale(100.0f, 100.0f, 1000.0f);
 		pMummyLaser2->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
 		pMummyLaser2->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
@@ -3498,10 +3447,8 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		CMummyLaser* pMummyLaser3 = new CMummyLaser();
 		pMummyLaser3->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
-		//pMummyLaser3->SetPosition({ 500.0f,  100.0f, 1500.0f });
-
-		pMummyLaser3->SetTextureIndex(0x1000);
-		pMummyLaser3->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		pMummyLaser3->SetTextureIndex(0x04);
+		pMummyLaser3->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
 		pMummyLaser3->Scale(100.0f, 100.0f, 1000.0f);
 		pMummyLaser3->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
 		pMummyLaser3->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
@@ -3538,7 +3485,6 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle, 1);
 				
 					if (-1 != idx) {
-						cout << "레이저1111111" << endl;
 						pMummyLaser->SetUseable(false);
 						
 						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
@@ -3567,7 +3513,6 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle, 1);
 
 					if (-1 != idx) {
-						cout << "레이저2222222222" << endl;
 						pMummyLaser->SetUseable(false);
 
 						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
@@ -3595,7 +3540,6 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle, 1);
 
 					if (-1 != idx) {
-						cout << "레이저2222222222" << endl;
 						pMummyLaser->SetUseable(false);
 
 						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
@@ -3700,8 +3644,6 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle2, 2);
 
 					if (-1 != idx) {
-
-
 						pMummyLaser2->SetUseable(false);
 						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[1]->GetPosition() }, { 0,200,0 });
 						pMummyLaser2->SetPosition(pos);
@@ -3756,9 +3698,7 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 					m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 					pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 					pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
-					//m_Particles->UseParticle(idx, pMummyLaser3->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f), 1);
-					//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Mummy[2]->GetLook()), -1));
-
+				
 					pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
 					m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
 					pMummyLaser3->AddFriends_p(m_Mummy[2]);
@@ -3784,9 +3724,7 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 						m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 						pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(30.0f, 0, -150), 1));
 						pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x+30.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
-						//m_Particles->UseParticle(idx, pMummyLaser3->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f), 1);
-						//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Mummy[2]->GetLook()), -1));
-
+					
 						pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
 						m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
 						pMummyLaser3->AddFriends_p(m_Mummy[2]);
@@ -3813,9 +3751,7 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 						m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 						pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(-30, 0, -150), 1));
 						pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x-30.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
-						//m_Particles->UseParticle(idx, pMummyLaser3->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f), 1);
-						//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Mummy[2]->GetLook()), -1));
-
+						
 						pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
 						m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
 						pMummyLaser3->AddFriends_p(m_Mummy[2]);
@@ -3950,10 +3886,8 @@ void CSceneYJ::DeleteEnemy(CEnemy* pEmeny)
 			m_MummyExist[0] = false;
 			pEmeny->SetMummyDie(true);
 
-
 			if (m_One_Mira_Die == true)
 			{
-				cout << "미라 한마리 남음" << endl;
 				m_Two_Mira_Die = true;
 				m_Two_Mira_Die_Laser = true;
 				m_Mummy[1]->Scale(5.f, 5.f, 5.f, true);
@@ -3975,10 +3909,8 @@ void CSceneYJ::DeleteEnemy(CEnemy* pEmeny)
 			m_MummyExist[1] = false;
 			pEmeny->SetMummyDie2(true);
 
-
 			if (m_One_Mira_Die == true)
 			{
-				cout << "미라 한마리 남음" << endl;
 				m_Two_Mira_Die = true;
 				m_Two_Mira_Die_Laser = true;
 				m_Mummy[0]->Scale(5.f, 5.f, 5.f, true);
@@ -4002,7 +3934,6 @@ void CSceneYJ::DeleteEnemy(CEnemy* pEmeny)
 
 			if (m_One_Mira_Die == true)
 			{
-				cout << "미라 한마리 남음" << endl;
 				m_Two_Mira_Die = true;
 				m_Two_Mira_Die_Laser = true;
 				m_Mummy[0]->Scale(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f, true);

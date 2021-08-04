@@ -18,6 +18,7 @@ void CShaderHandler::CreateAllShaders(ID3D12Device* pd3dDevice, ID3D12RootSignat
 	CreatePlayerShader(pd3dDevice, pd3dGraphicsRootSignature);
 	CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature);
 	//CreateShadowShader(pd3dDevice, pd3dGraphicsRootSignature);
+	CreateLaserShader(pd3dDevice, pd3dGraphicsRootSignature);
 
 	CreateBillboardShader(pd3dDevice, pd3dGraphicsRootSignature);
 
@@ -372,6 +373,29 @@ void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12Roo
 	pShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,true,true);
 	pShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Object", pShader);
+}
+
+void CShaderHandler::CreateLaserShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CShader* pLaserShader = new CShader();
+	
+	if (m_UserID == ShaderHandlerUser::JH) {
+		pLaserShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSLaserLighting");
+		pLaserShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSLaserLighting");
+	}
+	else if (m_UserID == ShaderHandlerUser::YJ) {
+		pLaserShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSLaserLighting");
+		pLaserShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSLaserLighting");
+	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pLaserShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSLaserLighting");
+		pLaserShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSLaserLighting");
+	}
+
+	pLaserShader->CreateInputLayout(ShaderTypes::Textured);
+	pLaserShader->CreateLaserShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pLaserShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Data.emplace("Laser", pLaserShader);
 }
 
 void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)

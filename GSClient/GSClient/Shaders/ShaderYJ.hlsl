@@ -119,10 +119,11 @@ Texture2D PawnDiffuse : register(t53);
 Texture2D RookDiffuse : register(t54);
 
 Texture2D ChessTile : register(t55);
+Texture2D Laser : register(t56);
 
-Texture2D gtxtMap : register(t56);
-Texture2D gtxtMirror : register(t57);
-Texture2D gtxtShadowMap : register(t58);
+Texture2D gtxtMap : register(t57);
+Texture2D gtxtMirror : register(t58);
+Texture2D gtxtShadowMap : register(t59);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -874,27 +875,6 @@ VS_TEXTURED_LIGHTING_OUTPUT VSTexturedLighting(VS_TEXTURED_LIGHTING_INPUT input)
     output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxWorld);
     output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
     output.uv = input.uv;
-    
-    float frameCount = 0;
-    if (gnTexturesMask & 0x400)
-    {
-        frameCount = 8;
-    }
-    if (gnTexturesMask & 0x800)
-    {
-        frameCount = 8;
-    }
-    if (gnTexturesMask & 0x1000)
-    {
-        frameCount = 8;
-    }
-
-    float newTime = fmod(gfTime * 10.0f, frameCount);
-    //output.uv.x /= frameCount;
-    output.uv.x += (1.0f / frameCount) * (int) newTime;
-    //output.uv.y /= frameCount;
-    //output.uv.y += (1.0f / frameCount) * (int) newTime;
-    
     output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
 
     return (output);
@@ -962,38 +942,72 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     {
         cColor = gtxtBox.Sample(gssWrap, input.uv);
     }
-    if (gnTexturesMask & 0x400)
-    {
-        //float4 Color = { 0.1f, 0.1f, 0.1f, 1.0f };
-        
-        cColor = gtxtBox.Sample(gssWrap, input.uv);
-        cColor.rgb *= 0.1f;
-        cColor.a += 0.5f;
-        
-        //cColor = lerp(cColor, Color, 0.5);
-    }
-    if (gnTexturesMask & 0x800)
-    {
-        //float4 Color = { 0.2f, 0.2f, 0.2f, 1.0f };
-        
-        cColor = gtxtBox.Sample(gssWrap, input.uv);
-        cColor.rgb *= 0.1f;
-        cColor.a += 0.5f;
-        
-        //cColor = lerp(cColor, Color, 0.5);
-    }
     
-    if (gnTexturesMask & 0x1000)
+    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+    shadowFactor = CalcShadowFactor_t(input.shadowPosH);
+
+    input.normalW = normalize(input.normalW);
+    float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
+
+    return (cColor * cIllumination);
+}
+
+VS_TEXTURED_LIGHTING_OUTPUT VSLaserLighting(VS_TEXTURED_LIGHTING_INPUT input)
+{
+    VS_TEXTURED_LIGHTING_OUTPUT output;
+
+    output.normalW = mul(input.normal, (float3x3) gmtxWorld);
+    output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxWorld);
+    output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+    output.uv = input.uv;
+    
+    float frameCount = 0;
+    if (gnTexturesMask & 0x01)
     {
-        //float4 Color = { 0.3f, 0.3f, 0.3f, 1.0f };
-        
-        cColor = gtxtBox.Sample(gssWrap, input.uv);
+        frameCount = 8;
+    }
+    if (gnTexturesMask & 0x02)
+    {
+        frameCount = 8;
+    }
+    if (gnTexturesMask & 0x04)
+    {
+        frameCount = 8;
+    }
+
+    float newTime = fmod(gfTime * 10.0f, frameCount);
+    output.uv.x += (1.0f / frameCount) * (int) newTime;
+   
+    output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+
+    return (output);
+}
+
+float4 PSLaserLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+    float3 uvw = float3(input.uv, nPrimitiveID / 2);
+    float4 cColor; // = gtxtBox.Sample(gssWrap, uvw);
+
+    if (gnTexturesMask & 0x01)
+    {
+        cColor = Laser.Sample(gssWrap, input.uv);
         cColor.rgb *= 0.1f;
         cColor.a += 0.5f;
-        
-        //cColor = lerp(cColor, Color, 0.5);
     }
-    
+
+    if (gnTexturesMask & 0x02)
+    {
+        cColor = Laser.Sample(gssWrap, input.uv);
+        cColor.rgb *= 0.1f;
+        cColor.a += 0.5f;
+    }
+    if (gnTexturesMask & 0x04)
+    {
+        cColor = Laser.Sample(gssWrap, input.uv);
+        cColor.rgb *= 0.1f;
+        cColor.a += 0.5f;
+    }
+
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
     shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
