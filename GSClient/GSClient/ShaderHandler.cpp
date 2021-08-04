@@ -345,7 +345,7 @@ void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 void CShaderHandler::CreateTextRenderShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	CShader* pTextShader = new CShader();
-	if (m_UserID == ShaderHandlerUser::JH) {
+	 {
 		pTextShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VS_FONT_MAIN");
 		pTextShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PS_FONT_MAIN");
 		//pEffectShader->CreateGeometryShader(L"Shaders/ShaderJH.hlsl", "GSEffect");
@@ -381,16 +381,20 @@ void CShaderHandler::CreateLaserShader(ID3D12Device* pd3dDevice, ID3D12RootSigna
 	CShader* pLaserShader = new CShader();
 	
 	if (m_UserID == ShaderHandlerUser::JH) {
-		pLaserShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSLaserLighting");
-		pLaserShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSLaserLighting");
+		//pLaserShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSLaserLighting");
+		//pLaserShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSLaserLighting");
+		pLaserShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSLaserLighting");
+		pLaserShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSLaserLighting");
 	}
 	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pLaserShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSLaserLighting");
 		pLaserShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSLaserLighting");
 	}
 	else if (m_UserID == ShaderHandlerUser::TH) {
-		pLaserShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSLaserLighting");
-		pLaserShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSLaserLighting");
+		pLaserShader->CreateVertexShader(L"Shaders\\ShaderYJ.hlsl", "VSLaserLighting");
+		pLaserShader->CreatePixelShader(L"Shaders\\ShaderYJ.hlsl", "PSLaserLighting");
+		//pLaserShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSLaserLighting");
+		//pLaserShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSLaserLighting");
 	}
 
 	pLaserShader->CreateInputLayout(ShaderTypes::Textured);
