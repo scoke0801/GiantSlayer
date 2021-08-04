@@ -342,19 +342,6 @@ void CPlayer::Attack(int type)
 
 	SetVelocityToZero();
 
-	auto temp = m_Colliders[0];
-	m_Colliders[0] = m_SpareCollisionBox;
-	m_SpareCollisionBox = temp;
-
-	temp = m_AABB[0];
-	m_AABB[0] = m_SpareAABB;
-	m_SpareAABB = temp;
-
-	auto tempMesh = m_BoundingObjectMeshes[0];
-	m_BoundingObjectMeshes[0] = m_SpareBoundingBox;
-	m_SpareBoundingBox = tempMesh;
-	UpdateColliders();
-
 	if (type == 0) {
 		if (m_WeaponType == PlayerWeaponType::Sword && m_ComboTimer > 0.0f) {
 			if (m_LastAttackAnim == 0) {
