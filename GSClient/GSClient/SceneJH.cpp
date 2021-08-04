@@ -1096,10 +1096,7 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 }
  
 void CSceneJH::RenderText(ID3D12GraphicsCommandList* pd3dCommandList, const string& text, const XMFLOAT2& pos, const XMFLOAT2& scale, const XMFLOAT2& padding, const XMFLOAT4& color)
-{
-	auto shader = CShaderHandler::GetInstance().GetData("Text");
-	shader->Render(pd3dCommandList, m_CurrentCamera);
-	
+{ 
 }
 
 void CSceneJH::Communicate(SOCKET& sock)
