@@ -51,7 +51,7 @@ public:
 	void AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		int count,
 		PARTICLE_TYPE type,
-		int idx);
+		CMesh* pMesh);
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void Update(float elapsedTime);
 

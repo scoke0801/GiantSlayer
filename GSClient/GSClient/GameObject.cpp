@@ -263,6 +263,7 @@ void CGameObject::SetPositionPlus(XMFLOAT3 pos)
 	UpdateTransform(NULL);
 }
 
+
 void CGameObject::SetVelocity(XMFLOAT3 vel)
 {
 	m_xmf3Velocity = vel;
@@ -281,6 +282,13 @@ void CGameObject::LookAtDirection(XMFLOAT3 dir, void* pContext)
 	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);
 	XMFLOAT3 targetPosition = Vector3::Multifly(normalizedDir, 150000.0f);
 	LookAt(m_xmf3Position, targetPosition, XMFLOAT3{ 0,1,0 });  
+}
+void CGameObject::LookAtDirections(XMFLOAT3 dir)
+{
+	dir.y = 0;
+	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);
+	XMFLOAT3 targetPosition = Vector3::Multifly(normalizedDir, 150000.0f);
+	LookAt(m_xmf3Position, targetPosition, XMFLOAT3{ 0,1,0 });
 }
 
 void CGameObject::SetVelocity(OBJ_DIRECTION direction)

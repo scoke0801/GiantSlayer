@@ -78,8 +78,6 @@ public:
 	virtual D3D12_INPUT_LAYOUT_DESC CreateShadowInputLayout();
 	virtual D3D12_RASTERIZER_DESC CreateShadowRasterizerState();
 	
-
-
 	// Å×¼¿ Ãß°¡
 	D3D12_SHADER_BYTECODE CreateDomainShader(WCHAR* pszFileName, LPCSTR pszShaderName);
 	D3D12_SHADER_BYTECODE CreateHullShader(WCHAR* pszFileName, LPCSTR pszShaderName);
@@ -96,6 +94,8 @@ public:
 	void CreateBoundaryShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	void CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, bool isLeftSide = true);
+
+	void CreateLaserShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, bool isLeftSide = true);
 
 	void CreateUIShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
  

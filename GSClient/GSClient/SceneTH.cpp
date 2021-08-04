@@ -1429,35 +1429,7 @@ void CSceneTH::ProcessInput()
 			m_CurrentCamera->Strafe(cameraSpeed);
 	}
 
-	for (int i = 0; i < 8; i++)
-	{
-		if (keyInput.KEY_C && m_PuzzleBox[i]->GetSelectBox() && !m_PuzzleBoxCount)
-		{
-			cout << "박스를 이동합니다";
-
-			m_PuzzleBoxCount = TRUE;
-
-			m_PuzzleBox[i]->SetGripBox(!m_isBoxDown);
-
-		}
-	}
-	for (int i = 0; i < 8; i++)
-	{
-		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox() && m_PuzzleBoxCount)
-		{
-			m_PuzzleBoxCount = FALSE;
-
-			m_PuzzleBox[i]->SetGripBox(false);
-
-			cout << " x축 : " << m_PuzzleBox[i]->GetPosition().x << " y축 :" << m_PuzzleBox[i]->GetPosition().z << endl;
-
-			//-1760
-
-			m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
-
-		}
-	}
-
+	
 	if (keyInput.KEY_1)
 	{
 		m_Player->SetWeapon(PlayerWeaponType::Sword);

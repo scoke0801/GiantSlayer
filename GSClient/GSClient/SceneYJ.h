@@ -13,8 +13,17 @@ class CLightCamera;
 class CEnemy;
 class CMummy;
 
-
 class CFbxObject2;
+
+#define ChessPuzzleSize 7
+
+enum ChessType {
+	King = 0,
+	Knight,
+	Pawn,
+	Rook,
+	Count,
+};
 
 class CSceneYJ : public CScene
 {
@@ -24,8 +33,18 @@ private:
 private:
 	bool						m_isPlayerSelected = true;
 	bool						m_isPlayerBoxCollide = false;
-	bool						m_isBoxDown = false;
-	bool						m_PuzzleNumSelect[9] = { false };
+
+	CGameObject*				m_Chess[4];
+	bool						m_ChessPlate_Check[4] = { false };		// 체스판체크용
+	XMFLOAT3					m_ChessPlate[7][7];						// 체스판
+	bool						m_ChessCollide_Check[4] = { false,false,false,false };
+
+	CMummy*						m_Mummy[3];
+	bool						m_MummyExist[3] = { true,true,true };
+	bool						m_One_Mira_Die = false;
+	bool						m_One_Mira_Die_Laser = false;
+	bool						m_Two_Mira_Die = false;
+	bool						m_Two_Mira_Die_Laser = false;
 
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -39,29 +58,24 @@ private:
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
 	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;
 
-	CGameObject* m_Mirror[1] = { nullptr };
-	CPlayer* m_Player = nullptr;
+	CGameObject*				m_Mirror[1] = { nullptr };
+	CPlayer*					m_Player = nullptr;
 	
-	float					m_AttackDelayTime;
-	bool					m_LaserCount = false;
+	float						m_AttackDelayTime;
 	
 	int							m_CurrentPlayerNum = 0;
-	//vector<CPlayer*>			m_Players[MAX_PLAYER];
-	CPlayer* m_Players[MAX_ROOM_PLAYER];
+ 
+	CPlayer*					m_Players[MAX_ROOM_PLAYER];
+
 	bool						m_PlayerExistingSector[MAX_ROOM_PLAYER];
-
-	CBox* m_PuzzleBox[8];
-
+ 
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
 	vector<UI*>					m_SPGauges;
-	HelpTextUI* m_HelpTextUI;
+	HelpTextUI*					m_HelpTextUI;
 
-	CSkyBox* m_Skybox;
-	CTerrain* m_Terrain;
-
-	CMummy* m_Mummy[3];
-	
+	CSkyBox*					m_Skybox;
+	CTerrain*					m_Terrain;
 
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 
@@ -74,17 +88,6 @@ private:
 	CLightCamera* m_pLightCamera = nullptr;
 
 	short						m_DoorIdx = 0;
-	int							m_PuzzleNum[4];
-
-	bool						m_PuzzleBoxCount = false;
-	bool						m_Mira[3] = { TRUE,TRUE,TRUE };
-	bool						m_One_Mira_Die = false;
-	bool						m_One_Mira_Die_Laser = false;
-	bool						m_Two_Mira_Die = false;
-	bool						m_Two_Mira_Die_Laser = false;
-	
-	
-	
 	
 private:
 	POINT						m_LastMousePos;

@@ -72,8 +72,9 @@ protected:
 
 	float					m_Mummy_Die;
 
-	float					m_LaserAttackDelayTime[3] = { 3.0f,7.0f,11.0f };
+	float					m_LaserAttackDelayTime[3] = { 5.0f,7.0f,11.0f };
 	bool					m_LaserAttack[3] = { false,false,false };
+	bool					m_MummyExist[3] = { true,true,true };
 
 public:
 	CEnemy(); 
@@ -86,15 +87,12 @@ public:
 	void SetActivityScope(const XMFLOAT3& xmf3ActivityScope, const XMFLOAT3& xmf3Center);
 	XMFLOAT3 GetActivityScope() const { return m_xmf3ActivityScope; } 
 
+
 	// 시야 범위 설정
 	void SetSightBoundingBox(const XMFLOAT3& sight);
 
 	// 공격 대상 탐색 
 	bool IsEnemyInSight();
-
-	bool isAttack0() const { return m_LaserAttack[0]; }
-	bool isAttack1() const { return m_LaserAttack[1]; }
-	bool isAttack2() const { return m_LaserAttack[2]; }
 
 	void ConnectPlayer(CPlayer** pPlayers, int playerCount); 
 
@@ -124,8 +122,13 @@ public:
 	void SetIsOnMoving(bool info) { m_IsOnMoving = info; }
 	 
 	void SetAttackDelayTime(float delayTime) { m_AttackDelayTime = delayTime; }
-	void SetMummyDie(float die) { m_Mummy_Die = die; }
-	float GetMummyDie() const { return m_Mummy_Die; }
+
+	void SetMummyDie(bool die) { m_MummyExist[0] = die; }
+	bool GetMummyDie() const { return m_MummyExist[0]; }
+	void SetMummyDie2(bool die) { m_MummyExist[1] = die; }
+	bool GetMummyDie2() const { return m_MummyExist[1]; }
+	void SetMummyDie3(bool die) { m_MummyExist[2] = die; }
+	bool GetMummyDie3() const { return m_MummyExist[2]; }
 
 	void SetEnemyAttackType(EnemyAttackType attackType) { m_AttackType = attackType; }
 	EnemyAttackType GetEnemyAttackType() const { return m_AttackType; } 
@@ -167,6 +170,8 @@ class CMummy :public CEnemy
 {
 private:
 	vector<CMummy*> m_Friends;
+	vector<CMummyLaser*> m_Friends_Laser;
+
 	bool PlayerCheck = false;
 	bool LaserDelayTime[3] = { false,false,false };
 	bool shotLaser[3] = { false,false,false };
@@ -187,15 +192,8 @@ public:
 	void Attack(float elapsedTime) override;
 	void Update(float elapsedTime) override;
 	void AddFriends(CMummy* mummy);
+	void AddFriends_Laser(CMummyLaser* Laser);
 	void SendDieInfotoFriends();
 	void RemoveFriends(CMummy* mummy);
-
-	
-
-	bool isAttack0() const { return m_LaserAttack[0]; }
-	bool isAttack1() const { return m_LaserAttack[1]; }
-	bool isAttack2() const { return m_LaserAttack[2]; }
-
-	
 };
 
