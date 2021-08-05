@@ -74,7 +74,16 @@ void CShaderHandler::CreateFBXShader(ID3D12Device* pd3dDevice, ID3D12RootSignatu
 		pFBXFeatureShaderRight->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
 		pFBXFeatureShaderRight->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFBXFeatureShader");
 	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pFBXShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTexturedLighting");
+		pFBXShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSTexturedLighting");
 
+		pFBXFeatureShaderLeft->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTexturedLighting");
+		pFBXFeatureShaderLeft->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSFBXFeatureShader");
+
+		pFBXFeatureShaderRight->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTexturedLighting");
+		pFBXFeatureShaderRight->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSFBXFeatureShader");
+	}
 	pFBXShader->CreateInputLayout(ShaderTypes::Textured);
 	pFBXShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pFBXShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -97,10 +106,15 @@ void CShaderHandler::CreateFBXAnimatedShader(ID3D12Device* pd3dDevice, ID3D12Roo
 	CShader* pFBXFeatureShaderLeft = new CShader();
 	CShader* pFBXFeatureShaderRight = new CShader();
 
-	//if (m_UserID == ShaderHandlerUser::TH) 
+	if (m_UserID == ShaderHandlerUser::TH) 
 	{
 		pFBXShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSFbxAnimated");
 		pFBXShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFbxAnimated");
+	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE)
+	{
+		pFBXShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSFbxAnimated");
+		pFBXShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSFbxAnimated");
 	}
 
 	pFBXShader->CreateInputLayout(ShaderTypes::FbxAnimated);
@@ -134,6 +148,14 @@ void CShaderHandler::CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignatur
 		pUiHelpTextShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VS_UI_Textured");
 		pUiHelpTextShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PS_UI_HelpText");
 	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE)
+	{
+		pUiShader->CreateVertexShader(L"Shaders/ShaderGameScene.hlsl", "VS_UI_Textured");
+		pUiShader->CreatePixelShader(L"Shaders/ShaderGameScene.hlsl", "PS_UI_Textured");
+
+		pUiHelpTextShader->CreateVertexShader(L"Shaders/ShaderGameScene.hlsl", "VS_UI_Textured");
+		pUiHelpTextShader->CreatePixelShader(L"Shaders/ShaderGameScene.hlsl", "PS_UI_HelpText");
+	}
 	pUiShader->CreateInputLayout(ShaderTypes::Textured);
 	pUiShader->CreateUIShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Ui", pUiShader);
@@ -158,6 +180,10 @@ void CShaderHandler::CreateShadowShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		pShadowShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSStandardShadow");
 		pShadowShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandardShadow");
 	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pShadowShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSStandardShadow");
+		pShadowShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSStandardShadow");
+	}
 	pShadowShader->CreateInputLayout(ShaderTypes::Shadow);
 	pShadowShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
 	m_Data.emplace("Shadow", pShadowShader);
@@ -180,6 +206,10 @@ void CShaderHandler::CreatePlayerShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		pPlayerShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
 		pPlayerShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSTexturedLighting");
 	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pPlayerShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTexturedLighting");
+		pPlayerShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSTexturedLighting");
+	}
 	pPlayerShader->CreateInputLayout(ShaderTypes::Textured);
 	pPlayerShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pPlayerShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -201,6 +231,10 @@ void CShaderHandler::CreateMinmapShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		pMinimapShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VSMinimap");
 		pMinimapShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PSMinimap");
 	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pMinimapShader->CreateVertexShader(L"Shaders/ShaderGameScene.hlsl", "VSMinimap");
+		pMinimapShader->CreatePixelShader(L"Shaders/ShaderGameScene.hlsl", "PSMinimap");
+	}
 	pMinimapShader->CreateInputLayout(ShaderTypes::Textured);
 	pMinimapShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Minimap", pMinimapShader);
@@ -220,6 +254,10 @@ void CShaderHandler::CreateSkyboxShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 	else if (m_UserID == ShaderHandlerUser::TH) {
 		pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTextured");
 		pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSTextured");
+	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pSkyBoxShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTextured");
+		pSkyBoxShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSTextured");
 	}
 	pSkyBoxShader->CreateInputLayout(ShaderTypes::Textured);
 	pSkyBoxShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -247,6 +285,12 @@ void CShaderHandler::CreateTerrainShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 		pTerrainShader->CreateDomainShader(L"Shaders\\ShaderTH.hlsl", "DSTerrainTessellation");
 		pTerrainShader->CreateHullShader(L"Shaders\\ShaderTH.hlsl", "HSTerrainTessellation");
 	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pTerrainShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTerrainTessellation");
+		pTerrainShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSTerrainTessellation");
+		pTerrainShader->CreateDomainShader(L"Shaders\\ShaderGameScene.hlsl", "DSTerrainTessellation");
+		pTerrainShader->CreateHullShader(L"Shaders\\ShaderGameScene.hlsl", "HSTerrainTessellation");
+	}
 	pTerrainShader->CreateInputLayout(ShaderTypes::Terrain);
 	pTerrainShader->CreateTerrainShader(pd3dDevice, pd3dGraphicsRootSignature); 
 	m_Data.emplace("Terrain", pTerrainShader);
@@ -266,6 +310,10 @@ void CShaderHandler::CreateTerrainWaterShader(ID3D12Device* pd3dDevice, ID3D12Ro
 	else if (m_UserID == ShaderHandlerUser::TH) {
 		pTerrainWaterShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSTerrainWater");
 		pTerrainWaterShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSTerrainWater");
+	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pTerrainWaterShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTerrainWater");
+		pTerrainWaterShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSTerrainWater");
 	}
 	pTerrainWaterShader->CreateInputLayout(ShaderTypes::TerrainWater);
 	pTerrainWaterShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
@@ -337,6 +385,12 @@ void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		//pEffectShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VSMinimap");
 		//pEffectShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PSMinimap");
 	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pEffectShader->CreateVertexShader(L"Shaders/ShaderGameScene.hlsl", "VSEffect");
+		pEffectShader->CreatePixelShader(L"Shaders/ShaderGameScene.hlsl", "PSEffect");
+		//pEffectShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VSMinimap");
+		//pEffectShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PSMinimap");
+	}
 	pEffectShader->CreateInputLayout(ShaderTypes::Effect);
 	pEffectShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, true, true);
 	m_Data.emplace("Effect", pEffectShader);
@@ -345,11 +399,16 @@ void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 void CShaderHandler::CreateTextRenderShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	CShader* pTextShader = new CShader();
-	 {
+	if (m_UserID == ShaderHandlerUser::JH) {
 		pTextShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VS_FONT_MAIN");
 		pTextShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PS_FONT_MAIN");
 		//pEffectShader->CreateGeometryShader(L"Shaders/ShaderJH.hlsl", "GSEffect");
 	} 
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pTextShader->CreateVertexShader(L"Shaders/ShaderGameScene.hlsl", "VS_FONT_MAIN");
+		pTextShader->CreatePixelShader(L"Shaders/ShaderGameScene.hlsl", "PS_FONT_MAIN");
+		//pEffectShader->CreateGeometryShader(L"Shaders/ShaderJH.hlsl", "GSEffect");
+	}
 	pTextShader->CreateInputLayout(ShaderTypes::Text);
 	pTextShader->CreateFontShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Text", pTextShader);
@@ -369,6 +428,10 @@ void CShaderHandler::CreateBasicObjectShader(ID3D12Device* pd3dDevice, ID3D12Roo
 	else if (m_UserID == ShaderHandlerUser::TH) {
 		pShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
 		pShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSTexturedLighting");
+	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTexturedLighting");
+		pShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSTexturedLighting");
 	}
 	pShader->CreateInputLayout(ShaderTypes::Textured);
 	pShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,true,true);
@@ -396,7 +459,12 @@ void CShaderHandler::CreateLaserShader(ID3D12Device* pd3dDevice, ID3D12RootSigna
 		//pLaserShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSLaserLighting");
 		//pLaserShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSLaserLighting");
 	}
-
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pLaserShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSLaserLighting");
+		pLaserShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSLaserLighting");
+		//pLaserShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSLaserLighting");
+		//pLaserShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSLaserLighting");
+	}
 	pLaserShader->CreateInputLayout(ShaderTypes::Textured);
 	pLaserShader->CreateLaserShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pLaserShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -419,7 +487,10 @@ void CShaderHandler::CreateStandardShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 		pStandardShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSStandard");
 		pStandardShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
-
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pStandardShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSStandard");
+		pStandardShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSStandard");
+	}
 	pStandardShader->CreateInputLayout(ShaderTypes::Standard);
 	pStandardShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
 	pStandardShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -441,7 +512,10 @@ void CShaderHandler::CreateSkinnedShader(ID3D12Device* pd3dDevice, ID3D12RootSig
 		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSSkinnedAnimationStandard");
 		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSStandard");
 	}
-	
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pSkinnedShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSSkinnedAnimationStandard");
+		pSkinnedShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSStandard");
+	}
 
 	pSkinnedShader->CreateInputLayout(ShaderTypes::Skinned);
 	pSkinnedShader->CreateFBXMeshShader(pd3dDevice, pd3dGraphicsRootSignature, false);
@@ -467,6 +541,11 @@ void CShaderHandler::CreateBillboardShader(ID3D12Device* pd3dDevice, ID3D12RootS
 		pBillboardShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSBillboard");
 		pBillboardShader->CreateGeometryShader(L"Shaders\\ShaderTH.hlsl", "GSBillboard");
 	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pBillboardShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSBillboard");
+		pBillboardShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSBillboard");
+		pBillboardShader->CreateGeometryShader(L"Shaders\\ShaderGameScene.hlsl", "GSBillboard");
+	}
 	pBillboardShader->CreateInputLayout(ShaderTypes::Billboard);
 	pBillboardShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT);	
 	m_Data.emplace("Billboard", pBillboardShader);
@@ -486,6 +565,10 @@ void CShaderHandler::CreateDoorWallShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 	else if (m_UserID == ShaderHandlerUser::TH) {
 		pDoorWallShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
 		pDoorWallShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSDoorWall");
+	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pDoorWallShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTexturedLighting");
+		pDoorWallShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSDoorWall");
 	}
 	pDoorWallShader->CreateInputLayout(ShaderTypes::Textured);
 	pDoorWallShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -508,6 +591,10 @@ void CShaderHandler::CreateBridgeShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		pBridgeShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
 		pBridgeShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSBridgeLight");
 	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pBridgeShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTexturedLighting");
+		pBridgeShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSBridgeLight");
+	}
 	pBridgeShader->CreateInputLayout(ShaderTypes::Textured);
 	pBridgeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pBridgeShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -528,6 +615,10 @@ void CShaderHandler::CreatePuzzleShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 	else if (m_UserID == ShaderHandlerUser::TH) {
 		pPuzzleShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
 		pPuzzleShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSPuzzle");
+	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pPuzzleShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTexturedLighting");
+		pPuzzleShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSPuzzle");
 	}
 	pPuzzleShader->CreateInputLayout(ShaderTypes::Textured);
 	pPuzzleShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
@@ -550,6 +641,10 @@ void CShaderHandler::CreateSignShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 		pSignShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
 		pSignShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSSign");
 	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pSignShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTexturedLighting");
+		pSignShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSSign");
+	}
 	pSignShader->CreateInputLayout(ShaderTypes::Textured);
 	pSignShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);
 	pSignShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -571,6 +666,10 @@ void CShaderHandler::CreateTreeShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 		pTreeShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
 		pTreeShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFBXFeatureShader");
 	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pTreeShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTexturedLighting");
+		pTreeShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSFBXFeatureShader");
+	}
 	pTreeShader->CreateInputLayout(ShaderTypes::Textured);
 	pTreeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true); 
 	pTreeShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
@@ -591,6 +690,10 @@ void CShaderHandler::CreateMirrorShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 	else if (m_UserID == ShaderHandlerUser::TH) {
 		pMirrorShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSTexturedLighting");
 		pMirrorShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSMirror");
+	}
+	else if (m_UserID == ShaderHandlerUser::GAMESCENE) {
+		pMirrorShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSTexturedLighting");
+		pMirrorShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSMirror");
 	}
 	pMirrorShader->CreateInputLayout(ShaderTypes::Textured);
 	pMirrorShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, TRUE);

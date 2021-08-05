@@ -1,5 +1,6 @@
 #pragma once
 #include "Scene.h"
+#include "GameScene.h"
 
 class CShader;
 class CGameObject;
@@ -17,13 +18,13 @@ class CFbxObject2;
 
 #define ChessPuzzleSize 7
 
-enum ChessType {
-	King = 0,
-	Knight,
-	Pawn,
-	Rook,
-	Count,
-};
+//enum ChessType {
+//	King = 0,
+//	Knight,
+//	Pawn,
+//	Rook,
+//	Count,
+//};
 
 class CSceneYJ : public CScene
 {

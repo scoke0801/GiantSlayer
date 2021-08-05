@@ -3471,6 +3471,7 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		CMummyLaser* pMummyLaser2 = new CMummyLaser();
 		pMummyLaser2->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+		
 		pMummyLaser2->SetTextureIndex(0x02);
 		pMummyLaser2->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
 		pMummyLaser2->Scale(100.0f, 100.0f, 1000.0f);
@@ -3483,6 +3484,7 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		CMummyLaser* pMummyLaser3 = new CMummyLaser();
 		pMummyLaser3->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+		
 		pMummyLaser3->SetTextureIndex(0x04);
 		pMummyLaser3->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
 		pMummyLaser3->Scale(100.0f, 100.0f, 1000.0f);
@@ -3494,10 +3496,10 @@ void CSceneYJ::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 {
-	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy1 && m_MummyExist[0]==true)
+	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy1 && m_MummyExist[0] == true)
 	{
 		// 미라가 2마리 남았을때
-		if (m_One_Mira_Die_Laser==true)
+		if (m_One_Mira_Die_Laser == true)
 		{
 			for (int i = 0; i < 3; i++)
 			{
@@ -3516,30 +3518,30 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
 			CMummyLaser* pMummyLaser = reinterpret_cast<CMummyLaser*>(pObj);
-			
+
 			if (pMummyLaser->IsCanUse()) {
 				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle, 1);
-				
-					if (-1 != idx) {
-						pMummyLaser->SetUseable(false);
-						
-						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
-						pMummyLaser->SetPosition(pos);
-						
-						pMummyLaser->SetLaserType(Laser_TYPE::Laser1);
-						m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-						pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-						pMummyLaser->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
 
-						pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
-						m_Mummy[0]->AddFriends_Laser(pMummyLaser);
-						pMummyLaser->AddFriends_p(m_Mummy[0]);
-					}
-					
-				break;
+				if (-1 != idx) {
+					pMummyLaser->SetUseable(false);
+
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
+					pMummyLaser->SetPosition(pos);
+
+					pMummyLaser->SetLaserType(Laser_TYPE::Laser1);
+					m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+					pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+					pMummyLaser->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
+
+					pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
+					m_Mummy[0]->AddFriends_Laser(pMummyLaser);
+					pMummyLaser->AddFriends_p(m_Mummy[0]);
 				}
+
+				break;
 			}
-		
+		}
+
 
 		if (m_One_Mira_Die == true)
 		{
@@ -3557,12 +3559,12 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 						pMummyLaser->SetLaserType(Laser_TYPE::Laser1);
 						m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 						pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(30.0f, 0, -150), 1));
-						pMummyLaser->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x+30.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
+						pMummyLaser->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x + 30.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
 
 						pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
 						m_Mummy[0]->AddFriends_Laser(pMummyLaser);
 						pMummyLaser->AddFriends_p(m_Mummy[0]);
-						
+
 					}
 					break;
 				}
@@ -3594,7 +3596,7 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 				}
 			}
 		}
-		
+
 
 	}
 
@@ -3617,21 +3619,21 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 			}
 			m_Two_Mira_Die_Laser = false;
 		}
-		
+
 		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
 			CMummyLaser* pMummyLaser2 = reinterpret_cast<CMummyLaser*>(pObj);
-			
+
 			if (pMummyLaser2->IsCanUse()) {
 				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle2, 2);
-	
+
 				if (-1 != idx) {
-				
+
 					pMummyLaser2->SetUseable(false);
 					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[1]->GetPosition() }, { 0,200,0 });
 					pMummyLaser2->SetPosition(pos);
-					
+
 					pMummyLaser2->SetLaserType(Laser_TYPE::Laser2);
-				
+
 					m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 					pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 					pMummyLaser2->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
@@ -3661,7 +3663,7 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 						m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 						pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(30, 0, -150), 1));
-						pMummyLaser2->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x+30.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
+						pMummyLaser2->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x + 30.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
 
 						pMummyLaser2->ConnectParticle(m_Particles->GetParticleObj(idx));
 						m_Mummy[1]->AddFriends_Laser(pMummyLaser2);
@@ -3688,7 +3690,7 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 						m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 						pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(-30, 0, -150), 1));
-						pMummyLaser2->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x-30.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
+						pMummyLaser2->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x - 30.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
 
 						pMummyLaser2->ConnectParticle(m_Particles->GetParticleObj(idx));
 						m_Mummy[1]->AddFriends_Laser(pMummyLaser2);
@@ -3722,10 +3724,9 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 		}
 		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
 			CMummyLaser* pMummyLaser3 = reinterpret_cast<CMummyLaser*>(pObj);
-			
+
 			if (pMummyLaser3->IsCanUse()) {
 				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle3, 3);
-				cout << idx << endl;
 				if (-1 != idx) {
 					pMummyLaser3->SetUseable(false);
 					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[2]->GetPosition() }, { 0,200,0 });
@@ -3734,7 +3735,7 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 					m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 					pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 					pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
-				
+
 					pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
 					m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
 					pMummyLaser3->AddFriends_p(m_Mummy[2]);
@@ -3742,7 +3743,7 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 				break;
 			}
-			
+
 		}
 		if (m_One_Mira_Die == true)
 		{
@@ -3751,7 +3752,6 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 				if (pMummyLaser3->IsCanUse()) {
 					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle3, 3);
-					cout << idx << endl;
 					if (-1 != idx) {
 						pMummyLaser3->SetUseable(false);
 						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[2]->GetPosition() }, { 0,200,0 });
@@ -3759,8 +3759,8 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 						pMummyLaser3->SetLaserType(Laser_TYPE::Laser3);
 						m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 						pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(30.0f, 0, -150), 1));
-						pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x+30.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
-					
+						pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x + 30.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
+
 						pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
 						m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
 						pMummyLaser3->AddFriends_p(m_Mummy[2]);
@@ -3778,7 +3778,6 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 				if (pMummyLaser3->IsCanUse()) {
 					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle3, 3);
-					cout << idx << endl;
 					if (-1 != idx) {
 						pMummyLaser3->SetUseable(false);
 						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[2]->GetPosition() }, { 0,200,0 });
@@ -3786,8 +3785,8 @@ void CSceneYJ::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 						pMummyLaser3->SetLaserType(Laser_TYPE::Laser3);
 						m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
 						pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(-30, 0, -150), 1));
-						pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x-30.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
-						
+						pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x - 30.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
+
 						pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
 						m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
 						pMummyLaser3->AddFriends_p(m_Mummy[2]);

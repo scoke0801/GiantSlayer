@@ -79,7 +79,7 @@ void CPlayer::Update(float fTimeElapsed)
 		}
 		else if (m_PullBox == TRUE)
 		{
-			SetAnimationSet(13);
+			SetAnimationSet(14);
 		}
 		else
 			SetAnimationSet(RUN);

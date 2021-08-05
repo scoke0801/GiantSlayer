@@ -5,6 +5,7 @@ enum class ShaderHandlerUser
 	TH,
 	YJ,
 	JH,
+	GAMESCENE,
 };
 class CShader;
 class CTerrain;

@@ -25,6 +25,9 @@
     <FxCompile Include="Shaders\ParticleShader.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\ShaderGameScene.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSTextureLoader12.cpp">
@@ -158,7 +161,7 @@
     </ClCompile>
     <ClCompile Include="MummyLaser.cpp">
       <Filter>GameObject\MummyLaser</Filter>
-    </ClCompile> 
+    </ClCompile>
     <ClCompile Include="Skill.cpp">
       <Filter>GameObject\Skill</Filter>
     </ClCompile>
@@ -319,12 +322,12 @@
     </ClInclude>
     <ClInclude Include="MummyLaser.h">
       <Filter>GameObject\MummyLaser</Filter>
-    </ClInclude> 
+    </ClInclude>
     <ClInclude Include="Skill.h">
       <Filter>GameObject\Skill</Filter>
-    </ClInclude> 
+    </ClInclude>
     <ClInclude Include="Font.h">
-      <Filter>Font</Filter> 
+      <Filter>Font</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -437,13 +440,13 @@
     </Filter>
     <Filter Include="GameObject\MummyLaser">
       <UniqueIdentifier>{092adec7-9cc3-486c-bcc4-02c1d10527ec}</UniqueIdentifier>
-    </Filter> 
+    </Filter>
     <Filter Include="GameObject\Skill">
       <UniqueIdentifier>{b4b216eb-730a-45f0-9923-13f9c60ad9d6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Font">
       <UniqueIdentifier>{a6ace682-ef0d-41fc-a40f-b9384dc3cc30}</UniqueIdentifier>
-    </Filter> 
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GSClient.rc">
