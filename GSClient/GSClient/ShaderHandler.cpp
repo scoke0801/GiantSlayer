@@ -332,8 +332,8 @@ void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		//pEffectShader->CreatePixelShader(L"Shaders/ShaderYJ.hlsl", "PSMinimap");
 	}
 	else if (m_UserID == ShaderHandlerUser::TH) {
-		pEffectShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSEffect");
-		pEffectShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSEffect");
+		pEffectShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VSEffect");
+		pEffectShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PSEffect");
 		//pEffectShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VSMinimap");
 		//pEffectShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PSMinimap");
 	}

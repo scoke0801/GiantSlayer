@@ -2,6 +2,9 @@
 #include "Skill.h"
 #include "Shader.h"
 #include "Particle.h"
+#include "Effect.h"
+
+#include "SceneTH.h"
 
 CFireBall::CFireBall()
 {
@@ -37,8 +40,22 @@ void CFireBall::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 void CFireBall::Update(float fTimeElapsed)
 {
-	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, TEST_ARROW_SPEED * fTimeElapsed)));
-	Rotate(XMFLOAT3(0.3f, 1.0f, 0.0f), 360.0f * fTimeElapsed);
+	if (false == m_isDrawable) {
+		m_ElapsedTime += fTimeElapsed;
+
+		if (m_ElapsedTime > FIREBALL_LIFE_TIME) {
+			m_ElapsedTime = 0.0f;
+			m_isDrawable = true;
+
+			XMFLOAT3 effectPos = m_xmf3Position;
+			auto curScene = MAIN_GAME_SCENE_T;
+
+			curScene->UseEffects((int)EffectTypes::FireBallExplosion, effectPos);
+		}
+
+		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, FIREBALL_SPEED * fTimeElapsed)));
+		Rotate(XMFLOAT3(0.3f, 1.0f, 0.0f), 360.0f * fTimeElapsed);
+	}
 }
 
 void CFireBall::SetSkill(CGameObject* owner)

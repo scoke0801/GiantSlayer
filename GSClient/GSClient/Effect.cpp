@@ -105,6 +105,10 @@ void CEffect::SetEffectType(EffectTypes effectType)
 		SetTextureIndex(0x04);
 		m_LifeTime = 1.2f;
 		break;
+	case EffectTypes::FireBallExplosion:
+		SetTextureIndex(0x08);
+		m_LifeTime = 1.0f;
+		break;
 	default:
 		break;
 	}
@@ -143,6 +147,13 @@ void CEffectHandler::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	for (int i = 0; i < 10; ++i) {
 		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 300.0f, 0.0f, 300.0f });
 		pTempEffect->SetEffectType(EffectTypes::WarnningCircle);
+		m_Effects.emplace_back(std::move(pTempEffect));
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 90.0f, 90.0f, 0.0f });
+		pTempEffect->SetEffectType(EffectTypes::FireBallExplosion);
+		pTempEffect->Scale(4, 4, 4, true);
 		m_Effects.emplace_back(std::move(pTempEffect));
 	}
 }

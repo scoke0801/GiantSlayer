@@ -299,7 +299,7 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
-		"Effect_1", "Effect_2", "Effect_3",
+		"Effect_1", "Effect_2", "Effect_3", "Effect_4",
 		"FireBall"
 	};
 
@@ -325,7 +325,7 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/Textures/Skeleton_D.dds",
 		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",
 		L"resources/Textures/DS_equipment_standard.dds",
-		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds",
+		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds", L"resources/Effects/FireBall_Explosion.dds",
 		L"resources/Textures/FireBall.dds"
 	};
 
@@ -382,7 +382,7 @@ void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
 		"MeleeSkeleton_02_EquipAll",
-		"Effect_1", "Effect_2", "Effect_3",
+		"Effect_1", "Effect_2", "Effect_3", "Effect_4",
 		"FireBall"
 	};
 
@@ -529,6 +529,22 @@ void CSceneTH::Update(float elapsedTime)
 				pArrow->SetDrawable(true);
 
 				cout << "충돌 : 플레이어 화살 - 적\n";
+				break;
+			}
+		}
+	}
+	for (auto pFireball : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pFireball->IsDrawable()) {
+			continue;
+		}
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy])
+		{
+			if (pFireball->CollisionCheck(pEnemy)) {
+				pEnemy->ChangeState(ObjectState::Attacked, pFireball);
+				pFireball->SetDrawable(true);
+
+				cout << "충돌 : 플레이어 파이어볼 - 적\n";
 				break;
 			}
 		}
@@ -3425,7 +3441,8 @@ void CSceneTH::UseEffects(int effectType, const XMFLOAT3& xmf3Position)
 	auto effect = m_EffectsHandler->RecycleEffect((EffectTypes)effectType);
 	if (effect != nullptr) {
 		effect->SetPosition(xmf3Position);
-		effect->FixPositionByTerrain(m_Terrain);
+		if(effectType < 4)
+			effect->FixPositionByTerrain(m_Terrain);
 		effect->SetDrawable(true);
 	}
 }
@@ -3435,7 +3452,8 @@ void CSceneTH::UseEffects(int effectType, const XMFLOAT3& xmf3Position, float wa
 	auto effect = m_EffectsHandler->RecycleEffect((EffectTypes)effectType);
 	if (effect != nullptr) {
 		effect->SetPosition(xmf3Position);
-		effect->FixPositionByTerrain(m_Terrain);
+		if (effectType < 4)
+			effect->FixPositionByTerrain(m_Terrain);
 		effect->WakeUpAfterTime(wakeupTime);
 	}
 }
