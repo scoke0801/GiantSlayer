@@ -13,7 +13,7 @@ public:
 	XMFLOAT3 Mummy_pos[3];
 
 
-	CMummyLaser() { m_isDrawable = true; }
+	CMummyLaser() { m_isDrawable = true; m_ExistingSector = SECTOR_POSITION::SECTOR_4; }
 	virtual ~CMummyLaser() {}
 
 public:
@@ -30,10 +30,7 @@ public:
 	void SetDrawable(bool drawable);
 	void AddFriends_p(CMummy* mummy);
 	void SetDirecionVector(const XMFLOAT3& direction);
-	
-
-	
-	
+	 
 	void ConnectParticle(ParticleObject* particle) { m_ConnectedParticle = particle; }
 private:
 	XMFLOAT3 m_xmf3TargetPosition;

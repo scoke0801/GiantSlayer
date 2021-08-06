@@ -841,14 +841,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	m_Particles->Draw(pd3dCommandList, m_CurrentCamera); 
 	m_EffectsHandler->Draw(pd3dCommandList, m_CurrentCamera);
-	//for (int i = 0; i < m_ObjectLayers.size(); ++i) {
-	//	//if (i == (int)OBJECT_LAYER::Enemy) {
-	//	//	continue;
-	//	//}
-	//	for (auto pObject : m_ObjectLayers[i]) { 
-	//		pObject->Draw(pd3dCommandList, m_CurrentCamera);
-	//	}
-	//} 
+
 
 	auto playerPos = m_Player->GetPosition();
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
