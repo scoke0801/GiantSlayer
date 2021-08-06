@@ -510,7 +510,7 @@ void CMummy::Update(float elapsedTime)
 				{
 					//this->SetAnimationSet(2);
 					//this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
-					MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
+					MAIN_GAME_SCENE->ShotMummyLaser(this, GetLook());
 				}
 			}
 			m_LaserAttackDelayTime[0] = 5.0f;
@@ -570,7 +570,7 @@ void CMummy::Update(float elapsedTime)
 				{
 					//this->SetAnimationSet(2);
 					//this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
-					MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
+					MAIN_GAME_SCENE->ShotMummyLaser(this, GetLook());
 				}
 
 			}
@@ -627,7 +627,7 @@ void CMummy::Update(float elapsedTime)
 				{
 					//this->SetAnimationSet(2);
 					//this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
-					MAIN_GAME_SCENE_Y->ShotMummyLaser(this, GetLook());
+					MAIN_GAME_SCENE->ShotMummyLaser(this, GetLook());
 				}
 			}
 			m_LaserAttackDelayTime[2] = 11.0f;

@@ -1089,7 +1089,7 @@ void CGameObjectVer2::SetTextureIndexFindByName(string fileName)
 		SetTextureIndex(0x100);
 	}
 	else if (fileName == "twoHandedStaff_texture") {
-		SetTextureIndex(0x200);
+		SetTextureIndex(0x400);
 	}
 	int stop = 3;
 }

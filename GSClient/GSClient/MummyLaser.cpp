@@ -30,7 +30,6 @@ void CMummyLaser::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 
 void CMummyLaser::Update(float fTimeElapsed)
 {
-	
 	if (false == m_isDrawable) {
 		m_ConnectedParticle->SetDrawable(true);
 		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ARROW_SPEED * fTimeElapsed)));

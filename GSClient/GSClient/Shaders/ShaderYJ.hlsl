@@ -1440,28 +1440,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
         cColor = lerp(cColor, Color, 0.5);
         
     }
-    // // 분노 2스택
-    //else if (gnTexturesMask & 0x400)
-    //{
-    //    float4 Color = { 1.0f, 0.0f, 0.0f, 1.0f };
-    //    cColor = gtxtMummy.Sample(gssWrap, input.uv);
-        
-    //    cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
-        
-    //    cColor = lerp(cColor, Color, 0.5);
-    //}
-	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
-	//{
-	//	float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-	//	float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] → [-1, 1]
-	//	normalW = normalize(mul(vNormal, TBN));
-	//}
-	//else
-	//{
-	//	normalW = normalize(input.normalW);
-	//}
-	//float4 cIllumination = Lighting(input.positionW, normalW, gnMaterialID);
-
+  
     float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
     shadowFactor = CalcShadowFactor_P(input.shadowPosH);
     input.normalW = normalize(input.normalW);

@@ -5,6 +5,7 @@
 class CCamera;
 class CSceneJH;
 class CSceneYJ;
+class CGameScene;
 
 class CFramework
 {
@@ -87,7 +88,7 @@ public: // about GetInstance , init framework
 	// 씬 그자체에 접근이 필요할 때
 	CScene* GetScene() { return m_CurrentScene; }
 	// 메인 게임씬에 접근이 필요할 때
-	CSceneJH* GetMainGameScene() { return reinterpret_cast<CSceneJH*>(m_CurrentScene); }
+	CGameScene* GetMainGameScene() { return reinterpret_cast<CGameScene*>(m_CurrentScene); }
 	CSceneYJ* GetMainGameScene_Y() { return reinterpret_cast<CSceneYJ*>(m_CurrentScene); }
 
 private:
