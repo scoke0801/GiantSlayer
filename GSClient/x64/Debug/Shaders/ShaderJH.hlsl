@@ -800,7 +800,7 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	if (input.texIndex & 0x01)
-	{
+	{ 
 		cColor = gtxtForest.Sample(gssWrap, input.uv0);
 	}
 	if (input.texIndex & 0x02)
@@ -1428,6 +1428,6 @@ VS_FONT_OUT VS_FONT_MAIN(VS_FONT_IN input, uint vertexID : SV_VertexID)
  
 float4 PS_FONT_MAIN(VS_FONT_OUT input) : SV_TARGET
 { 
-return float4(input.color.rgb, input.color.a * gtxtWater.Sample(gssWrap, input.texCoord).a);
+return float4(input.color.rgb, input.color.a * gtxtFont.Sample(gssWrap, input.texCoord).a);
 	//return float4(input.color.rgb, input.color.a * gtxtFont.Sample(gssWrap, input.texCoord).a);
 }

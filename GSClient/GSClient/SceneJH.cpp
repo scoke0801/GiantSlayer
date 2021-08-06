@@ -817,7 +817,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	m_pcbMappedSceneFrameData->m_PlayerWeapon = m_Player->GetSelectedWeapon();
 	auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
 		chrono::high_resolution_clock::now() - m_CreatedTime);
-	m_pcbMappedSceneFrameData->m_Time = timeElapsed.count() * 0.001f; 
+	m_pcbMappedSceneFrameData->m_Time = timeElapsed.count() * 0.001f;
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
 
@@ -835,11 +835,11 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	for (auto mirror : m_Mirror) {
 		mirror->Draw(pd3dCommandList, m_CurrentCamera);
-	} 
+	}
 
 	//pfbxTestObject->Draw(pd3dCommandList, m_CurrentCamera);
 
-	m_Particles->Draw(pd3dCommandList, m_CurrentCamera); 
+	//m_Particles->Draw(pd3dCommandList, m_CurrentCamera);
 	m_EffectsHandler->Draw(pd3dCommandList, m_CurrentCamera);
 	//for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 	//	//if (i == (int)OBJECT_LAYER::Enemy) {
@@ -864,21 +864,21 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 			for (auto pObject : m_ObjectLayers[i]) {
 				if (false == pObject->IsInNearSector(m_PlayerExistingSector)) {
 					continue;
-				} 
+				}
 				pObject->Draw(pd3dCommandList, m_CurrentCamera);
 			}
 		}
-	} 
+	}
 
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 
-
+	//ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
+	//pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"TEST"), XMFLOAT2(0.02f, 0.01f), XMFLOAT2(200.0f, 200.0f)); 
-
+	//TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È: "), XMFLOAT2(0.02f, 0.01f), XMFLOAT2(2.0f, 2.0f));
 }
 
 void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
