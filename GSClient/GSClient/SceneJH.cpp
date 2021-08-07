@@ -492,13 +492,14 @@ void CSceneJH::Update(float elapsedTime)
 		player->FixPositionByTerrain(m_Terrain);
 		player->FixCameraByTerrain(m_Terrain);
 	}
+	
 	m_PlayerExistingSector[m_Player->GetPlayerExistingSector()] = true;
 
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
 		}
-	}
+	} 
 
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
@@ -506,8 +507,9 @@ void CSceneJH::Update(float elapsedTime)
 		}
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
+			m_Player->UpdateCamera();
 		}
-	}
+	} 
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
