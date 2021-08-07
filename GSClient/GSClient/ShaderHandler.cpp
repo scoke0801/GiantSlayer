@@ -111,6 +111,11 @@ void CShaderHandler::CreateFBXAnimatedShader(ID3D12Device* pd3dDevice, ID3D12Roo
 		pFBXShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSFbxAnimated");
 		pFBXShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFbxAnimated");
 	}
+	else if (m_UserID == ShaderHandlerUser::JH)
+	{
+		pFBXShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSFbxAnimated");
+		pFBXShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSFbxAnimated");
+	}
 	else if (m_UserID == ShaderHandlerUser::GAMESCENE)
 	{
 		pFBXShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSFbxAnimated");
