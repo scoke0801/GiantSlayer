@@ -179,13 +179,12 @@ void CBridge::UpdateColliders()
 
 bool CBridge::CollisionCheck(Collider* pAABB)
 {
-	for (CGameObject* pObject : m_Objects)
-	{
-		if (pObject->CollisionCheck(pAABB)) {
-			m_CollideObject = pObject; 
+	for (auto pObj : m_Objects) {
+		if (pObj->CollisionCheck(pAABB)) {
+			m_CollideObject = pObj;
 			return true;
 		}
-	} 
+	}
 	return false;
 }
 
@@ -196,6 +195,7 @@ bool CBridge::CollisionCheck(CGameObject* other)
 		bool result = CollisionCheck(otherAABB[i]);
 		if (result) { 
 			other->FixCollision(m_CollideObject);
+			cout << "´Ù¸®¶û Ãâµ¿ " << i << "\n";
 			return true; 
 		}
 	}

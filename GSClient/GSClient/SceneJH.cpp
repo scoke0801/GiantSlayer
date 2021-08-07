@@ -613,7 +613,7 @@ void CSceneJH::Update(float elapsedTime)
 				break;
 			}
 		}
-	}
+	} 
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
 		if (pPuzzle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pPuzzle);
@@ -874,7 +874,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	auto playerPos = m_Player->GetPosition();
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		if (i == (int)OBJECT_LAYER::TerrainWater) {
-			m_ObjectLayers[i][0]->Draw(pd3dCommandList, m_CurrentCamera);
+			continue;
 		}
 		else {
 			for (auto pObject : m_ObjectLayers[i]) {
@@ -886,11 +886,13 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		}
 	}
 
-
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->Draw(pd3dCommandList, m_CurrentCamera);
 	}
+
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater][0]->Draw(pd3dCommandList, m_CurrentCamera);
+
 
 	// draw the text
 	//TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"TEST"), XMFLOAT2(0.02f, 0.01f), XMFLOAT2(200.0f, 200.0f));
@@ -1498,7 +1500,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_F2)
 	{
-		m_Player->SetPosition({ 8800 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
+		m_Player->SetPosition({ 6800 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F3)
