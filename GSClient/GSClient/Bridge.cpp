@@ -8,7 +8,7 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_CollisionHandleType = COLLISION_HANDLE_TYPE::NotCollide;
 	m_Name = OBJ_NAME::Bridge;  
 	int idx = -1;
-// 官蹿 积己
+	 
 	for (int i = 0; i < 10; i += 5)
 	{ 
 		CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
@@ -18,12 +18,11 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		idx = AddObject(pCubeMeshTex, pShader, 0x01);
 		m_Objects[idx]->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
 		m_Objects[idx]->SetSize({1, 251.0f ,1});
-		m_Objects[idx]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 1000, 1, 500,
-			XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i));
-		m_Objects[idx]->AddColider(new ColliderBox(XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i), 
-			XMFLOAT3(1000 * 0.5f, 1 * 0.5f, 500 * 0.5f))); 
-	}
-
+		m_Objects[idx]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 900, 300 + 1, 500,
+			XMFLOAT3(-0.0f, 251.0f -125 , -250.0f + 100.0f * i));
+		m_Objects[idx]->AddColider(new ColliderBox(XMFLOAT3(-0.0f, 251.0f - 125, -250.0f + 100.0f * i),
+			XMFLOAT3(900 * 0.5f, (300 + 1) * 0.5f, 500 * 0.5f)));
+	} 
 // 抄埃 积己
 	CCubeMeshTextured* pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,	
 		XMFLOAT3(-500.0f, 250.0f + 12.5f, 0.0f),
@@ -85,7 +84,7 @@ CBridge::CBridge(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 			XMFLOAT3(50 * 0.5f, 100 * 0.5f, 50 * 0.5f)));
 	}
 
-// 促府 罐魔 积己
+// 促府 罐魔 积己 
 	for (int i = 0; i < 3; ++i)
 	{
 		pCubeMeshTex = new CCubeMeshTextured(pd3dDevice, pd3dCommandList,
@@ -134,6 +133,10 @@ CBridge::~CBridge()
 {
 }
 
+void CBridge::Update(float fTimeElapsed)
+{
+}
+
 void CBridge::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	OnPrepareRender();
@@ -161,6 +164,15 @@ void CBridge::SetPosition(XMFLOAT3 pos)
 	CGameObject::SetPosition(pos);
 }
 
+void CBridge::SetPositionPlus(XMFLOAT3 pos)
+{
+	for (CGameObject* pObject : m_Objects)
+	{
+		pObject->SetPositionPlus(pos);
+	}
+	CGameObject::SetPosition(pos);
+}
+
 void CBridge::RotateAll(const XMFLOAT3& axis, float angle)
 {
 	for (CGameObject* pObject : m_Objects)
@@ -179,28 +191,34 @@ void CBridge::UpdateColliders()
 
 bool CBridge::CollisionCheck(Collider* pAABB)
 {
-	for (CGameObject* pObject : m_Objects)
-	{
-		if (pObject->CollisionCheck(pAABB)) {
-			m_CollideObject = pObject; 
-			return true;
+	bool res = false;
+	int i = 0;
+	for (auto pObj : m_Objects) {
+		if (pObj->CollisionCheck(pAABB)) {
+			m_CollideObject->FixCollision(pObj); 
+			//return true;
+			return res = true;
 		}
-	} 
-	return false;
+		++i;
+	}
+	return res;
 }
 
 bool CBridge::CollisionCheck(CGameObject* other)
-{ 
+{
+	bool res = false;
 	auto otherAABB = other->GetAABB();
+	m_CollideObject = other;
 	for (int i = 0; i < otherAABB.size(); ++i) {
 		bool result = CollisionCheck(otherAABB[i]);
-		if (result) { 
-			other->FixCollision(m_CollideObject);
-			return true; 
+		if (result) {
+			//other->FixCollision(m_CollideObject);
+			//return true;
+			return res = true;
 		}
 	}
 
-	return false; 
+	return res;
 }
 
 int CBridge::AddObject(CMesh* pMesh, CShader* pShader, UINT textureIndex)

@@ -460,8 +460,8 @@ void CShader::CreateGeneralShader(ID3D12Device* pd3dDevice,
 		transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
 		transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
-		//d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = TRUE;
-		d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = FALSE;
+		d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = TRUE;
+		//d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = FALSE;
 		d3dPipelineStateDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
 	}	
 
@@ -553,7 +553,7 @@ void CShader::CreateFBXMeshShader(ID3D12Device* pd3dDevice, ID3D12RootSignature*
 	transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
 	transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
 	transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL; 
-	d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = TRUE;
+	d3dPipelineStateDesc.BlendState.AlphaToCoverageEnable = FALSE;
 	d3dPipelineStateDesc.BlendState.RenderTarget[0] = transparencyBlendDesc; 
 
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "SceneJH.h"
 
-#include "stdafx.h" 
 #include "GameFramework.h"
 #include "Shader.h"
 #include "UI.h"
@@ -14,6 +13,8 @@
 #include "Puzzle.h" 
 #include "Particle.h"
 #include "Arrow.h"
+#include "Skill.h"
+#include "MummyLaser.h"
 #include "Enemy.h"
 #include "Sound.h"
 #include "FbxObject.h"
@@ -37,6 +38,8 @@ D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuStart;
 XMFLOAT3 LightPos;
 float lensize = 60000.0f;
 
+XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
+
 CSceneJH::CSceneJH()
 {
 	m_SoundManager = new CSoundManager();
@@ -51,7 +54,7 @@ CSceneJH::CSceneJH()
 
 	for (int i = 0; i < (int)FBX_MESH_TYPE::COUNT; ++i) {
 		m_LoadedFbxMesh[i] = nullptr;
-	} 
+	}
 
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		m_PlayerExistingSector[i] = false;
@@ -59,12 +62,12 @@ CSceneJH::CSceneJH()
 }
 
 CSceneJH::~CSceneJH()
-{  
-	
+{
+
 }
 
 void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
-{   
+{
 	BuildMirrorResource(pd3dDevice);
 	BuildMinimapResource(pd3dDevice);
 	BuildShadowResource(pd3dDevice);
@@ -74,10 +77,10 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::JH);
+	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::JH); // 수정필요
 	CShaderHandler::GetInstance().CreateAllShaders(pd3dDevice, m_pd3dGraphicsRootSignature);
 
-	BuildMaterials(pd3dDevice, pd3dCommandList); 
+	BuildMaterials(pd3dDevice, pd3dCommandList);
 	CreateLightCamera(pd3dDevice, pd3dCommandList, width, height);
 
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
@@ -85,7 +88,7 @@ void CSceneJH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 	BuildSceneFrameData(pd3dDevice, pd3dCommandList);
 	BuildObjects(pd3dDevice, pd3dCommandList);
 	BuildUIs(pd3dDevice, pd3dCommandList);
-	 
+
 	m_CreatedTime = chrono::high_resolution_clock::now();
 }
 
@@ -103,7 +106,7 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 		pCamera->SetScissorRect(0, 0, width, height);
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		m_Cameras[i] = pCamera;
-	} 
+	}
 	m_Cameras[0]->SetPosition({ 500,  250 + 150, 1200 });
 	m_Cameras[0]->Pitch(XMConvertToRadians(15));
 	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
@@ -115,10 +118,10 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 	m_Cameras[3]->SetPosition({ 2000, 1000, 8000 });
 	//m_Cameras[3]->Pitch(XMConvertToRadians(90));
 	m_Cameras[4]->SetPosition({ 0,0,0 });
-	 
+
 	//m_MirrorCamera = m_Cameras[3];
 	m_MinimapCamera = m_Cameras[1];
-	 
+
 	m_MirrorCamera = new CCamera;
 	m_MirrorCamera->SetLens(0.45f * PI, width, height, 1.0f, 60000.0f);
 	m_MirrorCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
@@ -130,16 +133,16 @@ void CSceneJH::BuildCamera(ID3D12Device* pd3dDevice,
 		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 60000.0f);
 		pCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
 		pCamera->SetScissorRect(0, 0, width, height);
-		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList); 
+		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		pCamera->SetPosition({ 500,  250 + 150, 1200 });
-		pCamera->Pitch(XMConvertToRadians(15)); 
+		pCamera->Pitch(XMConvertToRadians(15));
 		pCamera->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 		m_PlayerCameras.emplace_back(std::move(pCamera));
 	}
 
 	if (CFramework::GetInstance().IsOnConntected())
 	{
-		int id = CFramework::GetInstance().GetPlayerId(); 
+		int id = CFramework::GetInstance().GetPlayerId();
 		m_CurrentCamera = m_PlayerCameras[id];
 		m_isPlayerSelected = true;
 	}
@@ -173,7 +176,7 @@ void CSceneJH::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 }
 
 void CSceneJH::BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{  
+{
 	m_pLights = new LIGHTS;
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 
@@ -227,8 +230,8 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
-		m_ObjectLayers[i].reserve(50); 
-	} 
+		m_ObjectLayers[i].reserve(50);
+	}
 
 	m_Skybox = new CSkyBox(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("SkyBox"));
 	m_Terrain = new CTerrain(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Terrain"));
@@ -238,37 +241,43 @@ void CSceneJH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pTerrainWater->SetPosition(XMFLOAT3(5450.0f * MAP_SCALE_SIZE, -1300.0f, 16500.0f * MAP_SCALE_SIZE));
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater].push_back(pTerrainWater);
 
-	//FbxLoader(m_pfbxManager, "tree", false, 1);
+	//FbxLoader(m_pfbxManager, "laser3", false, 1);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
-	//BuildMapSector1(pd3dDevice, pd3dCommandList);
-	//BuildMapSector2(pd3dDevice, pd3dCommandList);
-	//BuildMapSector3(pd3dDevice, pd3dCommandList); 
+	BuildMapSector1(pd3dDevice, pd3dCommandList);
+	BuildMapSector2(pd3dDevice, pd3dCommandList);
+	BuildMapSector3(pd3dDevice, pd3dCommandList);
 	//BuildMapSector4(pd3dDevice, pd3dCommandList);
-	//BuildMapSector5(pd3dDevice, pd3dCommandList); 
+	//BuildMapSector5(pd3dDevice, pd3dCommandList);
 
 	BuildBridges(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Bridge"));
-	
+
 	BuildDoorWall(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("DoorWall"));
 	BuildPuzzles(pd3dDevice, pd3dCommandList);
-	
+
 	BuildSigns(pd3dDevice, pd3dCommandList);
-	BuildMirror(pd3dDevice, pd3dCommandList); 
-	BuildPlayers(pd3dDevice, pd3dCommandList); 
+	BuildMirror(pd3dDevice, pd3dCommandList);
+	BuildPlayers(pd3dDevice, pd3dCommandList);
 
 	BuildParticles(pd3dDevice, pd3dCommandList);
 	BuildArrows(pd3dDevice, pd3dCommandList);
+	BuildMummyLaser(pd3dDevice, pd3dCommandList);
+	BuildProjectiles(pd3dDevice, pd3dCommandList);
 
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
-	   
-	m_EffectsHandler = new CEffectHandler();
-	m_EffectsHandler->Init(pd3dDevice, pd3dCommandList, m_Player); 
 
-	//UseEffects((int)EffectTypes::Thunder, { 1000.0f, 0.0f, 1000.0f }); 
-	//UseEffects((int)EffectTypes::BossAttacked, { 500.0f, 0.0f, 500.0f });
-	//UseEffects((int)EffectTypes::WarnningCircle, { 500.0f, 0.0f, 500.0f }); 
+	m_EffectsHandler = new CEffectHandler();
+	m_EffectsHandler->Init(pd3dDevice, pd3dCommandList, m_Player);
+
+	/*pfbxTestObject = new CFbxObject2(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, m_pfbxManager, "resources/Fbx/human.fbx");
+	pfbxTestObject->SetAnimationStack(2);
+	pfbxTestObject->m_pAnimationController->SetPosition(0, 0.0f);
+	pfbxTestObject->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+	pfbxTestObject->SetPosition({ 1000,  150, 1000 });
+	pfbxTestObject->SetTextureIndex(0x01);*/
 
 	auto end_t = chrono::high_resolution_clock::now();
 
@@ -280,14 +289,16 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 {
 	const char* keyNames[] =
 	{
-		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain","BossWall",
+		"Forest","Dry_Forest","Desert",
+		"Dry_Desert","Rocky_Terrain","BossWall",
 		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
 		"Box","Wood", "WoodSignBoard",
 		"GrassWall", "SandWall","RockyWall",
 		"Door",
 		"HP_SP", "Minimap", "WeaponUI",
 		"HP_SP_PER",
-		"Flower_Red", "Flower_White", "Grass_1", "Grass_2", "Tree", "NoLeafTree", "Leaves", "Moss_Rock",
+		"Player_Clothes", "Player_Face", "Player_Hair", "Player_Sword", "Player_Bow", "Player_Staff",
+		"Tree", "NoLeafTree", "Leaves", "Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
 		"Dry_Tree", "Stump", "Dead_Tree",
@@ -297,9 +308,13 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
+		"Mat01_mummy_A","Mat01_mummy_M",
 		"GreenTree",
-		"Bow",
-		"Effect_1", "Effect_2", "Effect_3"
+		"Effect_1", "Effect_2", "Effect_3",
+		"FireBall",
+		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse",
+		"ChessTile",
+		"Laser",
 	};
 
 	const wchar_t* address[] =
@@ -307,13 +322,11 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",
 		L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",L"resources/OBJ/bossWall.dds",
 		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds",
-		L"resources/OBJ/Box.dds",
-		L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
+		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
 		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
 		L"resources/OBJ/Door.dds",
 		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
-		//L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds",
-		L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds",
+		L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds", L"resources/Textures/bow_texture.dds", L"resources/Textures/twoHandedStaff_texture.dds",
 		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
 		L"resources/OBJ/Board.dds",
 		L"resources/UI/HelpText.dds",
@@ -323,11 +336,14 @@ void CSceneJH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Rain.dds",
 		L"resources/Textures/Body_D.dds",L"resources/Textures/Body_C.dds",L"resources/Textures/Body_E.dds",L"resources/Textures/Body_N.dds",
 		L"resources/Textures/Skeleton_D.dds",
-		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",
-		L"resources/Textures/DS_equipment_standard.dds",
+		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",L"resources/Textures/DS_equipment_standard.dds",
+		L"resources/Textures/Mat01_mummy_A.dds",L"resources/Textures/Mat01_mummy_M.dds",
 		L"resources/OBJ/GreenTree.dds",
-		L"resources/Textures/bow_texture.dds",
-		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds"
+		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds",
+		L"resources/Textures/FireBall.dds",
+		L"resources/Textures/KingDiffuse.dds",L"resources/Textures/KnightDiffuse.dds",L"resources/Textures/PawnDiffuse.dds",L"resources/Textures/RookDiffuse.dds",
+		L"resources/OBJ/ChessTile.dds",
+		L"resources/Textures/LightningSpriteSheet2.dds",
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -363,28 +379,32 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	const char* keyNames[] =
 	{
-		"Forest","Dry_Forest","Desert","Dry_Desert","Rocky_Terrain","BossWall",
-		"Sky_Front", "Sky_Back", "Sky_Left", "Sky_Right", "Sky_Top","Sky_Bottom",
+		"Forest","Dry_Forest","Desert",
+		"Dry_Desert","Rocky_Terrain","BossWall",
+		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
 		"Box","Wood", "WoodSignBoard",
 		"GrassWall", "SandWall","RockyWall",
 		"Door",
-		"HP_SP","HP_SP_PER",
-		"Minimap",
-		"WeaponUI",
-		"Flower_Red","Flower_White","Grass_1","Grass_2","Tree","NoLeafTree","Leaves","Moss_Rock",
+		"HP_SP", "Minimap", "WeaponUI",
+		"HP_SP_PER",
+		"Player_Clothes", "Player_Face", "Player_Hair", "Player_Sword", "Player_Bow", "Player_Staff",
+		"Tree", "NoLeafTree", "Leaves", "Moss_Rock",
 		"PuzzleBoard",
 		"HelpText",
-		"Dry_Tree","Stump","Dead_Tree",
+		"Dry_Tree", "Stump", "Dead_Tree",
 		"Desert_Rock",
 		"TerrainWater",
 		"Rain",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
-		"MeleeSkeleton_02","MeleeSkeleton_02_Equip",
-		"MeleeSkeleton_02_EquipAll",
+		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
+		"Mat01_mummy_A","Mat01_mummy_M",
 		"GreenTree",
-		"Bow",
-		"Effect_1", "Effect_2", "Effect_3"
+		"Effect_1", "Effect_2", "Effect_3",
+		"FireBall",
+		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse",
+		"ChessTile",
+		"Laser",
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -431,7 +451,7 @@ void CSceneJH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pd3dDevice->CreateDepthStencilView(m_pd3dShadowMap, &dsvDesc, CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize));
 
 	m_d3dDsvShadowMapCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize);
-	m_d3dSrvShadowMapGPUHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 4, gnCbvSrvDescriptorIncrementSize);
+	m_d3dSrvShadowMapGPUHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 3, gnCbvSrvDescriptorIncrementSize);
 }
 
 void CSceneJH::ReleaseObjects()
@@ -454,7 +474,6 @@ void CSceneJH::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	}
-	//pfbxTestObject->Update(elapsedTime);
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(m_Terrain);
@@ -472,23 +491,32 @@ void CSceneJH::Update(float elapsedTime)
 		player->UpdateColliders();
 		player->FixPositionByTerrain(m_Terrain);
 		player->FixCameraByTerrain(m_Terrain);
-		//m_PlayerExistingSector[player->GetPlayerExistingSector()] = true;
 	}
+	
 	m_PlayerExistingSector[m_Player->GetPlayerExistingSector()] = true;
 
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
 		}
-	}
+	} 
 
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
 		}
 		if (pObstacle->CollisionCheck(m_Player)) {
+			m_Player->FixCollision(pObstacle); 
+		}
+	} 
+
+	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Bridge]) {
+		if (false == pObstacle->IsInNearSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
-			//cout << "충돌 : 플레이어 - 장애물\n";
+			m_Player->UpdateCamera();
 		}
 	}
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
@@ -503,7 +531,6 @@ void CSceneJH::Update(float elapsedTime)
 			if (false == m_Player->IsCanAttack()) {
 				if (false == m_Player->IsAleradyAttack()) {
 					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					//cout << "플레이어 공격 - 몬스터\n";
 					m_Player->SetAleradyAttack(true);
 				}
 			}
@@ -511,10 +538,35 @@ void CSceneJH::Update(float elapsedTime)
 			{
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
 				m_Player->FixCollision();
-				//cout << "충돌 : 플레이어 - 적\n";
 			}
 		}
 	}
+
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		if (pEnemy->CollisionCheck(m_Player)) {
+
+			if (false == m_Player->IsCanAttack()) {
+				if (false == m_Player->IsAleradyAttack()) {
+					CMummy* thisEnemy = reinterpret_cast<CMummy*>(pEnemy);
+
+					thisEnemy->SendDieInfotoFriends();
+
+					DeleteEnemy(thisEnemy);
+
+					m_Player->SetAleradyAttack(true);
+				}
+			}
+			else if (m_Player->Attacked(pEnemy))
+			{
+				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				m_Player->FixCollision();
+			}
+		}
+	}
+
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 			if (false == pEnemy->IsInSameSector(pObstacle->GetExistingSector())) {
@@ -524,10 +576,24 @@ void CSceneJH::Update(float elapsedTime)
 				CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
 				thisEnemy->FixCollision(pObstacle);
 				thisEnemy->CollideToObstacle();
-				//cout << "충돌 : 몬스터 - 장애물 재탐색 수행\n";
 			}
 		}
 	}
+
+	for (auto pMummy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
+		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+			if (false == pMummy->IsInSameSector(pObstacle->GetExistingSector())) {
+				continue;
+			}
+			if (pObstacle->CollisionCheck(pMummy)) {
+				CMummy* thisEnemy = reinterpret_cast<CMummy*>(pMummy);
+				thisEnemy->FixCollision(pObstacle);
+				thisEnemy->CollideToObstacle();
+			}
+		}
+	}
+
+
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
 		// 변수명 변경으로 인한 true/false 반전..
 		if (true == pArrow->IsDrawable()) {
@@ -537,19 +603,18 @@ void CSceneJH::Update(float elapsedTime)
 			if (m_Player->Attacked(pArrow)) {
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
 				pArrow->SetDrawable(true);
-				//cout << "충돌 : 플레이어 - 적\n";
 			}
 		}
 	}
+
+
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
 		// 변수명 변경으로 인한 true/false 반전..
 		if (true == pArrow->IsDrawable()) {
 			continue;
 		}
-		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
-			if (false == pEnemy->IsInSameSector(pArrow->GetExistingSector())) {
-				continue;
-			}
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy])
+		{
 			if (pArrow->CollisionCheck(pEnemy)) {
 				pEnemy->ChangeState(ObjectState::Attacked, pArrow);
 				pArrow->SetDrawable(true);
@@ -558,165 +623,155 @@ void CSceneJH::Update(float elapsedTime)
 				break;
 			}
 		}
-	}
+	} 
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
-		if (false == pPuzzle->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
 		if (pPuzzle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pPuzzle);
 			m_isPlayerBoxCollide = true;
+			m_Player->UpdateCamera();
+			break;
+		}
+	}
+	 
+	for (auto pChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle]) {
+		if (pChessPuzzle->CollisionCheck(m_Player)) {
+			m_Player->FixCollision(pChessPuzzle);
+			m_isPlayerBoxCollide = true;
+			m_Player->UpdateCamera();
+			break;
 		}
 	}
 
 	/*for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 1; i++)
+		{
 			if (pArrow->CollisionCheck(m_Mirror[i])) {
 				m_Mirror[i]->FixCollision();
 				if (i == 0)
 				{
 					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_0(), 1));
-					cout << "충돌 : 플레이어 - 거울0\n";
 				}
 				else if (i == 1)
 				{
 					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_1(), 1));
-					cout << "충돌 : 플레이어 - 거울1\n";
 				}
 				else if (i == 2)
 				{
 					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_2(), 1));
-					cout << "충돌 : 플레이어 - 거울2\n";
 				}
 			}
-		} 
+		}
 	}*/
-	 
-	if (m_Player->GetPlayerExistingSector() == (int)SECTOR_POSITION::SECTOR_3) {
-		// 퍼즐 상자하고 충돌처리
-		for (int i = 0; i < 8; i++)
+
+	// 퍼즐 위치 선정
+	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
+	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 5.0f);
+	XMFLOAT3 Speed = { 0.3f,0.3f,0.3f };
+
+	// 체스 퍼즐 충돌처리
+	for (auto pPlayerChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle]) {
+
+		if (pPlayerChessPuzzle->CollisionCheck(m_Player))
 		{
-			if (m_PuzzleBox[i]->CollisionCheck(m_Player))
-			{
-				m_PuzzleBox[i]->SetSelectBox(true);
-			}
-			else
-			{
-				m_PuzzleBox[i]->SetSelectBox(false);
-			}
+			m_Player->FixCollision(pPlayerChessPuzzle);
+			m_isPlayerBoxCollide = true;
+			m_Player->UpdateCamera();
+
+			break;
 		}
 	}
-	// 퍼즐 범위 내일 작업할때 사용 
 
-	/*x축 12450 12150   11950 11650  11450 11150
-
-		9800
-		10000
-
-		10250
-		10450
-
-		10700
-		10900
-		*/
-		// 1번
-	for (int i = 0; i < 8; i++)
+	// 체스 그 자체랑 충돌처리
+	for (int i = 0; i < ChessType::Count; i++)
 	{
-		if ((m_PuzzleBox[i]->GetPosition().x > 12150 && m_PuzzleBox[i]->GetPosition().x < 12450) &&
-			(m_PuzzleBox[i]->GetPosition().z > 9800 && m_PuzzleBox[i]->GetPosition().z < 10000) &&
-			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
+		if (
+			(
+				(m_Chess[i]->GetPosition().x + 215.0f > m_Player->GetPosition().x)
+				&& (m_Chess[i]->GetPosition().x - 215.0f < m_Player->GetPosition().x)
+				)
+			&&
+			(
+				(m_Chess[i]->GetPosition().z + 225.0f > m_Player->GetPosition().z)
+				&& (m_Chess[i]->GetPosition().z - 225.0f < m_Player->GetPosition().z)
+				)
+
 			)
 		{
-			m_PuzzleNumSelect[1] = TRUE;
+			m_ChessCollide_Check[i] = true;
 		}
-	}
-
-	// 3번
-	for (int i = 0; i < 8; i++)
-	{
-		if ((m_PuzzleBox[i]->GetPosition().x > 11150 && m_PuzzleBox[i]->GetPosition().x < 11450) &&
-			(m_PuzzleBox[i]->GetPosition().z > 9800 && m_PuzzleBox[i]->GetPosition().z < 10000) &&
-			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f)
-			)
+		else
 		{
-			m_PuzzleNumSelect[3] = TRUE;
+			m_ChessCollide_Check[i] = false;
 		}
-	}
 
-	// 5번
-	for (int i = 0; i < 8; i++)
+	}
+	for (int i = 0; i < ChessType::Count; i++)
 	{
-		if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
-			(m_PuzzleBox[i]->GetPosition().z > 10250 && m_PuzzleBox[i]->GetPosition().z < 10450) &&
-			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
+		if (m_ChessCollide_Check[i] == true)
 		{
-			m_PuzzleNumSelect[5] = TRUE;
+
+			m_Player->Box_Pull(TRUE);
+			m_Chess[i]->SetPosition({
+									m_Chess[i]->GetPosition().x + Final_Vec.x,
+									m_Chess[i]->GetPosition().y ,
+									m_Chess[i]->GetPosition().z + Final_Vec.z
+				});
+		}
+		else if (m_ChessCollide_Check[King] == false && m_ChessCollide_Check[Knight] == false && m_ChessCollide_Check[Pawn] == false && m_ChessCollide_Check[Rook] == false)
+		{
+			m_Player->Box_Pull(FALSE);
 		}
 	}
+	// 1 킹 2 나이트 3 폰 4 룩 // 퍼즐 체크 
 
-	// 8번
-	for (int i = 0; i < 8; i++)
+	if ((m_Chess[King]->GetPosition().x > 18320.0f && m_Chess[King]->GetPosition().x < 18720.0f)
+		&& (m_Chess[King]->GetPosition().z > 17150.0f && m_Chess[King]->GetPosition().z < 17550.0f))
 	{
-		if ((m_PuzzleBox[i]->GetPosition().x > 11650 && m_PuzzleBox[i]->GetPosition().x < 11950) &&
-			(m_PuzzleBox[i]->GetPosition().z > 10700 && m_PuzzleBox[i]->GetPosition().z < 10900) &&
-			(m_PuzzleBox[i]->GetPosition().y < -1700.0f && m_PuzzleBox[i]->GetPosition().y > -1720.0f))
-		{
-			m_PuzzleNumSelect[7] = TRUE;
-		}
+		m_ChessPlate_Check[King] = true;
+	}
+	if ((m_Chess[Knight]->GetPosition().x > 18320.0f && m_Chess[Knight]->GetPosition().x < 18720.0f)
+		&& (m_Chess[Knight]->GetPosition().z > 15950.0f && m_Chess[Knight]->GetPosition().z < 16350.0f))
+	{
+		m_ChessPlate_Check[Knight] = true;
+	}
+	if ((m_Chess[Pawn]->GetPosition().x > 17720.0f && m_Chess[Pawn]->GetPosition().x < 18120.0f)
+		&& (m_Chess[Pawn]->GetPosition().z > 16550.0f && m_Chess[Pawn]->GetPosition().z < 16950.0f))
+	{
+		m_ChessPlate_Check[Pawn] = true;
+	}
+	if ((m_Chess[Rook]->GetPosition().x > 17140.0f && m_Chess[Rook]->GetPosition().x < 17520.0f)
+		&& (m_Chess[Rook]->GetPosition().z > 15950.0f && m_Chess[Rook]->GetPosition().z < 16350.0f))
+	{
+		m_ChessPlate_Check[Rook] = true;
 	}
 
-	if (m_PuzzleNumSelect[1] && m_PuzzleNumSelect[5] && m_PuzzleNumSelect[3] && m_PuzzleNumSelect[7])
+	if (m_ChessPlate_Check[King] && m_ChessPlate_Check[Knight] && m_ChessPlate_Check[Pawn] && m_ChessPlate_Check[Rook])
 	{
 		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
 		p->OpenDoor();
 	}
 
-	// 퍼즐 위치 선정
-	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
-	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 100.0f);
-
-	for (int i = 0; i < 8; i++)
-	{
-		if (m_PuzzleBox[i]->GetGriptBox())
-		{
-			m_PuzzleBox[i]->SetPosition(
-				{
-					Final_Vec.x + m_Player->GetPosition().x,Final_Vec.y + m_Player->GetPosition().y+100.0f ,Final_Vec.z + m_Player->GetPosition().z
-				}
-			);
-		}
-
-	}
-	 
 	//m_PlayerCameras[CFramework::GetInstance().GetPlayerId()]->Update(elapsedTime);
-			
+	  
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
 	if (m_MirrorCamera)
 	{
 		m_MirrorCamera->UpdateViewMatrix();
 	}
-	 
+
 	if (m_pLightCamera)
 	{
 		LightPos = m_Player->GetPosition();
 		XMFLOAT3 TempPlayerPosition = m_Player->GetPosition();
 
-		LightPos.y = 3000.0f; 
+		LightPos.y = 3000.0f;
 		LightPos.z += 5000.0f;
-		 
-		//LightPos.x = m_Player->GetLook().x;
-		//LightPos.y = m_Player->GetPosition().y+3000.0f;
-
-		
 		m_pLightCamera->LookAt(LightPos,
 			{ TempPlayerPosition },
 			m_Player->GetUp()
 		);
-		
-		//m_pLightCamera->SetPosition(LightPos); 
 
-		 
 		m_pLightCamera->UpdateViewMatrix();
 	}
 
@@ -733,13 +788,12 @@ void CSceneJH::Update(float elapsedTime)
 	}
 }
 
-
 void CSceneJH::UpdateForMultiplay(float elapsedTime)
 {
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
-	for (int i = 0; i < m_ObjectLayers.size(); ++i) { 
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
 			pObject->UpdateOnServer(elapsedTime);
 			pObject->UpdateColliders();
@@ -757,10 +811,8 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 		if (!player->IsDrawable()) continue;
 		player->UpdateOnServer(elapsedTime);
 		player->UpdateColliders();
-		//player->FixPositionByTerrain(m_Terrain);
-		//player->FixCameraByTerrain(m_Terrain);
 		m_PlayerExistingSector[player->GetPlayerExistingSector()] = true;
-	} 
+	}
 
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
@@ -772,9 +824,9 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 	if (m_pLightCamera)
 	{
 		LightPos = m_Player->GetPosition();
- 
+
 		LightPos.y = 3000.0f;
-		LightPos.z += 5000.0f; 
+		LightPos.z += 5000.0f;
 
 		m_pLightCamera->LookAt({ LightPos },
 			{ m_Player->GetPosition().x,m_Player->GetPosition().y,m_Player->GetPosition().z },
@@ -795,6 +847,7 @@ void CSceneJH::UpdateForMultiplay(float elapsedTime)
 		m_MinimapCamera->UpdateViewMatrix();
 	}
 }
+
 void CSceneJH::AnimateObjects(float fTimeElapsed)
 {
 }
@@ -809,69 +862,49 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
 
-	//ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dBasicSrvDescriptorHeap };
-	//pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
 	m_pcbMappedSceneFrameData->m_PlayerHP = m_Player->GetHP();
 	m_pcbMappedSceneFrameData->m_PlayerSP = m_Player->GetSP();
 	m_pcbMappedSceneFrameData->m_PlayerWeapon = m_Player->GetSelectedWeapon();
 	auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
 		chrono::high_resolution_clock::now() - m_CreatedTime);
-	m_pcbMappedSceneFrameData->m_Time = timeElapsed.count() * 0.001f; 
+	m_pcbMappedSceneFrameData->m_Time = timeElapsed.count() * 0.001f;
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
-
-	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
-	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
-	//
-	//::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
-	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	//pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
-	//
-	//D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dBasicSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	//pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
 
 	m_Skybox->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	for (auto mirror : m_Mirror) {
 		mirror->Draw(pd3dCommandList, m_CurrentCamera);
-	} 
+	}
 
-	//pfbxTestObject->Draw(pd3dCommandList, m_CurrentCamera);
-
-	m_Particles->Draw(pd3dCommandList, m_CurrentCamera); 
+	m_Particles->Draw(pd3dCommandList, m_CurrentCamera);
 	m_EffectsHandler->Draw(pd3dCommandList, m_CurrentCamera);
-
 
 	auto playerPos = m_Player->GetPosition();
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		if (i == (int)OBJECT_LAYER::TerrainWater) {
-			m_ObjectLayers[i][0]->Draw(pd3dCommandList, m_CurrentCamera);
-		}
-		else if (i == (int)OBJECT_LAYER::Puzzle) {
-			for (auto pObject : m_ObjectLayers[i]) {
-				pObject->Draw(pd3dCommandList, m_CurrentCamera);
-			}
+			continue;
 		}
 		else {
 			for (auto pObject : m_ObjectLayers[i]) {
 				if (false == pObject->IsInNearSector(m_PlayerExistingSector)) {
 					continue;
-				} 
+				}
 				pObject->Draw(pd3dCommandList, m_CurrentCamera);
 			}
 		}
-	} 
+	}
 
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater][0]->Draw(pd3dCommandList, m_CurrentCamera);
+
 
 	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"TEST"), XMFLOAT2(0.02f, 0.01f), XMFLOAT2(200.0f, 200.0f)); 
-
+	//TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"TEST"), XMFLOAT2(0.02f, 0.01f), XMFLOAT2(200.0f, 200.0f));
 }
 
 void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -922,8 +955,8 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	m_pcbMappedSceneFrameData->m_PlayerWeapon = m_Player->GetSelectedWeapon();
 	auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
 		chrono::high_resolution_clock::now() - m_CreatedTime);
-	m_pcbMappedSceneFrameData->m_Time = timeElapsed.count() * 0.001f; 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress(); 
+	m_pcbMappedSceneFrameData->m_Time = timeElapsed.count() * 0.001f;
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
@@ -936,9 +969,6 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 	m_Skybox->Draw(pd3dCommandList, m_MinimapCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 
-	//for (auto pObject : m_ObjectLayers[(int)OBJECT_LAYER::Skybox]) {
-	//	pObject->Draw(pd3dCommandList, m_CurrentCamera);
-	//} 
 	for (auto pObject : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		pObject->Draw(pd3dCommandList, m_CurrentCamera);
 	}
@@ -969,8 +999,8 @@ void CSceneJH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 }
 
 void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
-{  
-	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature); 
+{
+	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
 	if (m_MirrorCamera)
 	{
@@ -995,7 +1025,8 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
-	 
+
+
 	m_Skybox->Draw(pd3dCommandList, m_MirrorCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
@@ -1012,7 +1043,7 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 			}
 			pObject->Draw(pd3dCommandList, m_CurrentCamera);
 		}
-	} 
+	}
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
 
@@ -1036,7 +1067,7 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 }
 
 void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
+{
 	if (m_isPlayerSelected == true)
 	{
 		pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
@@ -1056,12 +1087,6 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 
 		pd3dCommandList->OMSetRenderTargets(0, NULL, FALSE, &m_d3dDsvShadowMapCPUHandle);
 
-		//for (int i = 0; i < m_ObjectLayers.size(); ++i) {
-		//	for (auto pObject : m_ObjectLayers[i]) {
-		//		pObject->Draw_Shadow(pd3dCommandList, m_pLightCamera);
-		//	}
-		//} 
-		
 		auto playerPos = m_Player->GetPosition();
 		for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 			for (auto pObject : m_ObjectLayers[i]) {
@@ -1071,7 +1096,7 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 				pObject->Draw_Shadow(pd3dCommandList, m_pLightCamera);
 			}
 		}
-		 
+
 
 		for (auto player : m_Players) {
 			if (!player->IsDrawable()) continue;
@@ -1080,16 +1105,7 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 
 		pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dShadowMap,
 			D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
-	} 
-	/*if (m_CurrentCamera)
-	{
-		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
-		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER__CAMERA);
-	}*/
-}
- 
-void CSceneJH::RenderText(ID3D12GraphicsCommandList* pd3dCommandList, const string& text, const XMFLOAT2& pos, const XMFLOAT2& scale, const XMFLOAT2& padding, const XMFLOAT4& color)
-{ 
+	}
 }
 
 void CSceneJH::Communicate(SOCKET& sock)
@@ -1101,11 +1117,9 @@ void CSceneJH::Communicate(SOCKET& sock)
 
 	int retVal;
 	bool haveToRecv = false;
-	//SendPacket(&p_syncUpdateRequest);
-	
+
 	if (m_MousePositions.size() > 0) {
 		SendMouseInputPacket();
-		//RecvMouseProcessPacket();
 	}
 }
 
@@ -1131,8 +1145,6 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 
 			m_Player = m_Players[p_processLogin.id];
 			m_CurrentCamera = m_PlayerCameras[p_processLogin.id];
-			//m_Player->SetCamera(m_CurrentCamera); 
-			//m_CurrentCamera->SetTarget(m_Player);
 
 			m_MinimapCamera->SetTarget(m_Players[p_processLogin.id]);
 
@@ -1140,9 +1152,6 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 				CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
 				p->OpenDoor();
 			}
-			//for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
-			//	m_Players[i]->SetDrawable(p_processLogin.existPlayer[i]);
-			//}
 		}
 		break;
 	case PACKET_PROTOCOL::S2C_NEW_PLAYER:
@@ -1225,10 +1234,10 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			IntToFloat(p_monsterUpdate->lookY),
 			IntToFloat(p_monsterUpdate->lookZ) };
 		int id = p_monsterUpdate->id;
-		
+
 		reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id])->SetAnimationSet(p_monsterUpdate->state);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition(pos);
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
 	}
@@ -1271,23 +1280,23 @@ void CSceneJH::ProcessPacket(unsigned char* p_buf)
 			case SWORD_RUN:
 			case BOW_RUN:
 				m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
-				break; 
+				break;
 			case SWORD_ATK:
 			case BOW_ATK:
 				m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
 				break;
 			case SWORD_DEATH:
-			case BOW_DEATH: 
+			case BOW_DEATH:
 				m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
 				break;
 
 			case WALK: break;
 			case DAMAGED: break;
-			case SWORD_GET:break; 
+			case SWORD_GET:break;
 			case BOW_GET:break;
 			default:
 				break;
-			} 
+			}
 		}
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
@@ -1313,11 +1322,11 @@ void CSceneJH::LoginToServer()
 {
 	P_C2S_LOGIN p_login;
 	p_login.size = sizeof(p_login);
-	p_login.type = PACKET_PROTOCOL::C2S_LOGIN; 
+	p_login.type = PACKET_PROTOCOL::C2S_LOGIN;
 	p_login.roomIndex = -1;
 	strcpy_s(p_login.name, CFramework::GetInstance().GetPlayerName().c_str());
-	 
-	SendPacket(&p_login); 
+
+	SendPacket(&p_login);
 }
 
 void CSceneJH::LogoutToServer()
@@ -1422,17 +1431,17 @@ void CSceneJH::ProcessInput()
 
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_W)
-	{ 
-		if (m_isPlayerSelected) { 
-			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));   
+	{
+		if (m_isPlayerSelected) {
+			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetLook3f(), distance));
 		}
 		else
 			m_CurrentCamera->Walk(cameraSpeed);
 	}
 	if (keyInput.KEY_A)
 	{
-		if (m_isPlayerSelected) { 
-			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetRight3f(), -distance)); 
+		if (m_isPlayerSelected) {
+			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetRight3f(), -distance));
 		}
 		else
 			m_CurrentCamera->Strafe(-cameraSpeed);
@@ -1447,40 +1456,11 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_D)
 	{
-		if (m_isPlayerSelected) { 
+		if (m_isPlayerSelected) {
 			m_Player->SetVelocity(Vector3::Add(shift, m_CurrentCamera->GetRight3f(), distance));
 		}
 		else
 			m_CurrentCamera->Strafe(cameraSpeed);
-	}
-
-	for (int i = 0; i < 8; i++)
-	{
-		if (keyInput.KEY_C && m_PuzzleBox[i]->GetSelectBox() && !m_PuzzleBoxCount)
-		{
-			cout << "박스를 이동합니다";
-
-			m_PuzzleBoxCount = TRUE;
-
-			m_PuzzleBox[i]->SetGripBox(!m_isBoxDown);
-
-		}
-	}
-	for (int i = 0; i < 8; i++)
-	{
-		if (keyInput.KEY_B && m_PuzzleBox[i]->GetSelectBox() && m_PuzzleBoxCount)
-		{
-			m_PuzzleBoxCount = FALSE;
-
-			m_PuzzleBox[i]->SetGripBox(false);
-
-			cout << " x축 : " << m_PuzzleBox[i]->GetPosition().x << " y축 :" << m_PuzzleBox[i]->GetPosition().z << endl;
-
-			//-1760
-
-			m_PuzzleBox[i]->SetPosition({ m_PuzzleBox[i]->GetPosition().x, -1710.0f, m_PuzzleBox[i]->GetPosition().z });
-
-		}
 	}
 
 	if (keyInput.KEY_1)
@@ -1491,12 +1471,10 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_2)
 	{
 		m_Player->SetWeapon(PlayerWeaponType::Bow);
-		//m_CurrentCamera = m_Cameras[1];
 	}
 	if (keyInput.KEY_3)
 	{
 		m_isPlayerSelected = true;
-		//m_CurrentCamera = m_Cameras[0];
 		m_CurrentCamera = m_PlayerCameras[0];
 	}
 	if (keyInput.KEY_4)
@@ -1507,23 +1485,8 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_5)
 	{
 		m_isPlayerSelected = false;
-		//m_CurrentCamera = m_Cameras[3];
 	}
-	if (keyInput.KEY_9)
-	{
-		if (m_Player->GetWeapon() == PlayerWeaponType::Sword) {
-			m_Player->SetWeapon(PlayerWeaponType::Bow);
-		}
-		else if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
-			m_Player->SetWeapon(PlayerWeaponType::Staff);
-		}
-		else if (m_Player->GetWeapon() == PlayerWeaponType::Staff) {
-			m_Player->SetWeapon(PlayerWeaponType::Sword);
-		}
-		else {
-			cout << "...?" << endl;
-		}
-	}
+
 	if (keyInput.KEY_SPACE)
 	{
 		DisplayVector3(m_Player->GetPosition());
@@ -1540,39 +1503,37 @@ void CSceneJH::ProcessInput()
 		m_CurrentCamera->SetSpeed(max(cameraSpeed - 1.0f, 1.0f));
 	}
 	if (keyInput.KEY_F1)
-	{ 
-		//m_Player->SetPosition({ 2500,  0, 2500 }); 
+	{
 		m_Player->SetPosition({ 1622 * MAP_SCALE_SIZE, 0, 10772 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F2)
 	{
-		// 2800
-		m_Player->SetPosition({ 8800 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
+		m_Player->SetPosition({ 6800 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F3)
-	{ 
+	{
 		m_Player->SetPosition({ 11838.8 * MAP_SCALE_SIZE,  -1000, 10428.2 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F4)
 	{
 		m_Player->SetPosition({ 17000 * MAP_SCALE_SIZE,  -6000, 5500 * MAP_SCALE_SIZE });
-		m_Player->FixPositionByTerrain(m_Terrain); 
+		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F5)
-	{ 
+	{
 		m_Player->SetPosition({ 16749.9 * MAP_SCALE_SIZE,  -6000, 8500.78 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F6)
-	{ 
+	{
 		m_Player->SetPosition({ 16958.4 * MAP_SCALE_SIZE,  -6000, 14861.1 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_U)
-	{ 
+	{
 		for (int i = 0; i < 5; ++i) {
 			CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
 			p->OpenDoor();
@@ -1583,27 +1544,15 @@ void CSceneJH::ProcessInput()
 		for (int i = 0; i < 5; ++i) {
 			CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
 			p->CloserDoor();
-		} 
+		}
 	}
 	if (keyInput.KEY_O)
 	{
-		//DisplayVector3(m_Player->GetPosition());
 		gbBoundaryOn = true;
 	}
 	if (keyInput.KEY_P)
 	{
 		gbBoundaryOn = false;
-	}
-	if (keyInput.KEY_J)
-	{
-		if (m_Player->IsCanAttack()) {
-			m_Player->Attack(0);
-			m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
-
-			if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
-				ShotPlayerArrow();
-			}
-		}
 	}
 	if (keyInput.KEY_K)
 	{
@@ -1613,15 +1562,87 @@ void CSceneJH::ProcessInput()
 	{
 		gbWireframeOn = false;
 	}
-	if (keyInput.KEY_T)
-	{
-		gbShadowOn = true;
-	}
-	if (keyInput.KEY_Y)
-	{
-		gbShadowOn = false;
-	} 
+
 	m_CurrentCamera->UpdateViewMatrix();
+}
+
+void CSceneJH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
+{
+	if (isKeyUp == false)
+	{
+		if (wParam == VK_9) {
+			if (m_Player->GetWeapon() == PlayerWeaponType::Sword) {
+				m_Player->SetWeapon(PlayerWeaponType::Bow);
+			}
+			else if (m_Player->GetWeapon() == PlayerWeaponType::Bow) {
+				m_Player->SetWeapon(PlayerWeaponType::Staff);
+			}
+			else if (m_Player->GetWeapon() == PlayerWeaponType::Staff) {
+				m_Player->SetWeapon(PlayerWeaponType::Sword);
+			}
+			else {
+				cout << "...?" << endl;
+			}
+		}
+		if (wParam == VK_J) {
+			if (m_Player->IsCanAttack()) {
+				switch (m_Player->GetWeapon())
+				{
+				case PlayerWeaponType::Sword:
+					m_Player->Attack(0);
+					break;
+				case PlayerWeaponType::Bow:
+					m_Player->Attack(0);
+					m_Player->pullString = true;
+					break;
+				case PlayerWeaponType::Staff:
+					m_Player->Attack(0);
+					ActiveSkill(OBJECT_LAYER::FireBall, m_Player);
+					break;
+				}
+			}
+			else {
+				switch (m_Player->GetWeapon())
+				{
+				case PlayerWeaponType::Sword:
+					if (m_Player->GetAttackWaitTime() < 0.5f) {
+						cout << m_Player->GetAttackWaitTime() << endl;
+						m_Player->SetSwordAttackKeyDown(true);
+					}
+					break;
+				}
+			}
+		}
+		if (wParam == VK_M) {
+			if (m_Player->IsCanAttack()) {
+				m_Player->Attack(1);
+				cout << "SKILLLLL~~" << endl;
+			}
+		}
+	}
+	else
+	{
+		if (wParam == VK_J) {
+			switch (m_Player->GetWeapon())
+			{
+			case PlayerWeaponType::Sword:
+				break;
+			case PlayerWeaponType::Bow:
+				if (m_Player->ShotAble()) {
+					ShotPlayerArrow();
+					m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+				}
+				else {
+					m_Player->IncreaseAttackWaitingTime(0);
+					m_Player->SetAnimationSet(IDLE);
+				}
+				m_Player->ResetBow();
+				break;
+			case PlayerWeaponType::Staff:
+				break;
+			}
+		}
+	}
 }
 
 void CSceneJH::OnMouseDown(WPARAM btnState, int x, int y)
@@ -1632,7 +1653,7 @@ void CSceneJH::OnMouseDown(WPARAM btnState, int x, int y)
 	if (m_CurrentCamera->IsOnShake()) {
 		// 피격 상태일 때 잠시 제어권 뺏기
 		return;
-	} 
+	}
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
 	SetCapture(CFramework::GetInstance().GetHWND());
@@ -1647,7 +1668,7 @@ void CSceneJH::OnMouseUp(WPARAM btnState, int x, int y)
 	if (m_CurrentCamera->IsOnShake()) {
 		// 피격 상태일 때 잠시 제어권 뺏기
 		return;
-	} 
+	}
 	ReleaseCapture();
 }
 
@@ -1669,10 +1690,10 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 		{
 			float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
 			float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
-			 
+
 			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_LMOVE;
 			m_MouseInputTypes.emplace_back(MOUSE_INPUT_TYPE::M_LMOVE);
-			m_MousePositions.emplace_back(POINTF{ dx, dy });  
+			m_MousePositions.emplace_back(POINTF{ dx, dy });
 		}
 		else if ((btnState & MK_RBUTTON) != 0)
 		{
@@ -1682,7 +1703,7 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 
 			m_MouseInputTypes.emplace_back(MOUSE_INPUT_TYPE::M_RMOVE);
 			m_MousePositions.emplace_back(POINTF{ dx, dy });
-		} 
+		}
 	}
 	else {
 		if ((btnState & MK_LBUTTON) != 0)
@@ -1723,12 +1744,12 @@ void CSceneJH::OnMouseMove(WPARAM btnState, int x, int y)
 
 void CSceneJH::ReleaseUploadBuffers()
 {
-	for (int i = 0; i < (int)OBJECT_LAYER::Count; ++i) { 
+	for (int i = 0; i < (int)OBJECT_LAYER::Count; ++i) {
 		for (auto pObject : m_ObjectLayers[i])
 		{
 			pObject->ReleaseUploadBuffers();
 		}
-	} 
+	}
 }
 
 ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
@@ -1769,7 +1790,7 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	pd3dRootParameters[4].Descriptor.ShaderRegister = 4; //Light
 	pd3dRootParameters[4].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	 
+
 	pd3dRootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[5].Descriptor.ShaderRegister = 5; //Material
 	pd3dRootParameters[5].Descriptor.RegisterSpace = 0;
@@ -1779,7 +1800,7 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	pd3dRootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[6].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[0]);
 	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-	 
+
 	pd3dRootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[7].Descriptor.ShaderRegister = 6; //BoneOffsets
 	pd3dRootParameters[7].Descriptor.RegisterSpace = 0;
@@ -1790,10 +1811,6 @@ ID3D12RootSignature* CSceneJH::CreateGraphicsRootSignature(ID3D12Device* pd3dDev
 	pd3dRootParameters[8].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	//pd3dRootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	//pd3dRootParameters[9].Descriptor.ShaderRegister = 8; //font
-	//pd3dRootParameters[9].Descriptor.RegisterSpace = 0;
-	//pd3dRootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags
 		= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
@@ -1871,68 +1888,67 @@ void CSceneJH::BuildBridges(ID3D12Device* pd3dDevice,
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ 8000.0f * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);  
+	pBridge->SetPositionPlus({ 8000.0f * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ (10000.0f - 680) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
+	pBridge->SetPositionPlus({ (10000.0f - 680) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPositionPlus({ (9000.0f - 340) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPositionPlus({ (11000.0f - 680 - 340) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
+
+	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
+	pBridge->SetShader(pShader);
+	pBridge->SetObjectName(OBJ_NAME::Bridge);
+	pBridge->RotateAll({ 0,1,0 }, 90.0f);
+	pBridge->SetPositionPlus({ 8000.0f * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ (9000.0f - 340) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+	pBridge->SetPositionPlus({ (10000.0f - 680) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ (11000.0f - 680 - 340) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
+	pBridge->SetPositionPlus({ (9000.0f - 340) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
 
 	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
 	pBridge->SetShader(pShader);
 	pBridge->SetObjectName(OBJ_NAME::Bridge);
 	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ 8000.0f * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);  
-
-	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
-	pBridge->SetShader(pShader);
-	pBridge->SetObjectName(OBJ_NAME::Bridge);
-	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ (10000.0f - 680) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
-
-	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
-	pBridge->SetShader(pShader);
-	pBridge->SetObjectName(OBJ_NAME::Bridge);
-	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ (9000.0f - 340) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
-
-	pBridge = new CBridge(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pShader);
-	pBridge->SetShader(pShader);
-	pBridge->SetObjectName(OBJ_NAME::Bridge);
-	pBridge->RotateAll({ 0,1,0 }, 90.0f);
-	pBridge->SetPosition({ (11000.0f - 680 - 340) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBridge);
-
+	pBridge->SetPositionPlus({ (11000.0f - 680 - 340) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
 }
 
 void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader)
 {
 	CDoorWall* pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 4000 * MAP_SCALE_SIZE, 1000, 500, pShader);
-	pDoorWall->SetPosition({ 0,0, 7500 * MAP_SCALE_SIZE});
+	pDoorWall->SetPosition({ 0,0, 7500 * MAP_SCALE_SIZE });
 	pDoorWall->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 	m_DoorIdx = m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].size();
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pDoorWall); 
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pDoorWall);
 
 	pDoorWall = new CDoorWall(pd3dDevice, pd3dCommandList, 3300 * MAP_SCALE_SIZE, 1000, 500, pShader);
 	pDoorWall->SetPosition({ 10300 * MAP_SCALE_SIZE, -2000, 7500 * MAP_SCALE_SIZE });
@@ -1963,7 +1979,7 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pWall->Rotate({ 0,1,0 }, 90);
 	pWall->SetPosition({ 13750 * MAP_SCALE_SIZE, -3500 + 1250, 4750 * MAP_SCALE_SIZE });
 	pWall->SetTextureIndex(0x04);
-	pWall->SetShader(pShader); 
+	pWall->SetShader(pShader);
 	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 1500, 2500, 500, XMFLOAT3{ 0,0,0 });
 	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
 	pWall->SetExistingSector(SECTOR_POSITION::SECTOR_4);
@@ -1973,9 +1989,9 @@ void CSceneJH::BuildDoorWall(ID3D12Device* pd3dDevice,
 	pWall->Rotate({ 0,1,0 }, 90);
 	pWall->SetPosition({ 13750 * MAP_SCALE_SIZE, -3500 + 1250, 6250 * MAP_SCALE_SIZE });
 	pWall->SetTextureIndex(0x04);
-	pWall->SetShader(pShader); 
+	pWall->SetShader(pShader);
 	pWall->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 1500, 2500, 500, XMFLOAT3{ 0,0,0 });
-	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f))); 
+	pWall->AddColider(new ColliderBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
 	pWall->SetExistingSector(SECTOR_POSITION::SECTOR_4);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pWall);
 }
@@ -2044,48 +2060,132 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	pUI->SetShader(CShaderHandler::GetInstance().GetData("Minimap"));
 	pUI->Rotate(180);
 	m_UIs.push_back(pUI);
-	
+
 }
 
 void CSceneJH::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < ChessPuzzleSize; i++)
 	{
-		m_PuzzleNum[i] = rand() % 9;
+		for (int j = 0; j < ChessPuzzleSize; j++)
+		{
+			m_ChessPlate[i][j].x = 16855 + 355 * i;
+			m_ChessPlate[i][j].z = 14417 + 450 * j;
+			m_ChessPlate[i][j].y = -1750.0f;
+		}
 	}
-
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
-	pPuzzlePlate->SetPosition({ 10600.0f * MAP_SCALE_SIZE, -2000.0f,( 1500.0f + 8000.0f) * MAP_SCALE_SIZE });
-	//m_Objects.push_back(std::move(pPuzzlePlate));
+
+	pPuzzlePlate->SetPosition({ 11130.0f * MAP_SCALE_SIZE, -2000.0f,(2000.0f + 8000.0f) * MAP_SCALE_SIZE });
+
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pPuzzlePlate);
 
 	CGameObject* pObject = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
-	pObject->SetPosition({ 10500.0f * MAP_SCALE_SIZE, -2000.0f, (1500.0f + 8000.0f ) * MAP_SCALE_SIZE });
-	//m_Objects.push_back(std::move(pObject));
-	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
-	for (int i = 0; i < 8; ++i)
-	{
-		m_PuzzleBox[i] = new CBox(pd3dDevice, pd3dCommandList, 150, 100, 150);
+	CGameObject* pObject2 = new CPuzzle(pd3dDevice, pd3dCommandList, PuzzleType::Holding, CShaderHandler::GetInstance().GetData("Puzzle"));
 
-		if (i > 3)
-		{
-			m_PuzzleBox[i]->SetPosition({ (10900.0f + 1 * 1800.0f) * MAP_SCALE_SIZE,  300 - 2000.0f, (1800.0f + (i - 4) * 300.0f + 8000.0f) * MAP_SCALE_SIZE });
-		}
-		else
-		{
-			m_PuzzleBox[i]->SetPosition({ (10900.0f + 0 * 1800.0f) * MAP_SCALE_SIZE,  300 - 2000.0f, (1800.0f + i * 300.0f + 8000.0f) * MAP_SCALE_SIZE });
-		}
-		m_PuzzleBox[i]->SetTextureIndex(0x200);
-		m_PuzzleBox[i]->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		m_PuzzleBox[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 150.0f, 100.0f, 150.0f, XMFLOAT3{ 0,0,0 });
-		m_PuzzleBox[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 150.0f * 0.5f, 100.0f * 0.5f, 150.0f * 0.5f }));
-		m_PuzzleBox[i]->SetSelectBox(FALSE);
-		m_PuzzleBox[i]->SetGripBox(FALSE);
-		m_PuzzleBox[i]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
-		//m_Objects.push_back(std::move(pObject));
-		m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox].push_back(m_PuzzleBox[i]); 
-	}
+	// 고정된 체스말
+	pObject = new CGameObject();
+	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::King]);
+	pObject->Rotate({ 1,0,0 }, -90);
+	pObject->SetPosition(m_ChessPlate[1][0]);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x4000);
+	pObject->Scale(300, 300, 300);
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
 
+	pObject = new CGameObject();
+	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight]);
+	pObject->Rotate({ 1,0,0 }, -90);
+	pObject->SetPosition(m_ChessPlate[0][2]);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x8000);
+	pObject->Scale(300, 300, 300);
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+
+	pObject = new CGameObject();
+	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Pawn]);
+	pObject->Rotate({ 1,0,0 }, -90);
+	pObject->SetPosition(m_ChessPlate[3][1]);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x10000);
+	pObject->Scale(300, 300, 300);
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+
+	pObject = new CGameObject();
+	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Rook]);
+	pObject->Rotate({ 1,0,0 }, -90);
+	pObject->SetPosition(m_ChessPlate[5][2]);
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x20000);
+	pObject->Scale(300, 300, 300);
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+
+
+	// 플레이어가 움직일수 있는 퍼즐
+	m_Chess[King] = new CGameObject();
+	m_Chess[King]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::King]);
+	m_Chess[King]->Rotate({ 1,0,0 }, -90);
+	m_Chess[King]->SetPosition(m_ChessPlate[0][6]);
+	m_Chess[King]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	m_Chess[King]->SetChess(Chess_Type::King);
+	m_Chess[King]->SetTextureIndex(0x400);
+	m_Chess[King]->Scale(300, 300, 300);
+	m_Chess[King]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	m_Chess[King]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_Chess[King]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[King]);
+
+	m_Chess[Knight] = new CGameObject();
+	m_Chess[Knight]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight]);
+	m_Chess[Knight]->Rotate({ 1,0,0 }, -90);
+	m_Chess[Knight]->SetPosition(m_ChessPlate[6][3]);
+	m_Chess[Knight]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	m_Chess[Knight]->SetChess(Chess_Type::Knight);
+	m_Chess[Knight]->SetTextureIndex(0x800);
+	m_Chess[Knight]->Scale(300, 300, 300);
+	m_Chess[Knight]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	m_Chess[Knight]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_Chess[Knight]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[Knight]);
+
+	m_Chess[Pawn] = new CGameObject();
+	m_Chess[Pawn]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Pawn]);
+	m_Chess[Pawn]->Rotate({ 1,0,0 }, -90);
+	m_Chess[Pawn]->SetPosition(m_ChessPlate[3][5]);
+	m_Chess[Pawn]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	m_Chess[Pawn]->SetChess(Chess_Type::Pawn);
+	m_Chess[Pawn]->SetTextureIndex(0x1000);
+	m_Chess[Pawn]->Scale(300, 300, 300);
+	m_Chess[Pawn]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	m_Chess[Pawn]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_Chess[Pawn]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[Pawn]);
+
+	m_Chess[Rook] = new CGameObject();
+	m_Chess[Rook]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Rook]);
+	m_Chess[Rook]->Rotate({ 1,0,0 }, -90);
+	m_Chess[Rook]->SetPosition(m_ChessPlate[6][6]);
+	m_Chess[Rook]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	m_Chess[Rook]->SetChess(Chess_Type::Rook);
+	m_Chess[Rook]->SetTextureIndex(0x2000);
+	m_Chess[Rook]->Scale(300, 300, 300);
+	m_Chess[Rook]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	m_Chess[Rook]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_Chess[Rook]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[Rook]);
 }
 
 void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -2111,16 +2211,19 @@ void CSceneJH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		true, true, CShaderHandler::GetInstance().GetData("Sign"));
 	pSign->SetPosition({ 13000.0f * MAP_SCALE_SIZE, -3250.0f, 1300.0f * MAP_SCALE_SIZE });
 	pSign->RotateAll({ 0,1,0 }, 90.0f);
-	pSign->SetExistingSector(SECTOR_POSITION::SECTOR_4); 
+	pSign->SetExistingSector(SECTOR_POSITION::SECTOR_4);
+
+	//m_Objects.push_back(pSign);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pSign);
 }
 
 void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+
 	{
 		XMFLOAT3 scale = { 120.0f, 120.0f, 120.0f };
 		m_Boss = new CBoss(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-		
+
 		//x : 25592.2 y : -6962.67 z : 25934.3
 		//z : 21800.0 14533
 		//z : 29700.0 19800
@@ -2130,23 +2233,98 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		//m_Boss->SetPosition({ 1500 * MAP_SCALE_SIZE, -6070, 1500 * MAP_SCALE_SIZE });
 		m_Boss->FixPositionByTerrain(m_Terrain);
 		m_Boss->Scale(120, 120, 120);
-		m_Boss->Rotate({ 0,1,0 }, 180); 
+		m_Boss->Rotate({ 0,1,0 }, 180);
 		m_Boss->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 
 		XMFLOAT3 centerPos = m_Boss->GetPosition();
-		XMFLOAT3 scopeSize = { 4100*2, 0, 4100 * 2 };
+		XMFLOAT3 scopeSize = { 4100 * 2, 0, 4100 * 2 };
 		m_Boss->SetActivityScope({ scopeSize.x, 0, scopeSize.z }, { centerPos });
 		m_Boss->SetSightBoundingBox({ scopeSize.x / scale.x, 15, scopeSize.z / scale.z });
-		m_Boss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, scopeSize.x  / scale.x, 15, scopeSize.z / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+		m_Boss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, scopeSize.x / scale.x, 15, scopeSize.z / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(m_Boss);
-		
+
 	}
 
 	CGameObjectVer2* pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 		m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
 
+	CGameObjectVer2* pMummyModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Mummy.bin", NULL, true);
+
 	CEnemy* pEnemy;
-	XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
+
+
+	// Monster Area4 임시 여기다 배치 // 추후에 리턴 지우고 맨 밑으로 수정
+	{
+		scale = { 600.0f,600.0f,600.0f };
+		CGameObjectVer2* pMummyModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Mummy.bin", NULL, true);
+
+		m_Mummy[0] = new CMummy();
+		m_Mummy[0]->Scale(scale.x, scale.y, scale.z, true);
+		m_Mummy[0]->SetChild(pMummyModel, true);
+		m_Mummy[0]->SetShadertoAll();
+		m_Mummy[0]->SetTextureInedxToAll(0x200);
+
+		m_Mummy[0]->SetPosition({ 18900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250.0f), 6250.0f * MAP_SCALE_SIZE });
+		m_Mummy[0]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 18900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+		m_Mummy[0]->SetEnemyAttackType(EnemyAttackType::Mummy1);
+
+		m_Mummy[0]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+
+		m_Mummy[0]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
+		m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[0])));
+		m_Mummy[0]->AddFriends(m_Mummy[0]);
+
+		scale = { 600.0f,600.0f,600.0f };
+		pMummyModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Mummy.bin", NULL, true);
+
+		m_Mummy[1] = new CMummy();
+		m_Mummy[1]->Scale(scale.x, scale.y, scale.z);
+		m_Mummy[1]->SetChild(pMummyModel, true);
+		m_Mummy[1]->SetShadertoAll();
+		m_Mummy[1]->SetTextureInedxToAll(0x200);
+
+		m_Mummy[1]->SetPosition({ 16900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250), 6250 * MAP_SCALE_SIZE });
+		m_Mummy[1]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 16900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+		m_Mummy[1]->SetEnemyAttackType(EnemyAttackType::Mummy2);
+
+		m_Mummy[1]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+
+		m_Mummy[1]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
+		m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[1])));
+		m_Mummy[1]->AddFriends(m_Mummy[1]);
+
+		scale = { 600.0f,600.0f,600.0f };
+
+		pMummyModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Mummy.bin", NULL, true);
+
+		m_Mummy[2] = new CMummy();
+		m_Mummy[2]->Scale(scale.x, scale.y, scale.z);
+		m_Mummy[2]->SetChild(pMummyModel, true);
+		m_Mummy[2]->SetShadertoAll();
+		m_Mummy[2]->SetTextureInedxToAll(0x200);
+
+		m_Mummy[2]->SetPosition({ 14900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250), 6250 * MAP_SCALE_SIZE });
+		m_Mummy[2]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 14900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+		m_Mummy[2]->SetEnemyAttackType(EnemyAttackType::Mummy3);
+
+		m_Mummy[2]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		m_Mummy[2]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
+
+		m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[2])));
+		m_Mummy[2]->AddFriends(m_Mummy[2]);
+	}
+
+	scale = { 300.0f,300.0f,300.0f };
 	{	// Monster Area1 
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
@@ -2162,8 +2340,6 @@ void CSceneJH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-		return;
-
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
@@ -2571,7 +2747,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pBillboardObject->SetPosition({ x_Tree * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f , z_Tree * MAP_SCALE_SIZE });
 
 		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard")); 
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
 	}
 
@@ -2584,13 +2760,13 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pBillboardObject->Scale(5.0f, 5.0f, 5.0f);
 
 		x_Tree = 4000 + 100.0f * i;
-		z_Tree = 4500 + 700.0f * i;		
+		z_Tree = 4500 + 700.0f * i;
 		x_Tree *= MAP_SCALE_SIZE;
 		z_Tree *= MAP_SCALE_SIZE;
 		pBillboardObject->SetPosition({ x_Tree * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree * MAP_SCALE_SIZE });
 
 		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard")); 
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
 	}
 
@@ -2607,7 +2783,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard")); 
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
 	}
 
@@ -2624,7 +2800,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard")); 
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
 	}
 
@@ -2641,7 +2817,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard")); 
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
 	}
 
@@ -2668,7 +2844,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard")); 
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
 	}
 
@@ -2696,7 +2872,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 380.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard")); 
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
 	}
 
@@ -2724,13 +2900,13 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 380.0f, z_Tree });
 
 		pBillboardObject->SetTextureIndex(0x010);
-		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard")); 
+		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
 	}
 #pragma endregion 
-	
+
 	CGameObject* pObject;
-	
+
 	for (int i = 0; i < 2; i++)
 	{
 		pObject = new CGameObject();
@@ -2738,7 +2914,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->SetPosition({ 1000.0f + i * 1000.0f, 100, 850 });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x200);
-		pObject->Scale(100, 100, 100); 
+		pObject->Scale(100, 100, 100);
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
@@ -2761,7 +2937,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject = new CGameObject();
 		pObject->Rotate({ 1,0,0 }, 90);
 		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
-		pObject->SetPosition({( 1200.0f + i * 1000.0f) * MAP_SCALE_SIZE, 0, 3150 * MAP_SCALE_SIZE });
+		pObject->SetPosition({ (1200.0f + i * 1000.0f) * MAP_SCALE_SIZE, 0, 3150 * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
 		pObject->Scale(50, 50, 50);
@@ -2787,7 +2963,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject = new CGameObject();
 		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->Rotate({ 0,0,1 }, 90);
-		pObject->SetPosition({ 2600.0f * MAP_SCALE_SIZE, 0,( 4650 + 500.0f * i) * MAP_SCALE_SIZE });
+		pObject->SetPosition({ 2600.0f * MAP_SCALE_SIZE, 0,(4650 + 500.0f * i) * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
 		pObject->Scale(50, 50, 50);
@@ -2800,7 +2976,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject = new CGameObject();
 		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->Rotate({ 0,0,1 }, 90);
-		pObject->SetPosition({ 2600.0f * MAP_SCALE_SIZE, -200.0f, (4650 + 500.0f * i ) * MAP_SCALE_SIZE });
+		pObject->SetPosition({ 2600.0f * MAP_SCALE_SIZE, -200.0f, (4650 + 500.0f * i) * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
 		pObject->Scale(50, 50, 50);
@@ -2836,7 +3012,7 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1]);
 		pObject->Rotate({ 0,0,1 }, 90);
 
-		pObject->SetPosition({ (x_bush + 300 * i) * MAP_SCALE_SIZE, 0, (z_bush + 700.0f * i ) * MAP_SCALE_SIZE });
+		pObject->SetPosition({ (x_bush + 300 * i) * MAP_SCALE_SIZE, 0, (z_bush + 700.0f * i) * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 		pObject->SetTextureIndex(0x01);
 
@@ -2854,7 +3030,6 @@ void CSceneJH::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 }
-
 void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObject* pObject;
@@ -2863,20 +3038,20 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		pObject = new CGameObject();
 
-		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock]); 
+		pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock]);
 		float x = 500.0f + i * 1000.0f;
 		float z = 19500 - 500.0f * i;
 		float y = m_Terrain->GetDetailHeight(x, z);
-		pObject->SetPosition({x * MAP_SCALE_SIZE, y, z * MAP_SCALE_SIZE });
+		pObject->SetPosition({ x * MAP_SCALE_SIZE, y, z * MAP_SCALE_SIZE });
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
 		pObject->SetTextureIndex(0x02);
-		pObject->Scale(50, 50, 50); 
+		pObject->Scale(50, 50, 50);
 		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5 * 0.5f, 7 * 0.5f, 3 * 0.5f)));
 		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 5, 7, 3, { 0,0,0 });
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
-	} 
- 
+	}
+
 	float x_Tree, z_Tree;
 
 	for (int i = 0; i < 1; i++)
@@ -2930,7 +3105,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) - 100.0f, z_Tree });
 		pObject->SetTextureIndex(0x04);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("Tree"));
-		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200*0.5f, 1500 * 0.5f, 150 * 0.5f)));
+		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
 		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 200, 1500, 150, { 0, 0, 100 });
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
@@ -2944,16 +3119,16 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	x_Tree *= MAP_SCALE_SIZE;
 	z_Tree *= MAP_SCALE_SIZE;
-	pObject->Scale(20.0f, 20.0f, 20.0f); 
+	pObject->Scale(20.0f, 20.0f, 20.0f);
 	pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree), z_Tree });
-	pObject->SetTextureIndex(0x08); 
+	pObject->SetTextureIndex(0x08);
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(15 * 0.5f, 10 * 0.5f, 15 * 0.5f)));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 15, 10, 15, { 0,0,0 });
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
-///////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////
 
 	pObject = new CGameObject();
 	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01]);
@@ -2982,7 +3157,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		z_Tree *= MAP_SCALE_SIZE;
 		pObject->Scale(150.0f + 50 * i, 150.0f + 50 * i, 150.0f + 50 * i);
 		pObject->Rotate({ 0,1,0 }, 30 + 30 * i);
-		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 1000.0f + 400.0f *i, z_Tree });
+		pObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 1000.0f + 400.0f * i, z_Tree });
 		pObject->SetTextureIndex(0x10);
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
 		pObject->AddColider(new ColliderBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
@@ -2993,7 +3168,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 }
 
 void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{ 
+{
 	CGameObject* pObject;
 
 	float x_Pos, z_Pos;
@@ -3008,7 +3183,7 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		z_Pos = 18500.0f;
 
 		if (i == 0)
-		{ 
+		{
 			z_Pos = 19500;
 			pObject->Scale(4.0f, 4.0f, 4.0f);
 		}
@@ -3092,13 +3267,13 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->Scale(0.5f, 0.5f, 0.5f);
 		pObject->SetPosition({ x_Pos , m_Terrain->GetDetailHeight(x_Pos,z_Pos) , z_Pos });
 		pObject->SetTextureIndex(0x020);
-		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));		
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureRight"));
 		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
 		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 600, 250, 600, { 0, 220, 0 });
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
-	
+
 	return;
 	for (int i = 0; i < 4; i++)
 	{
@@ -3126,35 +3301,40 @@ void CSceneJH::BuildMapSector3(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 }
-
 void CSceneJH::BuildMapSector4(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 
 void CSceneJH::BuildMapSector5(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-} 
+}
 
 void CSceneJH::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	/*m_pfbxManager = FbxManager::Create();
 	m_pfbxScene = FbxScene::Create(m_pfbxManager, "");
-	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");   
+	m_pfbxIOs = FbxIOSettings::Create(m_pfbxManager, "");
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
-	  
 
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree"); 
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree"); 
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree] = new CFixedMesh(pd3dDevice, pd3dCommandList, "GreenTree");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
-	//m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow"); 
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree] = new CFixedMesh(pd3dDevice, pd3dCommandList, "GreenTree");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
+
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::King] = new CFixedMesh(pd3dDevice, pd3dCommandList, "king");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Rook] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rook");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Pawn] = new CFixedMesh(pd3dDevice, pd3dCommandList, "pawn");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight] = new CFixedMesh(pd3dDevice, pd3dCommandList, "knight");
+
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Laser");
 }
 
 void CSceneJH::BuildShadowResource(ID3D12Device* pd3dDevice)
@@ -3206,9 +3386,9 @@ void CSceneJH::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	XMFLOAT3 xmf3Up = Vector3::CrossProduct(xmf3Look, xmf3Right, true);
 
 	m_pLightCamera = new CLightCamera();
-	 
+
 	m_pLightCamera->SetOffset(XMFLOAT3(0.0f, 500.0f, -400.0f));
-	m_pLightCamera->SetLens( 0.25 * PI, nWidth, nHeight, 1.0f, lensize); 
+	m_pLightCamera->SetLens(0.25 * PI, nWidth, nHeight, 1.0f, lensize);
 	m_pLightCamera->SetRight(xmf3Right);
 	m_pLightCamera->SetUp(xmf3Up);
 	m_pLightCamera->SetLook(xmf3Look);
@@ -3216,7 +3396,7 @@ void CSceneJH::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pLightCamera->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pLightCamera->SetViewport(0, 0, nWidth, nHeight, 0.0f, 1.0f);
 	m_pLightCamera->SetScissorRect(0, 0, nWidth, nHeight);
-	 
+
 	m_pLightCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -3232,6 +3412,14 @@ void CSceneJH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	// 비
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 100000, PARTICLE_TYPE::RainParticle);
+
+
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle, m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle2, m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::MummyLaserParticle3, m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+
 
 	//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
 
@@ -3251,6 +3439,23 @@ void CSceneJH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	MakingFog();
 	MakingRain();
 }
+void CSceneJH::BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// FireBall
+	for (int i = 0; i < 5; ++i) {
+		CFireBall* pFireb = new CFireBall();
+		pFireb->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall]);
+		pFireb->SetPosition({ 500.0f,  100.0f, 1500.0f });
+		pFireb->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
+		pFireb->SetTextureIndex(0x400);
+		pFireb->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		pFireb->Scale(40.0f, 40.0f, 40.0f);
+		pFireb->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
+		pFireb->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::FireBall].push_back(pFireb);
+	}
+}
+
 void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	for (int i = 0; i < 10; ++i) {
@@ -3279,11 +3484,364 @@ void CSceneJH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
 	}
 }
+void CSceneJH::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	for (int i = 0; i < 30; i++)
+	{
+		CMummyLaser* pMummyLaser = new CMummyLaser();
+		pMummyLaser->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+		pMummyLaser->Rotate(XMFLOAT3(0, 1, 0), 90.0f);
+		pMummyLaser->SetTextureIndex(0x01);
+
+		pMummyLaser->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
+		pMummyLaser->Scale(100.0f, 100.0f, 1000.0f);
+
+		pMummyLaser->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
+		pMummyLaser->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(pMummyLaser);
+	}
+
+	for (int i = 0; i < 30; i++)
+	{
+		CMummyLaser* pMummyLaser2 = new CMummyLaser();
+		pMummyLaser2->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+		pMummyLaser2->SetTextureIndex(0x02);
+		pMummyLaser2->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
+		pMummyLaser2->Scale(100.0f, 100.0f, 1000.0f);
+		pMummyLaser2->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
+		pMummyLaser2->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2].push_back(pMummyLaser2);
+	}
+
+	for (int i = 0; i < 30; i++)
+	{
+		CMummyLaser* pMummyLaser3 = new CMummyLaser();
+		pMummyLaser3->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+		pMummyLaser3->SetTextureIndex(0x04);
+		pMummyLaser3->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
+		pMummyLaser3->Scale(100.0f, 100.0f, 1000.0f);
+		pMummyLaser3->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
+		pMummyLaser3->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3].push_back(pMummyLaser3);
+	}
+}
+
+void CSceneJH::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
+{
+	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy1 && m_MummyExist[0] == true)
+	{
+		// 미라가 2마리 남았을때
+		if (m_One_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 1.5f, scale.y * 1.5f, scale.z * 1.5f));
+			}
+			m_One_Mira_Die_Laser = false;
+		}
+		if (m_Two_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f));
+			}
+			m_Two_Mira_Die_Laser = false;
+		}
+
+		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+			CMummyLaser* pMummyLaser = reinterpret_cast<CMummyLaser*>(pObj);
+
+			if (pMummyLaser->IsCanUse()) {
+				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle, 1);
+
+				if (-1 != idx) {
+					pMummyLaser->SetUseable(false);
+
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
+					pMummyLaser->SetPosition(pos);
+
+					pMummyLaser->SetLaserType(Laser_TYPE::Laser1);
+					m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+					pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+					pMummyLaser->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
+
+					pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
+					m_Mummy[0]->AddFriends_Laser(pMummyLaser);
+					pMummyLaser->AddFriends_p(m_Mummy[0]);
+				}
+
+				break;
+			}
+		}
+
+
+		if (m_One_Mira_Die == true)
+		{
+			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+				CMummyLaser* pMummyLaser = reinterpret_cast<CMummyLaser*>(pObj);
+				if (pMummyLaser->IsCanUse()) {
+					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle, 1);
+
+					if (-1 != idx) {
+						pMummyLaser->SetUseable(false);
+
+						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
+						pMummyLaser->SetPosition(pos);
+
+						pMummyLaser->SetLaserType(Laser_TYPE::Laser1);
+						m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+						pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(30.0f, 0, -150), 1));
+						pMummyLaser->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x + 30.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
+
+						pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
+						m_Mummy[0]->AddFriends_Laser(pMummyLaser);
+						pMummyLaser->AddFriends_p(m_Mummy[0]);
+
+					}
+					break;
+				}
+			}
+		}
+		if (m_Two_Mira_Die == true)
+		{
+			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+				CMummyLaser* pMummyLaser = reinterpret_cast<CMummyLaser*>(pObj);
+				if (pMummyLaser->IsCanUse()) {
+					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle, 1);
+
+					if (-1 != idx) {
+						pMummyLaser->SetUseable(false);
+
+						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
+						pMummyLaser->SetPosition(pos);
+
+						pMummyLaser->SetLaserType(Laser_TYPE::Laser1);
+						m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+						pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(-30.0f, 0, -150), 1));
+						pMummyLaser->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x - 30.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
+
+						pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
+						m_Mummy[0]->AddFriends_Laser(pMummyLaser);
+						pMummyLaser->AddFriends_p(m_Mummy[0]);
+					}
+					break;
+				}
+			}
+		}
+
+
+	}
+
+	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy2 && m_MummyExist[1] == true)
+	{
+		// 미라가 2마리 남았을때
+		if (m_One_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 1.5f, scale.y * 1.5f, scale.z * 1.5f));
+			}
+			m_One_Mira_Die_Laser = false;
+		}
+		if (m_Two_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f));
+			}
+			m_Two_Mira_Die_Laser = false;
+		}
+
+		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
+			CMummyLaser* pMummyLaser2 = reinterpret_cast<CMummyLaser*>(pObj);
+
+			if (pMummyLaser2->IsCanUse()) {
+				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle2, 2);
+
+				if (-1 != idx) {
+
+					pMummyLaser2->SetUseable(false);
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[1]->GetPosition() }, { 0,200,0 });
+					pMummyLaser2->SetPosition(pos);
+
+					pMummyLaser2->SetLaserType(Laser_TYPE::Laser2);
+
+					m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+					pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+					pMummyLaser2->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
+
+					pMummyLaser2->ConnectParticle(m_Particles->GetParticleObj(idx));
+					m_Mummy[1]->AddFriends_Laser(pMummyLaser2);
+					pMummyLaser2->AddFriends_p(m_Mummy[1]);
+				}
+				break;
+			}
+		}
+		if (m_One_Mira_Die == true)
+		{
+			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
+				CMummyLaser* pMummyLaser2 = reinterpret_cast<CMummyLaser*>(pObj);
+
+				if (pMummyLaser2->IsCanUse()) {
+					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle2, 2);
+
+					if (-1 != idx) {
+
+						pMummyLaser2->SetUseable(false);
+						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[1]->GetPosition() }, { 0,200,0 });
+						pMummyLaser2->SetPosition(pos);
+
+						pMummyLaser2->SetLaserType(Laser_TYPE::Laser2);
+
+						m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+						pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(30, 0, -150), 1));
+						pMummyLaser2->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x + 30.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
+
+						pMummyLaser2->ConnectParticle(m_Particles->GetParticleObj(idx));
+						m_Mummy[1]->AddFriends_Laser(pMummyLaser2);
+						pMummyLaser2->AddFriends_p(m_Mummy[1]);
+					}
+					break;
+				}
+			}
+		}
+		if (m_Two_Mira_Die == true)
+		{
+			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
+				CMummyLaser* pMummyLaser2 = reinterpret_cast<CMummyLaser*>(pObj);
+
+				if (pMummyLaser2->IsCanUse()) {
+					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle2, 2);
+
+					if (-1 != idx) {
+						pMummyLaser2->SetUseable(false);
+						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[1]->GetPosition() }, { 0,200,0 });
+						pMummyLaser2->SetPosition(pos);
+
+						pMummyLaser2->SetLaserType(Laser_TYPE::Laser2);
+
+						m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+						pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(-30, 0, -150), 1));
+						pMummyLaser2->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x - 30.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
+
+						pMummyLaser2->ConnectParticle(m_Particles->GetParticleObj(idx));
+						m_Mummy[1]->AddFriends_Laser(pMummyLaser2);
+						pMummyLaser2->AddFriends_p(m_Mummy[1]);
+					}
+					break;
+				}
+			}
+		}
+
+	}
+
+	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy3 && m_MummyExist[2] == true)
+	{
+		// 미라가 2마리 남았을때
+		if (m_One_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 1.5f, scale.y * 1.5f, scale.z * 1.5f));
+			}
+			m_One_Mira_Die_Laser = false;
+		}
+		if (m_Two_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f));
+			}
+			m_Two_Mira_Die_Laser = false;
+		}
+		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
+			CMummyLaser* pMummyLaser3 = reinterpret_cast<CMummyLaser*>(pObj);
+
+			if (pMummyLaser3->IsCanUse()) {
+				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle3, 3);
+				cout << idx << endl;
+				if (-1 != idx) {
+					pMummyLaser3->SetUseable(false);
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[2]->GetPosition() }, { 0,200,0 });
+					pMummyLaser3->SetPosition(pos);
+					pMummyLaser3->SetLaserType(Laser_TYPE::Laser3);
+					m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+					pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+					pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
+
+					pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
+					m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
+					pMummyLaser3->AddFriends_p(m_Mummy[2]);
+				}
+
+				break;
+			}
+
+		}
+		if (m_One_Mira_Die == true)
+		{
+			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
+				CMummyLaser* pMummyLaser3 = reinterpret_cast<CMummyLaser*>(pObj);
+
+				if (pMummyLaser3->IsCanUse()) {
+					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle3, 3);
+					cout << idx << endl;
+					if (-1 != idx) {
+						pMummyLaser3->SetUseable(false);
+						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[2]->GetPosition() }, { 0,200,0 });
+						pMummyLaser3->SetPosition(pos);
+						pMummyLaser3->SetLaserType(Laser_TYPE::Laser3);
+						m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+						pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(30.0f, 0, -150), 1));
+						pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x + 30.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
+
+						pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
+						m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
+						pMummyLaser3->AddFriends_p(m_Mummy[2]);
+					}
+
+					break;
+				}
+
+			}
+		}
+		if (m_Two_Mira_Die == true)
+		{
+			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
+				CMummyLaser* pMummyLaser3 = reinterpret_cast<CMummyLaser*>(pObj);
+
+				if (pMummyLaser3->IsCanUse()) {
+					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle3, 3);
+					cout << idx << endl;
+					if (-1 != idx) {
+						pMummyLaser3->SetUseable(false);
+						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[2]->GetPosition() }, { 0,200,0 });
+						pMummyLaser3->SetPosition(pos);
+						pMummyLaser3->SetLaserType(Laser_TYPE::Laser3);
+						m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+						pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(-30, 0, -150), 1));
+						pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x - 30.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
+
+						pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
+						m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
+						pMummyLaser3->AddFriends_p(m_Mummy[2]);
+					}
+
+					break;
+				}
+
+			}
+		}
+
+	}
+
+}
+
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true); 
-	
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
+
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
 
@@ -3295,20 +3853,20 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_PlayerCameras[0]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 	m_PlayerCameras[0]->SetTarget(m_Players[0]);
 	m_Players[0]->SetCamera(m_PlayerCameras[0]);
-	 
+
 	m_Players[0]->SetDrawable(true);
 	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
 	//m_Players[0]->SetTextureIndex(0x400); 
 
 	//m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
 	//m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
-	 
+
 	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
 	m_Players[0]->AnimationChange(PlayerWeaponType::Sword);
 	m_Players[0]->DisableBow();
 	++m_CurrentPlayerNum;
-	
-	m_MinimapCamera->SetTarget(m_Players[0]); 
+
+	m_MinimapCamera->SetTarget(m_Players[0]);
 	//auto pBox = new CBox(pd3dDevice, pd3dCommandList, 80, 165.0, 80.0f);
 	//pBox->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 	//pBox->SetTextureIndex(0x100); 
@@ -3319,21 +3877,21 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
 
-		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);   
+		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 
 		m_Players[i]->SetWeapon(PlayerWeaponType::Sword);
-		
+
 		m_Players[i]->SetCamera(m_PlayerCameras[i]);
 
 		m_Players[i]->SetChild(pPlayerModel, true);
 		m_Players[i]->SetPosition({ 550.0f,   230.0f,  1850.0f });
 		m_Players[i]->Scale(200, 200, 200);
-		m_Players[i]->SetShadertoAll(); 
+		m_Players[i]->SetShadertoAll();
 
 		m_PlayerCameras[i]->SetOffset(XMFLOAT3(0.0f, 1.5f, -4.0f));
 		m_PlayerCameras[i]->SetTarget(m_Players[i]);
 
-		m_Players[i]->SetDrawable(false); 
+		m_Players[i]->SetDrawable(false);
 
 		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
 		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
@@ -3346,9 +3904,27 @@ void CSceneJH::EnterNewSector(int sectorNum)
 
 	CGameObject* obj = m_BlockingPlateToPreviousSector[sectorNum - 1];
 	m_BlockingPlateToPreviousSector.erase(sectorNum - 1);
-	 
+
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(obj);
-	EnterNewSector(sectorNum - 1); 
+	EnterNewSector(sectorNum - 1);
+}
+
+void CSceneJH::ActiveSkill(OBJECT_LAYER type, CGameObject* user)
+{
+	if (type == OBJECT_LAYER::FireBall) {
+		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
+			CFireBall* pFireb = reinterpret_cast<CFireBall*>(pObj);
+			if (pFireb->IsCanUse()) {
+				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::FireBallParticle);
+				if (-1 != idx) {
+					pFireb->SetUseable(false);
+					pFireb->SetSkill(user);
+					cout << "shot fb" << endl;
+				}
+				break;
+			}
+		}
+	}
 }
 
 void CSceneJH::ShotPlayerArrow()
@@ -3365,7 +3941,7 @@ void CSceneJH::ShotPlayerArrow()
 				pArrow->SetPosition(pos);
 				pArrow->SetTargetVector(Vector3::Multifly(m_Player->GetLook(), 1));
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
-				m_Particles->SetDirection(idx,  Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()),-1));
+				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), -1));
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
 				pArrow->SetExistingSector((SECTOR_POSITION)m_Player->GetPlayerExistingSector());
 				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
@@ -3373,33 +3949,109 @@ void CSceneJH::ShotPlayerArrow()
 			break;
 		}
 		++i;
-	} 
+	}
 }
 
+
 void CSceneJH::ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector)
-{ 
+{
 	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
 		CArrow* pArrow = reinterpret_cast<CArrow*>(pObj);
-		if (pArrow->IsCanUse()) { 
+		if (pArrow->IsCanUse()) {
 			pArrow->SetUseable(false);
 			XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ pEmeny->GetPosition() }, { 0,150,0 });
-		pArrow->SetPosition(pos);
+			pArrow->SetPosition(pos);
 			pArrow->SetTargetVector(lookVector);
 			pArrow->SetExistingSector(pEmeny->GetExistingSector());
 			//m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT); 
 			break;
-		} 
+		}
 	}
 }
 
 void CSceneJH::DeleteEnemy(CEnemy* pEmeny)
 {
+	auto res2 = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Mummy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end(), pEmeny);
+	CMummy* pMummy = reinterpret_cast<CMummy*>(pEmeny);
+	if (res2 != m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end()) {
+
+		if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy1)
+		{
+			cout << " 미라 삭제\n";
+			m_MummyExist[0] = false;
+			pEmeny->SetMummyDie(true);
+
+			if (m_One_Mira_Die == true)
+			{
+				m_Two_Mira_Die = true;
+				m_Two_Mira_Die_Laser = true;
+				m_Mummy[1]->Scale(5.f, 5.f, 5.f, true);
+				m_Mummy[2]->Scale(5.f, 5.f, 5.f, true);
+			}
+
+			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
+			m_One_Mira_Die = true;
+			m_One_Mira_Die_Laser = true;
+
+
+			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
+			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
+		}
+
+		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy2)
+		{
+			cout << " 미라2 삭제\n";
+			m_MummyExist[1] = false;
+			pEmeny->SetMummyDie2(true);
+
+			if (m_One_Mira_Die == true)
+			{
+				m_Two_Mira_Die = true;
+				m_Two_Mira_Die_Laser = true;
+				m_Mummy[0]->Scale(5.f, 5.f, 5.f, true);
+				m_Mummy[2]->Scale(5.f, 5.f, 5.f, true);
+			}
+
+			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
+			m_One_Mira_Die = true;
+			m_One_Mira_Die_Laser = true;
+
+			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
+
+		}
+
+		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy3)
+		{
+			cout << " 미라3 삭제\n";
+			m_MummyExist[2] = false;
+			pEmeny->SetMummyDie3(true);
+
+			if (m_One_Mira_Die == true)
+			{
+				m_Two_Mira_Die = true;
+				m_Two_Mira_Die_Laser = true;
+				m_Mummy[0]->Scale(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f, true);
+				m_Mummy[1]->Scale(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f, true);
+			}
+
+			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
+			m_One_Mira_Die = true;
+			m_One_Mira_Die_Laser = true;
+
+			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
+		}
+
+	}
+
 	auto res = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Enemy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end(), pEmeny);
 	if (res != m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end()) {
-	//	cout << " 몬스터 삭제\n";
+		cout << " 몬스터 삭제\n";
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].erase(res);
 	}
 }
+
 
 void CSceneJH::MakingFog()
 {
@@ -3434,7 +4086,7 @@ void CSceneJH::UseEffects(int effectType, const XMFLOAT3& xmf3Position)
 		effect->SetPosition(xmf3Position);
 		effect->FixPositionByTerrain(m_Terrain);
 		effect->SetDrawable(true);
-	} 
+	}
 }
 
 void CSceneJH::UseEffects(int effectType, const XMFLOAT3& xmf3Position, float wakeupTime)
@@ -3448,7 +4100,7 @@ void CSceneJH::UseEffects(int effectType, const XMFLOAT3& xmf3Position, float wa
 }
 
 void CSceneJH::SendMouseInputPacket()
-{  
+{
 	P_C2S_MOUSE_INPUT p_mouseInput;
 
 	p_mouseInput.size = sizeof(p_mouseInput);
@@ -3456,7 +4108,7 @@ void CSceneJH::SendMouseInputPacket()
 	p_mouseInput.id = CFramework::GetInstance().GetPlayerId();
 	p_mouseInput.inputNum = m_MousePositions.size();
 
-	for (int i = 0; i < p_mouseInput.inputNum; ++i) {   
+	for (int i = 0; i < p_mouseInput.inputNum; ++i) {
 		p_mouseInput.InputType[i] = m_MouseInputTypes[i];
 		p_mouseInput.xInput[i] = FloatToInt(m_MousePositions[i].x);
 		p_mouseInput.yInput[i] = FloatToInt(m_MousePositions[i].y);
@@ -3473,19 +4125,19 @@ void CSceneJH::SendMouseInputPacket()
 
 void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-// 4개 벽 테두리
+	// 4개 벽 테두리
 	CGameObject* pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 100, 10000, 20000 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f * MAP_SCALE_SIZE)));
-	pObject->SetPosition({ 0,-2000,10000 * MAP_SCALE_SIZE });  
+	pObject->SetPosition({ 0,-2000,10000 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 100, 10000, 20000 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f * MAP_SCALE_SIZE)));
-	pObject->SetPosition({ 19950 * MAP_SCALE_SIZE,-2000,10000 * MAP_SCALE_SIZE }); 
+	pObject->SetPosition({ 19950 * MAP_SCALE_SIZE,-2000,10000 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
@@ -3502,7 +4154,7 @@ void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->SetPosition({ 10000 * MAP_SCALE_SIZE,-2000,19950 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
-// Forest to DryDesrt 아래 방향 벽  
+	// Forest to DryDesrt 아래 방향 벽  
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 9600 * MAP_SCALE_SIZE, 800, 100, XMFLOAT3{ 0,0,0 });
@@ -3518,8 +4170,8 @@ void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 15200 * 0.5f * MAP_SCALE_SIZE)));
 	pObject->SetPosition({ 10000 * MAP_SCALE_SIZE,-2000, 7600 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
-	
-// Forest 지역 내 못가는 지형 
+
+	// Forest 지역 내 못가는 지형 
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2000 * MAP_SCALE_SIZE, 10000, 7000 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
@@ -3528,15 +4180,15 @@ void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->UpdateColliders();
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
-// Desrt to DryDesrt and Rock 왼쪽 벽
+	// Desrt to DryDesrt and Rock 왼쪽 벽
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 400 , 10000, 12800 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 400, 10000, 12800 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
 	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 12800 * 0.5f * MAP_SCALE_SIZE)));
 	pObject->SetPosition({ 13800 * MAP_SCALE_SIZE, -2000, 13600 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
-// boss 지역 중간 벽
+	// boss 지역 중간 벽
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 5600 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
@@ -3547,11 +4199,11 @@ void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 800, 10000, 5600 * MAP_SCALE_SIZE, XMFLOAT3{ 0,0,0 });
-	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f , 10000 * 0.5f, 5600 * 0.5f * MAP_SCALE_SIZE)));
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f * MAP_SCALE_SIZE)));
 	pObject->SetPosition({ 18000 * MAP_SCALE_SIZE,-2000, 10800 * MAP_SCALE_SIZE });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
-// 사막 지역 가로 벽
+	// 사막 지역 가로 벽
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 4000 * MAP_SCALE_SIZE, 1000, 100, XMFLOAT3{ 0,0,0 });
@@ -3566,7 +4218,7 @@ void CSceneJH::BuildBoundingRegions(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject->SetPosition({ 11600 * MAP_SCALE_SIZE ,-3000, 3600 * MAP_SCALE_SIZE });
 	m_BlockingPlateToPreviousSector[2] = (std::move(pObject));
 
-// 보스 지역 입구 가로 벽
+	// 보스 지역 입구 가로 벽
 	pObject = new CGameObject();
 	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
 	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2400 * MAP_SCALE_SIZE, 10000, 100, XMFLOAT3{ 0,0,0 });
@@ -3593,6 +4245,6 @@ void CSceneJH::RecvMouseProcessPacket()
 
 	// 플레이어 추가 혹은 삭제 패킷 수신
 	if (type == PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT) {
-		
+
 	}
 }

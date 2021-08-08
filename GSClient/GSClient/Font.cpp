@@ -12,7 +12,7 @@ constexpr int maxNumTextCharacters = 1024;
 Font LoadFont(const string& fileName, int windowWidth, int windowHeight)
 {
     std::wifstream fs;
-    fs.open(fileName);
+    fs.open(fileName.c_str());
 
     Font font;
     std::wstring tmp;
@@ -84,7 +84,7 @@ Font LoadFont(const string& fileName, int windowWidth, int windowHeight)
     std::wstring wtmp;
     fs >> wtmp; // file="Arial.png"
     startpos = wtmp.find(L"\"") + 1;
-        font.fontImage = wtmp.substr(startpos, wtmp.size() - startpos - 1);
+    font.fontImage = wtmp.substr(startpos, wtmp.size() - startpos - 1);
 
     // get number of characters
     fs >> tmp >> tmp; // chars count=97
@@ -418,7 +418,7 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
     pd3dCommandList->IASetVertexBuffers(0, 1, &textVertexBufferView);
 
     // bind the text srv. We will assume the correct descriptor heap and table are currently bound and set
-    pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_Font.srvHandle);
+    //pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_Font.srvHandle);
 
     int numCharacters = 0;
 
@@ -496,7 +496,7 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
 bool TextHandler::InitVertexBuffer(ID3D12Device* pd3dDevice,
     ID3D12GraphicsCommandList* pd3dCommandList, ID3D12DescriptorHeap* d3dDescripotrHeap, int handlePosition)
 {
-    TextHandler::Load("resources/Font/Arial.fnt");
+    TextHandler::Load("resources/Font/dotum.fnt");
 
     // Load the image from file
     D3D12_RESOURCE_DESC fontTextureDesc;

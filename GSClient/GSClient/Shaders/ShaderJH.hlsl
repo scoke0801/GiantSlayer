@@ -80,62 +80,75 @@ Texture2D gtxtRockyWall    : register(t17);
 Texture2D gtxtDoor         : register(t18);
 
 Texture2D gtxtHpSpGauge    : register(t19);
-Texture2D gtxtHpSpPer      : register(t20);
-Texture2D gtxtMinimap      : register(t21);
-Texture2D gtxtWeapons      : register(t22);
+Texture2D gtxtMinimap		: register(t20);
+Texture2D gtxtWeapons		: register(t21);
+Texture2D gtxtHpSpPer      : register(t22);
 
-Texture2D gtxtPlayerClothes    : register(t23); // 여분
-Texture2D gtxtPlayerFace  : register(t24); // 여분
-Texture2D gtxtPlayerHair    : register(t25); // 여분
-Texture2D gtxtPlayerSword  : register(t26); // 여분
 
-Texture2D gtxtTree         : register(t27);
-Texture2D gtxtNoLeafTrees  : register(t28);
-Texture2D gtxtLeaves       : register(t29);
-Texture2D gtxtMoss_Rock    : register(t30);
+Texture2D gtxtPlayerClothes	: register(t23);
+Texture2D gtxtPlayerFace	: register(t24);
+Texture2D gtxtPlayerHair	: register(t25);
+Texture2D gtxtPlayerSword	: register(t26);
+Texture2D gtxtPlayerBow		: register(t27);
+Texture2D gtxtPlayerStaff	: register(t28);
 
-Texture2D gtxtPuzzleBoard  : register(t31);
-Texture2D gtxtHelpText     : register(t32);
-Texture2D gtxtDry_Tree	   : register(t33);
-Texture2D gtxtStump		   : register(t34);
-Texture2D gtxtDead_Tree	   : register(t35);
-Texture2D gtxtDesert_Rock  : register(t36);
-Texture2D gtxtWater		   : register(t37);
-Texture2D gtxtRain		   : register(t38); 
+Texture2D gtxtTree         : register(t29);
+Texture2D gtxtNoLeafTrees  : register(t30);
+Texture2D gtxtLeaves       : register(t31);
+Texture2D gtxtMoss_Rock    : register(t32);
 
-Texture2D gtxtBossD		   : register(t39);
-Texture2D gtxtBossC		   : register(t40);
-Texture2D gtxtBossE		   : register(t41);
-Texture2D gtxtBossN		   : register(t42);
+Texture2D gtxtPuzzleBoard  : register(t33);
+Texture2D gtxtHelpText     : register(t34);
+Texture2D gtxtDry_Tree	   : register(t35);
+Texture2D gtxtStump		   : register(t36);
+Texture2D gtxtDead_Tree	   : register(t37);
+Texture2D gtxtDesert_Rock  : register(t38);
+Texture2D gtxtWater		   : register(t39);
+Texture2D gtxtRain		   : register(t40);
 
-Texture2D gtxtMeleeSkeleton_01_D: register(t43);
-Texture2D gtxtMeleeSkeleton_02: register(t44);
-Texture2D gtxtMeleeSkeleton_02_Equip: register(t45);
-Texture2D gtxtMeleeSkeleton_02_EquipAll: register(t46);
+Texture2D gtxtBossD		   : register(t41);
+Texture2D gtxtBossC		   : register(t42);
+Texture2D gtxtBossE		   : register(t43);
+Texture2D gtxtBossN		   : register(t44);
 
-Texture2D gtxtGreenTree		: register(t47);
-Texture2D gtxtBow			: register(t48);
-Texture2D gtxtEffect_1		: register(t49);
-Texture2D gtxtEffect_2		: register(t50);
-Texture2D gtxtEffect_3		: register(t51);
+Texture2D gtxtMeleeSkeleton_01_D: register(t45);
+Texture2D gtxtMeleeSkeleton_02: register(t46);
+Texture2D gtxtMeleeSkeleton_02_Equip: register(t47);
+Texture2D gtxtMeleeSkeleton_02_EquipAll: register(t48);
 
-Texture2D gtxtMap			: register(t52);
-Texture2D gtxtMirror		: register(t53);
-Texture2D gtxtShadowMap		: register(t54);
+Texture2D gtxtMummy			: register(t49);
+Texture2D gtxtMummy_M		: register(t50);
+Texture2D gtxtGreenTree		: register(t51);
+Texture2D gtxtEffect_1		: register(t52);
+Texture2D gtxtEffect_2		: register(t53);
+Texture2D gtxtEffect_3		: register(t54);
+Texture2D gtxtFireBall		: register(t55);
 
-Texture2D gtxtFont			: register(t55);
+Texture2D KingDiffuse		: register(t56);
+Texture2D KnightDiffuse		: register(t57);
+Texture2D PawnDiffuse		: register(t58);
+Texture2D RookDiffuse		: register(t59);
+
+Texture2D ChessTile			: register(t60);
+Texture2D Laser				: register(t61);
+
+Texture2D gtxtMap			: register(t62);
+Texture2D gtxtMirror		: register(t63);
+Texture2D gtxtShadowMap		: register(t64);
+
+Texture2D gtxtFont			: register(t65);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
-    f4ShadowPos.xyz /= f4ShadowPos.w;
+	f4ShadowPos.xyz /= f4ShadowPos.w;
 
 	float fDepth = f4ShadowPos.z;
 
 	uint nWidth, nHeight, nMips;
 	gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
 
-    float dx = 1.0f / (float) nWidth ;
-  
+	float dx = 1.0f / (float)nWidth;
+
 	float percentLit = 0.3f;
 
 	const float2 offsets[9] =
@@ -186,31 +199,31 @@ float CalcShadowFactor_t(float4 f4ShadowPos)
 
 float CalcShadowFactor_P(float4 f4ShadowPos)
 {
-    f4ShadowPos.xyz /= f4ShadowPos.w;
+	f4ShadowPos.xyz /= f4ShadowPos.w;
 
-    float fDepth = f4ShadowPos.z;
+	float fDepth = f4ShadowPos.z;
 
-    uint nWidth, nHeight, nMips;
-    gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
+	uint nWidth, nHeight, nMips;
+	gtxtShadowMap.GetDimensions(0, nWidth, nHeight, nMips);
 
-    float dx = 1.0f / (float) nWidth;
-  
-    float percentLit = 0.3f;
+	float dx = 1.0f / (float)nWidth;
 
-    const float2 offsets[9] =
-    {
-        float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
+	float percentLit = 0.3f;
+
+	const float2 offsets[9] =
+	{
+		float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
 		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
 		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx),
-    };
+	};
 
 	[unroll]
-    for (int i = 0; i < 9; i++)
-    {
-        percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
-    }
+	for (int i = 0; i < 9; i++)
+	{
+		percentLit += gtxtShadowMap.SampleCmpLevelZero(gscsShadow, f4ShadowPos.xy + offsets[i], fDepth).r;
+	}
 
-    return (percentLit / 9.0f) + 1.0f;
+	return (percentLit / 9.0f) + 1.0f;
 
 }
 //정점 셰이더의 입력을 위한 구조체를 선언한다. 
@@ -349,13 +362,13 @@ VS_EFFECT_OUT VSEffect(VS_EFFECT_IN input)
 	VS_EFFECT_OUT outRes;
 	outRes.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
 	outRes.uv = input.uv;
-	
+
 	float frameCount = 0;
 	if (gnTexturesMask & 0x01) { frameCount = 15; }
 	if (gnTexturesMask & 0x02) { frameCount = 10; }
 	if (gnTexturesMask & 0x04) { frameCount = 10; }
 
-	float newTime = fmod(gfTime * 10.0f, frameCount); 
+	float newTime = fmod(gfTime * 10.0f, frameCount);
 	outRes.uv.x /= frameCount;
 	outRes.uv.x += (1.0f / frameCount) * (int)newTime;
 
@@ -363,7 +376,7 @@ VS_EFFECT_OUT VSEffect(VS_EFFECT_IN input)
 }
 
 float4 PSEffect(VS_EFFECT_OUT input) : SV_TARGET
-{ 
+{
 	float4 cColor;
 
 	if (gnTexturesMask & 0x01)
@@ -591,7 +604,7 @@ float4 PSMinimap(VS_MOUT input) : SV_TARGET
 
 //////////////////////////////////////////////////////
 //
- 
+
 struct VS_TERRAIN_INPUT
 {
 	float3 position : POSITION;
@@ -609,7 +622,7 @@ struct VS_TERRAIN_TESSELLATION_OUTPUT
 	float3 position : POSITION;
 	float3 positionW : POSITION1;
 	float2 uv0 : TEXCOORD0;
-	float3 normalW : NORMAL;	
+	float3 normalW : NORMAL;
 	uint texIndex : TEXTURE;
 	float4 shadowPosH : SHADOWPOS;
 };
@@ -620,7 +633,7 @@ VS_TERRAIN_TESSELLATION_OUTPUT VSTerrainTessellation(VS_TERRAIN_INPUT input)
 
 	output.position = input.position;
 	output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
-	output.normalW = mul(input.normal, (float3x3) gmtxWorld); 
+	output.normalW = mul(input.normal, (float3x3) gmtxWorld);
 	output.uv0 = input.uv0;
 	output.texIndex = input.texIndex;
 	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
@@ -639,7 +652,7 @@ struct HS_TERRAIN_TESSELLATION_OUTPUT
 	float3 position : POSITION;
 	float3 positionW : POSITION1;
 	float2 uv0 : TEXCOORD0;
-	float3 normalW : NORMAL;	
+	float3 normalW : NORMAL;
 	uint texIndex : TEXTURE;
 	float4 shadowPosH : SHADOWPOS;
 };
@@ -653,8 +666,8 @@ struct DS_TERRAIN_TESSELLATION_OUTPUT
 
 	float3 normalW : NORMAL;
 
-	float4 tessellation : TEXCOORD2;	
-	
+	float4 tessellation : TEXCOORD2;
+
 	uint texIndex : TEXTURE;
 
 	float4 shadowPosH : SHADOWPOS;
@@ -716,7 +729,7 @@ HS_TERRAIN_TESSELLATION_OUTPUT HSTerrainTessellation(InputPatch<VS_TERRAIN_TESSE
 	output.normalW = mul(input[i].normalW, (float3x3) gmtxWorld);
 	output.positionW = (float3) mul(float4(input[i].position, 1.0f), gmtxWorld);
 	output.uv0 = input[i].uv0;
-	output.texIndex = input[i].texIndex; 
+	output.texIndex = input[i].texIndex;
 	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
 
 	return(output);
@@ -739,7 +752,7 @@ HS_TERRAIN_TESSELLATION_CONSTANT HSTerrainTessellationConstant(InputPatch<VS_TER
 	float3 f3Sum = float3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < 25; i++)
 		f3Sum += input[i].positionW;
-	 
+
 	float3 f3Center = f3Sum / 25.0f;
 	output.fTessInsides[0] = output.fTessInsides[1] = CalculateTessFactor(f3Center);
 
@@ -750,7 +763,7 @@ HS_TERRAIN_TESSELLATION_CONSTANT HSTerrainTessellationConstant(InputPatch<VS_TER
 [domain("quad")]
 DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	HS_TERRAIN_TESSELLATION_CONSTANT patchConstant,
-	float2 uv : SV_DomainLocation, 
+	float2 uv : SV_DomainLocation,
 	OutputPatch<HS_TERRAIN_TESSELLATION_OUTPUT, 25> patch)
 {
 	DS_TERRAIN_TESSELLATION_OUTPUT output = (DS_TERRAIN_TESSELLATION_OUTPUT)0;
@@ -760,15 +773,15 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 	BernsteinCoeffcient5x5(uv.y, vB);
 
 	output.uv0 = lerp(lerp(patch[0].uv0, patch[4].uv0, uv.x), lerp(patch[20].uv0, patch[24].uv0, uv.x), uv.y);
-	
+
 	float3 position = CubicBezierSum5x5(patch, uB, vB);
 	float3 normal = CubicBezierNormalSum5x5(patch, uB, vB);
 	matrix mtxWorldViewProjection = mul(mul(gmtxWorld, gmtxView), gmtxProjection);
 	output.position = mul(float4(position, 1.0f), mtxWorldViewProjection);
-	  
+
 	for (int i = 0; i < 25; i++)
 	{
-		output.normalW = (float3)(mul(float4(normal, 1.0f),gmtxWorld));
+		output.normalW = (float3)(mul(float4(normal, 1.0f), gmtxWorld));
 		output.positionW = (float3)mul(float4(position, 1.0f), gmtxWorld);
 		output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
 	}
@@ -796,7 +809,7 @@ struct VS_LIGHT_OUT
 };
 
 float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
-{ 
+{
 	float4 cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	if (input.texIndex & 0x01)
@@ -827,7 +840,7 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		toEyeW /= distToEye; // normalize
 
 		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
-		 
+
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
 	if (input.texIndex & 0x20)
@@ -843,7 +856,7 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 		toEyeW /= distToEye; // normalize
 
 		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
-		 
+
 		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
@@ -855,9 +868,9 @@ float4 PSTerrainTessellation(DS_TERRAIN_TESSELLATION_OUTPUT input) : SV_TARGET
 	return (cColor * cIllumination);
 }
 
-static matrix<float, 3, 3> sf3x3TextureAnimation = { 
+static matrix<float, 3, 3> sf3x3TextureAnimation = {
 	{ 0.0f, -1.0f, 0.0f },
-	{ 1.0f, 0.0f, 0.0f }, 
+	{ 1.0f, 0.0f, 0.0f },
 	{ 0.0f, 0.0f, 0.0f }
 };
 struct VS_WATER_INPUT
@@ -874,8 +887,8 @@ struct VS_WATER_OUTPUT
 
 VS_WATER_OUTPUT VSTerrainWater(VS_WATER_INPUT input)
 {
-	VS_WATER_OUTPUT output; 
-	 
+	VS_WATER_OUTPUT output;
+
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
@@ -893,7 +906,7 @@ float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
 	//float4 cDetail1TexColor = gtxtWaterDetail1Texture.Sample(gssWrap, input.uv * 20.0f);
 
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	cColor = cBaseTexColor; 
+	cColor = cBaseTexColor;
 	cColor.a = 0.6f;
 	//cColor = lerp(cBaseTexColor * cDetail0TexColor, cDetail1TexColor.r * 0.5f, 0.35f);
 	//cColor = cBaseTexColor * cDetail0TexColor;
@@ -969,7 +982,19 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	}
 	if (gnTexturesMask & 0x80)
 	{
-		cColor = gtxtBox.Sample(gssWrap, input.uv); 
+		cColor = gtxtBox.Sample(gssWrap, input.uv);
+
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
 	}
 	if (gnTexturesMask & 0x100)
 	{
@@ -979,6 +1004,10 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	{
 		cColor = gtxtBox.Sample(gssWrap, input.uv);
 	}
+	if (gnTexturesMask & 0x400)
+	{
+		cColor = gtxtFireBall.Sample(gssWrap, input.uv);
+	}
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
@@ -986,6 +1015,71 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
 	return(cColor * cIllumination);
+}
+
+VS_TEXTURED_LIGHTING_OUTPUT VSLaserLighting(VS_TEXTURED_LIGHTING_INPUT input)
+{
+	VS_TEXTURED_LIGHTING_OUTPUT output;
+
+	output.normalW = mul(input.normal, (float3x3) gmtxWorld);
+	output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxWorld);
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	float frameCount = 0;
+	if (gnTexturesMask & 0x01)
+	{
+		frameCount = 8;
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		frameCount = 8;
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		frameCount = 8;
+	}
+
+	float newTime = fmod(gfTime * 10.0f, frameCount);
+	output.uv.x += (1.0f / frameCount) * (int)newTime;
+
+	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
+
+	return (output);
+}
+
+float4 PSLaserLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor; // = gtxtBox.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = Laser.Sample(gssWrap, input.uv);
+		cColor.rgb *= 0.1f;
+		cColor.a += 0.5f;
+	}
+
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = Laser.Sample(gssWrap, input.uv);
+		cColor.rgb *= 0.1f;
+		cColor.a += 0.5f;
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = Laser.Sample(gssWrap, input.uv);
+		cColor.rgb *= 0.1f;
+		cColor.a += 0.5f;
+	}
+
+	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
+
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
+
+	return (cColor * cIllumination);
 }
 
 float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
@@ -1057,7 +1151,7 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
-	return(cColor * cIllumination);	 
+	return(cColor * cIllumination);
 }
 
 
@@ -1076,18 +1170,19 @@ float4 PSPuzzle(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	}
 	if (gnTexturesMask & 0x04)
 	{
+		cColor = ChessTile.Sample(gssClamp, uvw);
 	}
 	if (gnTexturesMask & 0x08)
 	{
 		cColor = gtxtPuzzleBoard.Sample(gssClamp, uvw);
-	} 
+	}
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
 
-	return(cColor * cIllumination);	
+	return (cColor * cIllumination);
 }
 float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
@@ -1101,7 +1196,7 @@ float4 PSSign(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primitiv
 	if (gnTexturesMask & 0x02)
 	{
 		cColor = gtxtWoodSignBoard.Sample(gssClamp, uvw);
-	} 
+	}
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
@@ -1154,7 +1249,7 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	if (gnTexturesMask & 0x20)
 	{
 		cColor = gtxtDesert_Rock.Sample(gssWrap, input.uv);
-	}  
+	}
 
 	if (gnTexturesMask & 0x40)
 	{
@@ -1162,7 +1257,7 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	}
 	if (gnTexturesMask & 0x80)
 	{
-		cColor = gtxtBox.Sample(gssWrap, input.uv); 
+		cColor = gtxtBox.Sample(gssWrap, input.uv);
 	}
 	if (gnTexturesMask & 0x100)
 	{
@@ -1172,6 +1267,71 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 	{
 		cColor = gtxtGreenTree.Sample(gssWrap, input.uv);
 	}
+	if (gnTexturesMask & 0x400)
+	{
+		float4 Color = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+		cColor = KingDiffuse.Sample(gssWrap, input.uv);
+
+		cColor = lerp(cColor, Color, 0.5);
+	}
+	if (gnTexturesMask & 0x800)
+	{
+		float4 Color = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+		cColor = KnightDiffuse.Sample(gssWrap, input.uv);
+
+		cColor = lerp(cColor, Color, 0.5);
+	}
+	if (gnTexturesMask & 0x1000)
+	{
+		float4 Color = { 0.0f, 0.0f, .0f, 1.0f };
+
+		cColor = PawnDiffuse.Sample(gssWrap, input.uv);
+
+		cColor = lerp(cColor, Color, 0.5);
+	}
+	if (gnTexturesMask & 0x2000)
+	{
+		float4 Color = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+		cColor = RookDiffuse.Sample(gssWrap, input.uv);
+
+		cColor = lerp(cColor, Color, 0.5);
+	}
+	if (gnTexturesMask & 0x4000)
+	{
+		float4 Color = { 0.7f, 0.5f, 0.5f, 1.0f };
+
+		cColor = KingDiffuse.Sample(gssWrap, input.uv);
+
+		cColor = lerp(cColor, Color, 0.5);
+	}
+	if (gnTexturesMask & 0x8000)
+	{
+		float4 Color = { 0.8f, 0.5f, 0.5f, 1.0f };
+
+		cColor = KnightDiffuse.Sample(gssWrap, input.uv);
+
+		cColor = lerp(cColor, Color, 0.5);
+	}
+	if (gnTexturesMask & 0x10000)
+	{
+		float4 Color = { 0.8f, 0.5f, 0.5f, 1.0f };
+
+		cColor = PawnDiffuse.Sample(gssWrap, input.uv);
+
+		cColor = lerp(cColor, Color, 0.5);
+	}
+	if (gnTexturesMask & 0x20000)
+	{
+		float4 Color = { 0.8f, 0.5f, 0.5f, 1.0f };
+
+		cColor = RookDiffuse.Sample(gssWrap, input.uv);
+
+		cColor = lerp(cColor, Color, 0.5);
+	}
+
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor(input.shadowPosH);
 
@@ -1180,7 +1340,7 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
 
 	return(cColor * cIllumination);
 }
-  
+
 // 그림자 계산 
 struct VS_STANDARD_SHADOW_INPUT
 {
@@ -1209,14 +1369,145 @@ VS_STANDARD_SHADOW_OUTPUT VSStandardShadow(VS_STANDARD_SHADOW_INPUT input)
 void PSStandardShadow(VS_STANDARD_SHADOW_OUTPUT input)
 {
 	float4 f4AlbedoColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
-	 
+
 	f4AlbedoColor = gtxtBox.Sample(gssWrap, input.uv);
 
 	clip(f4AlbedoColor.a - 0.1f);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
 
+struct VS_FBX_ANIMATED_INPUT
+{
+	float3 position : POSITION;
+	float2 uv : TEXCOORD;
+	float3 normal : NORMAL;
+	float4 weights : BONEWEIGHT;
+	uint4 indices : BONEINDEX;
+};
 
+struct VS_FBX_ANIMATED_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
+	float3 normalW : NORMAL;
+	float2 uv : TEXCOORD;
+};
+
+VS_FBX_ANIMATED_OUTPUT VSFbxAnimated(VS_FBX_ANIMATED_INPUT input)
+{
+	VS_FBX_ANIMATED_OUTPUT output = (VS_FBX_ANIMATED_OUTPUT)0.0f;
+
+	float TempWeights[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	TempWeights[0] = input.weights.x;
+	TempWeights[1] = input.weights.y;
+	TempWeights[2] = input.weights.z;
+	//TempWeights[3] = input.weights.w;
+	TempWeights[3] = 1.0f - TempWeights[0] - TempWeights[1] - TempWeights[2];
+
+	/*if(input.weights.w < 0.001f)
+		TempWeights[3] = 1.0f - TempWeights[0] - TempWeights[1] - TempWeights[2];
+	else
+		TempWeights[3] = input.weights.w;*/
+
+	float3 TempPos = float3(0.0f, 0.0f, 0.0f);
+	float3 TempNormal = float3(0.0f, 0.0f, 0.0f);
+
+	for (int i = 0; i < 4; i++)
+	{
+		TempPos += TempWeights[i] * mul(float4(input.position, 1.0f), gpmtxBoneTransforms[input.indices[i]]).xyz;
+		//TempPos += TempWeights[i] * mul(gpmtxBoneTransforms[input.indices[i]], float4(input.position, 1.0f)).xyz;
+		TempNormal += TempWeights[i] * mul(input.normal, (float3x3) gpmtxBoneTransforms[input.indices[i]]);
+	}
+
+	input.position = TempPos;
+	input.normal = TempNormal;
+
+	float4 TempPosW = mul(float4(input.position, 1.0f), gmtxWorld);
+	output.positionW = TempPosW.xyz;
+	output.position = mul(mul(TempPosW, gmtxView), gmtxProjection);
+	output.normalW = mul(input.normal, (float3x3) gmtxWorld);
+	output.uv = input.uv;
+
+	return (output);
+}
+
+float4 PSFbxAnimated(VS_FBX_ANIMATED_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor; // = gtxtBox.Sample(gssWrap, uvw);
+
+	if (gnTexturesMask & 0x01)
+	{
+		cColor = gtxtForest.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x02)
+	{
+		cColor = gSkyBox_Front.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gSkyBox_Back.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gSkyBox_Right.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x10)
+	{
+		cColor = gSkyBox_Left.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x20)
+	{
+		cColor = gSkyBox_Top.Sample(gssClamp, input.uv);
+	}
+
+	if (gnTexturesMask & 0x40)
+	{
+		cColor = gSkyBox_Bottom.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x80)
+	{
+		cColor = gtxtBox.Sample(gssWrap, input.uv);
+
+		float4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
+		float FogStart = 10000.0f;
+		float FogRange = 20000.0f;
+
+		float3 toEyeW = gvCameraPosition + input.position.xyz;
+		float distToEye = length(toEyeW);
+		toEyeW /= distToEye; // normalize
+
+		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
+
+		cColor = lerp(cColor, FogColor, 1 - fogAmount);
+	}
+	if (gnTexturesMask & 0x100)
+	{
+		cColor = gtxtWood.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x200)
+	{
+		cColor = gtxtBox.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x400)
+	{
+		cColor = gtxtRockyWall.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x800)
+	{
+		cColor = gtxtBossWall.Sample(gssWrap, input.uv);
+	}
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
+
+	return (cColor * cIllumination);
+}
 
 ////////////////////////////////////////////////////////////////////
 struct VS_STANDARD_INPUT
@@ -1313,7 +1604,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		float fogAmount = saturate((distToEye - FogStart + 5000.0f) / FogRange);
 
 		//cColor = lerp(cColor, FogColor, 1 - fogAmount);
-	} 
+	}
 	else if (gnTexturesMask & 0x20)
 	{
 		cColor = gtxtMeleeSkeleton_01_D.Sample(gssWrap, input.uv);
@@ -1325,7 +1616,30 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 	else if (gnTexturesMask & 0x80)
 	{
-		cColor = gtxtBow.Sample(gssWrap, input.uv);
+		cColor = gtxtPlayerBow.Sample(gssWrap, input.uv);
+	}
+
+	else if (gnTexturesMask & 0x100)
+	{
+		cColor = gtxtMummy.Sample(gssWrap, input.uv);
+
+		cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
+	}
+	else if (gnTexturesMask & 0x200)
+	{
+
+		float4 Color = { 0.5f, 0.0f, 0.0f, 1.0f };
+		cColor = gtxtMummy.Sample(gssWrap, input.uv);
+
+		cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
+
+		cColor = lerp(cColor, Color, 0.5);
+
+	}
+
+	else if (gnTexturesMask & 0x400)
+	{
+		cColor = gtxtPlayerStaff.Sample(gssWrap, input.uv);
 	}
 	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	//{
@@ -1340,16 +1654,16 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	//float4 cIllumination = Lighting(input.positionW, normalW, gnMaterialID);
 
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-    shadowFactor = CalcShadowFactor_P(input.shadowPosH);
+	shadowFactor = CalcShadowFactor_P(input.shadowPosH);
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
-	
+
 	return(cColor * cIllumination);
-//return(lerp(cColor, cIllumination, 0.5f));
+	//return(lerp(cColor, cIllumination, 0.5f));
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-  
+
 struct VS_SKINNED_STANDARD_INPUT
 {
 	float3 position : POSITION;
@@ -1384,7 +1698,7 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	//output.positionW = mul(float4(input.position, 1.0f), gmtxWorld).xyz;
 	//output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-	output.uv = input.uv; 
+	output.uv = input.uv;
 	output.shadowPosH = mul(float4(output.positionW, 0.5f), gmtxShadowTransform);
 	return(output);
 }
@@ -1425,9 +1739,9 @@ VS_FONT_OUT VS_FONT_MAIN(VS_FONT_IN input, uint vertexID : SV_VertexID)
 
 	return output;
 }
- 
+
 float4 PS_FONT_MAIN(VS_FONT_OUT input) : SV_TARGET
-{ 
+{
 return float4(input.color.rgb, input.color.a * gtxtWater.Sample(gssWrap, input.texCoord).a);
-	//return float4(input.color.rgb, input.color.a * gtxtFont.Sample(gssWrap, input.texCoord).a);
+//return float4(input.color.rgb, input.color.a * gtxtFont.Sample(gssWrap, input.texCoord).a);
 }

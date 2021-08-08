@@ -111,6 +111,11 @@ void CShaderHandler::CreateFBXAnimatedShader(ID3D12Device* pd3dDevice, ID3D12Roo
 		pFBXShader->CreateVertexShader(L"Shaders\\ShaderTH.hlsl", "VSFbxAnimated");
 		pFBXShader->CreatePixelShader(L"Shaders\\ShaderTH.hlsl", "PSFbxAnimated");
 	}
+	else if (m_UserID == ShaderHandlerUser::JH)
+	{
+		pFBXShader->CreateVertexShader(L"Shaders\\ShaderJH.hlsl", "VSFbxAnimated");
+		pFBXShader->CreatePixelShader(L"Shaders\\ShaderJH.hlsl", "PSFbxAnimated");
+	}
 	else if (m_UserID == ShaderHandlerUser::GAMESCENE)
 	{
 		pFBXShader->CreateVertexShader(L"Shaders\\ShaderGameScene.hlsl", "VSFbxAnimated");
@@ -370,8 +375,7 @@ void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 	CShader* pEffectShader = new CShader();
 	if (m_UserID == ShaderHandlerUser::JH) {
 		pEffectShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSEffect");
-		pEffectShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSEffect"); 
-		//pEffectShader->CreateGeometryShader(L"Shaders/ShaderJH.hlsl", "GSEffect");
+		pEffectShader->CreatePixelShader(L"Shaders/ShaderJH.hlsl", "PSEffect");  
 	} 
 	else if (m_UserID == ShaderHandlerUser::YJ) {
 		pEffectShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VSEffect");
@@ -392,7 +396,7 @@ void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		//pEffectShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PSMinimap");
 	}
 	pEffectShader->CreateInputLayout(ShaderTypes::Effect);
-	pEffectShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, true, true);
+	pEffectShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
 	m_Data.emplace("Effect", pEffectShader);
 }
 
@@ -572,6 +576,7 @@ void CShaderHandler::CreateDoorWallShader(ID3D12Device* pd3dDevice, ID3D12RootSi
 	}
 	pDoorWallShader->CreateInputLayout(ShaderTypes::Textured);
 	pDoorWallShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
+	//pDoorWallShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
 	pDoorWallShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("DoorWall", pDoorWallShader);
 }
@@ -596,7 +601,7 @@ void CShaderHandler::CreateBridgeShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 		pBridgeShader->CreatePixelShader(L"Shaders\\ShaderGameScene.hlsl", "PSBridgeLight");
 	}
 	pBridgeShader->CreateInputLayout(ShaderTypes::Textured);
-	pBridgeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pBridgeShader->CreateGeneralShader(pd3dDevice, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, false, true);
 	pBridgeShader->CreateBoundaryShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Bridge", pBridgeShader);
 }
