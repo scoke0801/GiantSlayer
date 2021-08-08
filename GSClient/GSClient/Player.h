@@ -14,17 +14,17 @@ enum class PlayerMoveType
 
 enum class PlayerWeaponType
 {
-	None	= 0x00,
-	Sword	= 0x01,
-	Bow		= 0x02,
-	Staff	= 0x03
+	None = 0x00,
+	Sword = 0x01,
+	Bow = 0x02,
+	Staff = 0x03
 };
 
-class CTerrain; 
+class CTerrain;
 
 class CPlayer : public CGameObjectVer2
-{    
-public: 
+{
+public:
 	AnimationType IDLE = AnimationType::SWORD_IDLE;
 	AnimationType RUN = AnimationType::SWORD_RUN;
 	AnimationType ATK = AnimationType::SWORD_ATK;
@@ -33,14 +33,15 @@ public:
 	AnimationType SKILL = AnimationType::SWORD_SKILL;
 	AnimationType DEATH = AnimationType::SWORD_DEATH;
 	AnimationType CHANGEWEAPON = AnimationType::BOW_GET;
+	AnimationType PUSH = AnimationType::BOX_PUSH;
 
 private:
 	bool m_IsAlreadyAttack = false;
 
 private:
 	PlayerMoveType m_MovingType = PlayerMoveType::Run;
-	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword; 
-	
+	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
+
 	bool m_isOnGround = true;
 	float m_JumpTime = 0.0f;
 
@@ -72,8 +73,8 @@ public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName);
 
-	~CPlayer();	
-	
+	~CPlayer();
+
 public:
 	void Update(float fTimeElapsed) override;
 	void UpdateOnServer(float fTimeElapsed) override;
@@ -82,8 +83,8 @@ public:
 	void FixCameraByTerrain(CTerrain* pTerrain);
 
 	void FixPositionByTerrain(CTerrain* pTerrain) override;
-	 
-public: 
+
+public:
 	int GetPlayerExistingSector() const;
 	virtual void SetVelocity(XMFLOAT3 dir) override;
 
@@ -94,10 +95,10 @@ public:
 	void SetDrawBow();
 	void SetDrawStaff();
 	PlayerWeaponType GetWeapon() { return m_WeaponType; }
-	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; } 
+	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; }
 
 	void SetCanAttack(bool info) { m_IsCanAttack = info; }
-	void SetPullBox(bool info ) { m_PullBox = info; }
+	void SetPullBox(bool info) { m_PullBox = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }
 
 	bool IsBox() const { return m_IsCanAttack; }
@@ -111,7 +112,7 @@ public:
 	float GetStringPullTime() const { return m_StringPullTime; }
 
 	void AnimationChange(PlayerWeaponType weapon);
-	 
+
 	void Jump();
 
 	bool Attacked(CGameObject* pObject);
@@ -120,11 +121,11 @@ public:
 	void ResetBow();
 
 	void Box_Pull(bool Pull_State);
-	
+
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
 
-	void DisableSword(); 
+	void DisableSword();
 	void DisableBow();
 	bool ShotAble();
 };

@@ -310,7 +310,7 @@ void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
 		"Mat01_mummy_A","Mat01_mummy_M",
 		"GreenTree",
-		"Effect_1", "Effect_2", "Effect_3",
+		"Effect_1", "Effect_2", "Effect_3", "Effect_4",
 		"FireBall",
 		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse",
 		"ChessTile",
@@ -339,7 +339,7 @@ void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",L"resources/Textures/DS_equipment_standard.dds",
 		L"resources/Textures/Mat01_mummy_A.dds",L"resources/Textures/Mat01_mummy_M.dds",
 		L"resources/OBJ/GreenTree.dds",
-		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds",
+		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds", L"resources/Effects/FireBall_Explosion.dds",
 		L"resources/Textures/FireBall.dds",
 		L"resources/Textures/KingDiffuse.dds",L"resources/Textures/KnightDiffuse.dds",L"resources/Textures/PawnDiffuse.dds",L"resources/Textures/RookDiffuse.dds",
 		L"resources/OBJ/ChessTile.dds",
@@ -400,7 +400,7 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
 		"Mat01_mummy_A","Mat01_mummy_M",
 		"GreenTree",
-		"Effect_1", "Effect_2", "Effect_3",
+		"Effect_1", "Effect_2", "Effect_3", "Effect_4",
 		"FireBall",
 		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse",
 		"ChessTile",
@@ -720,6 +720,22 @@ void CGameScene::Update(float elapsedTime)
 				pArrow->SetDrawable(true);
 
 				cout << "충돌 : 플레이어 화살 - 적\n";
+				break;
+			}
+		}
+	}
+	for (auto pFireball : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pFireball->IsDrawable()) {
+			continue;
+		}
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy])
+		{
+			if (pFireball->CollisionCheck(pEnemy)) {
+				pEnemy->ChangeState(ObjectState::Attacked, pFireball);
+				pFireball->SetDrawable(true);
+
+				cout << "충돌 : 플레이어 파이어볼 - 적\n";
 				break;
 			}
 		}
@@ -3438,6 +3454,7 @@ void CGameScene::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight] = new CFixedMesh(pd3dDevice, pd3dCommandList, "knight");
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Laser");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall] = new CFixedMesh(pd3dDevice, pd3dCommandList, "FireBall");
 }
 
 void CGameScene::BuildShadowResource(ID3D12Device* pd3dDevice)
@@ -3509,6 +3526,7 @@ void CGameScene::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	for (int i = 0; i < 10; ++i) {
 		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::ArrowParticle);
 		//m_Particles->UseParticle(i, XMFLOAT3(500.0f * i, -500.0f, 3000.0f), XMFLOAT3(0.0f, 0.0f, -1.0f));
+		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::FireBallParticle);
 	}
 	// 안개
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::RadialParitcle);
@@ -3553,8 +3571,8 @@ void CGameScene::BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		pFireb->SetTextureIndex(0x400);
 		pFireb->SetShader(CShaderHandler::GetInstance().GetData("Object"));
 		pFireb->Scale(40.0f, 40.0f, 40.0f);
-		pFireb->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
-		pFireb->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		pFireb->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.0f, 0.0f, 0.0f, XMFLOAT3{ 0,0,0 });
+		pFireb->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2.0f, 2.0f, 2.0f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::FireBall].push_back(pFireb);
 	}
 }
@@ -3753,7 +3771,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player9.bin", NULL, true);
 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
@@ -3788,7 +3806,7 @@ void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	for (int i = 1; i < MAX_ROOM_PLAYER; ++i) {
 		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player9.bin", NULL, true);
 
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 
@@ -3850,8 +3868,11 @@ void CGameScene::ShotPlayerArrow()
 			if (-1 != idx) {
 				cout << "파티클 인덱스 " << idx << " 화살 인덱스 : " << i << " \n";
 				pArrow->SetUseable(false);
-				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,150,0 });
+				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Player->GetPosition() }, { 0,180,0 });
 				pArrow->SetPosition(pos);
+				pArrow->m_startPos = pos;
+				pArrow->SetStringPower(m_Player->GetStringPullTime());
+				cout << "string power: " << m_Player->GetStringPullTime() << endl;
 				pArrow->SetTargetVector(Vector3::Multifly(m_Player->GetLook(), 1));
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(m_Player->GetLook()), -1));
@@ -3994,7 +4015,8 @@ void CGameScene::UseEffects(int effectType, const XMFLOAT3& xmf3Position)
 	auto effect = m_EffectsHandler->RecycleEffect((EffectTypes)effectType);
 	if (effect != nullptr) {
 		effect->SetPosition(xmf3Position);
-		effect->FixPositionByTerrain(m_Terrain);
+		if (effectType < 4)
+			effect->FixPositionByTerrain(m_Terrain);
 		effect->SetDrawable(true);
 	}
 }
@@ -4004,7 +4026,8 @@ void CGameScene::UseEffects(int effectType, const XMFLOAT3& xmf3Position, float 
 	auto effect = m_EffectsHandler->RecycleEffect((EffectTypes)effectType);
 	if (effect != nullptr) {
 		effect->SetPosition(xmf3Position);
-		effect->FixPositionByTerrain(m_Terrain);
+		if (effectType < 4)
+			effect->FixPositionByTerrain(m_Terrain);
 		effect->WakeUpAfterTime(wakeupTime);
 	}
 }

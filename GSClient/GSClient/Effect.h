@@ -7,7 +7,8 @@ enum class EffectTypes {
 	None,
 	BossAttacked,
 	Thunder,
-	WarnningCircle
+	WarnningCircle,
+	FireBallExplosion
 };
 class CEffect : public CGameObject
 {

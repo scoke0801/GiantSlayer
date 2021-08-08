@@ -122,21 +122,22 @@ Texture2D gtxtGreenTree		: register(t51);
 Texture2D gtxtEffect_1		: register(t52);
 Texture2D gtxtEffect_2		: register(t53);
 Texture2D gtxtEffect_3		: register(t54);
-Texture2D gtxtFireBall		: register(t55);
+Texture2D gtxtEffect_4		: register(t55);
+Texture2D gtxtFireBall		: register(t56);
 
-Texture2D KingDiffuse		: register(t56);
-Texture2D KnightDiffuse		: register(t57);
-Texture2D PawnDiffuse		: register(t58);
-Texture2D RookDiffuse		: register(t59);
+Texture2D KingDiffuse		: register(t57);
+Texture2D KnightDiffuse		: register(t58);
+Texture2D PawnDiffuse		: register(t59);
+Texture2D RookDiffuse		: register(t60);
 
-Texture2D ChessTile			: register(t60);
-Texture2D Laser				: register(t61);
+Texture2D ChessTile			: register(t61);
+Texture2D Laser				: register(t62);
 
-Texture2D gtxtMap			: register(t62);
-Texture2D gtxtMirror		: register(t63);
-Texture2D gtxtShadowMap		: register(t64);
+Texture2D gtxtMap			: register(t63);
+Texture2D gtxtMirror		: register(t64);
+Texture2D gtxtShadowMap		: register(t65);
 
-Texture2D gtxtFont			: register(t65);
+Texture2D gtxtFont			: register(t66);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -390,6 +391,10 @@ float4 PSEffect(VS_EFFECT_OUT input) : SV_TARGET
 	if (gnTexturesMask & 0x04)
 	{
 		cColor = gtxtEffect_3.Sample(gssClamp, input.uv);
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		cColor = gtxtEffect_4.Sample(gssClamp, input.uv);
 	}
 	return cColor;
 }
