@@ -13,6 +13,7 @@ class CParticle;
 class CLightCamera;
 class CEnemy;
 class CMummy;
+class CMummyLaser;
 class CFbxObject2;
 class CBoss;
 class CEffectHandler;
@@ -36,6 +37,8 @@ private:
 private:
 	bool						m_isPlayerSelected = true;
 	bool						m_isPlayerBoxCollide = false;
+	bool test = false;
+	bool cc = false;
 
 	CGameObject* m_Chess[4];
 	bool						m_ChessPlate_Check[4] = { false };		// 체스판체크용
@@ -48,6 +51,10 @@ private:
 	bool						m_One_Mira_Die_Laser = false;
 	bool						m_Two_Mira_Die = false;
 	bool						m_Two_Mira_Die_Laser = false;
+
+	CMummyLaser* m_MummyLaser[3];
+	CMummyLaser* m_MummyLaser2[3];
+	CMummyLaser* m_MummyLaser3[3];
 
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -205,7 +212,7 @@ public:
 	void DeleteEnemy(CEnemy* pEmeny);
 
 	void ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector);
-
+	
 	// 이펙트 재사용 함수
 	void UseEffects(int effectType, const XMFLOAT3& xmf3Position);
 	// 이펙트 재사용 함수, 대기 시간 설정하는 경우

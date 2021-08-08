@@ -274,6 +274,11 @@ void CGameObject::SetLaserType(Laser_TYPE laser)
 	m_LaserType = laser;
 }
 
+void CGameObject::SetLaser(UINT laser)
+{
+	m_Laser = laser;
+}
+
 
 
 void CGameObject::LookAtDirection(XMFLOAT3 dir, void* pContext)

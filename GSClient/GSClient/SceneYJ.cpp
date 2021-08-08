@@ -3917,9 +3917,8 @@ void CSceneYJ::DeleteEnemy(CEnemy* pEmeny)
 
 		if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy1)
 		{
-			cout << " 미라 삭제\n";
 			m_MummyExist[0] = false;
-			pEmeny->SetMummyDie(true);
+			//pEmeny->SetMummyDie(true);
 
 			if (m_One_Mira_Die == true)
 			{
@@ -3940,9 +3939,8 @@ void CSceneYJ::DeleteEnemy(CEnemy* pEmeny)
 
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy2)
 		{
-			cout << " 미라2 삭제\n";
 			m_MummyExist[1] = false;
-			pEmeny->SetMummyDie2(true);
+			//pEmeny->SetMummyDie(true);
 
 			if (m_One_Mira_Die == true)
 			{
@@ -3963,9 +3961,8 @@ void CSceneYJ::DeleteEnemy(CEnemy* pEmeny)
 
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy3)
 		{
-			cout << " 미라3 삭제\n";
 			m_MummyExist[2] = false;
-			pEmeny->SetMummyDie3(true);
+			//pEmeny->SetMummyDie(true);
 
 			if (m_One_Mira_Die == true)
 			{

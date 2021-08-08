@@ -74,7 +74,7 @@ protected:
 
 	float					m_LaserAttackDelayTime[3] = { 5.0f,7.0f,11.0f };
 	bool					m_LaserAttack[3] = { false,false,false };
-	bool					m_MummyExist[3] = { true,true,true };
+	
 
 public:
 	CEnemy(); 
@@ -123,16 +123,13 @@ public:
 	 
 	void SetAttackDelayTime(float delayTime) { m_AttackDelayTime = delayTime; }
 
-	void SetMummyDie(bool die) { m_MummyExist[0] = die; }
-	bool GetMummyDie() const { return m_MummyExist[0]; }
-	void SetMummyDie2(bool die) { m_MummyExist[1] = die; }
-	bool GetMummyDie2() const { return m_MummyExist[1]; }
-	void SetMummyDie3(bool die) { m_MummyExist[2] = die; }
-	bool GetMummyDie3() const { return m_MummyExist[2]; }
+
+	
 
 	void SetEnemyAttackType(EnemyAttackType attackType) { m_AttackType = attackType; }
 	EnemyAttackType GetEnemyAttackType() const { return m_AttackType; } 
 
+	
 	float GetAttackRange() const { return m_AttackRange; }
 
 	CPlayer* GetTargetPlayer() const { return m_TargetPlayer; }
@@ -178,7 +175,7 @@ private:
 	float					dir[3] = { 15.0f,15.0f,15.0f };
 	bool ScaleCheck = false;
 	bool MummyScale[3] = { false,false,false };
-	
+	bool MummyDie[3] = { false,false,false };
 public:
 
 	CParticle* m_Particles;
@@ -195,5 +192,13 @@ public:
 	void AddFriends_Laser(CMummyLaser* Laser);
 	void SendDieInfotoFriends();
 	void RemoveFriends(CMummy* mummy);
+	void OneDie();
+
+	void SetMummyDie(int die) { MummyDie[0] = die; };
+	int GetMummyDie() const { return MummyDie[0]; };
+	void SetMummyDie2(int die) { MummyDie[1] = die; };
+	int GetMummyDie2() const { return MummyDie[1]; };
+	void SetMummyDie3(int die) { MummyDie[2] = die; };
+	int GetMummyDie3() const { return MummyDie[2]; };
 };
 

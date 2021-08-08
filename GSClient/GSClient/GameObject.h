@@ -141,6 +141,7 @@ protected: // 렌더링 관련 변수
 	Laser_TYPE m_LaserType = Laser_TYPE::Laser1;
 	Chess_Type m_ChessType = Chess_Type::King;
 
+	UINT				m_Laser = 0;
 	//EnemyAttackType m_EnemyAttackType = EnemyAttackType::Mummy1;
 
 	bool				m_isDrawable = true;
@@ -152,6 +153,7 @@ protected:	// 객체 관련 속성 변수
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
 	bool				m_isCollidable = true;
 	CSkill*				m_Skill;
+
 
 	//ObjectState			m_StateType = ObjectState::Idle;
 
@@ -199,6 +201,7 @@ public:
 	virtual void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera); 
 	virtual void SetTargetVector(const XMFLOAT3& playerLookAt);
 
+	
 
 public:
 	virtual void Move(XMFLOAT3 shift);
@@ -267,6 +270,10 @@ public:
 	virtual void SetVelocity(XMFLOAT3 dir);
 
 	virtual void SetLaserType(Laser_TYPE laser);
+
+	virtual void SetLaser(UINT laser);
+	
+	UINT GetLaser() const { return m_Laser; };
 
 	Laser_TYPE GetLaserType() const { return m_LaserType; };
 

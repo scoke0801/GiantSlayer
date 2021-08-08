@@ -38,8 +38,8 @@ D3D12_CPU_DESCRIPTOR_HANDLE dsvCpuStart;
 XMFLOAT3 LightPos;
 float lensize = 60000.0f;
 
+XMFLOAT3 Mummy_scale = { 300.0f,300.0f,300.0f };
 XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
-
 CGameScene::CGameScene()
 {
 	m_SoundManager = new CSoundManager();
@@ -530,6 +530,73 @@ void CGameScene::Update(float elapsedTime)
 		}
 	}
 
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		if (pEnemy->CollisionCheck(m_Player)) {
+			// 공격 상태일 때만 체력이 닳는것이 맞을까...
+			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+			//	
+			//}
+			if (false == m_Player->IsCanAttack()) {
+				if (false == m_Player->IsAleradyAttack()) {
+					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+					m_Player->SetAleradyAttack(true);
+				}
+			}
+			else if (m_Player->Attacked(pEnemy))
+			{
+				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				m_Player->FixCollision();
+			}
+		}
+	}
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		if (pEnemy->CollisionCheck(m_Player)) {
+			// 공격 상태일 때만 체력이 닳는것이 맞을까...
+			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+			//	
+			//}
+			if (false == m_Player->IsCanAttack()) {
+				if (false == m_Player->IsAleradyAttack()) {
+					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+					m_Player->SetAleradyAttack(true);
+				}
+			}
+			else if (m_Player->Attacked(pEnemy))
+			{
+				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				m_Player->FixCollision();
+			}
+		}
+	}
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		if (pEnemy->CollisionCheck(m_Player)) {
+			// 공격 상태일 때만 체력이 닳는것이 맞을까...
+			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+			//	
+			//}
+			if (false == m_Player->IsCanAttack()) {
+				if (false == m_Player->IsAleradyAttack()) {
+					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+					m_Player->SetAleradyAttack(true);
+				}
+			}
+			else if (m_Player->Attacked(pEnemy))
+			{
+				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				m_Player->FixCollision();
+			}
+		}
+	}
+
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
@@ -567,19 +634,54 @@ void CGameScene::Update(float elapsedTime)
 			}
 		}
 	}
+	
+	for (auto pMummy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy])
+	{
+		// 왼쪽벽
+		if (pMummy->GetPosition().x < 21269)
+		{
+			test = true;
+		}
+		else if (pMummy->GetPosition().x > 21369)
+		{
+			test = false;
+		}
+		if (test == true)
+		{
+			cout << "반전" << endl;
+			//pMummy->LookAt(Vector3::Multifly(XMFLOAT3(180, 0, 0), 1));
+			pMummy->SetTargetVector(Vector3::Multifly(XMFLOAT3(180, 0, 0), 1));
+		}
 
-	for (auto pMummy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
+		if (pMummy->GetPosition().x > 29485)
+		{
+			test = true;
+		}
+		else if (pMummy->GetPosition().x < 29385)
+		{
+			test = false;
+		}
+		if (test == true)
+		{
+			cout << "반전" << endl;
+			//pMummy->LookAt(Vector3::Multifly(XMFLOAT3(180, 0, 0), 1));
+			pMummy->SetTargetVector(Vector3::Multifly(XMFLOAT3(180, 0, 0), -1));
+		}
+
+	}
+	/*for (auto pMummy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
 		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 			if (false == pMummy->IsInSameSector(pObstacle->GetExistingSector())) {
 				continue;
 			}
 			if (pObstacle->CollisionCheck(pMummy)) {
 				CMummy* thisEnemy = reinterpret_cast<CMummy*>(pMummy);
+				thisEnemy->Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees(180)));
 				thisEnemy->FixCollision(pObstacle);
 				thisEnemy->CollideToObstacle();
 			}
 		}
-	}
+	}*/
 
 
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
@@ -2206,7 +2308,6 @@ void CGameScene::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-
 	{
 		XMFLOAT3 scale = { 120.0f, 120.0f, 120.0f };
 		m_Boss = new CBoss(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -2256,11 +2357,12 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Mummy[0]->SetPosition({ 18900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250.0f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[0]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 18900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[0]->SetEnemyAttackType(EnemyAttackType::Mummy1);
-
+		m_Mummy[0]->SetMummyDie(0);
 		m_Mummy[0]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 
 		m_Mummy[0]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
-		m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+		m_Mummy[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.25f / scale.x, 0.5, 225.0f  / scale.z, XMFLOAT3{ 0, 0.25f,0 });
+		m_Mummy[0]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0.25f,0 }, XMFLOAT3(1020.0f * 0.25f / scale.x, 0.5f, 225.0f / scale.z)));
 
 		m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[0])));
 		m_Mummy[0]->AddFriends(m_Mummy[0]);
@@ -2278,11 +2380,12 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Mummy[1]->SetPosition({ 16900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250), 6250 * MAP_SCALE_SIZE });
 		m_Mummy[1]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 16900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[1]->SetEnemyAttackType(EnemyAttackType::Mummy2);
-
+		m_Mummy[1]->SetMummyDie(0);
 		m_Mummy[1]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 
 		m_Mummy[1]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
-		m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+		m_Mummy[1]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.25f / scale.x, 0.5, 225.0f / scale.z, XMFLOAT3{ 0, 0.25f,0 });
+		m_Mummy[1]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0.25f,0 }, XMFLOAT3(1020.0f * 0.25f / scale.x, 0.5f, 225.0f / scale.z)));
 
 		m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[1])));
 		m_Mummy[1]->AddFriends(m_Mummy[1]);
@@ -2301,11 +2404,12 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Mummy[2]->SetPosition({ 14900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250), 6250 * MAP_SCALE_SIZE });
 		m_Mummy[2]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 14900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[2]->SetEnemyAttackType(EnemyAttackType::Mummy3);
-
+		m_Mummy[2]->SetMummyDie(0);
 		m_Mummy[2]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		m_Mummy[2]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
 
-		m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.75f / scale.x, 3, 225.0f * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
+		m_Mummy[2]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1020.0f * 0.25f / scale.x, 0.5, 225.0f / scale.z, XMFLOAT3{ 0, 0.25f,0 });
+		m_Mummy[2]->AddColider(new ColliderBox(XMFLOAT3{ 0, 0.25f,0 }, XMFLOAT3(1020.0f * 0.25f / scale.x, 0.5f, 225.0f / scale.z)));
 
 		m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[2])));
 		m_Mummy[2]->AddFriends(m_Mummy[2]);
@@ -3473,43 +3577,44 @@ void CGameScene::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 }
 void CGameScene::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	for (int i = 0; i < 30; i++)
+	m_Mummy[0] = new CMummy();
+	for (int i = 0; i < 3; i++)
 	{
-		CMummyLaser* pMummyLaser = new CMummyLaser();
-		pMummyLaser->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
-		pMummyLaser->Rotate(XMFLOAT3(0, 1, 0), 90.0f);
-		pMummyLaser->SetTextureIndex(0x01);
-
-		pMummyLaser->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
-		pMummyLaser->Scale(100.0f, 100.0f, 1000.0f);
-
-		pMummyLaser->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
-		pMummyLaser->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
-		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(pMummyLaser);
+		m_MummyLaser[i] = new CMummyLaser();
+		m_MummyLaser[i]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+		m_MummyLaser[i]->SetTextureIndex(0x01);
+		m_MummyLaser[i]->SetLaserType(Laser_TYPE::Laser1);
+		m_MummyLaser[i]->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
+		m_MummyLaser[i]->Scale(100.0f, 100.0f, 1000.0f);
+		m_MummyLaser[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.0f, 2.f, XMFLOAT3{ 0,0,1 });
+		m_MummyLaser[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 1), XMFLOAT3(0.5f, 0.5f, 1.0f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(m_MummyLaser[i]);
 	}
 
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 3; i++)
 	{
-		CMummyLaser* pMummyLaser2 = new CMummyLaser();
-		pMummyLaser2->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
-		pMummyLaser2->SetTextureIndex(0x02);
-		pMummyLaser2->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
-		pMummyLaser2->Scale(100.0f, 100.0f, 1000.0f);
-		pMummyLaser2->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
-		pMummyLaser2->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
-		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2].push_back(pMummyLaser2);
+		m_MummyLaser2[i] = new CMummyLaser();
+		m_MummyLaser2[i]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+		m_MummyLaser2[i]->SetTextureIndex(0x02);
+		m_MummyLaser2[i]->SetLaserType(Laser_TYPE::Laser2);
+		m_MummyLaser2[i]->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
+		m_MummyLaser2[i]->Scale(100.0f, 100.0f, 1000.0f);
+		m_MummyLaser2[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.0f, 2.f, XMFLOAT3{ 0,0,1 });
+		m_MummyLaser2[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 1), XMFLOAT3(0.5f, 0.5f, 1.0f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(m_MummyLaser2[i]);
 	}
 
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 3; i++)
 	{
-		CMummyLaser* pMummyLaser3 = new CMummyLaser();
-		pMummyLaser3->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
-		pMummyLaser3->SetTextureIndex(0x04);
-		pMummyLaser3->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
-		pMummyLaser3->Scale(100.0f, 100.0f, 1000.0f);
-		pMummyLaser3->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
-		pMummyLaser3->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
-		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3].push_back(pMummyLaser3);
+		m_MummyLaser3[i] = new CMummyLaser();
+		m_MummyLaser3[i]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser]);
+		m_MummyLaser3[i]->SetTextureIndex(0x04);
+		m_MummyLaser3[i]->SetLaserType(Laser_TYPE::Laser3);
+		m_MummyLaser3[i]->SetShader(CShaderHandler::GetInstance().GetData("Laser"));
+		m_MummyLaser3[i]->Scale(100.0f, 100.0f, 1000.0f);
+		m_MummyLaser3[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.0f, 2.f, XMFLOAT3{ 0,0,1 });
+		m_MummyLaser3[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 1), XMFLOAT3(0.5f, 0.5f, 1.0f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(m_MummyLaser3[i]);
 	}
 }
 
@@ -3523,6 +3628,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 			for (int i = 0; i < 3; i++)
 			{
 				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 1.5f, scale.y * 1.5f, scale.z * 1.5f));
+				m_Mummy[i]->SetActivityScope({ 2000.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 			}
 			m_One_Mira_Die_Laser = false;
 		}
@@ -3530,93 +3636,28 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f));
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 3.f, scale.y * 3.f, scale.z * 3.f));
+				m_Mummy[i]->SetActivityScope({ 2800.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+
 			}
 			m_Two_Mira_Die_Laser = false;
 		}
 
-		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
-			CMummyLaser* pMummyLaser = reinterpret_cast<CMummyLaser*>(pObj);
-
-			if (pMummyLaser->IsCanUse()) {
-				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle, 1);
-				
-				if (-1 != idx) {
-					pMummyLaser->SetUseable(false);
-
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
-					pMummyLaser->SetPosition(pos);
-
-					pMummyLaser->SetLaserType(Laser_TYPE::Laser1);
-					m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-					pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-					pMummyLaser->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
-
-					pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
-					m_Mummy[0]->AddFriends_Laser(pMummyLaser);
-					pMummyLaser->AddFriends_p(m_Mummy[0]);
-				}
-
-				break;
-			}
-		}
-
-
-		if (m_One_Mira_Die == true)
+		for (int i = 0; i < 3; i++)
 		{
-			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
-				CMummyLaser* pMummyLaser = reinterpret_cast<CMummyLaser*>(pObj);
-				if (pMummyLaser->IsCanUse()) {
-					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle, 1);
+			m_MummyLaser[i]->SetUseable(false);
 
-					if (-1 != idx) {
-						pMummyLaser->SetUseable(false);
-
-						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
-						pMummyLaser->SetPosition(pos);
-
-						pMummyLaser->SetLaserType(Laser_TYPE::Laser1);
-						m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-						pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(30.0f, 0, -150), 1));
-						pMummyLaser->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x + 30.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
-
-						pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
-						m_Mummy[0]->AddFriends_Laser(pMummyLaser);
-						pMummyLaser->AddFriends_p(m_Mummy[0]);
-
-					}
-					break;
-				}
-			}
+			XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
+			m_MummyLaser[i]->SetPosition(pos);
+			m_MummyLaser[i]->SetLaser(i);
+			m_MummyLaser[i]->SetLaserType(Laser_TYPE::Laser1);
+			m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser[i]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser[i]->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
+			//m_MummyLaser[i]->ConnectParticle(m_Particles->GetParticleObj(idx));
+			m_Mummy[0]->AddFriends_Laser(m_MummyLaser[i]);
+			m_MummyLaser[i]->AddFriends_p(m_Mummy[0]);
 		}
-		if (m_Two_Mira_Die == true)
-		{
-			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
-				CMummyLaser* pMummyLaser = reinterpret_cast<CMummyLaser*>(pObj);
-				if (pMummyLaser->IsCanUse()) {
-					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle, 1);
-
-					if (-1 != idx) {
-						pMummyLaser->SetUseable(false);
-
-						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
-						pMummyLaser->SetPosition(pos);
-
-						pMummyLaser->SetLaserType(Laser_TYPE::Laser1);
-						m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-						pMummyLaser->SetTargetVector(Vector3::Multifly(XMFLOAT3(-30.0f, 0, -150), 1));
-						pMummyLaser->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x - 30.0f, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
-
-						pMummyLaser->ConnectParticle(m_Particles->GetParticleObj(idx));
-						m_Mummy[0]->AddFriends_Laser(pMummyLaser);
-						pMummyLaser->AddFriends_p(m_Mummy[0]);
-					}
-					break;
-				}
-			}
-		}
-
-
 	}
 
 	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy2 && m_MummyExist[1] == true)
@@ -3626,6 +3667,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 		{
 			for (int i = 0; i < 3; i++)
 			{
+				m_Mummy[i]->SetActivityScope({ 2000.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 1.5f, scale.y * 1.5f, scale.z * 1.5f));
 			}
 			m_One_Mira_Die_Laser = false;
@@ -3634,94 +3676,27 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f));
+				m_Mummy[i]->SetActivityScope({ 2800.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 3.f, scale.y * 3.f, scale.z * 3.f));
 			}
 			m_Two_Mira_Die_Laser = false;
 		}
-
-		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
-			CMummyLaser* pMummyLaser2 = reinterpret_cast<CMummyLaser*>(pObj);
-
-			if (pMummyLaser2->IsCanUse()) {
-				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle2, 2);
-
-				if (-1 != idx) {
-
-					pMummyLaser2->SetUseable(false);
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[1]->GetPosition() }, { 0,200,0 });
-					pMummyLaser2->SetPosition(pos);
-
-					pMummyLaser2->SetLaserType(Laser_TYPE::Laser2);
-
-					m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-					pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-					pMummyLaser2->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
-
-					pMummyLaser2->ConnectParticle(m_Particles->GetParticleObj(idx));
-					m_Mummy[1]->AddFriends_Laser(pMummyLaser2);
-					pMummyLaser2->AddFriends_p(m_Mummy[1]);
-				}
-				break;
-			}
-		}
-		if (m_One_Mira_Die == true)
+		for (int i = 0; i < 3; i++)
 		{
-			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
-				CMummyLaser* pMummyLaser2 = reinterpret_cast<CMummyLaser*>(pObj);
-
-				if (pMummyLaser2->IsCanUse()) {
-					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle2, 2);
-
-					if (-1 != idx) {
-
-						pMummyLaser2->SetUseable(false);
-						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[1]->GetPosition() }, { 0,200,0 });
-						pMummyLaser2->SetPosition(pos);
-
-						pMummyLaser2->SetLaserType(Laser_TYPE::Laser2);
-
-						m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-						pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(30, 0, -150), 1));
-						pMummyLaser2->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x + 30.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
-
-						pMummyLaser2->ConnectParticle(m_Particles->GetParticleObj(idx));
-						m_Mummy[1]->AddFriends_Laser(pMummyLaser2);
-						pMummyLaser2->AddFriends_p(m_Mummy[1]);
-					}
-					break;
-				}
-			}
+			m_MummyLaser2[i]->SetUseable(false);
+			XMFLOAT3 pos2 = Vector3::Add(XMFLOAT3{ m_Mummy[1]->GetPosition() }, { 0,200,0 });
+			m_MummyLaser2[i]->SetPosition(pos2);
+			m_MummyLaser2[i]->SetLaser(i);
+			m_MummyLaser2[i]->SetLaserType(Laser_TYPE::Laser2);
+			m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser2[i]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser2[i]->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
+			//m_MummyLaser[i]->ConnectParticle(m_Particles->GetParticleObj(idx));
+			m_Mummy[1]->AddFriends_Laser(m_MummyLaser2[i]);
+			m_MummyLaser2[i]->AddFriends_p(m_Mummy[1]);
 		}
-		if (m_Two_Mira_Die == true)
-		{
-			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
-				CMummyLaser* pMummyLaser2 = reinterpret_cast<CMummyLaser*>(pObj);
-
-				if (pMummyLaser2->IsCanUse()) {
-					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle2, 2);
-
-					if (-1 != idx) {
-						pMummyLaser2->SetUseable(false);
-						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[1]->GetPosition() }, { 0,200,0 });
-						pMummyLaser2->SetPosition(pos);
-
-						pMummyLaser2->SetLaserType(Laser_TYPE::Laser2);
-
-						m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-						pMummyLaser2->SetTargetVector(Vector3::Multifly(XMFLOAT3(-30, 0, -150), 1));
-						pMummyLaser2->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x - 30.0f, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
-
-						pMummyLaser2->ConnectParticle(m_Particles->GetParticleObj(idx));
-						m_Mummy[1]->AddFriends_Laser(pMummyLaser2);
-						pMummyLaser2->AddFriends_p(m_Mummy[1]);
-					}
-					break;
-				}
-			}
-		}
-
 	}
-
+	
 	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy3 && m_MummyExist[2] == true)
 	{
 		// 미라가 2마리 남았을때
@@ -3729,6 +3704,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 		{
 			for (int i = 0; i < 3; i++)
 			{
+				m_Mummy[i]->SetActivityScope({ 2000.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 1.5f, scale.y * 1.5f, scale.z * 1.5f));
 			}
 			m_One_Mira_Die_Laser = false;
@@ -3737,92 +3713,30 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f));
+				m_Mummy[i]->SetActivityScope({ 2800.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 3.f, scale.y * 3.f, scale.z * 3.f));
 			}
 			m_Two_Mira_Die_Laser = false;
 		}
-		for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
-			CMummyLaser* pMummyLaser3 = reinterpret_cast<CMummyLaser*>(pObj);
-
-			if (pMummyLaser3->IsCanUse()) {
-				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle3, 3);
-				cout << idx << endl;
-				if (-1 != idx) {
-					pMummyLaser3->SetUseable(false);
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[2]->GetPosition() }, { 0,200,0 });
-					pMummyLaser3->SetPosition(pos);
-					pMummyLaser3->SetLaserType(Laser_TYPE::Laser3);
-					m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-					pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-					pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
-
-					pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
-					m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
-					pMummyLaser3->AddFriends_p(m_Mummy[2]);
-				}
-
-				break;
-			}
-
-		}
-		if (m_One_Mira_Die == true)
+		for (int i = 0; i < 3; i++)
 		{
-			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
-				CMummyLaser* pMummyLaser3 = reinterpret_cast<CMummyLaser*>(pObj);
-
-				if (pMummyLaser3->IsCanUse()) {
-					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle3, 3);
-					cout << idx << endl;
-					if (-1 != idx) {
-						pMummyLaser3->SetUseable(false);
-						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[2]->GetPosition() }, { 0,200,0 });
-						pMummyLaser3->SetPosition(pos);
-						pMummyLaser3->SetLaserType(Laser_TYPE::Laser3);
-						m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-						pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(30.0f, 0, -150), 1));
-						pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x + 30.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
-
-						pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
-						m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
-						pMummyLaser3->AddFriends_p(m_Mummy[2]);
-					}
-
-					break;
-				}
-
-			}
+			m_MummyLaser3[i]->SetUseable(false);
+			XMFLOAT3 pos3 = Vector3::Add(XMFLOAT3{ m_Mummy[2]->GetPosition() }, { 0,200,0 });
+			m_MummyLaser3[i]->SetPosition(pos3);
+			m_MummyLaser3[i]->SetLaser(i);
+			m_MummyLaser3[i]->SetLaserType(Laser_TYPE::Laser3);
+			m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser3[i]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser3[i]->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
+			//m_MummyLaser[i]->ConnectParticle(m_Particles->GetParticleObj(idx));
+			m_Mummy[2]->AddFriends_Laser(m_MummyLaser3[i]);
+			m_MummyLaser3[i]->AddFriends_p(m_Mummy[2]);
 		}
-		if (m_Two_Mira_Die == true)
-		{
-			for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
-				CMummyLaser* pMummyLaser3 = reinterpret_cast<CMummyLaser*>(pObj);
-
-				if (pMummyLaser3->IsCanUse()) {
-					int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::MummyLaserParticle3, 3);
-					cout << idx << endl;
-					if (-1 != idx) {
-						pMummyLaser3->SetUseable(false);
-						XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[2]->GetPosition() }, { 0,200,0 });
-						pMummyLaser3->SetPosition(pos);
-						pMummyLaser3->SetLaserType(Laser_TYPE::Laser3);
-						m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
-						pMummyLaser3->SetTargetVector(Vector3::Multifly(XMFLOAT3(-30, 0, -150), 1));
-						pMummyLaser3->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x - 30.0f, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
-
-						pMummyLaser3->ConnectParticle(m_Particles->GetParticleObj(idx));
-						m_Mummy[2]->AddFriends_Laser(pMummyLaser3);
-						pMummyLaser3->AddFriends_p(m_Mummy[2]);
-					}
-
-					break;
-				}
-
-			}
-		}
-
 	}
-
+		
 }
+
+
 
 void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -3958,22 +3872,22 @@ void CGameScene::ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 
 void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 {
+	int i = 0;
 	auto res2 = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Mummy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end(), pEmeny);
 	CMummy* pMummy = reinterpret_cast<CMummy*>(pEmeny);
 	if (res2 != m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end()) {
 
 		if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy1)
 		{
-			cout << " 미라 삭제\n";
 			m_MummyExist[0] = false;
-			pEmeny->SetMummyDie(true);
-
+			m_Mummy[1]->SetMummyDie(1);
+			m_Mummy[2]->SetMummyDie(1);
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
 				m_Two_Mira_Die_Laser = true;
-				m_Mummy[1]->Scale(5.f, 5.f, 5.f, true);
-				m_Mummy[2]->Scale(5.f, 5.f, 5.f, true);
+				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
+				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
@@ -3987,16 +3901,15 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy2)
 		{
-			cout << " 미라2 삭제\n";
 			m_MummyExist[1] = false;
-			pEmeny->SetMummyDie2(true);
-
+			m_Mummy[0]->SetMummyDie2(1);
+			m_Mummy[2]->SetMummyDie2(1);
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
 				m_Two_Mira_Die_Laser = true;
-				m_Mummy[0]->Scale(5.f, 5.f, 5.f, true);
-				m_Mummy[2]->Scale(5.f, 5.f, 5.f, true);
+				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
@@ -4005,21 +3918,19 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 
 			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
-
 		}
-
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy3)
 		{
-			cout << " 미라3 삭제\n";
 			m_MummyExist[2] = false;
-			pEmeny->SetMummyDie3(true);
-
+			m_Mummy[0]->SetMummyDie(1);
+			m_Mummy[1]->SetMummyDie(1);
+			
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
 				m_Two_Mira_Die_Laser = true;
-				m_Mummy[0]->Scale(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f, true);
-				m_Mummy[1]->Scale(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f, true);
+				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
