@@ -148,6 +148,8 @@ protected: // 렌더링 관련 변수
 protected:	// 객체 관련 속성 변수
 	int					m_HP = 0;
 	int					m_SP = 0;
+	float				m_ATK = 0;
+	float				m_DEF = 0;
 
 	OBJ_NAME			m_Name;
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
@@ -297,9 +299,16 @@ public:
 
 	void SetHP(UINT HP) { m_HP = HP; }
 	UINT GetHP() const { return m_HP; }
+	void TakeDamage(float dmg) { m_HP -= (dmg - m_DEF); }
 
 	void SetSP(UINT SP) { m_SP = SP; }
 	UINT GetSP() const { return m_SP; }
+
+	void SetATK(UINT ATK) { m_ATK = ATK; }
+	UINT GetATK() const { return m_ATK; }
+
+	void SetDEF(UINT DEF) { m_DEF = DEF; }
+	UINT GetDEF() const { return m_DEF; }
 
 	void SetSize(const XMFLOAT3& size) { m_xmf3Size = size; }
 	XMFLOAT3 GetSize()const { return m_xmf3Size; }
@@ -323,6 +332,14 @@ public:
 	DirectX::XMFLOAT3 GetReflectLook_1()const;
 	DirectX::XMFLOAT3 GetReflectLook_2()const;
 	DirectX::XMFLOAT3 GetReflectLook_P()const;
+
+	void InverseDirection() {
+		//m_xmf4x4World._21 *= -1;
+		//m_xmf4x4World._22 *= -1;
+		//m_xmf4x4World._23 *= -1;
+
+		m_xmf3Velocity = Vector3::Multifly(m_xmf3Velocity, -1);
+	};
 };
  
 class CBox : public CGameObject
