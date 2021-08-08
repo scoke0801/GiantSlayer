@@ -416,7 +416,7 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
     pd3dCommandList->IASetVertexBuffers(0, 1, &textVertexBufferView);
 
     // bind the text srv. We will assume the correct descriptor heap and table are currently bound and set
-    pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_Font.srvHandle);
+    //pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_Font.srvHandle);
 
     int numCharacters = 0;
 
