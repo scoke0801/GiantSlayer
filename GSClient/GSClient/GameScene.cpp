@@ -476,6 +476,10 @@ void CGameScene::Update(float elapsedTime)
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
+	for (auto pMummy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
+		pMummy->FixPositionByTerrain(m_Terrain);
+	}
+
 	m_EffectsHandler->Update(elapsedTime);
 
 	m_Particles->Update(elapsedTime);
@@ -1633,6 +1637,18 @@ void CGameScene::ProcessInput()
 		m_Player->SetPosition({ 16958.4 * MAP_SCALE_SIZE,  -6000, 14861.1 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
+	if (keyInput.KEY_F7)
+	{
+		DeleteEnemy(m_Mummy[0]);
+	}
+	if (keyInput.KEY_F8)
+	{
+		DeleteEnemy(m_Mummy[1]);
+	}
+	if (keyInput.KEY_F9)
+	{
+		DeleteEnemy(m_Mummy[2]);
+	}
 	if (keyInput.KEY_U)
 	{
 		for (int i = 0; i < 5; ++i) {
@@ -2365,7 +2381,7 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Mummy[0]->SetChild(pMummyModel, true);
 		m_Mummy[0]->SetShadertoAll();
 		m_Mummy[0]->SetTextureInedxToAll(0x200);
-
+		
 		m_Mummy[0]->SetPosition({ 18900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250.0f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[0]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 18900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[0]->SetEnemyAttackType(EnemyAttackType::Mummy1);
@@ -2388,9 +2404,9 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Mummy[1]->SetChild(pMummyModel, true);
 		m_Mummy[1]->SetShadertoAll();
 		m_Mummy[1]->SetTextureInedxToAll(0x200);
-
-		m_Mummy[1]->SetPosition({ 16900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250), 6250 * MAP_SCALE_SIZE });
-		m_Mummy[1]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 16900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+		
+		m_Mummy[1]->SetPosition({ 16900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(16900.0f, 6250), 6250 * MAP_SCALE_SIZE });
+		m_Mummy[1]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 16900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(16900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[1]->SetEnemyAttackType(EnemyAttackType::Mummy2);
 		m_Mummy[1]->SetMummyDie(0);
 		m_Mummy[1]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
@@ -2413,8 +2429,8 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Mummy[2]->SetShadertoAll();
 		m_Mummy[2]->SetTextureInedxToAll(0x200);
 
-		m_Mummy[2]->SetPosition({ 14900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250), 6250 * MAP_SCALE_SIZE });
-		m_Mummy[2]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 14900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+		m_Mummy[2]->SetPosition({ 14900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(14900.0f, 6250), 6250 * MAP_SCALE_SIZE });
+		m_Mummy[2]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 14900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(14900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[2]->SetEnemyAttackType(EnemyAttackType::Mummy3);
 		m_Mummy[2]->SetMummyDie(0);
 		m_Mummy[2]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
@@ -3901,14 +3917,12 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
-
+			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
+			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
+			
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
 			m_One_Mira_Die = true;
 			m_One_Mira_Die_Laser = true;
-
-
-			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
-			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 		}
 
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy2)
@@ -3923,20 +3937,18 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
+			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
 			m_One_Mira_Die = true;
 			m_One_Mira_Die_Laser = true;
-
-			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
-			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 		}
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy3)
 		{
 			m_MummyExist[2] = false;
-			m_Mummy[0]->SetMummyDie(1);
-			m_Mummy[1]->SetMummyDie(1);
-			
+			m_Mummy[0]->SetMummyDie3(1);
+			m_Mummy[1]->SetMummyDie3(1);
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
@@ -3944,13 +3956,12 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
+			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
 			m_One_Mira_Die = true;
 			m_One_Mira_Die_Laser = true;
-
-			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
-			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 		}
 
 	}

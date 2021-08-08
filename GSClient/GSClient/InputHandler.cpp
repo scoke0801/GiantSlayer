@@ -36,6 +36,8 @@ void CInputHandler::ProcessInput()
 	if (GetAsyncKeyState(VK_F4) & 0x8000)		m_Inputs.KEY_F4 = true;
 	if (GetAsyncKeyState(VK_F5) & 0x8000)		m_Inputs.KEY_F5 = true;
 	if (GetAsyncKeyState(VK_F6) & 0x8000)		m_Inputs.KEY_F6 = true;
+	if (GetAsyncKeyState(VK_F7) & 0x8000)		m_Inputs.KEY_F7 = true;
+	if (GetAsyncKeyState(VK_F8) & 0x8000)		m_Inputs.KEY_F8 = true;
 	if (GetAsyncKeyState(VK_F9) & 0x8000)		m_Inputs.KEY_F9 = true;
 
 	if (GetAsyncKeyState(VK_ADD) & 0x8000)		m_Inputs.KEY_ADD = true;

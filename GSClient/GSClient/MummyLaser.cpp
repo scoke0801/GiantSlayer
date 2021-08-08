@@ -33,7 +33,7 @@ void CMummyLaser::Update(float fTimeElapsed)
 	if (false == m_isDrawable) {
 		//m_ConnectedParticle->SetDrawable(true);
 		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ARROW_SPEED * fTimeElapsed)));
-		Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 15.0f+m_ElapsedTime);
+		Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 5.0f);
 		/*if (m_ConnectedParticle != nullptr) {
 			m_ConnectedParticle->SetPosition(m_xmf3Position);
 		}*/

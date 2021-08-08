@@ -339,7 +339,6 @@ CMeleeEnemy::CMeleeEnemy()
 	m_AttackType = EnemyAttackType::Melee;
 	m_AttackRange = 320.0f;
 	
-
 	m_EnemyType = EnemyType::Skeleton;
 
 	//m_HeightFromTerrain = 150.0f;
@@ -523,13 +522,13 @@ void CMummy::Update(float elapsedTime)
 
 					if (Laser->GetLaser()==1&&(this->GetMummyDie2()==1 || this->GetMummyDie3()==1))
 					{
-						Laser->SetTargetVector(Vector3::Multifly(XMFLOAT3(30.0f, 0, -150), 1));
-						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x + 30.0f, this->GetLook().y, this->GetLook().z), -1));
+						Laser->SetTargetVector(Vector3::Multifly(XMFLOAT3(-30.0f, 0, -150), 1));
+						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x - 30.0f, this->GetLook().y, this->GetLook().z), -1));
 					}
 					if (Laser->GetLaser() == 2 && (this->GetMummyDie2() == 1 && this->GetMummyDie3() == 1))
 					{
-						Laser->SetTargetVector(Vector3::Multifly(XMFLOAT3(60.0f, 0, -150), 1));
-						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x + 60.0f, this->GetLook().y, this->GetLook().z), -1));
+						Laser->SetTargetVector(Vector3::Multifly(XMFLOAT3(-60.0f, 0, -150), 1));
+						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x - 60.0f, this->GetLook().y, this->GetLook().z), -1));
 					}
 
 					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
@@ -597,8 +596,8 @@ void CMummy::Update(float elapsedTime)
 					}
 					if (Laser->GetLaser() == 2 && (this->GetMummyDie() == 1 && this->GetMummyDie3() == 1))
 					{
-						Laser->SetTargetVector(Vector3::Multifly(XMFLOAT3(60.0f, 0, -150), 1));
-						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x + 60.0f, this->GetLook().y, this->GetLook().z), -1));
+						Laser->SetTargetVector(Vector3::Multifly(XMFLOAT3(-30.0f, 0, -150), 1));
+						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x - 30.0f, this->GetLook().y, this->GetLook().z), -1));
 					}
 
 					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });

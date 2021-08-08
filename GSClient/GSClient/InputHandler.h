@@ -51,6 +51,8 @@ struct GameInputs
 	bool KEY_F4 = false;
 	bool KEY_F5 = false; 
 	bool KEY_F6 = false;
+	bool KEY_F7 = false;
+	bool KEY_F8 = false;
 	bool KEY_F9 = false;
 
 	bool KEY_ADD = false;
