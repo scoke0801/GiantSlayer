@@ -19,16 +19,21 @@ public:
 	virtual ~CBridge(); 
 
 public:
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
+	void Update(float fTimeElapsed) override;
+	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
 	void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 public:
-	virtual void SetPosition(XMFLOAT3 pos) override;
+	void SetPosition(XMFLOAT3 pos) override;
+	void SetPositionPlus(XMFLOAT3 pos) override;
+
+
 	void RotateAll(const XMFLOAT3& axis, float angle);
 
 	void UpdateColliders() override;
 	bool CollisionCheck(Collider* pCollider) override;
 	bool CollisionCheck(CGameObject* other) override;
+
 private:
 	int AddObject(CMesh* pMesh, CShader* pShader, UINT textureIndex);  
 };
