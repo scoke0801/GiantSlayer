@@ -625,6 +625,9 @@ void CSceneJH::Update(float elapsedTime)
 		}
 	} 
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
+		if (false == pPuzzle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		} 
 		if (pPuzzle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pPuzzle);
 			m_isPlayerBoxCollide = true;
@@ -634,6 +637,9 @@ void CSceneJH::Update(float elapsedTime)
 	}
 	 
 	for (auto pChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle]) {
+		if (false == pChessPuzzle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
 		if (pChessPuzzle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pChessPuzzle);
 			m_isPlayerBoxCollide = true;
@@ -3971,22 +3977,22 @@ void CSceneJH::ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 
 void CSceneJH::DeleteEnemy(CEnemy* pEmeny)
 {
+	int i = 0;
 	auto res2 = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Mummy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end(), pEmeny);
 	CMummy* pMummy = reinterpret_cast<CMummy*>(pEmeny);
 	if (res2 != m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end()) {
 
 		if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy1)
 		{
-			cout << " 미라 삭제\n";
 			m_MummyExist[0] = false;
-			pEmeny->SetMummyDie(true);
-
+			m_Mummy[1]->SetMummyDie(1);
+			m_Mummy[2]->SetMummyDie(1);
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
 				m_Two_Mira_Die_Laser = true;
-				m_Mummy[1]->Scale(5.f, 5.f, 5.f, true);
-				m_Mummy[2]->Scale(5.f, 5.f, 5.f, true);
+				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
+				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
@@ -4000,16 +4006,15 @@ void CSceneJH::DeleteEnemy(CEnemy* pEmeny)
 
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy2)
 		{
-			cout << " 미라2 삭제\n";
 			m_MummyExist[1] = false;
-			pEmeny->SetMummyDie2(true);
-
+			m_Mummy[0]->SetMummyDie2(1);
+			m_Mummy[2]->SetMummyDie2(1);
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
 				m_Two_Mira_Die_Laser = true;
-				m_Mummy[0]->Scale(5.f, 5.f, 5.f, true);
-				m_Mummy[2]->Scale(5.f, 5.f, 5.f, true);
+				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
@@ -4018,21 +4023,19 @@ void CSceneJH::DeleteEnemy(CEnemy* pEmeny)
 
 			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
-
 		}
-
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy3)
 		{
-			cout << " 미라3 삭제\n";
 			m_MummyExist[2] = false;
-			pEmeny->SetMummyDie3(true);
+			m_Mummy[0]->SetMummyDie(1);
+			m_Mummy[1]->SetMummyDie(1);
 
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
 				m_Two_Mira_Die_Laser = true;
-				m_Mummy[0]->Scale(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f, true);
-				m_Mummy[1]->Scale(scale.x * 5.f, scale.y * 5.f, scale.z * 5.f, true);
+				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
