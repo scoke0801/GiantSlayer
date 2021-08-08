@@ -157,7 +157,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 //
-class CTextVertex : public CVertex {
+class CTextVertex  {
 public:
 	CTextVertex() {}
 	CTextVertex(float r, float g, float b, float a, float u, float v, float tw, float th, float x, float y, float w, float h)

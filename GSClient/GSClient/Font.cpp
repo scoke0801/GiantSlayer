@@ -406,19 +406,17 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
     // clear the depth buffer so we can draw over everything
     // pd3dCommandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-    CShaderHandler::GetInstance().GetData("Text")->Render(pd3dCommandList, nullptr);
-
     // set the text pipeline state object
-    //d3dCommandList->SetPipelineState(textPSO);
-
+    CShaderHandler::GetInstance().GetData("Text")->Render(pd3dCommandList, nullptr);
+     
     // this way we only need 4 vertices per quad rather than 6 if we were to use a triangle list topology
     pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-
+     
     // set the text vertex buffer
     pd3dCommandList->IASetVertexBuffers(0, 1, &textVertexBufferView);
 
     // bind the text srv. We will assume the correct descriptor heap and table are currently bound and set
-    //pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_Font.srvHandle);
+    pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_Font.srvHandle);
 
     int numCharacters = 0;
 
@@ -466,8 +464,25 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
         if (i > 0)
             kerning = m_Font.GetKerning(lastChar, c);
 
-        vert[numCharacters] = CTextVertex(color.x,
-        //vert = CTextVertex(color.x,
+        //auto vertex = CTextVertex(color.x,
+        //    color.y,
+        //    color.z,
+        //    color.w,
+        //    fc->u,
+        //    fc->v,
+        //    fc->twidth,
+        //    fc->theight,
+        //    x + ((fc->xoffset + kerning) * scale.x),
+        //    y - (fc->yoffset * scale.y),
+        //    fc->width * scale.x,
+        //    fc->height * scale.y);
+
+        //::memcpy(&textVBGPUAddress->m_Pos, &vertex.m_Pos, sizeof(XMFLOAT4));
+        //::memcpy(&textVBGPUAddress->m_Color, &color, sizeof(XMFLOAT4)); 
+        //::memcpy(&textVBGPUAddress->m_TexCoord, &vertex.m_TexCoord, sizeof(XMFLOAT4));
+
+        //::memcpy(&textVBGPUAddress->m_TexCoord, &vertex., sizeof(XMFLOAT4));
+        textVBGPUAddress[numCharacters] = CTextVertex(color.x,
             color.y,
             color.z,
             color.w,
@@ -486,8 +501,8 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
         x += (fc->xadvance - horrizontalPadding) * scale.x;
 
         lastChar = c;
-    }
-
+    } 
+     
     // we are going to have 4 vertices per character (trianglestrip to make quad), and each instance is one character
     pd3dCommandList->DrawInstanced(4, numCharacters, 0, 0);
 }
@@ -595,14 +610,13 @@ bool TextHandler::InitVertexBuffer(ID3D12Device* pd3dDevice,
 
         // map the resource heap to get a gpu virtual address to the beginning of the heap
         hr = textVertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&textVBGPUAddress));
-    }
 
+    }
      
     // set the text vertex buffer view for each frame
     {
         textVertexBufferView.BufferLocation = textVertexBuffer->GetGPUVirtualAddress();
         textVertexBufferView.StrideInBytes = sizeof(CTextVertex);
         textVertexBufferView.SizeInBytes = maxNumTextCharacters * sizeof(CTextVertex);
-    }
-     
+    } 
 }

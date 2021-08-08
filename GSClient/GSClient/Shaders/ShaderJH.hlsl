@@ -1742,6 +1742,6 @@ VS_FONT_OUT VS_FONT_MAIN(VS_FONT_IN input, uint vertexID : SV_VertexID)
 
 float4 PS_FONT_MAIN(VS_FONT_OUT input) : SV_TARGET
 {
-return float4(input.color.rgb, input.color.a * gtxtWater.Sample(gssWrap, input.texCoord).a);
+	return float4(input.color.rgb, input.color.a * gtxtFont.Sample(gssWrap, input.texCoord).a);
 //return float4(input.color.rgb, input.color.a * gtxtFont.Sample(gssWrap, input.texCoord).a);
 }

@@ -13,6 +13,7 @@ class CParticle;
 class CLightCamera;
 class CEnemy;
 class CMummy;
+class CMummyLaser;
 class CFbxObject2;
 class CBoss;
 class CEffectHandler;
@@ -40,6 +41,10 @@ private:
 	bool						m_One_Mira_Die_Laser = false;
 	bool						m_Two_Mira_Die = false;
 	bool						m_Two_Mira_Die_Laser = false;
+
+	CMummyLaser*				m_MummyLaser[3];
+	CMummyLaser*				m_MummyLaser2[3];
+	CMummyLaser*				m_MummyLaser3[3];
 
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
@@ -165,7 +170,7 @@ public:
 	void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 	void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 	void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
-
+	void DrawFont(ID3D12GraphicsCommandList* pd3dCommandList) override;
 public:
 	void Communicate(SOCKET& sock) override;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 constexpr int MAX_NUM_TEXT_CHARACTERS = 1024;
+class CTextVertex;
 struct FontChar
 {
     // the unicode id
@@ -110,6 +111,5 @@ private:
      
     ID3D12Resource* textVertexBuffer;
     D3D12_VERTEX_BUFFER_VIEW textVertexBufferView; // a view for our text vertex buffer
-    UINT8* textVBGPUAddress; // this is a pointer to each of the text constant buffers
-     
+    CTextVertex* textVBGPUAddress; // this is a pointer to each of the text constant buffers 
 };
