@@ -8,6 +8,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 {
 	m_Type = OBJ_TYPE::Player;
 
+	// Status
 	m_HP = 100;
 	m_SP = 100;
 }
@@ -17,6 +18,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 {
 	m_Type = OBJ_TYPE::Player;
 
+	// Status
 	m_HP = 100;
 	m_SP = 100;
 }
@@ -70,7 +72,7 @@ void CPlayer::Update(float fTimeElapsed)
 		/*if (m_AttackedDelay == 0.0f) {
 			SetAnimationSet(AnimationType::IDLE);
 		}*/
-	} 
+	}
 	else {
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0) {
 			if (m_ComboTimer > 0)
@@ -79,7 +81,7 @@ void CPlayer::Update(float fTimeElapsed)
 		}
 		else if (m_PullBox == TRUE)
 		{
-			SetAnimationSet(14);
+			SetAnimationSet(PUSH);
 		}
 		else
 			SetAnimationSet(RUN);
@@ -131,7 +133,7 @@ void CPlayer::UpdateCamera()
 		{
 			m_Camera->UpdateAimMode(m_xmf3Position);
 			auto lookVec = GetLook();
-			m_Camera->LookAt(m_Camera->GetPosition3f(), Vector3::Multifly(lookVec, 15000.0f) , GetUp());
+			m_Camera->LookAt(m_Camera->GetPosition3f(), Vector3::Multifly(lookVec, 15000.0f), GetUp());
 		}
 		else
 		{
@@ -152,10 +154,10 @@ void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
 
 	/*
 	높이 맵에서 카메라의 현재 위치 (x, z)에 대한 지형의 높이(y 값)를 구한다.
-	이 값이 카메라의 위치 벡터의 y-값 보다 크면 카메라가 지형의 아래에 있게 된다. 
+	이 값이 카메라의 위치 벡터의 y-값 보다 크면 카메라가 지형의 아래에 있게 된다.
 	이렇게 되면 다음 그림의 왼쪽과 같이
 	지형이 그려지지 않는 경우가 발생한다(카메라가 지형 안에 있으므로 삼각형의 와인딩 순서가 바뀐다).
-	이러한 경우가 발생하지 않도록 카메라의 위치 벡터의 y-값의 최소값은 (지형의 높이 + 5)로 설정한다. 
+	이러한 경우가 발생하지 않도록 카메라의 위치 벡터의 y-값의 최소값은 (지형의 높이 + 5)로 설정한다.
 	카메라의 위치 벡터의 y-값의 최소값은 지형의 모든 위치에서
 	카메라가 지형 아래에 위치하지 않도록 설정해야 한다.*/
 
@@ -169,7 +171,7 @@ void CPlayer::FixCameraByTerrain(CTerrain* pTerrain)
 	if (xmf3CameraPosition.y <= fHeight)
 	{
 		xmf3CameraPosition.y = fHeight;
-		m_Camera->SetPosition(xmf3CameraPosition); 
+		m_Camera->SetPosition(xmf3CameraPosition);
 		m_Camera->LookAt(m_xmf3Position, GetUp());
 	}
 }
@@ -189,7 +191,7 @@ void CPlayer::FixPositionByTerrain(CTerrain* pTerrain)
 }
 
 int CPlayer::GetPlayerExistingSector() const
-{ 
+{
 	if (m_xmf3Position.x < 14379 && m_xmf3Position.z < 22824) {
 		return 0;
 	}
@@ -220,13 +222,13 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 		return;
 	}
 	dir.y = 0;
-	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);  
+	XMFLOAT3 normalizedDir = Vector3::Normalize(dir);
 	XMFLOAT3 targetPosition = Vector3::Multifly(normalizedDir, 150000.0f);
-	LookAt(m_xmf3Position, targetPosition, XMFLOAT3{ 0,1,0 }); 
+	LookAt(m_xmf3Position, targetPosition, XMFLOAT3{ 0,1,0 });
 	//Rotate({ 0,1,0 }, 180.0f);
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, m_xmf3Velocity.y, 0.0f);
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, 
+	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity,
 		Vector3::Multifly(normalizedDir, PLAYER_RUN_SPEED));
 
 	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
@@ -236,7 +238,7 @@ void CPlayer::SetVelocity(XMFLOAT3 dir)
 	if (m_xmf3Velocity.z > speed) m_xmf3Velocity.z = speed;
 	if (m_xmf3Velocity.x < -speed) m_xmf3Velocity.x = -speed;
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
-	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed; 
+	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
 }
 
 void CPlayer::SetWeapon(PlayerWeaponType weaponType)
@@ -252,9 +254,9 @@ void CPlayer::SetWeapon(PlayerWeaponType weaponType)
 		SKILL = AnimationType::SWORD_SKILL;
 		DEATH = AnimationType::SWORD_DEATH;
 
-		m_AttackAnimLength = 2.2f;
-		m_SwordAnim2Length = 2.033334f;
-		m_SwordAnim3Length = 3.0f;
+		m_AttackAnimLength = 2.0f;
+		m_SwordAnim2Length = 1.133333f;
+		m_SwordAnim3Length = 1.466667f;
 		m_SkillAnimLength = 4.8f;
 
 		SetDrawSword();
@@ -376,7 +378,7 @@ void CPlayer::ResetAttack()
 {
 	m_IsAlreadyAttack = false;
 	m_AttackWaitingTime = 0.0f;
-	m_IsCanAttack = true; 
+	m_IsCanAttack = true;
 }
 
 void CPlayer::ResetBow()
@@ -388,10 +390,10 @@ void CPlayer::ResetBow()
 }
 
 void CPlayer::Box_Pull(bool Pull_State)
-{ 
-	SetPullBox(Pull_State);  
+{
+	SetPullBox(Pull_State);
 }
- 
+
 
 void CPlayer::AnimationChange(PlayerWeaponType weapon)
 {
@@ -413,7 +415,7 @@ void CPlayer::AnimationChange(PlayerWeaponType weapon)
 		m_AttackAnimPauseTime = 0.6f;
 	}
 }
- 
+
 void CPlayer::DisableSword()
 {
 	SetDrawableRecursively("sword1", false);
@@ -425,7 +427,7 @@ void CPlayer::DisableBow()
 {
 	SetDrawableRecursively("sword1", true);
 	SetDrawableRecursively("bow_LeftHand", false);
-	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false); 
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
 }
 
 bool CPlayer::ShotAble()

@@ -25,6 +25,7 @@ protected:
 	CGameObject* m_Owner;
 	CGameObject* target;
 
+	float m_ElapsedTime = 0;
 	float damage;
 
 	XMFLOAT3 m_xmf3TargetPosition;

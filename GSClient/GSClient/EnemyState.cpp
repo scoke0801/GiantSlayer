@@ -254,7 +254,7 @@ void AttackedState::Enter(CEnemy* enemy)
     if (hp <= 0) {
         cout << " »èÁ¦ ÇØ !!\n";
         
-        MAIN_GAME_SCENE_Y->DeleteEnemy(enemy);
+        MAIN_GAME_SCENE->DeleteEnemy(enemy);
         
         return;
     }

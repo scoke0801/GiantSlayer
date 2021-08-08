@@ -32,6 +32,9 @@ constexpr float ARROW_LIFE_TIME = 3.0f;
 constexpr float ARROW_SPEED = 3263.0f;
 constexpr float TEST_ARROW_SPEED = ARROW_SPEED / 3;
 
+constexpr float FIREBALL_LIFE_TIME = 2.0f;
+constexpr float FIREBALL_SPEED = 1000.0f;
+
 constexpr float PLAYER_JUMP_HEIGHT = 165.0 * 1.75f;
 constexpr float TO_JUMP_TIME = 1.0f;
 
@@ -74,9 +77,9 @@ enum AnimationType
 	STAFF_RUN,
 	STAFF_ATK,
 	STAFF_SKILL,
-	STAFF_DEATH
+	STAFF_DEATH,
 	// ¹Ú½º==============
-	//BOX_IDLE,
+	BOX_PUSH
 	//BOX_WALK,
 	//BOX_PICK,
 	//BOX_DOWN
