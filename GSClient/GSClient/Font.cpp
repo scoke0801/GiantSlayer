@@ -403,9 +403,6 @@ void TextHandler::Load(const string& fileName)
 void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring text, XMFLOAT2 pos,
     XMFLOAT2 scale, XMFLOAT2 padding, XMFLOAT4 color)
 {
-    // clear the depth buffer so we can draw over everything
-    // pd3dCommandList->ClearDepthStencilView(dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
     // set the text pipeline state object
     CShaderHandler::GetInstance().GetData("Text")->Render(pd3dCommandList, nullptr);
      
@@ -414,9 +411,6 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
      
     // set the text vertex buffer
     pd3dCommandList->IASetVertexBuffers(0, 1, &textVertexBufferView);
-
-    // bind the text srv. We will assume the correct descriptor heap and table are currently bound and set
-    //pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_Font.srvHandle);
 
     int numCharacters = 0;
 
@@ -464,24 +458,6 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
         if (i > 0)
             kerning = m_Font.GetKerning(lastChar, c);
 
-        //auto vertex = CTextVertex(color.x,
-        //    color.y,
-        //    color.z,
-        //    color.w,
-        //    fc->u,
-        //    fc->v,
-        //    fc->twidth,
-        //    fc->theight,
-        //    x + ((fc->xoffset + kerning) * scale.x),
-        //    y - (fc->yoffset * scale.y),
-        //    fc->width * scale.x,
-        //    fc->height * scale.y);
-
-        //::memcpy(&textVBGPUAddress->m_Pos, &vertex.m_Pos, sizeof(XMFLOAT4));
-        //::memcpy(&textVBGPUAddress->m_Color, &color, sizeof(XMFLOAT4)); 
-        //::memcpy(&textVBGPUAddress->m_TexCoord, &vertex.m_TexCoord, sizeof(XMFLOAT4));
-
-        //::memcpy(&textVBGPUAddress->m_TexCoord, &vertex., sizeof(XMFLOAT4));
         textVBGPUAddress[numCharacters] = CTextVertex(color.x,
             color.y,
             color.z,

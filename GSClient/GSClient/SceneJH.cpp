@@ -906,8 +906,7 @@ void CSceneJH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		player->Draw(pd3dCommandList, m_CurrentCamera);
 	}
 
-	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater][0]->Draw(pd3dCommandList, m_CurrentCamera);
-	 
+	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater][0]->Draw(pd3dCommandList, m_CurrentCamera);  
 }
 
 void CSceneJH::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1028,8 +1027,7 @@ void CSceneJH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Reso
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
-
-
+	 
 	m_Skybox->Draw(pd3dCommandList, m_MirrorCamera);
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
@@ -1112,10 +1110,10 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 }
 
 void CSceneJH::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
-{	
+{ 
 	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"), XMFLOAT2(0.02f, 0.01f), XMFLOAT2(2.0f, 2.0f));
-
+	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"),
+		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
 }
 
 void CSceneJH::Communicate(SOCKET& sock)
