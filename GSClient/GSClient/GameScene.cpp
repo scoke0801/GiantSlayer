@@ -463,6 +463,7 @@ void CGameScene::Update(float elapsedTime)
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
+	
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
 			if (false == pObject->IsInNearSector(m_PlayerExistingSector)) {
@@ -788,7 +789,7 @@ void CGameScene::Update(float elapsedTime)
 	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
 	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 5.0f);
 	XMFLOAT3 Speed = { 0.3f,0.3f,0.3f };
-
+	
 	// 체스 퍼즐 충돌처리
 	for (auto pPlayerChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle]) {
 
@@ -801,6 +802,7 @@ void CGameScene::Update(float elapsedTime)
 			break;
 		}
 	}
+
 
 	// 체스 그 자체랑 충돌처리
 	for (int i = 0; i < ChessType::Count; i++)
@@ -830,19 +832,51 @@ void CGameScene::Update(float elapsedTime)
 	{
 		if (m_ChessCollide_Check[i] == true)
 		{
-
 			m_Player->Box_Pull(TRUE);
 			m_Chess[i]->SetPosition({
 									m_Chess[i]->GetPosition().x + Final_Vec.x,
 									m_Chess[i]->GetPosition().y ,
 									m_Chess[i]->GetPosition().z + Final_Vec.z
 				});
+			if (m_Chess[i]->GetPosition().x < 16500.0f)
+			{
+				m_Chess[i]->SetPosition({
+									16500.0f ,
+									m_Chess[i]->GetPosition().y ,
+									m_Chess[i]->GetPosition().z
+					});
+			}
+			if (m_Chess[i]->GetPosition().x > 19300.0f)
+			{
+				m_Chess[i]->SetPosition({
+									19300.0f ,
+									m_Chess[i]->GetPosition().y ,
+									m_Chess[i]->GetPosition().z
+					});
+			}
+			if (m_Chess[i]->GetPosition().z < 15600.0f)
+			{
+				m_Chess[i]->SetPosition({
+									m_Chess[i]->GetPosition().x ,
+									m_Chess[i]->GetPosition().y ,
+									15600.0f
+					});
+			}
+			if (m_Chess[i]->GetPosition().z > 17800.0f)
+			{
+				m_Chess[i]->SetPosition({
+									m_Chess[i]->GetPosition().x ,
+									m_Chess[i]->GetPosition().y ,
+									17800.0f
+					});
+			}
 		}
 		else if (m_ChessCollide_Check[King] == false && m_ChessCollide_Check[Knight] == false && m_ChessCollide_Check[Pawn] == false && m_ChessCollide_Check[Rook] == false)
 		{
 			m_Player->Box_Pull(FALSE);
 		}
 	}
+	
 	// 1 킹 2 나이트 3 폰 4 룩 // 퍼즐 체크 
 
 	if ((m_Chess[King]->GetPosition().x > 18320.0f && m_Chess[King]->GetPosition().x < 18720.0f)
@@ -865,7 +899,7 @@ void CGameScene::Update(float elapsedTime)
 	{
 		m_ChessPlate_Check[Rook] = true;
 	}
-
+	
 	if (m_ChessPlate_Check[King] && m_ChessPlate_Check[Knight] && m_ChessPlate_Check[Pawn] && m_ChessPlate_Check[Rook])
 	{
 		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
