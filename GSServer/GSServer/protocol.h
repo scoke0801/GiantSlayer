@@ -77,13 +77,9 @@ enum AnimationType
 	STAFF_RUN,
 	STAFF_ATK,
 	STAFF_SKILL,
-	STAFF_DEATH
+	STAFF_DEATH,
 	// 박스==============
-	//BOX_IDLE,
-	//BOX_WALK,
-	//BOX_PICK,
-	//BOX_DOWN
-
+	BOX_PUSH
 };
 // x,y,z 크기를 short로 보내면 맵 크기 20000에서 
 // int, float 형 변환 계산하기에 크기가 작아서 int형으로 사용
