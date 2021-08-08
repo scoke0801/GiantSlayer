@@ -8,8 +8,11 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 {
 	m_Type = OBJ_TYPE::Player;
 
+	// Status
 	m_HP = 100;
 	m_SP = 100;
+	m_ATK = 20;
+	m_DEF = 10;
 }
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -17,8 +20,11 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 {
 	m_Type = OBJ_TYPE::Player;
 
+	// Status
 	m_HP = 100;
 	m_SP = 100;
+	m_ATK = 20;
+	m_DEF = 10;
 }
 
 CPlayer::~CPlayer()
@@ -252,9 +258,9 @@ void CPlayer::SetWeapon(PlayerWeaponType weaponType)
 		SKILL = AnimationType::SWORD_SKILL;
 		DEATH = AnimationType::SWORD_DEATH;
 
-		m_AttackAnimLength = 2.2f;
-		m_SwordAnim2Length = 2.033334f;
-		m_SwordAnim3Length = 3.0f;
+		m_AttackAnimLength = 2.0f;
+		m_SwordAnim2Length = 1.133333f;
+		m_SwordAnim3Length = 1.466667f;
 		m_SkillAnimLength = 4.8f;
 
 		SetDrawSword();

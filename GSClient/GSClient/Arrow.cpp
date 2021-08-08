@@ -64,7 +64,10 @@ void CArrow::SetTargetPosition(const XMFLOAT3& targetPos)
 	XMFLOAT3 dirVector = Vector3::Normalize(Vector3::Subtract(targetPos, m_xmf3Position));
 
 	m_xmf3TargetPosition = targetPos;
-	m_xmf3Velocity = dirVector; 
+	m_xmf3Velocity = dirVector;
+
+	//
+	m_ATK = 20;
 }
 
 void CArrow::SetTargetVector(const XMFLOAT3& playerLookAt)

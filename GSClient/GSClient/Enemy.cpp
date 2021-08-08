@@ -313,6 +313,12 @@ CRangedEnemy::CRangedEnemy()
 	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this);
 	m_Speed = 165.0f * 2.5f;
+
+	// Status
+	m_HP = 80;
+	m_SP = 100;
+	m_ATK = 20;
+	m_DEF = 0;
 }
  
 CRangedEnemy::~CRangedEnemy()
@@ -345,6 +351,12 @@ CMeleeEnemy::CMeleeEnemy()
 	//m_HeightFromTerrain = 150.0f;
 	m_State = new PatrolState(this);
 	m_Speed = 165.0f * 2.5f;
+
+	// Status
+	m_HP = 120;
+	m_SP = 100;
+	m_ATK = 25;
+	m_DEF = 10;
 } 
 
 CMeleeEnemy::~CMeleeEnemy()
@@ -425,13 +437,18 @@ CMummy::CMummy()
 	m_Type = OBJ_TYPE::Mummy;
 	m_AttackType = EnemyAttackType::Mummy1;
 
-	m_HP = 15.0f;
 	m_AttackRange = 1200.0f;
 	m_Mummy_Die = 0.0f;
 	//m_HeightFromTerrain = 150.0f; 
 
 	m_State = new PatrolState(this);
 	m_ExistingSector = SECTOR_POSITION::SECTOR_4;
+
+	// Status
+	m_HP = 150;
+	m_SP = 100;
+	m_ATK = 50;
+	m_DEF = 20;
 }
 
 CMummy::~CMummy()

@@ -482,6 +482,7 @@ void CSceneTH::Update(float elapsedTime)
 			if (false == m_Player->IsCanAttack()) {
 				if (false == m_Player->IsAleradyAttack()) {
 					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+					//pEnemy->TakeDamage(m_Player->GetATK());
 					//cout << "플레이어 공격 - 몬스터\n";
 					m_Player->SetAleradyAttack(true);
 				}
@@ -489,6 +490,7 @@ void CSceneTH::Update(float elapsedTime)
 			else if (m_Player->Attacked(pEnemy))
 			{
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				//m_Player->TakeDamage(pEnemy->GetATK());
 				m_Player->FixCollision();
 				//cout << "충돌 : 플레이어 - 적\n";
 			}
@@ -512,6 +514,7 @@ void CSceneTH::Update(float elapsedTime)
 		if (pArrow->CollisionCheck(m_Player)) {
 			if (m_Player->Attacked(pArrow)) {
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				//m_Player->TakeDamage(pArrow->GetATK());
 				pArrow->SetDrawable(true);
 				//cout << "충돌 : 플레이어 - 적\n";
 			}
@@ -526,6 +529,7 @@ void CSceneTH::Update(float elapsedTime)
 		{
 			if (pArrow->CollisionCheck(pEnemy)) {
 				pEnemy->ChangeState(ObjectState::Attacked, pArrow);
+				//pEnemy->TakeDamage(pArrow->GetATK());
 				pArrow->SetDrawable(true);
 
 				cout << "충돌 : 플레이어 화살 - 적\n";
@@ -542,6 +546,7 @@ void CSceneTH::Update(float elapsedTime)
 		{
 			if (pFireball->CollisionCheck(pEnemy)) {
 				pEnemy->ChangeState(ObjectState::Attacked, pFireball);
+				//pEnemy->TakeDamage(pFireball->GetATK());
 				pFireball->SetDrawable(true);
 
 				cout << "충돌 : 플레이어 파이어볼 - 적\n";
@@ -2129,7 +2134,6 @@ void CSceneTH::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	return;
 	{
 		XMFLOAT3 scale = { 120.0f, 120.0f, 120.0f };
 		m_Boss = new CBoss(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -2172,6 +2176,8 @@ void CSceneTH::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0, 0.0f,0 });
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+		return;
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);

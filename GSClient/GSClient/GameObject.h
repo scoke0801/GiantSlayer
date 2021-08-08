@@ -145,8 +145,10 @@ protected: // 렌더링 관련 변수
 
 	bool				m_isDrawable = true;
 protected:	// 객체 관련 속성 변수
-	int					m_HP = 0;
-	int					m_SP = 0;
+	float				m_HP = 0;
+	float				m_SP = 0;
+	float				m_ATK;
+	float				m_DEF;
 
 	OBJ_NAME			m_Name;
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
@@ -293,6 +295,9 @@ public:
 
 	void SetSP(UINT SP) { m_SP = SP; }
 	UINT GetSP() const { return m_SP; }
+
+	void TakeDamage(float dmg) { m_HP -= (dmg - m_DEF); }
+	float GetATK() { return m_ATK; }
 
 	void SetSize(const XMFLOAT3& size) { m_xmf3Size = size; }
 	XMFLOAT3 GetSize()const { return m_xmf3Size; }

@@ -9,6 +9,7 @@
 CFireBall::CFireBall()
 {
 	m_isDrawable = true;
+	m_ATK = 35;
 }
 
 CFireBall::~CFireBall()
