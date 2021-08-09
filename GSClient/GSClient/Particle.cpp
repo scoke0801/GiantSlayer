@@ -122,6 +122,7 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("FogParticle"));
 		pObject->SetMesh(pMesh);
 		pObject->SetType(type);
+		pObject->SetTextureIndex(0x02);
 		m_ParticleObjs.push_back(std::move(pObject));
 	}
 	else if (type == PARTICLE_TYPE::RainParticle)
@@ -132,6 +133,7 @@ void CParticle::AddParticle(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		pObject->SetShader(CShaderHandler::GetInstance().GetData("RainParticle"));
 		pObject->SetMesh(pMesh);
 		pObject->SetType(type);
+		pObject->SetTextureIndex(0x01);
 		m_ParticleObjs.push_back(std::move(pObject));
 	}
 	else if (type == PARTICLE_TYPE::SandParticle)

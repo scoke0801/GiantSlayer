@@ -3657,7 +3657,7 @@ void CSceneJH::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
@@ -3692,7 +3692,7 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	for (int i = 1; i < MAX_ROOM_PLAYER; ++i) {
 		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player2.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
 
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 

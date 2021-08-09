@@ -358,7 +358,7 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 {
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = m_Textures.size() + 3;
+	srvHeapDesc.NumDescriptors = m_Textures.size() + 4;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
@@ -448,8 +448,10 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 	pd3dDevice->CreateDepthStencilView(m_pd3dShadowMap, &dsvDesc, CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize));
 
+	TextHandler::GetInstance().InitVertexBuffer(pd3dDevice, pd3dCommandList, m_pd3dSrvDescriptorHeap, m_Textures.size() + 3);
+
 	m_d3dDsvShadowMapCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize);
-	m_d3dSrvShadowMapGPUHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 3, gnCbvSrvDescriptorIncrementSize);
+	m_d3dSrvShadowMapGPUHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 4, gnCbvSrvDescriptorIncrementSize);
 }
 
 void CGameScene::ReleaseObjects()
@@ -1119,6 +1121,13 @@ void CGameScene::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12R
 	}
 }
 
+void CGameScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// draw the text
+	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"),
+		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
+}
+
 void CGameScene::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
@@ -1586,8 +1595,7 @@ void CGameScene::ProcessInput()
 
 	if (keyInput.KEY_1)
 	{
-		m_Player->SetWeapon(PlayerWeaponType::Sword);
-		m_CurrentCamera = m_Cameras[0];
+		m_Player->SetWeapon(PlayerWeaponType::Sword); 
 	}
 	if (keyInput.KEY_2)
 	{
@@ -1595,6 +1603,7 @@ void CGameScene::ProcessInput()
 	}
 	if (keyInput.KEY_3)
 	{
+		m_Player->SetWeapon(PlayerWeaponType::Staff);
 		m_isPlayerSelected = true; 
 		m_CurrentCamera = m_PlayerCameras[0];
 	}
@@ -2168,7 +2177,7 @@ void CGameScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_MinimapArrow->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(m_MinimapArrow);
 
-	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, true);
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, false);
 	pUI->SetPosition({ -0.53, 0.65,  0 });		// WeaponUI
 	pUI->SetTextureIndex(0x10);
 	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
@@ -3787,7 +3796,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player9.bin", NULL, true);
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
@@ -3822,7 +3831,7 @@ void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	for (int i = 1; i < MAX_ROOM_PLAYER; ++i) {
 		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player9.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
 
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 

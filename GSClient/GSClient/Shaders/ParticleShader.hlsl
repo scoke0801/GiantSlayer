@@ -2,78 +2,88 @@
 SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
 
-Texture2D gtxtForest : register(t0);
-Texture2D gtxtDryForest : register(t1);
-Texture2D gtxtDesert : register(t2);
-Texture2D gtxtDryDesert : register(t3);
-Texture2D gtxtRocky_Terrain : register(t4);
-Texture2D gtxtBossWall : register(t5); // 수정요망
 
-Texture2D gSkyBox_Front : register(t6);
-Texture2D gSkyBox_Back : register(t7);
-Texture2D gSkyBox_Right : register(t8);
-Texture2D gSkyBox_Left : register(t9);
-Texture2D gSkyBox_Top : register(t10);
-Texture2D gSkyBox_Bottom : register(t11);
+Texture2D gtxtForest	   : register(t0);
+Texture2D gtxtDryForest	   : register(t1);
+Texture2D gtxtDesert	   : register(t2);
+Texture2D gtxtDryDesert	   : register(t3);
+Texture2D gtxtRocky_Terrain: register(t4);
+Texture2D gtxtBossWall	   : register(t5); // 수정요망
 
-Texture2D gtxtBox : register(t12);
-Texture2D gtxtWood : register(t13);
-Texture2D gtxtWoodSignBoard : register(t14);
-Texture2D gtxtGrassWall : register(t15);
-Texture2D gtxtSandWall : register(t16);
-Texture2D gtxtRockyWall : register(t17);
-Texture2D gtxtDoor : register(t18);
+Texture2D gSkyBox_Front    : register(t6);
+Texture2D gSkyBox_Back     : register(t7);
+Texture2D gSkyBox_Right    : register(t8);
+Texture2D gSkyBox_Left     : register(t9);
+Texture2D gSkyBox_Top      : register(t10);
+Texture2D gSkyBox_Bottom   : register(t11);
 
-Texture2D gtxtHpSpGauge : register(t19);
-Texture2D gtxtHpSpPer : register(t20);
-Texture2D gtxtMinimap : register(t21);
-Texture2D gtxtWeapons : register(t22);
+Texture2D gtxtBox          : register(t12);
+Texture2D gtxtWood         : register(t13);
+Texture2D gtxtWoodSignBoard: register(t14);
+Texture2D gtxtGrassWall    : register(t15);
+Texture2D gtxtSandWall     : register(t16);
+Texture2D gtxtRockyWall    : register(t17);
+Texture2D gtxtDoor         : register(t18);
 
-Texture2D gtxtPlayerClothes : register(t23); // 여분
-Texture2D gtxtPlayerFace : register(t24); // 여분
-Texture2D gtxtPlayerHair : register(t25); // 여분
-Texture2D gtxtPlayerSword : register(t26); // 여분
-
-Texture2D gtxtTree : register(t27);
-Texture2D gtxtNoLeafTrees : register(t28);
-Texture2D gtxtLeaves : register(t29);
-Texture2D gtxtMoss_Rock : register(t30);
-
-Texture2D gtxtPuzzleBoard : register(t31);
-Texture2D gtxtHelpText : register(t32);
-Texture2D gtxtDry_Tree : register(t33);
-Texture2D gtxtStump : register(t34);
-Texture2D gtxtDead_Tree : register(t35);
-Texture2D gtxtDesert_Rock : register(t36);
-Texture2D gtxtWater : register(t37);
-Texture2D gtxtRain : register(t38);
-
-Texture2D gtxtBossD : register(t39);
-Texture2D gtxtBossC : register(t40);
-Texture2D gtxtBossE : register(t41);
-Texture2D gtxtBossN : register(t42);
-
-Texture2D gtxtMeleeSkeleton_01_D : register(t43);
-Texture2D gtxtMeleeSkeleton_02 : register(t44);
-Texture2D gtxtMeleeSkeleton_02_Equip : register(t45);
-Texture2D gtxtMeleeSkeleton_02_EquipAll : register(t46);
+Texture2D gtxtHpSpGauge    : register(t19);
+Texture2D gtxtMinimap		: register(t20);
+Texture2D gtxtWeapons		: register(t21);
+Texture2D gtxtHpSpPer      : register(t22);
 
 
-Texture2D gtxtMummy : register(t47);
-Texture2D gtxtMummy_M : register(t48);
-Texture2D gtxtGreenTree : register(t49);
-Texture2D gtxtBow : register(t50);
+Texture2D gtxtPlayerClothes	: register(t23);
+Texture2D gtxtPlayerFace	: register(t24);
+Texture2D gtxtPlayerHair	: register(t25);
+Texture2D gtxtPlayerSword	: register(t26);
+Texture2D gtxtPlayerBow		: register(t27);
+Texture2D gtxtPlayerStaff	: register(t28);
 
-Texture2D KingDiffuse : register(t51);
-Texture2D KnightDiffuse : register(t52);
-Texture2D PawnDiffuse : register(t53);
-Texture2D RookDiffuse : register(t54);
+Texture2D gtxtTree         : register(t29);
+Texture2D gtxtNoLeafTrees  : register(t30);
+Texture2D gtxtLeaves       : register(t31);
+Texture2D gtxtMoss_Rock    : register(t32);
 
-Texture2D ChessTile : register(t55);
+Texture2D gtxtPuzzleBoard  : register(t33);
+Texture2D gtxtHelpText     : register(t34);
+Texture2D gtxtDry_Tree	   : register(t35);
+Texture2D gtxtStump		   : register(t36);
+Texture2D gtxtDead_Tree	   : register(t37);
+Texture2D gtxtDesert_Rock  : register(t38);
+Texture2D gtxtWater		   : register(t39);
+Texture2D gtxtRain		   : register(t40);
 
-Texture2D gtxtMap : register(t56);
-Texture2D gtxtMirror : register(t57);
-Texture2D gtxtShadowMap : register(t58);
+Texture2D gtxtBossD		   : register(t41);
+Texture2D gtxtBossC		   : register(t42);
+Texture2D gtxtBossE		   : register(t43);
+Texture2D gtxtBossN		   : register(t44);
+
+Texture2D gtxtMeleeSkeleton_01_D: register(t45);
+Texture2D gtxtMeleeSkeleton_02: register(t46);
+Texture2D gtxtMeleeSkeleton_02_Equip: register(t47);
+Texture2D gtxtMeleeSkeleton_02_EquipAll: register(t48);
+
+Texture2D gtxtMummy			: register(t49);
+Texture2D gtxtMummy_M		: register(t50);
+Texture2D gtxtGreenTree		: register(t51);
+Texture2D gtxtEffect_1		: register(t52);
+Texture2D gtxtEffect_2		: register(t53);
+Texture2D gtxtEffect_3		: register(t54);
+Texture2D gtxtEffect_4		: register(t55);
+Texture2D gtxtFireBall		: register(t56);
+
+Texture2D KingDiffuse		: register(t57);
+Texture2D KnightDiffuse		: register(t58);
+Texture2D PawnDiffuse		: register(t59);
+Texture2D RookDiffuse		: register(t60);
+
+Texture2D ChessTile			: register(t61);
+Texture2D Laser				: register(t62);
+
+Texture2D gtxtMap			: register(t63);
+Texture2D gtxtMirror		: register(t64);
+Texture2D gtxtShadowMap		: register(t65);
+
+Texture2D gtxtFont			: register(t66);
 
 //게임 객체의 정보를 위한 상수 버퍼를 선언한다. 
 cbuffer cbGameOBJInfo : register(b0)
@@ -424,10 +434,10 @@ float4 PSTexParticle(VS_TEX_PARTICLE_OUT input) : SV_TARGET
    
     cColor = gtxtBox.Sample(gssWrap, input.uv);
     
-    //if (gnTexturesMask & 0x01)
-    //{
-    //    cColor = gtxtBox.Sample(gssWrap, input.uv);
-    //}
+    if (gnTexturesMask & 0x01)
+    {
+        cColor = gtxtRain.Sample(gssWrap, input.uv);
+    }
     
     
 	//cColor = gtxtBox.Sample(gssWrap, input.uv);
