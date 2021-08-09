@@ -334,7 +334,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 	}
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 	m_AttackedDelay += 0.6666667f;
-	TakeDamage(pObject->GetATK());
+	//TakeDamage(pObject->GetATK());
 	SetAnimationSet(AnimationType::DAMAGED);
 	if (m_HP <= 5) {
 		m_HP = 0;

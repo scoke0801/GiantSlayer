@@ -72,7 +72,7 @@ protected:
 
 	float					m_Mummy_Die;
 
-	float					m_LaserAttackDelayTime[3] = { 5.0f,7.0f,11.0f };
+	float					m_LaserAttackDelayTime[3] = { 7.0f,9.0f,11.0f };
 	bool					m_LaserAttack[3] = { false,false,false };
 	
 public:

@@ -9,7 +9,6 @@ void CMummyLaser::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 	if (true == m_isDrawable) return;
 	OnPrepareRender();
 
-	
 	if (m_pShader)
 	{
 		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.
@@ -73,12 +72,8 @@ void CMummyLaser::AddFriends_p(CMummy* mummy)
 
 void CMummyLaser::SetDirecionVector(const XMFLOAT3& direction)
 {
-	
-
-
 	XMFLOAT3 normalVec = Vector3::Normalize(direction);
 	m_xmf4x4World._21 = normalVec.x;
 	m_xmf4x4World._22 = normalVec.y;
-	m_xmf4x4World._23 = normalVec.z;
-	
+	m_xmf4x4World._23 = normalVec.z;	
 }

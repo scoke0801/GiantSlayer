@@ -522,25 +522,16 @@ void CGameScene::Update(float elapsedTime)
 		}
 	}
 	 
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pArrow->IsDrawable()) {
 			continue;
 		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox])
+		{
+			if (pArrow->CollisionCheck(pEnemy)) {
+				pArrow->InverseDirection();
+				break;
 			}
 		}
 	}
@@ -566,6 +557,37 @@ void CGameScene::Update(float elapsedTime)
 				m_Player->FixCollision();
 			}
 		}
+		//if (pEnemy->CollisionCheck(m_Mirror[0])) {
+		//	//pEnemy->InverseDirection();
+		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
+		//}
+	}
+
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		if (pEnemy->CollisionCheck(m_Player)) {
+			// 공격 상태일 때만 체력이 닳는것이 맞을까...
+			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+			//	
+			//}
+			if (false == m_Player->IsCanAttack()) {
+				if (false == m_Player->IsAleradyAttack()) {
+					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+					m_Player->SetAleradyAttack(true);
+				}
+			}
+			else if (m_Player->Attacked(pEnemy))
+			{
+				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				m_Player->FixCollision();
+			}
+		}
+		//if (pEnemy->CollisionCheck(m_Mirror[0])) {
+		//	//pEnemy->InverseDirection();
+		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
+		//}
 	}
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
@@ -711,6 +733,8 @@ void CGameScene::Update(float elapsedTime)
 			}
 		}
 	}
+
+	
 
 
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
@@ -2813,7 +2837,7 @@ void CGameScene::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	{
 		m_Mirror[i] = new CGameObject();
 
-		CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
+		CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f * MAP_SCALE_SIZE, 2600.0f, 1.0f);
 
 		m_MirrorCamera->SetPosition({ 17000 * MAP_SCALE_SIZE, -3000, 210 * MAP_SCALE_SIZE });
 
@@ -2837,7 +2861,7 @@ void CGameScene::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 			m_Mirror[i]->SetPosition({ float(17000 + 2900) * MAP_SCALE_SIZE, -2300, 3200 * MAP_SCALE_SIZE });
 		}
 		m_Mirror[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000, 2600, 10.0, XMFLOAT3{ 0,0,0 });
-		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f, 2600.0f * 0.5f, 10.0f * 0.5f }));
+		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f* MAP_SCALE_SIZE, 2600.0f * 0.5f, 10.0f * 0.5f }));
 
 		m_Mirror[i]->SetTextureIndex(0x01);
 
