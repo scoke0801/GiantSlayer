@@ -2839,7 +2839,7 @@ void CFogParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	const float PARTICLE_SIZE = 20.0f;
 
-	UINT texIndex = 0x01;
+	UINT texIndex = 0x02;
 
 	for (int i = 0; i < count; ++i) {
 		XMFLOAT3 pos = GetRandomVector3(1000, 1, 50);

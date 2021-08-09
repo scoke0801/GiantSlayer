@@ -85,58 +85,58 @@ Texture2D gtxtWeapons		: register(t21);
 Texture2D gtxtHpSpPer      : register(t22);
 
 
-Texture2D gtxtPlayerClothes	: register(t23);
-Texture2D gtxtPlayerFace	: register(t24);
-Texture2D gtxtPlayerHair	: register(t25);
-Texture2D gtxtPlayerSword	: register(t26);
-Texture2D gtxtPlayerBow		: register(t27);
-Texture2D gtxtPlayerStaff	: register(t28);
+Texture2D gtxtPlayerClothes				: register(t23);
+Texture2D gtxtPlayerFace				: register(t24);
+Texture2D gtxtPlayerHair				: register(t25);
+Texture2D gtxtPlayerSword				: register(t26);
+Texture2D gtxtPlayerBow					: register(t27);
+Texture2D gtxtPlayerStaff				: register(t28);
 
-Texture2D gtxtTree         : register(t29);
-Texture2D gtxtNoLeafTrees  : register(t30);
-Texture2D gtxtLeaves       : register(t31);
-Texture2D gtxtMoss_Rock    : register(t32);
+Texture2D gtxtTree						: register(t29);
+Texture2D gtxtNoLeafTrees				: register(t30);
+Texture2D gtxtLeaves					: register(t31);
+Texture2D gtxtMoss_Rock					: register(t32);
 
-Texture2D gtxtPuzzleBoard  : register(t33);
-Texture2D gtxtHelpText     : register(t34);
-Texture2D gtxtDry_Tree	   : register(t35);
-Texture2D gtxtStump		   : register(t36);
-Texture2D gtxtDead_Tree	   : register(t37);
-Texture2D gtxtDesert_Rock  : register(t38);
-Texture2D gtxtWater		   : register(t39);
-Texture2D gtxtRain		   : register(t40);
+Texture2D gtxtPuzzleBoard				: register(t33);
+Texture2D gtxtHelpText					: register(t34);
+Texture2D gtxtDry_Tree					: register(t35);
+Texture2D gtxtStump						: register(t36);
+Texture2D gtxtDead_Tree					: register(t37);
+Texture2D gtxtDesert_Rock				: register(t38);
+Texture2D gtxtWater						: register(t39);
+Texture2D gtxtRain						: register(t40);
+Texture2D gtxtFogParticle				: register(t41);
 
-Texture2D gtxtBossD		   : register(t41);
-Texture2D gtxtBossC		   : register(t42);
-Texture2D gtxtBossE		   : register(t43);
-Texture2D gtxtBossN		   : register(t44);
+Texture2D gtxtBossD						: register(t42);
+Texture2D gtxtBossC						: register(t43);
+Texture2D gtxtBossE						: register(t44);
+Texture2D gtxtBossN						: register(t45);
+Texture2D gtxtMeleeSkeleton_01_D		: register(t46);
+Texture2D gtxtMeleeSkeleton_02			: register(t47);
+Texture2D gtxtMeleeSkeleton_02_Equip	: register(t48);
+Texture2D gtxtMeleeSkeleton_02_EquipAll	: register(t49);
+Texture2D gtxtMummy						: register(t50);
+Texture2D gtxtMummy_M					: register(t51);
+Texture2D gtxtGreenTree					: register(t52);
 
-Texture2D gtxtMeleeSkeleton_01_D: register(t45);
-Texture2D gtxtMeleeSkeleton_02: register(t46);
-Texture2D gtxtMeleeSkeleton_02_Equip: register(t47);
-Texture2D gtxtMeleeSkeleton_02_EquipAll: register(t48);
+Texture2D gtxtEffect_1					: register(t53);
+Texture2D gtxtEffect_2					: register(t54);
+Texture2D gtxtEffect_3					: register(t55);
+Texture2D gtxtEffect_4					: register(t56);
+Texture2D gtxtFireBall					: register(t57);
 
-Texture2D gtxtMummy			: register(t49);
-Texture2D gtxtMummy_M		: register(t50);
-Texture2D gtxtGreenTree		: register(t51);
-Texture2D gtxtEffect_1		: register(t52);
-Texture2D gtxtEffect_2		: register(t53);
-Texture2D gtxtEffect_3		: register(t54);
-Texture2D gtxtFireBall		: register(t55);
+Texture2D KingDiffuse					: register(t58);
+Texture2D KnightDiffuse					: register(t59);
+Texture2D PawnDiffuse					: register(t60);
+Texture2D RookDiffuse					: register(t61);
+Texture2D ChessTile						: register(t62);
 
-Texture2D KingDiffuse		: register(t56);
-Texture2D KnightDiffuse		: register(t57);
-Texture2D PawnDiffuse		: register(t58);
-Texture2D RookDiffuse		: register(t59);
+Texture2D Laser							: register(t63);
 
-Texture2D ChessTile			: register(t60);
-Texture2D Laser				: register(t61);
-
-Texture2D gtxtMap			: register(t62);
-Texture2D gtxtMirror		: register(t63);
-Texture2D gtxtShadowMap		: register(t64);
-
-Texture2D gtxtFont			: register(t65);
+Texture2D gtxtMap						: register(t64);
+Texture2D gtxtMirror					: register(t65);
+Texture2D gtxtShadowMap					: register(t66);
+Texture2D gtxtFont						: register(t67);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {

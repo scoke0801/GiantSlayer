@@ -105,6 +105,7 @@ Texture2D gtxtDead_Tree					: register(t37);
 Texture2D gtxtDesert_Rock				: register(t38);
 Texture2D gtxtWater						: register(t39);
 Texture2D gtxtRain						: register(t40); 
+Texture2D gtxtFogParticle				: register(t41);
 
 Texture2D gtxtBossD						: register(t42);
 Texture2D gtxtBossC						: register(t43);
@@ -117,17 +118,21 @@ Texture2D gtxtMeleeSkeleton_02_EquipAll	: register(t49);
 Texture2D gtxtMummy						: register(t50);
 Texture2D gtxtMummy_M					: register(t51);
 Texture2D gtxtGreenTree					: register(t52);
+
 Texture2D gtxtEffect_1					: register(t53);
 Texture2D gtxtEffect_2					: register(t54);
 Texture2D gtxtEffect_3					: register(t55);
 Texture2D gtxtEffect_4					: register(t56);
 Texture2D gtxtFireBall					: register(t57);
+
 Texture2D KingDiffuse					: register(t58);
 Texture2D KnightDiffuse					: register(t59);
 Texture2D PawnDiffuse					: register(t60);
 Texture2D RookDiffuse					: register(t61);
 Texture2D ChessTile						: register(t62);
+
 Texture2D Laser							: register(t63);
+
 Texture2D gtxtMap						: register(t64);
 Texture2D gtxtMirror					: register(t65);
 Texture2D gtxtShadowMap					: register(t66);

@@ -52,6 +52,7 @@ Texture2D gtxtDead_Tree					: register(t37);
 Texture2D gtxtDesert_Rock				: register(t38);
 Texture2D gtxtWater						: register(t39);
 Texture2D gtxtRain						: register(t40);
+Texture2D gtxtFogParticle				: register(t41);
 
 Texture2D gtxtBossD						: register(t42);
 Texture2D gtxtBossC						: register(t43);
@@ -197,6 +198,8 @@ VS_TEX_PARTICLE_OUT VSFogParticle(VS_TEX_PARTICLE_IN input)
 
     float newTime = (gfTime - emitTime);
     newTime = fmod(newTime, lifeTime);
+
+    float3 position;
     if (newTime > 0.0f)
     {
         float t = newTime;
@@ -211,8 +214,8 @@ VS_TEX_PARTICLE_OUT VSFogParticle(VS_TEX_PARTICLE_IN input)
         float3 speed = speedLength;
 
         float3 objPos = float3(copyMat._41, copyMat._42, copyMat._43);
-        float3 position = input.position + objPos;
-		 
+        position = input.position + objPos;
+
         position = position + t * input.speed + tt * newAcc * 0.5f;
 
         copyMat._22 = 1.0f;
@@ -221,7 +224,7 @@ VS_TEX_PARTICLE_OUT VSFogParticle(VS_TEX_PARTICLE_IN input)
         copyMat._42 = position.y;
         copyMat._43 = position.z;
 		
-        outRes.positionW = position;
+        //outRes.positionW = position;
 
         outRes.position = mul(mul(mul(float4(input.position, 1.0f), copyMat), gmtxView), gmtxProjection);
     }
@@ -234,7 +237,7 @@ VS_TEX_PARTICLE_OUT VSFogParticle(VS_TEX_PARTICLE_IN input)
     //outRes.color = input.color;
 	//outRes.color.a = intensity;
 	 
-    outRes.time = input.time;
+    outRes.time = (length(position - gvCameraPosition) / 7500.0f) - 0.5f;
     outRes.uv = input.uv;
     outRes.index = input.index;
      
@@ -433,9 +436,14 @@ float4 PSTexParticle(VS_TEX_PARTICLE_OUT input) : SV_TARGET
     if (gnTexturesMask & 0x01)
     {
         cColor = gtxtRain.Sample(gssWrap, input.uv);
+    }   
+    if (gnTexturesMask & 0x02)
+    {
+        cColor = gtxtFogParticle.Sample(gssWrap, input.uv); 
+        //cColor.g += 0.2f;
+        cColor.a += input.time;
     }
-    
-    
+     
 	//cColor = gtxtBox.Sample(gssWrap, input.uv);
 	//cColor = 0.1f;
 	return cColor;
