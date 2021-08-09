@@ -138,6 +138,7 @@ void CPlayer::UpdateCamera()
 			m_Camera->UpdateAimMode(m_xmf3Position);
 			auto lookVec = GetLook();
 			m_Camera->LookAt(m_Camera->GetPosition3f(), Vector3::Multifly(lookVec, 15000.0f), GetUp());
+			m_Camera->Strafe(-20);
 		}
 		else
 		{

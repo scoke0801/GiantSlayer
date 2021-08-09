@@ -1076,7 +1076,6 @@ void CGameScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		}
 	}
 
-
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->Draw(pd3dCommandList, m_CurrentCamera);
