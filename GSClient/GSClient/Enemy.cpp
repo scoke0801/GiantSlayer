@@ -344,6 +344,11 @@ CMeleeEnemy::CMeleeEnemy()
 	//m_HeightFromTerrain = 150.0f;
 	m_State = new PatrolState(this);
 	m_Speed = 165.0f * 2.5f;
+
+	//m_HP = 100;
+	//m_SP = 100;
+	m_ATK = 15;
+	//m_DEF = 10;
 } 
 
 CMeleeEnemy::~CMeleeEnemy()
@@ -424,7 +429,7 @@ CMummy::CMummy()
 	m_Type = OBJ_TYPE::Mummy;
 	m_AttackType = EnemyAttackType::Mummy1;
 
-	m_HP = 15.0f;
+	m_HP = 50.0f;
 	m_AttackRange = 1200.0f;
 	m_Mummy_Die = 0.0f;
 	//m_HeightFromTerrain = 150.0f; 

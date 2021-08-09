@@ -11,6 +11,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	// Status
 	m_HP = 100;
 	m_SP = 100;
+	m_ATK = 100;
+	m_DEF = 10;
 }
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -21,6 +23,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	// Status
 	m_HP = 100;
 	m_SP = 100;
+	m_ATK = 100;
+	m_DEF = 10;
 }
 
 CPlayer::~CPlayer()
@@ -330,7 +334,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 	}
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 	m_AttackedDelay += 0.6666667f;
-	m_HP -= 5;
+	TakeDamage(pObject->GetATK());
 	SetAnimationSet(AnimationType::DAMAGED);
 	if (m_HP <= 5) {
 		m_HP = 0;

@@ -4,6 +4,7 @@
 class CShader;
 class CGameObject;
 class CCamera;
+class CTerrain;
 class CPlayer;
 class UI;
 class HelpTextUI;
@@ -11,9 +12,12 @@ class CTerrain;
 class CParticle;
 class CLightCamera;
 class CEnemy;
+class CMummy;
+class CMummyLaser;
 class CFbxObject2;
 class CBoss;
 class CEffectHandler;
+class Font;
 
 class CSceneTH : public CScene
 {
@@ -23,13 +27,31 @@ private:
 private:
 	bool						m_isPlayerSelected = true;
 	bool						m_isPlayerBoxCollide = false;
-	bool						m_isBoxDown = false;
-	bool						m_PuzzleNumSelect[9] = { false };
+	bool test = false;
+	bool cc = false;
+
+	CGameObject* m_Chess[4];
+	bool						m_ChessPlate_Check[4] = { false };		// 체스판체크용
+	XMFLOAT3					m_ChessPlate[7][7];						// 체스판
+	bool						m_ChessCollide_Check[4] = { false,false,false,false };
+
+	CMummy* m_Mummy[3];
+	bool						m_MummyExist[3] = { true,true,true };
+	bool						m_One_Mira_Die = false;
+	bool						m_One_Mira_Die_Laser = false;
+	bool						m_Two_Mira_Die = false;
+	bool						m_Two_Mira_Die_Laser = false;
+
+	CMummyLaser* m_MummyLaser[3];
+	CMummyLaser* m_MummyLaser2[3];
+	CMummyLaser* m_MummyLaser3[3];
+
 private:
 	//array<CFixedMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
 	array<CMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
 
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
+
 	CBoss* m_Boss = nullptr;
 
 	CParticle* m_Particles;
@@ -42,10 +64,13 @@ private:
 	CGameObject* m_Mirror[1] = { nullptr };
 	CPlayer* m_Player = nullptr;
 
+	float						m_AttackDelayTime;
+
 	int							m_CurrentPlayerNum = 0;
-	//vector<CPlayer*>			m_Players[MAX_PLAYER]; 
-	CPlayer* m_Players[MAX_ROOM_PLAYER]; 
-	CBox* m_PuzzleBox[8]; 
+
+	CPlayer* m_Players[MAX_ROOM_PLAYER];
+
+	bool						m_PlayerExistingSector[MAX_ROOM_PLAYER];
 
 	vector<UI*>					m_UIs;
 	vector<UI*>					m_HPGauges;
@@ -66,8 +91,6 @@ private:
 	CLightCamera* m_pLightCamera = nullptr;
 
 	short						m_DoorIdx = 0;
-	int							m_PuzzleNum[4];
-	bool						m_PuzzleBoxCount = false;
 
 private:
 	POINT						m_LastMousePos;
@@ -103,6 +126,8 @@ private:
 private:
 	ID3D12Resource* m_pd3dShadowMap = NULL;
 
+	ID3D12Resource* m_pd3dFontTexture = NULL;
+
 private:	// about SceneInfo
 	ID3D12Resource* m_pd3dcbSceneInfo = NULL;
 	CB_GAMESCENE_FRAME_DATA* m_pcbMappedSceneFrameData = NULL;
@@ -136,6 +161,7 @@ public:
 	void Update(float elapsedTime) override;
 	void UpdateForMultiplay(float elapsedTime)override;
 	void AnimateObjects(float fTimeElapsed);
+	void ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp);
 
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override;
@@ -157,7 +183,6 @@ public:
 	void AddPlayer(int palyerId) override {}
 public:
 	void ProcessInput() override;
-	void ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp) override;
 
 	void OnMouseDown(WPARAM btnState, int x, int y) override;
 	void OnMouseUp(WPARAM btnState, int x, int y)	override;
@@ -173,7 +198,10 @@ public:
 	void ActiveSkill(OBJECT_LAYER type, CGameObject* user);
 	void ShotPlayerArrow();
 	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
+
 	void DeleteEnemy(CEnemy* pEmeny);
+
+	void ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector);
 
 	// 이펙트 재사용 함수
 	void UseEffects(int effectType, const XMFLOAT3& xmf3Position);
@@ -190,7 +218,8 @@ private:
 	void BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	void BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);

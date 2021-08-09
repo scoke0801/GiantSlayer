@@ -30,6 +30,7 @@ public:
 	void SetDrawable(bool drawable);
 	void AddFriends_p(CMummy* mummy);
 	void SetDirecionVector(const XMFLOAT3& direction);
+	void InverseDirection();
 	 
 	void ConnectParticle(ParticleObject* particle) { m_ConnectedParticle = particle; }
 private:
