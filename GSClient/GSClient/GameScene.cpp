@@ -465,6 +465,7 @@ void CGameScene::Update(float elapsedTime)
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
+	
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
 			if (false == pObject->IsInNearSector(m_PlayerExistingSector)) {
@@ -523,25 +524,16 @@ void CGameScene::Update(float elapsedTime)
 		}
 	}
 	 
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pArrow->IsDrawable()) {
 			continue;
 		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox])
+		{
+			if (pArrow->CollisionCheck(pEnemy)) {
+				pArrow->InverseDirection();
+				break;
 			}
 		}
 	}
@@ -567,6 +559,37 @@ void CGameScene::Update(float elapsedTime)
 				m_Player->FixCollision();
 			}
 		}
+		//if (pEnemy->CollisionCheck(m_Mirror[0])) {
+		//	//pEnemy->InverseDirection();
+		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
+		//}
+	}
+
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		if (pEnemy->CollisionCheck(m_Player)) {
+			// 공격 상태일 때만 체력이 닳는것이 맞을까...
+			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+			//	
+			//}
+			if (false == m_Player->IsCanAttack()) {
+				if (false == m_Player->IsAleradyAttack()) {
+					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+					m_Player->SetAleradyAttack(true);
+				}
+			}
+			else if (m_Player->Attacked(pEnemy))
+			{
+				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				m_Player->FixCollision();
+			}
+		}
+		//if (pEnemy->CollisionCheck(m_Mirror[0])) {
+		//	//pEnemy->InverseDirection();
+		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
+		//}
 	}
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
@@ -713,6 +736,8 @@ void CGameScene::Update(float elapsedTime)
 		}
 	}
 
+	
+
 
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
 		// 변수명 변경으로 인한 true/false 반전..
@@ -790,7 +815,7 @@ void CGameScene::Update(float elapsedTime)
 	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
 	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 5.0f);
 	XMFLOAT3 Speed = { 0.3f,0.3f,0.3f };
-
+	
 	// 체스 퍼즐 충돌처리
 	for (auto pPlayerChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle]) {
 
@@ -803,6 +828,7 @@ void CGameScene::Update(float elapsedTime)
 			break;
 		}
 	}
+
 
 	// 체스 그 자체랑 충돌처리
 	for (int i = 0; i < ChessType::Count; i++)
@@ -832,19 +858,51 @@ void CGameScene::Update(float elapsedTime)
 	{
 		if (m_ChessCollide_Check[i] == true)
 		{
-
 			m_Player->Box_Pull(TRUE);
 			m_Chess[i]->SetPosition({
 									m_Chess[i]->GetPosition().x + Final_Vec.x,
 									m_Chess[i]->GetPosition().y ,
 									m_Chess[i]->GetPosition().z + Final_Vec.z
 				});
+			if (m_Chess[i]->GetPosition().x < 16500.0f)
+			{
+				m_Chess[i]->SetPosition({
+									16500.0f ,
+									m_Chess[i]->GetPosition().y ,
+									m_Chess[i]->GetPosition().z
+					});
+			}
+			if (m_Chess[i]->GetPosition().x > 19300.0f)
+			{
+				m_Chess[i]->SetPosition({
+									19300.0f ,
+									m_Chess[i]->GetPosition().y ,
+									m_Chess[i]->GetPosition().z
+					});
+			}
+			if (m_Chess[i]->GetPosition().z < 15600.0f)
+			{
+				m_Chess[i]->SetPosition({
+									m_Chess[i]->GetPosition().x ,
+									m_Chess[i]->GetPosition().y ,
+									15600.0f
+					});
+			}
+			if (m_Chess[i]->GetPosition().z > 17800.0f)
+			{
+				m_Chess[i]->SetPosition({
+									m_Chess[i]->GetPosition().x ,
+									m_Chess[i]->GetPosition().y ,
+									17800.0f
+					});
+			}
 		}
 		else if (m_ChessCollide_Check[King] == false && m_ChessCollide_Check[Knight] == false && m_ChessCollide_Check[Pawn] == false && m_ChessCollide_Check[Rook] == false)
 		{
 			m_Player->Box_Pull(FALSE);
 		}
 	}
+	
 	// 1 킹 2 나이트 3 폰 4 룩 // 퍼즐 체크 
 
 	if ((m_Chess[King]->GetPosition().x > 18320.0f && m_Chess[King]->GetPosition().x < 18720.0f)
@@ -867,7 +925,7 @@ void CGameScene::Update(float elapsedTime)
 	{
 		m_ChessPlate_Check[Rook] = true;
 	}
-
+	
 	if (m_ChessPlate_Check[King] && m_ChessPlate_Check[Knight] && m_ChessPlate_Check[Pawn] && m_ChessPlate_Check[Rook])
 	{
 		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
@@ -2788,7 +2846,7 @@ void CGameScene::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	{
 		m_Mirror[i] = new CGameObject();
 
-		CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
+		CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f * MAP_SCALE_SIZE, 2600.0f, 1.0f);
 
 		m_MirrorCamera->SetPosition({ 17000 * MAP_SCALE_SIZE, -3000, 210 * MAP_SCALE_SIZE });
 
@@ -2812,7 +2870,7 @@ void CGameScene::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 			m_Mirror[i]->SetPosition({ float(17000 + 2900) * MAP_SCALE_SIZE, -2300, 3200 * MAP_SCALE_SIZE });
 		}
 		m_Mirror[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000, 2600, 10.0, XMFLOAT3{ 0,0,0 });
-		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f, 2600.0f * 0.5f, 10.0f * 0.5f }));
+		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f* MAP_SCALE_SIZE, 2600.0f * 0.5f, 10.0f * 0.5f }));
 
 		m_Mirror[i]->SetTextureIndex(0x01);
 

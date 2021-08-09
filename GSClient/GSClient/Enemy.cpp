@@ -517,7 +517,7 @@ void CMummy::Update(float elapsedTime)
 				}
 				
 			}
-			m_LaserAttackDelayTime[0] = 5.0f;
+			m_LaserAttackDelayTime[0] = 7.0f;
 			for (auto& Laser : m_Friends_Laser)
 			{
 				if (Laser->GetLaserType() == Laser_TYPE::Laser1)
@@ -546,7 +546,7 @@ void CMummy::Update(float elapsedTime)
 		// 발사틈을 줘서 발사하고 나서 방향벡터 다시 원상복귀 
 		if (m_LaserAttack[0] == true)
 		{
-			if (m_LaserAttackDelayTime[0] < 4.7f && m_LaserAttackDelayTime[0]>4.5f)
+			if (m_LaserAttackDelayTime[0] < 6.7f && m_LaserAttackDelayTime[0]>6.5f)
 			{
 				if (shotLaser[0] == true)
 				{
@@ -560,7 +560,7 @@ void CMummy::Update(float elapsedTime)
 				shotLaser[0] = false;
 				m_LaserAttack[0] = false;
 			}
-			else if (m_LaserAttackDelayTime[0] < 4.5f)
+			else if (m_LaserAttackDelayTime[0] < 6.5f)
 			{
 				this->FindNextPosition();
 				this->SetIsOnMoving(true);
@@ -573,6 +573,20 @@ void CMummy::Update(float elapsedTime)
 
 	if (this->GetMummyDie2() == false)
 	{
+		if (m_LaserAttackDelayTime[1] < 3.0f)
+		{
+			for (auto& Laser : m_Friends_Laser)
+			{
+				if (Laser->GetLaserType() == Laser_TYPE::Laser2)
+				{
+					Laser->SetDrawable(true);
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					Laser->SetPosition(pos);
+				}
+
+			}
+		}
+
 		// 만약 레이저발사시간이 됬으면 발사 하고 시간을 다시 초기화
 		if (m_LaserAttack[1] == false && m_LaserAttackDelayTime[1] < 1.0f)
 		{
@@ -582,11 +596,10 @@ void CMummy::Update(float elapsedTime)
 
 				if (this->GetEnemyAttackType() == EnemyAttackType::Mummy2)
 				{
-
 					MAIN_GAME_SCENE->ShotMummyLaser(this, GetLook());
 				}
 			}
-			m_LaserAttackDelayTime[1] = 7.0f;
+			m_LaserAttackDelayTime[1] = 9.0f;
 			for (auto& Laser : m_Friends_Laser)
 			{
 				if (Laser->GetLaserType() == Laser_TYPE::Laser2)
@@ -616,7 +629,7 @@ void CMummy::Update(float elapsedTime)
 		// 발사틈을 줘서 발사하고 나서 방향벡터 다시 원상복귀 
 		if (m_LaserAttack[1] == true)
 		{
-			if (m_LaserAttackDelayTime[1] < 6.7f && m_LaserAttackDelayTime[1]>6.5f)
+			if (m_LaserAttackDelayTime[1] < 8.7f && m_LaserAttackDelayTime[1]>8.5f)
 			{
 				if (shotLaser[1] == true)
 				{
@@ -630,7 +643,7 @@ void CMummy::Update(float elapsedTime)
 				shotLaser[1] = false;
 				m_LaserAttack[1] = false;
 			}
-			else if (m_LaserAttackDelayTime[1] < 6.5f)
+			else if (m_LaserAttackDelayTime[1] < 8.5f)
 			{
 				this->FindNextPosition();
 				this->SetIsOnMoving(true);
@@ -640,6 +653,20 @@ void CMummy::Update(float elapsedTime)
 	if (this->GetMummyDie3() == false)
 	{
 		// 만약 레이저발사시간이 됬으면 발사 하고 시간을 다시 초기화
+		if (m_LaserAttackDelayTime[2] < 5.0f)
+		{
+			for (auto& Laser : m_Friends_Laser)
+			{
+				if (Laser->GetLaserType() == Laser_TYPE::Laser3)
+				{
+					Laser->SetDrawable(true);
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					Laser->SetPosition(pos);
+				}
+
+			}
+		}
+
 		if (m_LaserAttack[2] == false && m_LaserAttackDelayTime[2] < 1.0f)
 		{
 			if (shotLaser[2] == false)
@@ -703,6 +730,8 @@ void CMummy::Update(float elapsedTime)
 				this->FindNextPosition();
 				this->SetIsOnMoving(true);
 			}
+			
+			
 		}
 	}
 
