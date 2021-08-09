@@ -1474,7 +1474,7 @@ void CSceneJH::ProcessInput()
 	if (keyInput.KEY_1)
 	{
 		m_Player->SetWeapon(PlayerWeaponType::Sword);
-		m_CurrentCamera = m_Cameras[0];
+		//m_CurrentCamera = m_Cameras[0];
 	}
 	if (keyInput.KEY_2)
 	{
@@ -1482,6 +1482,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_3)
 	{
+		m_Player->SetWeapon(PlayerWeaponType::Staff);
 		m_isPlayerSelected = true;
 		m_CurrentCamera = m_PlayerCameras[0];
 	}
@@ -2043,7 +2044,7 @@ void CSceneJH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	m_MinimapArrow->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(m_MinimapArrow);
 
-	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, true);
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, false);
 	pUI->SetPosition({ -0.53, 0.65,  0 });		// WeaponUI
 	pUI->SetTextureIndex(0x10);
 	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));

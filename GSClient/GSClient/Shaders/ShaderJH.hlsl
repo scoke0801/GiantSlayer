@@ -522,9 +522,16 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	}
 	if (gnTexturesMask & 0x10)
 	{
+		if (gnWeapon & 0x01) { 
+			input.uv.y = (input.uv.y / 3.0f);
+		}
 		if (gnWeapon & 0x02)
 		{
-			input.uv.y += 0.5;
+			input.uv.y = (input.uv.y / 3.0f) + (1/3.0f);
+		}
+		if (gnWeapon & 0x04) {
+
+			input.uv.y = (input.uv.y / 3.0f) + (2 / 3.0f);
 		}
 		cColor = gtxtWeapons.Sample(gssWrap, input.uv);
 	}
