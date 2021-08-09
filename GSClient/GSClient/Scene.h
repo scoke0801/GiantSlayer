@@ -98,7 +98,7 @@ public:
 	virtual void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) {}
 	virtual void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) {}
 	virtual void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) {}
-
+	virtual void DrawFont(ID3D12GraphicsCommandList* pd3dCommandList) {}
 public:
 	// about Keyboard process
 	virtual void ProcessInput() {}
