@@ -2820,10 +2820,10 @@ CFogParticleMesh::CFogParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	: CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = particleCount * 6;
-	m_Vertices = new CParticleVertex[m_nVertices];
+	m_Vertices = new CParticleTextureVertex[m_nVertices];
 	m_CurrentVertexIndex = 0;
 
-	m_nStride = sizeof(CParticleVertex);
+	m_nStride = sizeof(CParticleTextureVertex);
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	CreateMeshes(pd3dDevice, pd3dCommandList, particleCount);
@@ -2838,6 +2838,8 @@ CFogParticleMesh::~CFogParticleMesh()
 void CFogParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int count)
 {
 	const float PARTICLE_SIZE = 20.0f;
+
+	UINT texIndex = 0x01;
 
 	for (int i = 0; i < count; ++i) {
 		XMFLOAT3 pos = GetRandomVector3(1000, 1, 50);
@@ -2856,10 +2858,11 @@ void CFogParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 		// 매개변수 방정식 값, 원 크기, 원 주기
 		XMFLOAT3 randValues = XMFLOAT3(GetRandomValue(5.0f, 0.0f, 0.0f), GetRandomValue(1.0f,1.0f,1.0f) , GetRandomValue(2.0f, 0.0f, 0.0f));
-		// v0 
+		// v0   
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;
@@ -2867,7 +2870,8 @@ void CFogParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		// v1
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(1.0f, 0.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;
@@ -2875,7 +2879,8 @@ void CFogParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		// v2
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(1.0f, 1.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;
@@ -2883,7 +2888,8 @@ void CFogParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		// v3
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y + PARTICLE_SIZE, pos.z);
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(0.0f, 0.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;
@@ -2891,7 +2897,8 @@ void CFogParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		// v4
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x + PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(1.0f, 1.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;
@@ -2899,7 +2906,8 @@ void CFogParticleMesh::CreateMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		// v5
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Position = XMFLOAT3(pos.x - PARTICLE_SIZE, pos.y - PARTICLE_SIZE, pos.z);
 		m_Vertices[m_CurrentVertexIndex].m_xmf3Speed = speed;
-		m_Vertices[m_CurrentVertexIndex].m_xmf4Diffuse = color;
+		m_Vertices[m_CurrentVertexIndex].m_xmf2TexCoord = XMFLOAT2(0.0f, 1.0f);
+		m_Vertices[m_CurrentVertexIndex].m_nTexture = texIndex;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2Time = time;
 		m_Vertices[m_CurrentVertexIndex].m_xmf2RandomValue = randValues;
 		++m_CurrentVertexIndex;

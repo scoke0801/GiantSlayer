@@ -1518,7 +1518,7 @@ void CSceneJH::ProcessInput()
 	}
 	if (keyInput.KEY_F2)
 	{
-		m_Player->SetPosition({ 6800 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
+		m_Player->SetPosition({ 5500 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F3)
@@ -3058,6 +3058,7 @@ void CSceneJH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5 * 0.5f, 7 * 0.5f, 3 * 0.5f)));
 		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 5, 7, 3, { 0,0,0 });
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
+		pObject->FixPositionByTerrain(m_Terrain);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 

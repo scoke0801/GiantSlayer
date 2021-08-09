@@ -304,7 +304,7 @@ void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		"Dry_Tree", "Stump", "Dead_Tree",
 		"Desert_Rock",
 		"TerrainWater",
-		"Rain",
+		"Rain", "FogParticle",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
@@ -333,7 +333,7 @@ void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds",
 		L"resources/OBJ/Desert_Rock.dds",
 		L"resources/OBJ/Water.dds",
-		L"resources/OBJ/Rain.dds",
+		L"resources/OBJ/Rain.dds",		L"resources/OBJ/FogParticle.dds",
 		L"resources/Textures/Body_D.dds",L"resources/Textures/Body_C.dds",L"resources/Textures/Body_E.dds",L"resources/Textures/Body_N.dds",
 		L"resources/Textures/Skeleton_D.dds",
 		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",L"resources/Textures/DS_equipment_standard.dds",
@@ -394,7 +394,7 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		"Dry_Tree", "Stump", "Dead_Tree",
 		"Desert_Rock",
 		"TerrainWater",
-		"Rain",
+		"Rain", "FogParticle",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
@@ -1638,8 +1638,8 @@ void CGameScene::ProcessInput()
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F2)
-	{ 
-		m_Player->SetPosition({ 8800 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
+	{
+		m_Player->SetPosition({ 5500 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F3)
@@ -3193,6 +3193,7 @@ void CGameScene::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5 * 0.5f, 7 * 0.5f, 3 * 0.5f)));
 		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 5, 7, 3, { 0,0,0 });
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
+		pObject->FixPositionByTerrain(m_Terrain);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 

@@ -332,7 +332,7 @@ public:
 class CFogParticleMesh : public CMesh
 {
 private:
-	CParticleVertex* m_Vertices;
+	CParticleTextureVertex* m_Vertices;
 	int					m_CurrentVertexIndex = 0;
 
 public:
