@@ -342,9 +342,7 @@ void CTitleScene2::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	}
-	  
-	m_HelpTextUI->Update(elapsedTime);
-	     
+	   
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime); 
 }
 
@@ -442,11 +440,7 @@ void CTitleScene2::ProcessInput()
 {
 	if (false == m_IsFocusOn) {
 		return;
-	}
-	if (m_CurrentCamera->IsOnShake()) {
-		// 피격 상태일 때 잠시 제어권 뺏기
-		return;
-	}
+	} 
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 		auto keyInput = GAME_INPUT;
@@ -515,11 +509,7 @@ void CTitleScene2::OnMouseDown(WPARAM btnState, int x, int y)
 {
 	if (false == m_IsFocusOn) {
 		return;
-	}
-	if (m_CurrentCamera->IsOnShake()) {
-		// 피격 상태일 때 잠시 제어권 뺏기
-		return;
-	}
+	} 
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
 	SetCapture(CFramework::GetInstance().GetHWND());
@@ -530,11 +520,7 @@ void CTitleScene2::OnMouseUp(WPARAM btnState, int x, int y)
 	if (false == m_IsFocusOn) {
 		return;
 	}
-
-	if (m_CurrentCamera->IsOnShake()) {
-		// 피격 상태일 때 잠시 제어권 뺏기
-		return;
-	}
+	 
 	ReleaseCapture();
 }
 
@@ -542,11 +528,7 @@ void CTitleScene2::OnMouseMove(WPARAM btnState, int x, int y)
 {
 	if (false == m_IsFocusOn) {
 		return;
-	}
-	if (m_CurrentCamera->IsOnShake()) {
-		// 피격 상태일 때 잠시 제어권 뺏기
-		return;
-	}
+	} 
 	//
 	// 싱글플레이, 멀티 플레이 코드 분리 작업 진행 필요
 	//
