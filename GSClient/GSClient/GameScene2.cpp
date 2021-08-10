@@ -64,6 +64,7 @@ void CTitleScene2::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 	 
+	CShaderHandler::GetInstance().CreateTextRenderShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	BuildMaterials(pd3dDevice, pd3dCommandList); 
 
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
@@ -253,7 +254,7 @@ void CTitleScene2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12Graphics
 		pd3dDevice->CreateShaderResourceView(texResource, &srvDesc, hDescriptor);
 	}
 	   
-	//TextHandler::GetInstance().InitVertexBuffer(pd3dDevice, pd3dCommandList, m_pd3dSrvDescriptorHeap, m_Textures.size()); 
+	TextHandler::GetInstance().InitVertexBuffer(pd3dDevice, pd3dCommandList, m_pd3dSrvDescriptorHeap, m_Textures.size()); 
 }
 
 void CTitleScene2::ReleaseObjects()
@@ -334,6 +335,7 @@ void CTitleScene2::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CTitleScene2::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+
 	for (UI* pUI : m_UIs)
 	{
 		pUI->Draw(pd3dCommandList, m_CurrentCamera);
@@ -342,7 +344,7 @@ void CTitleScene2::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 void CTitleScene2::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// draw the text
-	//TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"), XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
+	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Roomµé°¡¿ä"), XMFLOAT2(0.22f, 0.51f), XMFLOAT2(2.0f, 2.0f), { 0.5f, 0.5f }, { 1.0f, 1.0f, 1.0f ,1.0f });
 }
    
 void CTitleScene2::Communicate(SOCKET& sock)
@@ -669,21 +671,27 @@ void CTitleScene2::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	pUiHelpTextShader->CreateInputLayout(ShaderTypes::Textured);
 	pUiHelpTextShader->CreateUIShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	 
-	UI* pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.09f, 0.0f, true);
-	pUI->SetPosition({ -0.50, 0.88,  0.92 });		// HP, SP
+	UI* pUI = new UI(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 0.0f, false);
+	pUI->SetPosition({ -0.0, 0.0,  0.92 });		// Title
 	pUI->SetTextureIndex(0x01);
 	pUI->SetShader(pUiShader);
 	m_UIs.push_back(pUI);
 
-	pUI = new UI(pd3dDevice, pd3dCommandList, 0.3f, 0.09f, 0.0f, true);
-	pUI->SetPosition({ -0.50, 0.79,  0.92 });		// HP, SP
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.25f, 0.0f, false);
+	pUI->SetPosition({ -0.5, -0.65,  0.91 });		//MultiBtn
 	pUI->SetTextureIndex(0x02);
 	pUI->SetShader(pUiShader);
 	m_UIs.push_back(pUI);
 
-	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, false);
-	pUI->SetPosition({ -0.53, 0.65,  0 });		// WeaponUI
-	pUI->SetTextureIndex(0x10);
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.25f, 0.0f, false);
+	pUI->SetPosition({ 0.4, -0.65,  0.91 });		// SingleBtn
+	pUI->SetTextureIndex(0x4);
+	pUI->SetShader(pUiShader);
+	m_UIs.push_back(pUI);
+
+	pUI = new UI(pd3dDevice, pd3dCommandList, 1.6f, 1.6f, 0.0f, false);
+	pUI->SetPosition({0.0f, 0.0,  0.90 });		// RoomBoard
+	pUI->SetTextureIndex(0x8);
 	pUI->SetShader(pUiShader);
 	m_UIs.push_back(pUI);
 }
