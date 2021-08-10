@@ -25,6 +25,8 @@
 #define VK_K 0x4B
 #define VK_L 0x4C 
 #define VK_M 0x4D
+#define VK_N 0x4E
+
 struct GameInputs
 {
 	bool KEY_1 = false;
@@ -71,6 +73,7 @@ struct GameInputs
 	bool KEY_T = false;
 	bool KEY_Y = false;
 	bool KEY_M = false;
+	bool KEY_N = false;
 };
 enum class CommandType
 {

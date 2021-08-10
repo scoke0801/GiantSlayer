@@ -19,6 +19,8 @@ class CBoss;
 class CEffectHandler;
 class Font;
 
+#define ChessPuzzleSize 7
+
 class CSceneTH : public CScene
 {
 private:
@@ -170,6 +172,7 @@ public:
 	void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 	void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
 	void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	void DrawFont(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
 	void Communicate(SOCKET& sock) override;
@@ -220,6 +223,7 @@ private:
 	void BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);

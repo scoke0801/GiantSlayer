@@ -50,6 +50,7 @@ private:
 	float m_SwordAnim2Length = 0.0f;
 	float m_SwordAnim3Length = 0.0f;
 	float m_SkillAnimLength = 0.0f;
+	float m_DeathAnimLength = 0.0f;
 	float m_AttackWaitingTime = 0.0f;
 
 	float m_AttackAnimPauseTime = 0.0f;
@@ -66,6 +67,8 @@ private:
 	float m_ComboTimer = 0.5f;
 
 public:
+	bool m_Alive = true;
+
 	bool pullString = false;
 	float m_StringPullTime = 0.0f;
 

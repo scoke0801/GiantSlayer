@@ -33,6 +33,10 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	if (m_HP <= 0 && m_AttackedDelay <= 0.1f) {
+		return;
+	}
+
 	if (m_IsCanAttack == false) {
 		if (!m_AnimationPaused)
 			m_AttackWaitingTime -= fTimeElapsed;
@@ -90,35 +94,38 @@ void CPlayer::Update(float fTimeElapsed)
 		else
 			SetAnimationSet(RUN);
 	}
-	float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
-	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
+	if (m_Alive) {
+		float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
-	Move(vel);
+		XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
-	if (false == m_isOnGround) {
-		float y;
-		if (m_JumpTime > 0.5f) {
-			y = -PLAYER_JUMP_HEIGHT * fTimeElapsed;
+		Move(vel);
+
+		if (false == m_isOnGround) {
+			float y;
+			if (m_JumpTime > 0.5f) {
+				y = -PLAYER_JUMP_HEIGHT * fTimeElapsed;
+			}
+			else {
+				y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
+			}
+			Move({ 0,y,0 });
+			m_JumpTime += fTimeElapsed;
+			if (m_JumpTime > TO_JUMP_TIME) {
+				m_JumpTime = 0.0f;
+				m_isOnGround = true;
+			}
 		}
-		else {
-			y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
-		}
-		Move({ 0,y,0 });
-		m_JumpTime += fTimeElapsed;
-		if (m_JumpTime > TO_JUMP_TIME) {
-			m_JumpTime = 0.0f;
-			m_isOnGround = true;
-		}
+		UpdateCamera();
+
+		float fLength = Vector3::Length(m_xmf3Velocity);
+		float fDeceleration = (Friction * fTimeElapsed);
+		if (fDeceleration > fLength) fDeceleration = fLength;
+
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+		m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
 	}
-	UpdateCamera();
-
-	float fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = (Friction * fTimeElapsed);
-	if (fDeceleration > fLength) fDeceleration = fLength;
-
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-	m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
 
 	CGameObjectVer2::Animate(fTimeElapsed);
 	UpdateTransform(NULL);
@@ -263,6 +270,7 @@ void CPlayer::SetWeapon(PlayerWeaponType weaponType)
 		m_SwordAnim2Length = 1.133333f;
 		m_SwordAnim3Length = 1.466667f;
 		m_SkillAnimLength = 4.8f;
+		m_DeathAnimLength = 3.7f;
 
 		SetDrawSword();
 	}
@@ -276,6 +284,7 @@ void CPlayer::SetWeapon(PlayerWeaponType weaponType)
 		m_AttackAnimLength = 1.533333f;
 		m_SkillAnimLength = 5.0f;
 		m_AttackAnimPauseTime = 0.6f;
+		m_DeathAnimLength = 3.866667f;
 
 		SetDrawBow();
 	}
@@ -288,6 +297,7 @@ void CPlayer::SetWeapon(PlayerWeaponType weaponType)
 
 		m_AttackAnimLength = 1.433333f;
 		m_SkillAnimLength = 1.133333f;
+		m_DeathAnimLength = 3.7f;
 
 		SetDrawStaff();
 	}
@@ -333,13 +343,27 @@ bool CPlayer::Attacked(CGameObject* pObject)
 	if (m_AttackedDelay > 0.0f) {
 		return false;
 	}
+	m_IsCanAttack = false;
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
-	m_AttackedDelay += 0.6666667f;
-	//TakeDamage(pObject->GetATK());
-	SetAnimationSet(AnimationType::DAMAGED);
-	if (m_HP <= 5) {
-		m_HP = 0;
+
+	if (pObject == nullptr)
+		TakeDamage(1000);
+	else
+		TakeDamage(pObject->GetATK());
+
+	if (m_HP > 0) {
+		m_AttackedDelay += 0.6666667f;
+		SetAnimationSet(AnimationType::DAMAGED);
 	}
+	else {
+		m_Alive = false;
+		m_HP = 0;
+		m_SP = 0;
+		m_AttackedDelay += m_DeathAnimLength;
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		SetAnimationSet(DEATH);
+	}
+
 	return true;
 }
 
@@ -398,7 +422,6 @@ void CPlayer::Box_Pull(bool Pull_State)
 {
 	SetPullBox(Pull_State);
 }
-
 
 void CPlayer::AnimationChange(PlayerWeaponType weapon)
 {

@@ -413,6 +413,11 @@ void CShaderHandler::CreateTextRenderShader(ID3D12Device* pd3dDevice, ID3D12Root
 		pTextShader->CreatePixelShader(L"Shaders/ShaderGameScene.hlsl", "PS_FONT_MAIN");
 		//pEffectShader->CreateGeometryShader(L"Shaders/ShaderJH.hlsl", "GSEffect");
 	}
+	else if (m_UserID == ShaderHandlerUser::TH) {
+		pTextShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VS_FONT_MAIN");
+		pTextShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PS_FONT_MAIN");
+		//pEffectShader->CreateGeometryShader(L"Shaders/ShaderJH.hlsl", "GSEffect");
+	}
 	pTextShader->CreateInputLayout(ShaderTypes::Text);
 	pTextShader->CreateFontShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Text", pTextShader);

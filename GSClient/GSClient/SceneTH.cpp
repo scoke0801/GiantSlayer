@@ -77,7 +77,7 @@ void CSceneTH::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCom
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::GAMESCENE); // 수정필요
+	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::TH); // 수정필요
 	CShaderHandler::GetInstance().CreateAllShaders(pd3dDevice, m_pd3dGraphicsRootSignature);
 
 	BuildMaterials(pd3dDevice, pd3dCommandList);
@@ -263,6 +263,7 @@ void CSceneTH::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	BuildParticles(pd3dDevice, pd3dCommandList);
 	BuildArrows(pd3dDevice, pd3dCommandList);
 	BuildMummyLaser(pd3dDevice, pd3dCommandList);
+	BuildProjectiles(pd3dDevice, pd3dCommandList);
 
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
@@ -303,7 +304,7 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		"Dry_Tree", "Stump", "Dead_Tree",
 		"Desert_Rock",
 		"TerrainWater",
-		"Rain",
+		"Rain", "FogParticle",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
@@ -332,7 +333,7 @@ void CSceneTH::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds",
 		L"resources/OBJ/Desert_Rock.dds",
 		L"resources/OBJ/Water.dds",
-		L"resources/OBJ/Rain.dds",
+		L"resources/OBJ/Rain.dds",		L"resources/OBJ/FogParticle.dds",
 		L"resources/Textures/Body_D.dds",L"resources/Textures/Body_C.dds",L"resources/Textures/Body_E.dds",L"resources/Textures/Body_N.dds",
 		L"resources/Textures/Skeleton_D.dds",
 		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",L"resources/Textures/DS_equipment_standard.dds",
@@ -357,7 +358,7 @@ void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = m_Textures.size() + 3;
+	srvHeapDesc.NumDescriptors = m_Textures.size() + 4;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
@@ -393,7 +394,7 @@ void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		"Dry_Tree", "Stump", "Dead_Tree",
 		"Desert_Rock",
 		"TerrainWater",
-		"Rain",
+		"Rain", "FogParticle",
 		"Boss_D", "Boss_C","Boss_E","Boss_N",
 		"MeleeSkeleton_01_D",
 		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
@@ -447,8 +448,10 @@ void CSceneTH::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	pd3dDevice->CreateDepthStencilView(m_pd3dShadowMap, &dsvDesc, CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize));
 
+	TextHandler::GetInstance().InitVertexBuffer(pd3dDevice, pd3dCommandList, m_pd3dSrvDescriptorHeap, m_Textures.size() + 3);
+
 	m_d3dDsvShadowMapCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize);
-	m_d3dSrvShadowMapGPUHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 3, gnCbvSrvDescriptorIncrementSize);
+	m_d3dSrvShadowMapGPUHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 4, gnCbvSrvDescriptorIncrementSize);
 }
 
 void CSceneTH::ReleaseObjects()
@@ -461,6 +464,7 @@ void CSceneTH::Update(float elapsedTime)
 {
 	m_SoundManager->OnUpdate();
 	ProcessInput();
+
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
@@ -520,25 +524,16 @@ void CSceneTH::Update(float elapsedTime)
 		}
 	}
 
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pArrow->IsDrawable()) {
 			continue;
 		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox])
+		{
+			if (pArrow->CollisionCheck(pEnemy)) {
+				pArrow->InverseDirection();
+				break;
 			}
 		}
 	}
@@ -564,9 +559,37 @@ void CSceneTH::Update(float elapsedTime)
 				m_Player->FixCollision();
 			}
 		}
-		if (pEnemy->CollisionCheck(m_Mirror[0])) {
-			pEnemy->InverseDirection();
+		//if (pEnemy->CollisionCheck(m_Mirror[0])) {
+		//	//pEnemy->InverseDirection();
+		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
+		//}
+	}
+
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
 		}
+		if (pEnemy->CollisionCheck(m_Player)) {
+			// 공격 상태일 때만 체력이 닳는것이 맞을까...
+			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+			//	
+			//}
+			if (false == m_Player->IsCanAttack()) {
+				if (false == m_Player->IsAleradyAttack()) {
+					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+					m_Player->SetAleradyAttack(true);
+				}
+			}
+			else if (m_Player->Attacked(pEnemy))
+			{
+				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				m_Player->FixCollision();
+			}
+		}
+		//if (pEnemy->CollisionCheck(m_Mirror[0])) {
+		//	//pEnemy->InverseDirection();
+		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
+		//}
 	}
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
@@ -589,9 +612,6 @@ void CSceneTH::Update(float elapsedTime)
 				m_Player->FixCollision();
 			}
 		}
-		if (pEnemy->CollisionCheck(m_Mirror[0])) {
-			pEnemy->InverseDirection();
-		}
 	}
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
@@ -613,9 +633,6 @@ void CSceneTH::Update(float elapsedTime)
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
 				m_Player->FixCollision();
 			}
-		}
-		if (pEnemy->CollisionCheck(m_Mirror[0])) {
-			pEnemy->InverseDirection();
 		}
 	}
 
@@ -720,6 +737,8 @@ void CSceneTH::Update(float elapsedTime)
 	}
 
 
+
+
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
 		// 변수명 변경으로 인한 true/false 반전..
 		if (true == pArrow->IsDrawable()) {
@@ -810,6 +829,7 @@ void CSceneTH::Update(float elapsedTime)
 		}
 	}
 
+
 	// 체스 그 자체랑 충돌처리
 	for (int i = 0; i < ChessType::Count; i++)
 	{
@@ -838,19 +858,51 @@ void CSceneTH::Update(float elapsedTime)
 	{
 		if (m_ChessCollide_Check[i] == true)
 		{
-
 			m_Player->Box_Pull(TRUE);
 			m_Chess[i]->SetPosition({
 									m_Chess[i]->GetPosition().x + Final_Vec.x,
 									m_Chess[i]->GetPosition().y ,
 									m_Chess[i]->GetPosition().z + Final_Vec.z
 				});
+			if (m_Chess[i]->GetPosition().x < 16500.0f)
+			{
+				m_Chess[i]->SetPosition({
+									16500.0f ,
+									m_Chess[i]->GetPosition().y ,
+									m_Chess[i]->GetPosition().z
+					});
+			}
+			if (m_Chess[i]->GetPosition().x > 19300.0f)
+			{
+				m_Chess[i]->SetPosition({
+									19300.0f ,
+									m_Chess[i]->GetPosition().y ,
+									m_Chess[i]->GetPosition().z
+					});
+			}
+			if (m_Chess[i]->GetPosition().z < 15600.0f)
+			{
+				m_Chess[i]->SetPosition({
+									m_Chess[i]->GetPosition().x ,
+									m_Chess[i]->GetPosition().y ,
+									15600.0f
+					});
+			}
+			if (m_Chess[i]->GetPosition().z > 17800.0f)
+			{
+				m_Chess[i]->SetPosition({
+									m_Chess[i]->GetPosition().x ,
+									m_Chess[i]->GetPosition().y ,
+									17800.0f
+					});
+			}
 		}
 		else if (m_ChessCollide_Check[King] == false && m_ChessCollide_Check[Knight] == false && m_ChessCollide_Check[Pawn] == false && m_ChessCollide_Check[Rook] == false)
 		{
 			m_Player->Box_Pull(FALSE);
 		}
 	}
+
 	// 1 킹 2 나이트 3 폰 4 룩 // 퍼즐 체크 
 
 	if ((m_Chess[King]->GetPosition().x > 18320.0f && m_Chess[King]->GetPosition().x < 18720.0f)
@@ -1024,7 +1076,6 @@ void CSceneTH::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		}
 	}
 
-
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->Draw(pd3dCommandList, m_CurrentCamera);
@@ -1125,6 +1176,13 @@ void CSceneTH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, 1);
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
+}
+
+void CSceneTH::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// draw the text
+	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"나옴1234abcd!@#"),
+		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
 }
 
 void CSceneTH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
@@ -1464,6 +1522,9 @@ void CSceneTH::LogoutToServer()
 
 void CSceneTH::ProcessInput()
 {
+	if (!m_Player->m_Alive) {
+		return;
+	}
 	if (false == m_IsFocusOn) {
 		return;
 	}
@@ -1595,7 +1656,6 @@ void CSceneTH::ProcessInput()
 	if (keyInput.KEY_1)
 	{
 		m_Player->SetWeapon(PlayerWeaponType::Sword);
-		m_CurrentCamera = m_Cameras[0];
 	}
 	if (keyInput.KEY_2)
 	{
@@ -1603,6 +1663,7 @@ void CSceneTH::ProcessInput()
 	}
 	if (keyInput.KEY_3)
 	{
+		m_Player->SetWeapon(PlayerWeaponType::Staff);
 		m_isPlayerSelected = true;
 		m_CurrentCamera = m_PlayerCameras[0];
 	}
@@ -1638,7 +1699,7 @@ void CSceneTH::ProcessInput()
 	}
 	if (keyInput.KEY_F2)
 	{
-		m_Player->SetPosition({ 8800 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
+		m_Player->SetPosition({ 5500 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
 	if (keyInput.KEY_F3)
@@ -1755,11 +1816,10 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 			}
 		}
 		if (wParam == VK_M) {
-			if (m_Player->IsCanAttack()) {
-				m_Player->Attack(1);
-				cout << "SKILLLLL~~" << endl;
-			}
+			m_Player->Attacked(nullptr);
+			cout << "SetHP 0" << endl;
 		}
+
 	}
 	else
 	{
@@ -1822,6 +1882,9 @@ void CSceneTH::OnMouseMove(WPARAM btnState, int x, int y)
 		// 피격 상태일 때 잠시 제어권 뺏기
 		return;
 	}
+	if (!m_Player->m_Alive) {
+		return;
+	}
 	//
 	// 싱글플레이, 멀티 플레이 코드 분리 작업 진행 필요
 	//
@@ -1856,14 +1919,9 @@ void CSceneTH::OnMouseMove(WPARAM btnState, int x, int y)
 			if (m_isPlayerSelected)
 			{
 				//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), dy * 30);
-				if (m_Player->pullString) {
-					m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 150);
-				}
-				else {
-					m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 80);
-				}
+				m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
 
-				if (m_Player->IsMoving() || m_Player->pullString)
+				if (m_Player->IsMoving())
 				{
 					m_Player->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
 					m_MinimapArrow->Rotate(-dx * 150);
@@ -2181,7 +2239,7 @@ void CSceneTH::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	m_MinimapArrow->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(m_MinimapArrow);
 
-	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, true);
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, false);
 	pUI->SetPosition({ -0.53, 0.65,  0 });		// WeaponUI
 	pUI->SetTextureIndex(0x10);
 	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
@@ -2792,7 +2850,7 @@ void CSceneTH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	{
 		m_Mirror[i] = new CGameObject();
 
-		CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f, 2600.0f, 1.0f);
+		CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f * MAP_SCALE_SIZE, 2600.0f, 1.0f);
 
 		m_MirrorCamera->SetPosition({ 17000 * MAP_SCALE_SIZE, -3000, 210 * MAP_SCALE_SIZE });
 
@@ -2816,7 +2874,7 @@ void CSceneTH::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 			m_Mirror[i]->SetPosition({ float(17000 + 2900) * MAP_SCALE_SIZE, -2300, 3200 * MAP_SCALE_SIZE });
 		}
 		m_Mirror[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000, 2600, 10.0, XMFLOAT3{ 0,0,0 });
-		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f, 2600.0f * 0.5f, 10.0f * 0.5f }));
+		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f * MAP_SCALE_SIZE, 2600.0f * 0.5f, 10.0f * 0.5f }));
 
 		m_Mirror[i]->SetTextureIndex(0x01);
 
@@ -3197,6 +3255,7 @@ void CSceneTH::BuildMapSector2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5 * 0.5f, 7 * 0.5f, 3 * 0.5f)));
 		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 5, 7, 3, { 0,0,0 });
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
+		pObject->FixPositionByTerrain(m_Terrain);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
 
@@ -3589,6 +3648,22 @@ void CSceneTH::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	MakingFog();
 	MakingRain();
 }
+void CSceneTH::BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	// FireBall
+	for (int i = 0; i < 5; ++i) {
+		CFireBall* pFireb = new CFireBall();
+		pFireb->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall]);
+		pFireb->SetPosition({ 500.0f,  100.0f, 1500.0f });
+		pFireb->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
+		pFireb->SetTextureIndex(0x400);
+		pFireb->SetShader(CShaderHandler::GetInstance().GetData("Object"));
+		pFireb->Scale(40.0f, 40.0f, 40.0f);
+		pFireb->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.0f, 0.0f, 0.0f, XMFLOAT3{ 0,0,0 });
+		pFireb->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2.0f, 2.0f, 2.0f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::FireBall].push_back(pFireb);
+	}
+}
 
 void CSceneTH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -3616,20 +3691,6 @@ void CSceneTH::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pArrow->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.5f, 0.5f, 15, XMFLOAT3{ 0,0,5 });
 		pArrow->AddColider(new ColliderBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
-	}
-
-	// FireBall
-	for (int i = 0; i < 10; ++i) {
-		CFireBall* pFireb = new CFireBall();
-		pFireb->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall]);
-		pFireb->SetPosition({ 500.0f,  100.0f, 1500.0f });
-		pFireb->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
-		pFireb->SetTextureIndex(0x400);
-		pFireb->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-		pFireb->Scale(40.0f, 40.0f, 40.0f);
-		pFireb->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 3.0f, 3.0f, 3.0f, XMFLOAT3{ 0,0,0 });
-		pFireb->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(3.0f, 3.0f, 3.0f)));
-		m_ObjectLayers[(int)OBJECT_LAYER::FireBall].push_back(pFireb);
 	}
 }
 void CSceneTH::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -3798,7 +3859,7 @@ void CSceneTH::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CGameObjectVer2* pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player9.bin", NULL, true);
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
 
 	m_Players[0] = new CPlayer(pd3dDevice, pd3dCommandList);
 	m_Player = m_Players[0];
@@ -3833,7 +3894,7 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	for (int i = 1; i < MAX_ROOM_PLAYER; ++i) {
 		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player9.bin", NULL, true);
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);
 
 		m_Players[i] = new CPlayer(pd3dDevice, pd3dCommandList);
 
@@ -3875,10 +3936,13 @@ void CSceneTH::ActiveSkill(OBJECT_LAYER type, CGameObject* user)
 			if (pFireb->IsCanUse()) {
 				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::FireBallParticle);
 				if (-1 != idx) {
+					CPlayer* player = reinterpret_cast<CPlayer*>(user);
+					pFireb->SetExistingSector((SECTOR_POSITION)player->GetPlayerExistingSector());
 					pFireb->SetUseable(false);
 					pFireb->SetSkill(user);
 					cout << "shot fb" << endl;
 				}
+
 				break;
 			}
 		}

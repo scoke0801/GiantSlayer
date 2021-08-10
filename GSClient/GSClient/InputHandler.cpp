@@ -55,6 +55,7 @@ void CInputHandler::ProcessInput()
 	if (GetAsyncKeyState(VK_K) & 0x8000)		m_Inputs.KEY_K = true;
 	if (GetAsyncKeyState(VK_L) & 0x8000)		m_Inputs.KEY_L = true;
 	if (GetAsyncKeyState(VK_M) & 0x8000)		m_Inputs.KEY_M = true;
+	if (GetAsyncKeyState(VK_N) & 0x8000)		m_Inputs.KEY_N = true;
 #pragma endregion
 }
 
