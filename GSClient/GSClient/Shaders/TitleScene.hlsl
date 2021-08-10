@@ -13,6 +13,7 @@ struct VS_OUT
 Texture2D gtxtMultipleButton : register(t0);
 Texture2D gtxtSimpleButton   : register(t1);
 Texture2D gtxtTitle		     : register(t2);
+Texture2D gtxtRoomBoard		 : register(t3);
 
 SamplerState gssWrap : register(s0);
 
@@ -44,6 +45,14 @@ float4 VSTest(uint nVertexID : SV_VertexID) :SV_POSITION
 	else if (nVertexID == 15) { output = float4(-1.0f, -0.325f, 0.0f, 1.0f); }
 	else if (nVertexID == 16) { output = float4( 1.0f, -0.525f, 0.0f, 1.0f); }
 	else if (nVertexID == 17) { output = float4(-1.0f, -0.525f, 0.0f, 1.0f); }
+
+	else if (nVertexID == 18) { output = float4(-1.0f, -0.325f, 0.0f, 1.0f); }
+	else if (nVertexID == 19) { output = float4( 1.0f, -0.325f, 0.0f, 1.0f); }
+	else if (nVertexID == 20) { output = float4( 1.0f, -0.525f, 0.0f, 1.0f); }
+
+	else if (nVertexID == 21) { output = float4(-1.0f, -0.325f, 0.0f, 1.0f); }
+	else if (nVertexID == 22) { output = float4( 1.0f, -0.525f, 0.0f, 1.0f); }
+	else if (nVertexID == 23) { output = float4(-1.0f, -0.525f, 0.0f, 1.0f); }
 
 	return(output);
 }
@@ -77,13 +86,21 @@ VS_OUT VSTextured(uint nVertexID : SV_VertexID)
 	else if (nVertexID == 10) { outResult.position = float4( 0.75f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 2;  }
 	else if (nVertexID == 11) { outResult.position = float4( 0.25f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 2;  }
 	
-	else if (nVertexID == 12) { outResult.position = float4(-1.0f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 3; }
-	else if (nVertexID == 13) { outResult.position = float4( 1.0f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 3; }
-	else if (nVertexID == 14) { outResult.position = float4( 1.0f, -1.0f, 0.0f, 1.0f);outResult.uv = float2(1, 1); outResult.index = 3; }
+	else if (nVertexID == 12) { outResult.position = float4(-0.8f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 3; }
+	else if (nVertexID == 13) { outResult.position = float4( 0.8f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 3; }
+	else if (nVertexID == 14) { outResult.position = float4( 0.8f, -1.0f, 0.0f, 1.0f);outResult.uv = float2(1, 1); outResult.index = 3; }
+															 
+	else if (nVertexID == 15) { outResult.position = float4(-0.8f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 3; }
+	else if (nVertexID == 16) { outResult.position = float4( 0.8f, -1.0, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 3; }
+	else if (nVertexID == 17) { outResult.position = float4(-0.8f, -1.0, 0.0f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 3; }
 
-	else if (nVertexID == 15) { outResult.position = float4(-1.0f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 3; }
-	else if (nVertexID == 16) { outResult.position = float4( 1.0f, -1.0, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 3; }
-	else if (nVertexID == 17) { outResult.position = float4(-1.0f, -1.0, 0.0f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 3; }
+	else if (nVertexID == 18) { outResult.position = float4(-1.0f,  1.00f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 4; }
+	else if (nVertexID == 19) { outResult.position = float4( 1.0f,  1.00f, 0.0f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 4; }
+	else if (nVertexID == 20) { outResult.position = float4( 1.0f, -1.00f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 4; }
+															 	 	
+	else if (nVertexID == 21) { outResult.position = float4(-1.0f,  1.00f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 4; }
+	else if (nVertexID == 22) { outResult.position = float4( 1.0f, -1.00,  0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 4; }
+	else if (nVertexID == 23) { outResult.position = float4(-1.0f, -1.00,  0.0f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 4; }
 
 	return(outResult);
 }
@@ -99,9 +116,13 @@ float4 PSTextured(VS_OUT input) : SV_TARGET
 	{ 
 		cColor = gtxtSimpleButton.Sample(gssWrap, input.uv);
 	}
-	else
+	else if (input.index == 3)
 	{
 		cColor = gtxtTitle.Sample(gssWrap, input.uv); 
+	}
+	else if (input.index == 4) 
+	{ 
+		cColor = gtxtRoomBoard.Sample(gssWrap, input.uv);
 	}
 	return(cColor);
 }

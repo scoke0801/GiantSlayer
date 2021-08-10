@@ -3,6 +3,9 @@
 #include "GameFramework.h" 
 
 #include "SceneJH.h"
+#include "Font.h"
+#include "ShaderHandler.h"
+
 CTitleScene::CTitleScene()
 { 
 	m_pd3dGraphicsRootSignature = NULL;
@@ -57,7 +60,7 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 	// 프리미티브 토폴로지를 설정한다.
 	pd3dCommandList->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
 	// 정점 6개를 사용하여 렌더링 한다.
-	pd3dCommandList->DrawInstanced(18, 1, 0, 0);
+	pd3dCommandList->DrawInstanced(24, 1, 0, 0);
 }
 
 void CTitleScene::ProcessInput()
@@ -140,10 +143,11 @@ void CTitleScene::OnMouseMove(WPARAM btnState, int x, int y)
 void CTitleScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	int width, int height)
 {
+	LoadTextures(pd3dDevice, pd3dCommandList);
+
 	CreateRootSignature(pd3dDevice, pd3dCommandList);
 	CreatePipelineState(pd3dDevice, pd3dCommandList);
 
-	LoadTextures(pd3dDevice, pd3dCommandList);
 	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
 	BuildObjects(pd3dDevice, pd3dCommandList); 
 }
@@ -152,7 +156,7 @@ void CTitleScene::CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 {
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[0].NumDescriptors = 3;
+	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size();
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -280,9 +284,13 @@ void CTitleScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	auto titleTex = make_unique<CTexture>();	
 	MakeTexture(pd3dDevice, pd3dCommandList, titleTex.get(), "Title", L"resources/UI/TitleTest.dds");
 
+	auto roomBoard = make_unique<CTexture>();
+	MakeTexture(pd3dDevice, pd3dCommandList, roomBoard.get(), "RoomBoard", L"resources/UI/HelpBoard.dds");
+
 	m_Textures[multiButtonTex->m_Name] = std::move(multiButtonTex);
 	m_Textures[singleButtonTex->m_Name] = std::move(singleButtonTex); 
 	m_Textures[titleTex->m_Name] = std::move(titleTex);
+	m_Textures[roomBoard->m_Name] = std::move(roomBoard); 
 }
 
 void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -291,7 +299,7 @@ void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	// Create the SRV heap.
 	//
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = 3;
+	srvHeapDesc.NumDescriptors = m_Textures.size();
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
@@ -304,6 +312,7 @@ void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	auto multiBtnTex = m_Textures["MultiButton"]->m_pd3dResource;
 	auto simpleBtnTex = m_Textures["SingleButton"]->m_pd3dResource; 
 	auto titleTex = m_Textures["Title"]->m_pd3dResource;
+	auto roomBoardTex = m_Textures["RoomBoard"]->m_pd3dResource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -321,5 +330,9 @@ void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Format = titleTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(titleTex, &srvDesc, hDescriptor);
+	 
+	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+	srvDesc.Format = roomBoardTex->GetDesc().Format;
+	pd3dDevice->CreateShaderResourceView(roomBoardTex, &srvDesc, hDescriptor);
 }
  

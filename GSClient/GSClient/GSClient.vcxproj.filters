@@ -168,6 +168,9 @@
     <ClCompile Include="Font.cpp">
       <Filter>Font</Filter>
     </ClCompile>
+    <ClCompile Include="GameScene2.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h">
@@ -328,6 +331,9 @@
     </ClInclude>
     <ClInclude Include="Font.h">
       <Filter>Font</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene2.h">
+      <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
