@@ -1,128 +1,148 @@
-cbuffer cbTestData : register(b0)
-{
-	bool	gMouseClick : packoffset(c0); 
-};
- 
-struct VS_OUT
-{
-	float4	position : SV_POSITION;
-	float2	uv		 : TEXCOORD;
-	uint	index	 : TEXTURE;
-}; 
 
+//게임 객체의 정보를 위한 상수 버퍼를 선언한다. 
+cbuffer cbGameOBJInfo : register(b0)
+{
+	matrix	gmtxWorld : packoffset(c0);
+	uint	gnTexturesMask : packoffset(c4.x);
+	uint	gnMaterialID : packoffset(c4.y);
+};
+
+//게임 씬의 정보를 위한 상수 버퍼를 선언한다. 
+cbuffer cbSceneFrameData : register(b1)
+{
+	uint	gnHP : packoffset(c0.r);
+	uint	gnSP: packoffset(c0.g);
+	uint	gnWeapon: packoffset(c0.b);
+	float   gfTime : packoffset(c0.a);
+};
+
+//카메라의 정보를 위한 상수 버퍼를 선언한다. 
+cbuffer cbCameraInfo : register(b2)
+{
+	matrix	gmtxView : packoffset(c0);
+	matrix	gmtxProjection : packoffset(c4);
+	float3	gvCameraPosition : packoffset(c8);
+};
+
+cbuffer cbLightCameraInfo : register(b3)
+{
+	matrix gmtxViewProjection : packoffset(c0);
+	matrix gmtxShadowTransform : packoffset(c4);
+};
+cbuffer cbBoneOffsets : register(b6)
+{
+	float4x4 gpmtxBoneOffsets[128];
+};
+
+cbuffer cbBoneTransforms : register(b7)
+{
+	float4x4 gpmtxBoneTransforms[128];
+};
+
+cbuffer cbFontTransform : register(b8)
+{
+	float4x4 wvpMat;
+};
+
+
+#define MATERIAL_ALBEDO_MAP			0x01
+#define MATERIAL_SPECULAR_MAP		0x02
+#define MATERIAL_NORMAL_MAP			0x04
+#define MATERIAL_METALLIC_MAP		0x08
+#define MATERIAL_EMISSION_MAP		0x10
+#define MATERIAL_DETAIL_ALBEDO_MAP	0x20
+#define MATERIAL_DETAIL_NORMAL_MAP	0x40
+
+SamplerState gssWrap : register(s0);
+SamplerState gssClamp : register(s1);
+SamplerComparisonState gscsShadow : register(s2); // 그림자
+ 
 Texture2D gtxtMultipleButton : register(t0);
 Texture2D gtxtSimpleButton   : register(t1);
 Texture2D gtxtTitle		     : register(t2);
 Texture2D gtxtRoomBoard		 : register(t3);
 
-SamplerState gssWrap : register(s0);
+Texture2D gtxtRocky_Terrain: register(t4);
+Texture2D gtxtBossWall	   : register(t5); // 수정요망  
 
-// 정점 셰이더를 정의한다.
-float4 VSTest(uint nVertexID : SV_VertexID) :SV_POSITION
+struct VS_TEXTURE_IN
 {
-	float4 output;
+	float3 position : POSITION;
+	float2 uv		: TEXCOORD;
+};
+struct VS_TEXTURE_OUT
+{
+	float4 position : SV_POSITION;
+	float2 uv	 : TEXCOORD;
+};
 
-	if (nVertexID == 0)		  { output = float4(-0.75f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 1)  { output = float4(-0.25f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 2)  { output = float4(-0.25f, -0.525f, 0.0f, 1.0f); } 
-																			  
-	else if (nVertexID == 3)  { output = float4(-0.75f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 4)  { output = float4(-0.25f, -0.525f, 0.0f, 1.0f); }
-	else if (nVertexID == 5)  { output = float4(-0.75f, -0.525f, 0.0f, 1.0f); }
-																			  
-	else if (nVertexID == 6)  { output = float4( 0.25f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 7)  { output = float4( 0.75f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 8)  { output = float4( 0.75f, -0.525f, 0.0f, 1.0f); } 
-																			  
-	else if (nVertexID == 9)  { output = float4( 0.25f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 10) { output = float4( 0.75f, -0.525f, 0.0f, 1.0f); }
-	else if (nVertexID == 11) { output = float4( 0.25f, -0.525f, 0.0f, 1.0f); }
-
-	else if (nVertexID == 12) { output = float4(-1.0f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 13) { output = float4( 1.0f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 14) { output = float4( 1.0f, -0.525f, 0.0f, 1.0f); }
-							  					 
-	else if (nVertexID == 15) { output = float4(-1.0f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 16) { output = float4( 1.0f, -0.525f, 0.0f, 1.0f); }
-	else if (nVertexID == 17) { output = float4(-1.0f, -0.525f, 0.0f, 1.0f); }
-
-	else if (nVertexID == 18) { output = float4(-1.0f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 19) { output = float4( 1.0f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 20) { output = float4( 1.0f, -0.525f, 0.0f, 1.0f); }
-
-	else if (nVertexID == 21) { output = float4(-1.0f, -0.325f, 0.0f, 1.0f); }
-	else if (nVertexID == 22) { output = float4( 1.0f, -0.525f, 0.0f, 1.0f); }
-	else if (nVertexID == 23) { output = float4(-1.0f, -0.525f, 0.0f, 1.0f); }
-
-	return(output);
+VS_TEXTURE_OUT VS_UI_Textured(VS_TEXTURE_IN input)
+{
+	VS_TEXTURE_OUT outRes;
+	outRes.position = mul(float4(input.position, 1.0f), gmtxWorld);
+	outRes.uv = input.uv;
+	return outRes;
 }
 
-// 픽셀 셰이더를 정의한다.
-float4 PSTest(float4 input : SV_POSITION) : SV_TARGET
-{
-	float4 color = float4(0.0f, 0.0f, 0.5f, 1.0f);
-	if (gMouseClick)color = float4(0.5f, 0.0f, 0.0f, 1.0f);
-
-	return color;
-}
-
-VS_OUT VSTextured(uint nVertexID : SV_VertexID)
-{
-	VS_OUT outResult;
- 
-	if		(nVertexID == 0)  { outResult.position = float4(-0.75f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 1; }
-	else if (nVertexID == 1)  { outResult.position = float4(-0.25f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 1; }
-	else if (nVertexID == 2)  { outResult.position = float4(-0.25f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 1; }
-							  																						   					 
-	else if (nVertexID == 3)  { outResult.position = float4(-0.75f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 1; }
-	else if (nVertexID == 4)  { outResult.position = float4(-0.25f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 1; }
-	else if (nVertexID == 5)  { outResult.position = float4(-0.75f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 1; }
-							  																						   					
-	else if (nVertexID == 6)  { outResult.position = float4( 0.25f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 2;  }
-	else if (nVertexID == 7)  { outResult.position = float4( 0.75f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 2;  }
-	else if (nVertexID == 8)  { outResult.position = float4( 0.75f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 2;  }
-							  																						   					 
-	else if (nVertexID == 9)  { outResult.position = float4( 0.25f, -0.325f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 2;  }
-	else if (nVertexID == 10) { outResult.position = float4( 0.75f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 2;  }
-	else if (nVertexID == 11) { outResult.position = float4( 0.25f, -0.525f, 0.0f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 2;  }
-	
-	else if (nVertexID == 12) { outResult.position = float4(-0.8f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 3; }
-	else if (nVertexID == 13) { outResult.position = float4( 0.8f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 3; }
-	else if (nVertexID == 14) { outResult.position = float4( 0.8f, -1.0f, 0.0f, 1.0f);outResult.uv = float2(1, 1); outResult.index = 3; }
-															 
-	else if (nVertexID == 15) { outResult.position = float4(-0.8f, 1.0f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 3; }
-	else if (nVertexID == 16) { outResult.position = float4( 0.8f, -1.0, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 3; }
-	else if (nVertexID == 17) { outResult.position = float4(-0.8f, -1.0, 0.0f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 3; }
-
-	else if (nVertexID == 18) { outResult.position = float4(-1.0f,  1.00f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 4; }
-	else if (nVertexID == 19) { outResult.position = float4( 1.0f,  1.00f, 0.0f, 1.0f); outResult.uv = float2(1, 0); outResult.index = 4; }
-	else if (nVertexID == 20) { outResult.position = float4( 1.0f, -1.00f, 0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 4; }
-															 	 	
-	else if (nVertexID == 21) { outResult.position = float4(-1.0f,  1.00f, 0.0f, 1.0f); outResult.uv = float2(0, 0); outResult.index = 4; }
-	else if (nVertexID == 22) { outResult.position = float4( 1.0f, -1.00,  0.0f, 1.0f); outResult.uv = float2(1, 1); outResult.index = 4; }
-	else if (nVertexID == 23) { outResult.position = float4(-1.0f, -1.00,  0.0f, 1.0f); outResult.uv = float2(0, 1); outResult.index = 4; }
-
-	return(outResult);
-}
-
-float4 PSTextured(VS_OUT input) : SV_TARGET
+float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 {
 	float4 cColor;
-	if (input.index == 1)
+
+	if (gnTexturesMask & 0x01)
 	{
-		cColor = gtxtMultipleButton.Sample(gssWrap, input.uv);
+		cColor = gtxtTitle.Sample(gssWrap, input.uv);
 	}
-	else if (input.index == 2)
-	{ 
-		cColor = gtxtSimpleButton.Sample(gssWrap, input.uv);
-	}
-	else if (input.index == 3)
+	if (gnTexturesMask & 0x02)
 	{
-		cColor = gtxtTitle.Sample(gssWrap, input.uv); 
+		cColor = gtxtTitle.Sample(gssWrap, input.uv);
 	}
-	else if (input.index == 4) 
-	{ 
-		cColor = gtxtRoomBoard.Sample(gssWrap, input.uv);
+	if (gnTexturesMask & 0x04)
+	{
+		cColor = gtxtTitle.Sample(gssWrap, input.uv);
 	}
-	return(cColor);
+	if (gnTexturesMask & 0x08)
+	{
+
+		cColor = gtxtTitle.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x10)
+	{
+		cColor = gtxtTitle.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x20)
+	{
+		cColor = gtxtTitle.Sample(gssWrap, input.uv);
+	}
+	return cColor;
+}
+
+float4 PS_UI_HelpText(VS_TEXTURE_OUT input) : SV_TARGET
+{
+	float4 cColor;
+
+	if (gnTexturesMask & 0x01)
+	{
+		input.uv.y += 0.1;
+	}
+	if (gnTexturesMask & 0x02)
+	{
+		input.uv.y += 0.2;
+	}
+	if (gnTexturesMask & 0x04)
+	{
+		input.uv.y += 0.3;
+	}
+	if (gnTexturesMask & 0x08)
+	{
+		input.uv.y += 0.4;
+	}
+	if (gnTexturesMask & 0x10)
+	{
+		input.uv.y += 0.5;
+	}
+	if (gnTexturesMask & 0x20)
+	{
+		input.uv.y += 0.6;
+	} 
+	return cColor;
 }

@@ -63,10 +63,7 @@ void CTitleScene2::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3
 	BuildDescripotrHeaps(pd3dDevice, pd3dCommandList);
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
-
-	CShaderHandler::GetInstance().SetUserID(ShaderHandlerUser::GAMESCENE); // ¼öÁ¤ÇÊ¿ä
-	CShaderHandler::GetInstance().CreateAllShaders(pd3dDevice, m_pd3dGraphicsRootSignature);
-
+	 
 	BuildMaterials(pd3dDevice, pd3dCommandList); 
 
 	BuildCamera(pd3dDevice, pd3dCommandList, width, height);
@@ -93,10 +90,11 @@ void CTitleScene2::BuildCamera(ID3D12Device* pd3dDevice,
 		pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 		m_Cameras[i] = pCamera;
 	}
+
 	m_Cameras[0]->SetPosition({ 500,  250 + 150, 1200 });
 	m_Cameras[0]->Pitch(XMConvertToRadians(15));
 	m_Cameras[0]->SetOffset(XMFLOAT3(0.0f, 450.0f, -500.0f));
-	 
+	m_CurrentCamera = m_Cameras[0];
 }
 
 void CTitleScene2::BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -189,63 +187,19 @@ void CTitleScene2::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 {
 	const char* keyNames[] =
 	{
-		"Forest","Dry_Forest","Desert",
-		"Dry_Desert","Rocky_Terrain","BossWall",
-		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
-		"Box","Wood", "WoodSignBoard",
-		"GrassWall", "SandWall","RockyWall",
-		"Door",
-		"HP_SP", "Minimap", "WeaponUI",
-		"HP_SP_PER",
-		"Player_Clothes", "Player_Face", "Player_Hair", "Player_Sword", "Player_Bow", "Player_Staff", 
-		"Tree", "NoLeafTree", "Leaves", "Moss_Rock",
-		"PuzzleBoard",
-		"HelpText",
-		"Dry_Tree", "Stump", "Dead_Tree",
-		"Desert_Rock",
-		"TerrainWater",
-		"Rain", "FogParticle",
-		"Boss_D", "Boss_C","Boss_E","Boss_N",
-		"MeleeSkeleton_01_D",
-		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
-		"Mat01_mummy_A","Mat01_mummy_M",
-		"GreenTree",
-		"Effect_1", "Effect_2", "Effect_3", "Effect_4",
-		"FireBall",
-		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse",
-		"ChessTile",
-		"Laser",
+		"multiButtonTex",
+		"singleButtonTex",
+		"titleTex",
+		"roomBoard"
 	};
 
 	const wchar_t* address[] =
 	{
-		L"resources/OBJ/Forest.dds",L"resources/OBJ/Dry_Forest.dds",L"resources/OBJ/Desert.dds",
-		L"resources/OBJ/Dry_Desert.dds",L"resources/OBJ/Rocky_Terrain.dds",L"resources/OBJ/bossWall.dds",
-		L"resources/skybox/front.dds",L"resources/skybox/back.dds", L"resources/skybox/left.dds",L"resources/skybox/right.dds",L"resources/skybox/top.dds", L"resources/skybox/bottom.dds",
-		L"resources/OBJ/Box.dds",L"resources/OBJ/Wood.dds", L"resources/OBJ/WoodSignBoard.dds",
-		L"resources/OBJ/GrassWallTexture.dds", L"resources/OBJ/StoneWallTexture.dds",L"resources/OBJ/RockyWall.dds",
-		L"resources/OBJ/Door.dds",
-		L"resources/UI/HP_SP.dds", L"resources/UI/Minimap.dds", L"resources/UI/Weapon.dds",L"resources/UI/SmallICons.dds",
-		L"resources/Textures/clothingSet_01_tex.dds",L"resources/Textures/girl_texture_01.dds",L"resources/Textures/hair1.dds",L"resources/Textures/sword1.dds", L"resources/Textures/bow_texture.dds", L"resources/Textures/twoHandedStaff_texture.dds",
-		L"resources/Billboard/Tree02.dds",L"resources/Billboard/NoLeafTree2.dds",L"resources/OBJ/Leaves.dds",L"resources/OBJ/ROck_Texture_Surface2.dds",
-		L"resources/OBJ/Board.dds",
-		L"resources/UI/HelpText.dds",
-		L"resources/OBJ/Dry_Tree.dds",L"resources/OBJ/Stump.dds",L"resources/OBJ/Dead_Tree.dds",
-		L"resources/OBJ/Desert_Rock.dds",
-		L"resources/OBJ/Water.dds",
-		L"resources/OBJ/Rain.dds",		L"resources/OBJ/FogParticle.dds",
-		L"resources/Textures/Body_D.dds",L"resources/Textures/Body_C.dds",L"resources/Textures/Body_E.dds",L"resources/Textures/Body_N.dds",
-		L"resources/Textures/Skeleton_D.dds",
-		L"resources/Textures/DemoSkeleton.dds", L"resources/Textures/DemoEquipment.dds",L"resources/Textures/DS_equipment_standard.dds",
-		L"resources/Textures/Mat01_mummy_A.dds",L"resources/Textures/Mat01_mummy_M.dds",
-		L"resources/OBJ/GreenTree.dds",
-		L"resources/Effects/effect_1.dds", L"resources/Effects/Thunder.dds",L"resources/Effects/warnninggCircle.dds", L"resources/Effects/FireBall_Explosion.dds",
-		L"resources/Textures/FireBall.dds",
-		L"resources/Textures/KingDiffuse.dds",L"resources/Textures/KnightDiffuse.dds",L"resources/Textures/PawnDiffuse.dds",L"resources/Textures/RookDiffuse.dds",
-		L"resources/OBJ/ChessTile.dds",
-		L"resources/Textures/LightningSpriteSheet2.dds",
-	};
-
+		L"resources/UI/MultiPlayButton.dds",
+		L"resources/UI/SinglePlayButton.dds",
+		L"resources/UI/TitleTest.dds",
+		L"resources/UI/HelpBoard.dds",
+	}; 
 	for (int i = 0; i < _countof(keyNames); ++i)
 	{
 		unique_ptr<CTexture> tempTex = make_unique<CTexture>();
@@ -258,14 +212,14 @@ void CTitleScene2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12Graphics
 {
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = m_Textures.size() + 4;
+	srvHeapDesc.NumDescriptors = m_Textures.size() + 1;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
 
 	// Add +1 DSV for shadow map.
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-	dsvHeapDesc.NumDescriptors = 2;
+	dsvHeapDesc.NumDescriptors = 1;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	dsvHeapDesc.NodeMask = 0;
@@ -275,36 +229,14 @@ void CTitleScene2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12Graphics
 	// Fill out the heap with actual descriptors. 
 	hDescriptor = m_pd3dSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	srvGpuStart = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	dsvCpuStart = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	dsvCpuStart = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(); 
 
 	const char* keyNames[] =
-	{
-		"Forest","Dry_Forest","Desert",
-		"Dry_Desert","Rocky_Terrain","BossWall",
-		"Sky_Front","Sky_Back", "Sky_Left", "Sky_Right","Sky_Top","Sky_Bottom",
-		"Box","Wood", "WoodSignBoard",
-		"GrassWall", "SandWall","RockyWall",
-		"Door",
-		"HP_SP", "Minimap", "WeaponUI",
-		"HP_SP_PER",
-		"Player_Clothes", "Player_Face", "Player_Hair", "Player_Sword", "Player_Bow", "Player_Staff",
-		"Tree", "NoLeafTree", "Leaves", "Moss_Rock",
-		"PuzzleBoard",
-		"HelpText",
-		"Dry_Tree", "Stump", "Dead_Tree",
-		"Desert_Rock",
-		"TerrainWater",
-		"Rain", "FogParticle",
-		"Boss_D", "Boss_C","Boss_E","Boss_N",
-		"MeleeSkeleton_01_D",
-		"MeleeSkeleton_02","MeleeSkeleton_02_Equip", "MeleeSkeleton_02_EquipAll",
-		"Mat01_mummy_A","Mat01_mummy_M",
-		"GreenTree",
-		"Effect_1", "Effect_2", "Effect_3", "Effect_4",
-		"FireBall",
-		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse",
-		"ChessTile",
-		"Laser",
+	{  
+		"multiButtonTex",
+		"singleButtonTex",
+		"titleTex",
+		"roomBoard"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -321,7 +253,7 @@ void CTitleScene2::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12Graphics
 		pd3dDevice->CreateShaderResourceView(texResource, &srvDesc, hDescriptor);
 	}
 	   
-	TextHandler::GetInstance().InitVertexBuffer(pd3dDevice, pd3dCommandList, m_pd3dSrvDescriptorHeap, m_Textures.size() + 1); 
+	//TextHandler::GetInstance().InitVertexBuffer(pd3dDevice, pd3dCommandList, m_pd3dSrvDescriptorHeap, m_Textures.size()); 
 }
 
 void CTitleScene2::ReleaseObjects()
@@ -373,12 +305,25 @@ void CTitleScene2::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 		m_CurrentCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
 		m_CurrentCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	}
-	  
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
+	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+	D3D12_GPU_DESCRIPTOR_HANDLE tex = m_pd3dSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOT_PARAMETER_TEXTURE, tex);
+
 	auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
 		chrono::high_resolution_clock::now() - m_CreatedTime);
 	m_pcbMappedSceneFrameData->m_Time = timeElapsed.count() * 0.001f;
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbSceneFrameDataGpuVirtualAddress = m_pd3dcbSceneInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_SCENE_FRAME_DATA, d3dcbSceneFrameDataGpuVirtualAddress); //GameSceneFrameData
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_MATERIAL, d3dcbMaterialsGpuVirtualAddress); //Materials
+
+	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
+	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
+
 	  
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
@@ -397,8 +342,7 @@ void CTitleScene2::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 void CTitleScene2::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"),
-		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
+	//TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"), XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
 }
    
 void CTitleScene2::Communicate(SOCKET& sock)
@@ -472,19 +416,11 @@ void CTitleScene2::ProcessInput()
 		}
 		if (keyInput.KEY_U) {
 			p_keyboard.keyInput = VK_U;
-			processKey = true;
-			//for (int i = 0; i < 5; ++i) {
-			//	CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
-			//	p->OpenDoor();
-			//}
+			processKey = true; 
 		}
 		if (keyInput.KEY_I) {
 			p_keyboard.keyInput = VK_I;
-			processKey = true;
-			//for (int i = 0; i < 5; ++i) {
-			//	CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
-			//	p->CloserDoor();
-			//}
+			processKey = true; 
 		}
 	}
 }
@@ -589,7 +525,7 @@ ID3D12RootSignature* CTitleScene2::CreateGraphicsRootSignature(ID3D12Device* pd3
 	// Ground
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size() + 4;
+	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size() + 1;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -716,22 +652,39 @@ ID3D12RootSignature* CTitleScene2::CreateGraphicsRootSignature(ID3D12Device* pd3
 void CTitleScene2::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	CShader* pShader = new CShader();
+	CShader* pUiShader = new CShader();
+	CShader* pUiHelpTextShader = new CShader();
+	 
+	{
+	pUiShader->CreateVertexShader(L"Shaders/TitleScene.hlsl", "VS_UI_Textured");
+	pUiShader->CreatePixelShader(L"Shaders/TitleScene.hlsl", "PS_UI_Textured");
+
+	pUiHelpTextShader->CreateVertexShader(L"Shaders/TitleScene.hlsl", "VS_UI_Textured");
+	pUiHelpTextShader->CreatePixelShader(L"Shaders/TitleScene.hlsl", "PS_UI_HelpText");
+	}
+
+	pUiShader->CreateInputLayout(ShaderTypes::Textured);
+	pUiShader->CreateUIShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	 
+	pUiHelpTextShader->CreateInputLayout(ShaderTypes::Textured);
+	pUiHelpTextShader->CreateUIShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	 
 	UI* pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.09f, 0.0f, true);
 	pUI->SetPosition({ -0.50, 0.88,  0.92 });		// HP, SP
 	pUI->SetTextureIndex(0x01);
-	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
+	pUI->SetShader(pUiShader);
 	m_UIs.push_back(pUI);
 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.3f, 0.09f, 0.0f, true);
 	pUI->SetPosition({ -0.50, 0.79,  0.92 });		// HP, SP
 	pUI->SetTextureIndex(0x02);
-	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
+	pUI->SetShader(pUiShader);
 	m_UIs.push_back(pUI);
 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1f, 0.1f, 0.0f, false);
 	pUI->SetPosition({ -0.53, 0.65,  0 });		// WeaponUI
 	pUI->SetTextureIndex(0x10);
-	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
+	pUI->SetShader(pUiShader);
 	m_UIs.push_back(pUI);
 }
 

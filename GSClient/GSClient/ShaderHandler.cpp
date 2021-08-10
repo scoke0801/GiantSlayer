@@ -160,7 +160,7 @@ void CShaderHandler::CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignatur
 
 		pUiHelpTextShader->CreateVertexShader(L"Shaders/ShaderGameScene.hlsl", "VS_UI_Textured");
 		pUiHelpTextShader->CreatePixelShader(L"Shaders/ShaderGameScene.hlsl", "PS_UI_HelpText");
-	}
+	} 
 	pUiShader->CreateInputLayout(ShaderTypes::Textured);
 	pUiShader->CreateUIShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Ui", pUiShader);
