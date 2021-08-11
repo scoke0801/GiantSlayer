@@ -115,6 +115,18 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	{
 		cColor = gtxtTitle.Sample(gssWrap, input.uv);
 	}
+	if (gnTexturesMask & 0x200)
+	{ 
+		cColor = gtxtPrevButton.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x400)
+	{
+		cColor = gtxtNextButton.Sample(gssWrap, input.uv);
+	}
+	if (gnTexturesMask & 0x800)
+	{
+		cColor = gtxtQuitButton.Sample(gssWrap, input.uv);
+	}
 	return cColor;
 }
 
@@ -146,6 +158,7 @@ float4 PS_UI_HelpText(VS_TEXTURE_OUT input) : SV_TARGET
 	{
 		input.uv.y += 0.6;
 	} 
+
 	return cColor;
 }
 

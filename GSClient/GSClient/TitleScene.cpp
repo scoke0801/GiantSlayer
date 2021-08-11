@@ -206,7 +206,7 @@ void CTitleScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		// detail
 		L"resources/UI/HelpBoard.dds",
 		// weapons
-		L"resources/UI/weapon.DDS.dds",
+		L"resources/UI/weapon.dds",
 		L"resources/UI/Prev.dds",L"resources/UI/Next.dds",L"resources/UI/Quit.dds",
 	}; 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -705,10 +705,26 @@ void CTitleScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pUI->SetTextureIndex(0x8);
 	pUI->SetShader(pUiShader);
 	m_UIs.push_back(pUI);
+
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1, 0.1f, 0.0f, false);
+	pUI->SetPosition({-0.8f, -0.8,  0.90 });		// PrevButton
+	pUI->SetTextureIndex(0x200);
+	pUI->SetShader(pUiShader);
+	m_UIs.push_back(pUI);
+
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1, 0.1f, 0.0f, false);
+	pUI->SetPosition({ 0.8f, -0.8,  0.90 });		// NextButton
+	pUI->SetTextureIndex(0x400);
+	pUI->SetShader(pUiShader);
+	m_UIs.push_back(pUI);
+
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1, 0.1f, 0.0f, false);
+	pUI->SetPosition({ 0.8f, 0.8,  0.90 });		// QuitButton
+	pUI->SetTextureIndex(0x800);
+	pUI->SetShader(pUiShader);
+	m_UIs.push_back(pUI);
 }
-
-
-
+ 
 void CTitleScene::SendMouseInputPacket()
 {
 	P_C2S_MOUSE_INPUT p_mouseInput;
