@@ -1182,7 +1182,7 @@ void CGameScene::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12R
 void CGameScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"),
+	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"), 0,
 		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
 }
 

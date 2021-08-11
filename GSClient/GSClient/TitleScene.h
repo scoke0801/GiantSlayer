@@ -73,7 +73,8 @@ private:
 
 private:
 	bool						m_IsOnRoomSelect = false;
-	int							m_nWeaponSelect = 1;
+	int							m_WeaponSelected = 1;
+	int							m_RoomStartNo = 1;
 
 	UI*							m_Select;
 	UI*							m_PrevBtn, *m_NextBtn;

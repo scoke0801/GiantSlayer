@@ -378,8 +378,21 @@ void CTitleScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_IsOnRoomSelect) {
 		// draw the text
-		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"무기선택"),
+		int index = 0;
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"무기선택"), index++,
 			XMFLOAT2(0.72f, 0.17f), XMFLOAT2(2.0f, 2.0f));
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"1"), index++,
+			XMFLOAT2(0.142f, 0.2f), XMFLOAT2(2.0f, 2.0f));
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"2"), index++,
+			XMFLOAT2(0.142f, 0.38f), XMFLOAT2(2.0f, 2.0f));
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"3"), index++,
+			XMFLOAT2(0.142f, 0.55f), XMFLOAT2(2.0f, 2.0f));
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"4"), index++,
+			XMFLOAT2(0.142f, 0.73f), XMFLOAT2(2.0f, 2.0f));
 	}
 }
    
@@ -487,10 +500,7 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
 	cout << "x - " << x << " y - " << y << "\n";
-	
-	float h = FRAME_BUFFER_HEIGHT * 0.3f;
-	float w = FRAME_BUFFER_WIDTH * 0.1f;
-	cout << w << " " << h << "\n";
+	 
 	if (false == m_IsOnRoomSelect) {
 		if (x > 192 && x < 445) {
 			if (y > 588 & y < 677) {
@@ -504,6 +514,7 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 				// single play 
 			}
 		}
+
 	} 
 	else if (true == m_IsOnRoomSelect) {
 		if (x < 128 || x > 1150) {
@@ -512,12 +523,57 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (y < 77 || y > 695) {
 			m_IsOnRoomSelect = false;
 		}
-	}
-	//pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.25f, 0.0f, false);
-	//pUI->SetPosition({ -0.5, -0.65,  0.91 });		//MultiBtn
-	
-	//pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.25f, 0.0f, false);
-	//pUI->SetPosition({ 0.4, -0.65,  0.91 });		// SingleBtn
+
+		if (x > 925 && x < 1061) {
+			if (y > 168 && y < 290) { 
+				m_WeaponSelected = 1;
+				m_Select->SetPosition({ 0.55f, 0.4f, 0.87 });
+			}
+		}
+		if (x > 925 && x < 1061) {
+			if (y > 321 && y < 445) { 
+				m_WeaponSelected = 2;
+				m_Select->SetPosition({ 0.55f, 0.0f, 0.87 });
+			}
+		}
+		if (x > 925 && x < 1061) {
+			if (y > 475 && y < 597) { 
+				m_WeaponSelected = 3;
+				m_Select->SetPosition({ 0.55f, -0.4f, 0.87 });
+			}
+		}
+
+
+		if (x > 223 && x < 861) {
+			if (y > 118 && y < 227) { 
+				// room 1
+			}
+			else if (y > 252 && y < 360) {
+				// room 2
+			}
+
+			else if (y > 383 && y < 496) {
+				// room 3
+			}
+
+			else if (y > 519 && y < 627) {
+				// room 4
+			}
+		}
+
+
+		if (x > 545 && x < 607) {
+			if (y > 651 && y < 690) {
+				// prev button
+			}
+		}
+
+		if (x > 674 && x < 733) {
+			if (y > 651 && y < 690) {
+				// next button
+			}
+		}
+	} 
 	SetCapture(CFramework::GetInstance().GetHWND());
 }
 
@@ -837,7 +893,7 @@ void CTitleScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_ToSelectWeapon.push_back(pUI);
 	 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.23, 0.33f, 0.0f, false);
-	pUI->SetPosition({ 0.55f, -0.4f, 0.87 });		// select
+	pUI->SetPosition({ 0.55f, 0.4f, 0.87 });		// select
 	pUI->SetTextureIndex(0x800);
 	pUI->SetShader(pUiShader);
 	m_Select = pUI;
