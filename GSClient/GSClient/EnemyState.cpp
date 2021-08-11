@@ -272,10 +272,13 @@ void AttackedState::Execute(CEnemy* enemy, float elapsedTime)
         if (enemy->GetHP() <= 0) {
             enemy->ChangeState(new DeathState(enemy));
         }
-        else if (enemy->GetTargetPlayer() == nullptr)
+        else {
+            enemy->ChangeState(new PatrolState(enemy));
+        }
+        /*else if (enemy->GetTargetPlayer() == nullptr)
             enemy->ChangeState(new PatrolState(enemy));
         else
-            enemy->ChangeState(new TraceState(enemy));
+            enemy->ChangeState(new TraceState(enemy));*/
     }
 }
 

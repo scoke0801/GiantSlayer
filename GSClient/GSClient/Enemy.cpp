@@ -16,7 +16,7 @@ CEnemy::CEnemy() : CGameObjectVer2()
 	m_HP = 100;
 	m_SP = 100;
 	m_ATK = 15;
-	m_DEF = 10;
+	m_DEF = 0;
 }
   
 CEnemy::~CEnemy()
@@ -322,7 +322,7 @@ CRangedEnemy::CRangedEnemy()
 	m_HP = 100;
 	m_SP = 100;
 	m_ATK = 15;
-	m_DEF = 10;
+	m_DEF = 0;
 }
  
 CRangedEnemy::~CRangedEnemy()
@@ -358,7 +358,7 @@ CMeleeEnemy::CMeleeEnemy()
 	m_HP = 100;
 	m_SP = 100;
 	m_ATK = 15;
-	m_DEF = 10;
+	m_DEF = 0;
 } 
 
 CMeleeEnemy::~CMeleeEnemy()
