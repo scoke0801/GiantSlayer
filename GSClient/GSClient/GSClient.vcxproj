@@ -183,7 +183,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameObjectVer2.h" />
     <ClInclude Include="GameScene.h" />
-    <ClInclude Include="GameScene2.h" />
+    <ClInclude Include="TitleScene.h" />
     <ClInclude Include="Skill.h" />
     <ClInclude Include="MummyLaser.h" />
     <ClInclude Include="Particle.h" />
@@ -221,7 +221,6 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
-    <ClInclude Include="TitleScene.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Wall.h" />
     <ClInclude Include="WICTextureLoader12.h" />
@@ -241,7 +240,7 @@
     <ClCompile Include="Communicates.cpp" />
     <ClCompile Include="FbxObject2.cpp" />
     <ClCompile Include="GameObjectVer2.cpp" />
-    <ClCompile Include="GameScene2.cpp" />
+    <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="Skill.cpp" />
     <ClCompile Include="MummyLaser.cpp" />
     <ClCompile Include="Particle.cpp" />
@@ -267,7 +266,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="InputHandler.cpp" />

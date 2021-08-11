@@ -57,12 +57,16 @@ SamplerState gssWrap : register(s0);
 SamplerState gssClamp : register(s1);
 SamplerComparisonState gscsShadow : register(s2); // ±×¸²ÀÚ
  
-Texture2D gtxtMultipleButton : register(t0);
-Texture2D gtxtSimpleButton   : register(t1);
-Texture2D gtxtTitle		     : register(t2);
-Texture2D gtxtRoomBoard		 : register(t3);
-
-Texture2D gtxtFont			: register(t4);
+Texture2D gtxtMultipleButton: register(t0);
+Texture2D gtxtSimpleButton	: register(t1);
+Texture2D gtxtTitle			: register(t2);
+Texture2D gtxtRoomBoard		: register(t3);
+Texture2D gtxtRoomDetail	: register(t4);
+Texture2D gtxtWeapons		: register(t5);
+Texture2D gtxtPrevButton	: register(t6);
+Texture2D gtxtNextButton	: register(t7);
+Texture2D gtxtQuitButton	: register(t8);
+Texture2D gtxtFont			: register(t9);
 
 struct VS_TEXTURE_IN
 {
