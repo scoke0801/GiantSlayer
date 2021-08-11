@@ -192,9 +192,10 @@ void CTitleScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		"singleButtonTex",
 		"titleTex",
 		"roomBoard",
-		"roomDetailBoard",
+		"roomInfo",
 		"weapons",
-		"prevBtn", "nextBtn", "quitBtn" 
+		"prevBtn", "nextBtn", "quitBtn" ,
+		"Select"
 	};
 
 	const wchar_t* address[] =
@@ -204,10 +205,11 @@ void CTitleScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		L"resources/UI/TitleTest.dds",
 		L"resources/UI/HelpBoard.dds",
 		// detail
-		L"resources/UI/HelpBoard.dds",
+		L"resources/UI/RoomInfo.dds",
 		// weapons
 		L"resources/UI/weapon.dds",
 		L"resources/UI/Prev.dds",L"resources/UI/Next.dds",L"resources/UI/Quit.dds",
+		L"resources/UI/Select.dds"
 	}; 
 	for (int i = 0; i < _countof(keyNames); ++i)
 	{
@@ -246,9 +248,11 @@ void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		"singleButtonTex",
 		"titleTex",
 		"roomBoard",
-		"roomDetailBoard",
+		"roomInfo",
 		"weapons",
-		"prevBtn", "nextBtn", "quitBtn"
+		"prevBtn", "nextBtn", "quitBtn",
+		"Select"
+
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -278,8 +282,7 @@ void CTitleScene::Update(float elapsedTime)
 {
 	m_SoundManager->OnUpdate();
 	ProcessInput();
-
-	
+	 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) { 
 			pObject->Update(elapsedTime);
@@ -345,17 +348,39 @@ void CTitleScene::Draw(ID3D12GraphicsCommandList* pd3dCommandList)
 }
 
 void CTitleScene::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-
+{ 
 	for (UI* pUI : m_UIs)
 	{
 		pUI->Draw(pd3dCommandList, m_CurrentCamera);
 	} 
+
+	if (m_IsOnRoomSelect) {
+		m_Select->Draw(pd3dCommandList, m_CurrentCamera);
+		m_PrevBtn->Draw(pd3dCommandList, m_CurrentCamera);;
+		m_NextBtn->Draw(pd3dCommandList, m_CurrentCamera);;
+		m_RoomBoard->Draw(pd3dCommandList, m_CurrentCamera);;
+
+		for (UI* pUI : m_Weapons)
+		{
+			pUI->Draw(pd3dCommandList, m_CurrentCamera);
+		}
+		for (UI* pUI : m_RoomInfos)
+		{
+			pUI->Draw(pd3dCommandList, m_CurrentCamera);
+		}
+		for (UI* pUI : m_ToSelectWeapon)
+		{
+			pUI->Draw(pd3dCommandList, m_CurrentCamera);
+		} 
+	}
 } 
 void CTitleScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Room들가요"), XMFLOAT2(0.22f, 0.51f), XMFLOAT2(2.0f, 2.0f), { 0.5f, 0.5f }, { 1.0f, 1.0f, 1.0f ,1.0f });
+	if (m_IsOnRoomSelect) {
+		// draw the text
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"무기선택"),
+			XMFLOAT2(0.72f, 0.17f), XMFLOAT2(2.0f, 2.0f));
+	}
 }
    
 void CTitleScene::Communicate(SOCKET& sock)
@@ -697,32 +722,98 @@ void CTitleScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.25f, 0.0f, false);
 	pUI->SetPosition({ 0.4, -0.65,  0.91 });		// SingleBtn
 	pUI->SetTextureIndex(0x4);
-	pUI->SetShader(pUiShader);
+	pUI->SetShader(pUiShader); 
 	m_UIs.push_back(pUI);
 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 1.6f, 1.6f, 0.0f, false);
 	pUI->SetPosition({0.0f, 0.0,  0.90 });		// RoomBoard
 	pUI->SetTextureIndex(0x8);
 	pUI->SetShader(pUiShader);
-	m_UIs.push_back(pUI);
+	m_RoomBoard = pUI;
+	 
+	 
+	for (int i = 0; i < 4; ++i) {
+		pUI = new UI(pd3dDevice, pd3dCommandList, 1.0, 0.3f, 0.0f, false);
+		pUI->SetPosition({ -0.15f, 0.55f - 0.35f * i, 0.89 });		// RoomInfo
+		pUI->SetTextureIndex(0x10);
+		pUI->SetShader(pUiShader);
+		m_RoomInfos.push_back(pUI);
+	}
+
+	for(int i = 0; i < 4; ++i)
+	{
+		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
+		pUI->SetPosition({ -0.55f, 0.54f - 0.35f * i, 0.89 });		// weapon
+		pUI->SetTextureIndex(0x20);
+		pUI->SetShader(pUiShader);
+		m_Weapons.push_back(pUI); 
+
+		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
+		pUI->SetPosition({ -0.35f, 0.54f - 0.35f * i, 0.89 });		// weapon
+		pUI->SetTextureIndex(0x40);
+		pUI->SetShader(pUiShader);
+		m_Weapons.push_back(pUI); 
+		
+		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
+		pUI->SetPosition({ -0.15f, 0.54f - 0.35f * i, 0.89 });		// weapon
+		pUI->SetTextureIndex(0x80);
+		pUI->SetShader(pUiShader);
+		m_Weapons.push_back(pUI); 
+
+		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
+		pUI->SetPosition({ 0.05f, 0.54f - 0.35f * i, 0.89 });		// weapon
+		pUI->SetTextureIndex(0x20);
+		pUI->SetShader(pUiShader);
+		m_Weapons.push_back(pUI);
+		
+		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
+		pUI->SetPosition({ 0.25f, 0.54f - 0.35f * i, 0.89 });		// weapon
+		pUI->SetTextureIndex(0x40);
+		pUI->SetShader(pUiShader);
+		m_Weapons.push_back(pUI);
+	}
 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1, 0.1f, 0.0f, false);
-	pUI->SetPosition({-0.8f, -0.8,  0.90 });		// PrevButton
+	pUI->SetPosition({-0.1f, -0.75,  0.87 });		// PrevButton
+	pUI->SetTextureIndex(0x100);
+	pUI->SetShader(pUiShader);
+	m_PrevBtn = pUI;
+
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1, 0.1f, 0.0f, false);
+	pUI->SetPosition({ 0.1f, -0.75, 0.87 });		// NextButton
 	pUI->SetTextureIndex(0x200);
 	pUI->SetShader(pUiShader);
-	m_UIs.push_back(pUI);
+	m_NextBtn = pUI;
 
-	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1, 0.1f, 0.0f, false);
-	pUI->SetPosition({ 0.8f, -0.8,  0.90 });		// NextButton
-	pUI->SetTextureIndex(0x400);
+	 
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
+	pUI->SetPosition({ 0.55f, 0.40f, 0.89 });		// weapon
+	pUI->SetTextureIndex(0x20);
 	pUI->SetShader(pUiShader);
-	m_UIs.push_back(pUI);
+	m_ToSelectWeapon.push_back(pUI);
 
-	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1, 0.1f, 0.0f, false);
-	pUI->SetPosition({ 0.8f, 0.8,  0.90 });		// QuitButton
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
+	pUI->SetPosition({ 0.55f, 0.00f, 0.89 });		// weapon
+	pUI->SetTextureIndex(0x40);
+	pUI->SetShader(pUiShader);
+	m_ToSelectWeapon.push_back(pUI);
+
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
+	pUI->SetPosition({ 0.55f, -0.4f, 0.89 });		// weapon
+	pUI->SetTextureIndex(0x80);
+	pUI->SetShader(pUiShader);
+	m_ToSelectWeapon.push_back(pUI);
+	 
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.23, 0.33f, 0.0f, false);
+	pUI->SetPosition({ 0.55f, -0.4f, 0.87 });		// select
 	pUI->SetTextureIndex(0x800);
 	pUI->SetShader(pUiShader);
-	m_UIs.push_back(pUI);
+	m_Select = pUI;
+	//pUI = new UI(pd3dDevice, pd3dCommandList, 0.1, 0.1f, 0.0f, false);
+	//pUI->SetPosition({ 0.75f, 0.72,  0.89 });		// QuitButton
+	//pUI->SetTextureIndex(0x800);
+	//pUI->SetShader(pUiShader);
+	//m_UIs.push_back(pUI);
 }
  
 void CTitleScene::SendMouseInputPacket()

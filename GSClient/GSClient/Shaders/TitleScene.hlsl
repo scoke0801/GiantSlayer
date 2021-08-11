@@ -61,12 +61,13 @@ Texture2D gtxtMultipleButton: register(t0);
 Texture2D gtxtSimpleButton	: register(t1);
 Texture2D gtxtTitle			: register(t2);
 Texture2D gtxtRoomBoard		: register(t3);
-Texture2D gtxtRoomDetail	: register(t4);
+Texture2D gtxtRoomInfo		: register(t4);
 Texture2D gtxtWeapons		: register(t5);
 Texture2D gtxtPrevButton	: register(t6);
 Texture2D gtxtNextButton	: register(t7);
 Texture2D gtxtQuitButton	: register(t8);
-Texture2D gtxtFont			: register(t9);
+Texture2D gtxtSelect		: register(t9);
+Texture2D gtxtFont			: register(t10);
 
 struct VS_TEXTURE_IN
 {
@@ -109,23 +110,44 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	}
 	if (gnTexturesMask & 0x10)
 	{
-		cColor = gtxtRoomBoard.Sample(gssWrap, input.uv);
+		cColor = gtxtRoomInfo.Sample(gssWrap, input.uv);
 	}
 	if (gnTexturesMask & 0x20)
 	{
-		cColor = gtxtTitle.Sample(gssWrap, input.uv);
+		input.uv.y /= 3.0f;
+		cColor = gtxtWeapons.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x200)
+
+	if (gnTexturesMask & 0x40)
+	{
+		input.uv.y /= 3.0f;
+		input.uv.y += 1.0f / 3.0f;
+		cColor = gtxtWeapons.Sample(gssWrap, input.uv);
+	}	
+
+	if (gnTexturesMask & 0x80)
+	{
+		input.uv.y /= 3.0f;
+		input.uv.y += 2.0f / 3.0f;
+		cColor = gtxtWeapons.Sample(gssWrap, input.uv);
+	}
+
+	if (gnTexturesMask & 0x100)
 	{ 
 		cColor = gtxtPrevButton.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x400)
+	if (gnTexturesMask & 0x200)
 	{
 		cColor = gtxtNextButton.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x800)
+	if (gnTexturesMask & 0x400)
 	{
 		cColor = gtxtQuitButton.Sample(gssWrap, input.uv);
+	}	
+	
+	if (gnTexturesMask & 0x800)
+	{
+		cColor = gtxtSelect.Sample(gssWrap, input.uv);
 	}
 	return cColor;
 }
@@ -195,6 +217,6 @@ VS_FONT_OUT VS_FONT_MAIN(VS_FONT_IN input, uint vertexID : SV_VertexID)
 float4 PS_FONT_MAIN(VS_FONT_OUT input) : SV_TARGET
 {
 	float4 cColor = float4(input.color.rgb, input.color.a * gtxtFont.Sample(gssWrap, input.texCoord).a);
-	cColor.rgb *= 0.1f;
+	//cColor.rgb *= 0.1f;
 	return cColor;
 }

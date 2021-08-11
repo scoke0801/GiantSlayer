@@ -18,7 +18,7 @@ class CFbxObject2;
 class CBoss;
 class CEffectHandler;
 class Font;
- 
+
 class CTitleScene : public CScene
 {  
 private: 
@@ -70,6 +70,18 @@ private: // for server mouse input process
 
 private:
 	CSoundManager*				m_SoundManager;
+
+private:
+	bool						m_IsOnRoomSelect = false;
+	int							m_nWeaponSelect = 1;
+
+	UI*							m_Select;
+	UI*							m_PrevBtn, *m_NextBtn;
+	UI* m_RoomBoard;
+
+	vector<UI*>					m_Weapons;
+	vector<UI*>					m_RoomInfos;
+	vector<UI*>					m_ToSelectWeapon;
 public:
 	CTitleScene();
 	~CTitleScene();
@@ -123,8 +135,7 @@ public:
 
 public:
 	void BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-
-
+	 
 private:
 	void SendMouseInputPacket();
 	void RecvMouseProcessPacket();
