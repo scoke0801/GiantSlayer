@@ -486,6 +486,38 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 	} 
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
+	cout << "x - " << x << " y - " << y << "\n";
+	
+	float h = FRAME_BUFFER_HEIGHT * 0.3f;
+	float w = FRAME_BUFFER_WIDTH * 0.1f;
+	cout << w << " " << h << "\n";
+	if (false == m_IsOnRoomSelect) {
+		if (x > 192 && x < 445) {
+			if (y > 588 & y < 677) {
+				// multi play
+				m_IsOnRoomSelect = true;
+			}
+		}
+
+		if (x > 770 && x < 1020) {
+			if (y > 588 & y < 677) {
+				// single play 
+			}
+		}
+	} 
+	else if (true == m_IsOnRoomSelect) {
+		if (x < 128 || x > 1150) {
+			m_IsOnRoomSelect = false;
+		}
+		if (y < 77 || y > 695) {
+			m_IsOnRoomSelect = false;
+		}
+	}
+	//pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.25f, 0.0f, false);
+	//pUI->SetPosition({ -0.5, -0.65,  0.91 });		//MultiBtn
+	
+	//pUI = new UI(pd3dDevice, pd3dCommandList, 0.4f, 0.25f, 0.0f, false);
+	//pUI->SetPosition({ 0.4, -0.65,  0.91 });		// SingleBtn
 	SetCapture(CFramework::GetInstance().GetHWND());
 }
 
