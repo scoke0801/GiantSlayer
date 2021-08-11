@@ -32,6 +32,7 @@ enum class FBX_MESH_TYPE : UINT {
 	Rook,
 	King,
 	Laser,
+	Npc,
 	COUNT
 };
 
@@ -49,6 +50,7 @@ enum class OBJECT_LAYER : int {
 	Bridge,
 	Enemy,
 	Mummy,
+	Npc,
 	Boss,
 	Arrow,
 	PlayerArrow,

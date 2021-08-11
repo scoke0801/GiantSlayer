@@ -122,13 +122,9 @@ public:
 	 
 	void SetAttackDelayTime(float delayTime) { m_AttackDelayTime = delayTime; }
 
-
-	
-
 	void SetEnemyAttackType(EnemyAttackType attackType) { m_AttackType = attackType; }
 	EnemyAttackType GetEnemyAttackType() const { return m_AttackType; } 
 
-	
 	float GetAttackRange() const { return m_AttackRange; }
 
 	CPlayer* GetTargetPlayer() const { return m_TargetPlayer; }
@@ -160,6 +156,13 @@ public:
 
 	void Attack(float elapsedTime) override;
 	//void Update(float elapsedTime) override {}
+};
+
+class CNpc : public CEnemy
+{
+public:
+	CNpc();
+	~CNpc();
 };
 
 class CMummy :public CEnemy

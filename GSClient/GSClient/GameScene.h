@@ -37,21 +37,27 @@ private:
 private:
 	bool						m_isPlayerSelected = true;
 	bool						m_isPlayerBoxCollide = false;
-	bool test = false;
-	bool cc = false;
-
-	CGameObject* m_Chess[4];
+	bool						m_Mummy_Reverse_Direction = false;
+	
+	CGameObject*				m_Chess[4];
 	bool						m_ChessPlate_Check[4] = { false };		// 체스판체크용
 	XMFLOAT3					m_ChessPlate[7][7];						// 체스판
 	bool						m_ChessCollide_Check[4] = { false,false,false,false };
 
-	CMummy* m_Mummy[3];
+	CMummy*						m_Mummy[3];
 	bool						m_MummyExist[3] = { true,true,true };
 	bool						m_One_Mira_Die = false;
 	bool						m_One_Mira_Die_Laser = false;
 	bool						m_Two_Mira_Die = false;
 	bool						m_Two_Mira_Die_Laser = false;
+	
+	CEnemy*						m_Npc = nullptr;
+	bool						m_Npc_Event = false;
+	bool						m_Interaction = false;
 
+	UI*							m_HelpBoard = nullptr;
+
+	
 	CMummyLaser* m_MummyLaser[3];
 	CMummyLaser* m_MummyLaser2[3];
 	CMummyLaser* m_MummyLaser3[3];
@@ -227,11 +233,13 @@ private:
 	void BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void BuildNpc(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
 	
 	void BuildMinimapResource(ID3D12Device* pd3dDevice);
 	void BuildMirrorResource(ID3D12Device* pd3dDevice);
