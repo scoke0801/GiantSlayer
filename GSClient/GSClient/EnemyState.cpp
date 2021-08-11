@@ -243,13 +243,17 @@ void TraceState::Exit(CEnemy* enemy)
 
 void AttackedState::Enter(CEnemy* enemy)
 {
-    enemy->ChangeAnimation(ObjectState::Attacked); 
-    const int PLAYER_DAMAGE = 15;
+    m_LifeTime = 0.8f;
+    enemy->ChangeAnimation(ObjectState::Attacked);
+
+    CGameObject* temp = (CGameObject*)m_Data;
+
+    enemy->TakeDamage(temp->GetATK());
+    cout << "피격! 남은 체력: " << enemy->GetHP() << endl;
+    /*const int PLAYER_DAMAGE = 15;
     int hp = enemy->GetHP();
     hp -= PLAYER_DAMAGE;
     enemy->SetHP(hp);
-
-    
 
     if (hp <= 0) {
         cout << " 삭제 해 !!\n";
@@ -257,17 +261,27 @@ void AttackedState::Enter(CEnemy* enemy)
         MAIN_GAME_SCENE->DeleteEnemy(enemy);
         
         return;
-    }
+    }*/
     //enemy->SetHP(hp);
 }
 
 void AttackedState::Execute(CEnemy* enemy, float elapsedTime)
 {
-   
+    m_ElapsedTime += elapsedTime;
+    if (m_ElapsedTime > m_LifeTime) {
+        if (enemy->GetHP() <= 0) {
+            enemy->ChangeState(new DeathState(enemy));
+        }
+        else if (enemy->GetTargetPlayer() == nullptr)
+            enemy->ChangeState(new PatrolState(enemy));
+        else
+            enemy->ChangeState(new TraceState(enemy));
+    }
 }
 
 void AttackedState::Exit(CEnemy* enemy)
 {
+    m_Data = nullptr;
 }
 
 void BornState::Enter(CEnemy* enemy)
@@ -293,6 +307,26 @@ void BornState::Execute(CEnemy* enemy, float elapsedTime)
 
 void BornState::Exit(CEnemy* enemy)
 {
+}
+
+void DeathState::Enter(CEnemy* enemy)
+{
+    cout << "쥬금" << endl;
+    m_LifeTime = ENEMY_DEATH_TIME;
+    enemy->ChangeAnimation(ObjectState::Die);
+}
+
+void DeathState::Execute(CEnemy* enemy, float elapsedTime)
+{
+    m_ElapsedTime += elapsedTime;
+    if (m_ElapsedTime > m_LifeTime) {
+        MAIN_GAME_SCENE->DeleteEnemy(enemy);
+    }
+}
+
+void DeathState::Exit(CEnemy* enemy)
+{
+
 }
 
 void Mummy_1_Die_Anger_State::Enter(CEnemy* enemy)

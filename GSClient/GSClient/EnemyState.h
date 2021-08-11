@@ -81,7 +81,10 @@ public:
 class AttackedState : public CState<CEnemy>
 {
 public:
-    AttackedState(CEnemy* enemy) { Enter(enemy); }
+    AttackedState(CEnemy* enemy, void* data) { 
+        m_Data = data;
+        Enter(enemy); 
+    }
 
 public:
     virtual void Enter(CEnemy* enemy);
@@ -140,6 +143,19 @@ class BornState : public CState<CEnemy>
 { 
 public:
     BornState(CEnemy* enemy) { Enter(enemy); }
+
+public:
+    virtual void Enter(CEnemy* enemy);
+
+    virtual void Execute(CEnemy* enemy, float elapsedTime);
+
+    virtual void Exit(CEnemy* enemy);
+};
+
+class DeathState : public CState<CEnemy>
+{
+public:
+    DeathState(CEnemy* enemy) { Enter(enemy); }
 
 public:
     virtual void Enter(CEnemy* enemy);

@@ -5,7 +5,7 @@ class ParticleObject;
 class CArrow :  public CGameObject
 {
 public:
-	CArrow() { m_isDrawable = true; }
+	CArrow() { m_isDrawable = true; m_ATK = 30; }
 	virtual ~CArrow() {}
 
 public:
@@ -16,8 +16,6 @@ public:
 public:
 	void SetTargetPosition(const XMFLOAT3& targetPos);
 	void SetTargetVector(const XMFLOAT3& playerLookAt); 
-
-	void SetArrow(CGameObject* owner);
 
 	bool IsCanUse() const { return m_isDrawable; }
 	void SetUseable(bool data) { m_isDrawable = data;  }

@@ -9,6 +9,7 @@ protected:
     float m_transformTime = 0.0f; // 폭주 변신시간
 
     ObjectState m_StateName;
+    void* m_Data;
 
 public:
     virtual ~CState() {}

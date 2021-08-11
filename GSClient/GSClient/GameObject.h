@@ -299,7 +299,12 @@ public:
 
 	void SetHP(UINT HP) { m_HP = HP; }
 	UINT GetHP() const { return m_HP; }
-	void TakeDamage(float dmg) { m_HP -= (dmg - m_DEF); }
+	void TakeDamage(float dmg) { 
+		if (dmg < m_DEF)
+			return;
+		m_HP -= (dmg - m_DEF);
+		if (m_HP <= 0) m_HP = 0;
+	}
 
 	void SetSP(UINT SP) { m_SP = SP; }
 	UINT GetSP() const { return m_SP; }

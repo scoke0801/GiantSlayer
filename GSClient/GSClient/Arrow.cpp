@@ -76,13 +76,6 @@ void CArrow::SetTargetVector(const XMFLOAT3& playerLookAt)
 	LookAt(m_xmf3Position, targetPos, XMFLOAT3(0, 1, 0));
 }
 
-void CArrow::SetArrow(CGameObject* owner)
-{
-	m_pOwner = owner;
-
-	SetUseable(false);
-}
-
 void CArrow::SetDrawable(bool drawable)
 {  
 	m_isDrawable = drawable; 

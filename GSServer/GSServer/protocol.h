@@ -40,6 +40,7 @@ constexpr float TO_JUMP_TIME = 1.0f;
 
 constexpr float MELLE_ENEMY_ATTACK_TIME = 2.7f;
 constexpr float RANGED_ENEMY_ATTACK_TIME = 2.0f;
+constexpr float ENEMY_DEATH_TIME = 1.66666f;
 
 constexpr float MELLE_MUMMY_ATTACK_TIME = 2.7f;
 constexpr float LASER_MUMMY_ATTACK_TIME = 2.0f;

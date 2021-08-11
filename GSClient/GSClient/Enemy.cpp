@@ -12,6 +12,11 @@ CEnemy::CEnemy() : CGameObjectVer2()
 	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this); 
 	m_Speed = 165.0f * 2.5f;
+
+	m_HP = 100;
+	m_SP = 100;
+	m_ATK = 15;
+	m_DEF = 10;
 }
   
 CEnemy::~CEnemy()
@@ -223,7 +228,7 @@ void CEnemy::ChangeState(ObjectState stateInfo, void* pData)
 		ChangeState(new AttackState(this));
 		break;
 	case ObjectState::Attacked:
-		ChangeState(new AttackedState(this));
+		ChangeState(new AttackedState(this, pData));
 		break;
 	case ObjectState::Mummy_1_Die_Anger:
 		ChangeState(new Mummy_1_Die_Anger_State(this));
@@ -313,6 +318,11 @@ CRangedEnemy::CRangedEnemy()
 	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this);
 	m_Speed = 165.0f * 2.5f;
+
+	m_HP = 100;
+	m_SP = 100;
+	m_ATK = 15;
+	m_DEF = 10;
 }
  
 CRangedEnemy::~CRangedEnemy()
@@ -345,10 +355,10 @@ CMeleeEnemy::CMeleeEnemy()
 	m_State = new PatrolState(this);
 	m_Speed = 165.0f * 2.5f;
 
-	//m_HP = 100;
-	//m_SP = 100;
+	m_HP = 100;
+	m_SP = 100;
 	m_ATK = 15;
-	//m_DEF = 10;
+	m_DEF = 10;
 } 
 
 CMeleeEnemy::~CMeleeEnemy()
