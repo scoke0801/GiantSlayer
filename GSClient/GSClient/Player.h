@@ -100,6 +100,7 @@ public:
 	void SetDrawSword();
 	void SetDrawBow();
 	void SetDrawStaff();
+	void SetWeaponPointer();
 	PlayerWeaponType GetWeapon() { return m_WeaponType; }
 	UINT GetSelectedWeapon() const { return (UINT)m_WeaponType; }
 

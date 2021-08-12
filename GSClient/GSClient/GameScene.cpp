@@ -681,11 +681,9 @@ void CGameScene::Update(float elapsedTime)
 			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
 			//	
 			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
+			if (false == m_Player->IsCanAttack() && pEnemy->IsCanDamaged()) {
+				pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+				m_Player->SetAleradyAttack(true);
 			}
 			else if (m_Player->Attacked(pEnemy))
 			{
@@ -3896,6 +3894,7 @@ void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_Players[0]->SetDrawable(true);
 	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
+	m_Players[0]->SetWeaponPointer();
 	//m_Players[0]->SetTextureIndex(0x400); 
 
 	//m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
@@ -3932,6 +3931,7 @@ void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		m_PlayerCameras[i]->SetTarget(m_Players[i]);
 
 		m_Players[i]->SetDrawable(false);
+		m_Players[i]->SetWeaponPointer();
 
 		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
 		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));

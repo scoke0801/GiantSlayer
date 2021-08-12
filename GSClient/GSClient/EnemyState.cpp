@@ -243,6 +243,8 @@ void TraceState::Exit(CEnemy* enemy)
 
 void AttackedState::Enter(CEnemy* enemy)
 {
+    enemy->SetCanDamaged(false);
+
     m_LifeTime = 0.8f;
     enemy->ChangeAnimation(ObjectState::Attacked);
 
@@ -273,6 +275,7 @@ void AttackedState::Execute(CEnemy* enemy, float elapsedTime)
             enemy->ChangeState(new DeathState(enemy));
         }
         else {
+            enemy->SetCanDamaged(true);
             enemy->ChangeState(new PatrolState(enemy));
         }
         /*else if (enemy->GetTargetPlayer() == nullptr)
@@ -284,7 +287,8 @@ void AttackedState::Execute(CEnemy* enemy, float elapsedTime)
 
 void AttackedState::Exit(CEnemy* enemy)
 {
-    m_Data = nullptr;
+    //m_Data = nullptr;
+    //enemy->SetCanDamaged(true);
 }
 
 void BornState::Enter(CEnemy* enemy)

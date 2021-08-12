@@ -154,6 +154,7 @@ protected:	// 按眉 包访 加己 函荐
 	OBJ_NAME			m_Name;
 	OBJ_TYPE			m_Type = OBJ_TYPE::Object;
 	bool				m_isCollidable = true;
+	bool				isCanDamaged = true;
 	CSkill*				m_Skill;
 
 
@@ -320,6 +321,9 @@ public:
 	 
 	virtual void SetDrawable(bool drawable) { m_isDrawable = drawable; }
 	bool IsDrawable() const { return m_isDrawable; }
+
+	bool IsCanDamaged() { return isCanDamaged; }
+	void SetCanDamaged(bool param) { isCanDamaged = param; }
 
 	void SetHegithFromTerrain(float height) { m_HeightFromTerrain = height; }
 	float GetHeightFromTerrain() const { return m_HeightFromTerrain; }
