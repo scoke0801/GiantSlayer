@@ -78,7 +78,9 @@ private:
 
 	UI*							m_Select;
 	UI*							m_PrevBtn, *m_NextBtn;
-	UI* m_RoomBoard;
+	UI*							m_RoomBoard;
+	UI*							m_EnterBox;
+	UI*							m_RoomSelect;
 
 	vector<UI*>					m_Weapons;
 	vector<UI*>					m_RoomInfos;

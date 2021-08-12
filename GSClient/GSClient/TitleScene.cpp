@@ -23,6 +23,7 @@
 #include "Boss.h"
 #include "Effect.h"
 #include "Font.h"
+#include "SceneJH.h"
 
 #define ROOT_PARAMETER_OBJECT				0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA		1
@@ -195,7 +196,9 @@ void CTitleScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		"roomInfo",
 		"weapons",
 		"prevBtn", "nextBtn", "quitBtn" ,
-		"Select"
+		"Select",
+		"EnterBox",
+		"RoomSelect"
 	};
 
 	const wchar_t* address[] =
@@ -209,7 +212,9 @@ void CTitleScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		// weapons
 		L"resources/UI/weapon.dds",
 		L"resources/UI/Prev.dds",L"resources/UI/Next.dds",L"resources/UI/Quit.dds",
-		L"resources/UI/Select.dds"
+		L"resources/UI/Select.dds",
+		L"resources/UI/EnterBox.dds",
+		L"resources/UI/RoomSelect.dds",
 	}; 
 	for (int i = 0; i < _countof(keyNames); ++i)
 	{
@@ -251,8 +256,9 @@ void CTitleScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		"roomInfo",
 		"weapons",
 		"prevBtn", "nextBtn", "quitBtn",
-		"Select"
-
+		"Select",
+		"EnterBox",
+		"RoomSelect"
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -356,9 +362,11 @@ void CTitleScene::DrawUI(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	if (m_IsOnRoomSelect) {
 		m_Select->Draw(pd3dCommandList, m_CurrentCamera);
-		m_PrevBtn->Draw(pd3dCommandList, m_CurrentCamera);;
-		m_NextBtn->Draw(pd3dCommandList, m_CurrentCamera);;
-		m_RoomBoard->Draw(pd3dCommandList, m_CurrentCamera);;
+		m_PrevBtn->Draw(pd3dCommandList, m_CurrentCamera);
+		m_NextBtn->Draw(pd3dCommandList, m_CurrentCamera);
+		m_RoomBoard->Draw(pd3dCommandList, m_CurrentCamera);
+		m_EnterBox->Draw(pd3dCommandList, m_CurrentCamera);
+		m_RoomSelect->Draw(pd3dCommandList, m_CurrentCamera);
 
 		for (UI* pUI : m_Weapons)
 		{
@@ -381,18 +389,21 @@ void CTitleScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 		int index = 0;
 		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"무기선택"), index++,
 			XMFLOAT2(0.72f, 0.17f), XMFLOAT2(2.0f, 2.0f));
-
-		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"1"), index++,
+		 
+		TextHandler::GetInstance().Render(pd3dCommandList, to_wstring((m_RoomStartNo)) , index++,
 			XMFLOAT2(0.142f, 0.2f), XMFLOAT2(2.0f, 2.0f));
 
-		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"2"), index++,
+		TextHandler::GetInstance().Render(pd3dCommandList, to_wstring((m_RoomStartNo + 1)), index++,
 			XMFLOAT2(0.142f, 0.38f), XMFLOAT2(2.0f, 2.0f));
 
-		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"3"), index++,
+		TextHandler::GetInstance().Render(pd3dCommandList, to_wstring((m_RoomStartNo + 2)), index++,
 			XMFLOAT2(0.142f, 0.55f), XMFLOAT2(2.0f, 2.0f));
 
-		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"4"), index++,
+		TextHandler::GetInstance().Render(pd3dCommandList, to_wstring((m_RoomStartNo + 3)), index++,
 			XMFLOAT2(0.142f, 0.73f), XMFLOAT2(2.0f, 2.0f));
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"입장"), index++,
+			XMFLOAT2(0.475f, 0.847f), XMFLOAT2(2.0f, 2.0f)); 
 	}
 }
    
@@ -436,6 +447,14 @@ void CTitleScene::ProcessInput()
 	if (false == m_IsFocusOn) {
 		return;
 	} 
+
+	static bool isFirst = true;
+	if (!isFirst) return;
+	auto keyInput = GAME_INPUT;
+	if (keyInput.KEY_SPACE)
+	{
+		ChangeScene<CSceneJH>(nullptr); 
+	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
 		auto keyInput = GAME_INPUT;
@@ -511,7 +530,8 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 
 		if (x > 770 && x < 1020) {
 			if (y > 588 & y < 677) {
-				// single play 
+				// single play  
+				ChangeScene<CSceneJH>(nullptr);
 			}
 		}
 
@@ -547,30 +567,40 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 223 && x < 861) {
 			if (y > 118 && y < 227) { 
 				// room 1
+				m_RoomSelect->SetPosition({ -0.69f, 0.55f, 0.87 });		// RoomSelect
 			}
 			else if (y > 252 && y < 360) {
 				// room 2
+				m_RoomSelect->SetPosition({ -0.69f, 0.2f, 0.87 });		// RoomSelect
 			}
 
 			else if (y > 383 && y < 496) {
 				// room 3
+				m_RoomSelect->SetPosition({ -0.69f, -0.15f, 0.87 });	// RoomSelect
 			}
 
 			else if (y > 519 && y < 627) {
 				// room 4
+				m_RoomSelect->SetPosition({ -0.69f, -0.5f, 0.87 });		// RoomSelect
 			}
 		}
 
 
-		if (x > 545 && x < 607) {
+		if (x > 503 && x < 559) {
 			if (y > 651 && y < 690) {
 				// prev button
 			}
 		}
 
-		if (x > 674 && x < 733) {
+		if (x > 718 && x < 775) {
 			if (y > 651 && y < 690) {
 				// next button
+			}
+		} 
+
+		if (x > 560 && x < 717) {
+			if (y > 651 && y < 690) {
+				// Enter button
 			}
 		}
 	} 
@@ -591,47 +621,7 @@ void CTitleScene::OnMouseMove(WPARAM btnState, int x, int y)
 	if (false == m_IsFocusOn) {
 		return;
 	} 
-	//
-	// 싱글플레이, 멀티 플레이 코드 분리 작업 진행 필요
-	//
-	if (CFramework::GetInstance().IsOnConntected())
-	{
-		if ((btnState & MK_LBUTTON) != 0)
-		{
-			float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
-			float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
-
-			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_LMOVE;
-			m_MouseInputTypes.emplace_back(MOUSE_INPUT_TYPE::M_LMOVE);
-			m_MousePositions.emplace_back(POINTF{ dx, dy });
-		}
-		else if ((btnState & MK_RBUTTON) != 0)
-		{
-			float dx = static_cast<float>(x - m_LastMousePos.x);
-			float dy = static_cast<float>(y - m_LastMousePos.y);
-			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_RMOVE;
-
-			m_MouseInputTypes.emplace_back(MOUSE_INPUT_TYPE::M_RMOVE);
-			m_MousePositions.emplace_back(POINTF{ dx, dy });
-		}
-	}
-	else {
-		if ((btnState & MK_LBUTTON) != 0)
-		{
-			// Make each pixel correspond to a quarter of a degree.
-			float dx = XMConvertToRadians(0.25f * static_cast<float>(x - m_LastMousePos.x));
-			float dy = XMConvertToRadians(0.25f * static_cast<float>(y - m_LastMousePos.y));
-			 
-		} 
-
-		if ((btnState & MK_RBUTTON) != 0)
-		{
-			float dx = static_cast<float>(x - m_LastMousePos.x);
-			float dy = static_cast<float>(y - m_LastMousePos.y);
-
-			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, dy * 0.025f));
-		}
-	}
+	 
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
 }
@@ -862,17 +852,16 @@ void CTitleScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	}
 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1, 0.1f, 0.0f, false);
-	pUI->SetPosition({-0.1f, -0.75,  0.87 });		// PrevButton
+	pUI->SetPosition({-0.17f, -0.75,  0.87 });		// PrevButton
 	pUI->SetTextureIndex(0x100);
 	pUI->SetShader(pUiShader);
 	m_PrevBtn = pUI;
 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.1, 0.1f, 0.0f, false);
-	pUI->SetPosition({ 0.1f, -0.75, 0.87 });		// NextButton
+	pUI->SetPosition({ 0.17f, -0.75, 0.87 });		// NextButton
 	pUI->SetTextureIndex(0x200);
 	pUI->SetShader(pUiShader);
 	m_NextBtn = pUI;
-
 	 
 	pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
 	pUI->SetPosition({ 0.55f, 0.40f, 0.89 });		// weapon
@@ -897,11 +886,18 @@ void CTitleScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pUI->SetTextureIndex(0x800);
 	pUI->SetShader(pUiShader);
 	m_Select = pUI;
-	//pUI = new UI(pd3dDevice, pd3dCommandList, 0.1, 0.1f, 0.0f, false);
-	//pUI->SetPosition({ 0.75f, 0.72,  0.89 });		// QuitButton
-	//pUI->SetTextureIndex(0x800);
-	//pUI->SetShader(pUiShader);
-	//m_UIs.push_back(pUI);
+
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.23, 0.13f, 0.0f, false);
+	pUI->SetPosition({ -0.00f, -0.75f, 0.87 });		// RoomEnterBox
+	pUI->SetTextureIndex(0x1000); 
+	pUI->SetShader(pUiShader);
+	m_EnterBox = pUI; 
+
+	pUI = new UI(pd3dDevice, pd3dCommandList, 0.12, 0.12f, 0.0f, false);
+	pUI->SetPosition({ -0.69f, 0.55f, 0.87 });		// RoomSelect 
+	pUI->SetTextureIndex(0x2000);
+	pUI->SetShader(pUiShader);
+	m_RoomSelect = pUI;
 }
  
 void CTitleScene::SendMouseInputPacket()

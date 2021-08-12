@@ -67,7 +67,11 @@ Texture2D gtxtPrevButton	: register(t6);
 Texture2D gtxtNextButton	: register(t7);
 Texture2D gtxtQuitButton	: register(t8);
 Texture2D gtxtSelect		: register(t9);
-Texture2D gtxtFont			: register(t10);
+
+Texture2D gtxtEnterBox		: register(t10);
+Texture2D gtxtRoomSelect	: register(t11);
+
+Texture2D gtxtFont			: register(t12);
 
 struct VS_TEXTURE_IN
 {
@@ -96,59 +100,69 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	{
 		cColor = gtxtTitle.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x02)
+	else if (gnTexturesMask & 0x02)
 	{
 		cColor = gtxtSimpleButton.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x04)
+	else if (gnTexturesMask & 0x04)
 	{
 		cColor = gtxtMultipleButton.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x08)
+	else if (gnTexturesMask & 0x08)
 	{ 
 		cColor = gtxtRoomBoard.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x10)
+	else if (gnTexturesMask & 0x10)
 	{
 		cColor = gtxtRoomInfo.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x20)
+	else if (gnTexturesMask & 0x20)
 	{
 		input.uv.y /= 3.0f;
 		cColor = gtxtWeapons.Sample(gssWrap, input.uv);
 	}
 
-	if (gnTexturesMask & 0x40)
+	else if (gnTexturesMask & 0x40)
 	{
 		input.uv.y /= 3.0f;
 		input.uv.y += 1.0f / 3.0f;
 		cColor = gtxtWeapons.Sample(gssWrap, input.uv);
 	}	
 
-	if (gnTexturesMask & 0x80)
+	else if (gnTexturesMask & 0x80)
 	{
 		input.uv.y /= 3.0f;
 		input.uv.y += 2.0f / 3.0f;
 		cColor = gtxtWeapons.Sample(gssWrap, input.uv);
 	}
 
-	if (gnTexturesMask & 0x100)
+	else if (gnTexturesMask & 0x100)
 	{ 
 		cColor = gtxtPrevButton.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x200)
+	else if (gnTexturesMask & 0x200)
 	{
 		cColor = gtxtNextButton.Sample(gssWrap, input.uv);
 	}
-	if (gnTexturesMask & 0x400)
+	else if (gnTexturesMask & 0x400)
 	{
 		cColor = gtxtQuitButton.Sample(gssWrap, input.uv);
 	}	
 	
-	if (gnTexturesMask & 0x800)
+	else if (gnTexturesMask & 0x800)
 	{
 		cColor = gtxtSelect.Sample(gssWrap, input.uv);
 	}
+
+	else if (gnTexturesMask & 0x1000)
+	{
+		cColor = gtxtEnterBox.Sample(gssWrap, input.uv);
+	}
+	else if (gnTexturesMask & 0x2000)
+	{
+		cColor = gtxtRoomSelect.Sample(gssWrap, input.uv);
+	}
+	 
 	return cColor;
 }
 
