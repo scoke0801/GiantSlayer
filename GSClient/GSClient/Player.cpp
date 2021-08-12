@@ -13,6 +13,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_SP = 100;
 	m_ATK = 30;
 	m_DEF = 0;
+
+	FindWeapon("sword1", this);
+	//swordCollider = m_pWeapon->GetColliders();
 }
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -326,7 +329,6 @@ void CPlayer::SetDrawStaff()
 	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
 	SetDrawableRecursively("twoHandedStaff", true);
 }
-
 
 void CPlayer::Jump()
 {

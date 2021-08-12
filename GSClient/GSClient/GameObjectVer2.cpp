@@ -1102,6 +1102,17 @@ void CGameObjectVer2::SetDrawableRecursively(char* name, bool draw)
 	if (m_pChild) m_pChild->SetDrawableRecursively(name, draw);
 }
 
+void CGameObjectVer2::FindWeapon(char* name, CGameObjectVer2* root)
+{
+	if (!strcmp(m_pstrFrameName, name)) {
+		m_pWeapon = this;
+		return;
+	}
+
+	if (m_pSibling) m_pSibling->FindWeapon(name, root);
+	if (m_pChild) m_pChild->FindWeapon(name, root);
+}
+
 void CGameObjectVer2::PrintPartNames()
 {
 	cout << m_pstrFrameName << endl;

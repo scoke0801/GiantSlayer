@@ -146,6 +146,8 @@ public:
 	CGameObjectVer2* m_pChild = NULL;
 	CGameObjectVer2* m_pSibling = NULL;
 
+	CGameObjectVer2* m_pWeapon = NULL;
+
 	int				m_nMaterials = 0;
 	CMaterial**		m_ppMaterials = NULL;
 
@@ -218,6 +220,7 @@ public:
 	void SetTextureIndexFindByName(string fileName);
 
 	void SetDrawableRecursively(char* name, bool draw);
+	void FindWeapon(char* name, CGameObjectVer2* root);
 	void PrintPartNames();
 
 	void GetAABBToBuffer(vector<Collider*>& buffer);

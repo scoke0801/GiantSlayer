@@ -672,6 +672,27 @@ void CGameScene::Update(float elapsedTime)
 				thisEnemy->CollideToObstacle();
 			}
 		}
+
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		if (pEnemy->CollisionCheck(m_Player)) {
+			// 공격 상태일 때만 체력이 닳는것이 맞을까...
+			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+			//	
+			//}
+			if (false == m_Player->IsCanAttack()) {
+				if (false == m_Player->IsAleradyAttack()) {
+					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+					m_Player->SetAleradyAttack(true);
+				}
+			}
+			else if (m_Player->Attacked(pEnemy))
+			{
+				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				m_Player->FixCollision();
+			}
+		}
 	}
 	
 	for (auto pMummy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy])
