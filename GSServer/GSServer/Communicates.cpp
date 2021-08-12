@@ -53,6 +53,26 @@ int recvn(SOCKET s, char* buf, int len, int flags)
 	return (len - left);
 }
  
+void SendPacket(SOCKET& sock, void* p)
+{
+	unsigned char p_size = reinterpret_cast<unsigned char*>(p)[0];
+	unsigned char p_type = reinterpret_cast<unsigned char*>(p)[1];
+
+	EX_OVER* s_over = new EX_OVER;
+	memset(&s_over->m_over, 0, sizeof(s_over->m_over));
+	memcpy(s_over->m_packetbuf, p, p_size);
+	s_over->m_wsabuf.buf = reinterpret_cast<CHAR*>(s_over->m_packetbuf);
+	s_over->m_wsabuf.len = p_size;
+	 
+	auto ret = WSASend(sock, &s_over->m_wsabuf, 1, NULL, 0, &s_over->m_over, NULL);
+	if (0 != ret) {
+		auto err_no = WSAGetLastError();
+		if (WSA_IO_PENDING != err_no) {
+			error_display("WSASend : "); 
+		}
+	}
+}
+
 bool SendPacket(SOCKET& sock, char* packet, int packetSize, int& retVal)
 {
 	// 데이터 보내기(고정 길이)

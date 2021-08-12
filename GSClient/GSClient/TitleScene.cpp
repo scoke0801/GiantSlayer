@@ -424,7 +424,34 @@ void CTitleScene::Communicate(SOCKET& sock)
 
 void CTitleScene::ProcessPacket(unsigned char* p_buf)
 {
-	 
+	char buf[10000];
+	PACKET_PROTOCOL type = (PACKET_PROTOCOL)p_buf[1];
+	switch (type)
+	{
+	case PACKET_PROTOCOL::S2C_SEND_ROOM_INFO:
+		P_S2C_SEND_ROOM_INFO packet;
+		 
+		memcpy(&packet, p_buf, p_buf[0]); 
+		
+		cout << "here!!!!!!!\n";
+		for (int i = 0; i < 20; ++i) {
+
+			if ((int)PlayerWeaponType::None == packet.weapons[i]) {
+				m_Weapons[i]->SetTextureIndex(0x0);
+			}
+			if ((int)PlayerWeaponType::Sword == packet.weapons[i]) {
+				m_Weapons[i]->SetTextureIndex(0x20);
+			}
+			if ((int)PlayerWeaponType::Bow == packet.weapons[i]) {
+				m_Weapons[i]->SetTextureIndex(0x40);
+			}
+			if ((int)PlayerWeaponType::Staff == packet.weapons[i]) {
+				m_Weapons[i]->SetTextureIndex(0x80);
+			}
+		}
+		 
+		break;
+	}
 }
 
 void CTitleScene::LoginToServer()
@@ -525,6 +552,15 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 			if (y > 588 & y < 677) {
 				// multi play
 				m_IsOnRoomSelect = true;
+				if (CFramework::GetInstance().ConnectToServer())
+				{
+					P_C2S_REQUEST_ROOM_INFO p_requestRoomInfo;
+					p_requestRoomInfo.size = sizeof(p_requestRoomInfo);
+					p_requestRoomInfo.type = PACKET_PROTOCOL::C2S_REQUEST_ROOM_INFO;
+					p_requestRoomInfo.baseRoomNo = 1;
+					SendPacket(&p_requestRoomInfo);
+					cout << "plz room info\n";
+				}
 			}
 		}
 
@@ -822,31 +858,31 @@ void CTitleScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	{
 		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
 		pUI->SetPosition({ -0.55f, 0.54f - 0.35f * i, 0.89 });		// weapon
-		pUI->SetTextureIndex(0x20);
+		pUI->SetTextureIndex(0x0);
 		pUI->SetShader(pUiShader);
 		m_Weapons.push_back(pUI); 
 
 		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
 		pUI->SetPosition({ -0.35f, 0.54f - 0.35f * i, 0.89 });		// weapon
-		pUI->SetTextureIndex(0x40);
+		pUI->SetTextureIndex(0x0);
 		pUI->SetShader(pUiShader);
 		m_Weapons.push_back(pUI); 
 		
 		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
 		pUI->SetPosition({ -0.15f, 0.54f - 0.35f * i, 0.89 });		// weapon
-		pUI->SetTextureIndex(0x80);
+		pUI->SetTextureIndex(0x0);
 		pUI->SetShader(pUiShader);
 		m_Weapons.push_back(pUI); 
 
 		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
 		pUI->SetPosition({ 0.05f, 0.54f - 0.35f * i, 0.89 });		// weapon
-		pUI->SetTextureIndex(0x20);
+		pUI->SetTextureIndex(0x0);
 		pUI->SetShader(pUiShader);
 		m_Weapons.push_back(pUI);
 		
 		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
 		pUI->SetPosition({ 0.25f, 0.54f - 0.35f * i, 0.89 });		// weapon
-		pUI->SetTextureIndex(0x40);
+		pUI->SetTextureIndex(0x0);
 		pUI->SetShader(pUiShader);
 		m_Weapons.push_back(pUI);
 	}
