@@ -311,6 +311,7 @@ void CTitleScene::UpdateForMultiplay(float elapsedTime)
 		}
 	}
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
+	CFramework::GetInstance().SetFrameDirtyFlag(true);
 
 }
 void CTitleScene::AnimateObjects(float fTimeElapsed)
@@ -408,18 +409,7 @@ void CTitleScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 }
    
 void CTitleScene::Communicate(SOCKET& sock)
-{
-	P_C2S_UPDATE_SYNC_REQUEST p_syncUpdateRequest;
-	p_syncUpdateRequest.size = sizeof(P_C2S_UPDATE_SYNC_REQUEST);
-	p_syncUpdateRequest.type = PACKET_PROTOCOL::C2S_INGAME_UPDATE_SYNC;
-	//p_syncUpdateRequest.playerNum = m_CurrentPlayerNum;
-
-	int retVal;
-	bool haveToRecv = false; 
-
-	if (m_MousePositions.size() > 0) {
-		SendMouseInputPacket(); 
-	}
+{ 
 }
 
 void CTitleScene::ProcessPacket(unsigned char* p_buf)
@@ -437,19 +427,25 @@ void CTitleScene::ProcessPacket(unsigned char* p_buf)
 		for (int i = 0; i < 20; ++i) {
 
 			if ((int)PlayerWeaponType::None == packet.weapons[i]) {
+				m_Weapons[i]->SetDrawable(false);
 				m_Weapons[i]->SetTextureIndex(0x0);
 			}
 			if ((int)PlayerWeaponType::Sword == packet.weapons[i]) {
+				m_Weapons[i]->SetDrawable(true);
 				m_Weapons[i]->SetTextureIndex(0x20);
 			}
 			if ((int)PlayerWeaponType::Bow == packet.weapons[i]) {
+				m_Weapons[i]->SetDrawable(true);
 				m_Weapons[i]->SetTextureIndex(0x40);
 			}
 			if ((int)PlayerWeaponType::Staff == packet.weapons[i]) {
+				m_Weapons[i]->SetDrawable(true);
 				m_Weapons[i]->SetTextureIndex(0x80);
 			}
 		}
-		 
+		cout << "here!22222!!!!!!\n";
+
+		CFramework::GetInstance().SetFrameDirtyFlag(true);
 		break;
 	}
 }
@@ -637,6 +633,11 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 560 && x < 717) {
 			if (y > 651 && y < 690) {
 				// Enter button
+
+				cout << "ChangeScene to CSceneJH\n";
+				ChangeScene<CSceneJH>(nullptr);
+
+				CFramework::GetInstance().GetCurrentScene()->LoginToServer();
 			}
 		}
 	} 
@@ -860,30 +861,35 @@ void CTitleScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pUI->SetPosition({ -0.55f, 0.54f - 0.35f * i, 0.89 });		// weapon
 		pUI->SetTextureIndex(0x0);
 		pUI->SetShader(pUiShader);
+		pUI->SetDrawable(false);
 		m_Weapons.push_back(pUI); 
 
 		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
 		pUI->SetPosition({ -0.35f, 0.54f - 0.35f * i, 0.89 });		// weapon
 		pUI->SetTextureIndex(0x0);
 		pUI->SetShader(pUiShader);
+		pUI->SetDrawable(false);
 		m_Weapons.push_back(pUI); 
 		
 		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
 		pUI->SetPosition({ -0.15f, 0.54f - 0.35f * i, 0.89 });		// weapon
 		pUI->SetTextureIndex(0x0);
 		pUI->SetShader(pUiShader);
+		pUI->SetDrawable(false);
 		m_Weapons.push_back(pUI); 
 
 		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
 		pUI->SetPosition({ 0.05f, 0.54f - 0.35f * i, 0.89 });		// weapon
 		pUI->SetTextureIndex(0x0);
 		pUI->SetShader(pUiShader);
+		pUI->SetDrawable(false);
 		m_Weapons.push_back(pUI);
 		
 		pUI = new UI(pd3dDevice, pd3dCommandList, 0.15, 0.25f, 0.0f, false);
 		pUI->SetPosition({ 0.25f, 0.54f - 0.35f * i, 0.89 });		// weapon
 		pUI->SetTextureIndex(0x0);
-		pUI->SetShader(pUiShader);
+		pUI->SetShader(pUiShader); 
+		pUI->SetDrawable(false);
 		m_Weapons.push_back(pUI);
 	}
 

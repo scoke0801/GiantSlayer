@@ -231,11 +231,10 @@ void PacketProcessor::ProcessPacket(CLIENT& client, unsigned char* p_buf)
 		P_C2S_REQUEST_ROOM_INFO p_RequestRoomInfo = *reinterpret_cast<P_C2S_REQUEST_ROOM_INFO*>(p_buf);
 		int roomNo = p_RequestRoomInfo.baseRoomNo;
 
-		P_S2C_SEND_ROOM_INFO p_RoomInfo;
-		int size = sizeof(P_S2C_SEND_ROOM_INFO);
-		p_RoomInfo.size = size;
-		p_RoomInfo.type = PACKET_PROTOCOL::S2C_SEND_ROOM_INFO;
+		P_S2C_SEND_ROOM_INFO p_RoomInfo; 
 		ZeroMemory(&p_RoomInfo, sizeof(P_S2C_SEND_ROOM_INFO));
+		p_RoomInfo.size = sizeof(P_S2C_SEND_ROOM_INFO);
+		p_RoomInfo.type = PACKET_PROTOCOL::S2C_SEND_ROOM_INFO;
 		for (int i = 0; i < 4; ++i) {
 			if (false == m_Rooms[roomNo + i- 1].IsActive()){
 				break;
@@ -247,7 +246,7 @@ void PacketProcessor::ProcessPacket(CLIENT& client, unsigned char* p_buf)
 				}
 			}
 		}  
-		CGameRoom::SendPacket(client.m_socket, &p_RoomInfo);
+		SendPacket(client.m_socket, &p_RoomInfo);
 	}
 		break;
 	case PACKET_PROTOCOL::C2S_LOGIN:
