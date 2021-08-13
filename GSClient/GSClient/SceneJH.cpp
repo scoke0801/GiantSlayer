@@ -1112,7 +1112,7 @@ void CSceneJH::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 void CSceneJH::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 { 
 	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"),
+	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"), 0,
 		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
 }
 

@@ -160,7 +160,7 @@ void CShaderHandler::CreateUiShader(ID3D12Device* pd3dDevice, ID3D12RootSignatur
 
 		pUiHelpTextShader->CreateVertexShader(L"Shaders/ShaderGameScene.hlsl", "VS_UI_Textured");
 		pUiHelpTextShader->CreatePixelShader(L"Shaders/ShaderGameScene.hlsl", "PS_UI_HelpText");
-	}
+	} 
 	pUiShader->CreateInputLayout(ShaderTypes::Textured);
 	pUiShader->CreateUIShader(pd3dDevice, pd3dGraphicsRootSignature);
 	m_Data.emplace("Ui", pUiShader);
@@ -402,6 +402,9 @@ void CShaderHandler::CreateEffectShader(ID3D12Device* pd3dDevice, ID3D12RootSign
 
 void CShaderHandler::CreateTextRenderShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
+	if (m_Data.find("Text") != m_Data.end()) {
+		m_Data.erase(m_Data.find("Text"));
+	}
 	CShader* pTextShader = new CShader();
 	if (m_UserID == ShaderHandlerUser::JH) {
 		pTextShader->CreateVertexShader(L"Shaders/ShaderJH.hlsl", "VS_FONT_MAIN");
@@ -416,6 +419,9 @@ void CShaderHandler::CreateTextRenderShader(ID3D12Device* pd3dDevice, ID3D12Root
 	else if (m_UserID == ShaderHandlerUser::TH) {
 		pTextShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VS_FONT_MAIN");
 		pTextShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PS_FONT_MAIN");
+	else {
+		pTextShader->CreateVertexShader(L"Shaders/TitleScene.hlsl", "VS_FONT_MAIN");
+		pTextShader->CreatePixelShader(L"Shaders/TitleScene.hlsl", "PS_FONT_MAIN");
 		//pEffectShader->CreateGeometryShader(L"Shaders/ShaderJH.hlsl", "GSEffect");
 	}
 	pTextShader->CreateInputLayout(ShaderTypes::Text);

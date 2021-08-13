@@ -85,6 +85,8 @@ DXGI_FORMAT GetDXGIFormatFromWICFormat(WICPixelFormatGUID& wicFormatGUID);
 WICPixelFormatGUID GetConvertToWICFormat(WICPixelFormatGUID& wicFormatGUID);
 int GetDXGIFormatBitsPerPixel(DXGI_FORMAT& dxgiFormat);
 
+constexpr int MAX_TEXT_NUM = 10;
+
 class TextHandler
 {
 private:
@@ -101,7 +103,7 @@ public:
 
     void Load(const string& fileName);
 
-    void Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring text, XMFLOAT2 pos, 
+    void Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring text, int index, XMFLOAT2 pos, 
         XMFLOAT2 scale = XMFLOAT2(1.0f, 1.0f), XMFLOAT2 padding = XMFLOAT2(0.5f, 0.0f), XMFLOAT4 color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
     bool InitVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12DescriptorHeap* d3dDescripotrHeap, int handlePosition);
@@ -109,7 +111,7 @@ public:
 private:
     Font m_Font;
      
-    ID3D12Resource* textVertexBuffer;
-    D3D12_VERTEX_BUFFER_VIEW textVertexBufferView; // a view for our text vertex buffer
-    CTextVertex* textVBGPUAddress; // this is a pointer to each of the text constant buffers 
+    ID3D12Resource* textVertexBuffer[MAX_TEXT_NUM];
+    D3D12_VERTEX_BUFFER_VIEW textVertexBufferView[MAX_TEXT_NUM]; // a view for our text vertex buffer
+    CTextVertex* textVBGPUAddress[MAX_TEXT_NUM]; // this is a pointer to each of the text constant buffers 
 };

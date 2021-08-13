@@ -12,7 +12,8 @@ enum class PlayerWeaponType
 {
 	None = 0x00,
 	Sword = 0x01,
-	Bow = 0x02
+	Bow = 0x02,
+	Staff = 0x04
 };
 
 class CPlayer : public CAnimationObject
@@ -85,6 +86,8 @@ public:
 	void SetCamera(CCamera* camera) { m_Camera = camera; }
 	CCamera* GetCamera() const { return m_Camera; }
 	  
+	PlayerWeaponType GetWeaponType() const { return m_WeaponType; }
+
 public:
 	void SetCanAttack(bool info) { m_IsCanAttack = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }
