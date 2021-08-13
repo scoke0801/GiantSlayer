@@ -46,6 +46,10 @@ CGameScene::CGameScene()
 	//m_SoundManager->AddStream("resources/sounds/TestTitle.mp3", Sound_Name::BGM_MAIN_GAME);
 
 	m_SoundManager->AddSound("resources/sounds/ShotArrow.wav", Sound_Name::EFFECT_ARROW_SHOT);
+	m_SoundManager->AddSound("resources/sounds/Laser.mp3", Sound_Name::EFFECT_Laser);
+	m_SoundManager->AddSound("resources/sounds/ChessSuccess.mp3", Sound_Name::EFFECT_Chess_Success);
+	m_SoundManager->AddSound("resources/sounds/FireBall.mp3", Sound_Name::EFFECT_Fire_Ball);
+	m_SoundManager->AddSound("resources/sounds/Sword2.mp3", Sound_Name::EFFECT_Sword);
 	//m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
 
 	cout << "Enter CGameScene \n";
@@ -928,6 +932,7 @@ void CGameScene::Update(float elapsedTime)
 	
 	if (m_ChessPlate_Check[King] && m_ChessPlate_Check[Knight] && m_ChessPlate_Check[Pawn] && m_ChessPlate_Check[Rook])
 	{
+		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Chess_Success);
 		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
 		p->OpenDoor();
 	}
@@ -1837,6 +1842,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 			switch (m_Player->GetWeapon())
 			{
 			case PlayerWeaponType::Sword:
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_Sword);
 				break;
 			case PlayerWeaponType::Bow:
 				if (m_Player->ShotAble()) {
@@ -1850,6 +1856,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 				m_Player->ResetBow();
 				break;
 			case PlayerWeaponType::Staff:
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_Fire_Ball);
 				break;
 			}
 		}
@@ -3777,6 +3784,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 {
 	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy1 && m_MummyExist[0] == true)
 	{
+		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Laser);
 		// 미라가 2마리 남았을때
 		if (m_One_Mira_Die_Laser == true)
 		{
@@ -3798,6 +3806,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 			m_Two_Mira_Die_Laser = false;
 		}
 
+		
 		for (int i = 0; i < 3; i++)
 		{
 			m_MummyLaser[i]->SetUseable(false);
@@ -3817,6 +3826,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy2 && m_MummyExist[1] == true)
 	{
+		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Laser);
 		// 미라가 2마리 남았을때
 		if (m_One_Mira_Die_Laser == true)
 		{
@@ -3854,6 +3864,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 	
 	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy3 && m_MummyExist[2] == true)
 	{
+		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Laser);
 		// 미라가 2마리 남았을때
 		if (m_One_Mira_Die_Laser == true)
 		{
