@@ -29,25 +29,31 @@ void CPlayer::Update(float fTimeElapsed)
 
 		switch (m_WeaponType)
 		{
-		case PlayerWeaponType::Sword: {
-		}break;
-
-		case PlayerWeaponType::Bow: {
-			if (pullString) {
-				if (m_AttackWaitingTime < 1.2f)
-					SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
-
-				if (m_AttackWaitingTime < m_AttackAnimPauseTime)
-					m_AnimationPaused = true;
-
-				m_StringPullTime += fTimeElapsed;
-				m_SP -= fTimeElapsed;
+			case PlayerWeaponType::Sword:
+			{
 			}
-		}break;
+			break;
 
-		case PlayerWeaponType::Staff: {
+			case PlayerWeaponType::Bow:
+			{
+				if (pullString) {
+					if (m_AttackWaitingTime < 1.2f)
+						SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
 
-		}break;
+					if (m_AttackWaitingTime < m_AttackAnimPauseTime)
+						m_AnimationPaused = true;
+
+					m_StringPullTime += fTimeElapsed;
+					m_SP -= fTimeElapsed;
+				}
+			}
+			break;
+
+			case PlayerWeaponType::Staff:
+			{
+
+			}
+			break;
 		}
 
 		if (m_AttackWaitingTime < 0.0f) {
@@ -63,9 +69,6 @@ void CPlayer::Update(float fTimeElapsed)
 	}
 	else if (m_AttackedDelay > 0.0f) {
 		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
-		/*if (m_AttackedDelay == 0.0f) {
-			SetAnimationSet(AnimationType::IDLE);
-		}*/
 	}
 	else {
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0) {
@@ -120,8 +123,19 @@ void CPlayer::Update(float fTimeElapsed)
 void CPlayer::UpdateCamera()
 {
 	if (m_Camera != nullptr) {
-		m_Camera->Update(m_xmf3Position);
-		m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
+		if (pullString)
+		{
+			m_Camera->UpdateAimMode(m_xmf3Position);
+			auto lookVec = GetLook();
+			m_Camera->LookAt(m_Camera->GetPosition3f(), Vector3::Multifly(lookVec, 15000.0f), GetUp());
+			m_Camera->Strafe(-20);
+		}
+		else
+		{
+			m_Camera->Update(m_xmf3Position);
+			m_Camera->LookAt(m_Camera->GetPosition3f(), m_xmf3Position, GetUp());
+		}
+
 		m_Camera->UpdateViewMatrix();
 	}
 }
@@ -203,6 +217,12 @@ void CPlayer::SetVelocity(const XMFLOAT3& dir)
 	if (m_xmf3Velocity.x < -speed) m_xmf3Velocity.x = -speed;
 	if (m_xmf3Velocity.y < -speed) m_xmf3Velocity.y = -speed;
 	if (m_xmf3Velocity.z < -speed) m_xmf3Velocity.z = -speed;
+}
+
+void CPlayer::SetWeaponPointer()
+{
+	FindWeapon("sword1", this);
+	//swordCollider = m_pWeapon->GetColliders();
 }
 
 void CPlayer::AnimationChange(PlayerWeaponType weapon)

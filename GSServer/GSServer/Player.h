@@ -73,7 +73,7 @@ private:
 public:
 	bool pullString = false;
 	float m_StringPullTime = 0.0f;
-
+	 
 	bool m_AnimationPaused = false;
 
 	bool m_Alive = true;
@@ -112,6 +112,7 @@ public:
 	void SetWeaponType(int weaponType) { m_WeaponType = (PlayerWeaponType)weaponType; }
 
 	void SetSwordAttackKeyDown(bool info) { m_AttackKeyDown = info; }
+	void SetWeaponPointer();
 public:
 	void SetCanAttack(bool info) { m_IsCanAttack = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }

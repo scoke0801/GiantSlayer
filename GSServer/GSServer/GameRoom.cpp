@@ -197,6 +197,9 @@ void CGameRoom::InitAll()
 	InitArrows();
 	BuildBlockingRegionOnMap();
 
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		m_PlayerExistingSector[i] = false;
+	}
 	for (int i = m_DoorStartIndex; i < m_DoorStartIndex + 5; ++i) {
 		CDoorWall* pDoorWall = reinterpret_cast<CDoorWall*>(
 			m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][i]);
@@ -215,7 +218,6 @@ void CGameRoom::InitAll()
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		m_Players[i]->UpdateColliders();
 	}
-
 }
  
 void CGameRoom::InitPlayers()
@@ -226,13 +228,10 @@ void CGameRoom::InitPlayers()
 			"resources/FbxExported/Player.bin", true);
 		m_Players[i] = new CPlayer();
 		m_Players[i]->SetChild(pPlayerModel, true);
-		m_Players[i]->Scale(200, 200, 200);
-		float x = float(rand() % 5000);
-		float z = float(rand() % 5000);
-		float y = GetDetailHeight(g_Heights, x, z);
-		//m_Players[i]->SetPosition({x,y,z });
+		m_Players[i]->Scale(200, 200, 200); 
 		m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
 		m_Players[i]->SetExistence(false);
+		//m_Players[i]->SetWeaponPointer();
 	}
 }
 
@@ -386,7 +385,7 @@ void CGameRoom::InitArrows()
 		pArrow->SetPosition({ 500.0f,  100.0f, 1500.0f });
 		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
 		pArrow->Scale(25.0f, 25.0f, 25.0f);
-		pArrow->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		pArrow->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow].push_back(pArrow);
 	}
 
@@ -395,7 +394,7 @@ void CGameRoom::InitArrows()
 		pArrow->SetPosition({ 500.0f,  100.0f, 1500.0f });
 		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
 		pArrow->Scale(100.0f, 100.0f, 50.0f);
-		pArrow->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		pArrow->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
 	}
 }
@@ -474,14 +473,14 @@ void CGameRoom::InitObstacle()
 	pObject = new CGameObject();
 	pObject->Rotate({ 0,1,0 }, 90);
 	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::WALL_1]);
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_4);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->Rotate({ 0,1,0 }, 90);
 	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::WALL_2]);
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_4);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	////////////////////////////////////////////////////////////////////////////////
@@ -513,7 +512,7 @@ void CGameRoom::InitObstacle()
 		pObject = new CGameObject();
 		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_ROCK_1 + i)]);
 		pObject->Scale(50, 50, 50);
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5 * 0.5f, 7 * 0.5f, 3 * 0.5f)));
+		pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(5 * 0.5f, 7 * 0.5f, 3 * 0.5f)));
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
@@ -523,7 +522,7 @@ void CGameRoom::InitObstacle()
 		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
 		pObject->Rotate({ 0,1,0 }, 60 + 30 * i);
 		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_1 + i)]);
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
+		pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
@@ -532,7 +531,7 @@ void CGameRoom::InitObstacle()
 		pObject->Scale(0.5f + 0.5 * i, 0.5f, 0.5f + 0.5 * i);
 		pObject->Rotate({ 0,1,0 }, 0 + 15 * i);
 		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DRY_TREE_3 + i)]);
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
+		pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 100), XMFLOAT3(200 * 0.5f, 1500 * 0.5f, 150 * 0.5f)));
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
@@ -540,14 +539,14 @@ void CGameRoom::InitObstacle()
 	pObject = new CGameObject();
 	pObject->Scale(20.0f, 20.0f, 20.0f);
 	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DRY_FOREST_STUMP_1]);
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(15 * 0.5f, 10 * 0.5f, 15 * 0.5f)));
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(15 * 0.5f, 10 * 0.5f, 15 * 0.5f)));
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->Scale(150.0f, 150.0f, 150.0f);
 	pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_1)]);
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
@@ -555,7 +554,7 @@ void CGameRoom::InitObstacle()
 		pObject = new CGameObject();
 		pObject->Scale(150.0f + 50 * i, 150.0f + 50 * i, 150.0f + 50 * i);
 		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DRY_FOREST_DEAD_TREE_2 + i)]);
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
+		pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(1, -5, -2.5), XMFLOAT3(1 * 0.5f, 5 * 0.5f, 1 * 0.5f)));
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_2);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
@@ -575,7 +574,7 @@ void CGameRoom::InitObstacle()
 
 		pObject = new CGameObject();
 		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_1 + i)]);
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
+		pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
@@ -597,7 +596,7 @@ void CGameRoom::InitObstacle()
 
 		pObject = new CGameObject();
 		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::DESERT_ROCK_6 + i)]);
-		pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
+		pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 220, 0), XMFLOAT3(600 * 0.5f, 250 * 0.5f, 600 * 0.5f)));
 		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
 		m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	}
@@ -609,45 +608,45 @@ void CGameRoom::BuildBlockingRegionOnMap()
 {
 	CGameObject* pObject = new CGameObject();
 	pObject->SetPosition({ 0,-2000,10000 });
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f)));
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(100 * 0.5f, 10000 * 0.5f, 20000 * 0.5f)));
 	pObject->SetPosition({ 19950,-2000,10000 });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 10000,-2000,00 });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(20000 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 10000,-2000,19950 });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	// Forest to DryDesrt 아래 방향 벽  
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(9600 * 0.5f, 800 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 4800,-1000, 15900 });
 	m_BlockingPlateToPreviousSector[0] = (std::move(pObject));
 
 	// Forest to Desert 왼쪽 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 15200 * 0.5f)));
 	pObject->SetPosition({ 10000,-2000, 7600 });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	// Forest 지역 내 못가는 지형 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(2000 * 0.5f, 10000 * 0.5f, 7000 * 0.5f)));
 	pObject->SetPosition({ 4000 + 1000, -2000, 11100 });
 	pObject->UpdateColliders();
@@ -655,46 +654,46 @@ void CGameRoom::BuildBlockingRegionOnMap()
 
 	// Desrt to DryDesrt and Rock 왼쪽 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(400 * 0.5f, 10000 * 0.5f, 12800 * 0.5f)));
 	pObject->SetPosition({ 13800, -2000, 7200 + 6400 });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	// boss 지역 중간 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
 	pObject->SetPosition({ 15200 + 400,-2000, 2800 + 8000 });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(800 * 0.5f, 10000 * 0.5f, 5600 * 0.5f)));
 	pObject->SetPosition({ 17600 + 400,-2000, 2800 + 8000 });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	// 사막 지역 가로 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 2000 + 9600,-2000, 15600 });
 	m_BlockingPlateToPreviousSector[1] = (std::move(pObject));
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(4000 * 0.5f, 1000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 2000 + 9600,-3000, 3600 });
 	m_BlockingPlateToPreviousSector[2] = (std::move(pObject));
 
 	// 보스 지역 입구 가로 벽
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 1200 + 13600,-2000, 8000 });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
 
 	pObject = new CGameObject();
-	pObject->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0, 0),
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0),
 		XMFLOAT3(2400 * 0.5f, 10000 * 0.5f, 100 * 0.5f)));
 	pObject->SetPosition({ 1200 + 13600 + 1600 + 2400,-2000, 8000 });
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary].push_back(pObject);
@@ -720,7 +719,7 @@ void CGameRoom::ResetPlayer(int player_id)
 	m_Players[player_id]->Scale(200, 200, 200);
 	m_Players[player_id]->SetPosition(PLAYER_START_POSITIONS[player_id]);
 	m_Players[player_id]->SetExistence(false);
-	m_Players[player_id]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
+	m_Players[player_id]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 	int nCameras = MAX_ROOM_PLAYER;
 	const float PI = 3.141592;
 

@@ -127,10 +127,10 @@ bool CGameObject::IsInSameSector(SECTOR_POSITION sectorPos) const
 	return m_ExistingSector == sectorPos;
 }
 
-bool CGameObject::CollisionCheck(const BoundingBox& pAABB)
+bool CGameObject::CollisionCheck(BoundingBox* pAABB)
 {
 	for (int i = 0; i < m_AABB.size(); ++i) {
-		bool result = m_AABB[i].Intersects(pAABB);
+		bool result = m_AABB[i]->Intersects(*pAABB);
 		if (result) return true;
 	}
 
@@ -186,13 +186,13 @@ void CGameObject::FixCollision(CGameObject* pObject)
 void CGameObject::UpdateColliders()
 {
 	for (int i = 0; i < m_BoundingBox.size(); ++i) {
-		m_BoundingBox[i].Transform(m_AABB[i], XMLoadFloat4x4(&m_xmf4x4World));
+		m_BoundingBox[i]->Transform(*m_AABB[i], XMLoadFloat4x4(&m_xmf4x4World));
 	}
 }
 
-void CGameObject::AddAABB(const BoundingBox& boundingBox)
+void CGameObject::AddAABB(BoundingBox* boundingBox)
 {  
-	m_AABB.push_back(boundingBox);
+	m_AABB.push_back(new BoundingBox(boundingBox->Center, boundingBox->Extents));
 }
   
 void CGameObject::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1])

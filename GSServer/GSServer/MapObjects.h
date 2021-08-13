@@ -10,7 +10,7 @@ public:
 	void SetPosition(XMFLOAT3 pos) override;
 	void Rotate(const XMFLOAT3& axis, float angle) override;
 
-	bool CollisionCheck(const BoundingBox& aabb) override;
+	bool CollisionCheck(BoundingBox* aabb) override;
 	bool CollisionCheck(CGameObject* other) override;
 
 	void UpdateColliders() override;
@@ -32,7 +32,7 @@ public:
 	void SetPosition(XMFLOAT3 pos) override;
 	void Rotate(const XMFLOAT3& axis, float angle) override;
 
-	bool CollisionCheck(const BoundingBox& aabb) override;
+	bool CollisionCheck(BoundingBox * aabb) override;
 
 	void UpdateColliders() override;
 
@@ -76,7 +76,7 @@ public:
 	void SetPosition(XMFLOAT3 pos) override;
 	void Rotate(const XMFLOAT3& axis, float angle) override;
 
-	bool CollisionCheck(const BoundingBox& aabb) override;
+	bool CollisionCheck(BoundingBox * aabb) override;
 
 	void UpdateColliders() override;
 	void OpenDoor();
@@ -103,7 +103,7 @@ public:
 	void SetPosition(XMFLOAT3 pos) override;
 	void Rotate(const XMFLOAT3& axis, float angle) override;
 	 
-	bool CollisionCheck(const BoundingBox& aabb) override;
+	bool CollisionCheck(BoundingBox * aabb) override;
 
 	bool CollisionCheck(CGameObject* other) override;
 
@@ -122,7 +122,7 @@ public:
 public:
 	void SetPosition(XMFLOAT3 pos) override;
 	 
-	bool CollisionCheck(const BoundingBox& aabb) override;
+	bool CollisionCheck(BoundingBox * aabb) override;
 
 	void UpdateColliders() override;
 };

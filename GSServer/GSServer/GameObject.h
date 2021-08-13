@@ -120,8 +120,8 @@ protected:
 	bool				m_isDrawable = true;
 
 protected:// 面倒贸府 包访 函荐
-	vector<BoundingBox>	m_BoundingBox;
-	vector<BoundingBox>	m_AABB;
+	vector<BoundingBox*>	m_BoundingBox;
+	vector<BoundingBox*>	m_AABB;
 
 public:
 	CGameObject();
@@ -177,7 +177,7 @@ public: // about sectoring for updates
 
 public:
 	// about collision
-	virtual bool CollisionCheck(const BoundingBox& pCollider);
+	virtual bool CollisionCheck(BoundingBox* pCollider);
 	virtual bool CollisionCheck(CGameObject* other);
 
 	void FixCollision(); 
@@ -185,13 +185,13 @@ public:
 
 	virtual void UpdateColliders();
 
-	void AddBoundingBox(const BoundingBox& boundingBox) { m_BoundingBox.push_back(boundingBox); AddAABB(boundingBox); }
-	void AddAABB(const BoundingBox& boundingBox);
+	void AddBoundingBox(BoundingBox* boundingBox) { m_BoundingBox.push_back(boundingBox); AddAABB(boundingBox); }
+	void AddAABB(BoundingBox* boundingBox);
 
 	int GetColliderCount() const { return m_BoundingBox.size(); }
 	 
-	vector<BoundingBox>& GetColliders() { return m_BoundingBox; }
-	vector<BoundingBox>& GetAABB() { return m_AABB; }
+	vector<BoundingBox*>& GetColliders() { return m_BoundingBox; }
+	vector<BoundingBox*>& GetAABB() { return m_AABB; }
 
 	void SetCollisionHandleType(COLLISION_HANDLE_TYPE type) { m_CollisionHandleType = type; }
 	COLLISION_HANDLE_TYPE GetCollisionHandleType() const { return m_CollisionHandleType; }

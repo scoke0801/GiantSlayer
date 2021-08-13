@@ -48,7 +48,7 @@ bool CEnemy::IsEnemyInSight() // Chase State
 		auto plAABBs = player->GetAABB();
 		bool ret = false;
 		for (auto plAABB : plAABBs) {
-			if (ret = m_ActivityRegionBox.Intersects(plAABB)) {
+			if (ret = m_ActivityRegionBox.Intersects(*plAABB)) {
 				break;
 			}
 		}
@@ -62,7 +62,7 @@ bool CEnemy::IsEnemyInSight() // Chase State
 
 		// 플레이어가 객체의 시야에 있는지 확인
 		for (auto plAABB : plAABBs) {
-			if (ret = m_SightAABB.Intersects(plAABB)) {
+			if (ret = m_SightAABB.Intersects(*plAABB)) {
 				// 해당 플레이어를 공격하도록 설정하자
 				cout << "공격할 대상을 찾았습니다.\n";
 
