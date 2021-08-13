@@ -392,7 +392,7 @@ void CPlayer::Attack(int type)
 			}
 		}
 		else {
-			IncreaseAttackWaitingTime(m_SwordAnim1Length);
+			IncreaseAttackWaitingTime(m_AttackAnimLength);
 			SetAnimationSet(ATK);
 			m_LastAttackAnim = 0;
 		}

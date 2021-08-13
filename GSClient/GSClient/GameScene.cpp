@@ -4008,10 +4008,13 @@ void CGameScene::ActiveSkill(OBJECT_LAYER type, CGameObject* user)
 			if (pFireb->IsCanUse()) {
 				int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::FireBallParticle);
 				if (-1 != idx) {
+					CPlayer* player = reinterpret_cast<CPlayer*>(user);
+					pFireb->SetExistingSector((SECTOR_POSITION)player->GetPlayerExistingSector());
 					pFireb->SetUseable(false);
 					pFireb->SetSkill(user);
 					cout << "shot fb" << endl;
 				}
+
 				break;
 			}
 		}
