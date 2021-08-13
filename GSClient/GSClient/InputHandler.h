@@ -17,6 +17,7 @@
 #define VK_9 0x39
 
 
+#define VK_R 0x52
 #define VK_U 0x55
 #define VK_I 0x49
 #define VK_O 0x4F
@@ -63,6 +64,7 @@ struct GameInputs
 	bool KEY_B = false;
 	bool KEY_C = false; 
 
+	bool KEY_R = false;
 	bool KEY_U = false;
 	bool KEY_I = false;
 	bool KEY_O = false;

@@ -433,6 +433,24 @@ void CMeleeEnemy::FindClosePositionToTarget()
 	//Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees(angle)));
 }
 
+CNpc::CNpc()
+{
+	m_Type = OBJ_TYPE::Enemy;
+	//m_AttackType = EnemyAttackType::Melee;
+	//m_AttackRange = 320.0f;
+
+	m_EnemyType = EnemyType::Skeleton;
+
+	m_State = new IdleState(this);
+	
+	m_ExistingSector = SECTOR_POSITION::SECTOR_1;
+}
+
+CNpc::~CNpc()
+{
+
+}
+
 
 CMummy::CMummy()
 {

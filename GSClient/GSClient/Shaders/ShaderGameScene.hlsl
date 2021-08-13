@@ -133,10 +133,15 @@ Texture2D ChessTile						: register(t62);
 
 Texture2D Laser							: register(t63);
 
-Texture2D gtxtMap						: register(t64);
-Texture2D gtxtMirror					: register(t65);
-Texture2D gtxtShadowMap					: register(t66);
-Texture2D gtxtFont						: register(t67);
+Texture2D gtxtNpc_A						: register(t64);
+Texture2D gtxtNpc_M						: register(t65);
+
+Texture2D gtxtHelpBoard					: register(t66);
+
+Texture2D gtxtMap						: register(t67);
+Texture2D gtxtMirror					: register(t68);
+Texture2D gtxtShadowMap					: register(t69);
+Texture2D gtxtFont						: register(t70);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -522,8 +527,8 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	}
 	if (gnTexturesMask & 0x08)
 	{
-
-	}
+        cColor = gtxtHelpBoard.Sample(gssWrap, input.uv);
+    }
 	if (gnTexturesMask & 0x10)
 	{
 		if (gnWeapon & 0x01) {
@@ -1019,6 +1024,10 @@ float4 PSTexturedLighting(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
     {
         cColor = gtxtFireBall.Sample(gssWrap, input.uv);
     }
+    if (gnTexturesMask & 0x800)
+    {
+        cColor = gtxtHelpBoard.Sample(gssWrap, input.uv);
+    }
 	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
 	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
@@ -1226,6 +1235,7 @@ float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	{
 		cColor = cColor = gtxtMirror.Sample(gssWrap, input.uv);
 	}
+    
 
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
@@ -1561,7 +1571,16 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 	output.uv = input.uv;
 
 	output.shadowPosH = mul(float4(output.positionW, 1.0f), gmtxShadowTransform);
-
+	
+ //   float frameCount = 10;
+	
+	//if (gnTexturesMask & 0x100)
+ //   {
+ //       float newTime = fmod(gfTime * 10.0f, frameCount);
+ //   }
+    
+  
+	
 	return(output);
 }
 
@@ -1582,6 +1601,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	float3 normalW;
 	float4 cColor = gtxtPlayerClothes.Sample(gssWrap, input.uv);
 
+	
 	if (gnTexturesMask & 0x01)
 	{
 		cColor = gtxtPlayerClothes.Sample(gssWrap, input.uv);
@@ -1632,14 +1652,17 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	
     else if (gnTexturesMask & 0x100)
     {
+        
         cColor = gtxtMummy.Sample(gssWrap, input.uv);
     
         cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
+		
     }
     else if (gnTexturesMask & 0x200)
     {
 
         float4 Color = { 0.5f, 0.0f, 0.0f, 1.0f };
+		
         cColor = gtxtMummy.Sample(gssWrap, input.uv);
         
         cColor += gtxtMummy_M.Sample(gssWrap, input.uv);
@@ -1652,6 +1675,13 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     {
         cColor = gtxtPlayerStaff.Sample(gssWrap, input.uv);
     }
+    else if (gnTexturesMask & 0x800)
+    {
+        cColor = gtxtNpc_A.Sample(gssWrap, input.uv);
+        cColor += gtxtNpc_M.Sample(gssWrap, input.uv);
+       
+    }
+	
 	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	//{
 	//	float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));

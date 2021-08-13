@@ -38,6 +38,10 @@ enum class Sound_Name : int
 	, BGM_GAME_LOSE
 	, BGM_GAME_WIN
 	, EFFECT_ARROW_SHOT
+	, EFFECT_Fire_Ball
+	, EFFECT_Sword
+	, EFFECT_Chess_Success
+	, EFFECT_Laser
 
 };
 

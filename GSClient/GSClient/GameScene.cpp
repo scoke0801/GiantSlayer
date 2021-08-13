@@ -46,6 +46,10 @@ CGameScene::CGameScene()
 	//m_SoundManager->AddStream("resources/sounds/TestTitle.mp3", Sound_Name::BGM_MAIN_GAME);
 
 	m_SoundManager->AddSound("resources/sounds/ShotArrow.wav", Sound_Name::EFFECT_ARROW_SHOT);
+	m_SoundManager->AddSound("resources/sounds/Laser.mp3", Sound_Name::EFFECT_Laser);
+	m_SoundManager->AddSound("resources/sounds/ChessSuccess.mp3", Sound_Name::EFFECT_Chess_Success);
+	m_SoundManager->AddSound("resources/sounds/FireBall.mp3", Sound_Name::EFFECT_Fire_Ball);
+	m_SoundManager->AddSound("resources/sounds/Sword2.mp3", Sound_Name::EFFECT_Sword);
 	//m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
 
 	cout << "Enter CGameScene \n";
@@ -241,7 +245,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pTerrainWater->SetPosition(XMFLOAT3(5450.0f * MAP_SCALE_SIZE, -1300.0f, 16500.0f * MAP_SCALE_SIZE));
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater].push_back(pTerrainWater);
 
-	//FbxLoader(m_pfbxManager, "laser3", false, 1);
+	//FbxLoader(m_pfbxManager, "Elf_Mesh", false, 1);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
@@ -259,7 +263,8 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	BuildSigns(pd3dDevice, pd3dCommandList);
 	BuildMirror(pd3dDevice, pd3dCommandList);
 	BuildPlayers(pd3dDevice, pd3dCommandList);
-
+	BuildNpc(pd3dDevice, pd3dCommandList);
+	
 	BuildParticles(pd3dDevice, pd3dCommandList);
 	BuildArrows(pd3dDevice, pd3dCommandList);
 	BuildMummyLaser(pd3dDevice, pd3dCommandList);
@@ -315,6 +320,8 @@ void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse",
 		"ChessTile",
 		"Laser",
+		"Npc_A","Npc_M",
+		"HelpBoard"
 	};
 
 	const wchar_t* address[] =
@@ -344,6 +351,9 @@ void CGameScene::LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		L"resources/Textures/KingDiffuse.dds",L"resources/Textures/KnightDiffuse.dds",L"resources/Textures/PawnDiffuse.dds",L"resources/Textures/RookDiffuse.dds",
 		L"resources/OBJ/ChessTile.dds",
 		L"resources/Textures/LightningSpriteSheet2.dds",
+		L"resources/Textures/Elf_Albedo.dds",L"resources/Textures/Elf_Metallic.dds",
+		L"resources/UI/HelpBoard.dds",
+
 	};
 
 	for (int i = 0; i < _countof(keyNames); ++i)
@@ -405,6 +415,8 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		"KingDiffuse","KnightDiffuse","PawnDiffuse","RookDiffuse",
 		"ChessTile",
 		"Laser",
+		"Npc_A","Npc_M",
+		"HelpBoard",
 	};
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -465,7 +477,6 @@ void CGameScene::Update(float elapsedTime)
 	m_SoundManager->OnUpdate();
 	ProcessInput();
 
-	
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
 		for (auto pObject : m_ObjectLayers[i]) {
 			if (false == pObject->IsInNearSector(m_PlayerExistingSector)) {
@@ -489,6 +500,15 @@ void CGameScene::Update(float elapsedTime)
 
 	m_HelpTextUI->Update(elapsedTime);
 
+	if (m_Interaction == true)
+	{
+		m_HelpBoard->SetDrawable(true);
+	}
+	else if (m_Interaction==false)
+	{
+		m_HelpBoard->SetDrawable(false);
+	}
+
 	ZeroMemory(m_PlayerExistingSector, sizeof(m_PlayerExistingSector));
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
@@ -499,7 +519,19 @@ void CGameScene::Update(float elapsedTime)
 	}
 	m_PlayerExistingSector[m_Player->GetPlayerExistingSector()] = true;
 
+	
+
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary]) {
+		if (pObstacle->CollisionCheck(m_Player)) {
+			m_Player->FixCollision(pObstacle);
+		}
+	}
+
+	// NPC랑 충돌
+	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Npc]) {
+		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
 		}
@@ -538,6 +570,7 @@ void CGameScene::Update(float elapsedTime)
 		}
 	}
 
+	
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
@@ -698,50 +731,30 @@ void CGameScene::Update(float elapsedTime)
 		// 왼쪽벽
 		if (pMummy->GetPosition().x < 21269)
 		{
-			test = true;
+			m_Mummy_Reverse_Direction = true;
 		}
 		else if (pMummy->GetPosition().x > 21369)
 		{
-			test = false;
+			m_Mummy_Reverse_Direction = false;
 		}
-		if (test == true)
+		if (m_Mummy_Reverse_Direction == true)
 		{
-			cout << "반전" << endl;
-			//pMummy->LookAt(Vector3::Multifly(XMFLOAT3(180, 0, 0), 1));
 			pMummy->SetTargetVector(Vector3::Multifly(XMFLOAT3(180, 0, 0), 1));
 		}
-
 		if (pMummy->GetPosition().x > 29485)
 		{
-			test = true;
+			m_Mummy_Reverse_Direction = true;
 		}
 		else if (pMummy->GetPosition().x < 29385)
 		{
-			test = false;
+			m_Mummy_Reverse_Direction = false;
 		}
-		if (test == true)
+		if (m_Mummy_Reverse_Direction == true)
 		{
-			cout << "반전" << endl;
-			//pMummy->LookAt(Vector3::Multifly(XMFLOAT3(180, 0, 0), 1));
 			pMummy->SetTargetVector(Vector3::Multifly(XMFLOAT3(180, 0, 0), -1));
 		}
-
 	}
-	/*for (auto pMummy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
-		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
-			if (false == pMummy->IsInSameSector(pObstacle->GetExistingSector())) {
-				continue;
-			}
-			if (pObstacle->CollisionCheck(pMummy)) {
-				CMummy* thisEnemy = reinterpret_cast<CMummy*>(pMummy);
-				thisEnemy->Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees(180)));
-				thisEnemy->FixCollision(pObstacle);
-				thisEnemy->CollideToObstacle();
-			}
-		}
-	}*/
-
-
+	
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
 		// 변수명 변경으로 인한 true/false 반전..
 		if (true == pArrow->IsDrawable()) {
@@ -754,9 +767,6 @@ void CGameScene::Update(float elapsedTime)
 			}
 		}
 	}
-
-	
-
 
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
 		// 변수명 변경으로 인한 true/false 반전..
@@ -809,27 +819,6 @@ void CGameScene::Update(float elapsedTime)
 		}
 	}
 
-	/*for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
-		for (int i = 0; i < 1; i++)
-		{
-			if (pArrow->CollisionCheck(m_Mirror[i])) {
-				m_Mirror[i]->FixCollision();
-				if (i == 0)
-				{
-					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_0(), 1));
-				}
-				else if (i == 1)
-				{
-					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_1(), 1));
-				}
-				else if (i == 2)
-				{
-					pArrow->SetTargetVector(Vector3::Multifly(pArrow->GetReflectLook_2(), 1));
-				}
-			}
-		}
-	}*/
-
 	// 퍼즐 위치 선정
 	XMFLOAT3 lookVec = Vector3::Normalize(m_Player->GetLook());
 	XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 5.0f);
@@ -848,7 +837,22 @@ void CGameScene::Update(float elapsedTime)
 		}
 	}
 
-
+	// npc 자체랑 충돌처리
+	if	(
+		((m_Npc->GetPosition().x + 215.0f > m_Player->GetPosition().x)
+			&& (m_Npc->GetPosition().x - 215.0f < m_Player->GetPosition().x))
+		&&
+		((m_Npc->GetPosition().z + 225.0f > m_Player->GetPosition().z)
+			&& (m_Npc->GetPosition().z - 225.0f < m_Player->GetPosition().z))
+		)
+	{
+		m_Npc_Event = true;
+	}
+	else
+	{
+		m_Npc_Event = false;
+	}
+		
 	// 체스 그 자체랑 충돌처리
 	for (int i = 0; i < ChessType::Count; i++)
 	{
@@ -947,6 +951,7 @@ void CGameScene::Update(float elapsedTime)
 	
 	if (m_ChessPlate_Check[King] && m_ChessPlate_Check[Knight] && m_ChessPlate_Check[Pawn] && m_ChessPlate_Check[Rook])
 	{
+		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Chess_Success);
 		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
 		p->OpenDoor();
 	}
@@ -1764,6 +1769,18 @@ void CGameScene::ProcessInput()
 			p->CloserDoor();
 		}
 	}
+	if (keyInput.KEY_R)
+	{
+		if (m_Npc_Event == true)
+		{
+			m_Interaction = true;
+		}
+		else if (m_Npc_Event == false)
+		{
+			m_Interaction = false;
+		}
+	}
+
 	if (keyInput.KEY_O)
 	{ 
 		gbBoundaryOn = true;
@@ -1844,6 +1861,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 			switch (m_Player->GetWeapon())
 			{
 			case PlayerWeaponType::Sword:
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_Sword);
 				break;
 			case PlayerWeaponType::Bow:
 				if (m_Player->ShotAble()) {
@@ -1857,6 +1875,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 				m_Player->ResetBow();
 				break;
 			case PlayerWeaponType::Staff:
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_Fire_Ball);
 				break;
 			}
 		}
@@ -2284,6 +2303,13 @@ void CGameScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pUI->Rotate(180);
 	m_UIs.push_back(pUI);
 
+	m_HelpBoard = new UI(pd3dDevice, pd3dCommandList, 1.6f, 1.6f, 0.0f, false);
+	m_HelpBoard->SetDrawable(false);
+	m_HelpBoard->SetPosition({ 0.0f, 0.0, 0.90 });        // RoomBoard
+	m_HelpBoard->SetTextureIndex(0x08);
+	m_HelpBoard->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
+	m_UIs.push_back(m_HelpBoard);
+
 }
 
 void CGameScene::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -2486,7 +2512,9 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Mummy[0]->Scale(scale.x, scale.y, scale.z, true);
 		m_Mummy[0]->SetChild(pMummyModel, true);
 		m_Mummy[0]->SetShadertoAll();
-		m_Mummy[0]->SetTextureInedxToAll(0x200);
+		//m_Mummy[0]->SetTextureInedxToAll(0x100);
+		//m_Mummy[0]->SetTextureIndex(0x100);
+		//m_Mummy[0]->SetTextureIndexFindByName();
 		
 		m_Mummy[0]->SetPosition({ 18900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.0f, 6250.0f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[0]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 18900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
@@ -2509,8 +2537,8 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Mummy[1]->Scale(scale.x, scale.y, scale.z);
 		m_Mummy[1]->SetChild(pMummyModel, true);
 		m_Mummy[1]->SetShadertoAll();
-		m_Mummy[1]->SetTextureInedxToAll(0x200);
-		
+		m_Mummy[1]->SetTextureInedxToAll(0x100);
+
 		m_Mummy[1]->SetPosition({ 16900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(16900.0f, 6250), 6250 * MAP_SCALE_SIZE });
 		m_Mummy[1]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 16900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(16900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[1]->SetEnemyAttackType(EnemyAttackType::Mummy2);
@@ -2533,8 +2561,8 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Mummy[2]->Scale(scale.x, scale.y, scale.z);
 		m_Mummy[2]->SetChild(pMummyModel, true);
 		m_Mummy[2]->SetShadertoAll();
-		m_Mummy[2]->SetTextureInedxToAll(0x200);
-
+		m_Mummy[2]->SetTextureInedxToAll(0x100);
+		
 		m_Mummy[2]->SetPosition({ 14900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(14900.0f, 6250), 6250 * MAP_SCALE_SIZE });
 		m_Mummy[2]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 14900.f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(14900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[2]->SetEnemyAttackType(EnemyAttackType::Mummy3);
@@ -2892,13 +2920,34 @@ void CGameScene::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		{
 			m_Mirror[i]->SetPosition({ float(17000 + 2900) * MAP_SCALE_SIZE, -2300, 3200 * MAP_SCALE_SIZE });
 		}
-		m_Mirror[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000, 2600, 10.0, XMFLOAT3{ 0,0,0 });
+		m_Mirror[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000 * MAP_SCALE_SIZE, 2600, 10.0, XMFLOAT3{ 0,0,0 });
 		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f* MAP_SCALE_SIZE, 2600.0f * 0.5f, 10.0f * 0.5f }));
 
 		m_Mirror[i]->SetTextureIndex(0x01);
 
 		m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox].push_back(m_Mirror[i]);
 	}
+}
+
+void CGameScene::BuildNpc(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CGameObjectVer2* pNpcModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Elf_Mesh.bin", NULL, true);
+
+	pNpcModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+		m_pd3dGraphicsRootSignature, "resources/FbxExported/Elf_Mesh.bin", NULL, true);
+
+	m_Npc = new CNpc();
+	m_Npc->Scale(scale.x/1.5f,scale.y/1.5f,scale.z/1.5f);
+	m_Npc->Rotate(XMFLOAT3(0, 1, 0), 180);
+	m_Npc->SetChild(pNpcModel, true);
+	m_Npc->SetShadertoAll();
+	m_Npc->SetTextureInedxToAll(0x800);
+	m_Npc->SetPosition({ 2305.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2305.0f, 4650.0f), 4650.0f * MAP_SCALE_SIZE });
+	//pNpc->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+	m_Npc->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+	m_Npc->SetExistingSector(SECTOR_POSITION::SECTOR_1);
+	m_ObjectLayers[(int)OBJECT_LAYER::Npc].push_back(reinterpret_cast<CGameObject*>(std::move(m_Npc)));
 }
 
 void CGameScene::BuildMinimapResource(ID3D12Device* pd3dDevice)
@@ -3759,6 +3808,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 {
 	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy1 && m_MummyExist[0] == true)
 	{
+		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Laser);
 		// 미라가 2마리 남았을때
 		if (m_One_Mira_Die_Laser == true)
 		{
@@ -3780,6 +3830,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 			m_Two_Mira_Die_Laser = false;
 		}
 
+		
 		for (int i = 0; i < 3; i++)
 		{
 			m_MummyLaser[i]->SetUseable(false);
@@ -3799,6 +3850,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 
 	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy2 && m_MummyExist[1] == true)
 	{
+		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Laser);
 		// 미라가 2마리 남았을때
 		if (m_One_Mira_Die_Laser == true)
 		{
@@ -3836,6 +3888,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 	
 	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy3 && m_MummyExist[2] == true)
 	{
+		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Laser);
 		// 미라가 2마리 남았을때
 		if (m_One_Mira_Die_Laser == true)
 		{
