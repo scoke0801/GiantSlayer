@@ -325,6 +325,7 @@ CRangedEnemy::CRangedEnemy()
 	m_DEF = 0;
 }
  
+
 CRangedEnemy::~CRangedEnemy()
 {
 
@@ -336,7 +337,7 @@ void CRangedEnemy::Attack(float elapsedTime)
 		// 실제 공격!
 		cout << "원거리 몬스터 화살 발사\n"; 
 		m_AttackDelayTime = RANGED_ENEMY_ATTACK_TIME + 1.0f;
-		MAIN_GAME_SCENE_Y->ShotMonsterArrow(this, GetLook());
+		MAIN_GAME_SCENE->ShotMonsterArrow(this, GetLook());
 	}
 }
   
