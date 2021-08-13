@@ -47,6 +47,7 @@ private:
 
 private:
 	float m_AttackAnimLength = 0.0f;
+	float m_SwordAnim1Length = 0.0f;
 	float m_SwordAnim2Length = 0.0f;
 	float m_SwordAnim3Length = 0.0f;
 	float m_SkillAnimLength = 0.0f;
@@ -55,7 +56,7 @@ private:
 
 	float m_AttackAnimPauseTime = 0.0f;
 
-	int m_LastAttackAnim = 1;
+	int m_LastAttackAnim = 0;
 
 	bool m_PullBox = false;
 
@@ -64,7 +65,7 @@ private:
 
 	float m_AttackedDelay = 0.0f;
 	float m_SkillCoolTime = 0.0f;
-	float m_ComboTimer = 0.5f;
+	float m_ComboTimer = 0.2f;
 
 	CGameObject* m_sword = nullptr;
 
@@ -118,8 +119,6 @@ public:
 	float GetAttackWaitTime() const { return m_AttackWaitingTime; }
 	float GetStringPullTime() const { return m_StringPullTime; }
 
-	void AnimationChange(PlayerWeaponType weapon);
-
 	void Jump();
 
 	bool Attacked(CGameObject* pObject);
@@ -132,7 +131,5 @@ public:
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
 
-	void DisableSword();
-	void DisableBow();
 	bool ShotAble();
 };

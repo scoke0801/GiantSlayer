@@ -19,12 +19,6 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	ID3D12RootSignature* pd3dGraphicsRootSignature, FbxManager* pfbxSdkManager, char* pstrFbxFileName)
 {
 	m_Type = OBJ_TYPE::Player;
-
-	// Status
-	m_HP = 100;
-	m_SP = 100;
-	m_ATK = 100;
-	m_DEF = 0;
 }
 
 CPlayer::~CPlayer()
@@ -66,7 +60,7 @@ void CPlayer::Update(float fTimeElapsed)
 
 		if (m_AttackWaitingTime < 0.0f) {
 			ResetAttack();
-			m_ComboTimer = 0.5f;
+			m_ComboTimer = 0.2f;
 			if (m_AttackKeyDown) {
 				SetSwordAttackKeyDown(false);
 				Attack(0);
@@ -267,6 +261,7 @@ void CPlayer::SetWeapon(PlayerWeaponType weaponType)
 		DEATH = AnimationType::SWORD_DEATH;
 
 		m_AttackAnimLength = 2.0f;
+		m_SwordAnim1Length = 2.0f;
 		m_SwordAnim2Length = 1.133333f;
 		m_SwordAnim3Length = 1.466667f;
 		m_SkillAnimLength = 4.8f;
@@ -381,23 +376,23 @@ void CPlayer::Attack(int type)
 	if (type == 0) {
 		if (m_WeaponType == PlayerWeaponType::Sword && m_ComboTimer > 0.0f) {
 			if (m_LastAttackAnim == 0) {
-				IncreaseAttackWaitingTime(m_SwordAnim2Length);
-				SetAnimationSet(ATK2);
+				IncreaseAttackWaitingTime(m_SwordAnim1Length);
+				SetAnimationSet(ATK);
 				m_LastAttackAnim = 1;
 			}
 			else if (m_LastAttackAnim == 1) {
-				IncreaseAttackWaitingTime(m_SwordAnim3Length);
-				SetAnimationSet(ATK3);
+				IncreaseAttackWaitingTime(m_SwordAnim2Length);
+				SetAnimationSet(ATK2);
 				m_LastAttackAnim = 2;
 			}
 			else if (m_LastAttackAnim == 2) {
-				IncreaseAttackWaitingTime(m_AttackAnimLength);
-				SetAnimationSet(ATK);
+				IncreaseAttackWaitingTime(m_SwordAnim3Length);
+				SetAnimationSet(ATK3);
 				m_LastAttackAnim = 0;
 			}
 		}
 		else {
-			IncreaseAttackWaitingTime(m_AttackAnimLength);
+			IncreaseAttackWaitingTime(m_SwordAnim1Length);
 			SetAnimationSet(ATK);
 			m_LastAttackAnim = 0;
 		}
@@ -426,41 +421,6 @@ void CPlayer::ResetBow()
 void CPlayer::Box_Pull(bool Pull_State)
 {
 	SetPullBox(Pull_State);
-}
-
-void CPlayer::AnimationChange(PlayerWeaponType weapon)
-{
-	if (weapon == PlayerWeaponType::Sword) {
-		IDLE = AnimationType::SWORD_IDLE;
-		RUN = AnimationType::SWORD_RUN;
-		ATK = AnimationType::SWORD_ATK;
-		DEATH = AnimationType::SWORD_DEATH;
-
-		m_AttackAnimLength = 1.033333f;
-	}
-	else if (weapon == PlayerWeaponType::Bow) {
-		IDLE = AnimationType::BOW_IDLE;
-		RUN = AnimationType::BOW_RUN;
-		ATK = AnimationType::BOW_ATK;
-		DEATH = AnimationType::BOW_DEATH;
-
-		m_AttackAnimLength = 1.533333f;
-		m_AttackAnimPauseTime = 0.6f;
-	}
-}
-
-void CPlayer::DisableSword()
-{
-	SetDrawableRecursively("sword1", false);
-	SetDrawableRecursively("bow_LeftHand", true);
-	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
-}
-
-void CPlayer::DisableBow()
-{
-	SetDrawableRecursively("sword1", true);
-	SetDrawableRecursively("bow_LeftHand", false);
-	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
 }
 
 bool CPlayer::ShotAble()

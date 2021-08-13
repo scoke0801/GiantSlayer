@@ -3680,8 +3680,6 @@ void CSceneJH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 
 	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
-	m_Players[0]->AnimationChange(PlayerWeaponType::Sword);
-	m_Players[0]->DisableBow();
 	++m_CurrentPlayerNum;
 
 	m_MinimapCamera->SetTarget(m_Players[0]);

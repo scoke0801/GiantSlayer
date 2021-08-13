@@ -1181,7 +1181,7 @@ void CSceneTH::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Res
 void CSceneTH::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"),
+	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"³ª¿È1234abcd!@#"), 0,
 		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
 }
 
@@ -3887,8 +3887,6 @@ void CSceneTH::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 
 	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
-	m_Players[0]->AnimationChange(PlayerWeaponType::Sword);
-	m_Players[0]->DisableBow();
 	++m_CurrentPlayerNum;
 
 	m_MinimapCamera->SetTarget(m_Players[0]);

@@ -419,6 +419,7 @@ void CShaderHandler::CreateTextRenderShader(ID3D12Device* pd3dDevice, ID3D12Root
 	else if (m_UserID == ShaderHandlerUser::TH) {
 		pTextShader->CreateVertexShader(L"Shaders/ShaderTH.hlsl", "VS_FONT_MAIN");
 		pTextShader->CreatePixelShader(L"Shaders/ShaderTH.hlsl", "PS_FONT_MAIN");
+	}
 	else {
 		pTextShader->CreateVertexShader(L"Shaders/TitleScene.hlsl", "VS_FONT_MAIN");
 		pTextShader->CreatePixelShader(L"Shaders/TitleScene.hlsl", "PS_FONT_MAIN");
