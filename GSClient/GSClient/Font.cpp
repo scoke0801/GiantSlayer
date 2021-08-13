@@ -400,7 +400,7 @@ void TextHandler::Load(const string& fileName)
     m_Font = LoadFont(fileName, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 }
 
-void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring text, XMFLOAT2 pos,
+void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring text, int index, XMFLOAT2 pos,
     XMFLOAT2 scale, XMFLOAT2 padding, XMFLOAT4 color)
 {
     // set the text pipeline state object
@@ -410,7 +410,7 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
     pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
      
     // set the text vertex buffer
-    pd3dCommandList->IASetVertexBuffers(0, 1, &textVertexBufferView);
+    pd3dCommandList->IASetVertexBuffers(0, 1, &textVertexBufferView[index]);
 
     int numCharacters = 0;
 
@@ -424,7 +424,7 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
     float verticalPadding = (m_Font.toppadding + m_Font.bottompadding) * padding.y;
 
     // cast the gpu virtual address to a textvertex, so we can directly store our vertices there
-    CTextVertex* vert = (CTextVertex*)textVBGPUAddress;
+    CTextVertex* vert = (CTextVertex*)textVBGPUAddress[index];
 
     wchar_t lastChar = -1; // no last character to start with
 
@@ -458,7 +458,7 @@ void TextHandler::Render(ID3D12GraphicsCommandList* pd3dCommandList, wstring tex
         if (i > 0)
             kerning = m_Font.GetKerning(lastChar, c);
 
-        textVBGPUAddress[numCharacters] = CTextVertex(color.x,
+        (textVBGPUAddress[index])[numCharacters] = CTextVertex(color.x,
             color.y,
             color.z,
             color.w,
@@ -566,6 +566,7 @@ bool TextHandler::InitVertexBuffer(ID3D12Device* pd3dDevice,
     pd3dDevice->CreateShaderResourceView(m_Font.textureBuffer, &fontsrvDesc, srvHandle);
 
     // create text vertex buffer committed resources 
+    for(int i = 0; i <MAX_TEXT_NUM; ++i)
     {
         // create upload heap. We will fill this with data for our text
         ID3D12Resource* vBufferUploadHeap;
@@ -575,24 +576,25 @@ bool TextHandler::InitVertexBuffer(ID3D12Device* pd3dDevice,
             &CD3DX12_RESOURCE_DESC::Buffer(maxNumTextCharacters * sizeof(CTextVertex)), // resource description for a buffer
             D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
             nullptr,
-            IID_PPV_ARGS(&textVertexBuffer));
+            IID_PPV_ARGS(&textVertexBuffer[i]));
         if (FAILED(hr))
         { 
             return false;
         }
-        textVertexBuffer->SetName(L"Text Vertex Buffer Upload Resource Heap");
+        textVertexBuffer[i]->SetName(L"Text Vertex Buffer Upload Resource Heap");
 
         CD3DX12_RANGE readRange(0, 0);	// We do not intend to read from this resource on the CPU. (so end is less than or equal to begin)
 
         // map the resource heap to get a gpu virtual address to the beginning of the heap
-        hr = textVertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&textVBGPUAddress));
+        hr = textVertexBuffer[i]->Map(0, &readRange, reinterpret_cast<void**>(&textVBGPUAddress[i]));
 
     }
      
     // set the text vertex buffer view for each frame
+    for(int i = 0; i <MAX_TEXT_NUM; ++i)
     {
-        textVertexBufferView.BufferLocation = textVertexBuffer->GetGPUVirtualAddress();
-        textVertexBufferView.StrideInBytes = sizeof(CTextVertex);
-        textVertexBufferView.SizeInBytes = maxNumTextCharacters * sizeof(CTextVertex);
+        textVertexBufferView[i].BufferLocation = textVertexBuffer[i]->GetGPUVirtualAddress();
+        textVertexBufferView[i].StrideInBytes = sizeof(CTextVertex);
+        textVertexBufferView[i].SizeInBytes = maxNumTextCharacters * sizeof(CTextVertex);
     } 
 }

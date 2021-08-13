@@ -212,6 +212,8 @@ enum class PACKET_PROTOCOL : short
 	//CLIENT  
 	C2S_LOGIN = 1,
 
+	C2S_REQUEST_ROOM_INFO,
+
 	C2S_INGAME_KEYBOARD_INPUT, 
 	C2S_INGAME_MOUSE_INPUT,
 
@@ -221,6 +223,8 @@ enum class PACKET_PROTOCOL : short
 
 	//SERVER 
 	S2C_LOGIN_HANDLE, 
+	
+	S2C_SEND_ROOM_INFO,
 
 	S2C_NEW_PLAYER,
 	S2C_DELETE_PLAYER,
@@ -250,7 +254,11 @@ struct P_C2S_LOGIN {
 	char name[MAX_NAME];
 	short roomIndex;
 };
-
+struct P_C2S_REQUEST_ROOM_INFO {
+	BYTE size;
+	PACKET_PROTOCOL type;
+	char baseRoomNo;
+};
 struct P_C2S_LOGOUT {
 	BYTE size;
 	PACKET_PROTOCOL type;
@@ -289,6 +297,12 @@ struct P_C2S_UPDATE_SYNC_REQUEST {
 /////////////////////////////////////////////////////////////////
 // server protocol packet
 
+struct P_S2C_SEND_ROOM_INFO {
+	BYTE size;
+	PACKET_PROTOCOL type;
+
+	short weapons[20];
+};
 struct P_S2C_PROCESS_LOGIN {
 	BYTE size; 
 	PACKET_PROTOCOL type;

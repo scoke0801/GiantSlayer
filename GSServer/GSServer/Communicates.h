@@ -11,6 +11,9 @@ void error_display(const char* msg);
 // recv를 이용한 사용자 정의함수
 int recvn(SOCKET s, char* buf, int len, int flags); 
 
+
+void SendPacket(SOCKET& sock, void* p);
+
 bool SendPacket(SOCKET& sock, char* packet, int packetSize, int& retVal);
 bool RecvPacket(SOCKET& sock, char* buf, int& retVal);
 

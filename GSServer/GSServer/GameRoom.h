@@ -75,6 +75,7 @@ public:
 	~CGameRoom() {}
 
 	void InitRoom(int roomIndex) { InitAll(); m_RoomIndex = roomIndex; }
+	static void SendPacket(SOCKET& socket, void* p);
 public:
 	void Update(float elapsedTime);
 
@@ -92,6 +93,9 @@ public:
 	bool CanEnter();
 
 	bool IsActive() { return m_IsActive; }
+	
+	CPlayer* GetPlayer(int index) { return m_Players[index]; }
+
 private:
 	void InitAll();
 	void InitPlayers();

@@ -1,90 +1,145 @@
 #pragma once
 #include "Scene.h"
 
-struct TestData
-{
-	bool MouseClikced = false;
-};
-
-struct TestVertex
-{
-	TestVertex(
-		const DirectX::XMFLOAT3& p,
-		const DirectX::XMFLOAT3& n,
-		const DirectX::XMFLOAT3& t,
-		const DirectX::XMFLOAT2& uv) :
-		m_xmf3Position(p),
-		m_xmf3Normal(n),
-		m_xmf3TangentU(t),
-		m_xmf2TexC(uv) {}
-	TestVertex(
-		float px, float py, float pz,
-		float nx, float ny, float nz,
-		float tx, float ty, float tz,
-		float u, float v) :
-		m_xmf3Position(px, py, pz),
-		m_xmf3Normal(nx, ny, nz),
-		m_xmf3TangentU(tx, ty, tz),
-		m_xmf2TexC(u, v) {}
-	XMFLOAT3 m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3 m_xmf3Normal;
-	XMFLOAT3 m_xmf3TangentU;
-	XMFLOAT2 m_xmf2TexC;
-};
+class CShader;
+class CGameObject;
+class CCamera;
+class CTerrain;
+class CPlayer;
+class UI;
+class HelpTextUI;
+class CTerrain;
+class CParticle;
+class CLightCamera;
+class CEnemy;
+class CMummy;
+class CMummyLaser;
+class CFbxObject2;
+class CBoss;
+class CEffectHandler;
+class Font;
 
 class CTitleScene : public CScene
-{
-private:	
-	D3D12_VIEWPORT			m_d3dViewport;
-	D3D12_RECT				m_d3dScissorRect;
+{  
+private: 
+	array<CMesh*, (int)FBX_MESH_TYPE::COUNT> m_LoadedFbxMesh;
+
+	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
+	 
+	vector<UI*>					m_UIs; 
+	HelpTextUI*					m_HelpTextUI; 
+
+	ID3D12RootSignature*		m_pd3dGraphicsRootSignature = NULL;
+	 
+	CCamera**					m_Cameras;
+	CCamera*					m_CurrentCamera = nullptr;  
 
 private:
-	ID3D12RootSignature*	m_pd3dGraphicsRootSignature;
-	ID3D12PipelineState*	m_pd3dPipelineState;
+	POINT						m_LastMousePos;
 
-	// 테스트 임 시 상 수 버 퍼
-	ID3D12Resource*			m_pd3dTestData = NULL;
-	TestData*				m_pcbMappedTestData = NULL;
+	ID3D12DescriptorHeap* m_pd3dSrvDescriptorHeap = nullptr;
+	ID3D12DescriptorHeap* m_pd3dDsvDescriptorHeap = nullptr;
+	 
+	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dDsvCPUDesciptorStartHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dDsvGPUDesciptorStartHandle;
 
-	ID3D12DescriptorHeap*	m_pd3dSrvDescriptorHeap = nullptr;
+private:	// about Meterail
+	MATERIALS*					m_pMaterials = NULL;
 
-private:	// 서버와 통신하기 위한 데이터 입니다.
-	WSADATA					m_WSA;
-	SOCKET					m_Sock;
-	SOCKADDR				m_ServerAddr;
+	ID3D12Resource*				m_pd3dcbMaterials = NULL;
+	MATERIAL*					m_pcbMappedMaterials = NULL;
 
-	bool					m_IsServerConnected;
-	bool					m_IsSingleplay = true;
+private:	// about Lights
+	LIGHTS*						m_pLights = NULL;
+
+	ID3D12Resource*				m_pd3dcbLights = NULL;
+	LIGHTS*						m_pcbMappedLights = NULL;
+	 
+
+	ID3D12Resource*				m_pd3dFontTexture = NULL;
+
+private:	// about SceneInfo
+	ID3D12Resource*				m_pd3dcbSceneInfo = NULL;
+	CB_GAMESCENE_FRAME_DATA*	m_pcbMappedSceneFrameData = NULL;
+	chrono::steady_clock::time_point m_CreatedTime;
+
+private: // for server mouse input process
+	vector<POINTF>				m_MousePositions;
+	vector<MOUSE_INPUT_TYPE>    m_MouseInputTypes;
+	MOUSE_INPUT_TYPE			m_prevMouseInputType;
 
 private:
-	POINT					m_LastMousePos;
+	CSoundManager*				m_SoundManager;
 
+private:
+	bool						m_IsOnRoomSelect = false;
+	int							m_WeaponSelected = 1;
+	int							m_RoomStartNo = 1;
+
+	UI*							m_Select;
+	UI*							m_PrevBtn, *m_NextBtn;
+	UI*							m_RoomBoard;
+	UI*							m_EnterBox;
+	UI*							m_RoomSelect;
+
+	vector<UI*>					m_Weapons;
+	vector<UI*>					m_RoomInfos;
+	vector<UI*>					m_ToSelectWeapon;
 public:
 	CTitleScene();
 	~CTitleScene();
 
-	virtual void Update(float elapsedTime) override;
-	virtual void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override; 
-
-public:
-	virtual void ProcessInput() override; 
-	 
-	virtual void OnMouseDown(WPARAM btnState, int x, int y) override;
-	virtual void OnMouseUp(WPARAM btnState, int x, int y)	override;
-	virtual void OnMouseMove(WPARAM btnState, int x, int y) override;
-
-public:
-	virtual void SendDataToNextScene(void* context) override {}
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) override;
 
-private: // 객체 생성 관련
-	void CreateRootSignature(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-
 	void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	void BuildConstantsBuffers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-
 	void LoadTextures(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-};
 
+	void BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	 
+	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void BuildLights(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void BuildSceneFrameData(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height); 
+
+	void ReleaseObjects();
+public:
+	void Update(float elapsedTime) override;
+	void UpdateForMultiplay(float elapsedTime)override;
+	void AnimateObjects(float fTimeElapsed);
+	void ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp);
+
+	void Draw(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	void DrawUI(ID3D12GraphicsCommandList* pd3dCommandList) override; 
+	void DrawFont(ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+public:
+	void Communicate(SOCKET& sock) override;
+
+	void ProcessPacket(unsigned char* p_buf) override;
+
+	void LoginToServer()  override;
+	void LogoutToServer() override;
+
+	void DeletePlayer(int playerId) override {}
+	void AddPlayer(int palyerId) override {}
+public:
+	void ProcessInput() override;
+
+	void OnMouseDown(WPARAM btnState, int x, int y) override;
+	void OnMouseUp(WPARAM btnState, int x, int y)	override;
+	void OnMouseMove(WPARAM btnState, int x, int y) override;
+public:
+	virtual void ReleaseUploadBuffers() override;
+
+	//그래픽 루트 시그너쳐를 생성한다.
+	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) override;
+	virtual ID3D12RootSignature* GetGraphicsRootSignature() override { return(m_pd3dGraphicsRootSignature); }
+
+public:
+	void BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	 
+private:
+	void SendMouseInputPacket();
+	void RecvMouseProcessPacket();
+};
