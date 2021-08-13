@@ -10,6 +10,7 @@ protected:
 
     ObjectState m_StateName;
 
+    void* m_Data;
 public:
     virtual ~CState() {}
 

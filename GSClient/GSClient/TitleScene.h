@@ -103,6 +103,7 @@ public:
 	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height); 
 
 	void ReleaseObjects();
+
 public:
 	void Update(float elapsedTime) override;
 	void UpdateForMultiplay(float elapsedTime)override;

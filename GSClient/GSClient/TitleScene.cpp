@@ -23,7 +23,7 @@
 #include "Boss.h"
 #include "Effect.h"
 #include "Font.h"
-#include "SceneJH.h"
+#include "GameScene.h"
 
 #define ROOT_PARAMETER_OBJECT				0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA		1
@@ -424,8 +424,7 @@ void CTitleScene::ProcessPacket(unsigned char* p_buf)
 		memcpy(&packet, p_buf, p_buf[0]); 
 		
 		cout << "here!!!!!!!\n";
-		for (int i = 0; i < 20; ++i) {
-
+		for (int i = 0; i < 20; ++i) { 
 			if ((int)PlayerWeaponType::None == packet.weapons[i]) {
 				m_Weapons[i]->SetDrawable(false);
 				m_Weapons[i]->SetTextureIndex(0x0);
@@ -476,7 +475,7 @@ void CTitleScene::ProcessInput()
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_SPACE)
 	{
-		ChangeScene<CSceneJH>(nullptr); 
+		ChangeScene<CGameScene>(nullptr); 
 	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
@@ -563,7 +562,7 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 770 && x < 1020) {
 			if (y > 588 & y < 677) {
 				// single play  
-				ChangeScene<CSceneJH>(nullptr);
+				ChangeScene<CGameScene>(nullptr);
 			}
 		}
 
@@ -634,8 +633,8 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 			if (y > 651 && y < 690) {
 				// Enter button
 
-				cout << "ChangeScene to CSceneJH\n";
-				ChangeScene<CSceneJH>(nullptr);
+				cout << "ChangeScene to CGameScene\n";
+				ChangeScene<CGameScene>((void*)&m_WeaponSelected);
 
 				CFramework::GetInstance().GetCurrentScene()->LoginToServer();
 			}

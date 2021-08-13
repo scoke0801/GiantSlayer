@@ -6,6 +6,9 @@ class CPlayer;
 enum class EnemyAttackType {
 	Melee,
 	Ranged,
+	Mummy1,
+	Mummy2,
+	Mummy3,
 	BossSkill_1,
 	BossSkill_2,
 	BossSkill_3,
@@ -67,6 +70,7 @@ public:
 
 	void ConnectPlayer(CPlayer** pPlayers, int playerCount);
 
+	void ChangeAnimation(ObjectState stateInfo);
 	void ChangeState(CState<CEnemy>* nextState);
 
 	void FixCollision(CGameObject* pCollideObject) override;
@@ -104,6 +108,9 @@ public:
 
 	EnemyType GetEnemyType() const { return m_EnemyType; }
 	void SetEnemyType(EnemyType enemyType) { m_EnemyType = enemyType; }
+
+	bool IsCanDamaged() { return m_isCanDamaged; }
+	void SetCanDamaged(bool param) { m_isCanDamaged = param; }
 };
 
 class CMeleeEnemy : public CEnemy
@@ -127,4 +134,11 @@ public:
 
 	void Attack(float elapsedTime) override;
 	//void Update(float elapsedTime) override {}
+};
+
+class CNpc : public CEnemy
+{
+public:
+	CNpc();
+	~CNpc();
 };

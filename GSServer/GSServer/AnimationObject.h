@@ -39,7 +39,8 @@ public: // about animation
 	int GetAnimationSet()const { return m_AnimationSet; }
 	void SetAnimationSet(int nAnimationSet);
 	void SetAnimationType(int nType);
-	
+
+	void SetDrawableRecursively(char* name, bool draw);
 public: // about read
 	static CAnimationObject* LoadFrameHierarchyFromFile(CAnimationObject* pParent, FILE* pInFile);
 	static CAnimationObject* LoadGeometryAndAnimationFromFile(const char* pstrFileName, bool bHasAnimation); 

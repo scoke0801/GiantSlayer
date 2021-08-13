@@ -253,6 +253,7 @@ struct P_C2S_LOGIN {
 	PACKET_PROTOCOL type;
 	char name[MAX_NAME];
 	short roomIndex;
+	int weaponType;
 };
 struct P_C2S_REQUEST_ROOM_INFO {
 	BYTE size;

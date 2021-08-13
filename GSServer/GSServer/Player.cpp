@@ -3,8 +3,13 @@
 
 CPlayer::CPlayer() :CAnimationObject()
 {
+	m_Type = OBJ_TYPE::Player;
+
+	// Status
 	m_HP = 100;
-	m_SP = 100; 
+	m_SP = 100;
+	m_ATK = 30;
+	m_DEF = 100;
 }
 
 CPlayer::~CPlayer()
@@ -14,54 +19,101 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	if (m_HP <= 0 && m_AttackedDelay <= 0.1f) {
+		return;
+	}
+
 	if (m_IsCanAttack == false) {
 		if (!m_AnimationPaused)
 			m_AttackWaitingTime -= fTimeElapsed;
 
 		switch (m_WeaponType)
 		{
-		case PlayerWeaponType::Sword:
-			break;
+		case PlayerWeaponType::Sword: {
+		}break;
 
-		case PlayerWeaponType::Bow:
-		{
+		case PlayerWeaponType::Bow: {
 			if (pullString) {
+				if (m_AttackWaitingTime < 1.2f)
+					SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+
 				if (m_AttackWaitingTime < m_AttackAnimPauseTime)
 					m_AnimationPaused = true;
 
 				m_StringPullTime += fTimeElapsed;
 				m_SP -= fTimeElapsed;
 			}
-		}
-		break;
+		}break;
+
+		case PlayerWeaponType::Staff: {
+
+		}break;
 		}
 
-		if (m_AttackWaitingTime < 0.0f)
+		if (m_AttackWaitingTime < 0.0f) {
 			ResetAttack();
+			m_ComboTimer = 0.2f;
+			if (m_AttackKeyDown) {
+				SetSwordAttackKeyDown(false);
+				Attack(0);
+			}
+			else
+				m_LastAttackAnim = 0;
+		}
 	}
 	else if (m_AttackedDelay > 0.0f) {
 		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
+		/*if (m_AttackedDelay == 0.0f) {
+			SetAnimationSet(AnimationType::IDLE);
+		}*/
 	}
 	else {
-		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0)
+		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0) {
+			if (m_ComboTimer > 0)
+				m_ComboTimer -= fTimeElapsed;
 			SetAnimationSet(IDLE);
+		}
+		else if (m_PullBox == TRUE)
+		{
+			SetAnimationSet(PUSH);
+		}
 		else
 			SetAnimationSet(RUN);
 	}
-	float Friction = (m_MovingType == Player_Move_Type::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
-	
-	XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
-	Move(vel);  
+	if (m_Alive) {
+		float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
-	UpdateCamera(); 
+		XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
-	float fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = (Friction * fTimeElapsed); 
-	if (fDeceleration > fLength) fDeceleration = fLength;
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-	//m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
-	CAnimationObject::Animate(fTimeElapsed);
+		Move(vel);
+
+		/*if (false == m_isOnGround) {
+			float y;
+			if (m_JumpTime > 0.5f) {
+				y = -PLAYER_JUMP_HEIGHT * fTimeElapsed;
+			}
+			else {
+				y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
+			}
+			Move({ 0,y,0 });
+			m_JumpTime += fTimeElapsed;
+			if (m_JumpTime > TO_JUMP_TIME) {
+				m_JumpTime = 0.0f;
+				m_isOnGround = true;
+			}
+		}*/
+		UpdateCamera();
+
+		float fLength = Vector3::Length(m_xmf3Velocity);
+		float fDeceleration = (Friction * fTimeElapsed);
+		if (fDeceleration > fLength) fDeceleration = fLength;
+
+		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+		m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
+	}
+
+	Animate(fTimeElapsed);
 	UpdateTransform(NULL);
 }
 
@@ -143,7 +195,7 @@ void CPlayer::SetVelocity(const XMFLOAT3& dir)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity,
 		Vector3::Multifly(normalizedDir, PLAYER_RUN_SPEED));
 
-	float speed = m_MovingType == (Player_Move_Type::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
+	float speed = m_MovingType == (PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 
 	if (m_xmf3Velocity.x > speed) m_xmf3Velocity.x = speed;
 	if (m_xmf3Velocity.y > speed) m_xmf3Velocity.y = speed;
@@ -197,12 +249,40 @@ bool CPlayer::Attacked(CGameObject* pObject)
 	return true;
 }
 
-void CPlayer::Attack()
+void CPlayer::Attack(int type)
 {
 	SetCanAttack(false);
-	IncreaseAttackWaitingTime(PLAYER_SWORD_ATTACK_TIME);
+
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
-	SetAnimationSet(ATK);
+
+	if (type == 0) {
+		if (m_WeaponType == PlayerWeaponType::Sword && m_ComboTimer > 0.0f) {
+			if (m_LastAttackAnim == 0) {
+				IncreaseAttackWaitingTime(m_SwordAnim1Length);
+				SetAnimationSet(ATK);
+				m_LastAttackAnim = 1;
+			}
+			else if (m_LastAttackAnim == 1) {
+				IncreaseAttackWaitingTime(m_SwordAnim2Length);
+				SetAnimationSet(ATK2);
+				m_LastAttackAnim = 2;
+			}
+			else if (m_LastAttackAnim == 2) {
+				IncreaseAttackWaitingTime(m_SwordAnim3Length);
+				SetAnimationSet(ATK3);
+				m_LastAttackAnim = 0;
+			}
+		}
+		else {
+			IncreaseAttackWaitingTime(m_SwordAnim1Length);
+			SetAnimationSet(ATK);
+			m_LastAttackAnim = 0;
+		}
+	}
+	else if (type == 1) {
+		IncreaseAttackWaitingTime(m_SkillAnimLength);
+		SetAnimationSet(SKILL);
+	}
 }
 
 void CPlayer::ResetAttack()

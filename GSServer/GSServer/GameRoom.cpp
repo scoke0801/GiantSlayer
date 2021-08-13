@@ -28,6 +28,15 @@ void CGameRoom::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	}
+
+
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
+		pEnemy->FixPositionByTerrain(g_Heights);
+	}
+	for (auto pMummy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
+		pMummy->FixPositionByTerrain(g_Heights);
+	}
+
 	ZeroMemory(m_PlayerExistingSector, sizeof(m_PlayerExistingSector));
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Players[i]->IsExist()) {
@@ -50,6 +59,20 @@ void CGameRoom::Update(float elapsedTime)
 			}
 		} 
 	}
+	// NPC랑 충돌
+	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Npc]) {
+		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+
+			if (pObstacle->CollisionCheck(m_Players[i])) {
+				m_Players[i]->FixCollision(pObstacle);
+			}
+		}
+	}
+
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
 		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
@@ -60,6 +83,36 @@ void CGameRoom::Update(float elapsedTime)
 			if (pObstacle->CollisionCheck(m_Players[i])) {
 				m_Players[i]->FixCollision(pObstacle);
 				//cout << "충돌발생 - [오브젝트, 플레이어 " << i << "]\n";
+			}
+		}
+	}
+
+
+	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Bridge]) {
+		if (false == pObstacle->IsInNearSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+
+
+			if (pObstacle->CollisionCheck(m_Players[i])) {
+				m_Players[i]->FixCollision(pObstacle);
+				m_Players[i]->UpdateCamera();
+			}
+		}
+	}
+
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pArrow->IsUsable()) {
+			continue;
+		}
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox])
+		{
+			if (pArrow->CollisionCheck(pEnemy)) {
+				pArrow->InverseDirection();
+				break;
 			}
 		}
 	}
@@ -149,6 +202,20 @@ void CGameRoom::InitAll()
 			m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][i]);
 		pDoorWall->OpenDoor();
 	} 
+
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+		for (auto pObject : m_ObjectLayers[i]) {
+			if (i == 9) {
+				int stop =3;
+			}
+			pObject->Update(0.016f);
+			pObject->UpdateColliders();
+		}
+	}	
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		m_Players[i]->UpdateColliders();
+	}
+
 }
  
 void CGameRoom::InitPlayers()
@@ -156,7 +223,7 @@ void CGameRoom::InitPlayers()
 	CAnimationObject* pPlayerModel;
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		pPlayerModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
-			"resources/FbxExported/Player2.bin", true);
+			"resources/FbxExported/Player.bin", true);
 		m_Players[i] = new CPlayer();
 		m_Players[i]->SetChild(pPlayerModel, true);
 		m_Players[i]->Scale(200, 200, 200);
@@ -166,7 +233,6 @@ void CGameRoom::InitPlayers()
 		//m_Players[i]->SetPosition({x,y,z });
 		m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
 		m_Players[i]->SetExistence(false);
-		m_Players[i]->AddBoundingBox(BoundingBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 	}
 }
 
@@ -204,7 +270,6 @@ void CGameRoom::InitMonsters()
 			pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 2005.0f * MAP_SCALE_SIZE, 11650.0f * MAP_SCALE_SIZE), 11650.0f * MAP_SCALE_SIZE });
 			pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 2005.0f * MAP_SCALE_SIZE, 11650.0f * MAP_SCALE_SIZE), 11650.0f * MAP_SCALE_SIZE });
 			pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 10, 3050 * 0.75f / scale.z });
 			pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 			m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
@@ -229,7 +294,6 @@ void CGameRoom::InitMonsters()
 			pEnemy->SetPosition({ 7800.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights,7800.0f * MAP_SCALE_SIZE,  11450.0f * MAP_SCALE_SIZE),  11450.0f * MAP_SCALE_SIZE });
 			pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 7800.0f * MAP_SCALE_SIZE,  11450.0f * MAP_SCALE_SIZE),  11450.0f * MAP_SCALE_SIZE });
 			pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
 			pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 			m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
@@ -252,7 +316,6 @@ void CGameRoom::InitMonsters()
 			pEnemy->SetPosition({ 12100.0f * MAP_SCALE_SIZE,GetDetailHeight(g_Heights,12100.0f * MAP_SCALE_SIZE, 17950.0f * MAP_SCALE_SIZE), 17950.0f * MAP_SCALE_SIZE });
 			pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f * MAP_SCALE_SIZE,GetDetailHeight(g_Heights,12100.0f * MAP_SCALE_SIZE, 17950.0f * MAP_SCALE_SIZE), 17950.0f * MAP_SCALE_SIZE });
 			pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 10, 1450 * 0.75f / scale.z });
 			pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_3);
 			m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
@@ -274,7 +337,6 @@ void CGameRoom::InitMonsters()
 			pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE,GetDetailHeight(g_Heights,11900.0f * MAP_SCALE_SIZE, 13300.0f * MAP_SCALE_SIZE), 13300.0f * MAP_SCALE_SIZE });
 			pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f * MAP_SCALE_SIZE,GetDetailHeight(g_Heights,11900.0f * MAP_SCALE_SIZE, 13300.0f * MAP_SCALE_SIZE), 13300.0f * MAP_SCALE_SIZE });
 			pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
 			pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_3);
 			m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
@@ -293,7 +355,6 @@ void CGameRoom::InitMonsters()
 			pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE,GetDetailHeight(g_Heights,11900.0f * MAP_SCALE_SIZE, 3250.0f * MAP_SCALE_SIZE), 3250.0f * MAP_SCALE_SIZE });
 			pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f * MAP_SCALE_SIZE,GetDetailHeight(g_Heights,11900.0f * MAP_SCALE_SIZE, 3250.0f * MAP_SCALE_SIZE), 3250.0f * MAP_SCALE_SIZE });
 			pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-			pEnemy->AddBoundingBox(BoundingBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 			pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
 			pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_4);
 			m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
@@ -315,7 +376,6 @@ void CGameRoom::InitMonsters()
 	XMFLOAT3 scopeSize = { 4100 * 2, 0, 4100 * 2 };
 	pBoss->SetActivityScope({ scopeSize.x, 0, scopeSize.z }, { centerPos });
 	pBoss->SetSightBoundingBox({ scopeSize.x / scale.x, 15, scopeSize.z / scale.z });
-	pBoss->AddBoundingBox(BoundingBox(XMFLOAT3{ scopeSize.x / scale.x, 15, scopeSize.z / scale.z }, XMFLOAT3{ 0, 0.0f,0 })); 
 	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pBoss);
 }
 
@@ -862,13 +922,13 @@ void CGameRoom::DeleteObject(CGameObject* pObject, int layerIdx)
 	}
 }
    
-void CGameRoom::EnterPlayer(CLIENT& client)
+void CGameRoom::EnterPlayer(CLIENT& client, int weapontType)
 {
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i] == nullptr) {
 			m_Clients[i] = &client;
 			m_IdIndexMatcher.emplace(client.id, i); 
-			m_IsActive = true;
+			m_IsActive = true; 
 			return;
 		} 
 	}
@@ -927,6 +987,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 		p_processLogin.size = sizeof(p_processLogin);
 		p_processLogin.type = PACKET_PROTOCOL::S2C_LOGIN_HANDLE;
 
+		P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(p_buf);
 		// p_id mean packet_id... 
 		cout << "player_id : " << p_id << " p_id : " << p_id << endl;
 		if (m_CurrentPlayerNum > MAX_ROOM_PLAYER) {
@@ -937,6 +998,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 
 			m_Players[id]->SetExistence(true);
 			m_Players[id]->SetId(p_id);
+			m_Players[id]->SetWeaponType(p_login.weaponType);
 			XMFLOAT3 pos = m_Players[id]->GetPosition();
 
 			p_processLogin.x = FloatToInt(pos.x);
@@ -992,7 +1054,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 			break;
 		case VK_J:
 			if (m_Players[id]->IsCanAttack()) {
-				m_Players[id]->Attack();
+				m_Players[id]->Attack(0);
 			}
 			break;
 		case VK_U:

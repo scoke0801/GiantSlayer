@@ -6,8 +6,18 @@
 CEnemy::CEnemy() :CAnimationObject()
 {
 	m_State = new PatrolState(this);
+
+	m_Type = OBJ_TYPE::Enemy;
+	m_EnemyType = EnemyType::Skeleton;
+
 	m_EnemyType = EnemyType::Skeleton;
 	m_Speed = 165.0f * 2.5f;
+
+
+	m_HP = 100;
+	m_SP = 100;
+	m_ATK = 15;
+	m_DEF = 0;
 }
 
 CEnemy::~CEnemy()
@@ -16,15 +26,11 @@ CEnemy::~CEnemy()
 }
 
 void CEnemy::Update(float elapsedTime)
-{
+{ 
 	m_State->Execute(this, elapsedTime);
 
-	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4World));
-
-	if (m_AttackDelayTime > 0.0f) {
-		m_AttackDelayTime = max(m_AttackDelayTime - elapsedTime, 0.0f);
-	}
-
+	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
+	  
 	CAnimationObject::Animate(elapsedTime);
 	UpdateTransform(NULL);
 }
@@ -115,6 +121,50 @@ void CEnemy::ConnectPlayer(CPlayer** pPlayers, int playerCount)
 	}
 }
 
+void CEnemy::ChangeAnimation(ObjectState stateInfo)
+{
+	switch (stateInfo)
+	{
+	case ObjectState::Wait:
+		SetAnimationSet(1);
+		break;
+	case ObjectState::Idle:
+		SetAnimationSet(1);
+		break;
+	case ObjectState::Patrol:
+		SetAnimationSet(1);
+		break;
+	case ObjectState::Trace:
+		SetAnimationSet(1);
+		break;
+	case ObjectState::Attack:
+		SetAnimationSet(2);
+		break;
+	case ObjectState::Attacked:
+		SetAnimationSet(3);
+		break;
+	case ObjectState::Die:
+		SetAnimationSet(4);
+		break;
+	case ObjectState::RunAway:
+		break;
+	case ObjectState::BossSkill_1:
+		break;
+	case ObjectState::BossSkill_2:
+		break;
+	case ObjectState::BossSkill_3:
+		break;
+	case ObjectState::BossSkill_4:
+		break;
+	case ObjectState::BossSkill_5:
+		break;
+	case ObjectState::BossBorn:
+		break;
+	default:
+		break;
+	}
+}
+
 void CEnemy::ChangeState(CState<CEnemy>* nextState)
 {
 	m_State->Exit(this);
@@ -179,9 +229,8 @@ void CEnemy::FindClosePositionToTarget()
 }
 
 void CEnemy::MoveToNextPosition(float elapsedTime)
-{
-	const float ENEMY_SPEED_TEMP = 165.0f * 2.5f;
-	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ENEMY_SPEED_TEMP * elapsedTime)));
+{ 
+	SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, m_Speed * elapsedTime)));
 	m_ToMovePosition.y = m_xmf3Position.y;
 	XMFLOAT3 gap = Vector3::Subtract(m_ToMovePosition, m_xmf3Position);
 	if (Vector3::Length(gap) < 10.0f) {
@@ -203,10 +252,7 @@ void CEnemy::LookTarget(bool rotatedModel)
 
 	m_ToMovePosition.y = m_xmf3Position.y;
 
-	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 });
-	if (rotatedModel) {
-		//Rotate({ 0,1,0 }, 180.0f);
-	}
+	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 }); 
 }
 
 void CEnemy::FixCollision(CGameObject* pCollideObject)
@@ -234,7 +280,13 @@ void CEnemy::ChangeState(ObjectState stateInfo, void* pData)
 		ChangeState(new AttackState(this));
 		break;
 	case ObjectState::Attacked:
-		ChangeState(new AttackedState(this));
+		ChangeState(new AttackedState(this, pData));
+		break;
+	case ObjectState::Mummy_1_Die_Anger:
+		//ChangeState(new Mummy_1_Die_Anger_State(this));
+		break;
+	case ObjectState::Mummy_2_Die_Anger:
+		//ChangeState(new AttackedState(this));
 		break;
 	case ObjectState::Die:
 		break;
@@ -248,13 +300,21 @@ void CEnemy::ChangeState(ObjectState stateInfo, void* pData)
 //////////////////////////////////////////////////////////////////////////
 
 CRangedEnemy::CRangedEnemy()
-{ 
+{
+	m_Type = OBJ_TYPE::Enemy;
 	m_AttackType = EnemyAttackType::Ranged;
+
+	m_EnemyType = EnemyType::Skeleton;
 
 	m_AttackRange = 1200.0f;
 	m_State = new PatrolState(this);
 	m_EnemyType = EnemyType::Skeleton;
 	m_Speed = 165.0f * 2.5f;
+
+	m_HP = 100;
+	m_SP = 100;
+	m_ATK = 15;
+	m_DEF = 0;
 }
 
 CRangedEnemy::~CRangedEnemy()
@@ -264,20 +324,12 @@ CRangedEnemy::~CRangedEnemy()
 
 void CRangedEnemy::Attack(float elapsedTime)
 {
-	// 공격관련 애니메이션 수행
-	// 현재는 임시코드
-	{
-		float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
-
-		//Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
+	if (m_AttackDelayTime <= 0.0f) {
+		// 실제 공격!
+		cout << "원거리 몬스터 화살 발사\n";
+		m_AttackDelayTime = RANGED_ENEMY_ATTACK_TIME + 1.0f;
+		//MAIN_GAME_SCENE_Y->ShotMonsterArrow(this, GetLook());
 	}
-
-	//if (m_AttackDelayTime <= 0.0f) {
-	//	// 실제 공격!
-	//	cout << "원거리 몬스터 화살 발사\n";
-	//	m_AttackDelayTime = RANGED_ENEMY_ATTACK_TIME + 1.0f;
-	//	MAIN_GAME_SCENE->ShotMonsterArrow(this, GetLook());
-	//}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -291,6 +343,11 @@ CMeleeEnemy::CMeleeEnemy()
 	m_State = new PatrolState(this);
 	m_EnemyType = EnemyType::Skeleton;
 	m_Speed = 165.0f * 2.5f;
+
+	m_HP = 100;
+	m_SP = 100;
+	m_ATK = 15;
+	m_DEF = 0;
 }
 
 CMeleeEnemy::~CMeleeEnemy()
@@ -299,13 +356,6 @@ CMeleeEnemy::~CMeleeEnemy()
 }
 void CMeleeEnemy::Attack(float elapsedTime)
 {
-	// 공격관련 애니메이션 수행
-	// 현재는 임시코드
-	{
-		//float rotateAnglePerFrame = 360.0f / RANGED_ENEMY_ATTACK_TIME;
-
-		//Rotate({ 0,0,1 }, rotateAnglePerFrame * elapsedTime);
-	}
 	if (m_AttackDelayTime <= 0.0f) {
 		// 실제 공격!  
 		m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.0f;
@@ -370,4 +420,21 @@ void CMeleeEnemy::FindClosePositionToTarget()
 	//Rotate({ 0,1,0 }, 180.0f);
 	//cout << "회전 각: " << angle << "\n";
 	//Rotate(XMFLOAT3(0, 1, 0), (XMConvertToDegrees(angle)));
+}
+CNpc::CNpc()
+{
+	m_Type = OBJ_TYPE::Enemy;
+	//m_AttackType = EnemyAttackType::Melee;
+	//m_AttackRange = 320.0f;
+
+	m_EnemyType = EnemyType::Skeleton;
+
+	m_State = new IdleState(this);
+
+	m_ExistingSector = SECTOR_POSITION::SECTOR_1;
+}
+
+CNpc::~CNpc()
+{
+
 }

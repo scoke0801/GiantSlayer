@@ -108,6 +108,8 @@ private:
 
 	short						m_DoorIdx = 0;
 
+	int							m_nSelectedWeaponType = 0x01;
+
 private:
 	POINT						m_LastMousePos;
 
@@ -174,6 +176,8 @@ public:
 
 	void ReleaseObjects();
 public:
+	void SendDataToNextScene(void* context) override;
+
 	void Update(float elapsedTime) override;
 	void UpdateForMultiplay(float elapsedTime)override;
 	void AnimateObjects(float fTimeElapsed);

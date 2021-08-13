@@ -165,6 +165,14 @@ void CAnimationObject::SetAnimationType(int nType)
 	if (m_pChild) m_pChild->SetAnimationType(nType);
 }
 
+void CAnimationObject::SetDrawableRecursively(char* name, bool draw)
+{
+	if (!strcmp(m_pstrFrameName, name)) SetDrawable(draw);
+
+	if (m_pSibling) m_pSibling->SetDrawableRecursively(name, draw);
+	if (m_pChild) m_pChild->SetDrawableRecursively(name, draw);
+}
+
 CAnimationObject* CAnimationObject::LoadFrameHierarchyFromFile(CAnimationObject* pParent, FILE* pInFile)
 {
 	static int count = 0;

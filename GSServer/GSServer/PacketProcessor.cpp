@@ -252,7 +252,7 @@ void PacketProcessor::ProcessPacket(CLIENT& client, unsigned char* p_buf)
 	case PACKET_PROTOCOL::C2S_LOGIN:
 	{ 
 		P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(p_buf);
-		client.m_RoomIndex = p_login.roomIndex; 
+		client.m_RoomIndex = p_login.roomIndex;  
 		if (client.m_RoomIndex == -1) {
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				if (m_Rooms[i].CanEnter()) {
@@ -261,7 +261,7 @@ void PacketProcessor::ProcessPacket(CLIENT& client, unsigned char* p_buf)
 				}
 			}
 		}
-		m_Rooms[client.m_RoomIndex].EnterPlayer(client);
+		m_Rooms[client.m_RoomIndex].EnterPlayer(client, p_login.weaponType);
 	} 
 	// break; ¾ÈÇØ¿ä
 	default:

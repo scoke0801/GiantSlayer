@@ -1529,12 +1529,20 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 	}
 }
 
+void CGameScene::SendDataToNextScene(void* context)
+{
+	if (context != nullptr) {
+		m_nSelectedWeaponType = *(int*)context;
+	}
+}
+
 void CGameScene::LoginToServer()
 {
 	P_C2S_LOGIN p_login;
 	p_login.size = sizeof(p_login);
 	p_login.type = PACKET_PROTOCOL::C2S_LOGIN;
 	p_login.roomIndex = -1;
+	p_login.weaponType = m_nSelectedWeaponType;
 	strcpy_s(p_login.name, CFramework::GetInstance().GetPlayerName().c_str());
 
 	SendPacket(&p_login);
@@ -2608,6 +2616,7 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,

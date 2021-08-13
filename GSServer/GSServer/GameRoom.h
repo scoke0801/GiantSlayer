@@ -18,11 +18,24 @@ enum class OBJECT_LAYER : int {
 	Puzzle,
 	PuzzleBox,
 	Obstacle,
+	ChessPuzzle,
+	PlayerChessPuzzle,
+	Bridge,
 	TerrainBoundary,
 	MirrorBox,
-	Enemy,
+	Enemy, 
+	Mummy,
+	Npc,
+
 	PlayerArrow,
 	MonsterArrow,
+
+	Mummylaser,
+	Mummylaser2,
+	Mummylaser3,
+
+	FireBall,
+
 	Count,
 };
 
@@ -89,7 +102,7 @@ public:
 
 	void DeleteObject(CGameObject* pObject, int layerIdx);
 
-	void EnterPlayer(CLIENT& client);
+	void EnterPlayer(CLIENT& client, int weapontType);
 	bool CanEnter();
 
 	bool IsActive() { return m_IsActive; }

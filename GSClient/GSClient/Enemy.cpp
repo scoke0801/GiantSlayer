@@ -196,10 +196,7 @@ void CEnemy::LookTarget(bool rotatedModel)
 
 	m_ToMovePosition.y = m_xmf3Position.y;
 
-	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 });
-	if (rotatedModel) {
-		//Rotate({ 0,1,0 }, 180.0f);
-	}
+	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 }); 
 } 
 
 void CEnemy::FixCollision(CGameObject* pCollideObject)
