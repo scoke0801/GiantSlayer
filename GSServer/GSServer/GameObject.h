@@ -177,6 +177,7 @@ public:
 public: // about sectoring for updates
 	// 플레이어가 위치한 영역과, 객체들이 위치한 영역을 비교하여
 	// 인접한 영역에 있는지 확인한다. 
+	bool IsInNearSector(SECTOR_POSITION sector) const;
 	bool IsInNearSector(bool* playerSector) const;
 	bool IsInSameSector(bool* playerSector) const;
 	bool IsInSameSector(SECTOR_POSITION sectorPos) const;

@@ -1015,8 +1015,7 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->UpdateOnServer(elapsedTime);
-		player->UpdateColliders(); 
-		DisplayVector3(player->GetPosition());
+		player->UpdateColliders();  
 		m_PlayerExistingSector[player->GetPlayerExistingSector()] = true;
 	}
 

@@ -911,8 +911,10 @@ void CGameRoom::SendMonsterActPacket()
 		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
 			continue;
 		}
-		for (int j = 0; j < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++j) {
-			SendPacket(m_Clients[i]->id, &p_monsterUpdate[j]);
+		for (int j = 0; j < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++j) { 
+			if (m_ObjectLayers[(int)OBJECT_LAYER::Enemy][j]->IsInNearSector((SECTOR_POSITION)m_Players[i]->GetPlayerExistingSector())) {
+				SendPacket(m_Clients[i]->id, &p_monsterUpdate[j]);
+			}
 		}
 	}
 }

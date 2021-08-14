@@ -109,6 +109,13 @@ void CGameObject::SetTargetVector(const XMFLOAT3& playerLookAt)
 	LookAt(m_xmf3Position, targetPos, XMFLOAT3(0, 1, 0));
 }
 
+bool CGameObject::IsInNearSector(SECTOR_POSITION sector) const
+{
+	auto gap = (int)m_ExistingSector - (int)sector;
+	 
+	return std::abs(gap <= 1);
+}
+
 bool CGameObject::IsInNearSector(bool* playerSector) const
 {
 	int prev = max((int)m_ExistingSector - 1, 0);
