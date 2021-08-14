@@ -1622,6 +1622,12 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 	{
 		P_S2C_CHESS_OBJ_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_CHESS_OBJ_UPDATE_SYNC*>(p_buf);
 
+		for (int i = 0; i < 4; ++i) {
+			XMFLOAT3 pos = { IntToFloat(packet->posX[i]), IntToFloat(packet->posY[i]), IntToFloat(packet->posZ[i]) };
+
+			m_Chess[i]->SetPosition(pos);
+		}
+		cout << "ChessACt\n";
 	}
 		break;
 

@@ -180,6 +180,22 @@ void CGameRoom::Update(float elapsedTime)
 			}
 		}
 	}
+	for (auto pFireball : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pFireball->IsDrawable()) {
+			continue;
+		}
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy])
+		{
+			if (pFireball->CollisionCheck(pEnemy)) {
+				pEnemy->ChangeState(ObjectState::Attacked, pFireball);
+				pFireball->SetDrawable(true);
+				 
+				break;
+			}
+		}
+	}
+
 	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) { 
 		if (false == pPuzzle->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
@@ -192,12 +208,193 @@ void CGameRoom::Update(float elapsedTime)
 			}
 		}
 	}
+
+
+	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
+		if (false == pPuzzle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+
+			if (pPuzzle->CollisionCheck(m_Players[i])) {
+				m_Players[i]->FixCollision(pPuzzle);
+				m_isPlayerBoxCollide[i] = true;
+				m_Players[i]->UpdateCamera();
+				break;
+			}
+		}
+	}
+
+
+	for (auto pChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle]) {
+		if (false == pChessPuzzle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+
+			if (pChessPuzzle->CollisionCheck(m_Players[i])) {
+				m_Players[i]->FixCollision(pChessPuzzle);
+				m_isPlayerBoxCollide[i] = true;
+				m_Players[i]->UpdateCamera();
+				break;
+			}
+		}
+	}
+
+	for (int playerIdx = 0; playerIdx < MAX_ROOM_PLAYER; ++playerIdx) {
+
+		if (false == m_PlayerExistingSector[2]) {
+			break;
+		}
+		if (m_Players[playerIdx]->IsExist() == false) continue;
+
+		// 퍼즐 위치 선정
+		XMFLOAT3 lookVec = Vector3::Normalize(m_Players[playerIdx]->GetLook());
+		XMFLOAT3 Final_Vec = Vector3::Multifly(lookVec, 5.0f);
+		XMFLOAT3 Speed = { 0.3f,0.3f,0.3f };
+
+		// 체스 퍼즐 충돌처리
+		for (auto pPlayerChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle]) {
+
+			if (pPlayerChessPuzzle->CollisionCheck(m_Players[playerIdx]))
+			{
+				m_Players[playerIdx]->FixCollision(pPlayerChessPuzzle);
+				m_isPlayerBoxCollide[playerIdx] = true;
+				m_Players[playerIdx]->UpdateCamera();
+
+				break;
+			}
+		}
+
+		// npc 자체랑 충돌처리
+		if (
+			((m_Npc->GetPosition().x + 215.0f > m_Players[playerIdx]->GetPosition().x)
+				&& (m_Npc->GetPosition().x - 215.0f < m_Players[playerIdx]->GetPosition().x))
+			&&
+			((m_Npc->GetPosition().z + 225.0f > m_Players[playerIdx]->GetPosition().z)
+				&& (m_Npc->GetPosition().z - 225.0f < m_Players[playerIdx]->GetPosition().z))
+			)
+		{
+			m_Npc_Event = true;
+		}
+		else
+		{
+			m_Npc_Event = false;
+		}
+
+		// 체스 그 자체랑 충돌처리
+		for (int i = 0; i < ChessType::Count; i++)
+		{
+			if (
+				(
+					(m_Chess[i]->GetPosition().x + 215.0f > m_Players[playerIdx]->GetPosition().x)
+					&& (m_Chess[i]->GetPosition().x - 215.0f < m_Players[playerIdx]->GetPosition().x)
+					)
+				&&
+				(
+					(m_Chess[i]->GetPosition().z + 225.0f > m_Players[playerIdx]->GetPosition().z)
+					&& (m_Chess[i]->GetPosition().z - 225.0f < m_Players[playerIdx]->GetPosition().z)
+					)
+
+				)
+			{
+				m_ChessCollide_Check[i] = true;
+				m_ChessChangeFlag = true;
+			}
+			else
+			{
+				m_ChessCollide_Check[i] = false;
+			}
+
+		}
+		for (int i = 0; i < ChessType::Count; i++)
+		{
+			if (m_ChessCollide_Check[i] == true)
+			{
+				m_Players[playerIdx]->Box_Pull(TRUE);
+				m_Chess[i]->SetPosition({
+										m_Chess[i]->GetPosition().x + Final_Vec.x,
+										m_Chess[i]->GetPosition().y ,
+										m_Chess[i]->GetPosition().z + Final_Vec.z
+					});
+				if (m_Chess[i]->GetPosition().x < 16500.0f)
+				{
+					m_Chess[i]->SetPosition({
+										16500.0f ,
+										m_Chess[i]->GetPosition().y ,
+										m_Chess[i]->GetPosition().z
+						});
+				}
+				if (m_Chess[i]->GetPosition().x > 19300.0f)
+				{
+					m_Chess[i]->SetPosition({
+										19300.0f ,
+										m_Chess[i]->GetPosition().y ,
+										m_Chess[i]->GetPosition().z
+						});
+				}
+				if (m_Chess[i]->GetPosition().z < 15600.0f)
+				{
+					m_Chess[i]->SetPosition({
+										m_Chess[i]->GetPosition().x ,
+										m_Chess[i]->GetPosition().y ,
+										15600.0f
+						});
+				}
+				if (m_Chess[i]->GetPosition().z > 17800.0f)
+				{
+					m_Chess[i]->SetPosition({
+										m_Chess[i]->GetPosition().x ,
+										m_Chess[i]->GetPosition().y ,
+										17800.0f
+						});
+				}
+			}
+			else if (m_ChessCollide_Check[King] == false && m_ChessCollide_Check[Knight] == false && m_ChessCollide_Check[Pawn] == false && m_ChessCollide_Check[Rook] == false)
+			{
+				m_Players[playerIdx]->Box_Pull(FALSE);
+			}
+		}
+
+		// 1 킹 2 나이트 3 폰 4 룩 // 퍼즐 체크 
+
+		if ((m_Chess[King]->GetPosition().x > 18320.0f && m_Chess[King]->GetPosition().x < 18720.0f)
+			&& (m_Chess[King]->GetPosition().z > 17150.0f && m_Chess[King]->GetPosition().z < 17550.0f))
+		{
+			m_ChessPlate_Check[King] = true;
+		}
+		if ((m_Chess[Knight]->GetPosition().x > 18320.0f && m_Chess[Knight]->GetPosition().x < 18720.0f)
+			&& (m_Chess[Knight]->GetPosition().z > 15950.0f && m_Chess[Knight]->GetPosition().z < 16350.0f))
+		{
+			m_ChessPlate_Check[Knight] = true;
+		}
+		if ((m_Chess[Pawn]->GetPosition().x > 17720.0f && m_Chess[Pawn]->GetPosition().x < 18120.0f)
+			&& (m_Chess[Pawn]->GetPosition().z > 16550.0f && m_Chess[Pawn]->GetPosition().z < 16950.0f))
+		{
+			m_ChessPlate_Check[Pawn] = true;
+		}
+		if ((m_Chess[Rook]->GetPosition().x > 17140.0f && m_Chess[Rook]->GetPosition().x < 17520.0f)
+			&& (m_Chess[Rook]->GetPosition().z > 15950.0f && m_Chess[Rook]->GetPosition().z < 16350.0f))
+		{
+			m_ChessPlate_Check[Rook] = true;
+		}
+
+		if (m_ChessPlate_Check[King] && m_ChessPlate_Check[Knight] && m_ChessPlate_Check[Pawn] && m_ChessPlate_Check[Rook])
+		{
+			//m_SoundManager->PlayEffect(Sound_Name::EFFECT_Chess_Success);
+			//CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
+			//p->OpenDoor();
+		}
+	}
 }
 void CGameRoom::InitAll()
 {  
 	InitPlayers();
 	InitCameras();
 	InitMonsters();
+	InitNPCs();
 	InitObstacle();
 	InitArrows();
 	InitFireBall();
@@ -479,6 +676,23 @@ void CGameRoom::InitArrows()
 		pArrow->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
 	}
+}
+
+void CGameRoom::InitNPCs()
+{
+	CAnimationObject* pNpcModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
+		"resources/FbxExported/Elf_Mesh.bin", true);
+
+	XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
+	m_Npc = new CNpc();
+	m_Npc->Scale(scale.x / 1.5f, scale.y / 1.5f, scale.z / 1.5f);
+	m_Npc->Rotate(XMFLOAT3(0, 1, 0), 180);
+	m_Npc->SetChild(pNpcModel, true); 
+	m_Npc->SetPosition({ 2305.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 2305.0f, 4650.0f), 4650.0f * MAP_SCALE_SIZE });
+	//pNpc->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+	m_Npc->ConnectPlayer(m_Players, 5);
+	m_Npc->SetExistingSector(SECTOR_POSITION::SECTOR_1);
+	m_ObjectLayers[(int)OBJECT_LAYER::Npc].push_back(reinterpret_cast<CGameObject*>(std::move(m_Npc)));
 }
 
 void CGameRoom::InitMummyLaser()
@@ -1349,8 +1563,21 @@ void CGameRoom::SendLaserActPacket()
 
 void CGameRoom::SendChessObjectActPacket()
 {
-	vector<P_S2C_CHESS_OBJ_UPDATE_SYNC> packets;
+	if (false == m_ChessChangeFlag) {
+		return;
+	}
+	 
+	P_S2C_CHESS_OBJ_UPDATE_SYNC packet;
+	ZeroMemory(&packet, sizeof(packet));
+	packet.size = sizeof(packet);
+	packet.type = PACKET_PROTOCOL::S2C_CHESS_OBJ_ACT;
 
+	for (int i = 0; i < 4; ++i) {
+		XMFLOAT3 pos = m_Chess[i]->GetPosition();
+		packet.posX[i] = FloatToInt(pos.x);
+		packet.posY[i] = FloatToInt(pos.y);
+		packet.posZ[i] = FloatToInt(pos.z);
+	}
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i] == nullptr) {
 			continue;
@@ -1359,10 +1586,9 @@ void CGameRoom::SendChessObjectActPacket()
 			continue;
 		}
 
-		for (auto p : packets) {
-			SendPacket(m_Clients[i]->id, &p);
-		}
+		SendPacket(m_Clients[i]->id, &packet);
 	}
+	m_ChessChangeFlag = false;
 }
 
 void CGameRoom::Disconnect(int packet_id)

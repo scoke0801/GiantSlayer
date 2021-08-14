@@ -499,6 +499,9 @@ void CMummy::Update(float elapsedTime)
 		if (false == player->IsExist()) {
 			continue;
 		}
+		if (false == player->IsExist()) {
+			continue;
+		}
 		if (player->GetPosition().x > 20600.0f && (player->GetPosition().z > 2400.0f && player->GetPosition().z < 12000.0f))
 		{
 			PlayerCheck = true;

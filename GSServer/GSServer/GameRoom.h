@@ -79,6 +79,8 @@ class CGameRoom
 
 	int										m_CurrentlyDeletedPlayerId;
 
+	bool									m_isPlayerSelected[MAX_ROOM_PLAYER] = { true,true,true,true,true };
+	bool									m_isPlayerBoxCollide[MAX_ROOM_PLAYER] = { false, };
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
 
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
@@ -94,6 +96,7 @@ class CGameRoom
 
 	bool									m_Mummy_Reverse_Direction = false;
 	
+	bool									m_ChessChangeFlag = false;
 	CGameObject*							m_Chess[4];
 	bool									m_ChessPlate_Check[4] = { false };		// 체스판체크용
 	XMFLOAT3								m_ChessPlate[7][7];						// 체스판
@@ -162,7 +165,8 @@ private:
 	void InitCameras();
 	void InitMonsters();
 	void InitArrows();
-	  
+	void InitNPCs();
+
 	void InitMummyLaser();
 	void InitFireBall();
 

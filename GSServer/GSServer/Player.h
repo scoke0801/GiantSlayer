@@ -129,5 +129,9 @@ public:
 	void ResetAttack();
 	void ResetBow();
 
+
+	void SetPullBox(bool info) { m_PullBox = info; }
+	void Box_Pull(bool Pull_State);
+
 	AnimationType GetStateName() const { return m_StateName; } 
 };

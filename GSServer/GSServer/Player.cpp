@@ -322,3 +322,7 @@ void CPlayer::ResetBow()
 	m_AnimationPaused = false;
 	m_StringPullTime = 0;
 }
+void CPlayer::Box_Pull(bool Pull_State)
+{
+	SetPullBox(Pull_State);
+}

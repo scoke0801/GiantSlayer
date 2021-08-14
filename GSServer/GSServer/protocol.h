@@ -485,8 +485,7 @@ struct P_S2C_CHESS_OBJ_UPDATE_SYNC
 {
 	BYTE			size;
 	PACKET_PROTOCOL type;
-	 
-
+	  
 	int				posX[4];
 	int				posY[4];
 	int				posZ[4]; 
