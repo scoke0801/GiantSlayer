@@ -255,7 +255,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pTerrainWater->SetPosition(XMFLOAT3(5450.0f * MAP_SCALE_SIZE, -1300.0f, 16500.0f * MAP_SCALE_SIZE));
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater].push_back(pTerrainWater);
 
-	//FbxLoader(m_pfbxManager, "Elf_Mesh", false, 1);
+	//FbxLoader(m_pfbxManager, "Stair", false, 1);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
@@ -2330,7 +2330,6 @@ void CGameScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 void CGameScene::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
 
 	pPuzzlePlate->SetPosition({ 11130.0f * MAP_SCALE_SIZE, -2000.0f,(2000.0f + 8000.0f) * MAP_SCALE_SIZE });
@@ -2973,6 +2972,22 @@ void CGameScene::BuildNpc(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_Npc->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 	m_Npc->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 	m_ObjectLayers[(int)OBJECT_LAYER::Npc].push_back(reinterpret_cast<CGameObject*>(std::move(m_Npc)));
+
+	CGameObject* pObject;
+	
+	// 고정된 체스말
+	pObject = new CGameObject();
+	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Quest]);
+	pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
+	pObject->Rotate(XMFLOAT3(0, 0, 1), 180);
+	pObject->SetPosition({ 2325.0f * MAP_SCALE_SIZE, 550.0f, 4650.0f * MAP_SCALE_SIZE });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x40000);
+	pObject->Scale(50, 100, 30);
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_1);
+	m_ObjectLayers[(int)OBJECT_LAYER::Npc].push_back(pObject);
 }
 
 void CGameScene::BuildMinimapResource(ID3D12Device* pd3dDevice)
@@ -3636,6 +3651,8 @@ void CGameScene::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Laser");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall] = new CFixedMesh(pd3dDevice, pd3dCommandList, "FireBall");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Quest] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Quest");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stair] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stair");
 }
 
 void CGameScene::BuildShadowResource(ID3D12Device* pd3dDevice)

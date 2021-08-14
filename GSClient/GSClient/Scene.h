@@ -33,6 +33,8 @@ enum class FBX_MESH_TYPE : UINT {
 	King,
 	Laser,
 	Npc,
+	Quest,
+	Stair,
 	COUNT
 };
 

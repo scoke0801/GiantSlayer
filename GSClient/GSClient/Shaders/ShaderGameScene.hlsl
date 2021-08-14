@@ -1352,14 +1352,34 @@ float4 PSFBXFeatureShader(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID :
         
         cColor = lerp(cColor, Color, 0.5);
     }
+    if (gnTexturesMask & 0x40000)
+    {
+        float4 Color = { 1.0f, 1.0f, 0.0f, 1.0f };
+		
+        cColor = Color;
+        
+        //cColor = lerp(cColor, Color, 0.5);
+    }
+    if (gnTexturesMask & 0x80000)
+    {
+        cColor = ChessTile.Sample(gssWrap, input.uv);
+    }
 	
-	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-	shadowFactor = CalcShadowFactor(input.shadowPosH);
+    if (!gnTexturesMask & 0x40000)
+    {
+    
+        float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+        shadowFactor = CalcShadowFactor(input.shadowPosH);
 
-	input.normalW = normalize(input.normalW);
-	 float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
-
-	return(cColor * cIllumination);
+        input.normalW = normalize(input.normalW);
+        float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
+    
+        return (cColor * cIllumination);
+    }
+    else
+    {
+        return (cColor);
+    }
 }
   
 // 그림자 계산 
@@ -1524,6 +1544,7 @@ float4 PSFbxAnimated(VS_FBX_ANIMATED_OUTPUT input, uint nPrimitiveID : SV_Primit
     {
         cColor = gtxtBossWall.Sample(gssWrap, input.uv);
     }
+    
     input.normalW = normalize(input.normalW);
     float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 

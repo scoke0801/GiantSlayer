@@ -114,32 +114,37 @@ CPlate::CPlate(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 	m_Objects.push_back(std::move(pObject));
 
 	// 첫번째 계단
-	pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 700, 80, 600);
-	pObject = new CGameObject();
-	pObject->SetMesh(pMesh);
-	pObject->SetShader(pShader);
-	pObject->Rotate(XMFLOAT3(1, 0, 0), -20.0f);
-	pObject->SetPosition(XMFLOAT3(1250.0f, 100.0f, -1370));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 700, 80, 600, XMFLOAT3{ 0,0,0 });
-	pObject->SetTextureIndex(0x04);
-	pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 600 * 0.5f }));
-	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
-	pObject->SetSize({ 1, 80 * 0.5f, 1 });
-	m_Objects.push_back(std::move(pObject));
-
-	// 끝날때 계단
-	pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 700, 80, 600);
-	pObject = new CGameObject();
-	pObject->SetMesh(pMesh);
-	pObject->SetShader(pShader);
-	pObject->Rotate(XMFLOAT3(1, 0, 0), 20.0f);
-	pObject->SetPosition(XMFLOAT3(1250.0f, 100.0f, 3170 ));
-	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 700, 80, 600, XMFLOAT3{ 0,0,0 });
-	pObject->SetTextureIndex(0x04);
-	pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 700 * 0.5f, 80 * 0.5f, 600 * 0.5f }));
-	pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
-	pObject->SetSize({ 1, 80 * 0.5f, 1 });
-	m_Objects.push_back(std::move(pObject));
+	for (int i = 0; i < 3; i++)
+	{
+		pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 300, 80, 300);
+		pObject = new CGameObject();
+		pObject->SetMesh(pMesh);
+		pObject->SetShader(pShader);
+		pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f-90*i, -1370-400*i));
+		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 300, 80, 300, XMFLOAT3{ 0,0,0 });
+		pObject->SetTextureIndex(0x04);
+		pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 300 * 0.5f, 80 * 0.5f, 300 * 0.5f }));
+		pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
+		pObject->SetSize({ 1, 80 * 0.5f, 1 });
+		m_Objects.push_back(std::move(pObject));
+	}
+	
+	
+	for (int i = 0; i < 3; i++)
+	{
+		// 끝날때 계단
+		pMesh = new CCubeMeshTextured(pd3dDevice, pd3dCommandList, 300, 80, 300);
+		pObject = new CGameObject();
+		pObject->SetMesh(pMesh);
+		pObject->SetShader(pShader);
+		pObject->SetPosition(XMFLOAT3(1250.0f, 200.0f-90*i, 3170+400*i));
+		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 300, 80, 300, XMFLOAT3{ 0,0,0 });
+		pObject->SetTextureIndex(0x04);
+		pObject->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 300 * 0.5f, 80 * 0.5f, 300 * 0.5f }));
+		pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
+		pObject->SetSize({ 1, 80 * 0.5f, 1 });
+		m_Objects.push_back(std::move(pObject));
+	}
 }
 
 CPlate::~CPlate()
