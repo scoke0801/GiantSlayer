@@ -291,7 +291,7 @@ void DeathState::Execute(CEnemy* enemy, float elapsedTime)
 {
     m_ElapsedTime += elapsedTime;
     if (m_ElapsedTime > m_LifeTime) {
-        //MAIN_GAME_SCENE->DeleteEnemy(enemy);
+        enemy->GetConnectedRoom()->DeleteEnemy(enemy);
     }
 }
 

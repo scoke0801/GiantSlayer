@@ -152,6 +152,7 @@
     <ClCompile Include="Arrow.cpp" />
     <ClCompile Include="Boss.cpp" />
     <ClCompile Include="AnimationObject.cpp" />
+    <ClCompile Include="MummyLaser.cpp" />
     <ClCompile Include="GameRoom.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="EnemyState.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Communicates.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="MummyLaser.h" />
     <ClInclude Include="PacketProcessor.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="protocol.h" />

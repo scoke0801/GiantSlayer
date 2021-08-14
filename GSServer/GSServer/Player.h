@@ -105,7 +105,11 @@ public:
 	void SetWeaponType(int weaponType) { m_WeaponType = (PlayerWeaponType)weaponType; }
 
 	void SetSwordAttackKeyDown(bool info) { m_AttackKeyDown = info; }
-	void SetWeaponPointer();
+	void SetWeaponPointer(); 
+
+	float GetAttackWaitTime() const { return m_AttackWaitingTime; }
+	float GetStringPullTime() const { return m_StringPullTime; }
+
 public:
 	void SetCanAttack(bool info) { m_IsCanAttack = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }

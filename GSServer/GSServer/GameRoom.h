@@ -2,8 +2,8 @@
 
 #include "Communicates.h"
 #include "Player.h"
-
-
+class CEnemy;
+class CMummy;
 enum class CommandType
 {
 	None = 0,
@@ -36,7 +36,7 @@ enum class OBJECT_LAYER : int {
 
 	FireBall,
 
-	Count,
+	Count
 };
 
 struct EX_OVER {
@@ -83,6 +83,24 @@ class CGameRoom
 
 	bool									m_IsActive = false;
 	int										m_RoomIndex = -1;
+
+	bool									m_Mummy_Reverse_Direction = false;
+	
+	CGameObject*							m_Chess[4];
+	bool									m_ChessPlate_Check[4] = { false };		// 체스판체크용
+	XMFLOAT3								m_ChessPlate[7][7];						// 체스판
+	bool									m_ChessCollide_Check[4] = { false,false,false,false };
+
+	CMummy*									m_Mummy[3];
+	bool									m_MummyExist[3] = { true,true,true };
+	bool									m_One_Mira_Die = false;
+	bool									m_One_Mira_Die_Laser = false;
+	bool									m_Two_Mira_Die = false;
+	bool									m_Two_Mira_Die_Laser = false;
+	
+	CEnemy*									m_Npc = nullptr;
+	bool									m_Npc_Event = false;
+	bool									m_Interaction = false;
 public:
 	CGameRoom();
 	~CGameRoom() {}
@@ -108,6 +126,14 @@ public:
 	bool IsActive() { return m_IsActive; }
 	
 	CPlayer* GetPlayer(int index) { return m_Players[index]; }
+
+public:
+	void ShotPlayerArrow(int p_id);
+	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
+
+	void DeleteEnemy(CEnemy* pEmeny);
+
+	void ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector);
 
 private:
 	void InitAll();

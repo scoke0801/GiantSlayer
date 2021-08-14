@@ -197,6 +197,13 @@ void CGameRoom::InitAll()
 	InitArrows();
 	BuildBlockingRegionOnMap();
 
+	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
+		for (auto pObject : m_ObjectLayers[i]) { 
+			pObject->ConnectRoom(this);
+		}
+	}
+	
+
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		m_PlayerExistingSector[i] = false;
 	}
@@ -256,6 +263,86 @@ void CGameRoom::InitCameras()
 
 void CGameRoom::InitMonsters()
 {
+	{
+		// boss
+		XMFLOAT3 scale = { 120.0f, 120.0f, 120.0f };
+		CBoss* pBoss = new CBoss();
+		pBoss->SetPosition({ 17166 * MAP_SCALE_SIZE, -6070, 17166 * MAP_SCALE_SIZE });
+		pBoss->Scale(120, 120, 120);
+		pBoss->Rotate({ 0,1,0 }, 180);
+		pBoss->ConnectPlayer(m_Players, MAX_ROOM_PLAYER);
+
+		XMFLOAT3 centerPos = pBoss->GetPosition();
+		XMFLOAT3 scopeSize = { 4100 * 2, 0, 4100 * 2 };
+		pBoss->SetActivityScope({ scopeSize.x, 0, scopeSize.z }, { centerPos });
+		pBoss->SetSightBoundingBox({ scopeSize.x / scale.x, 15, scopeSize.z / scale.z });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pBoss);
+	}
+
+	{ 
+		// Mummy
+		XMFLOAT3 scale = { 600.0f,600.0f,600.0f };
+		CAnimationObject* pMummyModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
+			"resources/FbxExported/Mummy.bin", true); 
+
+		m_Mummy[0] = new CMummy();
+		m_Mummy[0]->Scale(scale.x, scale.y, scale.z, true);
+		m_Mummy[0]->SetChild(pMummyModel, true); 
+		 
+		m_Mummy[0]->SetPosition({ 18900.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 18900.0f, 6250.0f), 6250.0f * MAP_SCALE_SIZE });
+		m_Mummy[0]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 18900.f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 18900.0f, 6250.0f), 6250.0f * MAP_SCALE_SIZE });
+		m_Mummy[0]->SetEnemyAttackType(EnemyAttackType::Mummy1);
+		m_Mummy[0]->SetMummyDie(0);
+		m_Mummy[0]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+
+		m_Mummy[0]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
+		m_Mummy[0]->AddBoundingBox(new BoundingBox(XMFLOAT3{ 0, 0.25f,0 }, XMFLOAT3(1020.0f * 0.25f / scale.x, 0.5f, 225.0f / scale.z)));
+
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[0])));
+		m_Mummy[0]->AddFriends(m_Mummy[0]);
+
+		scale = { 600.0f,600.0f,600.0f };
+		pMummyModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
+			"resources/FbxExported/Mummy.bin", true);
+
+		m_Mummy[1] = new CMummy();
+		m_Mummy[1]->Scale(scale.x, scale.y, scale.z);
+		m_Mummy[1]->SetChild(pMummyModel, true); 
+
+		m_Mummy[1]->SetPosition({ 16900.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 16900.0f, 6250), 6250 * MAP_SCALE_SIZE });
+		m_Mummy[1]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 16900.f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 16900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+		m_Mummy[1]->SetEnemyAttackType(EnemyAttackType::Mummy2);
+		m_Mummy[1]->SetMummyDie(0);
+		m_Mummy[1]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+
+		m_Mummy[1]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
+		m_Mummy[1]->AddBoundingBox(new BoundingBox(XMFLOAT3{ 0, 0.25f,0 }, XMFLOAT3(1020.0f * 0.25f / scale.x, 0.5f, 225.0f / scale.z)));
+
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[1])));
+		m_Mummy[1]->AddFriends(m_Mummy[1]);
+
+		scale = { 600.0f,600.0f,600.0f };
+
+		pMummyModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
+			"resources/FbxExported/Mummy.bin", true);
+
+		m_Mummy[2] = new CMummy();
+		m_Mummy[2]->Scale(scale.x, scale.y, scale.z);
+		m_Mummy[2]->SetChild(pMummyModel, true); 
+
+		m_Mummy[2]->SetPosition({ 14900.0f * MAP_SCALE_SIZE,  GetDetailHeight(g_Heights, 14900.0f, 6250), 6250 * MAP_SCALE_SIZE });
+		m_Mummy[2]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 14900.f * MAP_SCALE_SIZE,  GetDetailHeight(g_Heights, 14900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+		m_Mummy[2]->SetEnemyAttackType(EnemyAttackType::Mummy3);
+		m_Mummy[2]->SetMummyDie(0);
+		m_Mummy[2]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		m_Mummy[2]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
+
+		m_Mummy[2]->AddBoundingBox(new BoundingBox(XMFLOAT3{ 0, 0.25f,0 }, XMFLOAT3(1020.0f * 0.25f / scale.x, 0.5f, 225.0f / scale.z)));
+
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummy].push_back(reinterpret_cast<CGameObject*>(std::move(m_Mummy[2])));
+		m_Mummy[2]->AddFriends(m_Mummy[2]);
+	}
+
 	CEnemy* pEnemy;
 	CAnimationObject* pMonsterModel;
 	XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
@@ -363,19 +450,7 @@ void CGameRoom::InitMonsters()
 	for (int i = 0; i < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++i) {
 		auto pEnemy = reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][i]);
 		pEnemy->ConnectPlayer(m_Players, MAX_ROOM_PLAYER);
-	}
-	 
-	CBoss* pBoss = new CBoss(); 
-	pBoss->SetPosition({ 17166 * MAP_SCALE_SIZE, -6983.47559, 17166 * MAP_SCALE_SIZE });
-	pBoss->Scale(120, 120, 120);
-	pBoss->Rotate({ 0,1,0 }, 180);
-	pBoss->ConnectPlayer(m_Players, MAX_ROOM_PLAYER);
-
-	XMFLOAT3 centerPos = pBoss->GetPosition();
-	XMFLOAT3 scopeSize = { 4100 * 2, 0, 4100 * 2 };
-	pBoss->SetActivityScope({ scopeSize.x, 0, scopeSize.z }, { centerPos });
-	pBoss->SetSightBoundingBox({ scopeSize.x / scale.x, 15, scopeSize.z / scale.z });
-	m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(pBoss);
+	} 
 }
 
 void CGameRoom::InitArrows()
@@ -929,6 +1004,118 @@ bool CGameRoom::CanEnter()
 		}
 	}
 	return false;
+}
+
+void CGameRoom::ShotPlayerArrow(int p_id)
+{
+	int i = 0;
+	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
+		CArrow* pArrow = reinterpret_cast<CArrow*>(pObj);
+		if (pArrow->IsUsable()) {
+			pArrow->SetIsUsable(false);
+			XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Players[p_id]->GetPosition() }, { 0,180,0 });
+			pArrow->SetPosition(pos);
+			pArrow->m_startPos = pos;
+			pArrow->SetStringPower(m_Players[p_id]->GetStringPullTime()); 
+			pArrow->SetTargetVector(Vector3::Multifly(m_Players[p_id]->GetLook(), 1));
+			pArrow->SetExistingSector((SECTOR_POSITION)m_Players[p_id]->GetPlayerExistingSector()); 
+			break;
+		}
+		++i;
+	}
+}
+
+void CGameRoom::ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector)
+{
+	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
+		CArrow* pArrow = reinterpret_cast<CArrow*>(pObj);
+		if (pArrow->IsUsable()) {
+			pArrow->SetIsUsable(false);
+			XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ pEmeny->GetPosition() }, { 0,150,0 });
+			pArrow->SetPosition(pos);
+			pArrow->SetTargetVector(lookVector);
+			pArrow->SetExistingSector(pEmeny->GetExistingSector()); 
+			break;
+		}
+	}
+}
+
+void CGameRoom::DeleteEnemy(CEnemy* pEmeny)
+{
+	int i = 0;
+	auto res2 = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Mummy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end(), pEmeny);
+	CMummy* pMummy = reinterpret_cast<CMummy*>(pEmeny);
+	if (res2 != m_ObjectLayers[(int)OBJECT_LAYER::Mummy].end()) {
+
+		if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy1)
+		{
+			m_MummyExist[0] = false;
+			m_Mummy[1]->SetMummyDie(1);
+			m_Mummy[2]->SetMummyDie(1);
+			if (m_One_Mira_Die == true)
+			{
+				m_Two_Mira_Die = true;
+				m_Two_Mira_Die_Laser = true;
+				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
+				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
+			}
+			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
+			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
+
+			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
+			m_One_Mira_Die = true;
+			m_One_Mira_Die_Laser = true;
+		}
+
+		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy2)
+		{
+			m_MummyExist[1] = false;
+			m_Mummy[0]->SetMummyDie2(1);
+			m_Mummy[2]->SetMummyDie2(1);
+			if (m_One_Mira_Die == true)
+			{
+				m_Two_Mira_Die = true;
+				m_Two_Mira_Die_Laser = true;
+				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
+			}
+			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
+
+			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
+			m_One_Mira_Die = true;
+			m_One_Mira_Die_Laser = true;
+		}
+		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy3)
+		{
+			m_MummyExist[2] = false;
+			m_Mummy[0]->SetMummyDie3(1);
+			m_Mummy[1]->SetMummyDie3(1);
+			if (m_One_Mira_Die == true)
+			{
+				m_Two_Mira_Die = true;
+				m_Two_Mira_Die_Laser = true;
+				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
+			}
+			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
+			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
+
+			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
+			m_One_Mira_Die = true;
+			m_One_Mira_Die_Laser = true;
+		}
+
+	}
+
+	auto res = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Enemy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end(), pEmeny);
+	if (res != m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end()) { 
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].erase(res);
+	}
+}
+
+void CGameRoom::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
+{
 }
 
 void CGameRoom::InitPrevUserData(int c_id)

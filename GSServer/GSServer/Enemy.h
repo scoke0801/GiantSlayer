@@ -96,6 +96,7 @@ public:
 
 	void SetAttackDelayTime(float delayTime) { m_AttackDelayTime = delayTime; }
 
+	void SetEnemyAttackType(EnemyAttackType attackType) { m_AttackType = attackType; }
 	EnemyAttackType GetEnemyAttackType() const { return m_AttackType; }
 
 	float GetAttackRange() const { return m_AttackRange; }
@@ -110,7 +111,8 @@ public:
 	void SetEnemyType(EnemyType enemyType) { m_EnemyType = enemyType; }
 
 	bool IsCanDamaged() { return m_isCanDamaged; }
-	void SetCanDamaged(bool param) { m_isCanDamaged = param; }
+	void SetCanDamaged(bool param) { m_isCanDamaged = param; } 
+
 };
 
 class CMeleeEnemy : public CEnemy
@@ -142,3 +144,49 @@ public:
 	CNpc();
 	~CNpc();
 };
+
+class CMummyLaser;
+class CParticle;
+
+class CMummy :public CEnemy
+{
+private:
+	vector<CMummy*> m_Friends;
+	vector<CMummyLaser*> m_Friends_Laser;
+
+	bool PlayerCheck = false;
+	bool LaserDelayTime[3] = { false,false,false };
+	bool shotLaser[3] = { false,false,false };
+	float dir[3] = { 15.0f,15.0f,15.0f };
+	bool ScaleCheck = false;
+	bool MummyScale[3] = { false,false,false };
+	bool MummyDie[3] = { false,false,false };
+	 
+	float					m_Mummy_Die;
+
+	float					m_LaserAttackDelayTime[3] = { 7.0f,9.0f,11.0f };
+	bool					m_LaserAttack[3] = { false,false,false };
+
+public: 
+	CParticle* m_Particles;
+	 
+public: 
+	CMummy();
+	~CMummy();
+
+	void Attack(float elapsedTime) override;
+	void Update(float elapsedTime) override;
+	void AddFriends(CMummy* mummy);
+	void AddFriends_Laser(CMummyLaser* Laser);
+	void SendDieInfotoFriends();
+	void RemoveFriends(CMummy* mummy);
+	void OneDie();
+
+	void SetMummyDie(int die) { MummyDie[0] = die; };
+	int GetMummyDie() const { return MummyDie[0]; };
+	void SetMummyDie2(int die) { MummyDie[1] = die; };
+	int GetMummyDie2() const { return MummyDie[1]; };
+	void SetMummyDie3(int die) { MummyDie[2] = die; };
+	int GetMummyDie3() const { return MummyDie[2]; };
+};
+

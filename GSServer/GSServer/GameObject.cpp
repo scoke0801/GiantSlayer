@@ -101,6 +101,14 @@ void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
 
 }
 
+void CGameObject::SetTargetVector(const XMFLOAT3& playerLookAt)
+{
+	XMFLOAT3 dirVector = Vector3::Normalize(playerLookAt);
+	XMFLOAT3 targetPos = Vector3::Multifly(dirVector, 150000);
+	m_xmf3Velocity = dirVector;
+	LookAt(m_xmf3Position, targetPos, XMFLOAT3(0, 1, 0));
+}
+
 bool CGameObject::IsInNearSector(bool* playerSector) const
 {
 	int prev = max((int)m_ExistingSector - 1, 0);

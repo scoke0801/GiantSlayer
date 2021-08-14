@@ -83,6 +83,9 @@ enum class SECTOR_POSITION {
 	SECTOR_4,
 	SECTOR_5,
 };
+
+class CGameRoom;
+
 class CGameObject
 {
 private:
@@ -119,6 +122,7 @@ protected:
 
 	bool				m_isDrawable = true;
 
+	CGameRoom*			m_ConnectedRoom = nullptr;
 protected:// 충돌처리 관련 변수
 	vector<BoundingBox*>	m_BoundingBox;
 	vector<BoundingBox*>	m_AABB;
@@ -164,6 +168,11 @@ public:
 	bool IsUsable() const { return m_isUsing; }
 
 	virtual void SetDrawable(bool drawable) { m_isDrawable = drawable; }
+
+	void ConnectRoom(CGameRoom* room) { m_ConnectedRoom = room; }
+	CGameRoom* GetConnectedRoom() const { return m_ConnectedRoom; }
+
+	virtual void SetTargetVector(const XMFLOAT3& playerLookAt);
 
 public: // about sectoring for updates
 	// 플레이어가 위치한 영역과, 객체들이 위치한 영역을 비교하여
