@@ -13,7 +13,13 @@ enum class CommandType
 	MoveAttack,
 	Attack
 };
-
+enum ChessType {
+	King = 0,
+	Knight,
+	Pawn,
+	Rook,
+	Count,
+};
 // 편의를 위해 Layer에서 몇 가지 객체 유형은 제외하고 별도로 관리
 enum class OBJECT_LAYER : int {
 	TerrainWater,

@@ -10,6 +10,8 @@
 #include "MummyLaser.h"
 #include "FireBall.h"
 
+#define ChessPuzzleSize 7
+
 
 int g_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]; 
 
@@ -576,25 +578,98 @@ void CGameRoom::InitObstacle()
 	///////////////////////////////////////////////////////////////////////////////// 
 
 	// PUZZLE----------------------------------------------------------------------
-	CGameObject* pObject = new CPuzzle(OBJECT_ID::PUZZLE_1);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::PUZZLE_1]);
-	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
+	
 
-	XMFLOAT3 tempPos = g_ObjectPositions[OBJECT_ID::PUZZLE_1];
-	tempPos.x += 100;
-	pObject = new CPlate(OBJECT_ID::PUZZLE_1_PLATE);
-	pObject->SetPosition(tempPos);
-	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
-
-	for (int i = 0; i < 10; ++i) {
-		pObject = new CPuzzleBox((OBJECT_ID)((int)OBJECT_ID::PUZZLE_BOX_1 + i));
-		pObject->SetPosition(g_ObjectPositions[(OBJECT_ID)((int)OBJECT_ID::PUZZLE_BOX_1 + i)]);
-		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
-		m_ObjectLayers[(int)OBJECT_LAYER::PuzzleBox].push_back(pObject);
+	for (int i = 0; i < ChessPuzzleSize; i++)
+	{
+		for (int j = 0; j < ChessPuzzleSize; j++)
+		{
+			m_ChessPlate[i][j].x = 16855 + 355 * i;
+			m_ChessPlate[i][j].z = 14417 + 450 * j;
+			m_ChessPlate[i][j].y = -1750.0f;
+		}
 	}
-	//pObject = new CPuzzle(OBJECT_ID::PUZZLE_2);
-	//pObject->SetPosition(g_ObjectPositions[OBJECT_ID::PUZZLE_2]);
-	//m_Objects.push_back(std::move(pObject));
+	CPlate* pPuzzlePlate = new CPlate(OBJECT_ID::PUZZLE_1);
+
+	pPuzzlePlate->SetPosition({ 11130.0f * MAP_SCALE_SIZE, -2000.0f,(2000.0f + 8000.0f) * MAP_SCALE_SIZE });
+
+	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pPuzzlePlate);
+
+	CGameObject* pObject  = new CPuzzle(OBJECT_ID::PUZZLE_1);
+	CGameObject* pObject2 = new CPuzzle(OBJECT_ID::PUZZLE_1);
+
+	// 고정된 체스말
+	pObject = new CGameObject(); 
+	pObject->Rotate({ 1,0,0 }, -90);
+	pObject->SetPosition(m_ChessPlate[1][0]); 
+	pObject->Scale(300, 300, 300); 
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+
+	pObject = new CGameObject(); 
+	pObject->Rotate({ 1,0,0 }, -90);
+	pObject->SetPosition(m_ChessPlate[0][2]); 
+	pObject->Scale(300, 300, 300); 
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+
+	pObject = new CGameObject(); 
+	pObject->Rotate({ 1,0,0 }, -90);
+	pObject->SetPosition(m_ChessPlate[3][1]); 
+	pObject->Scale(300, 300, 300); 
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+
+	pObject = new CGameObject(); 
+	pObject->Rotate({ 1,0,0 }, -90);
+	pObject->SetPosition(m_ChessPlate[5][2]); 
+	pObject->Scale(300, 300, 300); 
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle].push_back(pObject);
+
+
+	// 플레이어가 움직일수 있는 퍼즐
+	m_Chess[King] = new CGameObject(); 
+	m_Chess[King]->Rotate({ 1,0,0 }, -90);
+	m_Chess[King]->SetPosition(m_ChessPlate[0][6]); 
+	m_Chess[King]->SetChess(Chess_Type::King); 
+	m_Chess[King]->Scale(300, 300, 300); 
+	m_Chess[King]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_Chess[King]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[King]);
+
+	m_Chess[Knight] = new CGameObject(); 
+	m_Chess[Knight]->Rotate({ 1,0,0 }, -90);
+	m_Chess[Knight]->SetPosition(m_ChessPlate[6][3]); 
+	m_Chess[Knight]->SetChess(Chess_Type::Knight); 
+	m_Chess[Knight]->Scale(300, 300, 300); 
+	m_Chess[Knight]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_Chess[Knight]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[Knight]);
+
+	m_Chess[Pawn] = new CGameObject(); 
+	m_Chess[Pawn]->Rotate({ 1,0,0 }, -90);
+	m_Chess[Pawn]->SetPosition(m_ChessPlate[3][5]); 
+	m_Chess[Pawn]->SetChess(Chess_Type::Pawn); 
+	m_Chess[Pawn]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_Chess[Pawn]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[Pawn]);
+
+	m_Chess[Rook] = new CGameObject(); 
+	m_Chess[Rook]->Rotate({ 1,0,0 }, -90);
+	m_Chess[Rook]->SetPosition(m_ChessPlate[6][6]); 
+	m_Chess[Rook]->SetChess(Chess_Type::Rook); 
+	m_Chess[Rook]->Scale(300, 300, 300); 
+	m_Chess[Rook]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	m_Chess[Rook]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
+	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[Rook]);
+
+	 
 /////////////////////////////////////////////////////////////////////////////////
 
 // DoorWall----------------------------------------------------------------------

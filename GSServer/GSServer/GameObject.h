@@ -123,6 +123,9 @@ protected:
 	bool				m_isDrawable = true;
 
 	CGameRoom*			m_ConnectedRoom = nullptr;
+
+	Chess_Type m_ChessType = Chess_Type::King;
+
 protected:// 面倒贸府 包访 函荐
 	vector<BoundingBox*>	m_BoundingBox;
 	vector<BoundingBox*>	m_AABB;
@@ -230,6 +233,9 @@ public:
 
 	void SetDEF(UINT DEF) { m_DEF = DEF; }
 	UINT GetDEF() const { return m_DEF; }
+
+	void SetChess(Chess_Type chess) { m_ChessType = chess; }
+	Chess_Type GetChess() const { return m_ChessType; }
 public:
 	DirectX::XMFLOAT3 GetRight()const;
 	DirectX::XMFLOAT3 GetUp()const;
