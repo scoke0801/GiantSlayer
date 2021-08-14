@@ -237,12 +237,12 @@ void PacketProcessor::ProcessPacket(CLIENT& client, unsigned char* p_buf)
 		p_RoomInfo.type = PACKET_PROTOCOL::S2C_SEND_ROOM_INFO;
 		for (int i = 0; i < 4; ++i) {
 			if (false == m_Rooms[roomNo + i- 1].IsActive()){
-				break;
+				continue;
 			}
-			for (int j = 0; j < MAX_ROOM_PLAYER; ++i) {
+			for (int j = 0; j < MAX_ROOM_PLAYER; ++j) {
 				CPlayer* player = m_Rooms[roomNo + i - 1].GetPlayer(j);
 				if (player->IsExist()) {
-					p_RoomInfo.weapons[i * 4 + j] = (int)player->GetWeaponType();
+					p_RoomInfo.weapons[i * 5 + j] = (int)player->GetWeaponType();
 				}
 			}
 		}  
@@ -250,9 +250,10 @@ void PacketProcessor::ProcessPacket(CLIENT& client, unsigned char* p_buf)
 	}
 		break;
 	case PACKET_PROTOCOL::C2S_LOGIN:
-	{ 
+	{
 		P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(p_buf);
-		client.m_RoomIndex = p_login.roomIndex;  
+		client.m_RoomIndex = p_login.roomIndex - 1;
+		cout << client.m_RoomIndex << "번 드감\n";
 		if (client.m_RoomIndex == -1) {
 			for (int i = 0; i < MAX_PLAYER; ++i) {
 				if (m_Rooms[i].CanEnter()) {
@@ -261,8 +262,10 @@ void PacketProcessor::ProcessPacket(CLIENT& client, unsigned char* p_buf)
 				}
 			}
 		}
-		m_Rooms[client.m_RoomIndex].EnterPlayer(client, p_login.weaponType);
-	} 
+		else {
+			m_Rooms[client.m_RoomIndex].EnterPlayer(client, p_login.weaponType);
+		}
+	}
 	// break; 안해요
 	default:
 		m_Rooms[client.m_RoomIndex].ProcessPacket(client.id, p_buf); 

@@ -73,13 +73,15 @@ private:
 
 private:
 	bool						m_IsOnRoomSelect = false;
-	int							m_WeaponSelected = 1;
+	PlayerWeaponType			m_WeaponSelected = PlayerWeaponType::Sword;
 	int							m_RoomStartNo = 1;
 
 	UI*							m_Select;
 	UI*							m_PrevBtn, *m_NextBtn;
 	UI*							m_RoomBoard;
 	UI*							m_EnterBox;
+
+	int							m_RoomSelectNo = 1;
 	UI*							m_RoomSelect;
 
 	vector<UI*>					m_Weapons;

@@ -8,14 +8,7 @@ enum class PlayerMoveType
 	Walk,
 	Run
 };
-
-enum class PlayerWeaponType
-{
-	None = 0x00,
-	Sword = 0x01,
-	Bow = 0x02,
-	Staff = 0x04
-};
+ 
 
 class CPlayer : public CAnimationObject
 { 

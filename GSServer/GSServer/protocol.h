@@ -12,7 +12,7 @@ constexpr int MAX_NAME = 200;
 
 constexpr int SERVERPORT = 9000;
 constexpr int BUFSIZE = 4096;
-constexpr int F_TO_I = 100000;
+constexpr int F_TO_I = 10000;
 constexpr int I_TO_F = F_TO_I;
 
 constexpr int MAX_MOUSE_INPUT = 30;
@@ -85,6 +85,14 @@ enum AnimationType
 	//BOX_PICK,
 	//BOX_DOWN
 
+};
+
+enum class PlayerWeaponType
+{
+	None = 0x00,
+	Sword = 0x01,
+	Bow = 0x02,
+	Staff = 0x04
 };
 // x,y,z 크기를 short로 보내면 맵 크기 20000에서 
 // int, float 형 변환 계산하기에 크기가 작아서 int형으로 사용
@@ -203,10 +211,7 @@ enum class ROTATION_AXIS : short {
 	ROTATE_AXIS_Y,
 	ROTATE_AXIS_Z
 };
-enum class WEAPON_TYPE : short {
-	SWORD = 1,
-	ARROW
-};
+
 enum class PACKET_PROTOCOL : short
 {
 	//CLIENT  
@@ -337,7 +342,7 @@ struct P_S2C_PROCESS_KEYBOARD {
 	int posX, posY, posZ;
 	int lookX, lookY, lookZ;
 
-	WEAPON_TYPE weaponType;
+	PlayerWeaponType weaponType;
 	 
 #ifdef _DEBUG 
 	short id;
@@ -376,9 +381,9 @@ struct P_S2C_UPDATE_SYNC {
 	char sp[MAX_ROOM_PLAYER];
 
 	BYTE states[MAX_ROOM_PLAYER];
-	bool existance[MAX_ROOM_PLAYER];
-
-	WEAPON_TYPE weaponType[MAX_ROOM_PLAYER];  
+	bool existance[MAX_ROOM_PLAYER];	
+	
+	PlayerWeaponType weaponType[MAX_ROOM_PLAYER];
 };
 
 struct P_S2C_MONSTERS_UPDATE_SYNC {

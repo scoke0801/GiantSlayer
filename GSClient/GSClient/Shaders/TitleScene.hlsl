@@ -102,11 +102,11 @@ float4 PS_UI_Textured(VS_TEXTURE_OUT input) : SV_TARGET
 	}
 	else if (gnTexturesMask & 0x02)
 	{
-		cColor = gtxtSimpleButton.Sample(gssWrap, input.uv);
+		cColor = gtxtMultipleButton.Sample(gssWrap, input.uv);
 	}
 	else if (gnTexturesMask & 0x04)
 	{
-		cColor = gtxtMultipleButton.Sample(gssWrap, input.uv);
+		cColor = gtxtSimpleButton.Sample(gssWrap, input.uv);
 	}
 	else if (gnTexturesMask & 0x08)
 	{ 

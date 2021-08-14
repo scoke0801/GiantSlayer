@@ -475,7 +475,9 @@ void CTitleScene::ProcessInput()
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_SPACE)
 	{
-		ChangeScene<CGameScene>(nullptr); 
+		if (false == m_IsOnRoomSelect) {
+			ChangeScene<CGameScene>(nullptr);
+		}
 	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
@@ -577,19 +579,19 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 
 		if (x > 925 && x < 1061) {
 			if (y > 168 && y < 290) { 
-				m_WeaponSelected = 1;
+				m_WeaponSelected = PlayerWeaponType::Sword;
 				m_Select->SetPosition({ 0.55f, 0.4f, 0.87 });
 			}
 		}
 		if (x > 925 && x < 1061) {
 			if (y > 321 && y < 445) { 
-				m_WeaponSelected = 2;
+				m_WeaponSelected = PlayerWeaponType::Bow;
 				m_Select->SetPosition({ 0.55f, 0.0f, 0.87 });
 			}
 		}
 		if (x > 925 && x < 1061) {
 			if (y > 475 && y < 597) { 
-				m_WeaponSelected = 3;
+				m_WeaponSelected = PlayerWeaponType::Staff;
 				m_Select->SetPosition({ 0.55f, -0.4f, 0.87 });
 			}
 		}
@@ -598,20 +600,24 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 223 && x < 861) {
 			if (y > 118 && y < 227) { 
 				// room 1
+				m_RoomSelectNo = m_RoomStartNo;
 				m_RoomSelect->SetPosition({ -0.69f, 0.55f, 0.87 });		// RoomSelect
 			}
 			else if (y > 252 && y < 360) {
 				// room 2
+				m_RoomSelectNo = m_RoomStartNo + 1;
 				m_RoomSelect->SetPosition({ -0.69f, 0.2f, 0.87 });		// RoomSelect
 			}
 
 			else if (y > 383 && y < 496) {
 				// room 3
+				m_RoomSelectNo = m_RoomStartNo + 2;
 				m_RoomSelect->SetPosition({ -0.69f, -0.15f, 0.87 });	// RoomSelect
 			}
 
 			else if (y > 519 && y < 627) {
 				// room 4
+				m_RoomSelectNo = m_RoomStartNo + 3;
 				m_RoomSelect->SetPosition({ -0.69f, -0.5f, 0.87 });		// RoomSelect
 			}
 		}
@@ -632,9 +638,11 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 560 && x < 717) {
 			if (y > 651 && y < 690) {
 				// Enter button
-
+				SCENE_CHANGE_INFO sceneChangeInfo;
+				sceneChangeInfo.roomNo = m_RoomSelectNo;
+				sceneChangeInfo.weaponType = (int)m_WeaponSelected;
 				cout << "ChangeScene to CGameScene\n";
-				ChangeScene<CGameScene>((void*)&m_WeaponSelected);
+				ChangeScene<CGameScene>((void*)&sceneChangeInfo);
 
 				CFramework::GetInstance().GetCurrentScene()->LoginToServer();
 			}

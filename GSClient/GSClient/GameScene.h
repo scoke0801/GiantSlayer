@@ -109,7 +109,7 @@ private:
 	short						m_DoorIdx = 0;
 
 	int							m_nSelectedWeaponType = 0x01;
-
+	int							m_nRoomNo = -1;
 private:
 	POINT						m_LastMousePos;
 

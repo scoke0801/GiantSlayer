@@ -799,7 +799,8 @@ void CGameRoom::SendSyncUpdatePacket()
 		p_syncUpdate.lookY[i] = FloatToInt(look.y);
 		p_syncUpdate.lookZ[i] = FloatToInt(look.z);
 
-		p_syncUpdate.states[i] = m_Players[i]->GetStateName();  
+		p_syncUpdate.weaponType[i] = m_Players[i]->GetWeaponType();
+		p_syncUpdate.states[i] = m_Players[i]->GetAnimationSet();  
 	}
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		p_syncUpdate.existance[i] = m_Players[i]->IsExist();
@@ -1070,6 +1071,42 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 				pDoorWall->CloserDoor();
 			}
 			break;
+		case VK_F1:
+		{
+			m_Players[p_keyboard.id]->SetPosition({ 1622 * MAP_SCALE_SIZE, 0, 10772 * MAP_SCALE_SIZE });
+			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+		}
+		break;
+		case VK_F2:
+		{
+			m_Players[p_keyboard.id]->SetPosition({ 5500 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
+			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+		}
+		break;
+		case VK_F3:
+		{
+			m_Players[p_keyboard.id]->SetPosition({ 11838.8 * MAP_SCALE_SIZE,  -1000, 10428.2 * MAP_SCALE_SIZE });
+			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+		}
+		break;
+		case VK_F4:
+		{
+			m_Players[p_keyboard.id]->SetPosition({ 17000 * MAP_SCALE_SIZE,  -6000, 5500 * MAP_SCALE_SIZE });
+			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+		}
+		break;
+		case VK_F5:
+		{
+			m_Players[p_keyboard.id]->SetPosition({ 16749.9 * MAP_SCALE_SIZE,  -6000, 8500.78 * MAP_SCALE_SIZE });
+			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+		}
+		break;
+		case VK_F6:
+		{
+			m_Players[p_keyboard.id]->SetPosition({ 16958.4 * MAP_SCALE_SIZE,  -6000, 14861.1 * MAP_SCALE_SIZE });
+			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+		} 
+		break;
 		}
 
 		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
@@ -1113,6 +1150,8 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 			p_syncUpdate.lookX[i] = FloatToInt(look.x);
 			p_syncUpdate.lookY[i] = FloatToInt(look.y);
 			p_syncUpdate.lookZ[i] = FloatToInt(look.z);
+
+			//p_syncUpdate.states[i] = m_Players[i]->GetAnimationSet();
 		}
 		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			p_syncUpdate.existance[i] = m_Players[i]->IsExist();
