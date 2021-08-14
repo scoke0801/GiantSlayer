@@ -8,6 +8,8 @@
 #include "PacketProcessor.h"
 #include "AnimationObject.h"
 #include "MummyLaser.h"
+#include "FireBall.h"
+
 
 int g_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]; 
 
@@ -196,6 +198,8 @@ void CGameRoom::InitAll()
 	InitMonsters();
 	InitObstacle();
 	InitArrows();
+	InitFireBall();
+	InitMummyLaser();
 	BuildBlockingRegionOnMap();
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
@@ -294,7 +298,7 @@ void CGameRoom::InitMonsters()
 		m_Mummy[0]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 18900.f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 18900.0f, 6250.0f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[0]->SetEnemyAttackType(EnemyAttackType::Mummy1);
 		m_Mummy[0]->SetMummyDie(0);
-		m_Mummy[0]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		m_Mummy[0]->ConnectPlayer(m_Players, 5);
 
 		m_Mummy[0]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
 		m_Mummy[0]->AddBoundingBox(new BoundingBox(XMFLOAT3{ 0, 0.25f,0 }, XMFLOAT3(1020.0f * 0.25f / scale.x, 0.5f, 225.0f / scale.z)));
@@ -314,7 +318,7 @@ void CGameRoom::InitMonsters()
 		m_Mummy[1]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 16900.f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 16900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[1]->SetEnemyAttackType(EnemyAttackType::Mummy2);
 		m_Mummy[1]->SetMummyDie(0);
-		m_Mummy[1]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		m_Mummy[1]->ConnectPlayer(m_Players, 5);
 
 		m_Mummy[1]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
 		m_Mummy[1]->AddBoundingBox(new BoundingBox(XMFLOAT3{ 0, 0.25f,0 }, XMFLOAT3(1020.0f * 0.25f / scale.x, 0.5f, 225.0f / scale.z)));
@@ -335,7 +339,7 @@ void CGameRoom::InitMonsters()
 		m_Mummy[2]->SetActivityScope({ 1200.0f, 0, 250.0f }, { 14900.f * MAP_SCALE_SIZE,  GetDetailHeight(g_Heights, 14900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
 		m_Mummy[2]->SetEnemyAttackType(EnemyAttackType::Mummy3);
 		m_Mummy[2]->SetMummyDie(0);
-		m_Mummy[2]->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		m_Mummy[2]->ConnectPlayer(m_Players, 5);
 		m_Mummy[2]->SetSightBoundingBox({ 5020.0f * 0.75f / scale.x, 3, 2250 * 0.75f / scale.z });
 
 		m_Mummy[2]->AddBoundingBox(new BoundingBox(XMFLOAT3{ 0, 0.25f,0 }, XMFLOAT3(1020.0f * 0.25f / scale.x, 0.5f, 225.0f / scale.z)));
@@ -472,6 +476,49 @@ void CGameRoom::InitArrows()
 		pArrow->Scale(100.0f, 100.0f, 50.0f);
 		pArrow->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
 		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
+	}
+}
+
+void CGameRoom::InitMummyLaser()
+{
+	for (int i = 0; i < 3; i++)
+	{
+		m_MummyLaser[i] = new CMummyLaser(); 
+		m_MummyLaser[i]->SetLaserType(Laser_TYPE::Laser1); 
+		m_MummyLaser[i]->Scale(100.0f, 100.0f, 1000.0f);
+		m_MummyLaser[i]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 1), XMFLOAT3(0.5f, 0.5f, 1.0f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(m_MummyLaser[i]);
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		m_MummyLaser2[i] = new CMummyLaser(); 
+		m_MummyLaser2[i]->SetLaserType(Laser_TYPE::Laser2); 
+		m_MummyLaser2[i]->Scale(100.0f, 100.0f, 1000.0f);
+		m_MummyLaser2[i]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 1), XMFLOAT3(0.5f, 0.5f, 1.0f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(m_MummyLaser2[i]);
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		m_MummyLaser3[i] = new CMummyLaser(); 
+		m_MummyLaser3[i]->SetLaserType(Laser_TYPE::Laser3); 
+		m_MummyLaser3[i]->Scale(100.0f, 100.0f, 1000.0f);
+		m_MummyLaser3[i]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 1), XMFLOAT3(0.5f, 0.5f, 1.0f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(m_MummyLaser3[i]);
+	}
+}
+
+void CGameRoom::InitFireBall()
+{
+	// FireBall
+	for (int i = 0; i < 5; ++i) {
+		CFireBall* pFireb = new CFireBall(); 
+		pFireb->SetPosition({ 500.0f,  100.0f, 1500.0f });
+		pFireb->SetTargetPosition({ 500.0f, 100.0f, 5000.0f }); 
+		pFireb->Scale(40.0f, 40.0f, 40.0f);
+		pFireb->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2.0f, 2.0f, 2.0f)));
+		m_ObjectLayers[(int)OBJECT_LAYER::FireBall].push_back(pFireb);
 	}
 }
   
@@ -924,10 +971,13 @@ void CGameRoom::SendMummyActPacket()
 	P_S2C_MUMMY_UPDATE_SYNC packet;
 
 	ZeroMemory(&packet, sizeof(packet));
+	packet.size = sizeof(packet);
+	packet.type = PACKET_PROTOCOL::S2C_INGAME_MUMMY_ACT;
 	for (int i = 0; i < 3; ++i) {
 		if (m_MummyExist[i]) {
 			XMFLOAT3 pos = m_Mummy[i]->GetPosition();
 			XMFLOAT3 look = m_Mummy[i]->GetLook();
+			packet.exist[i] = true;
 			packet.posX[i] = FloatToInt(pos.x);
 			packet.posY[i] = FloatToInt(pos.y);
 			packet.posZ[i] = FloatToInt(pos.z);
@@ -935,6 +985,10 @@ void CGameRoom::SendMummyActPacket()
 			packet.lookX[i] = FloatToInt(look.x);
 			packet.lookY[i] = FloatToInt(look.y);
 			packet.lookZ[i] = FloatToInt(look.z);
+			packet.state[i] = m_Mummy[i]->GetAnimationSet();
+		}
+		else {
+			packet.exist[i] = false;
 		}
 	}
 
@@ -946,7 +1000,7 @@ void CGameRoom::SendMummyActPacket()
 			continue; 
 		}
 
-		SECTOR_POSITION sector = m_Players[i]->GetExistingSector();
+		SECTOR_POSITION sector = (SECTOR_POSITION)m_Players[i]->GetPlayerExistingSector();
 		if (sector == SECTOR_POSITION::SECTOR_1 || sector == SECTOR_POSITION::SECTOR_2) {
 			continue;
 		}
@@ -962,6 +1016,8 @@ void CGameRoom::SendMonsterArrowActPacket()
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
 		P_S2C_MONSTER_ARROW_UPDATE_SYNC packet;
 		ZeroMemory(&packet, sizeof(packet));
+		packet.size = sizeof(packet);
+		packet.type = PACKET_PROTOCOL::SC2_INGAME_MONSTER_ARROW_ACT;
 		packet.id = idx;
 
 		XMFLOAT3 pos = pArrow->GetPosition();
@@ -976,6 +1032,7 @@ void CGameRoom::SendMonsterArrowActPacket()
 		++idx;
 	}
 
+	if (packets.empty()) return;
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i] == nullptr) {
 			continue;
@@ -998,6 +1055,8 @@ void CGameRoom::SendPlayerArrowActPacket()
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
 		P_S2C_PLAYER_ARROW_UPDATE_SYNC packet;
 		ZeroMemory(&packet, sizeof(packet));
+		packet.size = sizeof(packet);
+		packet.type = PACKET_PROTOCOL::S2C_INGAME_PLAYER_ARROW_ACT;
 		packet.id = idx;
 
 		XMFLOAT3 pos = pArrow->GetPosition();
@@ -1012,6 +1071,7 @@ void CGameRoom::SendPlayerArrowActPacket()
 		++idx;
 	}
 
+	if (packets.empty()) return;
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i] == nullptr) {
 			continue;
@@ -1034,6 +1094,8 @@ void CGameRoom::SendFireballActPacket()
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
 		P_S2C_FIREBALL_UPDATE_SYNC packet;
 		ZeroMemory(&packet, sizeof(packet));
+		packet.size = sizeof(packet);
+		packet.type = PACKET_PROTOCOL::S2C_INGAME_FIREBALL_ACT;
 		packet.id = idx;
 
 		XMFLOAT3 pos = pArrow->GetPosition();
@@ -1044,6 +1106,7 @@ void CGameRoom::SendFireballActPacket()
 		++idx;
 	}
 
+	if (packets.empty()) return;
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i] == nullptr) {
 			continue;
@@ -1061,56 +1124,93 @@ void CGameRoom::SendFireballActPacket()
 void CGameRoom::SendLaserActPacket()
 {
 	vector<P_S2C_LASER_UPDATE_SYNC> packets;
-	 
+	packets.reserve(3);
 	{
+		int count = 0;
 		P_S2C_LASER_UPDATE_SYNC packet;
 		ZeroMemory(&packet, sizeof(packet));
+		packet.size = sizeof(packet);
+		packet.type = PACKET_PROTOCOL::S2C_INGAME_LASER_ACT;
 		packet.id = 0;
 		int idx = 0;
 
-		for (auto pLaser : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
-			XMFLOAT3 pos = pLaser->GetPosition();
-			XMFLOAT3 look = pLaser->GetLook();
-			packet.posX[idx] = FloatToInt(pos.x);
-			packet.posY[idx] = FloatToInt(pos.y);
-			packet.posZ[idx] = FloatToInt(pos.z);
+		for (auto pLaser : m_MummyLaser) {
+			if (false == pLaser->IsDrawable()) {
+				XMFLOAT3 pos = pLaser->GetPosition();
+				XMFLOAT3 look = pLaser->GetLook();
+				packet.posX[idx] = FloatToInt(pos.x);
+				packet.posY[idx] = FloatToInt(pos.y);
+				packet.posZ[idx] = FloatToInt(pos.z);
+				packet.exist[idx] = true;
+				++count;
+			}
+			else {
+				packet.exist[idx] = false;
+			}
 			++idx;
 		}
-		packets.push_back(packet);
+		if (count != 0) {
+			packets.push_back(packet);
+		}
 	}
 	{
+		int count = 0;
 		P_S2C_LASER_UPDATE_SYNC packet;
 		ZeroMemory(&packet, sizeof(packet));
+		packet.size = sizeof(packet);
+		packet.type = PACKET_PROTOCOL::S2C_INGAME_LASER_ACT;
 		packet.id = 1;
 		int idx = 0;
 
-		for (auto pLaser : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
-			XMFLOAT3 pos = pLaser->GetPosition();
-			XMFLOAT3 look = pLaser->GetLook();
-			packet.posX[idx] = FloatToInt(pos.x);
-			packet.posY[idx] = FloatToInt(pos.y);
-			packet.posZ[idx] = FloatToInt(pos.z);
+		for (auto pLaser : m_MummyLaser2) {
+			if (false == pLaser->IsDrawable()) {
+				XMFLOAT3 pos = pLaser->GetPosition();
+				XMFLOAT3 look = pLaser->GetLook();
+				packet.posX[idx] = FloatToInt(pos.x);
+				packet.posY[idx] = FloatToInt(pos.y);
+				packet.posZ[idx] = FloatToInt(pos.z);
+				packet.exist[idx] = true;
+				++count;
+			}
+			else {
+				packet.exist[idx] = false;
+			}
 			++idx;
 		}
-		packets.push_back(packet);
+		if (count != 0) {
+			packets.push_back(packet);
+		}
 	}
 	{
+		int count = 0;
 		P_S2C_LASER_UPDATE_SYNC packet;
 		ZeroMemory(&packet, sizeof(packet));
+		packet.size = sizeof(packet);
+		packet.type = PACKET_PROTOCOL::S2C_INGAME_LASER_ACT;
 		packet.id = 2;
 		int idx = 0;
 
-		for (auto pLaser : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
-			XMFLOAT3 pos = pLaser->GetPosition();
-			XMFLOAT3 look = pLaser->GetLook();
-			packet.posX[idx] = FloatToInt(pos.x);
-			packet.posY[idx] = FloatToInt(pos.y);
-			packet.posZ[idx] = FloatToInt(pos.z);
+		for (auto pLaser : m_MummyLaser3) {
+			if (false == pLaser->IsDrawable()) {
+				XMFLOAT3 pos = pLaser->GetPosition();
+				XMFLOAT3 look = pLaser->GetLook();
+				packet.posX[idx] = FloatToInt(pos.x);
+				packet.posY[idx] = FloatToInt(pos.y);
+				packet.posZ[idx] = FloatToInt(pos.z);
+				packet.exist[idx] = true;
+				++count;
+			}
+			else {
+				packet.exist[idx] = false;
+			}
 			++idx;
 		}	
-		packets.push_back(packet);
+		if (count != 0) {
+			packets.push_back(packet);
+		}
 	} 
-	 
+	
+	if (packets.empty()) return;
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i] == nullptr) {
 			continue;
@@ -1118,12 +1218,16 @@ void CGameRoom::SendLaserActPacket()
 		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
 			continue;
 		}
-
+		SECTOR_POSITION sector = (SECTOR_POSITION)m_Players[i]->GetPlayerExistingSector();
+		if (sector == SECTOR_POSITION::SECTOR_1 || sector == SECTOR_POSITION::SECTOR_2) {
+			continue;
+		}
 		for (auto p : packets) {
 			SendPacket(m_Clients[i]->id, &p);
 		}
 	}
 }
+
 
 void CGameRoom::SendChessObjectActPacket()
 {

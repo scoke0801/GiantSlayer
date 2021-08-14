@@ -156,6 +156,9 @@ private:
 	void InitMonsters();
 	void InitArrows();
 	  
+	void InitMummyLaser();
+	void InitFireBall();
+
 	void InitObstacle();
 	 
 	void BuildBlockingRegionOnMap();

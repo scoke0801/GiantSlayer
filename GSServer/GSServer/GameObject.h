@@ -168,6 +168,7 @@ public:
 	bool IsUsable() const { return m_isUsing; }
 
 	virtual void SetDrawable(bool drawable) { m_isDrawable = drawable; }
+	bool IsDrawable() { return m_isDrawable; }
 
 	void ConnectRoom(CGameRoom* room) { m_ConnectedRoom = room; }
 	CGameRoom* GetConnectedRoom() const { return m_ConnectedRoom; }

@@ -414,6 +414,8 @@ struct P_S2C_MUMMY_UPDATE_SYNC
 	BYTE			size;
 	PACKET_PROTOCOL type;
 	
+	bool			exist[3];
+
 	int				posX[3];
 	int				posY[3];
 	int				posZ[3]; 
@@ -465,9 +467,7 @@ struct P_S2C_LASER_UPDATE_SYNC
 	int				posY[3];
 	int				posZ[3];
 
-	int				lookX[3];
-	int				lookY[3];
-	int				lookZ[3];
+	bool			exist[3];
 };
 struct P_S2C_FIREBALL_UPDATE_SYNC
 {

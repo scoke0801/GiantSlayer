@@ -1508,6 +1508,81 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 	case PACKET_PROTOCOL::S2C_INGAME_END:
 		cout << "Packet::GameEnd[ServerToClient]\n";
 		break;
+	case PACKET_PROTOCOL::S2C_INGAME_MUMMY_ACT:
+	{ 
+		P_S2C_MUMMY_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_MUMMY_UPDATE_SYNC*>(p_buf);
+
+		for (int i = 0; i < 3; ++i) {
+			if (packet->exist[i]) {
+				XMFLOAT3 pos = { IntToFloat(packet->posX[i]), IntToFloat(packet->posY[i]), IntToFloat(packet->posZ[i]) };
+				XMFLOAT3 look = { IntToFloat(packet->lookX[i]), IntToFloat(packet->lookY[i]), IntToFloat(packet->lookZ[i]) };
+
+				m_Mummy[i]->SetPosition(pos);
+				m_Mummy[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+				m_Mummy[i]->SetAnimationSet(packet->state[i]);
+			}
+		} 
+	}
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_PLAYER_ARROW_ACT: 
+	{
+		P_S2C_PLAYER_ARROW_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_PLAYER_ARROW_UPDATE_SYNC*>(p_buf);
+
+	}
+		break;
+	case PACKET_PROTOCOL::SC2_INGAME_MONSTER_ARROW_ACT:	
+	{
+		P_S2C_MONSTER_ARROW_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_MONSTER_ARROW_UPDATE_SYNC*>(p_buf);
+
+	}
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_LASER_ACT:		
+	{
+		P_S2C_LASER_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_LASER_UPDATE_SYNC*>(p_buf);
+		for (int i = 0; i < 3; ++i) { 
+			if (false == packet->exist[i]) {
+				if (packet->id == 0) {
+					m_MummyLaser[i]->SetDrawable(true); 
+				}
+				else if (packet->id == 1) {
+					m_MummyLaser2[i]->SetDrawable(true);
+				}
+				else if (packet->id == 2) {
+					m_MummyLaser3[i]->SetDrawable(true);
+				}
+				continue;
+			}
+			XMFLOAT3 pos = { IntToFloat(packet->posX[i]), IntToFloat(packet->posY[i]), IntToFloat(packet->posZ[i]) };
+
+			if (packet->id == 0) {
+				m_MummyLaser[i]->SetPosition(pos);
+				m_MummyLaser[i]->SetDrawable(false);
+			}
+			else if (packet->id == 1) {
+				m_MummyLaser2[i]->SetPosition(pos);
+				m_MummyLaser2[i]->SetDrawable(false);
+			}
+			else if (packet->id == 2) {
+				m_MummyLaser3[i]->SetPosition(pos);
+				m_MummyLaser3[i]->SetDrawable(false);
+			} 
+		}
+		cout << "Laser Update\n";
+	}
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_FIREBALL_ACT:	
+	{
+		P_S2C_FIREBALL_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_FIREBALL_UPDATE_SYNC*>(p_buf);
+
+	}
+		break;
+	case PACKET_PROTOCOL::S2C_CHESS_OBJ_ACT:
+	{
+		P_S2C_CHESS_OBJ_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_CHESS_OBJ_UPDATE_SYNC*>(p_buf);
+
+	}
+		break;
+
 	default:
 		cout << "Unknown Packet Type from server" << " Packet Type [" << +p_buf[1] << "]" << endl;
 		while (true) {
@@ -3806,8 +3881,7 @@ void CGameScene::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	}
 }
 void CGameScene::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	m_Mummy[0] = new CMummy();
+{ 
 	for (int i = 0; i < 3; i++)
 	{
 		m_MummyLaser[i] = new CMummyLaser();

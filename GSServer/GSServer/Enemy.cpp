@@ -496,6 +496,9 @@ void CMummy::Update(float elapsedTime)
 	// 4스테이지 플레이어 진입 체크
 	for (auto player : m_ConnectedPlayers)
 	{
+		if (false == player->IsExist()) {
+			continue;
+		}
 		if (player->GetPosition().x > 20600.0f && (player->GetPosition().z > 2400.0f && player->GetPosition().z < 12000.0f))
 		{
 			PlayerCheck = true;
@@ -531,8 +534,7 @@ void CMummy::Update(float elapsedTime)
 					//this->SetAnimationSet(2);
 					//this->SetTargetVector(Vector3::Multifly(XMFLOAT3(15, 0, -150), 1));
 					m_ConnectedRoom->ShotMummyLaser(this, GetLook()); 
-				}
-
+				} 
 			}
 			m_LaserAttackDelayTime[0] = 7.0f;
 			for (auto& Laser : m_Friends_Laser)

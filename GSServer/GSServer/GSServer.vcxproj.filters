@@ -53,6 +53,12 @@
     <Filter Include="JsonFiles">
       <UniqueIdentifier>{85a628f2-79a5-4a7b-a5cd-e12573f648a4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameObject\MummyLaser">
+      <UniqueIdentifier>{06761326-72f7-402f-b711-d07c5e320841}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Skill">
+      <UniqueIdentifier>{21beeab7-2d56-4bd0-8db8-6e80abe727b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PacketProcessor.cpp">
@@ -103,6 +109,12 @@
     <ClCompile Include="AnimationController.cpp">
       <Filter>GameObject\AnimationObject</Filter>
     </ClCompile>
+    <ClCompile Include="MummyLaser.cpp">
+      <Filter>GameObject\MummyLaser</Filter>
+    </ClCompile>
+    <ClCompile Include="FireBall.cpp">
+      <Filter>GameObject\Skill</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PacketProcessor.h">
@@ -152,6 +164,12 @@
     </ClInclude>
     <ClInclude Include="AnimationController.h">
       <Filter>GameObject\AnimationObject</Filter>
+    </ClInclude>
+    <ClInclude Include="MummyLaser.h">
+      <Filter>GameObject\MummyLaser</Filter>
+    </ClInclude>
+    <ClInclude Include="FireBall.h">
+      <Filter>GameObject\Skill</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
