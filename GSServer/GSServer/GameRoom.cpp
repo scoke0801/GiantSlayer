@@ -525,27 +525,58 @@ void CGameRoom::InitFireBall()
 void CGameRoom::InitObstacle()
 {
 	// Bridge --------------------------------------------------------------------
-	CGameObject* pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_1]);
-	pObject->Rotate({ 0, 1, 0 }, 90);
-	pObject->UpdateColliders();
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	CBridge* pBridge = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
+	pBridge->SetPositionPlus({ 8000.0f * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
+	pBridge->Rotate({ 0, 1, 0 }, 90);
+	pBridge->UpdateColliders();
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
 
-	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_2]);
-	pObject->Rotate({ 0, 1, 0 }, 90);
-	pObject->UpdateColliders();
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	pBridge = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
+	pBridge->SetPositionPlus({ (10000.0f - 680) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
+	pBridge->Rotate({ 0, 1, 0 }, 90);
+	pBridge->UpdateColliders();
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
 
-	pObject = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::BRIDEGE_SEC2_SEC3_3]);
-	pObject->Rotate({ 0, 1, 0 }, 90);
-	pObject->UpdateColliders();
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	pBridge = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
+	pBridge->SetPositionPlus({ (9000.0f - 340) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
+	pBridge->Rotate({ 0, 1, 0 }, 90);
+	pBridge->UpdateColliders();
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
+
+	pBridge = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
+	pBridge->SetPositionPlus({ (11000.0f - 680 - 340) * MAP_SCALE_SIZE,  -1301.0f,  17400 * MAP_SCALE_SIZE });
+	pBridge->Rotate({ 0, 1, 0 }, 90);
+	pBridge->UpdateColliders();
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
+
+	pBridge = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
+	pBridge->SetPositionPlus({ 8000.0f * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	pBridge->Rotate({ 0, 1, 0 }, 90);
+	pBridge->UpdateColliders();
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
+
+	pBridge = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_3);
+	pBridge->SetPositionPlus({ (10000.0f - 680) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	pBridge->Rotate({ 0, 1, 0 }, 90);
+	pBridge->UpdateColliders();
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
+
+	pBridge = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_1);
+	pBridge->SetPositionPlus({ (9000.0f - 340) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	pBridge->Rotate({ 0, 1, 0 }, 90);
+	pBridge->UpdateColliders();
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
+
+	pBridge = new CBridge(OBJECT_ID::BRIDEGE_SEC2_SEC3_2);
+	pBridge->SetPositionPlus({ (11000.0f - 680 - 340) * MAP_SCALE_SIZE,  -1301.0f,  18600 * MAP_SCALE_SIZE });
+	pBridge->Rotate({ 0, 1, 0 }, 90);
+	pBridge->UpdateColliders();
+	m_ObjectLayers[(int)OBJECT_LAYER::Bridge].push_back(pBridge);
+	 
 	///////////////////////////////////////////////////////////////////////////////// 
 
 	// PUZZLE----------------------------------------------------------------------
-	pObject = new CPuzzle(OBJECT_ID::PUZZLE_1);
+	CGameObject* pObject = new CPuzzle(OBJECT_ID::PUZZLE_1);
 	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::PUZZLE_1]);
 	m_ObjectLayers[(int)OBJECT_LAYER::Puzzle].push_back(pObject);
 
@@ -569,41 +600,41 @@ void CGameRoom::InitObstacle()
 // DoorWall----------------------------------------------------------------------
 	m_DoorStartIndex = m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].size();
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC1);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC1]);
+	pObject->SetPosition({ 0,0, 7500 * MAP_SCALE_SIZE });
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC2);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC2]);
+	pObject->SetPosition({ 10300 * MAP_SCALE_SIZE, -2000, 7500 * MAP_SCALE_SIZE });
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC3);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC3]);
+	pObject->SetPosition({ 13500 * MAP_SCALE_SIZE, -3500, 0 });
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_4);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC4);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC4]);
+	pObject->SetPosition({ 14000 * MAP_SCALE_SIZE,-4500, 8000 * MAP_SCALE_SIZE });
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_5);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC5);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::DOOR_WALL_SEC5]);
+	pObject->SetPosition({ 14000 * MAP_SCALE_SIZE, -7050, 13650 * MAP_SCALE_SIZE });
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_5);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->Rotate({ 0,1,0 }, 90);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::WALL_1]);
-	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
+	pObject->SetPosition({ 13750 * MAP_SCALE_SIZE, -3500 + 1250, 4750 * MAP_SCALE_SIZE });
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * MAP_SCALE_SIZE * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_4);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 
 	pObject = new CGameObject();
 	pObject->Rotate({ 0,1,0 }, 90);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::WALL_2]);
-	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
+	pObject->SetPosition({ 13750 * MAP_SCALE_SIZE, -3500 + 1250, 6250 * MAP_SCALE_SIZE });
+	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1500 * MAP_SCALE_SIZE * 0.5f, 2500 * 0.5f, 500 * 0.5f)));
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_4);
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
 	////////////////////////////////////////////////////////////////////////////////

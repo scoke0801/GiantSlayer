@@ -6,12 +6,14 @@ CBridge::CBridge(OBJECT_ID id)
 {
 	m_CollisionHandleType = COLLISION_HANDLE_TYPE::NotCollide;
 	m_ExistingSector = SECTOR_POSITION::SECTOR_2;
+
+	m_Name = OBJ_NAME::Bridge;
 	CGameObject* pObject;// = new CGameObject();
 	for (int i = 0; i < 10; i += 5) {
 		pObject = new CGameObject();
 		pObject->AddBoundingBox(new BoundingBox(
 			XMFLOAT3(-0.0f, 251.0f, -250.0f + 100.0f * i),
-			XMFLOAT3(1000 * 0.5f, 1 * 0.5f, 500 * 0.5f))); 
+			XMFLOAT3(900 * 0.5f, (300 + 1) * 0.5f, 500 * 0.5f)));
 		pObject->SetSize({ 1, 251.0f ,1 });
 		pObject->SetCollisionHandleType(COLLISION_HANDLE_TYPE::On);
 
@@ -106,31 +108,49 @@ void CBridge::Rotate(const XMFLOAT3& axis, float angle)
 	}
 }
 
+void CBridge::SetPositionPlus(XMFLOAT3 pos)
+{
+	for (auto pObj : m_Objects) {
+		pObj->Move(pos);
+	}
+	for (auto pPlate : m_Plates) {
+		pPlate->Move(pos);
+	}
+	CGameObject::SetPosition(pos);
+}
+
 bool CBridge::CollisionCheck(BoundingBox* aabb)
-{ 
-	/*for (auto pObj : m_Objects) {
-		if (pObj->CollisionCheck(aabb)) {
-			m_CollideObject = pObj;
-			return true; 
-		}
-	}*/
+{  
+	bool res = false;
+	int i = 0;
 	for (auto pPlate : m_Plates) {
 		if (pPlate->CollisionCheck(aabb)) {
-			m_CollideObject = pPlate;
-			return true;
+			m_CollideObject->FixCollision(pPlate);
+			//return true;
+			return res = true;
 		}
+		++i;
 	}
-	return false;
+	for (auto pObj : m_Objects) {
+		if (pObj->CollisionCheck(aabb)) {
+			m_CollideObject->FixCollision(pObj);
+			//return true;
+			return res = true;
+		}
+		++i;
+	}
+	return res;
 }
 
 bool CBridge::CollisionCheck(CGameObject* other)
 {
+	bool res = false;
 	auto otherAABB = other->GetAABB();
+	m_CollideObject = other;
 	for (int i = 0; i < otherAABB.size(); ++i) {
 		bool result = CollisionCheck(otherAABB[i]);
 		if (result) {
-			other->FixCollision(m_CollideObject);
-			return true;
+			return res = true;
 		}
 	}
 
@@ -290,32 +310,32 @@ CDoorWall::CDoorWall(OBJECT_ID id)
 	switch (id)
 	{
 	case OBJECT_ID::DOOR_WALL_SEC1: 
-		width = 4000;
+		width = 4000 * MAP_SCALE_SIZE;
 		height = 1000;
 		depth = 500;
 		doorHeight = height;
 		break;
 	case OBJECT_ID::DOOR_WALL_SEC2:
-		width = 3300;
+		width = 3300 * MAP_SCALE_SIZE;
 		height = 1000;
 		depth = 500; 
 		doorHeight = height;
 		break;
 	case OBJECT_ID::DOOR_WALL_SEC3:
-		width = 4000;
+		width = 4000 * MAP_SCALE_SIZE;
 		height = 2500;
 		depth = 500;
 		break;
 	case OBJECT_ID::DOOR_WALL_SEC4:
-		width = 5500;
+		width = 5500 * MAP_SCALE_SIZE;
 		height = 2000;
 		depth = 500;
 		doorHeight = height;
 		break;
 	case OBJECT_ID::DOOR_WALL_SEC5:
-		width = 5700;
+		width = 5800 * MAP_SCALE_SIZE;
 		height = 4500;
-		depth = 800;
+		depth = 800 * MAP_SCALE_SIZE;
 		doorHeight = 2500.0f;
 		break;  
 	}

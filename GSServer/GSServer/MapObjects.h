@@ -10,6 +10,8 @@ public:
 	void SetPosition(XMFLOAT3 pos) override;
 	void Rotate(const XMFLOAT3& axis, float angle) override;
 
+	void SetPositionPlus(XMFLOAT3 pos);
+
 	bool CollisionCheck(BoundingBox* aabb) override;
 	bool CollisionCheck(CGameObject* other) override;
 
