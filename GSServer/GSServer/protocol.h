@@ -238,7 +238,14 @@ enum class PACKET_PROTOCOL : short
 	S2C_INGAME_MOUSE_INPUT,
 	 
 	S2C_INGAME_MONSTER_ACT, 
-	 
+
+	S2C_INGAME_MUMMY_ACT,
+	S2C_INGAME_PLAYER_ARROW_ACT,
+	SC2_INGAME_MONSTER_ARROW_ACT,
+	S2C_INGAME_LASER_ACT,
+	S2C_INGAME_FIREBALL_ACT,
+	S2C_CHESS_OBJ_ACT,
+
 	S2C_INGAME_UPDATE_PLAYERS_STATE,
 	  
 	S2C_INGAME_DOOR_EVENT,
@@ -402,4 +409,86 @@ struct P_S2C_MONSTERS_UPDATE_SYNC {
 	BYTE			state;
 };
 
+struct P_S2C_MUMMY_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+	
+	int				posX[3];
+	int				posY[3];
+	int				posZ[3]; 
+
+	int				lookX[3];
+	int				lookY[3];
+	int				lookZ[3];	
+
+	BYTE			state[3];
+};
+struct P_S2C_PLAYER_ARROW_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+
+	BYTE			id;
+
+	int				posX;
+	int				posY;
+	int				posZ;
+
+	int				lookX;
+	int				lookY;
+	int				lookZ;
+};
+struct P_S2C_MONSTER_ARROW_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+
+	BYTE			id;
+
+	int				posX;
+	int				posY;
+	int				posZ;
+
+	int				lookX;
+	int				lookY;
+	int				lookZ;
+};
+struct P_S2C_LASER_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+
+	BYTE			id;
+
+	int				posX[3];
+	int				posY[3];
+	int				posZ[3];
+
+	int				lookX[3];
+	int				lookY[3];
+	int				lookZ[3];
+};
+struct P_S2C_FIREBALL_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+
+	BYTE			id;
+
+	int				posX;
+	int				posY;
+	int				posZ; 
+};
+
+struct P_S2C_CHESS_OBJ_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+	 
+
+	int				posX[4];
+	int				posY[4];
+	int				posZ[4]; 
+};
 #pragma pack (pop)

@@ -7,6 +7,7 @@
 #include "Arrow.h"
 #include "PacketProcessor.h"
 #include "AnimationObject.h"
+#include "MummyLaser.h"
 
 int g_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1]; 
 
@@ -916,6 +917,230 @@ void CGameRoom::SendMonsterActPacket()
 	}
 }
 
+void CGameRoom::SendMummyActPacket()
+{
+	P_S2C_MUMMY_UPDATE_SYNC packet;
+
+	ZeroMemory(&packet, sizeof(packet));
+	for (int i = 0; i < 3; ++i) {
+		if (m_MummyExist[i]) {
+			XMFLOAT3 pos = m_Mummy[i]->GetPosition();
+			XMFLOAT3 look = m_Mummy[i]->GetLook();
+			packet.posX[i] = FloatToInt(pos.x);
+			packet.posY[i] = FloatToInt(pos.y);
+			packet.posZ[i] = FloatToInt(pos.z);
+
+			packet.lookX[i] = FloatToInt(look.x);
+			packet.lookY[i] = FloatToInt(look.y);
+			packet.lookZ[i] = FloatToInt(look.z);
+		}
+	}
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			continue;
+		}
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
+			continue; 
+		}
+
+		SECTOR_POSITION sector = m_Players[i]->GetExistingSector();
+		if (sector == SECTOR_POSITION::SECTOR_1 || sector == SECTOR_POSITION::SECTOR_2) {
+			continue;
+		}
+		SendPacket(m_Clients[i]->id, &packet);
+	} 
+}
+
+void CGameRoom::SendMonsterArrowActPacket()
+{
+	vector<P_S2C_MONSTER_ARROW_UPDATE_SYNC> packets;
+	
+	int idx = 0;
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
+		P_S2C_MONSTER_ARROW_UPDATE_SYNC packet;
+		ZeroMemory(&packet, sizeof(packet));
+		packet.id = idx;
+
+		XMFLOAT3 pos = pArrow->GetPosition();
+		XMFLOAT3 look = pArrow->GetLook();
+		packet.posX = FloatToInt(pos.x);
+		packet.posY = FloatToInt(pos.y);
+		packet.posZ = FloatToInt(pos.z);
+
+		packet.lookX = FloatToInt(look.x);
+		packet.lookY = FloatToInt(look.y);
+		packet.lookZ = FloatToInt(look.z);
+		++idx;
+	}
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			continue;
+		}
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
+			continue;
+		}
+		
+		for (auto p : packets) {
+			SendPacket(m_Clients[i]->id, &p);
+		}
+	}
+}
+
+void CGameRoom::SendPlayerArrowActPacket()
+{
+	vector<P_S2C_PLAYER_ARROW_UPDATE_SYNC> packets;
+
+	int idx = 0;
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
+		P_S2C_PLAYER_ARROW_UPDATE_SYNC packet;
+		ZeroMemory(&packet, sizeof(packet));
+		packet.id = idx;
+
+		XMFLOAT3 pos = pArrow->GetPosition();
+		XMFLOAT3 look = pArrow->GetLook();
+		packet.posX = FloatToInt(pos.x);
+		packet.posY = FloatToInt(pos.y);
+		packet.posZ = FloatToInt(pos.z);
+
+		packet.lookX = FloatToInt(look.x);
+		packet.lookY = FloatToInt(look.y);
+		packet.lookZ = FloatToInt(look.z);
+		++idx;
+	}
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			continue;
+		}
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
+			continue;
+		}
+
+		for (auto p : packets) {
+			SendPacket(m_Clients[i]->id, &p);
+		}
+	}
+}
+
+void CGameRoom::SendFireballActPacket()
+{
+	vector<P_S2C_FIREBALL_UPDATE_SYNC> packets;
+
+	int idx = 0;
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
+		P_S2C_FIREBALL_UPDATE_SYNC packet;
+		ZeroMemory(&packet, sizeof(packet));
+		packet.id = idx;
+
+		XMFLOAT3 pos = pArrow->GetPosition();
+		XMFLOAT3 look = pArrow->GetLook();
+		packet.posX = FloatToInt(pos.x);
+		packet.posY = FloatToInt(pos.y);
+		packet.posZ = FloatToInt(pos.z); 
+		++idx;
+	}
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			continue;
+		}
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
+			continue;
+		}
+
+		for (auto p : packets) {
+			SendPacket(m_Clients[i]->id, &p);
+		}
+	}
+}
+
+void CGameRoom::SendLaserActPacket()
+{
+	vector<P_S2C_LASER_UPDATE_SYNC> packets;
+	 
+	{
+		P_S2C_LASER_UPDATE_SYNC packet;
+		ZeroMemory(&packet, sizeof(packet));
+		packet.id = 0;
+		int idx = 0;
+
+		for (auto pLaser : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+			XMFLOAT3 pos = pLaser->GetPosition();
+			XMFLOAT3 look = pLaser->GetLook();
+			packet.posX[idx] = FloatToInt(pos.x);
+			packet.posY[idx] = FloatToInt(pos.y);
+			packet.posZ[idx] = FloatToInt(pos.z);
+			++idx;
+		}
+		packets.push_back(packet);
+	}
+	{
+		P_S2C_LASER_UPDATE_SYNC packet;
+		ZeroMemory(&packet, sizeof(packet));
+		packet.id = 1;
+		int idx = 0;
+
+		for (auto pLaser : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
+			XMFLOAT3 pos = pLaser->GetPosition();
+			XMFLOAT3 look = pLaser->GetLook();
+			packet.posX[idx] = FloatToInt(pos.x);
+			packet.posY[idx] = FloatToInt(pos.y);
+			packet.posZ[idx] = FloatToInt(pos.z);
+			++idx;
+		}
+		packets.push_back(packet);
+	}
+	{
+		P_S2C_LASER_UPDATE_SYNC packet;
+		ZeroMemory(&packet, sizeof(packet));
+		packet.id = 2;
+		int idx = 0;
+
+		for (auto pLaser : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
+			XMFLOAT3 pos = pLaser->GetPosition();
+			XMFLOAT3 look = pLaser->GetLook();
+			packet.posX[idx] = FloatToInt(pos.x);
+			packet.posY[idx] = FloatToInt(pos.y);
+			packet.posZ[idx] = FloatToInt(pos.z);
+			++idx;
+		}	
+		packets.push_back(packet);
+	} 
+	 
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			continue;
+		}
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
+			continue;
+		}
+
+		for (auto p : packets) {
+			SendPacket(m_Clients[i]->id, &p);
+		}
+	}
+}
+
+void CGameRoom::SendChessObjectActPacket()
+{
+	vector<P_S2C_CHESS_OBJ_UPDATE_SYNC> packets;
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			continue;
+		}
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
+			continue;
+		}
+
+		for (auto p : packets) {
+			SendPacket(m_Clients[i]->id, &p);
+		}
+	}
+}
+
 void CGameRoom::Disconnect(int packet_id)
 { 
 	cout << "로그 아웃\n"; 
@@ -1116,6 +1341,121 @@ void CGameRoom::DeleteEnemy(CEnemy* pEmeny)
 
 void CGameRoom::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 {
+	XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
+	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy1 && m_MummyExist[0] == true)
+	{ 
+		// 미라가 2마리 남았을때
+		if (m_One_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 1.5f, scale.y * 1.5f, scale.z * 1.5f));
+				m_Mummy[i]->SetActivityScope({ 2000.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+			}
+			m_One_Mira_Die_Laser = false;
+		}
+		if (m_Two_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 3.f, scale.y * 3.f, scale.z * 3.f));
+				m_Mummy[i]->SetActivityScope({ 2800.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+
+			}
+			m_Two_Mira_Die_Laser = false;
+		}
+
+
+		for (int i = 0; i < 3; i++)
+		{
+			m_MummyLaser[i]->SetUseable(false);
+
+			XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ m_Mummy[0]->GetPosition() }, { 0,200,0 });
+			m_MummyLaser[i]->SetPosition(pos);
+			m_MummyLaser[i]->SetLaser(i);
+			m_MummyLaser[i]->SetLaserType(Laser_TYPE::Laser1);
+			m_Mummy[0]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser[i]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser[i]->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[0]->GetLook().x, m_Mummy[0]->GetLook().y, m_Mummy[0]->GetLook().z), -1));
+			//m_MummyLaser[i]->ConnectParticle(m_Particles->GetParticleObj(idx));
+			m_Mummy[0]->AddFriends_Laser(m_MummyLaser[i]);
+			m_MummyLaser[i]->AddFriends_p(m_Mummy[0]);
+		}
+	}
+
+	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy2 && m_MummyExist[1] == true)
+	{ 
+		// 미라가 2마리 남았을때
+		if (m_One_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetActivityScope({ 2000.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 1.5f, scale.y * 1.5f, scale.z * 1.5f));
+			}
+			m_One_Mira_Die_Laser = false;
+		}
+		if (m_Two_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetActivityScope({ 2800.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE,GetDetailHeight(g_Heights, 18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 3.f, scale.y * 3.f, scale.z * 3.f));
+			}
+			m_Two_Mira_Die_Laser = false;
+		}
+		for (int i = 0; i < 3; i++)
+		{
+			m_MummyLaser2[i]->SetUseable(false);
+			XMFLOAT3 pos2 = Vector3::Add(XMFLOAT3{ m_Mummy[1]->GetPosition() }, { 0,200,0 });
+			m_MummyLaser2[i]->SetPosition(pos2);
+			m_MummyLaser2[i]->SetLaser(i);
+			m_MummyLaser2[i]->SetLaserType(Laser_TYPE::Laser2);
+			m_Mummy[1]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser2[i]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser2[i]->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[1]->GetLook().x, m_Mummy[1]->GetLook().y, m_Mummy[1]->GetLook().z), -1));
+			//m_MummyLaser[i]->ConnectParticle(m_Particles->GetParticleObj(idx));
+			m_Mummy[1]->AddFriends_Laser(m_MummyLaser2[i]);
+			m_MummyLaser2[i]->AddFriends_p(m_Mummy[1]);
+		}
+	}
+
+	if (pMummy->GetEnemyAttackType() == EnemyAttackType::Mummy3 && m_MummyExist[2] == true)
+	{ 
+		// 미라가 2마리 남았을때
+		if (m_One_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetActivityScope({ 2000.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE,GetDetailHeight(g_Heights,18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 1.5f, scale.y * 1.5f, scale.z * 1.5f));
+			}
+			m_One_Mira_Die_Laser = false;
+		}
+		if (m_Two_Mira_Die_Laser == true)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				m_Mummy[i]->SetActivityScope({ 2800.0f, 0, 250.0f }, { (18900.f - (2000 * i)) * MAP_SCALE_SIZE,GetDetailHeight(g_Heights, 18900.f, 6250.f), 6250.0f * MAP_SCALE_SIZE });
+				m_Mummy[i]->SetSize(XMFLOAT3(scale.x * 3.f, scale.y * 3.f, scale.z * 3.f));
+			}
+			m_Two_Mira_Die_Laser = false;
+		}
+		for (int i = 0; i < 3; i++)
+		{
+			m_MummyLaser3[i]->SetUseable(false);
+			XMFLOAT3 pos3 = Vector3::Add(XMFLOAT3{ m_Mummy[2]->GetPosition() }, { 0,200,0 });
+			m_MummyLaser3[i]->SetPosition(pos3);
+			m_MummyLaser3[i]->SetLaser(i);
+			m_MummyLaser3[i]->SetLaserType(Laser_TYPE::Laser3);
+			m_Mummy[2]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser3[i]->SetTargetVector(Vector3::Multifly(XMFLOAT3(0, 0, -150), 1));
+			m_MummyLaser3[i]->LookAtDirections(Vector3::Multifly(XMFLOAT3(m_Mummy[2]->GetLook().x, m_Mummy[2]->GetLook().y, m_Mummy[2]->GetLook().z), -1));
+			//m_MummyLaser[i]->ConnectParticle(m_Particles->GetParticleObj(idx));
+			m_Mummy[2]->AddFriends_Laser(m_MummyLaser3[i]);
+			m_MummyLaser3[i]->AddFriends_p(m_Mummy[2]);
+		}
+	}
 }
 
 void CGameRoom::InitPrevUserData(int c_id)

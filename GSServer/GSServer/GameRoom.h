@@ -4,6 +4,8 @@
 #include "Player.h"
 class CEnemy;
 class CMummy;
+class CMummyLaser;
+
 enum class CommandType
 {
 	None = 0,
@@ -93,6 +95,11 @@ class CGameRoom
 
 	CMummy*									m_Mummy[3];
 	bool									m_MummyExist[3] = { true,true,true };
+
+	CMummyLaser*							m_MummyLaser[3];
+	CMummyLaser*							m_MummyLaser2[3];
+	CMummyLaser*							m_MummyLaser3[3];
+
 	bool									m_One_Mira_Die = false;
 	bool									m_One_Mira_Die_Laser = false;
 	bool									m_Two_Mira_Die = false;
@@ -112,6 +119,13 @@ public:
 
 	void SendSyncUpdatePacket();
 	void SendMonsterActPacket();
+
+	void SendMummyActPacket();
+	void SendMonsterArrowActPacket();
+	void SendPlayerArrowActPacket();
+	void SendFireballActPacket();
+	void SendLaserActPacket();
+	void SendChessObjectActPacket();
 
 	void Disconnect(CLIENT& client); 
 	void Disconnect(int id);

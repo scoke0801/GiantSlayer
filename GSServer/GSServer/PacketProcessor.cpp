@@ -60,6 +60,13 @@ void PacketProcessor::Update(float elapsedTime)
 			m_Rooms[i].Update(elapsedTime);
 			m_Rooms[i].SendSyncUpdatePacket();
 			m_Rooms[i].SendMonsterActPacket();
+
+			m_Rooms[i].SendMummyActPacket();
+			m_Rooms[i].SendMonsterArrowActPacket();
+			m_Rooms[i].SendPlayerArrowActPacket();
+			m_Rooms[i].SendFireballActPacket();
+			m_Rooms[i].SendLaserActPacket();
+			m_Rooms[i].SendChessObjectActPacket();
 		}  
 	}
 }
