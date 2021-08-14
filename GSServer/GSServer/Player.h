@@ -110,6 +110,7 @@ public:
 	float GetAttackWaitTime() const { return m_AttackWaitingTime; }
 	float GetStringPullTime() const { return m_StringPullTime; }
 
+	PlayerWeaponType GetWeapon() { return m_WeaponType; }
 public:
 	void SetCanAttack(bool info) { m_IsCanAttack = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }
@@ -126,6 +127,7 @@ public:
 	bool Attacked(CGameObject* pObject);
 	void Attack(int type);
 	void ResetAttack();
+	void ResetBow();
 
 	AnimationType GetStateName() const { return m_StateName; } 
 };

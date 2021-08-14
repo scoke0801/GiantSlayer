@@ -149,6 +149,7 @@ public:
 
 	void ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector);
 
+	void ShotFireBall(OBJECT_LAYER type, CGameObject* user);
 private:
 	void InitAll();
 	void InitPlayers();

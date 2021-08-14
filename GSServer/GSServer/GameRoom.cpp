@@ -1029,6 +1029,7 @@ void CGameRoom::SendMonsterArrowActPacket()
 		packet.lookX = FloatToInt(look.x);
 		packet.lookY = FloatToInt(look.y);
 		packet.lookZ = FloatToInt(look.z);
+		packets.push_back(packet);
 		++idx;
 	}
 
@@ -1053,6 +1054,10 @@ void CGameRoom::SendPlayerArrowActPacket()
 
 	int idx = 0;
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
+		if (pArrow->IsUsable()) {
+			continue;
+		}
+
 		P_S2C_PLAYER_ARROW_UPDATE_SYNC packet;
 		ZeroMemory(&packet, sizeof(packet));
 		packet.size = sizeof(packet);
@@ -1068,6 +1073,8 @@ void CGameRoom::SendPlayerArrowActPacket()
 		packet.lookX = FloatToInt(look.x);
 		packet.lookY = FloatToInt(look.y);
 		packet.lookZ = FloatToInt(look.z);
+
+		packets.push_back(packet);
 		++idx;
 	}
 
@@ -1091,18 +1098,23 @@ void CGameRoom::SendFireballActPacket()
 	vector<P_S2C_FIREBALL_UPDATE_SYNC> packets;
 
 	int idx = 0;
-	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
+	for (auto pFireBall : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
+		if (pFireBall->IsDrawable()) {
+			continue;
+		}
 		P_S2C_FIREBALL_UPDATE_SYNC packet;
 		ZeroMemory(&packet, sizeof(packet));
 		packet.size = sizeof(packet);
 		packet.type = PACKET_PROTOCOL::S2C_INGAME_FIREBALL_ACT;
 		packet.id = idx;
-
-		XMFLOAT3 pos = pArrow->GetPosition();
-		XMFLOAT3 look = pArrow->GetLook();
+		 
+		XMFLOAT3 pos = pFireBall->GetPosition();
+		XMFLOAT3 look = pFireBall->GetLook();
 		packet.posX = FloatToInt(pos.x);
 		packet.posY = FloatToInt(pos.y);
 		packet.posZ = FloatToInt(pos.z); 
+
+		packets.push_back(packet);
 		++idx;
 	}
 
@@ -1356,6 +1368,22 @@ void CGameRoom::ShotPlayerArrow(int p_id)
 	}
 }
 
+void CGameRoom::ShotFireBall(OBJECT_LAYER type, CGameObject* user)
+{
+	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
+		CFireBall* pFireb = reinterpret_cast<CFireBall*>(pObj);
+		if (pFireb->IsCanUse()) {
+			{
+				pFireb->SetUseable(false);
+				pFireb->SetSkill(user);
+				cout << "shot fb" << endl;
+			}
+			break;
+		}
+	}
+}
+
+
 void CGameRoom::ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 {
 	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
@@ -1470,8 +1498,6 @@ void CGameRoom::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 			}
 			m_Two_Mira_Die_Laser = false;
 		}
-
-
 		for (int i = 0; i < 3; i++)
 		{
 			m_MummyLaser[i]->SetUseable(false);
@@ -1654,81 +1680,134 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 #ifdef _DEBUG 
 		m_Players[id]->m_moveTime = p_keyboard.move_time;
 #endif
-		switch (p_keyboard.keyInput)
-		{
-		case VK_W:
-			m_Players[id]->SetVelocity(Vector3::Add(shift,
-				m_Cameras[id]->GetLook3f(), distance));
-			break;
-		case VK_S:
-			m_Players[id]->SetVelocity(Vector3::Add(shift,
-				m_Cameras[id]->GetLook3f(), -distance));
-			break;
-		case VK_A:
-			m_Players[id]->SetVelocity(Vector3::Add(shift,
-				m_Cameras[id]->GetRight3f(), -distance));
-			break;
-		case VK_D:
-			m_Players[id]->SetVelocity(Vector3::Add(shift,
-				m_Cameras[id]->GetRight3f(), distance));
-			break;
-		case VK_J:
-			if (m_Players[id]->IsCanAttack()) {
-				m_Players[id]->Attack(0);
-			}
-			break;
-		case VK_U:
-			for (int i = m_DoorStartIndex; i < m_DoorStartIndex + 5; ++i) {
-				CDoorWall* pDoorWall = reinterpret_cast<CDoorWall*>(
-					m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][i]);
-				pDoorWall->OpenDoor();
-			}
-			break;
-		case VK_I:
-			for (int i = m_DoorStartIndex; i < m_DoorStartIndex + 5; ++i) {
-				CDoorWall* pDoorWall = reinterpret_cast<CDoorWall*>(
-					m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][i]);
-				pDoorWall->CloserDoor();
-			}
-			break;
-		case VK_F1:
-		{
-			m_Players[p_keyboard.id]->SetPosition({ 1622 * MAP_SCALE_SIZE, 0, 10772 * MAP_SCALE_SIZE });
-			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
-		}
-		break;
-		case VK_F2:
-		{
-			m_Players[p_keyboard.id]->SetPosition({ 5500 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
-			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
-		}
-		break;
-		case VK_F3:
-		{
-			m_Players[p_keyboard.id]->SetPosition({ 11838.8 * MAP_SCALE_SIZE,  -1000, 10428.2 * MAP_SCALE_SIZE });
-			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
-		}
-		break;
-		case VK_F4:
-		{
-			m_Players[p_keyboard.id]->SetPosition({ 17000 * MAP_SCALE_SIZE,  -6000, 5500 * MAP_SCALE_SIZE });
-			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
-		}
-		break;
-		case VK_F5:
-		{
-			m_Players[p_keyboard.id]->SetPosition({ 16749.9 * MAP_SCALE_SIZE,  -6000, 8500.78 * MAP_SCALE_SIZE });
-			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
-		}
-		break;
-		case VK_F6:
-		{
-			m_Players[p_keyboard.id]->SetPosition({ 16958.4 * MAP_SCALE_SIZE,  -6000, 14861.1 * MAP_SCALE_SIZE });
-			m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
-		} 
-		break;
-		}
+		if (p_keyboard.isKeyDown) {
+			switch (p_keyboard.keyInput)
+			{
+			case VK_W:
+				m_Players[id]->SetVelocity(Vector3::Add(shift,
+					m_Cameras[id]->GetLook3f(), distance));
+				break;
+			case VK_S:
+				m_Players[id]->SetVelocity(Vector3::Add(shift,
+					m_Cameras[id]->GetLook3f(), -distance));
+				break;
+			case VK_A:
+				m_Players[id]->SetVelocity(Vector3::Add(shift,
+					m_Cameras[id]->GetRight3f(), -distance));
+				break;
+			case VK_D:
+				m_Players[id]->SetVelocity(Vector3::Add(shift,
+					m_Cameras[id]->GetRight3f(), distance));
+				break;
+			case VK_J:
+				if (m_Players[p_keyboard.id]->IsCanAttack()) {
+					switch (m_Players[p_keyboard.id]->GetWeapon())
+					{
+					case PlayerWeaponType::Sword:
+						m_Players[p_keyboard.id]->Attack(0);
+						break;
+					case PlayerWeaponType::Bow:
+						m_Players[p_keyboard.id]->Attack(0);
+						m_Players[p_keyboard.id]->pullString = true;
+						break;
+					case PlayerWeaponType::Staff:
+						m_Players[p_keyboard.id]->Attack(0);
+						ShotFireBall(OBJECT_LAYER::FireBall, m_Players[p_keyboard.id]);
+						break;
+					}
+				}
+				else {
+					switch (m_Players[p_keyboard.id]->GetWeapon())
+					{
+					case PlayerWeaponType::Sword:
+						if (m_Players[p_keyboard.id]->GetAttackWaitTime() < 0.5f) { 
+							m_Players[p_keyboard.id]->SetSwordAttackKeyDown(true);
+						}
+						break;
+					}
+				}
 
+				break;
+			case VK_U:
+				for (int i = m_DoorStartIndex; i < m_DoorStartIndex + 5; ++i) {
+					CDoorWall* pDoorWall = reinterpret_cast<CDoorWall*>(
+						m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][i]);
+					pDoorWall->OpenDoor();
+				}
+				break;
+			case VK_I:
+				for (int i = m_DoorStartIndex; i < m_DoorStartIndex + 5; ++i) {
+					CDoorWall* pDoorWall = reinterpret_cast<CDoorWall*>(
+						m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][i]);
+					pDoorWall->CloserDoor();
+				}
+				break;
+			case VK_F1:
+			{
+				m_Players[p_keyboard.id]->SetPosition({ 1622 * MAP_SCALE_SIZE, 0, 10772 * MAP_SCALE_SIZE });
+				m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+			}
+			break;
+			case VK_F2:
+			{
+				m_Players[p_keyboard.id]->SetPosition({ 5500 * MAP_SCALE_SIZE,  -1000, 18000 * MAP_SCALE_SIZE });
+				m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+			}
+			break;
+			case VK_F3:
+			{
+				m_Players[p_keyboard.id]->SetPosition({ 11838.8 * MAP_SCALE_SIZE,  -1000, 10428.2 * MAP_SCALE_SIZE });
+				m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+			}
+			break;
+			case VK_F4:
+			{
+				m_Players[p_keyboard.id]->SetPosition({ 17000 * MAP_SCALE_SIZE,  -6000, 5500 * MAP_SCALE_SIZE });
+				m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+			}
+			break;
+			case VK_F5:
+			{
+				m_Players[p_keyboard.id]->SetPosition({ 16749.9 * MAP_SCALE_SIZE,  -6000, 8500.78 * MAP_SCALE_SIZE });
+				m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+			}
+			break;
+			case VK_F6:
+			{
+				m_Players[p_keyboard.id]->SetPosition({ 16958.4 * MAP_SCALE_SIZE,  -6000, 14861.1 * MAP_SCALE_SIZE });
+				m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
+			}
+			break;
+			}
+		}
+		else {
+		if (p_keyboard.keyInput == VK_J) {
+			switch (m_Players[p_keyboard.id]->GetWeapon())
+			{
+			case PlayerWeaponType::Sword: 
+				break;
+			case PlayerWeaponType::Bow:
+				if (m_Players[p_keyboard.id]->ShotAble()) {
+					ShotPlayerArrow(id); 
+				}
+				else {
+
+					// test//
+					ShotPlayerArrow(id);
+					/// 
+
+
+
+					m_Players[p_keyboard.id]->IncreaseAttackWaitingTime(0);
+					m_Players[p_keyboard.id]->SetAnimationSet(IDLE);
+				}
+				m_Players[p_keyboard.id]->ResetBow();
+				break;
+			case PlayerWeaponType::Staff: 
+				break;
+			}
+		}
+		}
 		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
 		p_keyboardProcess.size = sizeof(p_keyboardProcess);
 		p_keyboardProcess.type = PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT;

@@ -1528,6 +1528,31 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 	{
 		P_S2C_PLAYER_ARROW_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_PLAYER_ARROW_UPDATE_SYNC*>(p_buf);
 
+		auto obj = m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow][packet->id];
+		CArrow* pArrow = reinterpret_cast<CArrow*>(obj);
+
+		XMFLOAT3 pos = { IntToFloat(packet->posX), IntToFloat(packet->posY), IntToFloat(packet->posZ) };
+		XMFLOAT3 look = { IntToFloat(packet->lookX), IntToFloat(packet->lookY), IntToFloat(packet->lookZ) };
+
+		if (pArrow->IsCanUse()) {
+			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
+			if (-1 != idx) { 
+				pArrow->SetUseable(false); 
+				pArrow->SetPosition(pos);
+				pArrow->m_startPos = pos; 
+				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
+				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx)); 
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+			}
+			break;
+		}
+		else
+		{
+			pArrow->SetPosition(pos);
+			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+		} 
+		cout << "Arrow act\n";
 	}
 		break;
 	case PACKET_PROTOCOL::SC2_INGAME_MONSTER_ARROW_ACT:	
@@ -1573,7 +1598,24 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 	case PACKET_PROTOCOL::S2C_INGAME_FIREBALL_ACT:	
 	{
 		P_S2C_FIREBALL_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_FIREBALL_UPDATE_SYNC*>(p_buf);
+		auto obj = m_ObjectLayers[(int)OBJECT_LAYER::FireBall][packet->id];
+		CFireBall* pFireball = reinterpret_cast<CFireBall*>(obj);
 
+		XMFLOAT3 pos = { IntToFloat(packet->posX), IntToFloat(packet->posY), IntToFloat(packet->posZ) };
+		 
+		if (pFireball->IsCanUse()) {
+			pFireball->SetUseable(false);
+			pFireball->SetPosition(pos);
+
+			m_SoundManager->PlayEffect(Sound_Name::EFFECT_Fire_Ball);
+
+			break;
+		}
+		else
+		{
+			pFireball->SetPosition(pos);
+		}
+		cout << "FBS act\n";
 	}
 		break;
 	case PACKET_PROTOCOL::S2C_CHESS_OBJ_ACT:
@@ -1631,6 +1673,7 @@ void CGameScene::ProcessInput()
 		auto keyInput = GAME_INPUT;
 		bool processKey = false;
 		P_C2S_KEYBOARD_INPUT p_keyboard;
+		p_keyboard.isKeyDown = true;
 		p_keyboard.size = sizeof(P_C2S_KEYBOARD_INPUT);
 		p_keyboard.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
 		p_keyboard.id = CFramework::GetInstance().GetPlayerId();
@@ -1695,11 +1738,7 @@ void CGameScene::ProcessInput()
 		if (keyInput.KEY_D) {
 			p_keyboard.keyInput = VK_D;
 			processKey = true;
-		}
-		if (keyInput.KEY_J) {
-			p_keyboard.keyInput = VK_J;
-			processKey = true;
-		}
+		} 
 		if (keyInput.KEY_U) {
 			p_keyboard.keyInput = VK_U;
 			processKey = true;
@@ -1744,8 +1783,7 @@ void CGameScene::ProcessInput()
 		{
 			gbWireframeOn = false;
 		}
-		if (processKey == false) return;
-		int retVal = 0;
+		if (processKey == false) return; 
 		SendPacket(&p_keyboard);
 		return;
 	}
@@ -1921,6 +1959,23 @@ void CGameScene::ProcessInput()
 
 void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 {
+	if (CFramework::GetInstance().IsOnConntected())
+	{
+		if (wParam != VK_J) {
+			return;
+		}
+		auto keyInput = GAME_INPUT;
+		bool processKey = false;
+		P_C2S_KEYBOARD_INPUT p_keyboard;
+		p_keyboard.size = sizeof(P_C2S_KEYBOARD_INPUT);
+		p_keyboard.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
+		p_keyboard.id = CFramework::GetInstance().GetPlayerId();
+		p_keyboard.keyInput = wParam;
+		p_keyboard.isKeyDown = !isKeyUp;
+		SendPacket(&p_keyboard);
+		return;
+	}
+	
 	if (isKeyUp == false)
 	{
 		if (wParam == VK_9) {

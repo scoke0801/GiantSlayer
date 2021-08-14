@@ -314,3 +314,11 @@ void CPlayer::ResetAttack()
 	m_AttackWaitingTime = 0.0f;
 	m_IsCanAttack = true;
 }
+
+void CPlayer::ResetBow()
+{
+	SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+	pullString = false;
+	m_AnimationPaused = false;
+	m_StringPullTime = 0;
+}

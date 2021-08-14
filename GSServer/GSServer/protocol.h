@@ -284,7 +284,7 @@ struct P_C2S_KEYBOARD_INPUT {
 	PACKET_PROTOCOL type;
 	short keyInput;
 	short id;
-
+	bool  isKeyDown;
 #ifdef _DEBUG 
 	int move_time;			// Stress Test 프로그램에서 delay를 측정할 때 사용, 
 							// 서버는 해당 id가 접속한 클라이언트에서 보내온 최신 값을 return 해야 한다.

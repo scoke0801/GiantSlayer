@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+ 
 class CFireBall : public CGameObject
 {
 public:
@@ -17,7 +18,7 @@ public:
 	bool IsCanUse() const { return m_isDrawable; }
 	void SetUseable(bool data) { m_isDrawable = data; }
 	void SetDrawable(bool drawable);
-
+	 
 protected:
 	CGameObject* m_Owner;
 	CGameObject* target;
