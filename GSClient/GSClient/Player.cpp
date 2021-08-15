@@ -31,6 +31,8 @@ void CPlayer::Update(float fTimeElapsed)
 		return;
 	}
 
+	DisplayVector3(GetLook());
+
 	if (m_IsCanAttack == false) {
 		if (!m_AnimationPaused)
 			m_AttackWaitingTime -= fTimeElapsed;

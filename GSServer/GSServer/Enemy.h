@@ -30,7 +30,7 @@ protected:
 	EnemyType				m_EnemyType;
 
 	vector<CPlayer*>		m_ConnectedPlayers;
-	CPlayer* m_TargetPlayer;
+	CPlayer*				m_TargetPlayer = nullptr;
 
 	bool					m_IsOnMoving = false;
 

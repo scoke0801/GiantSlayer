@@ -50,6 +50,34 @@ constexpr float PLAYER_SWORD_ATTACK_TIME = 1.033333f;
 constexpr float AIR_RESISTANCE = 0.007f;
 constexpr float GRAVITY = 1.0f;
 
+// 편의를 위해 Layer에서 몇 가지 객체 유형은 제외하고 별도로 관리
+enum class OBJECT_LAYER : int {
+	Skybox,
+	TerrainWater,
+	Puzzle,
+	PuzzleBox,
+	ChessPuzzle,
+	PlayerChessPuzzle,
+	Obstacle,
+	TerrainBoundary,
+	MirrorBox,
+	Bridge,
+	Enemy,
+	Mummy,
+	Npc,
+	Boss,
+	Arrow,
+	PlayerArrow,
+	MonsterArrow,
+	Mummylaser,
+	Mummylaser2,
+	Mummylaser3,
+	FireBall,
+	Billboard,
+	Fog,
+	Count,
+};
+
 enum AnimationType
 {
 	// 기본==========
@@ -245,6 +273,8 @@ enum class PACKET_PROTOCOL : short
 	S2C_INGAME_LASER_ACT,
 	S2C_INGAME_FIREBALL_ACT,
 	S2C_CHESS_OBJ_ACT,
+
+	S2C_DELETE_OBJ,
 
 	S2C_INGAME_UPDATE_PLAYERS_STATE,
 	  
@@ -490,5 +520,15 @@ struct P_S2C_CHESS_OBJ_UPDATE_SYNC
 	int				posX[4];
 	int				posY[4];
 	int				posZ[4]; 
+};
+
+struct P_S2C_DELETE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+
+	// objectLayer
+	short		objType;
+	short			idx;
 };
 #pragma pack (pop)

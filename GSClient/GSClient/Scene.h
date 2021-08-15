@@ -38,34 +38,6 @@ enum class FBX_MESH_TYPE : UINT {
 	COUNT
 };
 
-// 편의를 위해 Layer에서 몇 가지 객체 유형은 제외하고 별도로 관리
-enum class OBJECT_LAYER : int {
-	Skybox,
-	TerrainWater,
-	Puzzle,
-	PuzzleBox,
-	ChessPuzzle,
-	PlayerChessPuzzle,
-	Obstacle,
-	TerrainBoundary,
-	MirrorBox,
-	Bridge,
-	Enemy,
-	Mummy,
-	Npc,
-	Boss,
-	Arrow,
-	PlayerArrow,
-	MonsterArrow,
-	Mummylaser,
-	Mummylaser2,
-	Mummylaser3,
-	FireBall,
-	Billboard,
-	Fog,
-	Count,
-};
-
 class CScene
 {
 protected:

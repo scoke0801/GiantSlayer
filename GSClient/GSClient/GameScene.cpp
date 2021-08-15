@@ -1072,13 +1072,7 @@ void CGameScene::Update(float elapsedTime)
 		m_Player->SetPosition(XMFLOAT3(plPos.x, -1760.0f, plPos.z));
 		m_Player->UpdateCamera();
 	}
-	 
-//
-//x: 17611.5 y : -1760 z : 17922.1
-//x : 18312 y : -1760 z : 17907.7
-//
-//x : 17553.5 y : -2014.53 z : 18456.7
-//x : 18283.8 y : -2003.1 z : 18509.6
+	  
 
 }
 
@@ -1096,6 +1090,8 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
+	m_EffectsHandler->Update(elapsedTime);
+	 
 	m_Particles->Update(elapsedTime);
 
 	m_HelpTextUI->Update(elapsedTime);
@@ -1558,12 +1554,14 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
 
+			DisplayVector3(look);
+
 			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
 			m_Players[i]->SetPosition(pos);
 			m_Players[i]->UpdateCamera();
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
-				look, -PLAYER_RUN_SPEED)); 
+				look, PLAYER_RUN_SPEED)); 
 			m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
 			switch (p_syncUpdate.states[i]) {
 			case IDLE:
@@ -1638,7 +1636,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx)); 
-				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT); 
 			}
 			break;
 		}
@@ -1646,6 +1644,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		{
 			pArrow->SetPosition(pos);
 			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+			DisplayVector3(look);
 		} 
 		cout << "Arrow act\n";
 	}
@@ -1677,14 +1676,18 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			if (packet->id == 0) {
 				m_MummyLaser[i]->SetPosition(pos);
 				m_MummyLaser[i]->SetDrawable(false);
+				m_MummyLaser[i]->Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 5.0f);
 			}
 			else if (packet->id == 1) {
 				m_MummyLaser2[i]->SetPosition(pos);
 				m_MummyLaser2[i]->SetDrawable(false);
+				m_MummyLaser2[i]->Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 5.0f);
 			}
 			else if (packet->id == 2) {
 				m_MummyLaser3[i]->SetPosition(pos);
-				m_MummyLaser3[i]->SetDrawable(false);
+				m_MummyLaser3[i]->SetDrawable(false);		
+				m_MummyLaser3[i]->Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 5.0f);
+
 			} 
 		}
 		cout << "Laser Update\n";
@@ -1726,6 +1729,14 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 	}
 		break;
 
+	case PACKET_PROTOCOL::S2C_DELETE_OBJ:
+	{
+		P_S2C_DELETE_SYNC* packet = reinterpret_cast<P_S2C_DELETE_SYNC*>(p_buf);
+		 
+		m_ObjectLayers[packet->objType][packet->idx]->SetDrawable(true);
+		cout << "Delete Act\n";
+	}
+	break;
 	default:
 		cout << "Unknown Packet Type from server" << " Packet Type [" << +p_buf[1] << "]" << endl;
 		while (true) {
@@ -4223,9 +4234,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 		}
 	}
 		
-}
-
-
+} 
 
 void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {

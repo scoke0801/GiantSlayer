@@ -25,7 +25,10 @@ CEnemy::~CEnemy()
 }
 
 void CEnemy::Update(float elapsedTime)
-{ 
+{
+	if (m_AttackDelayTime > 0.0f) {
+		m_AttackDelayTime -= elapsedTime;
+	}
 	m_State->Execute(this, elapsedTime);
 
 	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
@@ -43,7 +46,7 @@ void CEnemy::UpdateOnServer(float fTimeElapsed)
 
 bool CEnemy::IsEnemyInSight() // Chase State
 { 
-	if (m_AttackDelayTime > 0.0f) {
+	if (m_AttackDelayTime > 0.0f) { 
 		return false;
 	}
 	for (auto player : m_ConnectedPlayers) { 

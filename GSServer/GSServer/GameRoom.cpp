@@ -32,8 +32,7 @@ void CGameRoom::Update(float elapsedTime)
 			pObject->Update(elapsedTime);
 			pObject->UpdateColliders();
 		}
-	}
-
+	} 
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(g_Heights);
@@ -52,8 +51,7 @@ void CGameRoom::Update(float elapsedTime)
 			m_PlayerExistingSector[m_Players[i]->GetPlayerExistingSector()] = true;
 		}
 	}
-
-
+	 
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary]) {
 		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			if (m_Players[i]->IsExist() == false) continue;
@@ -210,38 +208,38 @@ void CGameRoom::Update(float elapsedTime)
 	}
 
 
-	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
-		if (false == pPuzzle->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
-			if (m_Players[i]->IsExist() == false) continue;
+	//for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
+	//	if (false == pPuzzle->IsInSameSector(m_PlayerExistingSector)) {
+	//		continue;
+	//	}
+	//	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+	//		if (m_Players[i]->IsExist() == false) continue;
 
-			if (pPuzzle->CollisionCheck(m_Players[i])) {
-				m_Players[i]->FixCollision(pPuzzle);
-				m_isPlayerBoxCollide[i] = true;
-				m_Players[i]->UpdateCamera();
-				break;
-			}
-		}
-	}
+	//		if (pPuzzle->CollisionCheck(m_Players[i])) {
+	//			m_Players[i]->FixCollision(pPuzzle);
+	//			m_isPlayerBoxCollide[i] = true;
+	//			m_Players[i]->UpdateCamera();
+	//			break;
+	//		}
+	//	}
+	//}
 
 
-	for (auto pChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle]) {
-		if (false == pChessPuzzle->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
-			if (m_Players[i]->IsExist() == false) continue;
+	//for (auto pChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle]) {
+	//	if (false == pChessPuzzle->IsInSameSector(m_PlayerExistingSector)) {
+	//		continue;
+	//	}
+	//	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+	//		if (m_Players[i]->IsExist() == false) continue;
 
-			if (pChessPuzzle->CollisionCheck(m_Players[i])) {
-				m_Players[i]->FixCollision(pChessPuzzle);
-				m_isPlayerBoxCollide[i] = true;
-				m_Players[i]->UpdateCamera();
-				break;
-			}
-		}
-	}
+	//		if (pChessPuzzle->CollisionCheck(m_Players[i])) {
+	//			m_Players[i]->FixCollision(pChessPuzzle);
+	//			m_isPlayerBoxCollide[i] = true;
+	//			m_Players[i]->UpdateCamera();
+	//			break;
+	//		}
+	//	}
+	//}
 
 	for (int playerIdx = 0; playerIdx < MAX_ROOM_PLAYER; ++playerIdx) {
 
@@ -388,6 +386,49 @@ void CGameRoom::Update(float elapsedTime)
 			//p->OpenDoor();
 		}
 	}
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if ((int)SECTOR_POSITION::SECTOR_3!= m_Players[i]->GetPlayerExistingSector()) {
+			continue;
+		}
+		XMFLOAT3 plPos = m_Players[i]->GetPosition();
+
+		// 입구 계단
+		if ((plPos.x > 17553.5 && plPos.x < 18283.8) &&
+			(plPos.z > 17907.7 && plPos.z < 18509.6))
+		{
+			float min = -1980;
+			float max = -1760;
+
+			float t = (plPos.z / 18509.6);
+
+			float y = Lerp(max, min, Rate(17907.7, 18509.6, plPos.z));
+			cout << "out y : " << y << "\n";
+			m_Players[i]->SetPosition(XMFLOAT3(plPos.x, y, plPos.z));
+			m_Players[i]->UpdateCamera();
+		}
+		// 출구 계단
+		if ((plPos.x > 17527.7 && plPos.x < 18319.5) &&
+			(plPos.z > 13328 && plPos.z < 13887.7))
+		{
+			float min = -1950;
+			float max = -1760;
+
+			float t = (plPos.z / 13887.7);
+
+			float y = Lerp(min, max, Rate(13328, 13887.7, plPos.z)); 
+			m_Players[i]->SetPosition(XMFLOAT3(plPos.x, y, plPos.z));
+			m_Players[i]->UpdateCamera();
+		}
+
+		// 퍼즐
+		if ((plPos.x > 16450.0f && plPos.x < 19450.0f) &&
+			(plPos.z > 13900.0f && plPos.z < 17950.0f))
+		{
+			m_Players[i]->SetPosition(XMFLOAT3(plPos.x, -1760.0f, plPos.z));
+			m_Players[i]->UpdateCamera();
+		}
+	}
 }
 void CGameRoom::InitAll()
 {  
@@ -442,6 +483,7 @@ void CGameRoom::InitPlayers()
 		m_Players[i]->Scale(200, 200, 200); 
 		m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
 		m_Players[i]->SetExistence(false);
+
 		//m_Players[i]->SetWeaponPointer();
 	}
 }
@@ -665,6 +707,7 @@ void CGameRoom::InitArrows()
 		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
 		pArrow->Scale(25.0f, 25.0f, 25.0f);
 		pArrow->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		pArrow->SetIsPlayerArrow(true);
 		m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow].push_back(pArrow);
 	}
 
@@ -674,6 +717,7 @@ void CGameRoom::InitArrows()
 		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
 		pArrow->Scale(100.0f, 100.0f, 50.0f);
 		pArrow->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		pArrow->SetIsPlayerArrow(false);
 		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
 	}
 }
@@ -932,12 +976,7 @@ void CGameRoom::InitObstacle()
 	pObject = new CSign(OBJECT_ID::SIGN_SCROLL);
 	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::SIGN_SCROLL]);
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_1); 
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
-
-	pObject = new CSign(OBJECT_ID::SIGN_PUZZLE);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::SIGN_PUZZLE]);
-	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject); 
 
 	pObject = new CSign(OBJECT_ID::SIGN_MEDUSA);
 	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::SIGN_MEDUSA]);
@@ -1221,6 +1260,9 @@ void CGameRoom::SendSyncUpdatePacket()
 		//p_syncUpdate.Sp[i] = m_Players[i]->GetSP();
 		XMFLOAT3 pos = m_Players[i]->GetPosition();
 		XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
+		if (i == 0) { 
+			DisplayVector3(look);
+		}
 		p_syncUpdate.posX[i] = FloatToInt(pos.x);
 		p_syncUpdate.posY[i] = FloatToInt(pos.y);
 		p_syncUpdate.posZ[i] = FloatToInt(pos.z);
@@ -1240,6 +1282,7 @@ void CGameRoom::SendSyncUpdatePacket()
 			continue;
 		}
 		if (m_Clients[i]->m_state == PL_STATE::PLST_CONNECTED) {
+
 			SendPacket(m_Clients[i]->id, &p_syncUpdate);
 		}
 	}
@@ -1394,6 +1437,7 @@ void CGameRoom::SendPlayerArrowActPacket()
 		packet.lookY = FloatToInt(look.y);
 		packet.lookZ = FloatToInt(look.z);
 
+		DisplayVector3(look);
 		packets.push_back(packet);
 		++idx;
 	}
@@ -1411,6 +1455,7 @@ void CGameRoom::SendPlayerArrowActPacket()
 			SendPacket(m_Clients[i]->id, &p);
 		}
 	}
+	
 }
 
 void CGameRoom::SendFireballActPacket()
@@ -1591,6 +1636,36 @@ void CGameRoom::SendChessObjectActPacket()
 	m_ChessChangeFlag = false;
 }
 
+void CGameRoom::SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx)
+{
+	if (false == m_ObjectDeleteFlag) {
+		return;
+	}
+	  
+	P_S2C_DELETE_SYNC packet;
+	ZeroMemory(&packet, sizeof(packet));
+	packet.size = sizeof(packet);
+	packet.type = PACKET_PROTOCOL::S2C_DELETE_OBJ;
+	 
+	packet.idx = objIdx;
+	packet.objType = layerIdx;
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			continue;
+		}
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
+			continue;
+		}
+
+		SendPacket(m_Clients[i]->id, &packet);
+	}
+
+
+
+	m_ObjectDeleteFlag = false;
+} 
+
 void CGameRoom::Disconnect(int packet_id)
 { 
 	cout << "로그 아웃\n"; 
@@ -1659,6 +1734,19 @@ void CGameRoom::DeleteObject(CGameObject* pObject, int layerIdx)
 	}
 }
    
+void CGameRoom::RecyleObject(CGameObject* pObject, int layerIdx)
+{
+	auto res = std::find(m_ObjectLayers[layerIdx].begin(), m_ObjectLayers[layerIdx].end(), pObject);
+	
+	int idx = 0;
+	if (res != m_ObjectLayers[layerIdx].end()) {  
+		pObject->SetIsUsable(true);
+		SendDeletePacket(pObject, layerIdx, idx);
+		m_ObjectDeleteFlag = true;
+		++idx;
+	}
+}
+
 void CGameRoom::EnterPlayer(CLIENT& client, int weapontType)
 {
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
