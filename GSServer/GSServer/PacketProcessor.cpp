@@ -253,6 +253,7 @@ void PacketProcessor::ProcessPacket(CLIENT& client, unsigned char* p_buf)
 				}
 			}
 		}  
+		p_RoomInfo.roomInfo = roomNo;
 		SendPacket(client.m_socket, &p_RoomInfo);
 	}
 		break;

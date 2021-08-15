@@ -422,8 +422,7 @@ void CTitleScene::ProcessPacket(unsigned char* p_buf)
 		P_S2C_SEND_ROOM_INFO packet;
 		 
 		memcpy(&packet, p_buf, p_buf[0]); 
-		
-		cout << "here!!!!!!!\n";
+		m_RoomStartNo = packet.roomInfo;
 		for (int i = 0; i < 20; ++i) { 
 			if ((int)PlayerWeaponType::None == packet.weapons[i]) {
 				m_Weapons[i]->SetDrawable(false);
@@ -441,8 +440,7 @@ void CTitleScene::ProcessPacket(unsigned char* p_buf)
 				m_Weapons[i]->SetDrawable(true);
 				m_Weapons[i]->SetTextureIndex(0x80);
 			}
-		}
-		cout << "here!22222!!!!!!\n";
+		} 
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
 		break;
@@ -548,15 +546,14 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 192 && x < 445) {
 			if (y > 588 & y < 677) {
 				// multi play
-				m_IsOnRoomSelect = true;
 				if (CFramework::GetInstance().ConnectToServer())
 				{
+					m_IsOnRoomSelect = true;
 					P_C2S_REQUEST_ROOM_INFO p_requestRoomInfo;
 					p_requestRoomInfo.size = sizeof(p_requestRoomInfo);
 					p_requestRoomInfo.type = PACKET_PROTOCOL::C2S_REQUEST_ROOM_INFO;
 					p_requestRoomInfo.baseRoomNo = 1;
-					SendPacket(&p_requestRoomInfo);
-					cout << "plz room info\n";
+					SendPacket(&p_requestRoomInfo); 
 				}
 			}
 		}
@@ -626,12 +623,32 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 503 && x < 559) {
 			if (y > 651 && y < 690) {
 				// prev button
+				if ( m_IsOnRoomSelect )
+				{
+					m_IsOnRoomSelect = true;
+					P_C2S_REQUEST_ROOM_INFO p_requestRoomInfo;
+					p_requestRoomInfo.size = sizeof(p_requestRoomInfo);
+					p_requestRoomInfo.type = PACKET_PROTOCOL::C2S_REQUEST_ROOM_INFO;
+					p_requestRoomInfo.baseRoomNo = max(m_RoomStartNo - 4, 1);
+					SendPacket(&p_requestRoomInfo);
+				}				
+				cout << "prevButton\n";
 			}
 		}
 
 		if (x > 718 && x < 775) {
 			if (y > 651 && y < 690) {
 				// next button
+				if( m_IsOnRoomSelect )
+				{
+					m_IsOnRoomSelect = true;
+					P_C2S_REQUEST_ROOM_INFO p_requestRoomInfo;
+					p_requestRoomInfo.size = sizeof(p_requestRoomInfo);
+					p_requestRoomInfo.type = PACKET_PROTOCOL::C2S_REQUEST_ROOM_INFO;
+					p_requestRoomInfo.baseRoomNo = min(m_RoomStartNo + 4, 10);
+					SendPacket(&p_requestRoomInfo);
+				}
+				cout << "nextButton\n";
 			}
 		} 
 

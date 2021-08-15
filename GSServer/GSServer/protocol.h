@@ -314,6 +314,7 @@ struct P_S2C_SEND_ROOM_INFO {
 	BYTE size;
 	PACKET_PROTOCOL type;
 
+	int roomInfo;
 	short weapons[20];
 };
 struct P_S2C_PROCESS_LOGIN {
