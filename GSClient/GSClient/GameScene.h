@@ -77,7 +77,7 @@ private:
 	// 씬 생성 시 저장한 후, 게임 중 상황에 따라 처리
 	unordered_map<int, CGameObject*> m_BlockingPlateToPreviousSector;
 
-	CGameObject*				m_Mirror[1] = { nullptr };
+	CGameObject*				m_Mirror[3] = { nullptr,nullptr,nullptr };
 	CPlayer*					m_Player = nullptr;
 
 	float						m_AttackDelayTime;
@@ -102,7 +102,7 @@ private:
 	CCamera**					m_Cameras;
 	CCamera*					m_CurrentCamera = nullptr;
 	CCamera*					m_MinimapCamera = nullptr;
-	CCamera*					m_MirrorCamera = nullptr;
+	CCamera*					m_MirrorCamera[3] = { nullptr,nullptr,nullptr };
 
 	CLightCamera*				m_pLightCamera = nullptr;
 
@@ -139,7 +139,7 @@ private:	// about Minimap
 	UI*							m_MinimapArrow;
 
 private:
-	ID3D12Resource*				m_pd3dMirrorTex = NULL;
+	ID3D12Resource* m_pd3dMirrorTex[3] = { NULL,NULL,NULL };
 
 private:
 	ID3D12Resource*				m_pd3dShadowMap = NULL;
@@ -188,7 +188,7 @@ public:
 	void DrawPlayer(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	void FadeInOut(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	void DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
-	void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV) override;
+	void DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV,int idx) override;
 	void DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList) override;
 	void DrawFont(ID3D12GraphicsCommandList* pd3dCommandList) override;
 

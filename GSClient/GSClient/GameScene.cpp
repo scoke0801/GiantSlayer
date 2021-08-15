@@ -136,12 +136,15 @@ void CGameScene::BuildCamera(ID3D12Device* pd3dDevice,
 	//m_MirrorCamera = m_Cameras[3];
 	m_MinimapCamera = m_Cameras[1];
 
-	m_MirrorCamera = new CCamera;
-	m_MirrorCamera->SetLens(0.45f * PI, width, height, 1.0f, 60000.0f);
-	m_MirrorCamera->SetViewport(0, 0, width, height, 0.0f, 1.0f);
-	m_MirrorCamera->SetScissorRect(0, 0, width, height);
-	m_MirrorCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
+	for (int i = 0; i < 3; i++)
+	{
+		m_MirrorCamera[i] = new CCamera;
+		m_MirrorCamera[i]->SetLens(0.5f, width, height, 1.0f, 60000.0f);
+		//m_MirrorCamera->SetLens(0.45f * PI, width, height, 1.0f, 60000.0f);
+		m_MirrorCamera[i]->SetViewport(0, 0, width, height, 0.0f, 1.0f);
+		m_MirrorCamera[i]->SetScissorRect(0, 0, width, height);
+		m_MirrorCamera[i]->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	}
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		CCamera* pCamera = new CCamera;
 		pCamera->SetLens(0.25f * PI, width, height, 1.0f, 60000.0f);
@@ -378,7 +381,7 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 {
 	// Create the SRV heap. 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-	srvHeapDesc.NumDescriptors = m_Textures.size() + 4;
+	srvHeapDesc.NumDescriptors = m_Textures.size() + 6;
 	srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	pd3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_pd3dSrvDescriptorHeap));
@@ -447,10 +450,12 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	srvDesc.Format = m_pd3dMinimapTex->GetDesc().Format;
 	pd3dDevice->CreateShaderResourceView(m_pd3dMinimapTex, &srvDesc, hDescriptor);
 
-	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
-	srvDesc.Format = m_pd3dMirrorTex->GetDesc().Format;
-	pd3dDevice->CreateShaderResourceView(m_pd3dMirrorTex, &srvDesc, hDescriptor);
-
+	for (int i = 0; i < 3; i++)
+	{
+		hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
+		srvDesc.Format = m_pd3dMirrorTex[i]->GetDesc().Format;
+		pd3dDevice->CreateShaderResourceView(m_pd3dMirrorTex[i], &srvDesc, hDescriptor);
+	}
 	hDescriptor.ptr += gnCbvSrvDescriptorIncrementSize;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
@@ -470,10 +475,10 @@ void CGameScene::BuildDescripotrHeaps(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 	pd3dDevice->CreateDepthStencilView(m_pd3dShadowMap, &dsvDesc, CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize));
 
-	TextHandler::GetInstance().InitVertexBuffer(pd3dDevice, pd3dCommandList, m_pd3dSrvDescriptorHeap, m_Textures.size() + 3);
+	TextHandler::GetInstance().InitVertexBuffer(pd3dDevice, pd3dCommandList, m_pd3dSrvDescriptorHeap, m_Textures.size() + 5);
 
 	m_d3dDsvShadowMapCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(dsvCpuStart, 1, gnDsvDescriptorIncrementSize);
-	m_d3dSrvShadowMapGPUHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 4, gnCbvSrvDescriptorIncrementSize);
+	m_d3dSrvShadowMapGPUHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(srvGpuStart, m_Textures.size() + 6, gnCbvSrvDescriptorIncrementSize);
 }
 
 void CGameScene::ReleaseObjects()
@@ -994,9 +999,12 @@ void CGameScene::Update(float elapsedTime)
 
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
-	if (m_MirrorCamera)
+	for (int i = 0; i < 3; i++)
 	{
-		m_MirrorCamera->UpdateViewMatrix();
+		if (m_MirrorCamera[i])
+		{
+			m_MirrorCamera[i]->UpdateViewMatrix();
+		}
 	}
 
 	if (m_pLightCamera)
@@ -1103,9 +1111,12 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
-	if (m_MirrorCamera)
+	for (int i = 0; i < 3; i++)
 	{
-		m_MirrorCamera->UpdateViewMatrix();
+		if (m_MirrorCamera[i])
+		{
+			m_MirrorCamera[i]->UpdateViewMatrix();
+		}
 	}
 
 	if (m_pLightCamera)
@@ -1291,16 +1302,16 @@ void CGameScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
 }
 
-void CGameScene::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
+void CGameScene::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV,int idx)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
-	if (m_MirrorCamera)
+	if (m_MirrorCamera[idx])
 	{
-		m_MirrorCamera->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
-		m_MirrorCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		m_MirrorCamera[idx]->UpdateShaderVariables(pd3dCommandList, ROOT_PARAMETER_CAMERA);
+		m_MirrorCamera[idx]->SetViewportsAndScissorRects(pd3dCommandList);
 	}
-
+	
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_pd3dSrvDescriptorHeap };
 	pd3dCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
@@ -1320,7 +1331,8 @@ void CGameScene::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Re
 	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOT_PARAMETER_LIGHT, d3dcbLightsGpuVirtualAddress); //Lights
 
 
-	m_Skybox->Draw(pd3dCommandList, m_MirrorCamera);
+	m_Skybox->Draw(pd3dCommandList, m_MirrorCamera[idx]);
+	
 	m_Terrain->Draw(pd3dCommandList, m_CurrentCamera);
 	m_Player->Draw(pd3dCommandList, m_CurrentCamera);
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
@@ -1337,20 +1349,22 @@ void CGameScene::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Re
 			pObject->Draw(pd3dCommandList, m_CurrentCamera);
 		}
 	}
+	
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE));
 
-	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMirrorTex,
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMirrorTex[idx],
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
 
 	// Copy the input (back-buffer) to MimapTexture
-	pd3dCommandList->CopyResource(m_pd3dMirrorTex, pd3dRTV);
+	pd3dCommandList->CopyResource(m_pd3dMirrorTex[idx], pd3dRTV);
 
-	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMirrorTex,
+	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_pd3dMirrorTex[idx],
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON));
 
 	pd3dCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(pd3dRTV,
 		D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	
 
 	if (m_CurrentCamera)
 	{
@@ -2264,7 +2278,7 @@ ID3D12RootSignature* CGameScene::CreateGraphicsRootSignature(ID3D12Device* pd3dD
 	// Ground
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[1];
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size() + 4;
+	pd3dDescriptorRanges[0].NumDescriptors = m_Textures.size() + 6;
 	pd3dDescriptorRanges[0].BaseShaderRegister = 0;
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -3169,37 +3183,35 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 void CGameScene::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	for (int i = 0; i < 1; i++)
+	
+	for (int i = 0; i < 3; i++)
 	{
 		m_Mirror[i] = new CGameObject();
 
-		CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f * MAP_SCALE_SIZE, 2600.0f, 1.0f);
+		//CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 6000.0f * MAP_SCALE_SIZE, 2600.0f, 1.0f);
+		CPlaneMeshTextured* pMirrorMesh = new CPlaneMeshTextured(pd3dDevice, pd3dCommandList, 2000.0f * MAP_SCALE_SIZE, 2600.0f, 1.0f);
 
-		m_MirrorCamera->SetPosition({ 17000 * MAP_SCALE_SIZE, -3000, 210 * MAP_SCALE_SIZE });
-
+		m_MirrorCamera[i]->SetPosition({ (19200- (2200 * i)) * MAP_SCALE_SIZE, -3000, 210 * MAP_SCALE_SIZE });
+		
 		m_Mirror[i]->SetMesh(pMirrorMesh);
 		m_Mirror[i]->SetShader(CShaderHandler::GetInstance().GetData("Mirror")); 
 		m_Mirror[i]->SetExistingSector(SECTOR_POSITION::SECTOR_4);
-		if (i == 1 || i == 2)
-		{
-			m_Mirror[i]->Rotate({ 0,1,0 }, 90);
-		}
+		
+		m_Mirror[i]->SetPosition({ float(19200 - (2200 * i)) * MAP_SCALE_SIZE , -2300, 200 * MAP_SCALE_SIZE });
 		if (i == 0)
 		{
-			m_Mirror[i]->SetPosition({ float(17000 - (2900 * i)) * MAP_SCALE_SIZE , -2300, 200 * MAP_SCALE_SIZE });
+			m_Mirror[i]->SetTextureIndex(0x01);
 		}
-		if (i == 1)
+		else if (i == 1)
 		{
-			m_Mirror[i]->SetPosition({ float(17000 - (2900 * i)) * MAP_SCALE_SIZE, -2300, 3200 * MAP_SCALE_SIZE });
+			m_Mirror[i]->SetTextureIndex(0x02);
 		}
-		if (i == 2)
+		else if (i == 2)
 		{
-			m_Mirror[i]->SetPosition({ float(17000 + 2900) * MAP_SCALE_SIZE, -2300, 3200 * MAP_SCALE_SIZE });
+			m_Mirror[i]->SetTextureIndex(0x04);
 		}
 		m_Mirror[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000 * MAP_SCALE_SIZE, 2600, 10.0, XMFLOAT3{ 0,0,0 });
 		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f* MAP_SCALE_SIZE, 2600.0f * 0.5f, 10.0f * 0.5f }));
-
-		m_Mirror[i]->SetTextureIndex(0x01);
 
 		m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox].push_back(m_Mirror[i]);
 	}
@@ -3269,27 +3281,30 @@ void CGameScene::BuildMinimapResource(ID3D12Device* pd3dDevice)
 
 void CGameScene::BuildMirrorResource(ID3D12Device* pd3dDevice)
 {
-	D3D12_RESOURCE_DESC texDesc;
-	ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
-	texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	texDesc.Alignment = 0;
-	texDesc.Width = FRAME_BUFFER_WIDTH;
-	texDesc.Height = FRAME_BUFFER_HEIGHT;
-	texDesc.DepthOrArraySize = 1;
-	texDesc.MipLevels = 1;
-	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	texDesc.SampleDesc.Count = 1;
-	texDesc.SampleDesc.Quality = 0;
-	texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+	for (int i = 0; i < 3; i++)
+	{
+		D3D12_RESOURCE_DESC texDesc;
+		ZeroMemory(&texDesc, sizeof(D3D12_RESOURCE_DESC));
+		texDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		texDesc.Alignment = 0;
+		texDesc.Width = FRAME_BUFFER_WIDTH;
+		texDesc.Height = FRAME_BUFFER_HEIGHT;
+		texDesc.DepthOrArraySize = 1;
+		texDesc.MipLevels = 1;
+		texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		texDesc.SampleDesc.Count = 1;
+		texDesc.SampleDesc.Quality = 0;
+		texDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		texDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
-	pd3dDevice->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-		D3D12_HEAP_FLAG_NONE,
-		&texDesc,
-		D3D12_RESOURCE_STATE_COMMON,
-		nullptr,
-		IID_PPV_ARGS(&m_pd3dMirrorTex));
+		pd3dDevice->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE,
+			&texDesc,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			IID_PPV_ARGS(&m_pd3dMirrorTex[i]));
+	}
 }
 
 void CGameScene::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -4338,11 +4353,12 @@ void CGameScene::ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 		if (pArrow->IsCanUse()) {
 			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
 			if (-1 != idx) {
+				cout << "³ª°¡" << endl;
 				pArrow->SetUseable(false);
 				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ pEmeny->GetPosition() }, { 0,150,0 });
 				pArrow->SetPosition(pos);
 				pArrow->m_startPos = pos;
-				pArrow->SetStringPower(3.0f);
+				pArrow->SetStringPower(1.0f);
 				pArrow->SetTargetVector(lookVector);
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(pEmeny->GetLook()), -1));
