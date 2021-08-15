@@ -19,33 +19,7 @@ enum ChessType {
 	Pawn,
 	Rook,
 	Count,
-};
-// 편의를 위해 Layer에서 몇 가지 객체 유형은 제외하고 별도로 관리
-enum class OBJECT_LAYER : int {
-	TerrainWater,
-	Puzzle,
-	PuzzleBox,
-	Obstacle,
-	ChessPuzzle,
-	PlayerChessPuzzle,
-	Bridge,
-	TerrainBoundary,
-	MirrorBox,
-	Enemy, 
-	Mummy,
-	Npc,
-
-	PlayerArrow,
-	MonsterArrow,
-
-	Mummylaser,
-	Mummylaser2,
-	Mummylaser3,
-
-	FireBall,
-
-	Count
-};
+}; 
 
 struct EX_OVER {
 	WSAOVERLAPPED   m_over;
@@ -96,7 +70,9 @@ class CGameRoom
 
 	bool									m_Mummy_Reverse_Direction = false;
 	
+	bool									m_ObjectDeleteFlag = false;
 	bool									m_ChessChangeFlag = false;
+
 	CGameObject*							m_Chess[4];
 	bool									m_ChessPlate_Check[4] = { false };		// 체스판체크용
 	XMFLOAT3								m_ChessPlate[7][7];						// 체스판
@@ -136,12 +112,18 @@ public:
 	void SendLaserActPacket();
 	void SendChessObjectActPacket();
 
+	void SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx);
+
 	void Disconnect(CLIENT& client); 
 	void Disconnect(int id);
 
 	void ProcessPacket(int p_id, unsigned char* p_buf);
 
+	// 재사용 하지 않는 객체
 	void DeleteObject(CGameObject* pObject, int layerIdx);
+	
+	// 재사용하는 객체
+	void RecyleObject(CGameObject* pObject, int layerIdx);
 
 	void EnterPlayer(CLIENT& client, int weapontType);
 	bool CanEnter();

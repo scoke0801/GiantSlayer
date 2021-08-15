@@ -597,24 +597,24 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 223 && x < 861) {
 			if (y > 118 && y < 227) { 
 				// room 1
-				m_RoomSelectNo = m_RoomStartNo;
+				m_RoomSelectNo = 0;
 				m_RoomSelect->SetPosition({ -0.69f, 0.55f, 0.87 });		// RoomSelect
 			}
 			else if (y > 252 && y < 360) {
 				// room 2
-				m_RoomSelectNo = m_RoomStartNo + 1;
+				m_RoomSelectNo = 1;
 				m_RoomSelect->SetPosition({ -0.69f, 0.2f, 0.87 });		// RoomSelect
 			}
 
 			else if (y > 383 && y < 496) {
 				// room 3
-				m_RoomSelectNo = m_RoomStartNo + 2;
+				m_RoomSelectNo = 2;
 				m_RoomSelect->SetPosition({ -0.69f, -0.15f, 0.87 });	// RoomSelect
 			}
 
 			else if (y > 519 && y < 627) {
 				// room 4
-				m_RoomSelectNo = m_RoomStartNo + 3;
+				m_RoomSelectNo = 3;
 				m_RoomSelect->SetPosition({ -0.69f, -0.5f, 0.87 });		// RoomSelect
 			}
 		}
@@ -656,7 +656,7 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 			if (y > 651 && y < 690) {
 				// Enter button
 				SCENE_CHANGE_INFO sceneChangeInfo;
-				sceneChangeInfo.roomNo = m_RoomSelectNo;
+				sceneChangeInfo.roomNo = m_RoomStartNo + m_RoomSelectNo;
 				sceneChangeInfo.weaponType = (int)m_WeaponSelected;
 				cout << "ChangeScene to CGameScene\n";
 				ChangeScene<CGameScene>((void*)&sceneChangeInfo);

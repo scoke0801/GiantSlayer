@@ -32,8 +32,7 @@ void CGameRoom::Update(float elapsedTime)
 			pObject->Update(elapsedTime);
 			pObject->UpdateColliders();
 		}
-	}
-
+	} 
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(g_Heights);
@@ -52,8 +51,7 @@ void CGameRoom::Update(float elapsedTime)
 			m_PlayerExistingSector[m_Players[i]->GetPlayerExistingSector()] = true;
 		}
 	}
-
-
+	 
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary]) {
 		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			if (m_Players[i]->IsExist() == false) continue;
@@ -1591,6 +1589,36 @@ void CGameRoom::SendChessObjectActPacket()
 	m_ChessChangeFlag = false;
 }
 
+void CGameRoom::SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx)
+{
+	if (false == m_ObjectDeleteFlag) {
+		return;
+	}
+	  
+	P_S2C_DELETE_SYNC packet;
+	ZeroMemory(&packet, sizeof(packet));
+	packet.size = sizeof(packet);
+	packet.type = PACKET_PROTOCOL::S2C_DELETE_OBJ;
+	 
+	packet.idx = objIdx;
+	packet.objType = layerIdx;
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			continue;
+		}
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
+			continue;
+		}
+
+		SendPacket(m_Clients[i]->id, &packet);
+	}
+
+
+
+	m_ObjectDeleteFlag = true;
+} 
+
 void CGameRoom::Disconnect(int packet_id)
 { 
 	cout << "·Î±× ¾Æ¿ô\n"; 
@@ -1659,6 +1687,18 @@ void CGameRoom::DeleteObject(CGameObject* pObject, int layerIdx)
 	}
 }
    
+void CGameRoom::RecyleObject(CGameObject* pObject, int layerIdx)
+{
+	auto res = std::find(m_ObjectLayers[layerIdx].begin(), m_ObjectLayers[layerIdx].end(), pObject);
+	
+	int idx = 0;
+	if (res != m_ObjectLayers[layerIdx].end()) {  
+		pObject->SetIsUsable(true);
+		SendDeletePacket(pObject, layerIdx, idx);
+		++idx;
+	}
+}
+
 void CGameRoom::EnterPlayer(CLIENT& client, int weapontType)
 {
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {

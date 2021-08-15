@@ -1064,13 +1064,7 @@ void CGameScene::Update(float elapsedTime)
 		m_Player->SetPosition(XMFLOAT3(plPos.x, -1760.0f, plPos.z));
 		m_Player->UpdateCamera();
 	}
-	 
-//
-//x: 17611.5 y : -1760 z : 17922.1
-//x : 18312 y : -1760 z : 17907.7
-//
-//x : 17553.5 y : -2014.53 z : 18456.7
-//x : 18283.8 y : -2003.1 z : 18509.6
+	  
 
 }
 

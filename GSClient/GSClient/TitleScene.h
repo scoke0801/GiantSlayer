@@ -81,7 +81,7 @@ private:
 	UI*							m_RoomBoard;
 	UI*							m_EnterBox;
 
-	int							m_RoomSelectNo = 1;
+	int							m_RoomSelectNo = 0;
 	UI*							m_RoomSelect;
 
 	vector<UI*>					m_Weapons;
