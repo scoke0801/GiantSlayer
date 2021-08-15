@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "FireBall.h"
-
+#include "GameRoom.h"
 
 CFireBall::CFireBall()
 {
@@ -27,6 +27,7 @@ void CFireBall::Update(float fTimeElapsed)
 			/*auto curScene = MAIN_GAME_SCENE;
 
 			curScene->UseEffects((int)EffectTypes::FireBallExplosion, effectPos);*/
+			m_ConnectedRoom->RecyleObject(this, (int)OBJECT_LAYER::FireBall);
 		}
 
 		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, FIREBALL_SPEED * fTimeElapsed)));

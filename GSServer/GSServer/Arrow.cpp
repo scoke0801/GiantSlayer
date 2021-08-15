@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Arrow.h" 
- 
+#include "GameRoom.h"
+
 void CArrow::Update(float fTimeElapsed)
 {
 	if (false == m_isUsing) {
@@ -10,6 +11,14 @@ void CArrow::Update(float fTimeElapsed)
 		if (m_ElapsedTime > ARROW_LIFE_TIME) {
 			m_ElapsedTime = 0.0f;
 			m_isDrawable = true;
+			int idx;
+			if(m_IsPlayerArrow){
+				idx = (int)OBJECT_LAYER::PlayerArrow;
+			}
+			else {
+				idx = (int)OBJECT_LAYER::MonsterArrow;
+			}
+			m_ConnectedRoom->RecyleObject(this, idx);
 			//m_ConnectedParticle = nullptr;
 		}
 

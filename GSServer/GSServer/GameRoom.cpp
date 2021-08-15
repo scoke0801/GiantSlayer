@@ -663,6 +663,7 @@ void CGameRoom::InitArrows()
 		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
 		pArrow->Scale(25.0f, 25.0f, 25.0f);
 		pArrow->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		pArrow->SetIsPlayerArrow(true);
 		m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow].push_back(pArrow);
 	}
 
@@ -672,6 +673,7 @@ void CGameRoom::InitArrows()
 		pArrow->SetTargetPosition({ 500.0f, 100.0f, 5000.0f });
 		pArrow->Scale(100.0f, 100.0f, 50.0f);
 		pArrow->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 5), XMFLOAT3(0.25f, 0.25f, 7.5f)));
+		pArrow->SetIsPlayerArrow(false);
 		m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow].push_back(pArrow);
 	}
 }
@@ -1616,7 +1618,7 @@ void CGameRoom::SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx)
 
 
 
-	m_ObjectDeleteFlag = true;
+	m_ObjectDeleteFlag = false;
 } 
 
 void CGameRoom::Disconnect(int packet_id)
@@ -1695,6 +1697,7 @@ void CGameRoom::RecyleObject(CGameObject* pObject, int layerIdx)
 	if (res != m_ObjectLayers[layerIdx].end()) {  
 		pObject->SetIsUsable(true);
 		SendDeletePacket(pObject, layerIdx, idx);
+		m_ObjectDeleteFlag = true;
 		++idx;
 	}
 }

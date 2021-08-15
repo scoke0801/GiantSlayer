@@ -1657,14 +1657,18 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			if (packet->id == 0) {
 				m_MummyLaser[i]->SetPosition(pos);
 				m_MummyLaser[i]->SetDrawable(false);
+				m_MummyLaser[i]->Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 5.0f);
 			}
 			else if (packet->id == 1) {
 				m_MummyLaser2[i]->SetPosition(pos);
 				m_MummyLaser2[i]->SetDrawable(false);
+				m_MummyLaser2[i]->Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 5.0f);
 			}
 			else if (packet->id == 2) {
 				m_MummyLaser3[i]->SetPosition(pos);
-				m_MummyLaser3[i]->SetDrawable(false);
+				m_MummyLaser3[i]->SetDrawable(false);		
+				m_MummyLaser3[i]->Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 5.0f);
+
 			} 
 		}
 		cout << "Laser Update\n";
@@ -1706,6 +1710,14 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 	}
 		break;
 
+	case PACKET_PROTOCOL::S2C_DELETE_OBJ:
+	{
+		P_S2C_DELETE_SYNC* packet = reinterpret_cast<P_S2C_DELETE_SYNC*>(p_buf);
+		 
+		m_ObjectLayers[packet->objType][packet->idx]->SetDrawable(true);
+		cout << "Delete Act\n";
+	}
+	break;
 	default:
 		cout << "Unknown Packet Type from server" << " Packet Type [" << +p_buf[1] << "]" << endl;
 		while (true) {
