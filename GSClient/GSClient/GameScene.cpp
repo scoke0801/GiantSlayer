@@ -1002,6 +1002,12 @@ void CGameScene::Update(float elapsedTime)
 			m_Player->GetUp());
 		m_MinimapCamera->UpdateViewMatrix();
 	}
+
+	if ((m_Player->GetPosition().x > 16450.0f && m_Player->GetPosition().x < 19450.0f) &&
+		(m_Player->GetPosition().z > 13900.0f && m_Player->GetPosition().z < 17950.0f))
+	{
+		m_Player->SetPosition(XMFLOAT3(m_Player->GetPosition().x, -1760.0f, m_Player->GetPosition().z));
+	}
 }
 
 void CGameScene::UpdateForMultiplay(float elapsedTime)
