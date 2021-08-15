@@ -43,7 +43,7 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="Sound.cpp">
-      <Filter>Sound</Filter>
+      <Filter>Shader\Sound</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>Scene</Filter>
@@ -186,7 +186,7 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Sound.h">
-      <Filter>Sound</Filter>
+      <Filter>Shader\Sound</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>Scene</Filter>
@@ -351,9 +351,6 @@
     <Filter Include="GameObject">
       <UniqueIdentifier>{2f01299f-2fcf-4760-acff-98907f7b22c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sound">
-      <UniqueIdentifier>{27fdaea7-eecb-40ed-a1e2-222ae1cdc555}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Camera">
       <UniqueIdentifier>{35f4ba56-432a-4c1f-989b-3c79de5e9416}</UniqueIdentifier>
     </Filter>
@@ -446,6 +443,9 @@
     </Filter>
     <Filter Include="Font">
       <UniqueIdentifier>{a6ace682-ef0d-41fc-a40f-b9384dc3cc30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Sound">
+      <UniqueIdentifier>{27fdaea7-eecb-40ed-a1e2-222ae1cdc555}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

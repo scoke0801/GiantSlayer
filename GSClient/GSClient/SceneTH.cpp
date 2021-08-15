@@ -1185,7 +1185,7 @@ void CSceneTH::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
 }
 
-void CSceneTH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV)
+void CSceneTH::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV,int idx)
 {
 	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 

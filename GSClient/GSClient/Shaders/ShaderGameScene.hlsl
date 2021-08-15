@@ -140,8 +140,10 @@ Texture2D gtxtHelpBoard					: register(t66);
 
 Texture2D gtxtMap						: register(t67);
 Texture2D gtxtMirror					: register(t68);
-Texture2D gtxtShadowMap					: register(t69);
-Texture2D gtxtFont						: register(t70);
+Texture2D gtxtMirror2					: register(t69);
+Texture2D gtxtMirror3					: register(t70);
+Texture2D gtxtShadowMap					: register(t71);
+Texture2D gtxtFont						: register(t72);
 
 float CalcShadowFactor(float4 f4ShadowPos)
 {
@@ -1236,8 +1238,15 @@ float4 PSMirror(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Primit
 	{
 		cColor = cColor = gtxtMirror.Sample(gssWrap, input.uv);
 	}
+    else if (gnTexturesMask & 0x02)
+    {
+        cColor = cColor = gtxtMirror2.Sample(gssWrap, input.uv);
+    }
+    else if (gnTexturesMask & 0x04)
+    {
+        cColor = cColor = gtxtMirror3.Sample(gssWrap, input.uv);
+    }
     
-
 	input.normalW = normalize(input.normalW);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, gnMaterialID);
 

@@ -522,8 +522,7 @@ void CMummy::Update(float elapsedTime)
 			}
 		}
 	}
-
-
+	 
 	if (this->GetMummyDie() == false)
 	{
 		// 만약 레이저발사시간이 됬으면 발사 하고 시간을 다시 초기화
@@ -600,7 +599,8 @@ void CMummy::Update(float elapsedTime)
 			for (auto& Laser : m_Friends_Laser)
 			{
 				if (Laser->GetLaserType() == Laser_TYPE::Laser2)
-				{
+				{ 
+					m_ConnectedRoom->RecyleObject(Laser, (int)OBJECT_LAYER::Mummylaser);
 					Laser->SetDrawable(true);
 					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
 					Laser->SetPosition(pos);
@@ -681,11 +681,11 @@ void CMummy::Update(float elapsedTime)
 			{
 				if (Laser->GetLaserType() == Laser_TYPE::Laser3)
 				{
+					m_ConnectedRoom->RecyleObject(Laser, (int)OBJECT_LAYER::Mummylaser);
 					Laser->SetDrawable(true);
 					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
 					Laser->SetPosition(pos);
-				}
-
+				} 
 			}
 		}
 

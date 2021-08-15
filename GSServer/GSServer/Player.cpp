@@ -206,7 +206,6 @@ void CPlayer::SetVelocity(const XMFLOAT3& dir)
 	XMFLOAT3 normalizedDir = Vector3::Normalize(xmf3Dir); 
 	XMFLOAT3 targetPosition = Vector3::Multifly(normalizedDir, 150000.0f);
 	LookAt(m_xmf3Position, targetPosition, XMFLOAT3{ 0,1,0 });
-	Rotate({ 0,1,0 }, 180.0f);
 
 	m_xmf3Velocity = XMFLOAT3(0.0f, m_xmf3Velocity.y, 0.0f);
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity,

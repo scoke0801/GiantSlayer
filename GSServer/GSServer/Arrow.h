@@ -16,6 +16,10 @@ public:
 	void SetTargetVector(const XMFLOAT3& playerLookAt);  
 
 	void SetStringPower(float power) { stringPower = power; }
+
+	void SetIsPlayerArrow(bool info) { m_IsPlayerArrow = info; }
+	bool IsPlayerArrow(bool info) { return m_IsPlayerArrow; }
+
 private:
 	XMFLOAT3 m_xmf3TargetPosition;
 
@@ -25,6 +29,7 @@ private:
 
 	CGameObject* m_pOwner;
 
+	bool			m_IsPlayerArrow;
 public:
 	XMFLOAT3 m_startPos;
 	bool falldown = false;
