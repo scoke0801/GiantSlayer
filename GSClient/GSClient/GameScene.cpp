@@ -1026,11 +1026,52 @@ void CGameScene::Update(float elapsedTime)
 		m_MinimapCamera->UpdateViewMatrix();
 	}
 
-	if ((m_Player->GetPosition().x > 16450.0f && m_Player->GetPosition().x < 19450.0f) &&
-		(m_Player->GetPosition().z > 13900.0f && m_Player->GetPosition().z < 17950.0f))
+	XMFLOAT3 plPos = m_Player->GetPosition();
+
+	// 입구 계단
+	if ((plPos.x > 17553.5 && plPos.x < 18283.8) &&
+		(plPos.z > 17907.7 && plPos.z < 18509.6))
 	{
-		m_Player->SetPosition(XMFLOAT3(m_Player->GetPosition().x, -1760.0f, m_Player->GetPosition().z));
+		float min = -1980;
+		float max = -1760;
+		
+		float t = (plPos.z / 18509.6);
+
+		float y = Lerp(max, min, Rate(17907.7, 18509.6, plPos.z));
+		cout << "out y : " << y << "\n";
+		m_Player->SetPosition(XMFLOAT3(plPos.x, y, plPos.z));
+		m_Player->UpdateCamera();
 	}
+	// 출구 계단
+	if ((plPos.x > 17527.7 && plPos.x < 18319.5) &&
+		(plPos.z > 13328 && plPos.z < 13887.7))
+	{
+		float min = -1950;
+		float max = -1760;
+
+		float t = (plPos.z / 13887.7);
+
+		float y = Lerp(min, max, Rate(13328, 13887.7, plPos.z));
+		cout << "out y : " << y << "\n";
+		m_Player->SetPosition(XMFLOAT3(plPos.x, y, plPos.z));
+		m_Player->UpdateCamera();
+	}
+
+	// 퍼즐
+	if ((plPos.x > 16450.0f && plPos.x < 19450.0f) &&
+		(plPos.z > 13900.0f && plPos.z < 17950.0f))
+	{
+		m_Player->SetPosition(XMFLOAT3(plPos.x, -1760.0f, plPos.z));
+		m_Player->UpdateCamera();
+	}
+	 
+//
+//x: 17611.5 y : -1760 z : 17922.1
+//x : 18312 y : -1760 z : 17907.7
+//
+//x : 17553.5 y : -2014.53 z : 18456.7
+//x : 18283.8 y : -2003.1 z : 18509.6
+
 }
 
 void CGameScene::UpdateForMultiplay(float elapsedTime)
@@ -1903,7 +1944,7 @@ void CGameScene::ProcessInput()
 	if (keyInput.KEY_SPACE)
 	{
 		DisplayVector3(m_Player->GetPosition());
-		m_Player->Jump();
+		//m_Player->Jump();
 	}
 
 	////////////////////////////////////////////////////////// 
