@@ -19,6 +19,7 @@ CEnemy::CEnemy() : CGameObjectVer2()
 	m_DEF = 0;
 
 	m_TargetPlayer = nullptr;
+	// test
 }
   
 CEnemy::~CEnemy()
