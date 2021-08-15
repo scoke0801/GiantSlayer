@@ -50,9 +50,7 @@ CGameScene::CGameScene()
 	m_SoundManager->AddSound("resources/sounds/ChessSuccess.mp3", Sound_Name::EFFECT_Chess_Success);
 	m_SoundManager->AddSound("resources/sounds/FireBall.mp3", Sound_Name::EFFECT_Fire_Ball);
 	m_SoundManager->AddSound("resources/sounds/Sword2.mp3", Sound_Name::EFFECT_Sword);
-	 
-	m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
-
+	  
 	cout << "Enter CGameScene \n";
 	m_pd3dGraphicsRootSignature = NULL;
 	m_isPlayerSelected = false;
@@ -105,6 +103,8 @@ void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dC
 	BuildUIs(pd3dDevice, pd3dCommandList);
 
 	m_CreatedTime = chrono::high_resolution_clock::now();
+
+	m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
 }
 
 void CGameScene::BuildCamera(ID3D12Device* pd3dDevice,
@@ -1495,35 +1495,19 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		P_S2C_PROCESS_MOUSE p_mouseProcess;
 		memcpy(&p_mouseProcess, p_buf, p_buf[0]);
 		if (p_mouseProcess.cameraOffset != 0) {
-			float offset = IntToFloat(p_mouseProcess.cameraOffset);
-			//cout << "offset : " << offset << "\n";
+			float offset = IntToFloat(p_mouseProcess.cameraOffset); 
 			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
-		}
-		/*if (p_mouseProcess.cameraRotateX != 0) {
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX);
-		}*/
+		} 
 
 		if (p_mouseProcess.cameraRotateY != 0) {
-			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY);
-			//cout << "cameraRotateY : " << rotateY << "\n";
+			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY); 
 			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), rotateY);
 		}
-
-		//if (p_mouseProcess.cameraRotateZ != 0) {
-		//	m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ);
-		//}
-		/*if (p_mouseProcess.playerRotateX != 0) {
-			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX);
-		}*/
+		 
 		if (p_mouseProcess.playerRotateY != 0) {
-			float rotateY = IntToFloat(p_mouseProcess.playerRotateY);
-			//cout << "playerRotateY : " << rotateY << "\n";
-			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY);
-			//m_MinimapArrow->Rotate(-rotateY * 0.1f);
-		}
-		/*if (p_mouseProcess.playerRotateZ != 0) {
-			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ);
-		}*/
+			float rotateY = IntToFloat(p_mouseProcess.playerRotateY); 
+			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY); 
+		} 
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT:
 	{ 
@@ -1555,41 +1539,52 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
 
-			DisplayVector3(look);
-
 			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
 			m_Players[i]->SetPosition(pos);
-			m_Players[i]->UpdateCamera();
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
-				look, PLAYER_RUN_SPEED)); 
-			m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
-			switch (p_syncUpdate.states[i]) {
-			case IDLE:
-			case SWORD_IDLE:
-			case BOW_IDLE:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
-				break;
-			case SWORD_RUN:
-			case BOW_RUN:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
-				break;
-			case SWORD_ATK:
-			case BOW_ATK:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
-				break;
-			case SWORD_DEATH:
-			case BOW_DEATH:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
-				break;
-
-			case WALK: break;
-			case DAMAGED: break;
-			case SWORD_GET:break;
-			case BOW_GET:break;
-			default:
-				break;
+			//m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0), look, PLAYER_RUN_SPEED)); 
+			if (m_Players[i]->GetWeapon() != p_syncUpdate.weaponType[i]) { 
+				cout << "몬가 달라서 무기가 바뀜\n";
+				m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
 			}
+
+			//if(p_syncUpdate.states[i] == IDLE || p_syncUpdate.states[i] == SWORD_IDLE || p_syncUpdate.states[i] == BOW_IDLE)
+			
+			if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
+				cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
+				m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]); 	
+				m_Players[i]->UpdateOnServer(0.0f);
+			}
+
+			m_Players[i]->UpdateCamera();
+				/*cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
+				switch (p_syncUpdate.states[i]) {
+				case IDLE:
+				case SWORD_IDLE:
+				case BOW_IDLE:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
+					break;
+				case SWORD_RUN:
+				case BOW_RUN:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
+					break;
+				case SWORD_ATK:
+				case BOW_ATK:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
+					break;
+				case SWORD_DEATH:
+				case BOW_DEATH:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
+					break;
+
+				case WALK: break;
+				case DAMAGED: break;
+				case SWORD_GET:break;
+				case BOW_GET:break;
+				default:
+					break;
+				}
+			}*/
 		}
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
@@ -2112,6 +2107,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 		}
 		if (wParam == VK_J) {
 			if (m_Player->IsCanAttack()) {
+				cout << "Can Attack " << (int)m_Player ->GetAnimationSet() << "\n";
 				switch (m_Player->GetWeapon())
 				{
 				case PlayerWeaponType::Sword:
@@ -4281,9 +4277,6 @@ void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 		m_Players[i]->SetDrawable(false);
 		m_Players[i]->SetWeaponPointer();
-
-		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
-		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 	}
 }
 
