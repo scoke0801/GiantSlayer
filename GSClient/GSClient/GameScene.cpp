@@ -1294,8 +1294,8 @@ void CGameScene::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12R
 void CGameScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"나옴1234abcd!@#"), 0,
-		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
+	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"나옴1234abcd!@#"), 0, //텍스트 인덱스추가하면 다음줄 위치를 
+		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
 }
 
 void CGameScene::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV,int idx)
@@ -1554,8 +1554,6 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
 
-			DisplayVector3(look);
-
 			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
 			m_Players[i]->SetPosition(pos);
 			m_Players[i]->UpdateCamera();
@@ -1644,7 +1642,6 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		{
 			pArrow->SetPosition(pos);
 			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
-			DisplayVector3(look);
 		} 
 		cout << "Arrow act\n";
 	}
