@@ -374,6 +374,7 @@ VS_EFFECT_OUT VSEffect(VS_EFFECT_IN input)
 	if (gnTexturesMask & 0x01) { frameCount = 15; }
 	if (gnTexturesMask & 0x02) { frameCount = 10; }
 	if (gnTexturesMask & 0x04) { frameCount = 10; }
+	if (gnTexturesMask & 0x08) { frameCount = 13; }
 
 	float newTime = fmod(gfTime * 10.0f, frameCount); 
 	outRes.uv.x /= frameCount;

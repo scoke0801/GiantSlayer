@@ -151,7 +151,7 @@ void CEffectHandler::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	}
 
 	for (int i = 0; i < 10; ++i) {
-		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 192.0f, 192.0f, 0.0f });
+		CEffect* pTempEffect = new CEffect(pd3dDevice, pd3dCommandList, targetPlayer, { 190.0f, 190.0f, 0.0f });
 		pTempEffect->SetEffectType(EffectTypes::FireBallExplosion);
 		pTempEffect->Scale(4, 4, 4, true);
 		m_Effects.emplace_back(std::move(pTempEffect));

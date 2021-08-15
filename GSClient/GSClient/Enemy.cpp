@@ -17,6 +17,9 @@ CEnemy::CEnemy() : CGameObjectVer2()
 	m_SP = 100;
 	m_ATK = 15;
 	m_DEF = 0;
+
+	m_TargetPlayer = nullptr;
+	// test
 }
   
 CEnemy::~CEnemy()

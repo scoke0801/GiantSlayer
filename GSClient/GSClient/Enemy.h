@@ -127,6 +127,7 @@ public:
 
 	float GetAttackRange() const { return m_AttackRange; }
 
+	void SetTargetPlayer(CPlayer* target) { m_TargetPlayer = target; }
 	CPlayer* GetTargetPlayer() const { return m_TargetPlayer; }
 
 	ObjectState GetStateInfo() const override{ return m_State->GetStatename(); }

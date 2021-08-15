@@ -31,6 +31,7 @@ private:
 	ParticleObject* m_ConnectedParticle = nullptr;
 
 	float stringPower = 0.0f;
+	float lifeTime = ARROW_LIFE_TIME;
 
 	CGameObject* m_pOwner;
 
