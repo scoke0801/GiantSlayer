@@ -2717,14 +2717,6 @@ void CGameScene::BuildSigns(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	//m_Objects.push_back(pSign); 
 	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pSign);
 
-	// 퍼즐 벽 표지판
-	pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::NumPuzzle,
-		false, false, CShaderHandler::GetInstance().GetData("Sign"));
-	pSign->SetPosition({ 11200.0f * MAP_SCALE_SIZE, -1800.0f, 8200.0f * MAP_SCALE_SIZE });
-	pSign->SetExistingSector(SECTOR_POSITION::SECTOR_3);
-	//m_Objects.push_back(pSign);
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pSign);
-
 	// 메두사 벽 표지판
 	pSign = new CSign(pd3dDevice, pd3dCommandList, SignBoardInfos::Medusa,
 		true, true, CShaderHandler::GetInstance().GetData("Sign"));
@@ -3183,7 +3175,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 void CGameScene::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	
 	for (int i = 0; i < 3; i++)
 	{
 		m_Mirror[i] = new CGameObject();
@@ -3210,8 +3201,8 @@ void CGameScene::BuildMirror(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		{
 			m_Mirror[i]->SetTextureIndex(0x04);
 		}
-		m_Mirror[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 6000 * MAP_SCALE_SIZE, 2600, 10.0, XMFLOAT3{ 0,0,0 });
-		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 6000.0f * 0.5f* MAP_SCALE_SIZE, 2600.0f * 0.5f, 10.0f * 0.5f }));
+		m_Mirror[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, 2000 * MAP_SCALE_SIZE, 2600, 1.0, XMFLOAT3{ 0,0,0 });
+		m_Mirror[i]->AddColider(new ColliderBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 2500.0f * 0.5f* MAP_SCALE_SIZE, 2600.0f * 0.5f, 1.0f * 0.5f }));
 
 		m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox].push_back(m_Mirror[i]);
 	}
