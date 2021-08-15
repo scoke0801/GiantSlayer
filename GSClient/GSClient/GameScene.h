@@ -50,12 +50,16 @@ private:
 	bool						m_One_Mira_Die_Laser = false;
 	bool						m_Two_Mira_Die = false;
 	bool						m_Two_Mira_Die_Laser = false;
+	bool						m_All_Die = false;
 	
 	CEnemy*						m_Npc = nullptr;
 	bool						m_Npc_Event = false;
 	bool						m_Interaction = false;
 
 	UI*							m_HelpBoard = nullptr;
+	bool						m_StageFont[5] = { false,false, false, false, false };
+	float						m_StageFontTime = 3.0f;
+	bool m_Opendoor = false;
 
 	
 	CMummyLaser* m_MummyLaser[3];
@@ -229,6 +233,8 @@ public:
 	// 이펙트 재사용 함수, 대기 시간 설정하는 경우
 	void UseEffects(int effectType, const XMFLOAT3& xmf3Position, float wakeupTime);
 
+	void OpenDoor();
+
 private:
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
@@ -270,6 +276,7 @@ private:
 
 	void MakingFog();
 	void MakingRain();
+	
 
 private:
 	void SendMouseInputPacket();

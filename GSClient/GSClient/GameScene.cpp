@@ -502,6 +502,16 @@ void CGameScene::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	}
+	
+	// 미라 보고있으면 데미지
+	if (m_Player->GetPlayerExistingSector() == 3)
+	{
+		if ((m_Player->GetLook().x > -150.0f && m_Player->GetLook().x < 150.0f)&& m_Player->GetLook().z>0.0f)
+		{
+			m_Player->SetHP(m_Player->GetHP() - 0.01f);
+			cout << m_Player->GetHP() << endl;
+		}
+	}
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(m_Terrain);
@@ -525,6 +535,13 @@ void CGameScene::Update(float elapsedTime)
 		m_HelpBoard->SetDrawable(false);
 	}
 
+	if (m_Opendoor == true)
+	{
+		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 3]);
+		p->OpenDoor();
+		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Chess_Success);
+	}
+
 	ZeroMemory(m_PlayerExistingSector, sizeof(m_PlayerExistingSector));
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
@@ -535,13 +552,58 @@ void CGameScene::Update(float elapsedTime)
 	}
 	m_PlayerExistingSector[m_Player->GetPlayerExistingSector()] = true;
 
-	
+	if (m_Player->GetPlayerExistingSector() == 0)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[0] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 1)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[1] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 2)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[2] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 3)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[3] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 4)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[4] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
 
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
 		}
 	}
+	
 
 	// NPC랑 충돌
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Npc]) {
@@ -586,33 +648,6 @@ void CGameScene::Update(float elapsedTime)
 		}
 	}
 
-	
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
-			}
-		}
-		//if (pEnemy->CollisionCheck(m_Mirror[0])) {
-		//	//pEnemy->InverseDirection();
-		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
-		//}
-	}
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
@@ -640,50 +675,32 @@ void CGameScene::Update(float elapsedTime)
 		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
 		//}
 	}
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pArrow->IsDrawable()) {
 			continue;
 		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy])
+		{
+			if (pArrow->CollisionCheck(pEnemy)) {
+				pEnemy->SetHP(pEnemy->GetHP() - 1.0f);
+				
 			}
-			else if (m_Player->Attacked(pEnemy))
+			if (pEnemy->GetHP() == 0)
 			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
+				CMummy* thisEnemy = reinterpret_cast<CMummy*>(pEnemy);
+
+				thisEnemy->SendDieInfotoFriends();
+
+				DeleteEnemy(thisEnemy);
 			}
 		}
 	}
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
-			}
-		}
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy])
+	{
 	}
+	
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
@@ -691,18 +708,8 @@ void CGameScene::Update(float elapsedTime)
 		}
 		if (pEnemy->CollisionCheck(m_Player)) {
 
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					CMummy* thisEnemy = reinterpret_cast<CMummy*>(pEnemy);
-
-					thisEnemy->SendDieInfotoFriends();
-
-					DeleteEnemy(thisEnemy);
-
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
+			
+			if (m_Player->Attacked(pEnemy))
 			{
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
 				m_Player->FixCollision();
@@ -847,7 +854,7 @@ void CGameScene::Update(float elapsedTime)
 			break;
 		}
 	}
-
+	
 
 	for (auto pChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle]) {
 		if (pChessPuzzle->CollisionCheck(m_Player)) {
@@ -874,8 +881,12 @@ void CGameScene::Update(float elapsedTime)
 
 			break;
 		}
+		
 	}
 
+	
+
+	
 	// npc 자체랑 충돌처리
 	if	(
 		((m_Npc->GetPosition().x + 215.0f > m_Player->GetPosition().x)
@@ -897,13 +908,13 @@ void CGameScene::Update(float elapsedTime)
 	{
 		if (
 			(
-				(m_Chess[i]->GetPosition().x + 215.0f > m_Player->GetPosition().x)
-				&& (m_Chess[i]->GetPosition().x - 215.0f < m_Player->GetPosition().x)
+				(m_Chess[i]->GetPosition().x + 230.0f > m_Player->GetPosition().x)
+				&& (m_Chess[i]->GetPosition().x - 230.0f < m_Player->GetPosition().x)
 				)
 			&&
 			(
-				(m_Chess[i]->GetPosition().z + 225.0f > m_Player->GetPosition().z)
-				&& (m_Chess[i]->GetPosition().z - 225.0f < m_Player->GetPosition().z)
+				(m_Chess[i]->GetPosition().z + 230.0f > m_Player->GetPosition().z)
+				&& (m_Chess[i]->GetPosition().z - 230.0f < m_Player->GetPosition().z)
 				)
 
 			)
@@ -920,12 +931,33 @@ void CGameScene::Update(float elapsedTime)
 	{
 		if (m_ChessCollide_Check[i] == true)
 		{
-			m_Player->Box_Pull(TRUE);
-			m_Chess[i]->SetPosition({
-									m_Chess[i]->GetPosition().x + Final_Vec.x,
-									m_Chess[i]->GetPosition().y ,
-									m_Chess[i]->GetPosition().z + Final_Vec.z
-				});
+			if (m_Chess[King]->CollisionCheck(m_Chess[i])&& i!=0 )
+			{
+				m_Player->Box_Pull(TRUE);
+			}
+			if (m_Chess[Knight]->CollisionCheck(m_Chess[i]) && i != 1)
+			{
+				m_Player->Box_Pull(TRUE);
+			}
+			if (m_Chess[Pawn]->CollisionCheck(m_Chess[i]) && i != 2)
+			{
+				m_Player->Box_Pull(TRUE);
+			}
+			if (m_Chess[Rook]->CollisionCheck(m_Chess[i]) && i != 3)
+			{
+				m_Player->Box_Pull(TRUE);
+			}
+			else
+			{
+				m_Player->Box_Pull(TRUE);
+				m_Chess[i]->SetPosition({
+										m_Chess[i]->GetPosition().x + Final_Vec.x,
+										m_Chess[i]->GetPosition().y ,
+										m_Chess[i]->GetPosition().z + Final_Vec.z
+					});
+			}
+			
+
 			if (m_Chess[i]->GetPosition().x < 16500.0f)
 			{
 				m_Chess[i]->SetPosition({
@@ -990,7 +1022,6 @@ void CGameScene::Update(float elapsedTime)
 	
 	if (m_ChessPlate_Check[King] && m_ChessPlate_Check[Knight] && m_ChessPlate_Check[Pawn] && m_ChessPlate_Check[Rook])
 	{
-		
 		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
 		p->OpenDoor();
 		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Chess_Success);
@@ -1295,8 +1326,36 @@ void CGameScene::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12R
 void CGameScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"나옴1234abcd!@#"), 0, //텍스트 인덱스추가하면 다음줄 위치를 
-		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	if (m_Player->GetPlayerExistingSector() == 0 && m_StageFont[0]==false)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage1"), 0, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	}
+	else if (m_Player->GetPlayerExistingSector() == 1 && m_StageFont[1] == false)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage2"), 1, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	}
+	else if (m_Player->GetPlayerExistingSector() == 2 && m_StageFont[2] == false)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage3"), 2, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	}
+	else if (m_Player->GetPlayerExistingSector() == 3 && m_StageFont[3] == false)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage4"), 3, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	}
+	else if (m_Player->GetPlayerExistingSector() == 4 && m_StageFont[4] == false)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Boss_Stage"), 4, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	}
+	if (m_Interaction == true)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"거대한 지옥의 사냥개가 자연을 파괴하고있네\n 녀석을 해치워서 자연을 회복시켜주게"), 5, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.2f, 0.31f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	}
 }
 
 void CGameScene::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV,int idx)
@@ -2673,7 +2732,6 @@ void CGameScene::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_Chess[King]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
 	m_Chess[King]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
 	m_Chess[King]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
-
 	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[King]);
 
 	m_Chess[Knight] = new CGameObject();
@@ -4384,6 +4442,10 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 			m_MummyExist[0] = false;
 			m_Mummy[1]->SetMummyDie(1);
 			m_Mummy[2]->SetMummyDie(1);
+			if (m_Two_Mira_Die == true)
+			{
+				m_All_Die = true;
+			}
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
@@ -4391,12 +4453,18 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
+			
 			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
 			m_One_Mira_Die = true;
 			m_One_Mira_Die_Laser = true;
+			if (m_All_Die == true)
+			{
+				cout << "dd" << endl;
+				OpenDoor();
+			}
 		}
 
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy2)
@@ -4404,6 +4472,10 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 			m_MummyExist[1] = false;
 			m_Mummy[0]->SetMummyDie2(1);
 			m_Mummy[2]->SetMummyDie2(1);
+			if (m_Two_Mira_Die == true)
+			{
+				m_All_Die = true;
+			}
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
@@ -4411,18 +4483,28 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
+			
 			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
 			m_One_Mira_Die = true;
 			m_One_Mira_Die_Laser = true;
+			if (m_All_Die == true)
+			{
+				cout << "dd" << endl;
+				OpenDoor();
+			}
 		}
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy3)
 		{
 			m_MummyExist[2] = false;
 			m_Mummy[0]->SetMummyDie3(1);
 			m_Mummy[1]->SetMummyDie3(1);
+			if (m_Two_Mira_Die == true)
+			{
+				m_All_Die = true;
+			}
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
@@ -4430,13 +4512,20 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
+			
 			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
 			m_One_Mira_Die = true;
 			m_One_Mira_Die_Laser = true;
+			if (m_All_Die == true)
+			{
+				cout << "dd" << endl;
+				OpenDoor();
+			}
 		}
+		
 
 	}
 
@@ -4494,6 +4583,11 @@ void CGameScene::UseEffects(int effectType, const XMFLOAT3& xmf3Position, float 
 			effect->FixPositionByTerrain(m_Terrain);
 		effect->WakeUpAfterTime(wakeupTime);
 	}
+}
+
+void CGameScene::OpenDoor()
+{
+	m_Opendoor = true;
 }
 
 void CGameScene::SendMouseInputPacket()

@@ -568,7 +568,7 @@ void CMummy::Update(float elapsedTime)
 						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x - 60.0f, this->GetLook().y, this->GetLook().z), -1));
 					}
 
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,-2500 });
 					Laser->SetPosition(pos);
 				}
 			}
@@ -612,7 +612,7 @@ void CMummy::Update(float elapsedTime)
 				if (Laser->GetLaserType() == Laser_TYPE::Laser2)
 				{
 					Laser->SetDrawable(true);
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,-2500 });
 					Laser->SetPosition(pos);
 				}
 
@@ -650,7 +650,7 @@ void CMummy::Update(float elapsedTime)
 						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x - 30.0f, this->GetLook().y, this->GetLook().z), -1));
 					}
 
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,-2500 });
 					Laser->SetPosition(pos);
 				}
 
@@ -692,7 +692,7 @@ void CMummy::Update(float elapsedTime)
 				if (Laser->GetLaserType() == Laser_TYPE::Laser3)
 				{
 					Laser->SetDrawable(true);
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,-2500 });
 					Laser->SetPosition(pos);
 				}
 
@@ -730,7 +730,7 @@ void CMummy::Update(float elapsedTime)
 						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x + 60.0f, this->GetLook().y, this->GetLook().z), -1));
 					}
 
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,-2500 });
 					Laser->SetPosition(pos);
 				}
 
@@ -767,6 +767,7 @@ void CMummy::Update(float elapsedTime)
 		}
 	}
 
+	
 	
 	CGameObjectVer2::Animate(elapsedTime);
 	UpdateTransform(NULL);
