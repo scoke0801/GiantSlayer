@@ -43,14 +43,15 @@ XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
 CGameScene::CGameScene()
 {
 	m_SoundManager = new CSoundManager();
-	//m_SoundManager->AddStream("resources/sounds/TestTitle.mp3", Sound_Name::BGM_MAIN_GAME);
+	m_SoundManager->AddStream("resources/sounds/BGM_Maingame.m4a", Sound_Name::BGM_MAIN_GAME);
 
 	m_SoundManager->AddSound("resources/sounds/ShotArrow.wav", Sound_Name::EFFECT_ARROW_SHOT);
 	m_SoundManager->AddSound("resources/sounds/Laser.mp3", Sound_Name::EFFECT_Laser);
 	m_SoundManager->AddSound("resources/sounds/ChessSuccess.mp3", Sound_Name::EFFECT_Chess_Success);
 	m_SoundManager->AddSound("resources/sounds/FireBall.mp3", Sound_Name::EFFECT_Fire_Ball);
 	m_SoundManager->AddSound("resources/sounds/Sword2.mp3", Sound_Name::EFFECT_Sword);
-	//m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
+	 
+	m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
 
 	cout << "Enter CGameScene \n";
 	m_pd3dGraphicsRootSignature = NULL;

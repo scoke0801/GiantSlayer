@@ -42,12 +42,15 @@ float lensize = 60000.0f;
 XMFLOAT3 Mummy_scale = { 300.0f,300.0f,300.0f };
 XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
 CTitleScene::CTitleScene()
-{
+{  
 	m_SoundManager = new CSoundManager();
+	m_SoundManager->AddStream("resources/sounds/BGM_Maingame.m4a", Sound_Name::BGM_TITLE);
 	//m_SoundManager->AddStream("resources/sounds/TestTitle.mp3", Sound_Name::BGM_MAIN_GAME);
 
 	m_SoundManager->AddSound("resources/sounds/ShotArrow.wav", Sound_Name::EFFECT_ARROW_SHOT);
 	//m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
+
+	m_SoundManager->PlayBgm(Sound_Name::BGM_TITLE);
 
 	cout << "Enter CTitltScene \n";
 	m_pd3dGraphicsRootSignature = NULL; 
