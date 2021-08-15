@@ -71,9 +71,9 @@ void CPlayer::Update(float fTimeElapsed)
 	}
 	else if (m_AttackedDelay > 0.0f) {
 		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
-		/*if (m_AttackedDelay == 0.0f) {
+		if (m_AttackedDelay == 0.0f) {
 			SetAnimationSet(AnimationType::IDLE);
-		}*/
+		}
 	}
 	else {
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0) {
@@ -325,7 +325,7 @@ void CPlayer::SetDrawStaff()
 void CPlayer::SetWeaponPointer()
 {
 	FindWeapon("sword1", this);
-	swordCollider = m_pWeapon->GetColliders();
+	//m_pWeapon;
 }
 
 void CPlayer::Jump()

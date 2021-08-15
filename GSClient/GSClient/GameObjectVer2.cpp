@@ -1107,6 +1107,7 @@ void CGameObjectVer2::FindWeapon(char* name, CGameObjectVer2* root)
 {
 	if (!strcmp(m_pstrFrameName, name)) {
 		root->m_pWeapon = this;
+		cout << "무기 등록!" << endl;
 	}
 
 	if (m_pSibling) m_pSibling->FindWeapon(name, root);
