@@ -102,6 +102,7 @@ void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
 	else {
         enemy->MoveToNextPosition(elapsedTime);
 	}
+
     if (enemy->IsEnemyInSight()) {
         if (enemy->GetEnemyType() == EnemyType::Boss) {
             CBoss* pBoss = reinterpret_cast<CBoss*>(enemy);
@@ -186,7 +187,7 @@ void AttackState::Execute(CEnemy* enemy, float elapsedTime)
 
     m_ElapsedTime += elapsedTime; 
     if (m_LifeTime < m_ElapsedTime) { 
-        enemy->ChangeState(new PatrolState(enemy)); 
+        enemy->ChangeState(new TraceState(enemy)); 
     }
     else {
         enemy->ChangeAnimation(ObjectState::Attack);
@@ -276,7 +277,7 @@ void AttackedState::Execute(CEnemy* enemy, float elapsedTime)
         }
         else {
             enemy->SetCanDamaged(true);
-            enemy->ChangeState(new PatrolState(enemy));
+            enemy->ChangeState(new TraceState(enemy));
         }
         /*else if (enemy->GetTargetPlayer() == nullptr)
             enemy->ChangeState(new PatrolState(enemy));

@@ -59,14 +59,11 @@ private:
 	float m_SkillCoolTime = 0.0f;
 	float m_ComboTimer = 0.2f;
 
-	CGameObject* m_sword = nullptr;
-
 public:
 	bool m_Alive = true;
 
 	bool pullString = false;
 	float m_StringPullTime = 0.0f;
-	vector<Collider*> swordCollider;
 
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
