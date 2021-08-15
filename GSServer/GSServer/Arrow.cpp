@@ -4,16 +4,30 @@
 void CArrow::Update(float fTimeElapsed)
 {
 	if (false == m_isUsing) {
-		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, ARROW_SPEED * fTimeElapsed)));
-		Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 360.0f * fTimeElapsed); 
+		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, TEST_ARROW_SPEED * fTimeElapsed)));
+		
 		m_ElapsedTime += fTimeElapsed;
 		if (m_ElapsedTime > ARROW_LIFE_TIME) {
 			m_ElapsedTime = 0.0f;
-			m_isUsing = true;
+			m_isDrawable = true;
 			//m_ConnectedParticle = nullptr;
 		}
+
+		// 
+		if (m_xmf3Position.y >= m_startPos.y + 50) {
+			falldown = true;
+		}
+		if (!falldown) {
+			m_xmf3Position = Vector3::Add(m_xmf3Position, { 0.0f, 3.0f, 0.0f });
+			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), -10.0f * fTimeElapsed);
+		}
+		else {
+			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), 20.0f * fTimeElapsed);
+		}
+
+		m_xmf3Velocity = Vector3::Subtract(m_xmf3Velocity, Vector3::Multifly(m_xmf3Velocity, AIR_RESISTANCE));
+		m_xmf3Position = Vector3::Subtract(m_xmf3Position, { 0.0f, GRAVITY * m_ElapsedTime, 0.0f });
 	}
-	else return;  
 }
 
 void CArrow::SetTargetPosition(const XMFLOAT3& targetPos)

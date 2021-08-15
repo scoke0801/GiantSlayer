@@ -101,6 +101,21 @@ void CGameObject::SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents)
 
 }
 
+void CGameObject::SetTargetVector(const XMFLOAT3& playerLookAt)
+{
+	XMFLOAT3 dirVector = Vector3::Normalize(playerLookAt);
+	XMFLOAT3 targetPos = Vector3::Multifly(dirVector, 150000);
+	m_xmf3Velocity = dirVector;
+	LookAt(m_xmf3Position, targetPos, XMFLOAT3(0, 1, 0));
+}
+
+bool CGameObject::IsInNearSector(SECTOR_POSITION sector) const
+{
+	auto gap = (int)m_ExistingSector - (int)sector;
+	 
+	return std::abs(gap <= 1);
+}
+
 bool CGameObject::IsInNearSector(bool* playerSector) const
 {
 	int prev = max((int)m_ExistingSector - 1, 0);
@@ -127,10 +142,10 @@ bool CGameObject::IsInSameSector(SECTOR_POSITION sectorPos) const
 	return m_ExistingSector == sectorPos;
 }
 
-bool CGameObject::CollisionCheck(const BoundingBox& pAABB)
+bool CGameObject::CollisionCheck(BoundingBox* pAABB)
 {
 	for (int i = 0; i < m_AABB.size(); ++i) {
-		bool result = m_AABB[i].Intersects(pAABB);
+		bool result = m_AABB[i]->Intersects(*pAABB);
 		if (result) return true;
 	}
 
@@ -186,13 +201,13 @@ void CGameObject::FixCollision(CGameObject* pObject)
 void CGameObject::UpdateColliders()
 {
 	for (int i = 0; i < m_BoundingBox.size(); ++i) {
-		m_BoundingBox[i].Transform(m_AABB[i], XMLoadFloat4x4(&m_xmf4x4World));
+		m_BoundingBox[i]->Transform(*m_AABB[i], XMLoadFloat4x4(&m_xmf4x4World));
 	}
 }
 
-void CGameObject::AddAABB(const BoundingBox& boundingBox)
+void CGameObject::AddAABB(BoundingBox* boundingBox)
 {  
-	m_AABB.push_back(boundingBox);
+	m_AABB.push_back(new BoundingBox(boundingBox->Center, boundingBox->Extents));
 }
   
 void CGameObject::FixPositionByTerrain(int heightsMap[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1])

@@ -170,7 +170,7 @@ CAnimationObject* CBoss::LoadFrameHierarchyFromFileForBoss(CAnimationObject* pPa
 			 
 			if (true == isMainPart) {
 				XMFLOAT3 half = Vector3::Multifly(boundingBox.Extents, 0.5f);
-				pGameObject->AddBoundingBox({ boundingBox.Center, half });
+				pGameObject->AddBoundingBox(new BoundingBox{ boundingBox.Center, half });
 			}
 		}
 		else if (!strcmp(pstrToken, "<Transform>:"))
@@ -190,7 +190,7 @@ CAnimationObject* CBoss::LoadFrameHierarchyFromFileForBoss(CAnimationObject* pPa
 			bool hasBoundingBox = CAnimationObject::LoadMeshInfoFromFile(pInFile, center, extent);
 			if (hasBoundingBox) {
 				XMFLOAT3 half = Vector3::Multifly(extent, 0.5f);
-				pGameObject->AddBoundingBox({ center, half });
+				pGameObject->AddBoundingBox(new BoundingBox{ center, half });
 			}
 		}
 		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
@@ -204,7 +204,7 @@ CAnimationObject* CBoss::LoadFrameHierarchyFromFileForBoss(CAnimationObject* pPa
 
 			if (hasBoundingBox) {
 				XMFLOAT3 half = Vector3::Multifly(extent, 0.5f);
-				pGameObject->AddBoundingBox({ center, half });
+				pGameObject->AddBoundingBox(new BoundingBox{ center, half });
 			}
 
 			//pGameObject->isSkinned = true;

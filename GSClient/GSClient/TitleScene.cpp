@@ -23,7 +23,7 @@
 #include "Boss.h"
 #include "Effect.h"
 #include "Font.h"
-#include "SceneJH.h"
+#include "GameScene.h"
 
 #define ROOT_PARAMETER_OBJECT				0
 #define ROOT_PARAMETER_SCENE_FRAME_DATA		1
@@ -422,10 +422,8 @@ void CTitleScene::ProcessPacket(unsigned char* p_buf)
 		P_S2C_SEND_ROOM_INFO packet;
 		 
 		memcpy(&packet, p_buf, p_buf[0]); 
-		
-		cout << "here!!!!!!!\n";
-		for (int i = 0; i < 20; ++i) {
-
+		m_RoomStartNo = packet.roomInfo;
+		for (int i = 0; i < 20; ++i) { 
 			if ((int)PlayerWeaponType::None == packet.weapons[i]) {
 				m_Weapons[i]->SetDrawable(false);
 				m_Weapons[i]->SetTextureIndex(0x0);
@@ -442,8 +440,7 @@ void CTitleScene::ProcessPacket(unsigned char* p_buf)
 				m_Weapons[i]->SetDrawable(true);
 				m_Weapons[i]->SetTextureIndex(0x80);
 			}
-		}
-		cout << "here!22222!!!!!!\n";
+		} 
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
 		break;
@@ -476,7 +473,9 @@ void CTitleScene::ProcessInput()
 	auto keyInput = GAME_INPUT;
 	if (keyInput.KEY_SPACE)
 	{
-		ChangeScene<CSceneJH>(nullptr); 
+		if (false == m_IsOnRoomSelect) {
+			ChangeScene<CGameScene>(nullptr);
+		}
 	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
@@ -547,15 +546,14 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 192 && x < 445) {
 			if (y > 588 & y < 677) {
 				// multi play
-				m_IsOnRoomSelect = true;
 				if (CFramework::GetInstance().ConnectToServer())
 				{
+					m_IsOnRoomSelect = true;
 					P_C2S_REQUEST_ROOM_INFO p_requestRoomInfo;
 					p_requestRoomInfo.size = sizeof(p_requestRoomInfo);
 					p_requestRoomInfo.type = PACKET_PROTOCOL::C2S_REQUEST_ROOM_INFO;
 					p_requestRoomInfo.baseRoomNo = 1;
-					SendPacket(&p_requestRoomInfo);
-					cout << "plz room info\n";
+					SendPacket(&p_requestRoomInfo); 
 				}
 			}
 		}
@@ -563,7 +561,7 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 770 && x < 1020) {
 			if (y > 588 & y < 677) {
 				// single play  
-				ChangeScene<CSceneJH>(nullptr);
+				ChangeScene<CGameScene>(nullptr);
 			}
 		}
 
@@ -578,19 +576,19 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 
 		if (x > 925 && x < 1061) {
 			if (y > 168 && y < 290) { 
-				m_WeaponSelected = 1;
+				m_WeaponSelected = PlayerWeaponType::Sword;
 				m_Select->SetPosition({ 0.55f, 0.4f, 0.87 });
 			}
 		}
 		if (x > 925 && x < 1061) {
 			if (y > 321 && y < 445) { 
-				m_WeaponSelected = 2;
+				m_WeaponSelected = PlayerWeaponType::Bow;
 				m_Select->SetPosition({ 0.55f, 0.0f, 0.87 });
 			}
 		}
 		if (x > 925 && x < 1061) {
 			if (y > 475 && y < 597) { 
-				m_WeaponSelected = 3;
+				m_WeaponSelected = PlayerWeaponType::Staff;
 				m_Select->SetPosition({ 0.55f, -0.4f, 0.87 });
 			}
 		}
@@ -599,20 +597,24 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 223 && x < 861) {
 			if (y > 118 && y < 227) { 
 				// room 1
+				m_RoomSelectNo = m_RoomStartNo;
 				m_RoomSelect->SetPosition({ -0.69f, 0.55f, 0.87 });		// RoomSelect
 			}
 			else if (y > 252 && y < 360) {
 				// room 2
+				m_RoomSelectNo = m_RoomStartNo + 1;
 				m_RoomSelect->SetPosition({ -0.69f, 0.2f, 0.87 });		// RoomSelect
 			}
 
 			else if (y > 383 && y < 496) {
 				// room 3
+				m_RoomSelectNo = m_RoomStartNo + 2;
 				m_RoomSelect->SetPosition({ -0.69f, -0.15f, 0.87 });	// RoomSelect
 			}
 
 			else if (y > 519 && y < 627) {
 				// room 4
+				m_RoomSelectNo = m_RoomStartNo + 3;
 				m_RoomSelect->SetPosition({ -0.69f, -0.5f, 0.87 });		// RoomSelect
 			}
 		}
@@ -621,21 +623,43 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 503 && x < 559) {
 			if (y > 651 && y < 690) {
 				// prev button
+				if ( m_IsOnRoomSelect )
+				{
+					m_IsOnRoomSelect = true;
+					P_C2S_REQUEST_ROOM_INFO p_requestRoomInfo;
+					p_requestRoomInfo.size = sizeof(p_requestRoomInfo);
+					p_requestRoomInfo.type = PACKET_PROTOCOL::C2S_REQUEST_ROOM_INFO;
+					p_requestRoomInfo.baseRoomNo = max(m_RoomStartNo - 4, 1);
+					SendPacket(&p_requestRoomInfo);
+				}				
+				cout << "prevButton\n";
 			}
 		}
 
 		if (x > 718 && x < 775) {
 			if (y > 651 && y < 690) {
 				// next button
+				if( m_IsOnRoomSelect )
+				{
+					m_IsOnRoomSelect = true;
+					P_C2S_REQUEST_ROOM_INFO p_requestRoomInfo;
+					p_requestRoomInfo.size = sizeof(p_requestRoomInfo);
+					p_requestRoomInfo.type = PACKET_PROTOCOL::C2S_REQUEST_ROOM_INFO;
+					p_requestRoomInfo.baseRoomNo = min(m_RoomStartNo + 4, 10);
+					SendPacket(&p_requestRoomInfo);
+				}
+				cout << "nextButton\n";
 			}
 		} 
 
 		if (x > 560 && x < 717) {
 			if (y > 651 && y < 690) {
 				// Enter button
-
-				cout << "ChangeScene to CSceneJH\n";
-				ChangeScene<CSceneJH>(nullptr);
+				SCENE_CHANGE_INFO sceneChangeInfo;
+				sceneChangeInfo.roomNo = m_RoomSelectNo;
+				sceneChangeInfo.weaponType = (int)m_WeaponSelected;
+				cout << "ChangeScene to CGameScene\n";
+				ChangeScene<CGameScene>((void*)&sceneChangeInfo);
 
 				CFramework::GetInstance().GetCurrentScene()->LoginToServer();
 			}

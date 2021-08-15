@@ -1032,9 +1032,10 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 	for (auto player : m_Players) {
 		if (!player->IsDrawable()) continue;
 		player->UpdateOnServer(elapsedTime);
-		player->UpdateColliders(); 
+		player->UpdateColliders();  
 		m_PlayerExistingSector[player->GetPlayerExistingSector()] = true;
 	}
+
 
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
@@ -1450,9 +1451,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		}*/
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT:
-	{
-		//P_S2C_MONSTERS_UPDATE_SYNC p_monsterUpdate;
-		//memcpy(&p_monsterUpdate, p_buf, p_buf[0]);
+	{ 
 		P_S2C_MONSTERS_UPDATE_SYNC* p_monsterUpdate = reinterpret_cast<P_S2C_MONSTERS_UPDATE_SYNC*>(p_buf);
 
 		XMFLOAT3 pos = { IntToFloat(p_monsterUpdate->posX),
@@ -1486,19 +1485,8 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			m_Players[i]->UpdateCamera();
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
-				look, -PLAYER_RUN_SPEED));
-			/*if (m_Player == m_Players[i]) {
-				if (p_syncUpdate.states[i] == AnimationType::DAMAGED) {
-					if (m_Players[i]->GetAnimationSet() != AnimationType::DAMAGED) {
-						m_CurrentCamera->SetShake(true, 0.5f, 15);
-					}
-				}
-				else if (p_syncUpdate.states[i] == AnimationType::ATTACK) {
-					if (m_Players[i]->GetAnimationSet() != AnimationType::ATTACK) {
-						m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
-					}
-				}
-			}*/
+				look, -PLAYER_RUN_SPEED)); 
+			m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
 			switch (p_syncUpdate.states[i]) {
 			case IDLE:
 			case SWORD_IDLE:
@@ -1537,6 +1525,129 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 	case PACKET_PROTOCOL::S2C_INGAME_END:
 		cout << "Packet::GameEnd[ServerToClient]\n";
 		break;
+	case PACKET_PROTOCOL::S2C_INGAME_MUMMY_ACT:
+	{ 
+		P_S2C_MUMMY_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_MUMMY_UPDATE_SYNC*>(p_buf);
+
+		for (int i = 0; i < 3; ++i) {
+			if (packet->exist[i]) {
+				XMFLOAT3 pos = { IntToFloat(packet->posX[i]), IntToFloat(packet->posY[i]), IntToFloat(packet->posZ[i]) };
+				XMFLOAT3 look = { IntToFloat(packet->lookX[i]), IntToFloat(packet->lookY[i]), IntToFloat(packet->lookZ[i]) };
+
+				m_Mummy[i]->SetPosition(pos);
+				m_Mummy[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+				m_Mummy[i]->SetAnimationSet(packet->state[i]);
+			}
+		} 
+	}
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_PLAYER_ARROW_ACT: 
+	{
+		P_S2C_PLAYER_ARROW_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_PLAYER_ARROW_UPDATE_SYNC*>(p_buf);
+
+		auto obj = m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow][packet->id];
+		CArrow* pArrow = reinterpret_cast<CArrow*>(obj);
+
+		XMFLOAT3 pos = { IntToFloat(packet->posX), IntToFloat(packet->posY), IntToFloat(packet->posZ) };
+		XMFLOAT3 look = { IntToFloat(packet->lookX), IntToFloat(packet->lookY), IntToFloat(packet->lookZ) };
+
+		if (pArrow->IsCanUse()) {
+			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
+			if (-1 != idx) { 
+				pArrow->SetUseable(false); 
+				pArrow->SetPosition(pos);
+				pArrow->m_startPos = pos; 
+				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
+				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx)); 
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+			}
+			break;
+		}
+		else
+		{
+			pArrow->SetPosition(pos);
+			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+		} 
+		cout << "Arrow act\n";
+	}
+		break;
+	case PACKET_PROTOCOL::SC2_INGAME_MONSTER_ARROW_ACT:	
+	{
+		P_S2C_MONSTER_ARROW_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_MONSTER_ARROW_UPDATE_SYNC*>(p_buf);
+
+	}
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_LASER_ACT:		
+	{
+		P_S2C_LASER_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_LASER_UPDATE_SYNC*>(p_buf);
+		for (int i = 0; i < 3; ++i) { 
+			if (false == packet->exist[i]) {
+				if (packet->id == 0) {
+					m_MummyLaser[i]->SetDrawable(true); 
+				}
+				else if (packet->id == 1) {
+					m_MummyLaser2[i]->SetDrawable(true);
+				}
+				else if (packet->id == 2) {
+					m_MummyLaser3[i]->SetDrawable(true);
+				}
+				continue;
+			}
+			XMFLOAT3 pos = { IntToFloat(packet->posX[i]), IntToFloat(packet->posY[i]), IntToFloat(packet->posZ[i]) };
+
+			if (packet->id == 0) {
+				m_MummyLaser[i]->SetPosition(pos);
+				m_MummyLaser[i]->SetDrawable(false);
+			}
+			else if (packet->id == 1) {
+				m_MummyLaser2[i]->SetPosition(pos);
+				m_MummyLaser2[i]->SetDrawable(false);
+			}
+			else if (packet->id == 2) {
+				m_MummyLaser3[i]->SetPosition(pos);
+				m_MummyLaser3[i]->SetDrawable(false);
+			} 
+		}
+		cout << "Laser Update\n";
+	}
+		break;
+	case PACKET_PROTOCOL::S2C_INGAME_FIREBALL_ACT:	
+	{
+		P_S2C_FIREBALL_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_FIREBALL_UPDATE_SYNC*>(p_buf);
+		auto obj = m_ObjectLayers[(int)OBJECT_LAYER::FireBall][packet->id];
+		CFireBall* pFireball = reinterpret_cast<CFireBall*>(obj);
+
+		XMFLOAT3 pos = { IntToFloat(packet->posX), IntToFloat(packet->posY), IntToFloat(packet->posZ) };
+		 
+		if (pFireball->IsCanUse()) {
+			pFireball->SetUseable(false);
+			pFireball->SetPosition(pos);
+
+			m_SoundManager->PlayEffect(Sound_Name::EFFECT_Fire_Ball);
+
+			break;
+		}
+		else
+		{
+			pFireball->SetPosition(pos);
+		}
+		cout << "FBS act\n";
+	}
+		break;
+	case PACKET_PROTOCOL::S2C_CHESS_OBJ_ACT:
+	{
+		P_S2C_CHESS_OBJ_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_CHESS_OBJ_UPDATE_SYNC*>(p_buf);
+
+		for (int i = 0; i < 4; ++i) {
+			XMFLOAT3 pos = { IntToFloat(packet->posX[i]), IntToFloat(packet->posY[i]), IntToFloat(packet->posZ[i]) };
+
+			m_Chess[i]->SetPosition(pos);
+		}
+		cout << "ChessACt\n";
+	}
+		break;
+
 	default:
 		cout << "Unknown Packet Type from server" << " Packet Type [" << +p_buf[1] << "]" << endl;
 		while (true) {
@@ -1546,12 +1657,22 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 	}
 }
 
+void CGameScene::SendDataToNextScene(void* context)
+{
+	if (context != nullptr) {
+		SCENE_CHANGE_INFO info = *(SCENE_CHANGE_INFO*)context;
+		m_nSelectedWeaponType = info.weaponType;
+		m_nRoomNo = info.roomNo;
+	}
+}
+
 void CGameScene::LoginToServer()
 {
 	P_C2S_LOGIN p_login;
 	p_login.size = sizeof(p_login);
 	p_login.type = PACKET_PROTOCOL::C2S_LOGIN;
-	p_login.roomIndex = -1;
+	p_login.roomIndex = m_nRoomNo;
+	p_login.weaponType = m_nSelectedWeaponType;
 	strcpy_s(p_login.name, CFramework::GetInstance().GetPlayerName().c_str());
 
 	SendPacket(&p_login);
@@ -1575,10 +1696,56 @@ void CGameScene::ProcessInput()
 		auto keyInput = GAME_INPUT;
 		bool processKey = false;
 		P_C2S_KEYBOARD_INPUT p_keyboard;
+		p_keyboard.isKeyDown = true;
 		p_keyboard.size = sizeof(P_C2S_KEYBOARD_INPUT);
 		p_keyboard.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
 		p_keyboard.id = CFramework::GetInstance().GetPlayerId();
-
+		if (keyInput.KEY_F1)
+		{
+			p_keyboard.keyInput = VK_F1;
+			processKey = true;
+		}
+		 
+		if (keyInput.KEY_F2)
+		{
+			p_keyboard.keyInput = VK_F2;
+			processKey = true;
+		}
+		if (keyInput.KEY_F3)
+		{
+			p_keyboard.keyInput = VK_F3;
+			processKey = true;
+		}
+		if (keyInput.KEY_F4)
+		{
+			p_keyboard.keyInput = VK_F4;
+			processKey = true;
+		}
+		if (keyInput.KEY_F5)
+		{
+			p_keyboard.keyInput = VK_F5;
+			processKey = true;
+		}
+		if (keyInput.KEY_F6)
+		{
+			p_keyboard.keyInput = VK_F6;
+			processKey = true;
+		}
+		if (keyInput.KEY_F7)
+		{
+			p_keyboard.keyInput = VK_F7;
+			processKey = true;
+		}
+		if (keyInput.KEY_F8)
+		{
+			p_keyboard.keyInput = VK_F8;
+			processKey = true;
+		}
+		if (keyInput.KEY_F9)
+		{
+			p_keyboard.keyInput = VK_F9;
+			processKey = true;
+		}
 		if (keyInput.KEY_W) {
 			p_keyboard.keyInput = VK_W;
 			processKey = true;
@@ -1594,11 +1761,7 @@ void CGameScene::ProcessInput()
 		if (keyInput.KEY_D) {
 			p_keyboard.keyInput = VK_D;
 			processKey = true;
-		}
-		if (keyInput.KEY_J) {
-			p_keyboard.keyInput = VK_J;
-			processKey = true;
-		}
+		} 
 		if (keyInput.KEY_U) {
 			p_keyboard.keyInput = VK_U;
 			processKey = true;
@@ -1643,8 +1806,7 @@ void CGameScene::ProcessInput()
 		{
 			gbWireframeOn = false;
 		}
-		if (processKey == false) return;
-		int retVal = 0;
+		if (processKey == false) return; 
 		SendPacket(&p_keyboard);
 		return;
 	}
@@ -1825,6 +1987,23 @@ void CGameScene::ProcessInput()
 
 void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 {
+	if (CFramework::GetInstance().IsOnConntected())
+	{
+		if (wParam != VK_J) {
+			return;
+		}
+		auto keyInput = GAME_INPUT;
+		bool processKey = false;
+		P_C2S_KEYBOARD_INPUT p_keyboard;
+		p_keyboard.size = sizeof(P_C2S_KEYBOARD_INPUT);
+		p_keyboard.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
+		p_keyboard.id = CFramework::GetInstance().GetPlayerId();
+		p_keyboard.keyInput = wParam;
+		p_keyboard.isKeyDown = !isKeyUp;
+		SendPacket(&p_keyboard);
+		return;
+	}
+	
 	if (isKeyUp == false)
 	{
 		if (wParam == VK_9) {
@@ -2638,6 +2817,7 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
@@ -3810,8 +3990,7 @@ void CGameScene::BuildArrows(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	}
 }
 void CGameScene::BuildMummyLaser(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	m_Mummy[0] = new CMummy();
+{ 
 	for (int i = 0; i < 3; i++)
 	{
 		m_MummyLaser[i] = new CMummyLaser();
@@ -3995,22 +4174,10 @@ void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_Players[0]->SetDrawable(true);
 	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
-	m_Players[0]->SetWeaponPointer();
-	//m_Players[0]->SetTextureIndex(0x400); 
-
-	//m_Players[0]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
-	//m_Players[0]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
-
-	m_Players[0]->SetWeapon(PlayerWeaponType::Sword);
+	m_Players[0]->SetWeaponPointer();  
 	++m_CurrentPlayerNum;
 
-	m_MinimapCamera->SetTarget(m_Players[0]);
-	//auto pBox = new CBox(pd3dDevice, pd3dCommandList, 80, 165.0, 80.0f);
-	//pBox->SetShader(CShaderHandler::GetInstance().GetData("Object"));
-	//pBox->SetTextureIndex(0x100); 
-	//pBox->SetPosition({ 550.0f,  m_Terrain->GetDetailHeight(550.0f, 1850.0f) + 82.5f,  1850.0f }); 
-	//m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pBox);
-
+	m_MinimapCamera->SetTarget(m_Players[0]); 
 	for (int i = 1; i < MAX_ROOM_PLAYER; ++i) {
 		pPlayerModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/Player.bin", NULL, true);

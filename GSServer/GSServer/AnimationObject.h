@@ -30,16 +30,18 @@ public: // about collision
 	void UpdateColliders() override;
 	bool CollisionCheck(CGameObject* other) override;
 
-	void GetAABBToBuffer(vector<BoundingBox>& buffer);
+	void GetAABBToBuffer(vector<BoundingBox*>& buffer);
 	void CollectAABBFromChilds();
 
-	void SetAABB(vector<BoundingBox>& buffer) { m_AABB = buffer; buffer.clear(); }
+	void SetAABB(vector<BoundingBox*>& buffer) { m_AABB = buffer; buffer.clear(); }
 
 public: // about animation
 	int GetAnimationSet()const { return m_AnimationSet; }
 	void SetAnimationSet(int nAnimationSet);
 	void SetAnimationType(int nType);
-	
+
+	void SetDrawableRecursively(char* name, bool draw);
+	void FindWeapon(char* name, CAnimationObject* root);
 public: // about read
 	static CAnimationObject* LoadFrameHierarchyFromFile(CAnimationObject* pParent, FILE* pInFile);
 	static CAnimationObject* LoadGeometryAndAnimationFromFile(const char* pstrFileName, bool bHasAnimation); 
@@ -60,6 +62,8 @@ public:
 	CAnimationObject*			m_pParent = nullptr;
 	CAnimationObject*			m_pChild = nullptr;
 	CAnimationObject*			m_pSibling = nullptr;
+
+	CAnimationObject*			m_pWeapon = NULL;
 
 	CAnimationController*		m_pAnimationController = NULL;
 	int							m_AnimationSet = 0;

@@ -116,7 +116,7 @@ void CAnimationObject::SetChild(CAnimationObject* pChild, bool bReferenceUpdate)
 void CAnimationObject::UpdateColliders()
 {
 	for (int i = 0; i < m_BoundingBox.size(); ++i) {
-		m_BoundingBox[i].Transform(m_AABB[i], XMLoadFloat4x4(&m_xmf4x4World));
+		m_BoundingBox[i]->Transform(*m_AABB[i], XMLoadFloat4x4(&m_xmf4x4World));
 	}
 	
 	if (m_pSibling) m_pSibling->UpdateColliders();
@@ -133,7 +133,7 @@ bool CAnimationObject::CollisionCheck(CGameObject* other)
 	return false;
 }
 
-void CAnimationObject::GetAABBToBuffer(vector<BoundingBox>& buffer)
+void CAnimationObject::GetAABBToBuffer(vector<BoundingBox*>& buffer)
 {
 	for (int i = 0; i < m_AABB.size(); ++i) {
 		buffer.push_back(m_AABB[i]);
@@ -163,6 +163,24 @@ void CAnimationObject::SetAnimationType(int nType)
 
 	if (m_pSibling) m_pSibling->SetAnimationType(nType);
 	if (m_pChild) m_pChild->SetAnimationType(nType);
+}
+
+void CAnimationObject::SetDrawableRecursively(char* name, bool draw)
+{
+	if (!strcmp(m_pstrFrameName, name)) SetDrawable(draw);
+
+	if (m_pSibling) m_pSibling->SetDrawableRecursively(name, draw);
+	if (m_pChild) m_pChild->SetDrawableRecursively(name, draw);
+}
+
+void CAnimationObject::FindWeapon(char* name, CAnimationObject* root)
+{
+	if (!strcmp(m_pstrFrameName, name)) {
+		root->m_pWeapon = this;
+	}
+
+	if (m_pSibling) m_pSibling->FindWeapon(name, root);
+	if (m_pChild) m_pChild->FindWeapon(name, root);
 }
 
 CAnimationObject* CAnimationObject::LoadFrameHierarchyFromFile(CAnimationObject* pParent, FILE* pInFile)
@@ -214,7 +232,7 @@ CAnimationObject* CAnimationObject::LoadFrameHierarchyFromFile(CAnimationObject*
 			bool hasBoundingBox = CAnimationObject::LoadMeshInfoFromFile(pInFile, center, extent); 
 			if (hasBoundingBox) { 
 				XMFLOAT3 half = Vector3::Multifly(extent, 0.5f);
-				pGameObject->AddBoundingBox({ center, half });
+				pGameObject->AddBoundingBox(new BoundingBox{ center, half });
 			}
 		}
 		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
@@ -228,7 +246,7 @@ CAnimationObject* CAnimationObject::LoadFrameHierarchyFromFile(CAnimationObject*
 
 			if (hasBoundingBox) {
 				XMFLOAT3 half = Vector3::Multifly(extent, 0.5f);
-				pGameObject->AddBoundingBox({ center, half });
+				pGameObject->AddBoundingBox(new BoundingBox{ center, half });
 			}
 
 			//pGameObject->isSkinned = true;

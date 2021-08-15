@@ -12,7 +12,7 @@ constexpr int MAX_NAME = 200;
 
 constexpr int SERVERPORT = 9000;
 constexpr int BUFSIZE = 4096;
-constexpr int F_TO_I = 100000;
+constexpr int F_TO_I = 10000;
 constexpr int I_TO_F = F_TO_I;
 
 constexpr int MAX_MOUSE_INPUT = 30;
@@ -85,6 +85,14 @@ enum AnimationType
 	//BOX_PICK,
 	//BOX_DOWN
 
+};
+
+enum class PlayerWeaponType
+{
+	None = 0x00,
+	Sword = 0x01,
+	Bow = 0x02,
+	Staff = 0x04
 };
 // x,y,z 크기를 short로 보내면 맵 크기 20000에서 
 // int, float 형 변환 계산하기에 크기가 작아서 int형으로 사용
@@ -203,10 +211,7 @@ enum class ROTATION_AXIS : short {
 	ROTATE_AXIS_Y,
 	ROTATE_AXIS_Z
 };
-enum class WEAPON_TYPE : short {
-	SWORD = 1,
-	ARROW
-};
+
 enum class PACKET_PROTOCOL : short
 {
 	//CLIENT  
@@ -233,7 +238,14 @@ enum class PACKET_PROTOCOL : short
 	S2C_INGAME_MOUSE_INPUT,
 	 
 	S2C_INGAME_MONSTER_ACT, 
-	 
+
+	S2C_INGAME_MUMMY_ACT,
+	S2C_INGAME_PLAYER_ARROW_ACT,
+	SC2_INGAME_MONSTER_ARROW_ACT,
+	S2C_INGAME_LASER_ACT,
+	S2C_INGAME_FIREBALL_ACT,
+	S2C_CHESS_OBJ_ACT,
+
 	S2C_INGAME_UPDATE_PLAYERS_STATE,
 	  
 	S2C_INGAME_DOOR_EVENT,
@@ -253,6 +265,7 @@ struct P_C2S_LOGIN {
 	PACKET_PROTOCOL type;
 	char name[MAX_NAME];
 	short roomIndex;
+	int weaponType;
 };
 struct P_C2S_REQUEST_ROOM_INFO {
 	BYTE size;
@@ -271,7 +284,7 @@ struct P_C2S_KEYBOARD_INPUT {
 	PACKET_PROTOCOL type;
 	short keyInput;
 	short id;
-
+	bool  isKeyDown;
 #ifdef _DEBUG 
 	int move_time;			// Stress Test 프로그램에서 delay를 측정할 때 사용, 
 							// 서버는 해당 id가 접속한 클라이언트에서 보내온 최신 값을 return 해야 한다.
@@ -301,6 +314,7 @@ struct P_S2C_SEND_ROOM_INFO {
 	BYTE size;
 	PACKET_PROTOCOL type;
 
+	int roomInfo;
 	short weapons[20];
 };
 struct P_S2C_PROCESS_LOGIN {
@@ -336,7 +350,7 @@ struct P_S2C_PROCESS_KEYBOARD {
 	int posX, posY, posZ;
 	int lookX, lookY, lookZ;
 
-	WEAPON_TYPE weaponType;
+	PlayerWeaponType weaponType;
 	 
 #ifdef _DEBUG 
 	short id;
@@ -375,9 +389,9 @@ struct P_S2C_UPDATE_SYNC {
 	char sp[MAX_ROOM_PLAYER];
 
 	BYTE states[MAX_ROOM_PLAYER];
-	bool existance[MAX_ROOM_PLAYER];
-
-	WEAPON_TYPE weaponType[MAX_ROOM_PLAYER];  
+	bool existance[MAX_ROOM_PLAYER];	
+	
+	PlayerWeaponType weaponType[MAX_ROOM_PLAYER];
 };
 
 struct P_S2C_MONSTERS_UPDATE_SYNC {
@@ -396,4 +410,85 @@ struct P_S2C_MONSTERS_UPDATE_SYNC {
 	BYTE			state;
 };
 
+struct P_S2C_MUMMY_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+	
+	bool			exist[3];
+
+	int				posX[3];
+	int				posY[3];
+	int				posZ[3]; 
+
+	int				lookX[3];
+	int				lookY[3];
+	int				lookZ[3];	
+
+	BYTE			state[3];
+};
+struct P_S2C_PLAYER_ARROW_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+
+	BYTE			id;
+
+	int				posX;
+	int				posY;
+	int				posZ;
+
+	int				lookX;
+	int				lookY;
+	int				lookZ;
+};
+struct P_S2C_MONSTER_ARROW_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+
+	BYTE			id;
+
+	int				posX;
+	int				posY;
+	int				posZ;
+
+	int				lookX;
+	int				lookY;
+	int				lookZ;
+};
+struct P_S2C_LASER_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+
+	BYTE			id;
+
+	int				posX[3];
+	int				posY[3];
+	int				posZ[3];
+
+	bool			exist[3];
+};
+struct P_S2C_FIREBALL_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+
+	BYTE			id;
+
+	int				posX;
+	int				posY;
+	int				posZ; 
+};
+
+struct P_S2C_CHESS_OBJ_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+	  
+	int				posX[4];
+	int				posY[4];
+	int				posZ[4]; 
+};
 #pragma pack (pop)

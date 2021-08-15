@@ -2,6 +2,7 @@
   
 enum class ShaderHandlerUser
 {
+	None,
 	TH,
 	YJ,
 	JH,

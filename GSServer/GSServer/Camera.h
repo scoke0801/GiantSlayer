@@ -47,7 +47,7 @@ public:
 	void Update(float elapsedTime);
 	void Update(const XMFLOAT3& xmf3LookAt);
 	void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
-
+	void UpdateAimMode(const XMFLOAT3& xmf3LookAt);
 public:
 	// Define camera space via LookAt parameters.
 	void LookAt(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR target, DirectX::FXMVECTOR worldUp);

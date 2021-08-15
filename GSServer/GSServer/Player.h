@@ -2,19 +2,13 @@
 #include "AnimationObject.h"
 #include "Camera.h"
 
-enum class Player_Move_Type
+enum class PlayerMoveType
 {
 	None = 0,
 	Walk,
 	Run
 };
-enum class PlayerWeaponType
-{
-	None = 0x00,
-	Sword = 0x01,
-	Bow = 0x02,
-	Staff = 0x04
-};
+ 
 
 class CPlayer : public CAnimationObject
 { 
@@ -27,11 +21,15 @@ public:
 	AnimationType IDLE = AnimationType::SWORD_IDLE;
 	AnimationType RUN = AnimationType::SWORD_RUN;
 	AnimationType ATK = AnimationType::SWORD_ATK;
+	AnimationType ATK2 = AnimationType::SWORD_ATK2;
+	AnimationType ATK3 = AnimationType::SWORD_ATK3;
+	AnimationType SKILL = AnimationType::SWORD_SKILL;
 	AnimationType DEATH = AnimationType::SWORD_DEATH;
 	AnimationType CHANGEWEAPON = AnimationType::BOW_GET;
-
+	AnimationType PUSH = AnimationType::BOX_PUSH;
+	 
 private:
-	Player_Move_Type m_MovingType = Player_Move_Type::Run; 
+	PlayerMoveType m_MovingType = PlayerMoveType::Run;
 	PlayerWeaponType m_WeaponType = PlayerWeaponType::Sword;
 
 	short	m_Id;
@@ -40,22 +38,39 @@ private:
 
 	CCamera* m_Camera = nullptr;
 
+private:  
+	bool m_IsCanAttack = true;
+
+	bool m_IsAlreadyAttack = false;
+	 
+	float m_ComboTimer = 0.2f;
+
+	bool m_AttackKeyDown = false;
+
 private:
+	float m_SkillCoolTime = 0.0f;
+	float m_AttackedDelay = 0.0f;
 	float m_AttackAnimLength = 0.0f;
+	float m_SwordAnim1Length = 0.0f;
+	float m_SwordAnim2Length = 0.0f;
+	float m_SwordAnim3Length = 0.0f;
+	float m_SkillAnimLength = 0.0f;
+	float m_DeathAnimLength = 0.0f;
 	float m_AttackWaitingTime = 0.0f;
 
 	float m_AttackAnimPauseTime = 0.0f;
-	 
-	bool m_IsCanAttack = true;
 
-	float m_AttackedDelay = 0.0f;
-	bool m_IsAlreadyAttack = false;
+	int m_LastAttackAnim = 0;
 
+	bool m_PullBox = false; 
 public:
 	bool pullString = false;
 	float m_StringPullTime = 0.0f;
-
+	 
 	bool m_AnimationPaused = false;
+
+	bool m_Alive = true;
+	 
 public:
 	CPlayer();
 	~CPlayer();	
@@ -87,7 +102,15 @@ public:
 	CCamera* GetCamera() const { return m_Camera; }
 	  
 	PlayerWeaponType GetWeaponType() const { return m_WeaponType; }
+	void SetWeaponType(int weaponType) { m_WeaponType = (PlayerWeaponType)weaponType; }
 
+	void SetSwordAttackKeyDown(bool info) { m_AttackKeyDown = info; }
+	void SetWeaponPointer(); 
+
+	float GetAttackWaitTime() const { return m_AttackWaitingTime; }
+	float GetStringPullTime() const { return m_StringPullTime; }
+
+	PlayerWeaponType GetWeapon() { return m_WeaponType; }
 public:
 	void SetCanAttack(bool info) { m_IsCanAttack = info; }
 	bool IsCanAttack() const { return m_IsCanAttack; }
@@ -102,8 +125,13 @@ public:
 
 public:
 	bool Attacked(CGameObject* pObject);
-	void Attack(); 
+	void Attack(int type);
 	void ResetAttack();
+	void ResetBow();
+
+
+	void SetPullBox(bool info) { m_PullBox = info; }
+	void Box_Pull(bool Pull_State);
 
 	AnimationType GetStateName() const { return m_StateName; } 
 };

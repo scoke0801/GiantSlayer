@@ -73,13 +73,15 @@ private:
 
 private:
 	bool						m_IsOnRoomSelect = false;
-	int							m_WeaponSelected = 1;
+	PlayerWeaponType			m_WeaponSelected = PlayerWeaponType::Sword;
 	int							m_RoomStartNo = 1;
 
 	UI*							m_Select;
 	UI*							m_PrevBtn, *m_NextBtn;
 	UI*							m_RoomBoard;
 	UI*							m_EnterBox;
+
+	int							m_RoomSelectNo = 1;
 	UI*							m_RoomSelect;
 
 	vector<UI*>					m_Weapons;
@@ -103,6 +105,7 @@ public:
 	virtual void BuildCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height); 
 
 	void ReleaseObjects();
+
 public:
 	void Update(float elapsedTime) override;
 	void UpdateForMultiplay(float elapsedTime)override;

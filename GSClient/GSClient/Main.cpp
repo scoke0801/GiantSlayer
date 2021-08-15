@@ -224,8 +224,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         gFramework->OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         //CInputHandler::GetInstance().MouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0; 
-    case WM_SOCKET:
-        cout << "SOCKET\n";
+    case WM_SOCKET: 
         gFramework->OnHandleSocketMessage(wParam, lParam); 
         break;
     default:

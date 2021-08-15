@@ -2,7 +2,9 @@
 
 #include "Communicates.h"
 #include "Player.h"
-
+class CEnemy;
+class CMummy;
+class CMummyLaser;
 
 enum class CommandType
 {
@@ -11,19 +13,38 @@ enum class CommandType
 	MoveAttack,
 	Attack
 };
-
+enum ChessType {
+	King = 0,
+	Knight,
+	Pawn,
+	Rook,
+	Count,
+};
 // 편의를 위해 Layer에서 몇 가지 객체 유형은 제외하고 별도로 관리
 enum class OBJECT_LAYER : int {
 	TerrainWater,
 	Puzzle,
 	PuzzleBox,
 	Obstacle,
+	ChessPuzzle,
+	PlayerChessPuzzle,
+	Bridge,
 	TerrainBoundary,
 	MirrorBox,
-	Enemy,
+	Enemy, 
+	Mummy,
+	Npc,
+
 	PlayerArrow,
 	MonsterArrow,
-	Count,
+
+	Mummylaser,
+	Mummylaser2,
+	Mummylaser3,
+
+	FireBall,
+
+	Count
 };
 
 struct EX_OVER {
@@ -58,6 +79,8 @@ class CGameRoom
 
 	int										m_CurrentlyDeletedPlayerId;
 
+	bool									m_isPlayerSelected[MAX_ROOM_PLAYER] = { true,true,true,true,true };
+	bool									m_isPlayerBoxCollide[MAX_ROOM_PLAYER] = { false, };
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
 
 	// 플레이어가 새 지역으로 이동 시 이전 지역으로 이동을 막기 위한 벽을 생성
@@ -70,6 +93,30 @@ class CGameRoom
 
 	bool									m_IsActive = false;
 	int										m_RoomIndex = -1;
+
+	bool									m_Mummy_Reverse_Direction = false;
+	
+	bool									m_ChessChangeFlag = false;
+	CGameObject*							m_Chess[4];
+	bool									m_ChessPlate_Check[4] = { false };		// 체스판체크용
+	XMFLOAT3								m_ChessPlate[7][7];						// 체스판
+	bool									m_ChessCollide_Check[4] = { false,false,false,false };
+
+	CMummy*									m_Mummy[3];
+	bool									m_MummyExist[3] = { true,true,true };
+
+	CMummyLaser*							m_MummyLaser[3];
+	CMummyLaser*							m_MummyLaser2[3];
+	CMummyLaser*							m_MummyLaser3[3];
+
+	bool									m_One_Mira_Die = false;
+	bool									m_One_Mira_Die_Laser = false;
+	bool									m_Two_Mira_Die = false;
+	bool									m_Two_Mira_Die_Laser = false;
+	
+	CEnemy*									m_Npc = nullptr;
+	bool									m_Npc_Event = false;
+	bool									m_Interaction = false;
 public:
 	CGameRoom();
 	~CGameRoom() {}
@@ -82,6 +129,13 @@ public:
 	void SendSyncUpdatePacket();
 	void SendMonsterActPacket();
 
+	void SendMummyActPacket();
+	void SendMonsterArrowActPacket();
+	void SendPlayerArrowActPacket();
+	void SendFireballActPacket();
+	void SendLaserActPacket();
+	void SendChessObjectActPacket();
+
 	void Disconnect(CLIENT& client); 
 	void Disconnect(int id);
 
@@ -89,20 +143,33 @@ public:
 
 	void DeleteObject(CGameObject* pObject, int layerIdx);
 
-	void EnterPlayer(CLIENT& client);
+	void EnterPlayer(CLIENT& client, int weapontType);
 	bool CanEnter();
 
 	bool IsActive() { return m_IsActive; }
 	
 	CPlayer* GetPlayer(int index) { return m_Players[index]; }
 
+public:
+	void ShotPlayerArrow(int p_id);
+	void ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector);
+
+	void DeleteEnemy(CEnemy* pEmeny);
+
+	void ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector);
+
+	void ShotFireBall(OBJECT_LAYER type, CGameObject* user);
 private:
 	void InitAll();
 	void InitPlayers();
 	void InitCameras();
 	void InitMonsters();
 	void InitArrows();
-	  
+	void InitNPCs();
+
+	void InitMummyLaser();
+	void InitFireBall();
+
 	void InitObstacle();
 	 
 	void BuildBlockingRegionOnMap();

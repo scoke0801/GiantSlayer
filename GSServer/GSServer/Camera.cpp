@@ -83,6 +83,17 @@ void CCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	}
 }
 
+void CCamera::UpdateAimMode(const XMFLOAT3& xmf3LookAt)
+{
+	if (m_TargetPlayer == nullptr) return;
+
+	XMFLOAT3 dirVector = Vector3::Normalize(m_TargetPlayer->GetLook());
+
+	m_xmf3Position = Vector3::Subtract(m_TargetPlayer->GetPosition(), Vector3::Multifly(dirVector, -5));
+	m_xmf3Position.y += 200;
+}
+
+
 void CCamera::LookAt(DirectX::FXMVECTOR pos, DirectX::FXMVECTOR target, DirectX::FXMVECTOR worldUp)
 {
 	XMVECTOR L = XMVector3Normalize(XMVectorSubtract(target, pos));
