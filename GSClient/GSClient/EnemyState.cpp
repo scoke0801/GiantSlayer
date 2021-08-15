@@ -187,7 +187,7 @@ void AttackState::Execute(CEnemy* enemy, float elapsedTime)
 
     m_ElapsedTime += elapsedTime; 
     if (m_LifeTime < m_ElapsedTime) { 
-        enemy->ChangeState(new TraceState(enemy)); 
+        enemy->ChangeState(new TraceState(enemy));
     }
     else {
         enemy->ChangeAnimation(ObjectState::Attack);
@@ -275,9 +275,17 @@ void AttackedState::Execute(CEnemy* enemy, float elapsedTime)
         if (enemy->GetHP() <= 0) {
             enemy->ChangeState(new DeathState(enemy));
         }
-        else {
+        else if (enemy->GetTargetPlayer() != nullptr)
+        {
             enemy->SetCanDamaged(true);
             enemy->ChangeState(new TraceState(enemy));
+            cout << "몬스터 피격: 타겟 존재함 -> TraceState" << endl;
+        }
+        else
+        {
+            enemy->SetCanDamaged(true);
+            enemy->ChangeState(new PatrolState(enemy));
+            cout << "몬스터 피격: 타겟 없음 -> PatrolState" << endl;
         }
         /*else if (enemy->GetTargetPlayer() == nullptr)
             enemy->ChangeState(new PatrolState(enemy));

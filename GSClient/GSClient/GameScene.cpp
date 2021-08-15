@@ -832,10 +832,10 @@ void CGameScene::Update(float elapsedTime)
 		{
 			if (pFireball->CollisionCheck(pEnemy)) {
 				pEnemy->ChangeState(ObjectState::Attacked, pFireball);
+				UseEffects((int)EffectTypes::FireBallExplosion, pFireball->GetPosition());
 				pFireball->SetDrawable(true);
 
 				cout << "충돌 : 플레이어 파이어볼 - 적\n";
-				break;
 			}
 		}
 	}
@@ -4041,6 +4041,7 @@ void CGameScene::BuildProjectiles(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		pFireb->Scale(40.0f, 40.0f, 40.0f);
 		pFireb->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 0.0f, 0.0f, 0.0f, XMFLOAT3{ 0,0,0 });
 		pFireb->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(2.0f, 2.0f, 2.0f)));
+		pFireb->SetExplosionBoundingBox({1000.0f, 1000.0f, 1000.0f});
 		m_ObjectLayers[(int)OBJECT_LAYER::FireBall].push_back(pFireb);
 	}
 }

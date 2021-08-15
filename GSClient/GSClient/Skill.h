@@ -21,9 +21,15 @@ public:
 	void SetUseable(bool data) { m_isDrawable = data; }
 	void SetDrawable(bool drawable);
 
+	void SetExplosionBoundingBox(const XMFLOAT3& size);
+	BoundingBox GetExplosionBB() { return m_ExplosionAABB; }
+
 protected:
 	CGameObject* m_Owner;
 	CGameObject* target;
+
+	BoundingBox		m_ExplosionBox;
+	BoundingBox		m_ExplosionAABB;
 
 	float m_ElapsedTime = 0;
 	float damage;
@@ -31,4 +37,5 @@ protected:
 	XMFLOAT3 m_xmf3TargetPosition;
 
 	ParticleObject* m_ConnectedParticle = nullptr;
+	
 };
