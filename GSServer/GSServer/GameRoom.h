@@ -104,6 +104,7 @@ public:
 
 	void SendSyncUpdatePacket();
 	void SendMonsterActPacket();
+	void SendBossActPacket();
 
 	void SendMummyActPacket();
 	void SendMonsterArrowActPacket();

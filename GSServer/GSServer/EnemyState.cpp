@@ -190,7 +190,7 @@ void TraceState::Enter(CEnemy* enemy)
     enemy->ChangeAnimation(ObjectState::Patrol);
     m_StateName = ObjectState::Trace;
     m_LifeTime = 0.5f;
-   // cout << "TraceState::Enter \n";
+    cout << "TraceState::Enter \n";
     m_AttackRange = enemy->GetAttackRange();
     m_TargetPlayer = enemy->GetTargetPlayer();
     if (m_TargetPlayer == nullptr) {

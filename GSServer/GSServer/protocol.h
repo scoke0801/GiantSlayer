@@ -273,6 +273,7 @@ enum class PACKET_PROTOCOL : short
 	S2C_INGAME_LASER_ACT,
 	S2C_INGAME_FIREBALL_ACT,
 	S2C_CHESS_OBJ_ACT,
+	S2C_BOSS_ACT,
 
 	S2C_DELETE_OBJ,
 
@@ -530,5 +531,5 @@ struct P_S2C_DELETE_SYNC
 	// objectLayer
 	short		objType;
 	short			idx;
-};
+}; 
 #pragma pack (pop)

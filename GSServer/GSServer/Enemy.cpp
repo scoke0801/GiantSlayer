@@ -13,7 +13,6 @@ CEnemy::CEnemy() :CAnimationObject()
 	m_Type = OBJ_TYPE::Enemy;
 	m_EnemyType = EnemyType::Skeleton;
 
-	m_EnemyType = EnemyType::Skeleton;
 	m_Speed = 165.0f * 2.5f;
 
 
@@ -21,6 +20,8 @@ CEnemy::CEnemy() :CAnimationObject()
 	m_SP = 100;
 	m_ATK = 15;
 	m_DEF = 0;
+
+	m_TargetPlayer = nullptr;
 }
 
 CEnemy::~CEnemy()
@@ -29,7 +30,10 @@ CEnemy::~CEnemy()
 }
 
 void CEnemy::Update(float elapsedTime)
-{ 
+{
+	if (m_AttackDelayTime > 0.0f) {
+		m_AttackDelayTime -= elapsedTime;
+	}
 	m_State->Execute(this, elapsedTime);
 
 	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
@@ -255,11 +259,12 @@ void CEnemy::LookTarget(bool rotatedModel)
 
 	m_ToMovePosition.y = m_xmf3Position.y;
 
-	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 }); 
+	LookAt(m_xmf3Position, m_ToMovePosition, { 0,1,0 });
 }
 
 void CEnemy::FixCollision(CGameObject* pCollideObject)
 {
+	SetPosition(m_xmf3PrevPosition);
 }
 
 void CEnemy::Attack(float elapsedTime)
@@ -280,12 +285,13 @@ void CEnemy::ChangeState(ObjectState stateInfo, void* pData)
 	case ObjectState::Trace:
 		break;
 	case ObjectState::Attack:
-		ChangeState(new AttackState(this));
+		//ChangeState(new AttackState(this));
 		break;
 	case ObjectState::Attacked:
 		ChangeState(new AttackedState(this, pData));
 		break;
 	case ObjectState::Mummy_1_Die_Anger:
+		assert(!"CEnemyChangeState");
 		//ChangeState(new Mummy_1_Die_Anger_State(this));
 		break;
 	case ObjectState::Mummy_2_Die_Anger:

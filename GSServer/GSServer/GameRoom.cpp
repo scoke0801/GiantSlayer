@@ -1362,7 +1362,7 @@ void CGameRoom::SendSyncUpdatePacket()
 		XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
 
 		if (i == 0) {
-			DisplayVector3(look);
+			//DisplayVector3(look);
 		}
 		p_syncUpdate.posX[i] = FloatToInt(pos.x);
 		p_syncUpdate.posY[i] = FloatToInt(pos.y);
@@ -1396,7 +1396,8 @@ void CGameRoom::SendMonsterActPacket()
 	P_S2C_MONSTERS_UPDATE_SYNC p_monsterUpdate[MAX_MONSTER_COUNT];
 	ZeroMemory(&p_monsterUpdate, sizeof(p_monsterUpdate));
 
-	for (int i = 0; i < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++i) {
+	// 0 : boss
+	for (int i = 1; i < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++i) {
 		auto mon = m_ObjectLayers[(int)OBJECT_LAYER::Enemy][i];
 
 		XMFLOAT3 pos = mon->GetPosition();
@@ -1413,7 +1414,8 @@ void CGameRoom::SendMonsterActPacket()
 		p_monsterUpdate[i].lookX = FloatToInt(look.x);
 		p_monsterUpdate[i].lookY = FloatToInt(look.y);
 		p_monsterUpdate[i].lookZ = FloatToInt(look.z);
-		p_monsterUpdate[i].state = mon->GetAnimationType();
+
+		p_monsterUpdate[i].state = reinterpret_cast<CEnemy*>(mon)->GetAnimationSet();
 	}
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i] == nullptr) {
@@ -1425,6 +1427,50 @@ void CGameRoom::SendMonsterActPacket()
 		for (int j = 0; j < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++j) { 
 			if (m_ObjectLayers[(int)OBJECT_LAYER::Enemy][j]->IsInNearSector((SECTOR_POSITION)m_Players[i]->GetPlayerExistingSector())) {
 				SendPacket(m_Clients[i]->id, &p_monsterUpdate[j]);
+			}
+		}
+	}
+}
+
+void CGameRoom::SendBossActPacket()
+{
+	if (m_CurrentPlayerNum == 0) return;
+
+	P_S2C_MONSTERS_UPDATE_SYNC p_monsterUpdate;
+	ZeroMemory(&p_monsterUpdate, sizeof(p_monsterUpdate));
+
+	{
+		auto mon = m_ObjectLayers[(int)OBJECT_LAYER::Enemy][0];
+
+		XMFLOAT3 pos = mon->GetPosition();
+		XMFLOAT3 look = Vector3::Normalize(mon->GetLook());
+
+		p_monsterUpdate.type = PACKET_PROTOCOL::S2C_BOSS_ACT;
+		p_monsterUpdate.size = sizeof(p_monsterUpdate);
+		p_monsterUpdate.id = 0;
+
+		p_monsterUpdate.posX = FloatToInt(pos.x);
+		p_monsterUpdate.posY = FloatToInt(pos.y);
+		p_monsterUpdate.posZ = FloatToInt(pos.z);
+
+		p_monsterUpdate.lookX = FloatToInt(look.x);
+		p_monsterUpdate.lookY = FloatToInt(look.y);
+		p_monsterUpdate.lookZ = FloatToInt(look.z);
+
+		cout << (int)reinterpret_cast<CEnemy*>(mon)->GetAnimationSet() << "\n";
+		p_monsterUpdate.state = reinterpret_cast<CEnemy*>(mon)->GetAnimationSet();
+	}
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			continue;
+		}
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
+			continue;
+		}
+		for (int j = 0; j < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++j) {
+			if (m_ObjectLayers[(int)OBJECT_LAYER::Enemy][j]->IsInNearSector((SECTOR_POSITION)m_Players[i]->GetPlayerExistingSector())) {
+				SendPacket(m_Clients[i]->id, &p_monsterUpdate);
 			}
 		}
 	}

@@ -4,19 +4,23 @@
 
 CBoss::CBoss()  
 {
-	m_xmf4x4ToParent = Matrix4x4::Identity();
-	m_xmf4x4World = Matrix4x4::Identity();
+	// m_xmf4x4ToParent = Matrix4x4::Identity();
+	// m_xmf4x4World = Matrix4x4::Identity();
 
 	CAnimationObject* pBossModel = LoadGeometryAndAnimationFromFileForBoss(
 		"resources/FbxExported/Boss.bin", true);
-	SetChild(pBossModel);
+	SetChild(pBossModel, true);
 
 	m_ExistingSector = SECTOR_POSITION::SECTOR_5;
 
+	SetAnimationSet((int)BOSS_ANIMATION::Idle);
+	 
 	m_State = new WaitState(this);
-	m_EnemyType = EnemyType::Boss;
+	m_EnemyType = EnemyType::Boss; 
 	m_AttackRange = 1000.0f;
 	m_Speed = 165.0f * 10.0f;
+
+	m_TargetPlayer = nullptr;
 }
 
 
@@ -81,7 +85,7 @@ void CBoss::CalcNextAttackType()
 void CBoss::PlayerEnter(CPlayer* target)
 {
 	if (m_isOnAwaken == false) {
-		//SetAnimationSet((int)BOSS_ANIMATION::Born_1);
+		SetAnimationSet((int)BOSS_ANIMATION::Born_1);
 		m_isOnAwaken = true;
 	}
 }

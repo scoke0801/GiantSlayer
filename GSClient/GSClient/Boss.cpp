@@ -185,6 +185,47 @@ void CBoss::ChangeAnimation(ObjectState stateInfo)
 	}
 }
 
+void CBoss::ChangeAnimationForServer(BOSS_ANIMATION stateInfo)
+{
+	switch (stateInfo)
+	{
+	case BOSS_ANIMATION::Idle:
+		SetAnimationSet((int)BOSS_ANIMATION::Idle);
+		SetAnimationType(ANIMATION_TYPE_LOOP);
+		break; 
+	case BOSS_ANIMATION::Run:
+		SetAnimationSet((int)BOSS_ANIMATION::Run);
+		SetAnimationType(ANIMATION_TYPE_LOOP);
+		break;  
+	case BOSS_ANIMATION::Dead:
+		SetAnimationSet((int)BOSS_ANIMATION::Dead);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break; 
+	case BOSS_ANIMATION::Skill_1:
+		SetAnimationSet((int)BOSS_ANIMATION::Skill_1);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break;
+	case BOSS_ANIMATION::Skill_2:
+		SetAnimationSet((int)BOSS_ANIMATION::Skill_2);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break;
+	case BOSS_ANIMATION::Skill_3:
+		SetAnimationSet((int)BOSS_ANIMATION::Skill_3);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break;
+	case BOSS_ANIMATION::Born_2:
+		SetAnimationSet((int)BOSS_ANIMATION::Born_2);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break; 
+	case BOSS_ANIMATION::Born_1:
+		SetAnimationSet((int)BOSS_ANIMATION::Born_1);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break;
+	default:
+		break;
+	}
+}
+
 CGameObjectVer2* CBoss::LoadGeometryAndAnimationFromFileForBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader, bool bHasAnimation)
 {
 	FILE* pInFile = NULL;

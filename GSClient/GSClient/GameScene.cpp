@@ -1502,6 +1502,25 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
 	}
 	break;
+	case PACKET_PROTOCOL::S2C_BOSS_ACT:
+	{
+		P_S2C_MONSTERS_UPDATE_SYNC* p_monsterUpdate = reinterpret_cast<P_S2C_MONSTERS_UPDATE_SYNC*>(p_buf);
+
+		XMFLOAT3 pos = { IntToFloat(p_monsterUpdate->posX),
+			IntToFloat(p_monsterUpdate->posY),
+			IntToFloat(p_monsterUpdate->posZ) };
+		XMFLOAT3 look = { IntToFloat(p_monsterUpdate->lookX),
+			IntToFloat(p_monsterUpdate->lookY),
+			IntToFloat(p_monsterUpdate->lookZ) };
+		int id = p_monsterUpdate->id;
+
+		m_Boss->ChangeAnimationForServer((BOSS_ANIMATION)p_monsterUpdate->state);
+		m_Boss->SetPosition(pos);
+		m_Boss->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+
+		m_Boss->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
+	}
+	break;
 	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:
 		P_S2C_UPDATE_SYNC p_syncUpdate;
 		memcpy(&p_syncUpdate, p_buf, p_buf[0]);
@@ -1522,7 +1541,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				cout << "몬가 달라서 무기가 바뀜\n";
 				m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
 			} 
-			DisplayVector3(m_Players[i]->GetLook());
+
 			//if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
 			//	cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
 			//	//m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]); 	 
@@ -1612,10 +1631,8 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		else
 		{
 			pArrow->SetPosition(pos);
-			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
-			DisplayVector3(look);
-		} 
-		cout << "Arrow act\n";
+			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });  
+		}  
 	}
 		break;
 	case PACKET_PROTOCOL::SC2_INGAME_MONSTER_ARROW_ACT:	
@@ -1658,8 +1675,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_MummyLaser3[i]->Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 5.0f);
 
 			} 
-		}
-		cout << "Laser Update\n";
+		} 
 	}
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_FIREBALL_ACT:	
@@ -1681,8 +1697,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		else
 		{
 			pFireball->SetPosition(pos);
-		}
-		cout << "FBS act\n";
+		} 
 	}
 		break;
 	case PACKET_PROTOCOL::S2C_CHESS_OBJ_ACT:
@@ -2732,8 +2747,7 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Boss->SetActivityScope({ scopeSize.x, 0, scopeSize.z }, { centerPos });
 		m_Boss->SetSightBoundingBox({ scopeSize.x / scale.x, 15, scopeSize.z / scale.z });
 		m_Boss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, scopeSize.x / scale.x, 15, scopeSize.z / scale.z, XMFLOAT3{ 0, 0.0f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(m_Boss);
-
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(m_Boss); 
 	}
 
 	CGameObjectVer2* pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
