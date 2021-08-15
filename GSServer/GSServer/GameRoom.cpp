@@ -109,7 +109,7 @@ void CGameRoom::Update(float elapsedTime)
 
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
 		// 변수명 변경으로 인한 true/false 반전..
-		if (true == pArrow->IsUsable()) {
+		if (true == pArrow->IsDrawable()) {
 			continue;
 		}
 		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox])
@@ -118,29 +118,6 @@ void CGameRoom::Update(float elapsedTime)
 				cout << "반전\n";
 				pArrow->InverseDirection();
 				break;
-			}
-		}
-	}
-
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
-			if (m_Players[i]->IsExist() == false) continue;
-			if (false == pEnemy->CollisionCheck(m_Players[i])) {
-				continue;
-			}
-			if (false == m_Players[i]->IsCanAttack()) {
-				if (false == m_Players[i]->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Players[i]); 
-					m_Players[i]->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Players[i]->Attacked(pEnemy))
-			{
-				//m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Players[i]->FixCollision(); 
 			}
 		}
 	}
@@ -191,12 +168,13 @@ void CGameRoom::Update(float elapsedTime)
 				}
 			}
 			else if (m_Players[i]->Attacked(pEnemy))
-			{ 
+			{
 				m_Players[i]->FixCollision();
 
 			}
 		}
 	}
+	 
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
@@ -588,7 +566,8 @@ void CGameRoom::InitPlayers()
 		m_Players[i]->Scale(200, 200, 200); 
 		m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
 		m_Players[i]->SetExistence(false);
-		m_Players[i]->SetWeapon(PlayerWeaponType::Sword); 
+		m_Players[i]->SetWeapon(PlayerWeaponType::Sword);
+		m_Players[i]->SetWeaponPointer();
 	}
 }
 
@@ -618,6 +597,7 @@ void CGameRoom::InitMonsters()
 		XMFLOAT3 scale = { 120.0f, 120.0f, 120.0f };
 		CBoss* pBoss = new CBoss();
 		pBoss->SetPosition({ 17166 * MAP_SCALE_SIZE, -6070, 17166 * MAP_SCALE_SIZE });
+		pBoss->FixPositionByTerrain(g_Heights);
 		pBoss->Scale(120, 120, 120);
 		pBoss->Rotate({ 0,1,0 }, 180);
 		pBoss->ConnectPlayer(m_Players, MAX_ROOM_PLAYER);
@@ -1034,7 +1014,22 @@ void CGameRoom::InitObstacle()
 
 	 
 /////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 
+// MirrorBox----------------------------------------------------------------------
+	for (int i = 0; i < 3; i++)
+	{
+		pObject = new CGameObject();
+		  
+		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_4);
+
+		pObject->SetPosition({ float(19200 - (2200 * i)) * MAP_SCALE_SIZE , -2300, 200 * MAP_SCALE_SIZE });
+		  
+		pObject->AddBoundingBox(new BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 2500.0f * 0.5f * MAP_SCALE_SIZE, 2600.0f * 0.5f, 1.0f * 0.5f }));
+
+		m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox].push_back(pObject);
+	}
+	
 // DoorWall----------------------------------------------------------------------
 	m_DoorStartIndex = m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].size();
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC1);
@@ -1366,6 +1361,9 @@ void CGameRoom::SendSyncUpdatePacket()
 		XMFLOAT3 pos = m_Players[i]->GetPosition();
 		XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
 
+		if (i == 0) {
+			DisplayVector3(look);
+		}
 		p_syncUpdate.posX[i] = FloatToInt(pos.x);
 		p_syncUpdate.posY[i] = FloatToInt(pos.y);
 		p_syncUpdate.posZ[i] = FloatToInt(pos.z);
@@ -2222,29 +2220,30 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 					m_Cameras[id]->GetRight3f(), distance));
 				break;
 			case VK_J:
-				if (m_Players[p_keyboard.id]->IsCanAttack()) {
-					cout << "Can Attack " << (int)m_Players[p_keyboard.id]->GetAnimationSet() << "\n";
-					switch (m_Players[p_keyboard.id]->GetWeapon())
+				if (m_Players[id]->IsCanAttack()) {
+					cout << "Can Attack " << (int)m_Players[id]->GetAnimationSet() << "\n";
+					switch (m_Players[id]->GetWeapon())
 					{
 					case PlayerWeaponType::Sword:
-						m_Players[p_keyboard.id]->Attack(0);
+						m_Players[id]->Attack(0);
 						break;
 					case PlayerWeaponType::Bow:
-						m_Players[p_keyboard.id]->Attack(0);
-						m_Players[p_keyboard.id]->pullString = true;
+						m_Players[id]->Attack(0);
+						m_Players[id]->pullString = true;
 						break;
 					case PlayerWeaponType::Staff:
-						m_Players[p_keyboard.id]->Attack(0);
-						ShotFireBall(OBJECT_LAYER::FireBall, m_Players[p_keyboard.id]);
+						m_Players[id]->Attack(0);
+						ShotFireBall(OBJECT_LAYER::FireBall, m_Players[id]);
 						break;
 					}
 				}
 				else {
-					switch (m_Players[p_keyboard.id]->GetWeapon())
+					switch (m_Players[id]->GetWeapon())
 					{
 					case PlayerWeaponType::Sword:
-						if (m_Players[p_keyboard.id]->GetAttackWaitTime() < 0.5f) { 
-							m_Players[p_keyboard.id]->SetSwordAttackKeyDown(true);
+						if (m_Players[id]->GetAttackWaitTime() < 0.5f) {
+							cout << m_Players[id]->GetAttackWaitTime() << endl;
+							m_Players[id]->SetSwordAttackKeyDown(true);
 						}
 						break;
 					}
@@ -2305,19 +2304,19 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 		}
 		else {
 		if (p_keyboard.keyInput == VK_J) {
-			switch (m_Players[p_keyboard.id]->GetWeapon())
+			switch (m_Players[id]->GetWeapon())
 			{
 			case PlayerWeaponType::Sword: 
 				break;
 			case PlayerWeaponType::Bow:
-				if (m_Players[p_keyboard.id]->ShotAble()) {
+				if (m_Players[id]->ShotAble()) {
 					ShotPlayerArrow(id); 
 				}
-				else { 
-					m_Players[p_keyboard.id]->IncreaseAttackWaitingTime(0);
-					m_Players[p_keyboard.id]->SetAnimationSet(IDLE);
+				else {
+					m_Players[id]->IncreaseAttackWaitingTime(0);
+					m_Players[id]->SetAnimationSet(IDLE);
 				}
-				m_Players[p_keyboard.id]->ResetBow();
+				m_Players[id]->ResetBow();
 				break;
 			case PlayerWeaponType::Staff: 
 				break;

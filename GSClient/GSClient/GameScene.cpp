@@ -613,77 +613,51 @@ void CGameScene::Update(float elapsedTime)
 		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
 		//}
 	}
-
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
-			}
-		}
-		//if (pEnemy->CollisionCheck(m_Mirror[0])) {
-		//	//pEnemy->InverseDirection();
-		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
-		//}
-	}
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
-			}
-		}
-	}
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
-			}
-		}
-	}
+	 
+	//for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
+	//	if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+	//		continue;
+	//	}
+	//	if (pEnemy->CollisionCheck(m_Player)) {
+	//		// 공격 상태일 때만 체력이 닳는것이 맞을까...
+	//		//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+	//		//	
+	//		//}
+	//		if (false == m_Player->IsCanAttack()) {
+	//			if (false == m_Player->IsAleradyAttack()) {
+	//				pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+	//				m_Player->SetAleradyAttack(true);
+	//			}
+	//		}
+	//		else if (m_Player->Attacked(pEnemy))
+	//		{
+	//			m_CurrentCamera->SetShake(true, 0.5f, 15);
+	//			m_Player->FixCollision();
+	//		}
+	//	}
+	//}
+	//for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
+	//	if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+	//		continue;
+	//	}
+	//	if (pEnemy->CollisionCheck(m_Player)) {
+	//		// 공격 상태일 때만 체력이 닳는것이 맞을까...
+	//		//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
+	//		//	
+	//		//}
+	//		if (false == m_Player->IsCanAttack()) {
+	//			if (false == m_Player->IsAleradyAttack()) {
+	//				pEnemy->ChangeState(ObjectState::Attacked, m_Player);
+	//				m_Player->SetAleradyAttack(true);
+	//			}
+	//		}
+	//		else if (m_Player->Attacked(pEnemy))
+	//		{
+	//			m_CurrentCamera->SetShake(true, 0.5f, 15);
+	//			m_Player->FixCollision();
+	//		}
+	//	}
+	//}
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
@@ -1541,50 +1515,49 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 
 			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
 			m_Players[i]->SetPosition(pos);
+			m_Players[i]->UpdateCamera();
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-			//m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0), look, PLAYER_RUN_SPEED)); 
+			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0), look, PLAYER_RUN_SPEED)); 
 			if (m_Players[i]->GetWeapon() != p_syncUpdate.weaponType[i]) { 
 				cout << "몬가 달라서 무기가 바뀜\n";
 				m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
-			}
+			} 
+			DisplayVector3(m_Players[i]->GetLook());
+			//if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
+			//	cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
+			//	//m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]); 	 
+			//}
 
-			//if(p_syncUpdate.states[i] == IDLE || p_syncUpdate.states[i] == SWORD_IDLE || p_syncUpdate.states[i] == BOW_IDLE)
-			
 			if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
-				cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
-				m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]); 	
-				m_Players[i]->UpdateOnServer(0.0f);
-			}
-
-			m_Players[i]->UpdateCamera();
-				/*cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
+				//cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
 				switch (p_syncUpdate.states[i]) {
 				case IDLE:
 				case SWORD_IDLE:
 				case BOW_IDLE:
+				case STAFF_IDLE:
 					m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
 					break;
 				case SWORD_RUN:
 				case BOW_RUN:
+				case STAFF_RUN:
 					m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
 					break;
 				case SWORD_ATK:
 				case BOW_ATK:
+				case STAFF_ATK:
 					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
 					break;
 				case SWORD_DEATH:
 				case BOW_DEATH:
+				case STAFF_DEATH:
 					m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
 					break;
-
-				case WALK: break;
-				case DAMAGED: break;
-				case SWORD_GET:break;
-				case BOW_GET:break;
-				default:
+					 
+				default:	
+					m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
 					break;
 				}
-			}*/
+			}
 		}
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
@@ -3898,17 +3871,13 @@ void CGameScene::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock"); 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree] = new CFixedMesh(pd3dDevice, pd3dCommandList, "GreenTree");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
-
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree] = new CFixedMesh(pd3dDevice, pd3dCommandList, "GreenTree"); 
+	 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::King] = new CFixedMesh(pd3dDevice, pd3dCommandList, "king");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Rook] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rook");
@@ -3917,8 +3886,7 @@ void CGameScene::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Laser");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall] = new CFixedMesh(pd3dDevice, pd3dCommandList, "FireBall");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Quest] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Quest");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stair] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stair");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Quest] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Quest"); 
 }
 
 void CGameScene::BuildShadowResource(ID3D12Device* pd3dDevice)
@@ -3993,7 +3961,7 @@ void CGameScene::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::FireBallParticle);
 	}
 	// 안개
-	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::RadialParitcle);
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 1000, PARTICLE_TYPE::RadialParitcle);
 
 	// 비
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 100000, PARTICLE_TYPE::RainParticle);

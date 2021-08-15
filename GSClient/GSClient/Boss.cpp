@@ -18,7 +18,7 @@ CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 	m_State = new WaitState(this);
 	m_EnemyType = EnemyType::Boss;
 	m_AttackRange = 1000.0f;
-	m_Speed = 0.0f * 10.0f;
+	m_Speed = 165.0 * 10.0f;
 	m_ExistingSector = SECTOR_POSITION::SECTOR_5;
 }
 

@@ -144,7 +144,9 @@ void AttackState::Enter(CEnemy* enemy)
         break;
     case EnemyType::Boss:
         // 일단 랜덤하게 테스트를 해보는 방향으로
-    {
+    {  
+        CBoss* pBoss = reinterpret_cast<CBoss*>(enemy);
+        pBoss->CalcNextAttackType();
         m_AttackType = (int)enemy->GetEnemyAttackType();
         if (m_AttackType == (int)EnemyAttackType::BossSkill_1) {
             m_LifeTime = BOSS_ATTACK_1_ANIMATION_LENGTH;
@@ -242,14 +244,15 @@ void AttackedState::Execute(CEnemy* enemy, float elapsedTime)
         if (enemy->GetHP() <= 0) {
             enemy->ChangeState(new DeathState(enemy));
         }
-        else {
+        else if (enemy->GetTargetPlayer() != nullptr){
             enemy->SetCanDamaged(true);
             enemy->ChangeState(new PatrolState(enemy));
         }
-        /*else if (enemy->GetTargetPlayer() == nullptr)
-            enemy->ChangeState(new PatrolState(enemy));
         else
-            enemy->ChangeState(new TraceState(enemy));*/
+        {
+            enemy->SetCanDamaged(true);
+            enemy->ChangeState(new PatrolState(enemy)); 
+        } 
     }
 }
 

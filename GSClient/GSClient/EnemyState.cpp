@@ -110,9 +110,7 @@ void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
         }
         enemy->ChangeState(new TraceState(enemy));
     }
-
-    CMummy* pMummy = reinterpret_cast<CMummy*>(enemy);
-    
+     
     /*enemy->ChangeState(new AttackState(enemy));
     if (enemy->GetEnemyType() == EnemyType::Mummy) {
             CMummy* pMummy = reinterpret_cast<CMummy*>(enemy);
@@ -157,7 +155,9 @@ void AttackState::Enter(CEnemy* enemy)
         break;
     case EnemyType::Boss: 
         // 일단 랜덤하게 테스트를 해보는 방향으로
-    {
+    {  
+        CBoss* pBoss = reinterpret_cast<CBoss*>(enemy);
+        pBoss->CalcNextAttackType();
         m_AttackType = (int)enemy->GetEnemyAttackType(); 
         if (m_AttackType == (int)EnemyAttackType::BossSkill_1) { 
             m_LifeTime = BOSS_ATTACK_1_ANIMATION_LENGTH;
