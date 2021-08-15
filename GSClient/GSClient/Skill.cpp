@@ -4,15 +4,12 @@
 #include "Particle.h"
 #include "Effect.h"
 
-#include "SceneTH.h"
-#include "SceneJH.h"
-#include "SceneYJ.h"
 #include "GameScene.h"
 
 CFireBall::CFireBall()
 {
 	m_isDrawable = true;
-	m_ATK = 35;
+	m_ATK = 200;
 }
 
 CFireBall::~CFireBall()
@@ -44,6 +41,8 @@ void CFireBall::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 void CFireBall::Update(float fTimeElapsed)
 {
+	m_ExplosionBox.Transform(m_ExplosionAABB, XMLoadFloat4x4(&m_xmf4x4ToParent));
+
 	if (false == m_isDrawable) {
 		m_ElapsedTime += fTimeElapsed;
 
@@ -51,10 +50,8 @@ void CFireBall::Update(float fTimeElapsed)
 			m_ElapsedTime = 0.0f;
 			m_isDrawable = true;
 
-			XMFLOAT3 effectPos = m_xmf3Position;
 			auto curScene = MAIN_GAME_SCENE;
-
-			curScene->UseEffects((int)EffectTypes::FireBallExplosion, effectPos);
+			curScene->UseEffects((int)EffectTypes::FireBallExplosion, m_xmf3Position);
 		}
 
 		SetPosition(Vector3::Add(m_xmf3Position, Vector3::Multifly(m_xmf3Velocity, FIREBALL_SPEED * fTimeElapsed)));
@@ -97,4 +94,11 @@ void CFireBall::SetDrawable(bool drawable)
 			m_ConnectedParticle->SetDrawable(false);
 		}
 	}
+}
+
+void CFireBall::SetExplosionBoundingBox(const XMFLOAT3& size)
+{
+	m_ExplosionBox = BoundingBox({ 0,0,0 }, size);
+
+	m_ExplosionAABB = BoundingBox({ 0,0,0 }, size);
 }
