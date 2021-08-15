@@ -208,38 +208,38 @@ void CGameRoom::Update(float elapsedTime)
 	}
 
 
-	for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
-		if (false == pPuzzle->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
-			if (m_Players[i]->IsExist() == false) continue;
+	//for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
+	//	if (false == pPuzzle->IsInSameSector(m_PlayerExistingSector)) {
+	//		continue;
+	//	}
+	//	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+	//		if (m_Players[i]->IsExist() == false) continue;
 
-			if (pPuzzle->CollisionCheck(m_Players[i])) {
-				m_Players[i]->FixCollision(pPuzzle);
-				m_isPlayerBoxCollide[i] = true;
-				m_Players[i]->UpdateCamera();
-				break;
-			}
-		}
-	}
+	//		if (pPuzzle->CollisionCheck(m_Players[i])) {
+	//			m_Players[i]->FixCollision(pPuzzle);
+	//			m_isPlayerBoxCollide[i] = true;
+	//			m_Players[i]->UpdateCamera();
+	//			break;
+	//		}
+	//	}
+	//}
 
 
-	for (auto pChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle]) {
-		if (false == pChessPuzzle->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
-			if (m_Players[i]->IsExist() == false) continue;
+	//for (auto pChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle]) {
+	//	if (false == pChessPuzzle->IsInSameSector(m_PlayerExistingSector)) {
+	//		continue;
+	//	}
+	//	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+	//		if (m_Players[i]->IsExist() == false) continue;
 
-			if (pChessPuzzle->CollisionCheck(m_Players[i])) {
-				m_Players[i]->FixCollision(pChessPuzzle);
-				m_isPlayerBoxCollide[i] = true;
-				m_Players[i]->UpdateCamera();
-				break;
-			}
-		}
-	}
+	//		if (pChessPuzzle->CollisionCheck(m_Players[i])) {
+	//			m_Players[i]->FixCollision(pChessPuzzle);
+	//			m_isPlayerBoxCollide[i] = true;
+	//			m_Players[i]->UpdateCamera();
+	//			break;
+	//		}
+	//	}
+	//}
 
 	for (int playerIdx = 0; playerIdx < MAX_ROOM_PLAYER; ++playerIdx) {
 
@@ -384,6 +384,49 @@ void CGameRoom::Update(float elapsedTime)
 			//m_SoundManager->PlayEffect(Sound_Name::EFFECT_Chess_Success);
 			//CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
 			//p->OpenDoor();
+		}
+	}
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if ((int)SECTOR_POSITION::SECTOR_3!= m_Players[i]->GetPlayerExistingSector()) {
+			continue;
+		}
+		XMFLOAT3 plPos = m_Players[i]->GetPosition();
+
+		// 입구 계단
+		if ((plPos.x > 17553.5 && plPos.x < 18283.8) &&
+			(plPos.z > 17907.7 && plPos.z < 18509.6))
+		{
+			float min = -1980;
+			float max = -1760;
+
+			float t = (plPos.z / 18509.6);
+
+			float y = Lerp(max, min, Rate(17907.7, 18509.6, plPos.z));
+			cout << "out y : " << y << "\n";
+			m_Players[i]->SetPosition(XMFLOAT3(plPos.x, y, plPos.z));
+			m_Players[i]->UpdateCamera();
+		}
+		// 출구 계단
+		if ((plPos.x > 17527.7 && plPos.x < 18319.5) &&
+			(plPos.z > 13328 && plPos.z < 13887.7))
+		{
+			float min = -1950;
+			float max = -1760;
+
+			float t = (plPos.z / 13887.7);
+
+			float y = Lerp(min, max, Rate(13328, 13887.7, plPos.z)); 
+			m_Players[i]->SetPosition(XMFLOAT3(plPos.x, y, plPos.z));
+			m_Players[i]->UpdateCamera();
+		}
+
+		// 퍼즐
+		if ((plPos.x > 16450.0f && plPos.x < 19450.0f) &&
+			(plPos.z > 13900.0f && plPos.z < 17950.0f))
+		{
+			m_Players[i]->SetPosition(XMFLOAT3(plPos.x, -1760.0f, plPos.z));
+			m_Players[i]->UpdateCamera();
 		}
 	}
 }
@@ -933,12 +976,7 @@ void CGameRoom::InitObstacle()
 	pObject = new CSign(OBJECT_ID::SIGN_SCROLL);
 	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::SIGN_SCROLL]);
 	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_1); 
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
-
-	pObject = new CSign(OBJECT_ID::SIGN_PUZZLE);
-	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::SIGN_PUZZLE]);
-	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_3);
-	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject);
+	m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].push_back(pObject); 
 
 	pObject = new CSign(OBJECT_ID::SIGN_MEDUSA);
 	pObject->SetPosition(g_ObjectPositions[OBJECT_ID::SIGN_MEDUSA]);

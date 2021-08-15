@@ -332,3 +332,10 @@ extern int g_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1
 // 플레이어 시작 위치..
 extern XMFLOAT3 PLAYER_START_POSITIONS[5];
 extern unordered_map<OBJECT_ID, XMFLOAT3>		g_ObjectPositions;
+
+inline float Rate(float min, float max, float val)
+{
+	float range = max - min;
+	float target = val - min;
+	return  (target / range);
+}

@@ -544,7 +544,8 @@ void CPlate::Rotate(const XMFLOAT3& axis, float angle)
 }
 
 bool CPlate::CollisionCheck(BoundingBox * aabb)
-{ 
+{
+	return false;
 	bool res = false;
 	for (auto pObj : m_Objects) {
 		if (pObj->CollisionCheck(aabb)) {
@@ -558,6 +559,7 @@ bool CPlate::CollisionCheck(BoundingBox * aabb)
 
 bool CPlate::CollisionCheck(CGameObject* other)
 {
+	return false;
 	bool res = false;
 	auto otherAABB = other->GetAABB();
 	m_CollideObject = other;
