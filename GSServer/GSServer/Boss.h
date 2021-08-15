@@ -42,6 +42,7 @@ public:
     void PlayerEnter(CPlayer* target);
 
     void ChangeAnimation(ObjectState stateInfo) override;
+    BOSS_ANIMATION GetCurrentAnimation() const;
 private:
     static CAnimationObject* LoadGeometryAndAnimationFromFileForBoss(const char* pstrFileName, bool bHasAnimation);
 

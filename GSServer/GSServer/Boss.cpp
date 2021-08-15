@@ -314,3 +314,9 @@ void CBoss::ChangeAnimation(ObjectState stateInfo)
 		break;
 	}
 }
+
+BOSS_ANIMATION CBoss::GetCurrentAnimation() const
+{
+	int state = GetAnimationSet();
+	return BOSS_ANIMATION();
+}

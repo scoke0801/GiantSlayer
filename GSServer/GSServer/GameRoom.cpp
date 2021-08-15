@@ -1457,7 +1457,7 @@ void CGameRoom::SendBossActPacket()
 		p_monsterUpdate.lookY = FloatToInt(look.y);
 		p_monsterUpdate.lookZ = FloatToInt(look.z);
 
-		cout << (int)reinterpret_cast<CEnemy*>(mon)->GetAnimationSet() << "\n";
+		//cout << (int)reinterpret_cast<CEnemy*>(mon)->GetAnimationSet() << "\n";
 		p_monsterUpdate.state = reinterpret_cast<CEnemy*>(mon)->GetAnimationSet();
 	}
 
