@@ -63,6 +63,16 @@ CGameScene::CGameScene()
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		m_PlayerExistingSector[i] = false;
 	}
+
+	for (int i = 0; i < ChessPuzzleSize; i++)
+	{
+		for (int j = 0; j < ChessPuzzleSize; j++)
+		{
+			m_ChessPlate[i][j].x = 16855 + 355 * i;
+			m_ChessPlate[i][j].z = 14417 + 470 * j;
+			m_ChessPlate[i][j].y = -1750.0f;
+		}
+	}
 }
 
 CGameScene::~CGameScene()
@@ -245,7 +255,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pTerrainWater->SetPosition(XMFLOAT3(5450.0f * MAP_SCALE_SIZE, -1300.0f, 16500.0f * MAP_SCALE_SIZE));
 	m_ObjectLayers[(int)OBJECT_LAYER::TerrainWater].push_back(pTerrainWater);
 
-	//FbxLoader(m_pfbxManager, "Elf_Mesh", false, 1);
+	//FbxLoader(m_pfbxManager, "Stair", false, 1);
 
 	LoadFbxMeshes(pd3dDevice, pd3dCommandList);
 
@@ -927,13 +937,12 @@ void CGameScene::Update(float elapsedTime)
 	}
 	
 	// 1 킹 2 나이트 3 폰 4 룩 // 퍼즐 체크 
-
 	if ((m_Chess[King]->GetPosition().x > 18320.0f && m_Chess[King]->GetPosition().x < 18720.0f)
 		&& (m_Chess[King]->GetPosition().z > 17150.0f && m_Chess[King]->GetPosition().z < 17550.0f))
 	{
 		m_ChessPlate_Check[King] = true;
 	}
-	if ((m_Chess[Knight]->GetPosition().x > 18320.0f && m_Chess[Knight]->GetPosition().x < 18720.0f)
+	if ((m_Chess[Knight]->GetPosition().x > 18920.0f && m_Chess[Knight]->GetPosition().x < 19320.0f)
 		&& (m_Chess[Knight]->GetPosition().z > 15950.0f && m_Chess[Knight]->GetPosition().z < 16350.0f))
 	{
 		m_ChessPlate_Check[Knight] = true;
@@ -943,7 +952,8 @@ void CGameScene::Update(float elapsedTime)
 	{
 		m_ChessPlate_Check[Pawn] = true;
 	}
-	if ((m_Chess[Rook]->GetPosition().x > 17140.0f && m_Chess[Rook]->GetPosition().x < 17520.0f)
+	
+	if ((m_Chess[Rook]->GetPosition().x > 17040.0f && m_Chess[Rook]->GetPosition().x < 17520.0f)
 		&& (m_Chess[Rook]->GetPosition().z > 15950.0f && m_Chess[Rook]->GetPosition().z < 16350.0f))
 	{
 		m_ChessPlate_Check[Rook] = true;
@@ -951,9 +961,10 @@ void CGameScene::Update(float elapsedTime)
 	
 	if (m_ChessPlate_Check[King] && m_ChessPlate_Check[Knight] && m_ChessPlate_Check[Pawn] && m_ChessPlate_Check[Rook])
 	{
-		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Chess_Success);
+		
 		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
 		p->OpenDoor();
+		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Chess_Success);
 	}
 
 	//m_PlayerCameras[CFramework::GetInstance().GetPlayerId()]->Update(elapsedTime);
@@ -990,6 +1001,12 @@ void CGameScene::Update(float elapsedTime)
 			m_Player->GetPosition(),
 			m_Player->GetUp());
 		m_MinimapCamera->UpdateViewMatrix();
+	}
+
+	if ((m_Player->GetPosition().x > 16450.0f && m_Player->GetPosition().x < 19450.0f) &&
+		(m_Player->GetPosition().z > 13900.0f && m_Player->GetPosition().z < 17950.0f))
+	{
+		m_Player->SetPosition(XMFLOAT3(m_Player->GetPosition().x, -1760.0f, m_Player->GetPosition().z));
 	}
 }
 
@@ -1780,6 +1797,11 @@ void CGameScene::ProcessInput()
 			m_Interaction = false;
 		}
 	}
+	if (keyInput.KEY_Z)
+	{
+		m_Chess[King]->SetPosition(m_ChessPlate[5][6]);
+		m_Chess[Rook]->SetPosition(m_ChessPlate[1][4]);
+	}
 
 	if (keyInput.KEY_O)
 	{ 
@@ -2314,15 +2336,6 @@ void CGameScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 void CGameScene::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	for (int i = 0; i < ChessPuzzleSize; i++)
-	{
-		for (int j = 0; j < ChessPuzzleSize; j++)
-		{
-			m_ChessPlate[i][j].x = 16855 + 355 * i;
-			m_ChessPlate[i][j].z = 14417 + 450 * j;
-			m_ChessPlate[i][j].y = -1750.0f;
-		}
-	}
 	CPlate* pPuzzlePlate = new CPlate(pd3dDevice, pd3dCommandList, CShaderHandler::GetInstance().GetData("Puzzle"));
 
 	pPuzzlePlate->SetPosition({ 11130.0f * MAP_SCALE_SIZE, -2000.0f,(2000.0f + 8000.0f) * MAP_SCALE_SIZE });
@@ -2400,7 +2413,7 @@ void CGameScene::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_Chess[Knight] = new CGameObject();
 	m_Chess[Knight]->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Knight]);
 	m_Chess[Knight]->Rotate({ 1,0,0 }, -90);
-	m_Chess[Knight]->SetPosition(m_ChessPlate[6][3]);
+	m_Chess[Knight]->SetPosition(m_ChessPlate[6][4]);
 	m_Chess[Knight]->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
 	m_Chess[Knight]->SetChess(Chess_Type::Knight);
 	m_Chess[Knight]->SetTextureIndex(0x800);
@@ -2512,7 +2525,7 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Mummy[0]->Scale(scale.x, scale.y, scale.z, true);
 		m_Mummy[0]->SetChild(pMummyModel, true);
 		m_Mummy[0]->SetShadertoAll();
-		//m_Mummy[0]->SetTextureInedxToAll(0x100);
+		m_Mummy[0]->SetTextureInedxToAll(0x100);
 		//m_Mummy[0]->SetTextureIndex(0x100);
 		//m_Mummy[0]->SetTextureIndexFindByName();
 		
@@ -2594,6 +2607,23 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
   
+		// 원거리
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton_Archer.bin", NULL, true);
+		pEnemy = new CRangedEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
@@ -2948,6 +2978,22 @@ void CGameScene::BuildNpc(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_Npc->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 	m_Npc->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 	m_ObjectLayers[(int)OBJECT_LAYER::Npc].push_back(reinterpret_cast<CGameObject*>(std::move(m_Npc)));
+
+	CGameObject* pObject;
+	
+	// 고정된 체스말
+	pObject = new CGameObject();
+	pObject->SetMesh(m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Quest]);
+	pObject->Rotate(XMFLOAT3(1, 0, 0), 90);
+	pObject->Rotate(XMFLOAT3(0, 0, 1), 180);
+	pObject->SetPosition({ 2325.0f * MAP_SCALE_SIZE, 550.0f, 4650.0f * MAP_SCALE_SIZE });
+	pObject->SetShader(CShaderHandler::GetInstance().GetData("FBXFeatureLeft"));
+	pObject->SetTextureIndex(0x40000);
+	pObject->Scale(50, 100, 30);
+	pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
+	pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
+	pObject->SetExistingSector(SECTOR_POSITION::SECTOR_1);
+	m_ObjectLayers[(int)OBJECT_LAYER::Npc].push_back(pObject);
 }
 
 void CGameScene::BuildMinimapResource(ID3D12Device* pd3dDevice)
@@ -3611,6 +3657,8 @@ void CGameScene::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Laser");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall] = new CFixedMesh(pd3dDevice, pd3dCommandList, "FireBall");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Quest] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Quest");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stair] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stair");
 }
 
 void CGameScene::BuildShadowResource(ID3D12Device* pd3dDevice)
@@ -4055,15 +4103,25 @@ void CGameScene::ShotMonsterArrow(CEnemy* pEmeny, const XMFLOAT3& lookVector)
 	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
 		CArrow* pArrow = reinterpret_cast<CArrow*>(pObj);
 		if (pArrow->IsCanUse()) {
-			pArrow->SetUseable(false);
-			XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ pEmeny->GetPosition() }, { 0,150,0 });
-			pArrow->SetPosition(pos);
-			pArrow->SetTargetVector(lookVector);
-			pArrow->SetExistingSector(pEmeny->GetExistingSector());
-			//m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT); 
+			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
+			if (-1 != idx) {
+				pArrow->SetUseable(false);
+				XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ pEmeny->GetPosition() }, { 0,150,0 });
+				pArrow->SetPosition(pos);
+				pArrow->m_startPos = pos;
+				pArrow->SetStringPower(3.0f);
+				pArrow->SetTargetVector(lookVector);
+				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(pEmeny->GetLook()), -1));
+				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
+				pArrow->SetExistingSector((SECTOR_POSITION)m_Player->GetPlayerExistingSector());
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+				//m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT); 
+			}
 			break;
 		}
 	}
+	
 }
 
 void CGameScene::DeleteEnemy(CEnemy* pEmeny)
