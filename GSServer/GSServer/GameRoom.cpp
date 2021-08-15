@@ -440,6 +440,7 @@ void CGameRoom::InitPlayers()
 		m_Players[i]->Scale(200, 200, 200); 
 		m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
 		m_Players[i]->SetExistence(false);
+
 		//m_Players[i]->SetWeaponPointer();
 	}
 }
@@ -1221,6 +1222,9 @@ void CGameRoom::SendSyncUpdatePacket()
 		//p_syncUpdate.Sp[i] = m_Players[i]->GetSP();
 		XMFLOAT3 pos = m_Players[i]->GetPosition();
 		XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
+		if (i == 0) { 
+			DisplayVector3(look);
+		}
 		p_syncUpdate.posX[i] = FloatToInt(pos.x);
 		p_syncUpdate.posY[i] = FloatToInt(pos.y);
 		p_syncUpdate.posZ[i] = FloatToInt(pos.z);
@@ -1240,6 +1244,7 @@ void CGameRoom::SendSyncUpdatePacket()
 			continue;
 		}
 		if (m_Clients[i]->m_state == PL_STATE::PLST_CONNECTED) {
+
 			SendPacket(m_Clients[i]->id, &p_syncUpdate);
 		}
 	}
@@ -1394,6 +1399,7 @@ void CGameRoom::SendPlayerArrowActPacket()
 		packet.lookY = FloatToInt(look.y);
 		packet.lookZ = FloatToInt(look.z);
 
+		DisplayVector3(look);
 		packets.push_back(packet);
 		++idx;
 	}
@@ -1411,6 +1417,7 @@ void CGameRoom::SendPlayerArrowActPacket()
 			SendPacket(m_Clients[i]->id, &p);
 		}
 	}
+	
 }
 
 void CGameRoom::SendFireballActPacket()

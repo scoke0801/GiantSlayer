@@ -1082,6 +1082,8 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
+	m_EffectsHandler->Update(elapsedTime);
+	 
 	m_Particles->Update(elapsedTime);
 
 	m_HelpTextUI->Update(elapsedTime);
@@ -1538,12 +1540,14 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
 
+			DisplayVector3(look);
+
 			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
 			m_Players[i]->SetPosition(pos);
 			m_Players[i]->UpdateCamera();
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
-				look, -PLAYER_RUN_SPEED)); 
+				look, PLAYER_RUN_SPEED)); 
 			m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
 			switch (p_syncUpdate.states[i]) {
 			case IDLE:
@@ -1618,7 +1622,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx)); 
-				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT); 
 			}
 			break;
 		}
@@ -1626,6 +1630,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		{
 			pArrow->SetPosition(pos);
 			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+			DisplayVector3(look);
 		} 
 		cout << "Arrow act\n";
 	}
@@ -4223,9 +4228,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 		}
 	}
 		
-}
-
-
+} 
 
 void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
