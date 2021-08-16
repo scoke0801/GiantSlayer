@@ -591,7 +591,6 @@ void CFramework::OnHandleSocketMessage(WPARAM wParam, LPARAM lParam)
 
 bool CFramework::ConnectToServer()
 {
-	static bool isFirst = true;
 	if (!isFirst) return 0;
 
 	int retval = 0;

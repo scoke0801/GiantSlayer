@@ -878,9 +878,7 @@ void CGameScene::Update(float elapsedTime)
 		}
 		
 	}
-
-	
-
+	 
 	
 	// npc 자체랑 충돌처리
 	if	(
@@ -1118,9 +1116,7 @@ void CGameScene::Update(float elapsedTime)
 	{
 		m_Player->SetPosition(XMFLOAT3(plPos.x, -1760.0f, plPos.z));
 		m_Player->UpdateCamera();
-	}
-	  
-
+	} 
 }
 
 void CGameScene::UpdateForMultiplay(float elapsedTime)
@@ -1137,6 +1133,32 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(m_Terrain);
 	}
+
+	// npc 자체랑 충돌처리
+	if (
+		((m_Npc->GetPosition().x + 215.0f > m_Player->GetPosition().x)
+			&& (m_Npc->GetPosition().x - 215.0f < m_Player->GetPosition().x))
+		&&
+		((m_Npc->GetPosition().z + 225.0f > m_Player->GetPosition().z)
+			&& (m_Npc->GetPosition().z - 225.0f < m_Player->GetPosition().z))
+		)
+	{
+		m_Npc_Event = true;
+	}
+	else
+	{
+		m_Npc_Event = false;
+	}
+
+	if (m_Interaction == true)
+	{
+		m_HelpBoard->SetDrawable(true);
+	}
+	else if (m_Interaction == false)
+	{
+		m_HelpBoard->SetDrawable(false);
+	}
+
 	m_EffectsHandler->Update(elapsedTime);
 	 
 	m_Particles->Update(elapsedTime);
@@ -1150,8 +1172,7 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 		player->UpdateColliders();  
 		m_PlayerExistingSector[player->GetPlayerExistingSector()] = true;
 	}
-
-
+	 
 	if (m_Player->GetPlayerExistingSector() == 0)
 	{
 		m_StageFontTime -= elapsedTime;
@@ -1735,13 +1756,17 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_Players[i]->m_AnimationPaused = false;
 			} 
 			if (p_syncUpdate.weaponType[i] == PlayerWeaponType::Bow) {
+				if ((m_Players[i]->pullString) == true && (p_syncUpdate.pullString[i] == false)) {
+					m_Player->ResetBow();
+				}
+
 				m_Players[i]->pullString = p_syncUpdate.pullString[i]; 
 				m_Players[i]->m_AnimationPaused = (p_syncUpdate.animationPause[i]);
 				if (false == m_Players[i]->IsAnimationPaused()) { 
 					if (p_syncUpdate.pullString[i]) {
 						m_Players[i]->SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
 					} 
-				}   
+				}    
 			}
 			m_Players[i]->SetPosition(pos);
 			m_Players[i]->UpdateCamera();
@@ -1798,7 +1823,8 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
 				pArrow->SetExistingSector();
-				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);  
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+				cout << "Arrow\n";
 			}
 			break;
 		}
@@ -1807,7 +1833,6 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			pArrow->SetPosition(pos); 
 			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
 		}  
-		cout << "Arrow\n";
 	}
 		break;
 	case PACKET_PROTOCOL::SC2_INGAME_MONSTER_ARROW_ACT:	
@@ -1866,7 +1891,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			pFireball->SetPosition(pos);
 
 			m_SoundManager->PlayEffect(Sound_Name::EFFECT_Fire_Ball);
-
+			cout << "Fb\n";
 			break;
 		}
 		else
@@ -1891,7 +1916,11 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 	case PACKET_PROTOCOL::S2C_DELETE_OBJ:
 	{
 		P_S2C_DELETE_SYNC* packet = reinterpret_cast<P_S2C_DELETE_SYNC*>(p_buf);
-		 
+		  
+		if ((OBJECT_LAYER)packet->objType == OBJECT_LAYER::FireBall) {
+			XMFLOAT3 pos = m_ObjectLayers[packet->objType][packet->idx]->GetPosition();
+			UseEffects((int)EffectTypes::FireBallExplosion, pos);
+		}	
 		m_ObjectLayers[packet->objType][packet->idx]->SetDrawable(true);
 		cout << "Delete Act\n";
 	}
@@ -2066,6 +2095,14 @@ void CGameScene::ProcessInput()
 		{
 			p_keyboard.keyInput = VK_R;
 			processKey = true; 
+			if (m_Npc_Event == true)
+			{
+				m_Interaction = true;
+			}
+			else if (m_Npc_Event == false)
+			{
+				m_Interaction = false;
+			}
 		}
 		if (keyInput.KEY_Z)
 		{

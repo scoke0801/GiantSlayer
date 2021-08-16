@@ -127,6 +127,8 @@ public:
 	HWND GetHWND() const { return m_hWnd; }
 
 public:	// about server
+	bool isFirst = true;
+
 	bool ConnectToServer();
 	void LoginToServer();
 	void LogoutToServer();

@@ -573,9 +573,11 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 	else if (true == m_IsOnRoomSelect) {
 		if (x < 128 || x > 1150) {
 			m_IsOnRoomSelect = false;
+			CFramework::GetInstance().isFirst = true;
 		}
 		if (y < 77 || y > 695) {
-			m_IsOnRoomSelect = false;
+			m_IsOnRoomSelect = false;			
+			CFramework::GetInstance().isFirst = true;
 		}
 
 		if (x > 925 && x < 1061) {
