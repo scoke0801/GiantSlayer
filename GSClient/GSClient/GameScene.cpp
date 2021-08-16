@@ -507,13 +507,15 @@ void CGameScene::Update(float elapsedTime)
 	// 미라 보고있으면 데미지
 	if (m_Player->GetPlayerExistingSector() == 3 && m_Opendoor==false && m_Player->killit == false)
 	{
-		if (m_Player->GetPosition().x > 20970 && m_Player->GetPosition().x < 30000) {
-			if ((m_Player->GetLook().x > -150.0f && m_Player->GetLook().x < 150.0f) && m_Player->GetLook().z > 0.0f)
-			{
-				if (m_Player->GetHP() > 0)
-					m_Player->SetHP(m_Player->GetHP() - 1);
-				else
-					m_Player->Death();
+		if (false == m_Player->IsPowerOverWhelm()) {
+			if (m_Player->GetPosition().x > 20970 && m_Player->GetPosition().x < 30000) {
+				if ((m_Player->GetLook().x > -150.0f && m_Player->GetLook().x < 150.0f) && m_Player->GetLook().z > 0.0f)
+				{
+					if (m_Player->GetHP() > 0)
+						m_Player->SetHP(m_Player->GetHP() - 1);
+					else
+						m_Player->Death();
+				}
 			}
 		}
 	}
@@ -660,6 +662,9 @@ void CGameScene::Update(float elapsedTime)
 		if (pPlayer->killit == true)
 			break;
 
+		if (pPlayer->IsPowerOverWhelm()) {
+			break;
+		}
 		XMFLOAT3 pos = pPlayer->GetPosition();
 		if (pos.x > 1500 && pos.x < 18000 && pos.z > 24000 && pos.z < 30000 && pos.y < -1330) {
 			if (pPlayer->GetHP() > 0)
@@ -1803,7 +1808,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				case BOW_DEATH:
 				case STAFF_DEATH:
 					//m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
-					if (m_Players[i]->GetHP() > 0){
+					if (m_Players[i]->GetHP() >= 0){
 						m_Players[i]->Death();
 				}
 					break;

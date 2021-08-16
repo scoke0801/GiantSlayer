@@ -39,15 +39,17 @@ void CGameRoom::Update(float elapsedTime)
 			if (m_Players[i]->IsExist() == false) continue;
 
 			// 미라 보고있으면 데미지
-			if (m_Players[i]->GetPlayerExistingSector() == 3 && m_Players[i]->killit == false)
-			{
-				if (m_Players[i]->GetPosition().x > 20970 && m_Players[i]->GetPosition().x < 30000) {
-					if ((m_Players[i]->GetLook().x > -150.0f && m_Players[i]->GetLook().x < 150.0f) && m_Players[i]->GetLook().z > 0.0f)
-					{
-						if (m_Players[i]->GetHP() > 0)
-							m_Players[i]->SetHP(m_Players[i]->GetHP() - 1);
-						else
-							m_Players[i]->Death();
+			if (false == m_Players[i]->IsPowerOverWhelm()) {
+				if (m_Players[i]->GetPlayerExistingSector() == 3 && m_Players[i]->killit == false)
+				{
+					if (m_Players[i]->GetPosition().x > 20970 && m_Players[i]->GetPosition().x < 30000) {
+						if ((m_Players[i]->GetLook().x > -150.0f && m_Players[i]->GetLook().x < 150.0f) && m_Players[i]->GetLook().z > 0.0f)
+						{
+							if (m_Players[i]->GetHP() > 0)
+								m_Players[i]->SetHP(m_Players[i]->GetHP() - 1);
+							else
+								m_Players[i]->Death();
+						}
 					}
 				}
 			}
@@ -155,6 +157,9 @@ void CGameRoom::Update(float elapsedTime)
 		if (pPlayer->killit == true)
 			break;
 
+		if (pPlayer->IsPowerOverWhelm()) {
+			break;
+		}
 		XMFLOAT3 pos = pPlayer->GetPosition();
 		if (pos.x > 1500 && pos.x < 18000 && pos.z > 24000 && pos.z < 30000 && pos.y < -1330) {
 			if (pPlayer->GetHP() > 0)

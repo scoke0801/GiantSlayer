@@ -332,6 +332,10 @@ void DeathState::Enter(CEnemy* enemy)
 {
     cout << "Áê±Ý" << endl;
     m_LifeTime = ENEMY_DEATH_TIME;
+
+    if (enemy->GetEnemyType() == EnemyType::Boss)
+        m_LifeTime = BOSS_DEAD_ANIMATION_LENGTH;
+
     enemy->ChangeAnimation(ObjectState::Die);
 }
 

@@ -129,4 +129,5 @@ public:
 	bool IsOnPullstring() const { return pullString; }
 
 	void PowerOverWhelm() { m_PowerOverWhelm = true; }
+	bool IsPowerOverWhelm() const { return m_PowerOverWhelm; }
 };

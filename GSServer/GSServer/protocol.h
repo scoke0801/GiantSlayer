@@ -544,5 +544,6 @@ struct P_S2C_DELETE_SYNC
 	// objectLayer
 	short		objType;
 	short			idx;
-}; 
+};
+ 
 #pragma pack (pop)

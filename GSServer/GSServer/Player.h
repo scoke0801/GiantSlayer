@@ -138,4 +138,5 @@ public:
 
 	AnimationType GetStateName() const { return m_StateName; }
 	void PowerOverWhelm() { m_PowerOverWhelm = true; }
+	bool IsPowerOverWhelm() const { return m_PowerOverWhelm; }
 };
