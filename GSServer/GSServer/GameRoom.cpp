@@ -115,7 +115,7 @@ void CGameRoom::Update(float elapsedTime)
 		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox])
 		{
 			if (pArrow->CollisionCheck(pEnemy)) {
-				cout << "¹ÝÀü\n";
+
 				pArrow->InverseDirection();
 				break;
 			}
@@ -486,7 +486,7 @@ void CGameRoom::Update(float elapsedTime)
 			float t = (plPos.z / 18509.6);
 
 			float y = Lerp(max, min, Rate(17907.7, 18509.6, plPos.z));
-			cout << "out y : " << y << "\n";
+
 			m_Players[i]->SetPosition(XMFLOAT3(plPos.x, y, plPos.z));
 			m_Players[i]->UpdateCamera();
 		}
@@ -1942,7 +1942,7 @@ void CGameRoom::ShotFireBall(OBJECT_LAYER type, CGameObject* user)
 			{
 				pFireb->SetUseable(false);
 				pFireb->SetSkill(user);
-				cout << "shot fb" << endl;
+
 			}
 			break;
 		}
@@ -2267,7 +2267,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 				break;
 			case VK_J:
 				if (m_Players[id]->IsCanAttack()) {
-					cout << "Can Attack " << (int)m_Players[id]->GetAnimationSet() << "\n";
+
 					switch (m_Players[id]->GetWeapon())
 					{
 					case PlayerWeaponType::Sword:
@@ -2288,7 +2288,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 					{
 					case PlayerWeaponType::Sword:
 						if (m_Players[id]->GetAttackWaitTime() < 0.5f) {
-							cout << m_Players[id]->GetAttackWaitTime() << endl;
+
 							m_Players[id]->SetSwordAttackKeyDown(true);
 						}
 						break;
@@ -2368,7 +2368,9 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 				break;
 			}
 		}
+		break;
 		}
+
 		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
 		p_keyboardProcess.size = sizeof(p_keyboardProcess);
 		p_keyboardProcess.type = PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT;

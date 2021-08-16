@@ -1458,11 +1458,11 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		XMFLOAT3 look = XMFLOAT3{ IntToFloat(p_keyboardProcess.lookX),
 			IntToFloat(p_keyboardProcess.lookY),
 			IntToFloat(p_keyboardProcess.lookZ) };
-
+		 
 		m_Player->SetPosition(pos);
-
-		m_Player->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
-			look, -PLAYER_RUN_SPEED));
+		m_Player->UpdateCamera();
+		m_Player->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+		m_Player->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0), look, PLAYER_RUN_SPEED));
 	}
 	break;
 	case PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT:
@@ -1533,50 +1533,51 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
 
 			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
-			m_Players[i]->SetPosition(pos);
-			m_Players[i]->UpdateCamera();
-			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0), look, PLAYER_RUN_SPEED)); 
+			
 			if (m_Players[i]->GetWeapon() != p_syncUpdate.weaponType[i]) { 
 				cout << "몬가 달라서 무기가 바뀜\n";
 				m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
 			} 
 
-			//if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
-			//	cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
-			//	//m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]); 	 
-			//}
-
 			if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
-				//cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
-				switch (p_syncUpdate.states[i]) {
-				case IDLE:
-				case SWORD_IDLE:
-				case BOW_IDLE:
-				case STAFF_IDLE:
-					m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
-					break;
-				case SWORD_RUN:
-				case BOW_RUN:
-				case STAFF_RUN:
-					m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
-					break;
-				case SWORD_ATK:
-				case BOW_ATK:
-				case STAFF_ATK:
-					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
-					break;
-				case SWORD_DEATH:
-				case BOW_DEATH:
-				case STAFF_DEATH:
-					m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
-					break;
-					 
-				default:	
-					m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
-					break;
-				}
+				cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
+				m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]); 	 
 			}
+
+			//if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
+			//	//cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
+			//	switch (p_syncUpdate.states[i]) {
+			//	case IDLE:
+			//	case SWORD_IDLE:
+			//	case BOW_IDLE:
+			//	case STAFF_IDLE:
+			//		m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
+			//		break;
+			//	case SWORD_RUN:
+			//	case BOW_RUN:
+			//	case STAFF_RUN:
+			//		m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
+			//		break;
+			//	case SWORD_ATK:
+			//	case BOW_ATK:
+			//	case STAFF_ATK:
+			//		m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
+			//		break;
+			//	case SWORD_DEATH:
+			//	case BOW_DEATH:
+			//	case STAFF_DEATH:
+			//		m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
+			//		break;
+			//		 
+			//	default:	
+			//		m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
+			//		break;
+			//	}
+			//} 
+			m_Players[i]->SetPosition(pos);
+			m_Players[i]->UpdateCamera();
+			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0), look, PLAYER_RUN_SPEED));
 		}
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);

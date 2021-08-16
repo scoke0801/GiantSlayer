@@ -150,19 +150,19 @@ void AttackState::Enter(CEnemy* enemy)
         m_AttackType = (int)enemy->GetEnemyAttackType();
         if (m_AttackType == (int)EnemyAttackType::BossSkill_1) {
             m_LifeTime = BOSS_ATTACK_1_ANIMATION_LENGTH;
-            cout << "Atk - 1\n";
+
         }
         else if (m_AttackType == (int)EnemyAttackType::BossSkill_2) {
             m_LifeTime = BOSS_ATTACK_2_ANIMATION_LENGTH;
-            cout << "Atk - 2\n";
+
         }
         else if (m_AttackType == (int)EnemyAttackType::BossSkill_3) {
             m_LifeTime = BOSS_ATTACK_3_ANIMATION_LENGTH;
-            cout << "Atk - 3\n";
+
         }
         else if (m_AttackType == (int)EnemyAttackType::BossSkill_4) {
             m_LifeTime = BOSS_ATTACK_4_ANIMATION_LENGTH;
-            cout << "Atk - 4\n";
+
         }
     }
     break;

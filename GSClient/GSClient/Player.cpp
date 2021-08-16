@@ -92,7 +92,7 @@ void CPlayer::Update(float fTimeElapsed)
 
 	if (m_Alive) {
 		float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
-
+		Friction *= 1.8f;
 		XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
 		Move(vel);
@@ -119,7 +119,7 @@ void CPlayer::Update(float fTimeElapsed)
 		if (fDeceleration > fLength) fDeceleration = fLength;
 
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-		m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
+		//m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
 	}
 
 	CGameObjectVer2::Animate(fTimeElapsed);

@@ -641,7 +641,7 @@ void CAnimationObject::LoadAnimationFromFile(FILE* pInFile)
 			nReads = (UINT)::fread(&m_pAnimationController->m_nAnimationSets, sizeof(int), 1, pInFile);
 
 			m_pAnimationController->m_pAnimationSets = new CAnimationSet[m_pAnimationController->m_nAnimationSets];
-			cout << "애니메이션 개수: " << m_pAnimationController->m_nAnimationSets << endl;
+
 			haveToRead = true;
 		}
 		else if (!strcmp(pstrToken, "<FrameNames>:"))
