@@ -121,4 +121,7 @@ public:
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
 
 	bool ShotAble();
+	 
+	bool IsAnimationPaused() const { return m_AnimationPaused; }
+	bool IsOnPullstring() const { return pullString; }
 };

@@ -8,7 +8,7 @@
 extern int g_Heights[TERRAIN_HEIGHT_MAP_HEIGHT + 1][TERRAIN_HEIGHT_MAP_WIDTH + 1];
 
 void PacketProcessor::UpdateLoop()
-{	 
+{ 
 	timeElapsed = std::chrono::system_clock::now() - currentTime;
 	float dLag = 0.0f;
 

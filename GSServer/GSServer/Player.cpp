@@ -34,7 +34,7 @@ void CPlayer::Update(float fTimeElapsed)
 		case PlayerWeaponType::Sword: {
 		}break;
 
-		case PlayerWeaponType::Bow: {
+		case PlayerWeaponType::Bow: { 
 			if (pullString) {
 				if (m_AttackWaitingTime < 1.2f)
 					SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
@@ -276,7 +276,7 @@ void CPlayer::Attack(int type)
 			}
 		}
 		else {
-			IncreaseAttackWaitingTime(m_SwordAnim1Length);
+			IncreaseAttackWaitingTime(m_AttackAnimLength);
 			SetAnimationSet(ATK);
 			m_LastAttackAnim = 0;
 		}

@@ -17,6 +17,8 @@ void CAnimationObject::Update(float fTimeElapsed)
 
 void CAnimationObject::Animate(float fTimeElapsed)
 {
+	if (m_AnimationPaused)
+		return;
 	if (m_pAnimationController) m_pAnimationController->AdvanceTime(fTimeElapsed, NULL);
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);

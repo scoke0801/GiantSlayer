@@ -1152,6 +1152,51 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 	}
 
 
+	if (m_Player->GetPlayerExistingSector() == 0)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[0] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 1)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[1] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 2)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[2] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 3)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[3] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 4)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[4] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
 	for (int i = 0; i < 3; i++)
@@ -1655,41 +1700,51 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
 			} 
 
-			if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
-				cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
-				m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]); 	 
-			}
-
 			//if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
-			//	//cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
-			//	switch (p_syncUpdate.states[i]) {
-			//	case IDLE:
-			//	case SWORD_IDLE:
-			//	case BOW_IDLE:
-			//	case STAFF_IDLE:
-			//		m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
-			//		break;
-			//	case SWORD_RUN:
-			//	case BOW_RUN:
-			//	case STAFF_RUN:
-			//		m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
-			//		break;
-			//	case SWORD_ATK:
-			//	case BOW_ATK:
-			//	case STAFF_ATK:
-			//		m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
-			//		break;
-			//	case SWORD_DEATH:
-			//	case BOW_DEATH:
-			//	case STAFF_DEATH:
-			//		m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
-			//		break;
-			//		 
-			//	default:	
-			//		m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
-			//		break;
-			//	}
-			//} 
+			//	cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
+			//	m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]); 	 
+			//}
+
+			if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
+				//cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
+				switch (p_syncUpdate.states[i]) {
+				case IDLE:
+				case SWORD_IDLE:
+				case BOW_IDLE:
+				case STAFF_IDLE:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
+					break;
+				case SWORD_RUN:
+				case BOW_RUN:
+				case STAFF_RUN:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
+					break;
+				case SWORD_ATK:
+				case BOW_ATK:
+				case STAFF_ATK:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
+					break;
+				case SWORD_DEATH:
+				case BOW_DEATH:
+				case STAFF_DEATH:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
+					break;
+					 
+				default:	
+					m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
+					break;
+				}
+				m_Players[i]->m_AnimationPaused = false;
+			} 
+			if (p_syncUpdate.weaponType[i] == PlayerWeaponType::Bow) {
+				m_Players[i]->pullString = p_syncUpdate.pullString[i]; 
+				m_Players[i]->m_AnimationPaused = (p_syncUpdate.animationPause[i]);
+				if (false == m_Players[i]->IsAnimationPaused()) { 
+					if (p_syncUpdate.pullString[i]) {
+						m_Players[i]->SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+					} 
+				}   
+			}
 			m_Players[i]->SetPosition(pos);
 			m_Players[i]->UpdateCamera();
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
@@ -1718,6 +1773,9 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_Mummy[i]->SetPosition(pos);
 				m_Mummy[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
 				m_Mummy[i]->SetAnimationSet(packet->state[i]);
+			}
+			else {
+				m_Mummy[i]->SetDrawable(false);
 			}
 		} 
 	}
@@ -1750,6 +1808,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			pArrow->SetPosition(pos); 
 			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
 		}  
+		cout << "Arrow\n";
 	}
 		break;
 	case PACKET_PROTOCOL::SC2_INGAME_MONSTER_ARROW_ACT:	
@@ -1954,19 +2013,11 @@ void CGameScene::ProcessInput()
 		} 
 		if (keyInput.KEY_U) {
 			p_keyboard.keyInput = VK_U;
-			processKey = true;
-			//for (int i = 0; i < 5; ++i) {
-			//	CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
-			//	p->OpenDoor();
-			//}
+			processKey = true; 
 		}
 		if (keyInput.KEY_I) {
 			p_keyboard.keyInput = VK_I;
-			processKey = true;
-			//for (int i = 0; i < 5; ++i) {
-			//	CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
-			//	p->CloserDoor();
-			//}
+			processKey = true; 
 		}
 
 		if (keyInput.KEY_3)
@@ -1996,6 +2047,33 @@ void CGameScene::ProcessInput()
 		{
 			gbWireframeOn = false;
 		}
+
+		if (keyInput.KEY_F7)
+		{
+			p_keyboard.keyInput = VK_F7;
+			processKey = true;
+		}
+		if (keyInput.KEY_F8)
+		{
+			p_keyboard.keyInput = VK_F8;
+			processKey = true;
+		}
+		if (keyInput.KEY_F9)
+		{
+			p_keyboard.keyInput = VK_F9;
+			processKey = true;
+		} 
+		if (keyInput.KEY_R)
+		{
+			p_keyboard.keyInput = VK_R;
+			processKey = true; 
+		}
+		if (keyInput.KEY_Z)
+		{
+			p_keyboard.keyInput = VK_Z;
+			processKey = true;
+		}
+		 
 		if (processKey == false) return; 
 		SendPacket(&p_keyboard);
 		return;
@@ -2190,7 +2268,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 		p_keyboard.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
 		p_keyboard.id = CFramework::GetInstance().GetPlayerId();
 		p_keyboard.keyInput = wParam;
-		p_keyboard.isKeyDown = !isKeyUp;
+		p_keyboard.isKeyDown = !isKeyUp; 
 		SendPacket(&p_keyboard);
 		return;
 	}
@@ -2240,13 +2318,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 					break;
 				}
 			}
-		}
-		if (wParam == VK_M) {
-			if (m_Player->IsCanAttack()) {
-				m_Player->Attack(1);
-				cout << "SKILLLLL~~" << endl;
-			}
-		}
+		} 
 	}
 	else
 	{

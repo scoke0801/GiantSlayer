@@ -66,8 +66,6 @@ private:
 public:
 	bool pullString = false;
 	float m_StringPullTime = 0.0f;
-	 
-	bool m_AnimationPaused = false;
 
 	bool m_Alive = true;
 	 
@@ -121,6 +119,8 @@ public:
 
 	bool ShotAble();
 
+	bool IsAnimationPaused() const { return m_AnimationPaused; }
+	bool IsOnPullstring() const { return pullString; }
 public:
 	bool Attacked(CGameObject* pObject);
 	void Attack(int type);

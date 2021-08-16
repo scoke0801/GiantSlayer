@@ -127,6 +127,8 @@ void CPlayer::Update(float fTimeElapsed)
 
 void CPlayer::UpdateOnServer(float fTimeElapsed)
 {
+	UpdateCamera();
+
 	CGameObjectVer2::Animate(fTimeElapsed);
 	UpdateTransform(NULL);
 }
