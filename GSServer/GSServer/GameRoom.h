@@ -74,8 +74,9 @@ private:
 
 	bool									m_Mummy_Reverse_Direction = false;
 	
-	bool									m_ObjectDeleteFlag = false;
-	bool									m_ChessChangeFlag = false;
+	int										m_deleteCount = 0;
+	bool									m_ObjectDeleteFlag = false ;
+	bool									m_ChessChangeFlag  = false;
 
 	CGameObject*							m_Chess[4];
 	bool									m_ChessPlate_Check[4] = { false };		// 체스판체크용

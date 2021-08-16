@@ -1955,7 +1955,7 @@ void CGameRoom::SendDoorEvent()
 
 void CGameRoom::SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx)
 {
-	if (false == m_ObjectDeleteFlag) {
+	if (m_deleteCount <= 0); {
 		return;
 	}
 	  
@@ -1978,6 +1978,7 @@ void CGameRoom::SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx)
 		SendPacket(m_Clients[i]->id, &packet);
 	}
 	 
+	m_deleteCount = max(m_deleteCount - 1, 0);
 	m_ObjectDeleteFlag = false;
 } 
 
@@ -2064,6 +2065,7 @@ void CGameRoom::RecyleObject(CGameObject* pObject, int layerIdx)
 		{
 			pObject->SetIsUsable(true);
 			m_ObjectDeleteFlag = true;
+			++m_deleteCount;
 			SendDeletePacket(pObject, layerIdx, i); 
 			return;
 		}

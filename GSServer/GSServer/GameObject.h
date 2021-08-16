@@ -125,7 +125,7 @@ protected:
 	CGameRoom*			m_ConnectedRoom = nullptr;
 
 	Chess_Type m_ChessType = Chess_Type::King;
-
+	CGameObject*		m_pOwner;
 protected:// 面倒贸府 包访 函荐
 	vector<BoundingBox*>	m_BoundingBox;
 	vector<BoundingBox*>	m_AABB;
@@ -224,6 +224,9 @@ public:
 	virtual void ChangeState(ObjectState stateInfo, void* pData) {}
 	virtual ObjectState GetStateInfo() const { return ObjectState::Wait; }
 	virtual BYTE GetAnimationType() const { return 0;}
+
+	CGameObject* GetOnwer() const { return m_pOwner; }
+	void SetOwner(CGameObject* obj) { m_pOwner = obj; }
 
 	void SetHP(UINT HP) { m_HP = HP; }
 	UINT GetHP() const { return m_HP; }
