@@ -92,7 +92,6 @@ void PatrolState::Enter(CEnemy* enemy)
 void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
 {
     enemy->ChangeAnimation(ObjectState::Patrol);
-
     if (false == enemy->IsOnMoving()) {
         enemy->FindNextPosition();
         enemy->SetIsOnMoving(true);
@@ -100,6 +99,7 @@ void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
     else {
         enemy->MoveToNextPosition(elapsedTime);
     }
+
     if (enemy->IsEnemyInSight()) {
         if (enemy->GetEnemyType() == EnemyType::Boss) {
             CBoss* pBoss = reinterpret_cast<CBoss*>(enemy);
@@ -116,7 +116,7 @@ void PatrolState::Exit(CEnemy* enemy)
 
 void AttackState::Enter(CEnemy* enemy)
 {
-    cout << " AttackState::Enter\n";
+    //cout << " AttackState::Enter\n";
     m_StateName = ObjectState::Attack;
     auto enemyType = enemy->GetEnemyType();
     switch (enemyType)
@@ -145,18 +145,24 @@ void AttackState::Enter(CEnemy* enemy)
     case EnemyType::Boss:
         // 일단 랜덤하게 테스트를 해보는 방향으로
     {
+        CBoss* pBoss = reinterpret_cast<CBoss*>(enemy);
+        pBoss->CalcNextAttackType();
         m_AttackType = (int)enemy->GetEnemyAttackType();
         if (m_AttackType == (int)EnemyAttackType::BossSkill_1) {
             m_LifeTime = BOSS_ATTACK_1_ANIMATION_LENGTH;
+
         }
         else if (m_AttackType == (int)EnemyAttackType::BossSkill_2) {
             m_LifeTime = BOSS_ATTACK_2_ANIMATION_LENGTH;
+
         }
         else if (m_AttackType == (int)EnemyAttackType::BossSkill_3) {
             m_LifeTime = BOSS_ATTACK_3_ANIMATION_LENGTH;
+
         }
         else if (m_AttackType == (int)EnemyAttackType::BossSkill_4) {
             m_LifeTime = BOSS_ATTACK_4_ANIMATION_LENGTH;
+
         }
     }
     break;
@@ -167,9 +173,9 @@ void AttackState::Enter(CEnemy* enemy)
 
 void AttackState::Execute(CEnemy* enemy, float elapsedTime)
 {
-    m_ElapsedTime += elapsedTime; 
-    if (m_LifeTime < m_ElapsedTime) { 
-        enemy->ChangeState(new PatrolState(enemy)); 
+    m_ElapsedTime += elapsedTime;
+    if (m_LifeTime < m_ElapsedTime) {
+        enemy->ChangeState(new TraceState(enemy));
     }
     else {
         enemy->ChangeAnimation(ObjectState::Attack);
@@ -184,7 +190,7 @@ void AttackState::Exit(CEnemy* enemy)
 }
 
 void TraceState::Enter(CEnemy* enemy)
-{
+{ 
     enemy->ChangeAnimation(ObjectState::Patrol);
     m_StateName = ObjectState::Trace;
     m_LifeTime = 0.5f;
@@ -200,7 +206,7 @@ void TraceState::Execute(CEnemy* enemy, float elapsedTime)
 {
     m_ElapsedTime += elapsedTime;
     if (m_ElapsedTime > m_LifeTime) {
-        enemy->FindClosePositionToTarget(); 
+        enemy->FindClosePositionToTarget();
         m_ElapsedTime = 0.0f;
     }
 
@@ -242,14 +248,16 @@ void AttackedState::Execute(CEnemy* enemy, float elapsedTime)
         if (enemy->GetHP() <= 0) {
             enemy->ChangeState(new DeathState(enemy));
         }
-        else {
+        else if (enemy->GetTargetPlayer() != nullptr)
+        {
+            enemy->SetCanDamaged(true);
+            enemy->ChangeState(new TraceState(enemy));
+        }
+        else
+        {
             enemy->SetCanDamaged(true);
             enemy->ChangeState(new PatrolState(enemy));
         }
-        /*else if (enemy->GetTargetPlayer() == nullptr)
-            enemy->ChangeState(new PatrolState(enemy));
-        else
-            enemy->ChangeState(new TraceState(enemy));*/
     }
 }
 

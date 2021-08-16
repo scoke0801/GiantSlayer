@@ -18,7 +18,7 @@ CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 	m_State = new WaitState(this);
 	m_EnemyType = EnemyType::Boss;
 	m_AttackRange = 1000.0f;
-	m_Speed = 0.0f * 10.0f;
+	m_Speed = 165.0 * 10.0f;
 	m_ExistingSector = SECTOR_POSITION::SECTOR_5;
 }
 
@@ -177,6 +177,47 @@ void CBoss::ChangeAnimation(ObjectState stateInfo)
 	case ObjectState::BossSkill_5:
 		break;
 	case ObjectState::BossBorn: 
+		SetAnimationSet((int)BOSS_ANIMATION::Born_1);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break;
+	default:
+		break;
+	}
+}
+
+void CBoss::ChangeAnimationForServer(BOSS_ANIMATION stateInfo)
+{
+	switch (stateInfo)
+	{
+	case BOSS_ANIMATION::Idle:
+		SetAnimationSet((int)BOSS_ANIMATION::Idle);
+		SetAnimationType(ANIMATION_TYPE_LOOP);
+		break; 
+	case BOSS_ANIMATION::Run:
+		SetAnimationSet((int)BOSS_ANIMATION::Run);
+		SetAnimationType(ANIMATION_TYPE_LOOP);
+		break;  
+	case BOSS_ANIMATION::Dead:
+		SetAnimationSet((int)BOSS_ANIMATION::Dead);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break; 
+	case BOSS_ANIMATION::Skill_1:
+		SetAnimationSet((int)BOSS_ANIMATION::Skill_1);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break;
+	case BOSS_ANIMATION::Skill_2:
+		SetAnimationSet((int)BOSS_ANIMATION::Skill_2);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break;
+	case BOSS_ANIMATION::Skill_3:
+		SetAnimationSet((int)BOSS_ANIMATION::Skill_3);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break;
+	case BOSS_ANIMATION::Born_2:
+		SetAnimationSet((int)BOSS_ANIMATION::Born_2);
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		break; 
+	case BOSS_ANIMATION::Born_1:
 		SetAnimationSet((int)BOSS_ANIMATION::Born_1);
 		SetAnimationType(ANIMATION_TYPE_ONCE);
 		break;

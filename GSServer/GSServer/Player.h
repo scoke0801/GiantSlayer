@@ -119,8 +119,6 @@ public:
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
 
-	void AnimationChange(PlayerWeaponType weapon); 
-
 	bool ShotAble();
 
 public:
@@ -129,6 +127,7 @@ public:
 	void ResetAttack();
 	void ResetBow();
 
+	void SetWeapon(PlayerWeaponType weaponType);
 
 	void SetPullBox(bool info) { m_PullBox = info; }
 	void Box_Pull(bool Pull_State);

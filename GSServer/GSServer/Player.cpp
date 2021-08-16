@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Player.h" 
-
+#define ANIMATION_TYPE_ONCE			0
+#define ANIMATION_TYPE_LOOP			1
+#define ANIMATION_TYPE_PINGPONG		2 
 CPlayer::CPlayer() :CAnimationObject()
 {
 	m_Type = OBJ_TYPE::Player;
@@ -29,31 +31,25 @@ void CPlayer::Update(float fTimeElapsed)
 
 		switch (m_WeaponType)
 		{
-			case PlayerWeaponType::Sword:
-			{
+		case PlayerWeaponType::Sword: {
+		}break;
+
+		case PlayerWeaponType::Bow: {
+			if (pullString) {
+				if (m_AttackWaitingTime < 1.2f)
+					SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+
+				if (m_AttackWaitingTime < m_AttackAnimPauseTime)
+					m_AnimationPaused = true;
+
+				m_StringPullTime += fTimeElapsed;
+				m_SP -= fTimeElapsed;
 			}
-			break;
+		}break;
 
-			case PlayerWeaponType::Bow:
-			{
-				if (pullString) {
-					if (m_AttackWaitingTime < 1.2f)
-						SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+		case PlayerWeaponType::Staff: {
 
-					if (m_AttackWaitingTime < m_AttackAnimPauseTime)
-						m_AnimationPaused = true;
-
-					m_StringPullTime += fTimeElapsed;
-					m_SP -= fTimeElapsed;
-				}
-			}
-			break;
-
-			case PlayerWeaponType::Staff:
-			{
-
-			}
-			break;
+		}break;
 		}
 
 		if (m_AttackWaitingTime < 0.0f) {
@@ -69,6 +65,10 @@ void CPlayer::Update(float fTimeElapsed)
 	}
 	else if (m_AttackedDelay > 0.0f) {
 		m_AttackedDelay = max(m_AttackedDelay - fTimeElapsed, 0.0f);
+
+		if (m_AttackedDelay == 0.0f) {
+			SetAnimationSet(AnimationType::IDLE);
+		}
 	}
 	else {
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0) {
@@ -86,26 +86,12 @@ void CPlayer::Update(float fTimeElapsed)
 
 	if (m_Alive) {
 		float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
+		Friction *= 1.8f;
 
 		XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
 		Move(vel);
-
-		/*if (false == m_isOnGround) {
-			float y;
-			if (m_JumpTime > 0.5f) {
-				y = -PLAYER_JUMP_HEIGHT * fTimeElapsed;
-			}
-			else {
-				y = PLAYER_JUMP_HEIGHT * fTimeElapsed;
-			}
-			Move({ 0,y,0 });
-			m_JumpTime += fTimeElapsed;
-			if (m_JumpTime > TO_JUMP_TIME) {
-				m_JumpTime = 0.0f;
-				m_isOnGround = true;
-			}
-		}*/
+		 
 		UpdateCamera();
 
 		float fLength = Vector3::Length(m_xmf3Velocity);
@@ -113,7 +99,7 @@ void CPlayer::Update(float fTimeElapsed)
 		if (fDeceleration > fLength) fDeceleration = fLength;
 
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-		m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
+		//m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
 	}
 
 	Animate(fTimeElapsed);
@@ -226,27 +212,7 @@ void CPlayer::SetWeaponPointer()
 	FindWeapon("sword1", this);
 	//swordCollider = m_pWeapon->GetColliders();
 }
-
-void CPlayer::AnimationChange(PlayerWeaponType weapon)
-{
-	if (weapon == PlayerWeaponType::Sword) {
-		IDLE = AnimationType::SWORD_IDLE;
-		RUN = AnimationType::SWORD_RUN;
-		ATK = AnimationType::SWORD_ATK;
-		DEATH = AnimationType::SWORD_DEATH;
-
-		m_AttackAnimLength = 1.033333f;
-	}
-	else if (weapon == PlayerWeaponType::Bow) {
-		IDLE = AnimationType::BOW_IDLE;
-		RUN = AnimationType::BOW_RUN;
-		ATK = AnimationType::BOW_ATK;
-		DEATH = AnimationType::BOW_DEATH;
-
-		m_AttackAnimLength = 1.533333f;
-		m_AttackAnimPauseTime = 0.6f;
-	}
-} 
+ 
 
 bool CPlayer::ShotAble()
 {
@@ -261,13 +227,27 @@ bool CPlayer::Attacked(CGameObject* pObject)
 	if (m_AttackedDelay > 0.0f) {
 		return false;
 	}
+	m_IsCanAttack = false;
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
-	m_AttackedDelay += 0.6666667f;
-	m_HP -= 5;
-	SetAnimationSet(AnimationType::DAMAGED);
-	if (m_HP <= 5) {
-		m_HP = 0;
+
+	if (pObject == nullptr)
+		TakeDamage(1000);
+	else
+		TakeDamage(pObject->GetATK());
+
+	if (m_HP > 0) {
+		m_AttackedDelay += 0.6666667f;
+		SetAnimationSet(AnimationType::DAMAGED);
 	}
+	else {
+		m_Alive = false;
+		m_HP = 0;
+		m_SP = 0;
+		m_AttackedDelay += m_DeathAnimLength;
+		SetAnimationType(ANIMATION_TYPE_ONCE);
+		SetAnimationSet(DEATH);
+	}
+
 	return true;
 }
 
@@ -321,6 +301,67 @@ void CPlayer::ResetBow()
 	m_AnimationPaused = false;
 	m_StringPullTime = 0;
 }
+
+void CPlayer::SetWeapon(PlayerWeaponType weaponType)
+{
+	m_WeaponType = weaponType;
+
+	if (weaponType == PlayerWeaponType::Sword) {
+		IDLE = AnimationType::SWORD_IDLE;
+		RUN = AnimationType::SWORD_RUN;
+		ATK = AnimationType::SWORD_ATK;
+		ATK2 = AnimationType::SWORD_ATK2;
+		ATK3 = AnimationType::SWORD_ATK3;
+		SKILL = AnimationType::SWORD_SKILL;
+		DEATH = AnimationType::SWORD_DEATH;
+
+		m_AttackAnimLength = 2.0f;
+		m_SwordAnim1Length = 2.0f;
+		m_SwordAnim2Length = 1.133333f;
+		m_SwordAnim3Length = 1.466667f;
+		m_SkillAnimLength = 4.8f;
+		m_DeathAnimLength = 3.7f;
+
+		SetDrawableRecursively("sword1", true);
+		SetDrawableRecursively("bow_LeftHand", false);
+		SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+		SetDrawableRecursively("twoHandedStaff", false);
+	}
+	else if (weaponType == PlayerWeaponType::Bow) {
+		IDLE = AnimationType::BOW_IDLE;
+		RUN = AnimationType::BOW_RUN;
+		ATK = AnimationType::BOW_ATK;
+		SKILL = AnimationType::BOW_SKILL;
+		DEATH = AnimationType::BOW_DEATH;
+
+		m_AttackAnimLength = 1.533333f;
+		m_SkillAnimLength = 5.0f;
+		m_AttackAnimPauseTime = 0.6f;
+		m_DeathAnimLength = 3.866667f;
+
+		SetDrawableRecursively("sword1", false);
+		SetDrawableRecursively("bow_LeftHand", true);
+		SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+		SetDrawableRecursively("twoHandedStaff", false);
+	}
+	else if (weaponType == PlayerWeaponType::Staff) {
+		IDLE = AnimationType::STAFF_IDLE;
+		RUN = AnimationType::STAFF_RUN;
+		ATK = AnimationType::STAFF_ATK;
+		SKILL = AnimationType::STAFF_SKILL;
+		DEATH = AnimationType::STAFF_DEATH;
+
+		m_AttackAnimLength = 1.433333f;
+		m_SkillAnimLength = 1.133333f;
+		m_DeathAnimLength = 3.7f;
+
+		SetDrawableRecursively("sword1", false);
+		SetDrawableRecursively("bow_LeftHand", false);
+		SetDrawableRecursively("bow_arrow_RightHandMiddle1", false);
+		SetDrawableRecursively("twoHandedStaff", true);
+	}
+}
+
 void CPlayer::Box_Pull(bool Pull_State)
 {
 	SetPullBox(Pull_State);

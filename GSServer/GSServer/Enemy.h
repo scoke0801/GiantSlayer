@@ -66,11 +66,10 @@ public:
 
 	// 시야 범위 설정
 	void SetSightBoundingBox(const XMFLOAT3& sight);
-
-
+	 
 	void ConnectPlayer(CPlayer** pPlayers, int playerCount);
 
-	void ChangeAnimation(ObjectState stateInfo);
+	virtual void ChangeAnimation(ObjectState stateInfo);
 	void ChangeState(CState<CEnemy>* nextState);
 
 	void FixCollision(CGameObject* pCollideObject) override;
