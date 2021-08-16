@@ -507,12 +507,14 @@ void CGameScene::Update(float elapsedTime)
 	// 미라 보고있으면 데미지
 	if (m_Player->GetPlayerExistingSector() == 3 && m_Opendoor==false && m_Player->killit == false)
 	{
-		if ((m_Player->GetLook().x > -150.0f && m_Player->GetLook().x < 150.0f)&& m_Player->GetLook().z>0.0f)
-		{
-			if (m_Player->GetHP() > 0)
-				m_Player->SetHP(m_Player->GetHP() - 1);
-			else
-				m_Player->Death();
+		if (m_Player->GetPosition().x > 20970 && m_Player->GetPosition().x < 30000) {
+			if ((m_Player->GetLook().x > -150.0f && m_Player->GetLook().x < 150.0f) && m_Player->GetLook().z > 0.0f)
+			{
+				if (m_Player->GetHP() > 0)
+					m_Player->SetHP(m_Player->GetHP() - 1);
+				else
+					m_Player->Death();
+			}
 		}
 	}
 
@@ -773,9 +775,10 @@ void CGameScene::Update(float elapsedTime)
 		else if (pEnemy->GetStateInfo() == ObjectState::Attack)
 		{
 			if (pEnemy->CollisionCheck(m_Player)) {
-				m_Player->Attacked(pEnemy);
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
+				if (m_Player->Attacked(pEnemy)) {
+					m_CurrentCamera->SetShake(true, 0.5f, 15);
+					m_Player->FixCollision();
+				}
 			}
 		}
 
@@ -4601,6 +4604,7 @@ void CGameScene::ActiveSkill(OBJECT_LAYER type, CGameObject* user)
 					pFireb->SetExistingSector((SECTOR_POSITION)player->GetPlayerExistingSector());
 					pFireb->SetUseable(false);
 					pFireb->SetSkill(user);
+					pFireb->SetATK(user->GetATK());
 					cout << "shot fb" << endl;
 				}
 
@@ -4631,6 +4635,7 @@ void CGameScene::ShotPlayerArrow()
 				m_Particles->GetParticleObj(idx)->SetDrawable(true);
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
 				pArrow->SetExistingSector((SECTOR_POSITION)m_Player->GetPlayerExistingSector());
+				pArrow->SetATK(m_Player->GetATK());
 				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 			}
 			break;
