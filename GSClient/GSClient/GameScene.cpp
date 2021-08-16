@@ -1174,7 +1174,8 @@ void CGameScene::Update(float elapsedTime)
 			if (m_Player->GetPlayerExistingSector() == int(pEnemy->GetExistingSector()))
 			{
 				CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
-				DeleteEnemy(thisEnemy);
+				thisEnemy->ChangeState(new DeathState(thisEnemy));
+				//DeleteEnemy(thisEnemy);
 				m_MonsterAllDie = false;
 			}
 		}
