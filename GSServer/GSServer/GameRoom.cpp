@@ -33,20 +33,24 @@ void CGameRoom::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	} 
-	if(m_MummyExist[0] || m_MummyExist[1] || m_MummyExist[2]){
-	
-	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) { 
-		// 미라 보고있으면 데미지
-		if (m_Players[i]->IsExist() == false) continue;
+	if (m_MummyExist[0] || m_MummyExist[1] || m_MummyExist[2]) {
 
-		if (m_Players[i]->GetPlayerExistingSector() == 3)
-		{
-			if ((m_Players[i]->GetLook().x > -150.0f && m_Players[i]->GetLook().x < 150.0f) && m_Players[i]->GetLook().z > 0.0f)
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+			// 미라 보고있으면 데미지
+			if (m_Players[i]->IsExist() == false) continue;
+
+			// 미라 보고있으면 데미지
+			if (m_Players[i]->GetPlayerExistingSector() == 3 && m_Players[i]->killit == false)
 			{
-				m_Players[i]->SetHP(m_Players[i]->GetHP() - 0.01f); 
+				if ((m_Players[i]->GetLook().x > -150.0f && m_Players[i]->GetLook().x < 150.0f) && m_Players[i]->GetLook().z > 0.0f)
+				{
+					if (m_Players[i]->GetHP() > 0)
+						m_Players[i]->SetHP(m_Players[i]->GetHP() - 1);
+					else
+						m_Players[i]->Death();
+				}
 			}
 		}
-	}
 	}
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
@@ -1414,6 +1418,7 @@ void CGameRoom::SendSyncUpdatePacket()
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		p_syncUpdate.id[i] = i;// static_cast<char>(m_Players[i]->GetId());
 		p_syncUpdate.hp[i] = m_Players[i]->GetHP();
+		p_syncUpdate.sp[i] = m_Players[i]->GetSP();
 		//p_syncUpdate.Sp[i] = m_Players[i]->GetSP();
 		XMFLOAT3 pos = m_Players[i]->GetPosition();
 		XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
@@ -2353,12 +2358,18 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 						m_Players[id]->Attack(0);
 						break;
 					case PlayerWeaponType::Bow:
-						m_Players[id]->Attack(0);
-						m_Players[id]->pullString = true;
+						if (m_Players[id]->GetSP() > 20.0f) {
+							m_Players[id]->SetSP(m_Players[id]->GetSP() - 20);
+							m_Players[id]->Attack(0);
+							m_Players[id]->pullString = true;
+						}
 						break;
 					case PlayerWeaponType::Staff:
-						m_Players[id]->Attack(0);
-						ShotFireBall(OBJECT_LAYER::FireBall, m_Players[id]);
+						if (m_Players[id]->GetSP() > 30.0f) {
+							m_Players[id]->SetSP(m_Players[id]->GetSP() - 30);
+							m_Players[id]->Attack(0);
+							ShotFireBall(OBJECT_LAYER::FireBall, m_Players[id]);
+						} 
 						break;
 					}
 				}

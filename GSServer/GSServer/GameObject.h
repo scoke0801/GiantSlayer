@@ -173,6 +173,9 @@ public:
 	virtual void SetIsUsable(bool drawable) { m_isUsing = drawable; }
 	bool IsUsable() const { return m_isUsing; }
 
+	void SetSP(UINT SP) { m_SP = SP; }
+	UINT GetSP() const { return m_SP; }
+
 	virtual void SetDrawable(bool drawable) { m_isDrawable = drawable; }
 	bool IsDrawable() { return m_isDrawable; }
 

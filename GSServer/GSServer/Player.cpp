@@ -11,7 +11,7 @@ CPlayer::CPlayer() :CAnimationObject()
 	m_HP = 100;
 	m_SP = 100;
 	m_ATK = 30;
-	m_DEF = 100;
+	m_DEF = 0;
 }
 
 CPlayer::~CPlayer()

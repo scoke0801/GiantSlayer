@@ -1729,7 +1729,8 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
 
 			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
-			
+			m_Players[i]->SetSP(p_syncUpdate.sp[i]);
+
 			if (m_Players[i]->GetWeapon() != p_syncUpdate.weaponType[i]) {  
 				m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
 			} 
