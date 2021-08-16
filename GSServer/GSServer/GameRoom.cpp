@@ -33,6 +33,19 @@ void CGameRoom::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	} 
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) { 
+		// 미라 보고있으면 데미지
+		if (m_Players[i]->IsExist() == false) continue;
+
+		if (m_Players[i]->GetPlayerExistingSector() == 3)
+		{
+			if ((m_Players[i]->GetLook().x > -150.0f && m_Players[i]->GetLook().x < 150.0f) && m_Players[i]->GetLook().z > 0.0f)
+			{
+				m_Players[i]->SetHP(m_Players[i]->GetHP() - 0.01f); 
+			}
+		}
+	}
+
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(g_Heights);
@@ -146,6 +159,28 @@ void CGameRoom::Update(float elapsedTime)
 		}
 	}
 
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pArrow->IsDrawable()) {
+			continue;
+		}
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy])
+		{
+			if (pArrow->CollisionCheck(pEnemy)) {
+				pEnemy->SetHP(pEnemy->GetHP() - 1.0f);
+
+			}
+			if (pEnemy->GetHP() == 0)
+			{
+				CMummy* thisEnemy = reinterpret_cast<CMummy*>(pEnemy);
+
+				thisEnemy->SendDieInfotoFriends();
+
+				DeleteEnemy(thisEnemy);
+			}
+		}
+	}
+
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
@@ -155,19 +190,7 @@ void CGameRoom::Update(float elapsedTime)
 			if (false == pEnemy->CollisionCheck(m_Players[i])) {
 				continue;
 			}
-
-			if (false == m_Players[i]->IsCanAttack()) {
-				if (false == m_Players[i]->IsAleradyAttack()) {
-					CMummy* thisEnemy = reinterpret_cast<CMummy*>(pEnemy);
-
-					thisEnemy->SendDieInfotoFriends();
-
-					DeleteEnemy(thisEnemy);
-
-					m_Players[i]->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Players[i]->Attacked(pEnemy))
+			if (m_Players[i]->Attacked(pEnemy))
 			{
 				m_Players[i]->FixCollision();
 
@@ -2333,6 +2356,8 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 			{
 				m_Chess[King]->SetPosition(m_ChessPlate[5][6]);
 				m_Chess[Rook]->SetPosition(m_ChessPlate[1][4]);
+				m_Chess[Pawn]->SetPosition(m_ChessPlate[3][5]);
+				m_Chess[Knight]->SetPosition(m_ChessPlate[6][4]);
 				m_ChessChangeFlag = true;
 			}
 			break; 
