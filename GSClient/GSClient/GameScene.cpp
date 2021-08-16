@@ -1769,9 +1769,6 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
 
-			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
-			m_Players[i]->SetSP(p_syncUpdate.sp[i]);
-
 			if (m_Players[i]->GetWeapon() != p_syncUpdate.weaponType[i]) {  
 				m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
 			} 
@@ -1796,14 +1793,16 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 					break;
 				case BOW_ATK:
 					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
-				case STAFF_ATK: 
+				case STAFF_ATK:
 					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
 					break;
 				case SWORD_DEATH:
 				case BOW_DEATH:
 				case STAFF_DEATH:
 					//m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
-					m_Players[i]->Death();
+					if (m_Players[i]->GetHP() > 0){
+						m_Players[i]->Death();
+				}
 					break;
 					 
 				default:	
@@ -1812,6 +1811,8 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				}
 				m_Players[i]->m_AnimationPaused = false;
 			} 
+
+
 			if (p_syncUpdate.weaponType[i] == PlayerWeaponType::Bow) {
 				if ((m_Players[i]->pullString) == true && (p_syncUpdate.pullString[i] == false)) {
 					m_Player->ResetBow();
@@ -1825,6 +1826,9 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 					} 
 				}    
 			}
+			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
+			m_Players[i]->SetSP(p_syncUpdate.sp[i]);
+
 			m_Players[i]->SetPosition(pos);
 			m_Players[i]->UpdateCamera();
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
@@ -2062,7 +2066,7 @@ void CGameScene::ProcessInput()
 			p_keyboard.keyInput = VK_F1;
 			processKey = true;
 		}
-		 
+
 		if (keyInput.KEY_F2)
 		{
 			p_keyboard.keyInput = VK_F2;
@@ -2118,14 +2122,14 @@ void CGameScene::ProcessInput()
 		if (keyInput.KEY_D) {
 			p_keyboard.keyInput = VK_D;
 			processKey = true;
-		} 
+		}
 		if (keyInput.KEY_U) {
 			p_keyboard.keyInput = VK_U;
-			processKey = true; 
+			processKey = true;
 		}
 		if (keyInput.KEY_I) {
 			p_keyboard.keyInput = VK_I;
-			processKey = true; 
+			processKey = true;
 		}
 
 		if (keyInput.KEY_3)
@@ -2170,11 +2174,11 @@ void CGameScene::ProcessInput()
 		{
 			p_keyboard.keyInput = VK_F9;
 			processKey = true;
-		} 
+		}
 		if (keyInput.KEY_R)
 		{
 			p_keyboard.keyInput = VK_R;
-			processKey = true; 
+			processKey = true;
 			if (m_Npc_Event == true)
 			{
 				m_Interaction = true;
@@ -2189,15 +2193,26 @@ void CGameScene::ProcessInput()
 			p_keyboard.keyInput = VK_Z;
 			processKey = true;
 		}
-		 
-		if (processKey == false) return; 
+		// 公利
+		if (keyInput.KEY_N)
+		{
+			p_keyboard.keyInput = VK_N;
+			processKey = true;
+		}
+		// 阁胶磐 茄规
+		if (keyInput.KEY_M)
+		{
+			p_keyboard.keyInput = VK_M;
+			processKey = true;
+		}
+		if (processKey == false) return;
 		SendPacket(&p_keyboard);
 		return;
 	}
 
 	if (m_CurrentCamera == nullptr) return;
 
-	float cameraSpeed = m_CurrentCamera->GetSpeed(); 
+	float cameraSpeed = m_CurrentCamera->GetSpeed();
 
 	XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
 	float distance = PLAYER_RUN_SPEED;
@@ -2238,16 +2253,16 @@ void CGameScene::ProcessInput()
 
 	if (keyInput.KEY_1)
 	{
-		m_Player->SetWeapon(PlayerWeaponType::Sword); 
+		m_Player->SetWeapon(PlayerWeaponType::Sword);
 	}
 	if (keyInput.KEY_2)
 	{
-		m_Player->SetWeapon(PlayerWeaponType::Bow); 
+		m_Player->SetWeapon(PlayerWeaponType::Bow);
 	}
 	if (keyInput.KEY_3)
 	{
 		m_Player->SetWeapon(PlayerWeaponType::Staff);
-		m_isPlayerSelected = true; 
+		m_isPlayerSelected = true;
 		m_CurrentCamera = m_PlayerCameras[0];
 	}
 	if (keyInput.KEY_4)
@@ -2257,9 +2272,9 @@ void CGameScene::ProcessInput()
 	}
 	if (keyInput.KEY_5)
 	{
-		m_isPlayerSelected = false; 
+		m_isPlayerSelected = false;
 	}
-	 
+
 	if (keyInput.KEY_SPACE)
 	{
 		DisplayVector3(m_Player->GetPosition());
@@ -2276,7 +2291,7 @@ void CGameScene::ProcessInput()
 		m_CurrentCamera->SetSpeed(max(cameraSpeed - 1.0f, 1.0f));
 	}
 	if (keyInput.KEY_F1)
-	{ 
+	{
 		m_Player->SetPosition({ 1622 * MAP_SCALE_SIZE, 0, 10772 * MAP_SCALE_SIZE });
 		m_Player->FixPositionByTerrain(m_Terrain);
 	}
@@ -2351,13 +2366,13 @@ void CGameScene::ProcessInput()
 	}
 
 	if (keyInput.KEY_O)
-	{ 
+	{
 		gbBoundaryOn = true;
 	}
 	if (keyInput.KEY_P)
 	{
 		gbBoundaryOn = false;
-	} 
+	}
 	if (keyInput.KEY_K)
 	{
 		gbWireframeOn = true;
@@ -2366,7 +2381,16 @@ void CGameScene::ProcessInput()
 	{
 		gbWireframeOn = false;
 	}
-
+	if (keyInput.KEY_N)
+	{
+		//公利
+		m_Player->PowerOverWhelm();
+	}
+	if (keyInput.KEY_M)
+	{
+		// 茄规
+		m_Player->SetATK(500);
+	}
 	m_CurrentCamera->UpdateViewMatrix();
 }
 

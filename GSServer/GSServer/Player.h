@@ -62,7 +62,8 @@ private:
 
 	int m_LastAttackAnim = 0;
 
-	bool m_PullBox = false; 
+	bool m_PullBox = false;
+	float m_PowerOverWhelm = false;
 public:
 	bool pullString = false;
 	float m_StringPullTime = 0.0f;
@@ -135,5 +136,6 @@ public:
 	void SetPullBox(bool info) { m_PullBox = info; }
 	void Box_Pull(bool Pull_State);
 
-	AnimationType GetStateName() const { return m_StateName; } 
+	AnimationType GetStateName() const { return m_StateName; }
+	void PowerOverWhelm() { m_PowerOverWhelm = true; }
 };

@@ -2081,7 +2081,8 @@ void CGameRoom::ShotPlayerArrow(int p_id)
 			pArrow->m_startPos = pos;
 			pArrow->SetStringPower(m_Players[p_id]->GetStringPullTime()); 
 			pArrow->SetTargetVector(Vector3::Multifly(m_Players[p_id]->GetLook(), 1));
-			pArrow->SetExistingSector((SECTOR_POSITION)m_Players[p_id]->GetPlayerExistingSector());  
+			pArrow->SetExistingSector((SECTOR_POSITION)m_Players[p_id]->GetPlayerExistingSector());
+			pArrow->SetATK(m_Players[p_id]->GetATK());
 			break;
 		}
 		++i;
@@ -2096,7 +2097,7 @@ void CGameRoom::ShotFireBall(OBJECT_LAYER type, CGameObject* user)
 			{
 				pFireb->SetUseable(false);
 				pFireb->SetSkill(user);
-
+				pFireb->SetATK(user->GetATK());
 			}
 			break;
 		}
@@ -2496,6 +2497,18 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 				m_ChessChangeFlag = true;
 			}
 			break; 
+			case VK_N:
+			{
+				//무적
+				m_Players[id]->PowerOverWhelm();
+			}
+			break;
+			case VK_M:
+			{ 
+				// 한방
+				m_Players[id]->SetATK(500);
+			}
+			break;
 			case VK_R:
 			{
 				if (m_Npc_Event == true)

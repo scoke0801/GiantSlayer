@@ -58,7 +58,7 @@ private:
 	float m_AttackedDelay = 0.0f;
 	float m_SkillCoolTime = 0.0f;
 	float m_ComboTimer = 0.2f;
-
+	float m_PowerOverWhelm = false;
 public:
 	bool killit = false;
 	bool m_Alive = true;
@@ -127,4 +127,6 @@ public:
 
 	bool IsAnimationPaused() const { return m_AnimationPaused; }
 	bool IsOnPullstring() const { return pullString; }
+
+	void PowerOverWhelm() { m_PowerOverWhelm = true; }
 };

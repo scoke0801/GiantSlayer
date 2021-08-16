@@ -355,6 +355,9 @@ void CPlayer::Jump()
 
 bool CPlayer::Attacked(CGameObject* pObject)
 {
+	if (m_PowerOverWhelm) {
+		return false;
+	}
 	if (m_AttackedDelay > 0.0f) {
 		return false;
 	}
