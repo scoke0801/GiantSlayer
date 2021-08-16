@@ -21,9 +21,8 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
-	if (m_HP <= 0 && m_AttackedDelay <= 0.1f) {
+	if (m_Alive == false)
 		return;
-	}
 
 	if (m_IsCanAttack == false) {
 		if (!m_AnimationPaused)
@@ -34,7 +33,7 @@ void CPlayer::Update(float fTimeElapsed)
 		case PlayerWeaponType::Sword: {
 		}break;
 
-		case PlayerWeaponType::Bow: { 
+		case PlayerWeaponType::Bow: {
 			if (pullString) {
 				if (m_AttackWaitingTime < 1.2f)
 					SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
@@ -43,7 +42,7 @@ void CPlayer::Update(float fTimeElapsed)
 					m_AnimationPaused = true;
 
 				m_StringPullTime += fTimeElapsed;
-				m_SP -= fTimeElapsed;
+				//m_SP -= fTimeElapsed;
 			}
 		}break;
 
@@ -52,7 +51,7 @@ void CPlayer::Update(float fTimeElapsed)
 		}break;
 		}
 
-		if (m_AttackWaitingTime < 0.0f) {
+		if (m_AttackWaitingTime <= 0.0f) {
 			ResetAttack();
 			m_ComboTimer = 0.2f;
 			if (m_AttackKeyDown) {
@@ -61,6 +60,12 @@ void CPlayer::Update(float fTimeElapsed)
 			}
 			else
 				m_LastAttackAnim = 0;
+
+			if (killit == true) {
+				m_Alive = false;
+				SetDrawable(false);
+				m_IsCanAttack = true;
+			}
 		}
 	}
 	else if (m_AttackedDelay > 0.0f) {
@@ -71,6 +76,8 @@ void CPlayer::Update(float fTimeElapsed)
 		}
 	}
 	else {
+		if (m_SP < 100.0f)
+			m_SP += 1.0f;
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0) {
 			if (m_ComboTimer > 0)
 				m_ComboTimer -= fTimeElapsed;
@@ -87,7 +94,6 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_Alive) {
 		float Friction = (m_MovingType == PlayerMoveType::Run) ? PLAYER_RUN_SPEED : PLAYER_WALK_SPEED;
 		Friction *= 1.8f;
-
 		XMFLOAT3 vel = Vector3::Multifly(m_xmf3Velocity, fTimeElapsed);
 
 		Move(vel);
@@ -101,7 +107,6 @@ void CPlayer::Update(float fTimeElapsed)
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 		//m_xmf3Velocity.x = m_xmf3Velocity.y = m_xmf3Velocity.z = 0.0f;
 	}
-
 	Animate(fTimeElapsed);
 	UpdateTransform(NULL);
 }
@@ -220,6 +225,18 @@ bool CPlayer::ShotAble()
 		return true;
 
 	return false;
+}
+
+void CPlayer::Death()
+{
+	killit = true;
+	m_IsCanAttack = false;
+	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
+	m_HP = 0;
+	m_SP = 0;
+	IncreaseAttackWaitingTime(m_DeathAnimLength);
+	SetAnimationType(ANIMATION_TYPE_ONCE);
+	SetAnimationSet(DEATH);
 }
 
 bool CPlayer::Attacked(CGameObject* pObject)

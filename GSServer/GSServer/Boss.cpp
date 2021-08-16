@@ -21,6 +21,12 @@ CBoss::CBoss()
 	m_Speed = 165.0f * 10.0f;
 
 	m_TargetPlayer = nullptr;
+
+	m_SightDistance = 4100;
+
+	m_HP = 500;
+	m_ATK = 20;
+	m_DEF = 10;
 }
 
 
