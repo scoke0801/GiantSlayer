@@ -1716,7 +1716,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		memcpy(&p_mouseProcess, p_buf, p_buf[0]);
 		if (p_mouseProcess.cameraOffset != 0) {
 			float offset = IntToFloat(p_mouseProcess.cameraOffset); 
-			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
+			//m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
 		} 
 
 		if (p_mouseProcess.cameraRotateY != 0) {
@@ -2622,7 +2622,9 @@ void CGameScene::OnMouseMove(WPARAM btnState, int x, int y)
 			m_prevMouseInputType = MOUSE_INPUT_TYPE::M_RMOVE;
 
 			m_MouseInputTypes.emplace_back(MOUSE_INPUT_TYPE::M_RMOVE);
-			m_MousePositions.emplace_back(POINTF{ dx, dy });
+			m_MousePositions.emplace_back(POINTF{ dx, dy }); 
+
+			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, dy * 0.025f));
 		}
 	}
 	else {

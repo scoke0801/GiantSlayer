@@ -2759,8 +2759,8 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 			}
 			else if (p_mouse.InputType[i] == MOUSE_INPUT_TYPE::M_RMOVE) {
 				float offset = IntToFloat(p_mouse.yInput[i]);
-				cameraOffset += offset * 0.25f;
-				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset * 0.25f));
+				cameraOffset += offset * 0.025f;
+				m_Cameras[p_mouse.id]->MoveOffset(XMFLOAT3(0, 0, offset * 0.025f));
 			}
 		}
 
