@@ -1522,6 +1522,7 @@ void CGameRoom::SendMonsterActPacket()
 		p_monsterUpdate[i].lookZ = FloatToInt(look.z);
 
 		p_monsterUpdate[i].state = reinterpret_cast<CEnemy*>(mon)->GetAnimationSet();
+		p_monsterUpdate[i].alive = mon->IsUsable();
 	}
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i] == nullptr) {
@@ -2202,8 +2203,9 @@ void CGameRoom::DeleteEnemy(CEnemy* pEmeny)
 	}
 
 	auto res = std::find(m_ObjectLayers[(int)OBJECT_LAYER::Enemy].begin(), m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end(), pEmeny);
-	if (res != m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end()) { 
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].erase(res);
+	if (res != m_ObjectLayers[(int)OBJECT_LAYER::Enemy].end()) {
+		(*res)->SetIsUsable(false);
+		//m_ObjectLayers[(int)OBJECT_LAYER::Enemy].erase(res);
 	}
 }
 

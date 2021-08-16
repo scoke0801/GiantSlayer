@@ -1698,7 +1698,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		} 
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT:
-	{ 
+	{
 		P_S2C_MONSTERS_UPDATE_SYNC* p_monsterUpdate = reinterpret_cast<P_S2C_MONSTERS_UPDATE_SYNC*>(p_buf);
 
 		XMFLOAT3 pos = { IntToFloat(p_monsterUpdate->posX),
@@ -1709,11 +1709,15 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			IntToFloat(p_monsterUpdate->lookZ) };
 		int id = p_monsterUpdate->id;
 
-		reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id])->SetAnimationSet(p_monsterUpdate->state);
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition(pos);
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
+		if (p_monsterUpdate->alive) {
+			reinterpret_cast<CEnemy*>(m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id])->SetAnimationSet(p_monsterUpdate->state);
+			m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition(pos);
+			m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+			m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
+		}
+		else {
+			m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition({ -100000,-100000,-10000 });
+		}
 	}
 	break;
 	case PACKET_PROTOCOL::S2C_BOSS_ACT:

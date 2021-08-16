@@ -443,6 +443,7 @@ struct P_S2C_MONSTERS_UPDATE_SYNC {
 	int				lookZ;
 
 	BYTE			state;
+	bool			alive;
 };
 
 struct P_S2C_MUMMY_UPDATE_SYNC
