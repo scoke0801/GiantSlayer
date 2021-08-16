@@ -1932,6 +1932,10 @@ void CGameRoom::SendThunderSyncPacket()
 	}
 }
 
+void CGameRoom::SendDoorEvent()
+{
+}
+
 void CGameRoom::SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx)
 {
 	if (false == m_ObjectDeleteFlag) {

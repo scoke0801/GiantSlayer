@@ -121,6 +121,7 @@ public:
 	void SendLaserActPacket();
 	void SendChessObjectActPacket();
 	void SendThunderSyncPacket();
+	void SendDoorEvent();
 
 	void SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx);
 

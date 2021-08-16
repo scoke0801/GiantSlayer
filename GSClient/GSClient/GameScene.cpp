@@ -2058,7 +2058,9 @@ void CGameScene::ProcessInput()
 	}
 	if (m_CurrentCamera->IsOnShake()) {
 		// 피격 상태일 때 잠시 제어권 뺏기
-		return;
+		if (false == CFramework::GetInstance().IsOnConntected()) {
+			return;
+		}
 	}
 	if (CFramework::GetInstance().IsOnConntected())
 	{
@@ -2511,7 +2513,9 @@ void CGameScene::OnMouseDown(WPARAM btnState, int x, int y)
 	}
 	if (m_CurrentCamera->IsOnShake()) {
 		// 피격 상태일 때 잠시 제어권 뺏기
-		return;
+		if (false == CFramework::GetInstance().IsOnConntected()) { 
+			return;
+		}
 	}
 	m_LastMousePos.x = x;
 	m_LastMousePos.y = y;
@@ -2526,7 +2530,9 @@ void CGameScene::OnMouseUp(WPARAM btnState, int x, int y)
 
 	if (m_CurrentCamera->IsOnShake()) {
 		// 피격 상태일 때 잠시 제어권 뺏기
-		return;
+		if (false == CFramework::GetInstance().IsOnConntected()) {
+			return;
+		}
 	}
 	ReleaseCapture();
 }
@@ -2538,7 +2544,9 @@ void CGameScene::OnMouseMove(WPARAM btnState, int x, int y)
 	}
 	if (m_CurrentCamera->IsOnShake()) {
 		// 피격 상태일 때 잠시 제어권 뺏기
-		return;
+		if (false == CFramework::GetInstance().IsOnConntected()) {
+			return;
+		}
 	}
 	//
 	// 싱글플레이, 멀티 플레이 코드 분리 작업 진행 필요

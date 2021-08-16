@@ -545,5 +545,15 @@ struct P_S2C_DELETE_SYNC
 	short		objType;
 	short			idx;
 };
+
+struct P_S2C_DOOR_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
+
+	// 열리는 이벤트 : true / 닫히는 이벤트 : false
+	bool isOpenEvent;
+	bool idx;
+};
  
 #pragma pack (pop)
