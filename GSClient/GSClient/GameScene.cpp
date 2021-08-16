@@ -1696,7 +1696,23 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 					m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
 					break;
 				}
+				m_Players[i]->m_AnimationPaused = false;
 			} 
+			if (p_syncUpdate.weaponType[i] == PlayerWeaponType::Bow) {
+				if (false == m_Players[i]->IsAnimationPaused()) { 
+					if (p_syncUpdate.pullString[i]) {
+						m_Players[i]->SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+					} 
+				} 
+				else {
+					m_Players[i]->m_AnimationPaused = false;
+				}
+				if (false == m_Players[i]->IsOnPullstring()) {
+					if (p_syncUpdate.animationPause[i]) {
+						m_Players[i]->m_AnimationPaused = true;
+					}
+				}
+			}
 			m_Players[i]->SetPosition(pos);
 			m_Players[i]->UpdateCamera();
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
@@ -2218,7 +2234,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 		p_keyboard.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
 		p_keyboard.id = CFramework::GetInstance().GetPlayerId();
 		p_keyboard.keyInput = wParam;
-		p_keyboard.isKeyDown = !isKeyUp;
+		p_keyboard.isKeyDown = !isKeyUp; 
 		SendPacket(&p_keyboard);
 		return;
 	}

@@ -1349,6 +1349,7 @@ void CGameRoom::SendPacket(SOCKET& socket, void* p)
 void CGameRoom::SendSyncUpdatePacket()
 {
 	P_S2C_UPDATE_SYNC p_syncUpdate;
+	ZeroMemory(&p_syncUpdate, sizeof(p_syncUpdate));
 	p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
 	p_syncUpdate.size = sizeof(p_syncUpdate);
 
@@ -1374,6 +1375,12 @@ void CGameRoom::SendSyncUpdatePacket()
 
 		p_syncUpdate.weaponType[i] = m_Players[i]->GetWeaponType();
 		p_syncUpdate.states[i] = m_Players[i]->GetAnimationSet();  
+
+		if (p_syncUpdate.weaponType[i] == PlayerWeaponType::Bow) {
+			p_syncUpdate.animationPause[i] = m_Players[i]->IsAnimationPaused();
+			p_syncUpdate.pullString[i] = m_Players[i]->IsOnPullstring();
+		}
+		
 	}
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		p_syncUpdate.existance[i] = m_Players[i]->IsExist();

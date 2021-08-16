@@ -422,6 +422,8 @@ struct P_S2C_UPDATE_SYNC {
 	BYTE states[MAX_ROOM_PLAYER];
 	bool existance[MAX_ROOM_PLAYER];	
 	
+	bool pullString[MAX_ROOM_PLAYER];
+	bool animationPause[MAX_ROOM_PLAYER];
 	PlayerWeaponType weaponType[MAX_ROOM_PLAYER];
 };
 
