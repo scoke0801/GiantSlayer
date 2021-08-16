@@ -66,8 +66,6 @@ private:
 public:
 	bool pullString = false;
 	float m_StringPullTime = 0.0f;
-	 
-	bool m_AnimationPaused = false;
 
 	bool m_Alive = true;
 	 
@@ -119,16 +117,17 @@ public:
 	bool IsAleradyAttack() const { return m_IsAlreadyAttack; }
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
 
-	void AnimationChange(PlayerWeaponType weapon); 
-
 	bool ShotAble();
 
+	bool IsAnimationPaused() const { return m_AnimationPaused; }
+	bool IsOnPullstring() const { return pullString; }
 public:
 	bool Attacked(CGameObject* pObject);
 	void Attack(int type);
 	void ResetAttack();
 	void ResetBow();
 
+	void SetWeapon(PlayerWeaponType weaponType);
 
 	void SetPullBox(bool info) { m_PullBox = info; }
 	void Box_Pull(bool Pull_State);

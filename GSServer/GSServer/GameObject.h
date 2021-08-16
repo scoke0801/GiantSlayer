@@ -2,9 +2,9 @@
 
 //class CCamera;
 
-#define OBJECT_MAX_VELOCITY 120.0f
-#define PLAYER_RUN_VELOCITY 250.0f * 4
-#define PLAYER_WALK_VELOCITY 80.0f 
+#define OBJECT_MAX_VELOCITY 120.0f 
+#define PLAYER_RUN_VELOCITY 650.0f
+#define PLAYER_WALK_VELOCITY 80.0f  
 
 enum class OBJ_TYPE
 {
@@ -47,7 +47,6 @@ enum class COLLISION_HANDLE_TYPE : int {
 	On,
 	Attacked
 };
-
 enum class OBJ_DIRECTION
 {
 	Front = 0,
@@ -118,6 +117,7 @@ protected:
 	// 재활용 처리를 위한 변수
 	bool				m_isUsing = true;
 
+	bool				isCanDamaged = true;
 	SECTOR_POSITION		m_ExistingSector = SECTOR_POSITION::SECTOR_1;
 
 	bool				m_isDrawable = true;
@@ -163,6 +163,9 @@ public:
 	virtual void SetPosition(XMFLOAT3 pos);
 	virtual void SetVelocity(const XMFLOAT3& vel);
 	virtual void SetVelocity(OBJ_DIRECTION direction);
+
+	bool IsCanDamaged() { return isCanDamaged; }
+	void SetCanDamaged(bool param) { isCanDamaged = param; }
 
 	void SetBoundingBox(XMFLOAT3 center, XMFLOAT3 extents);
 	void SetObjectName(const OBJ_NAME& name) { m_Name = name; }

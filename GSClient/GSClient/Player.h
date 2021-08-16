@@ -124,4 +124,7 @@ public:
 	bool ShotAble();
 
 	void Death();
+
+	bool IsAnimationPaused() const { return m_AnimationPaused; }
+	bool IsOnPullstring() const { return pullString; }
 };

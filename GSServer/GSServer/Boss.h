@@ -1,7 +1,6 @@
 #pragma once
 #include "Enemy.h"
 
-
 constexpr float BOSS_BORN1_ANIMATION_LENGTH = 7.333333;
 constexpr float BOSS_DEAD_ANIMATION_LENGTH = 7;
 constexpr float BOSS_IDLE_ANIMATION_LENGTH = 3;
@@ -42,6 +41,8 @@ public:
 public:
     void PlayerEnter(CPlayer* target);
 
+    void ChangeAnimation(ObjectState stateInfo) override;
+    BOSS_ANIMATION GetCurrentAnimation() const;
 private:
     static CAnimationObject* LoadGeometryAndAnimationFromFileForBoss(const char* pstrFileName, bool bHasAnimation);
 

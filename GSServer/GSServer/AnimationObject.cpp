@@ -17,6 +17,8 @@ void CAnimationObject::Update(float fTimeElapsed)
 
 void CAnimationObject::Animate(float fTimeElapsed)
 {
+	if (m_AnimationPaused)
+		return;
 	if (m_pAnimationController) m_pAnimationController->AdvanceTime(fTimeElapsed, NULL);
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
@@ -641,7 +643,7 @@ void CAnimationObject::LoadAnimationFromFile(FILE* pInFile)
 			nReads = (UINT)::fread(&m_pAnimationController->m_nAnimationSets, sizeof(int), 1, pInFile);
 
 			m_pAnimationController->m_pAnimationSets = new CAnimationSet[m_pAnimationController->m_nAnimationSets];
-			cout << "애니메이션 개수: " << m_pAnimationController->m_nAnimationSets << endl;
+
 			haveToRead = true;
 		}
 		else if (!strcmp(pstrToken, "<FrameNames>:"))

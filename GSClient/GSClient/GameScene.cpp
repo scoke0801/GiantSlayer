@@ -50,9 +50,7 @@ CGameScene::CGameScene()
 	m_SoundManager->AddSound("resources/sounds/ChessSuccess.mp3", Sound_Name::EFFECT_Chess_Success);
 	m_SoundManager->AddSound("resources/sounds/FireBall.mp3", Sound_Name::EFFECT_Fire_Ball);
 	m_SoundManager->AddSound("resources/sounds/Sword2.mp3", Sound_Name::EFFECT_Sword);
-	 
-	m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
-
+	  
 	cout << "Enter CGameScene \n";
 	m_pd3dGraphicsRootSignature = NULL;
 	m_isPlayerSelected = false;
@@ -105,6 +103,8 @@ void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dC
 	BuildUIs(pd3dDevice, pd3dCommandList);
 
 	m_CreatedTime = chrono::high_resolution_clock::now();
+
+	m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
 }
 
 void CGameScene::BuildCamera(ID3D12Device* pd3dDevice,
@@ -502,6 +502,16 @@ void CGameScene::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	}
+	
+	// 미라 보고있으면 데미지
+	if (m_Player->GetPlayerExistingSector() == 3 && m_Opendoor==false)
+	{
+		if ((m_Player->GetLook().x > -150.0f && m_Player->GetLook().x < 150.0f)&& m_Player->GetLook().z>0.0f)
+		{
+			m_Player->SetHP(m_Player->GetHP() - 0.01f);
+			cout << m_Player->GetHP() << endl;
+		}
+	}
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(m_Terrain);
@@ -514,7 +524,7 @@ void CGameScene::Update(float elapsedTime)
 
 	m_Particles->Update(elapsedTime);
 
-	m_HelpTextUI->Update(elapsedTime);
+	//m_HelpTextUI->Update(elapsedTime);
 
 	if (m_Interaction == true)
 	{
@@ -523,6 +533,15 @@ void CGameScene::Update(float elapsedTime)
 	else if (m_Interaction==false)
 	{
 		m_HelpBoard->SetDrawable(false);
+	}
+
+	if (m_Opendoor == true)
+	{
+		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 3]);
+		CDoorWall* p2 = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 4]);
+		p->OpenDoor();
+		p2->OpenDoor();
+		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Chess_Success);
 	}
 
 	ZeroMemory(m_PlayerExistingSector, sizeof(m_PlayerExistingSector));
@@ -535,13 +554,58 @@ void CGameScene::Update(float elapsedTime)
 	}
 	m_PlayerExistingSector[m_Player->GetPlayerExistingSector()] = true;
 
-	
+	if (m_Player->GetPlayerExistingSector() == 0)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[0] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 1)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[1] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 2)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[2] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 3)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[3] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 4)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[4] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
 
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
 			m_Player->FixCollision(pObstacle);
 		}
 	}
+	
 
 	// NPC랑 충돌
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Npc]) {
@@ -597,9 +661,7 @@ void CGameScene::Update(float elapsedTime)
 				break;
 			}
 		}
-	}
-
-	
+	} 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
@@ -625,97 +687,37 @@ void CGameScene::Update(float elapsedTime)
 		//	//pEnemy->InverseDirection();
 		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
 		//}
-	}
+	} 
+	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
+		// 변수명 변경으로 인한 true/false 반전..
+		if (true == pArrow->IsDrawable()) {
+			continue;
+		}
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy])
+		{
+			if (pArrow->CollisionCheck(pEnemy)) {
+				pEnemy->SetHP(pEnemy->GetHP() - 1.0f);
+				
+			}
+			if (pEnemy->GetHP() == 0)
+			{
+				CMummy* thisEnemy = reinterpret_cast<CMummy*>(pEnemy);
 
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
-			}
-		}
-		//if (pEnemy->CollisionCheck(m_Mirror[0])) {
-		//	//pEnemy->InverseDirection();
-		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
-		//}
-	}
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser2]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
-			}
-		}
-	}
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser3]) {
-		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
-			continue;
-		}
-		if (pEnemy->CollisionCheck(m_Player)) {
-			// 공격 상태일 때만 체력이 닳는것이 맞을까...
-			//if (ObjectState::Attack == pEnemy->GetStateInfo()) {
-			//	
-			//}
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					pEnemy->ChangeState(ObjectState::Attacked, m_Player);
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
-			{
-				m_CurrentCamera->SetShake(true, 0.5f, 15);
-				m_Player->FixCollision();
-			}
-		}
-	}
+				thisEnemy->SendDieInfotoFriends();
 
+				DeleteEnemy(thisEnemy);
+			}
+		} 
+	}  
+	 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
 		}
 		if (pEnemy->CollisionCheck(m_Player)) {
 
-			if (false == m_Player->IsCanAttack()) {
-				if (false == m_Player->IsAleradyAttack()) {
-					CMummy* thisEnemy = reinterpret_cast<CMummy*>(pEnemy);
-
-					thisEnemy->SendDieInfotoFriends();
-
-					DeleteEnemy(thisEnemy);
-
-					m_Player->SetAleradyAttack(true);
-				}
-			}
-			else if (m_Player->Attacked(pEnemy))
+			
+			if (m_Player->Attacked(pEnemy))
 			{
 				m_CurrentCamera->SetShake(true, 0.5f, 15);
 				m_Player->FixCollision();
@@ -860,7 +862,7 @@ void CGameScene::Update(float elapsedTime)
 			break;
 		}
 	}
-
+	
 
 	for (auto pChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle]) {
 		if (pChessPuzzle->CollisionCheck(m_Player)) {
@@ -887,8 +889,12 @@ void CGameScene::Update(float elapsedTime)
 
 			break;
 		}
+		
 	}
 
+	
+
+	
 	// npc 자체랑 충돌처리
 	if	(
 		((m_Npc->GetPosition().x + 215.0f > m_Player->GetPosition().x)
@@ -910,13 +916,13 @@ void CGameScene::Update(float elapsedTime)
 	{
 		if (
 			(
-				(m_Chess[i]->GetPosition().x + 215.0f > m_Player->GetPosition().x)
-				&& (m_Chess[i]->GetPosition().x - 215.0f < m_Player->GetPosition().x)
+				(m_Chess[i]->GetPosition().x + 230.0f > m_Player->GetPosition().x)
+				&& (m_Chess[i]->GetPosition().x - 230.0f < m_Player->GetPosition().x)
 				)
 			&&
 			(
-				(m_Chess[i]->GetPosition().z + 225.0f > m_Player->GetPosition().z)
-				&& (m_Chess[i]->GetPosition().z - 225.0f < m_Player->GetPosition().z)
+				(m_Chess[i]->GetPosition().z + 230.0f > m_Player->GetPosition().z)
+				&& (m_Chess[i]->GetPosition().z - 230.0f < m_Player->GetPosition().z)
 				)
 
 			)
@@ -933,12 +939,53 @@ void CGameScene::Update(float elapsedTime)
 	{
 		if (m_ChessCollide_Check[i] == true)
 		{
-			m_Player->Box_Pull(TRUE);
-			m_Chess[i]->SetPosition({
-									m_Chess[i]->GetPosition().x + Final_Vec.x,
-									m_Chess[i]->GetPosition().y ,
-									m_Chess[i]->GetPosition().z + Final_Vec.z
-				});
+			if (m_Chess[King]->CollisionCheck(m_Chess[i])&& i!=0 )
+			{
+				m_Player->Box_Pull(TRUE);
+				m_Chess[King]->SetPosition({
+										m_Chess[King]->GetPosition().x + Final_Vec.x,
+										m_Chess[King]->GetPosition().y ,
+										m_Chess[King]->GetPosition().z + Final_Vec.z
+					});
+			}
+			else if (m_Chess[Knight]->CollisionCheck(m_Chess[i]) && i != 1)
+			{
+				m_Player->Box_Pull(TRUE);
+				m_Chess[Knight]->SetPosition({
+										m_Chess[Knight]->GetPosition().x + Final_Vec.x,
+										m_Chess[Knight]->GetPosition().y ,
+										m_Chess[Knight]->GetPosition().z + Final_Vec.z
+					});
+			}
+			else if (m_Chess[Pawn]->CollisionCheck(m_Chess[i]) && i != 2)
+			{
+				m_Player->Box_Pull(TRUE);
+				m_Chess[Pawn]->SetPosition({
+										m_Chess[Pawn]->GetPosition().x + Final_Vec.x,
+										m_Chess[Pawn]->GetPosition().y ,
+										m_Chess[Pawn]->GetPosition().z + Final_Vec.z
+					});
+			}
+			else if (m_Chess[Rook]->CollisionCheck(m_Chess[i]) && i != 3)
+			{
+				m_Player->Box_Pull(TRUE);
+				m_Chess[Rook]->SetPosition({
+										m_Chess[Rook]->GetPosition().x + Final_Vec.x,
+										m_Chess[Rook]->GetPosition().y ,
+										m_Chess[Rook]->GetPosition().z + Final_Vec.z
+					});
+			}
+			else
+			{
+				m_Player->Box_Pull(TRUE);
+				m_Chess[i]->SetPosition({
+										m_Chess[i]->GetPosition().x + Final_Vec.x,
+										m_Chess[i]->GetPosition().y ,
+										m_Chess[i]->GetPosition().z + Final_Vec.z
+					});
+			}
+			
+
 			if (m_Chess[i]->GetPosition().x < 16500.0f)
 			{
 				m_Chess[i]->SetPosition({
@@ -1003,7 +1050,6 @@ void CGameScene::Update(float elapsedTime)
 	
 	if (m_ChessPlate_Check[King] && m_ChessPlate_Check[Knight] && m_ChessPlate_Check[Pawn] && m_ChessPlate_Check[Rook])
 	{
-		
 		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 1]);
 		p->OpenDoor();
 		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Chess_Success);
@@ -1108,7 +1154,7 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 	 
 	m_Particles->Update(elapsedTime);
 
-	m_HelpTextUI->Update(elapsedTime);
+	//m_HelpTextUI->Update(elapsedTime);
 
 	ZeroMemory(m_PlayerExistingSector, sizeof(m_PlayerExistingSector));
 	for (auto player : m_Players) {
@@ -1119,6 +1165,51 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 	}
 
 
+	if (m_Player->GetPlayerExistingSector() == 0)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[0] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 1)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[1] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 2)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[2] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 3)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[3] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 4)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[4] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
 	for (int i = 0; i < 3; i++)
@@ -1308,8 +1399,52 @@ void CGameScene::DrawMinimap(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12R
 void CGameScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	// draw the text
-	TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"나옴1234abcd!@#"), 0,
-		XMFLOAT2(0.02f, 0.51f), XMFLOAT2(2.0f, 2.0f));
+	if (m_Player->GetPlayerExistingSector() == 0 && m_StageFont[0]==false)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage1"), 0, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"상인의 이야기를 들어주세요"), 1, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.35f, 0.85f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	}
+	else if (m_Player->GetPlayerExistingSector() == 1 && m_StageFont[1] == false)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage2"), 2, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"물 웅덩이를 피해 조심히 이동하세요"), 3, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.3f, 0.85f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	}
+	else if (m_Player->GetPlayerExistingSector() == 2 && m_StageFont[2] == false)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage3"), 4, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"퍼즐을 해결하세요"), 5, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.35f, 0.85f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	}
+	else if (m_Player->GetPlayerExistingSector() == 3 && m_StageFont[3] == false)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage4"), 6, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"미라의 공격을 피하세요"), 7, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.35f, 0.85f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	}
+	else if (m_Player->GetPlayerExistingSector() == 4 && m_StageFont[4] == false)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Boss_Stage"), 8, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.4f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"보스를 처치하세요"), 9, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.4f, 0.85f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+	}
+	if (m_Interaction == true)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"거대한 지옥의 사냥개가 자연을 파괴하고있네\n 녀석을 해치워서 자연을 회복시켜주게"), 10, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.2f, 0.31f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+	}
 }
 
 void CGameScene::DrawMirror(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dRTV,int idx)
@@ -1497,46 +1632,30 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		XMFLOAT3 look = XMFLOAT3{ IntToFloat(p_keyboardProcess.lookX),
 			IntToFloat(p_keyboardProcess.lookY),
 			IntToFloat(p_keyboardProcess.lookZ) };
-
+		 
 		m_Player->SetPosition(pos);
-
-		m_Player->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
-			look, -PLAYER_RUN_SPEED));
+		m_Player->UpdateCamera();
+		m_Player->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+		m_Player->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0), look, PLAYER_RUN_SPEED));
 	}
 	break;
 	case PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT:
 		P_S2C_PROCESS_MOUSE p_mouseProcess;
 		memcpy(&p_mouseProcess, p_buf, p_buf[0]);
 		if (p_mouseProcess.cameraOffset != 0) {
-			float offset = IntToFloat(p_mouseProcess.cameraOffset);
-			//cout << "offset : " << offset << "\n";
+			float offset = IntToFloat(p_mouseProcess.cameraOffset); 
 			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
-		}
-		/*if (p_mouseProcess.cameraRotateX != 0) {
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX);
-		}*/
+		} 
 
 		if (p_mouseProcess.cameraRotateY != 0) {
-			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY);
-			//cout << "cameraRotateY : " << rotateY << "\n";
+			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY); 
 			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), rotateY);
 		}
-
-		//if (p_mouseProcess.cameraRotateZ != 0) {
-		//	m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ);
-		//}
-		/*if (p_mouseProcess.playerRotateX != 0) {
-			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX);
-		}*/
+		 
 		if (p_mouseProcess.playerRotateY != 0) {
-			float rotateY = IntToFloat(p_mouseProcess.playerRotateY);
-			//cout << "playerRotateY : " << rotateY << "\n";
-			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY);
-			//m_MinimapArrow->Rotate(-rotateY * 0.1f);
-		}
-		/*if (p_mouseProcess.playerRotateZ != 0) {
-			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ);
-		}*/
+			float rotateY = IntToFloat(p_mouseProcess.playerRotateY); 
+			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY); 
+		} 
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT:
 	{ 
@@ -1557,6 +1676,25 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
 	}
 	break;
+	case PACKET_PROTOCOL::S2C_BOSS_ACT:
+	{
+		P_S2C_MONSTERS_UPDATE_SYNC* p_monsterUpdate = reinterpret_cast<P_S2C_MONSTERS_UPDATE_SYNC*>(p_buf);
+
+		XMFLOAT3 pos = { IntToFloat(p_monsterUpdate->posX),
+			IntToFloat(p_monsterUpdate->posY),
+			IntToFloat(p_monsterUpdate->posZ) };
+		XMFLOAT3 look = { IntToFloat(p_monsterUpdate->lookX),
+			IntToFloat(p_monsterUpdate->lookY),
+			IntToFloat(p_monsterUpdate->lookZ) };
+		int id = p_monsterUpdate->id;
+
+		m_Boss->ChangeAnimationForServer((BOSS_ANIMATION)p_monsterUpdate->state);
+		m_Boss->SetPosition(pos);
+		m_Boss->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+
+		m_Boss->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
+	}
+	break;
 	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:
 		P_S2C_UPDATE_SYNC p_syncUpdate;
 		memcpy(&p_syncUpdate, p_buf, p_buf[0]);
@@ -1568,41 +1706,60 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
 
-			DisplayVector3(look);
-
 			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
+			
+			if (m_Players[i]->GetWeapon() != p_syncUpdate.weaponType[i]) {  
+				m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
+			} 
+			  
+			if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
+				//cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
+				switch (p_syncUpdate.states[i]) {
+				case IDLE:
+				case SWORD_IDLE:
+				case BOW_IDLE:
+				case STAFF_IDLE:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
+					break;
+				case SWORD_RUN:
+				case BOW_RUN:
+				case STAFF_RUN:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
+					break;
+				case SWORD_ATK:
+					m_SoundManager->PlayEffect(Sound_Name::EFFECT_Sword);
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
+					break;
+				case BOW_ATK:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
+				case STAFF_ATK: 
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
+					break;
+				case SWORD_DEATH:
+				case BOW_DEATH:
+				case STAFF_DEATH:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
+					break;
+					 
+				default:	
+					m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
+					break;
+				}
+				m_Players[i]->m_AnimationPaused = false;
+			} 
+			if (p_syncUpdate.weaponType[i] == PlayerWeaponType::Bow) {
+				m_Players[i]->pullString = p_syncUpdate.pullString[i]; 
+				m_Players[i]->m_AnimationPaused = (p_syncUpdate.animationPause[i]);
+				if (false == m_Players[i]->IsAnimationPaused()) { 
+					if (p_syncUpdate.pullString[i]) {
+						m_Players[i]->SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+					} 
+				}   
+			}
 			m_Players[i]->SetPosition(pos);
 			m_Players[i]->UpdateCamera();
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
-				look, PLAYER_RUN_SPEED)); 
-			m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
-			switch (p_syncUpdate.states[i]) {
-			case IDLE:
-			case SWORD_IDLE:
-			case BOW_IDLE:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
-				break;
-			case SWORD_RUN:
-			case BOW_RUN:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
-				break;
-			case SWORD_ATK:
-			case BOW_ATK:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
-				break;
-			case SWORD_DEATH:
-			case BOW_DEATH:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
-				break;
-
-			case WALK: break;
-			case DAMAGED: break;
-			case SWORD_GET:break;
-			case BOW_GET:break;
-			default:
-				break;
-			}
+			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0), look, PLAYER_RUN_SPEED));
 		}
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
@@ -1628,6 +1785,9 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_Mummy[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
 				m_Mummy[i]->SetAnimationSet(packet->state[i]);
 			}
+			else {
+				m_Mummy[i]->SetDrawable(false);
+			}
 		} 
 	}
 		break;
@@ -1649,18 +1809,18 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				pArrow->m_startPos = pos; 
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
-				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx)); 
-				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT); 
+				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
+				pArrow->SetExistingSector();
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);  
 			}
 			break;
 		}
 		else
 		{
-			pArrow->SetPosition(pos);
+			pArrow->SetPosition(pos); 
 			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
-			DisplayVector3(look);
-		} 
-		cout << "Arrow act\n";
+		}  
+		cout << "Arrow\n";
 	}
 		break;
 	case PACKET_PROTOCOL::SC2_INGAME_MONSTER_ARROW_ACT:	
@@ -1703,8 +1863,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_MummyLaser3[i]->Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 5.0f);
 
 			} 
-		}
-		cout << "Laser Update\n";
+		} 
 	}
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_FIREBALL_ACT:	
@@ -1726,8 +1885,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		else
 		{
 			pFireball->SetPosition(pos);
-		}
-		cout << "FBS act\n";
+		} 
 	}
 		break;
 	case PACKET_PROTOCOL::S2C_CHESS_OBJ_ACT:
@@ -1867,19 +2025,11 @@ void CGameScene::ProcessInput()
 		} 
 		if (keyInput.KEY_U) {
 			p_keyboard.keyInput = VK_U;
-			processKey = true;
-			//for (int i = 0; i < 5; ++i) {
-			//	CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
-			//	p->OpenDoor();
-			//}
+			processKey = true; 
 		}
 		if (keyInput.KEY_I) {
 			p_keyboard.keyInput = VK_I;
-			processKey = true;
-			//for (int i = 0; i < 5; ++i) {
-			//	CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
-			//	p->CloserDoor();
-			//}
+			processKey = true; 
 		}
 
 		if (keyInput.KEY_3)
@@ -1909,6 +2059,33 @@ void CGameScene::ProcessInput()
 		{
 			gbWireframeOn = false;
 		}
+
+		if (keyInput.KEY_F7)
+		{
+			p_keyboard.keyInput = VK_F7;
+			processKey = true;
+		}
+		if (keyInput.KEY_F8)
+		{
+			p_keyboard.keyInput = VK_F8;
+			processKey = true;
+		}
+		if (keyInput.KEY_F9)
+		{
+			p_keyboard.keyInput = VK_F9;
+			processKey = true;
+		} 
+		if (keyInput.KEY_R)
+		{
+			p_keyboard.keyInput = VK_R;
+			processKey = true; 
+		}
+		if (keyInput.KEY_Z)
+		{
+			p_keyboard.keyInput = VK_Z;
+			processKey = true;
+		}
+		 
 		if (processKey == false) return; 
 		SendPacket(&p_keyboard);
 		return;
@@ -1916,8 +2093,7 @@ void CGameScene::ProcessInput()
 
 	if (m_CurrentCamera == nullptr) return;
 
-	float cameraSpeed = m_CurrentCamera->GetSpeed();
-	XMFLOAT3 velocity = m_Player->GetVelocity();
+	float cameraSpeed = m_CurrentCamera->GetSpeed(); 
 
 	XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
 	float distance = PLAYER_RUN_SPEED;
@@ -2066,6 +2242,8 @@ void CGameScene::ProcessInput()
 	{
 		m_Chess[King]->SetPosition(m_ChessPlate[5][6]);
 		m_Chess[Rook]->SetPosition(m_ChessPlate[1][4]);
+		m_Chess[Pawn]->SetPosition(m_ChessPlate[3][5]);
+		m_Chess[Knight]->SetPosition(m_ChessPlate[6][4]);
 	}
 
 	if (keyInput.KEY_O)
@@ -2102,7 +2280,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 		p_keyboard.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
 		p_keyboard.id = CFramework::GetInstance().GetPlayerId();
 		p_keyboard.keyInput = wParam;
-		p_keyboard.isKeyDown = !isKeyUp;
+		p_keyboard.isKeyDown = !isKeyUp; 
 		SendPacket(&p_keyboard);
 		return;
 	}
@@ -2125,6 +2303,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 		}
 		if (wParam == VK_J) {
 			if (m_Player->IsCanAttack()) {
+				cout << "Can Attack " << (int)m_Player ->GetAnimationSet() << "\n";
 				switch (m_Player->GetWeapon())
 				{
 				case PlayerWeaponType::Sword:
@@ -2160,13 +2339,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 					break;
 				}
 			}
-		}
-		if (wParam == VK_M) {
-			if (m_Player->IsCanAttack()) {
-				m_Player->Attack(1);
-				cout << "SKILLLLL~~" << endl;
-			}
-		}
+		} 
 	}
 	else
 	{
@@ -2596,11 +2769,11 @@ void CGameScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(pUI);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
-	m_HelpTextUI = new HelpTextUI(pd3dDevice, pd3dCommandList, 1.5, 0.25f, 0.8f, HELP_TEXT_INFO::QuestAccept);
+	/*m_HelpTextUI = new HelpTextUI(pd3dDevice, pd3dCommandList, 1.5, 0.25f, 0.8f, HELP_TEXT_INFO::QuestAccept);
 	m_HelpTextUI->SetPosition({ 0.0f, -0.8,  0 });
 	m_HelpTextUI->SetTextureIndex(0x01);
 	m_HelpTextUI->SetShader(CShaderHandler::GetInstance().GetData("UiHelpText"));
-	m_UIs.push_back(m_HelpTextUI);
+	m_UIs.push_back(m_HelpTextUI);*/
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.20f);
@@ -2698,7 +2871,6 @@ void CGameScene::BuildPuzzles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_Chess[King]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.5, 0.7, 1.5, XMFLOAT3{ 0,0,0.7 });
 	m_Chess[King]->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
 	m_Chess[King]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
-
 	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[King]);
 
 	m_Chess[Knight] = new CGameObject();
@@ -2785,8 +2957,7 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Boss->SetActivityScope({ scopeSize.x, 0, scopeSize.z }, { centerPos });
 		m_Boss->SetSightBoundingBox({ scopeSize.x / scale.x, 15, scopeSize.z / scale.z });
 		m_Boss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, scopeSize.x / scale.x, 15, scopeSize.z / scale.z, XMFLOAT3{ 0, 0.0f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(m_Boss);
-
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(m_Boss); 
 	}
 
 	CGameObjectVer2* pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
@@ -2891,22 +3062,7 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 3, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-  
-		// 원거리
-		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton_Archer.bin", NULL, true);
-		pEnemy = new CRangedEnemy();
-		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetChild(pSkeletonModel, true);
-		pEnemy->SetShadertoAll();
-		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
-		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
-		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 3, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
-		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-		
+
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
@@ -2917,6 +3073,8 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE + 1000.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 3, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
@@ -2932,27 +3090,43 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE + 2000.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->SetSightBoundingBox(sightBox);
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
+		// 원거리
+		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton_Archer.bin", NULL, true);
+		pEnemy = new CRangedEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetChild(pSkeletonModel, true);
+		pEnemy->SetShadertoAll();
+		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
+	}
+	{	// Monster Area1-2
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
-		pEnemy->SetTextureInedxToAll(0x40);
-		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE + 3000.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
-		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetPosition({ 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->SetSightBoundingBox(sightBox);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
+		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
+		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 3, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-	}
-	{	// Monster Area1-2
+
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/MaceSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
@@ -2963,8 +3137,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 3, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
@@ -2981,8 +3153,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 3, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
@@ -2999,8 +3169,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1600, 0, 2950 }, { 7800.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(7800.0f,  11450.0f),  11450.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1600 * 0.75f / scale.x , 10, 2950 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1600 * 0.75f / scale.x, 3, 2950 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
@@ -3018,8 +3186,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_3);
@@ -3036,8 +3202,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_3);
@@ -3054,8 +3218,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1300, 0, 1450 }, { 12100.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(12100.0f, 17950.0f), 17950.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1300 * 0.75f / scale.x, 3, 1450 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_3);
@@ -3074,8 +3236,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 3, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_3);
@@ -3092,8 +3252,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 3, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_3);
@@ -3110,8 +3268,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1400, 0, 1200 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 13300.0f), 13300.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1400 * 0.75f / scale.x , 10, 1200 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1400 * 0.75f / scale.x, 3, 1200 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_3);
@@ -3131,8 +3287,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 3, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_4);
@@ -3148,8 +3302,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 3, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_4);
@@ -3165,8 +3317,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 3, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_4);
@@ -3182,8 +3332,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetPosition({ 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1200, 0, 2750 }, { 11900.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(11900.0f, 3250.0f), 3250.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1200 * 0.75f / scale.x , 10, 2750 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1200 * 0.75f / scale.x, 3, 2750 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_4);
@@ -3370,8 +3518,14 @@ void CGameScene::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		z_Tree = 4000.0f + (600 * i);
 		x_Tree *= MAP_SCALE_SIZE;
 		z_Tree *= MAP_SCALE_SIZE;
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree });
-
+		if (i == 1)
+		{
+			pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f,  z_Tree });
+		}
+		if (i == 0)
+		{
+			pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 640.0f,  z_Tree });
+		}
 		pBillboardObject->SetTextureIndex(0x010);
 		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
@@ -3908,17 +4062,13 @@ void CGameScene::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock"); 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree] = new CFixedMesh(pd3dDevice, pd3dCommandList, "GreenTree");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
-
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree] = new CFixedMesh(pd3dDevice, pd3dCommandList, "GreenTree"); 
+	 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::King] = new CFixedMesh(pd3dDevice, pd3dCommandList, "king");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Rook] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rook");
@@ -3927,8 +4077,7 @@ void CGameScene::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Laser");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall] = new CFixedMesh(pd3dDevice, pd3dCommandList, "FireBall");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Quest] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Quest");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stair] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stair");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Quest] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Quest"); 
 }
 
 void CGameScene::BuildShadowResource(ID3D12Device* pd3dDevice)
@@ -4003,7 +4152,7 @@ void CGameScene::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::FireBallParticle);
 	}
 	// 안개
-	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::RadialParitcle);
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 1000, PARTICLE_TYPE::RadialParitcle);
 
 	// 비
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 100000, PARTICLE_TYPE::RainParticle);
@@ -4290,9 +4439,6 @@ void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 		m_Players[i]->SetDrawable(false);
 		m_Players[i]->SetWeaponPointer();
-
-		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
-		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 	}
 }
 
@@ -4397,6 +4543,10 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 			m_MummyExist[0] = false;
 			m_Mummy[1]->SetMummyDie(1);
 			m_Mummy[2]->SetMummyDie(1);
+			if (m_Two_Mira_Die == true)
+			{
+				m_All_Die = true;
+			}
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
@@ -4404,12 +4554,18 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
+			
 			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
 			m_One_Mira_Die = true;
 			m_One_Mira_Die_Laser = true;
+			if (m_All_Die == true)
+			{
+				cout << "dd" << endl;
+				OpenDoor();
+			}
 		}
 
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy2)
@@ -4417,6 +4573,10 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 			m_MummyExist[1] = false;
 			m_Mummy[0]->SetMummyDie2(1);
 			m_Mummy[2]->SetMummyDie2(1);
+			if (m_Two_Mira_Die == true)
+			{
+				m_All_Die = true;
+			}
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
@@ -4424,18 +4584,28 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 				m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
+			
 			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 			m_Mummy[2]->Scale(1.5f, 1.5f, 1.5f, true);
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
 			m_One_Mira_Die = true;
 			m_One_Mira_Die_Laser = true;
+			if (m_All_Die == true)
+			{
+				cout << "dd" << endl;
+				OpenDoor();
+			}
 		}
 		else if (pEmeny->GetEnemyAttackType() == EnemyAttackType::Mummy3)
 		{
 			m_MummyExist[2] = false;
 			m_Mummy[0]->SetMummyDie3(1);
 			m_Mummy[1]->SetMummyDie3(1);
+			if (m_Two_Mira_Die == true)
+			{
+				m_All_Die = true;
+			}
 			if (m_One_Mira_Die == true)
 			{
 				m_Two_Mira_Die = true;
@@ -4443,13 +4613,20 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 				m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 				m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 			}
+			
 			m_Mummy[0]->Scale(1.5f, 1.5f, 1.5f, true);
 			m_Mummy[1]->Scale(1.5f, 1.5f, 1.5f, true);
 
 			m_ObjectLayers[(int)OBJECT_LAYER::Mummy].erase(res2);
 			m_One_Mira_Die = true;
 			m_One_Mira_Die_Laser = true;
+			if (m_All_Die == true)
+			{
+				cout << "dd" << endl;
+				OpenDoor();
+			}
 		}
+		
 
 	}
 
@@ -4507,6 +4684,11 @@ void CGameScene::UseEffects(int effectType, const XMFLOAT3& xmf3Position, float 
 			effect->FixPositionByTerrain(m_Terrain);
 		effect->WakeUpAfterTime(wakeupTime);
 	}
+}
+
+void CGameScene::OpenDoor()
+{
+	m_Opendoor = true;
 }
 
 void CGameScene::SendMouseInputPacket()

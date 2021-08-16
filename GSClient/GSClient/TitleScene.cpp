@@ -44,7 +44,7 @@ XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
 CTitleScene::CTitleScene()
 {  
 	m_SoundManager = new CSoundManager();
-	m_SoundManager->AddStream("resources/sounds/BGM_Maingame.m4a", Sound_Name::BGM_TITLE);
+	m_SoundManager->AddStream("resources/sounds/BGM_Title.mp3", Sound_Name::BGM_TITLE);
 	//m_SoundManager->AddStream("resources/sounds/TestTitle.mp3", Sound_Name::BGM_MAIN_GAME);
 
 	m_SoundManager->AddSound("resources/sounds/ShotArrow.wav", Sound_Name::EFFECT_ARROW_SHOT);
@@ -58,7 +58,7 @@ CTitleScene::CTitleScene()
 
 CTitleScene::~CTitleScene()
 {
-
+	m_SoundManager->Stop();
 }
 
 void CTitleScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height)
@@ -564,6 +564,7 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 		if (x > 770 && x < 1020) {
 			if (y > 588 & y < 677) {
 				// single play  
+				m_SoundManager->Stop();
 				ChangeScene<CGameScene>(nullptr);
 			}
 		}
@@ -662,6 +663,7 @@ void CTitleScene::OnMouseDown(WPARAM btnState, int x, int y)
 				sceneChangeInfo.roomNo = m_RoomStartNo + m_RoomSelectNo;
 				sceneChangeInfo.weaponType = (int)m_WeaponSelected;
 				cout << "ChangeScene to CGameScene\n";
+				m_SoundManager->Stop();
 				ChangeScene<CGameScene>((void*)&sceneChangeInfo);
 
 				CFramework::GetInstance().GetCurrentScene()->LoginToServer();

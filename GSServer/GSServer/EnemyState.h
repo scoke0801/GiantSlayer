@@ -91,7 +91,7 @@ class TraceState : public CState<CEnemy>
 {
 private:
     float m_AttackRange;
-    CPlayer* m_TargetPlayer;
+    CPlayer* m_TargetPlayer = nullptr;
 
 public:
     TraceState(CEnemy* enemy) { Enter(enemy); }
