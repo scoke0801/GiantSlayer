@@ -102,6 +102,11 @@ void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dC
 	BuildObjects(pd3dDevice, pd3dCommandList);
 	BuildUIs(pd3dDevice, pd3dCommandList);
 
+	for (int i = 0; i < 5; ++i) {
+		CDoorWall* p = reinterpret_cast<CDoorWall*> (m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
+
+		p->OpenDoor();
+	}
 	m_CreatedTime = chrono::high_resolution_clock::now();
 
 	m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
@@ -4550,8 +4555,7 @@ void CGameScene::ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector)
 			m_Mummy[2]->AddFriends_Laser(m_MummyLaser3[i]);
 			m_MummyLaser3[i]->AddFriends_p(m_Mummy[2]);
 		}
-	}
-		
+	} 
 } 
 
 void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -4563,7 +4567,7 @@ void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_Player = m_Players[0];
 
 	m_Players[0]->SetChild(pPlayerModel, true);
-	m_Players[0]->SetPosition({ 550.0f,   230.0f,  1850.0f });
+	m_Players[0]->SetPosition({ 750.0f,   230.0f,  2350.0f });
 	m_Players[0]->Scale(200, 200, 200);
 	m_Players[0]->SetShadertoAll();
 

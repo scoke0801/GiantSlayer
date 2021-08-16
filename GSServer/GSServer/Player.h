@@ -132,6 +132,8 @@ public:
 	void ResetBow();
 
 	void SetWeapon(PlayerWeaponType weaponType);
+	
+	bool IsPull() const { return m_PullBox; }
 
 	void SetPullBox(bool info) { m_PullBox = info; }
 	void Box_Pull(bool Pull_State);

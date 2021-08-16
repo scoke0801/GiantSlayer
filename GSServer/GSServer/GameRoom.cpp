@@ -440,18 +440,31 @@ void CGameRoom::Update(float elapsedTime)
 			m_Npc_Event = false;
 		}
 
-		// 체스 그 자체랑 충돌처리
+		bool distOut = true;
 		for (int i = 0; i < ChessType::Count; i++)
 		{
+			float dist = Vector3::Length(Vector3::Subtract(m_Chess[i]->GetPosition(), m_Players[playerIdx]->GetPosition()));
+
+			if (dist <= 350)
+			{
+				distOut = false;
+			} 
+		}
+		if (distOut) {
+			m_Players[playerIdx]->Box_Pull(FALSE);
+		}
+		// 체스 그 자체랑 충돌처리
+		for (int i = 0; i < ChessType::Count; i++)
+		{  
 			if (
 				(
-					(m_Chess[i]->GetPosition().x + 215.0f > m_Players[playerIdx]->GetPosition().x)
-					&& (m_Chess[i]->GetPosition().x - 215.0f < m_Players[playerIdx]->GetPosition().x)
+					(m_Chess[i]->GetPosition().x + 350.0f > m_Players[playerIdx]->GetPosition().x)
+					&& (m_Chess[i]->GetPosition().x - 350.0f < m_Players[playerIdx]->GetPosition().x)
 					)
 				&&
 				(
-					(m_Chess[i]->GetPosition().z + 225.0f > m_Players[playerIdx]->GetPosition().z)
-					&& (m_Chess[i]->GetPosition().z - 225.0f < m_Players[playerIdx]->GetPosition().z)
+					(m_Chess[i]->GetPosition().z + 350.0f > m_Players[playerIdx]->GetPosition().z)
+					&& (m_Chess[i]->GetPosition().z - 350.0f < m_Players[playerIdx]->GetPosition().z)
 					)
 
 				)
@@ -463,18 +476,20 @@ void CGameRoom::Update(float elapsedTime)
 			{
 				m_ChessCollide_Check[i] = false;
 			}
-
 		}
+
 		for (int i = 0; i < ChessType::Count; i++)
 		{
-			if (m_ChessCollide_Check[i] == true)
+			if (m_ChessCollide_Check[i] == true && m_Players[playerIdx]->IsPull())
 			{
-				m_Players[playerIdx]->Box_Pull(TRUE);
+				//m_Players[playerIdx]->Box_Pull(TRUE);
 				m_Chess[i]->SetPosition({
 										m_Chess[i]->GetPosition().x + Final_Vec.x,
 										m_Chess[i]->GetPosition().y ,
 										m_Chess[i]->GetPosition().z + Final_Vec.z
 					});
+
+				// 체스판 범위 밖 체크
 				if (m_Chess[i]->GetPosition().x < 16500.0f)
 				{
 					m_Chess[i]->SetPosition({
@@ -508,10 +523,10 @@ void CGameRoom::Update(float elapsedTime)
 						});
 				}
 			}
-			else if (m_ChessCollide_Check[King] == false && m_ChessCollide_Check[Knight] == false && m_ChessCollide_Check[Pawn] == false && m_ChessCollide_Check[Rook] == false)
-			{
-				m_Players[playerIdx]->Box_Pull(FALSE);
-			}
+		}
+		if (m_ChessCollide_Check[King] == false && m_ChessCollide_Check[Knight] == false && m_ChessCollide_Check[Pawn] == false && m_ChessCollide_Check[Rook] == false)
+		{
+			//m_Players[playerIdx]->Box_Pull(FALSE);
 		}
 
 		// 1 킹 2 나이트 3 폰 4 룩 // 퍼즐 체크 
@@ -2522,7 +2537,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 			}
 			break;
 			case VK_R:
-			{
+			{ 
 				if (m_Npc_Event == true)
 				{
 					m_Interaction = true;
@@ -2530,7 +2545,22 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 				else if (m_Npc_Event == false)
 				{
 					m_Interaction = false;
-				}
+					// 체스 그 자체랑 충돌처리
+					for (int i = 0; i < ChessType::Count; i++)
+					{
+						float dist = Vector3::Length(Vector3::Subtract(m_Chess[i]->GetPosition(), m_Players[id]->GetPosition()));
+					
+						if( dist <= 350)
+						{
+							m_Players[id]->SetPullBox(true);
+							break;
+						}
+						else
+						{
+							m_Players[id]->SetPullBox(false);
+						}
+					}
+				} 
 			}
 			break;
 			case VK_F1:
