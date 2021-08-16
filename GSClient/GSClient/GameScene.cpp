@@ -524,7 +524,7 @@ void CGameScene::Update(float elapsedTime)
 
 	m_Particles->Update(elapsedTime);
 
-	m_HelpTextUI->Update(elapsedTime);
+	//m_HelpTextUI->Update(elapsedTime);
 
 	if (m_Interaction == true)
 	{
@@ -538,7 +538,9 @@ void CGameScene::Update(float elapsedTime)
 	if (m_Opendoor == true)
 	{
 		CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 3]);
+		CDoorWall* p2 = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + 4]);
 		p->OpenDoor();
+		p2->OpenDoor();
 		m_SoundManager->PlayEffect(Sound_Name::EFFECT_Chess_Success);
 	}
 
@@ -697,11 +699,7 @@ void CGameScene::Update(float elapsedTime)
 			}
 		}
 	}
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy])
-	{
-	}
 	
-
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
@@ -1126,7 +1124,7 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 	 
 	m_Particles->Update(elapsedTime);
 
-	m_HelpTextUI->Update(elapsedTime);
+	//m_HelpTextUI->Update(elapsedTime);
 
 	ZeroMemory(m_PlayerExistingSector, sizeof(m_PlayerExistingSector));
 	for (auto player : m_Players) {
@@ -1330,31 +1328,47 @@ void CGameScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 	{
 		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage1"), 0, //텍스트 인덱스추가하면 다음줄 위치를 
 			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"상인의 이야기를 들어주세요"), 1, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.35f, 0.85f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
 	}
 	else if (m_Player->GetPlayerExistingSector() == 1 && m_StageFont[1] == false)
 	{
-		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage2"), 1, //텍스트 인덱스추가하면 다음줄 위치를 
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage2"), 2, //텍스트 인덱스추가하면 다음줄 위치를 
 			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"물 웅덩이를 피해 조심히 이동하세요"), 3, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.3f, 0.85f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
 	}
 	else if (m_Player->GetPlayerExistingSector() == 2 && m_StageFont[2] == false)
 	{
-		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage3"), 2, //텍스트 인덱스추가하면 다음줄 위치를 
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage3"), 4, //텍스트 인덱스추가하면 다음줄 위치를 
 			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"퍼즐을 해결하세요"), 5, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.35f, 0.85f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
 	}
 	else if (m_Player->GetPlayerExistingSector() == 3 && m_StageFont[3] == false)
 	{
-		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage4"), 3, //텍스트 인덱스추가하면 다음줄 위치를 
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Stage4"), 6, //텍스트 인덱스추가하면 다음줄 위치를 
 			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"미라의 공격을 피하세요"), 7, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.35f, 0.85f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
 	}
 	else if (m_Player->GetPlayerExistingSector() == 4 && m_StageFont[4] == false)
 	{
-		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Boss_Stage"), 4, //텍스트 인덱스추가하면 다음줄 위치를 
-			XMFLOAT2(0.45f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"Boss_Stage"), 8, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.4f, 0.05f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"보스를 처치하세요"), 9, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.4f, 0.85f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
 	}
 	if (m_Interaction == true)
 	{
-		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"거대한 지옥의 사냥개가 자연을 파괴하고있네\n 녀석을 해치워서 자연을 회복시켜주게"), 5, //텍스트 인덱스추가하면 다음줄 위치를 
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"거대한 지옥의 사냥개가 자연을 파괴하고있네\n 녀석을 해치워서 자연을 회복시켜주게"), 10, //텍스트 인덱스추가하면 다음줄 위치를 
 			XMFLOAT2(0.2f, 0.31f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
 	}
 }
 
@@ -2109,6 +2123,8 @@ void CGameScene::ProcessInput()
 	{
 		m_Chess[King]->SetPosition(m_ChessPlate[5][6]);
 		m_Chess[Rook]->SetPosition(m_ChessPlate[1][4]);
+		m_Chess[Pawn]->SetPosition(m_ChessPlate[3][5]);
+		m_Chess[Knight]->SetPosition(m_ChessPlate[6][4]);
 	}
 
 	if (keyInput.KEY_O)
@@ -2630,11 +2646,11 @@ void CGameScene::BuildUIs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pUI->SetShader(CShaderHandler::GetInstance().GetData("Ui"));
 	m_UIs.push_back(pUI);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
-	m_HelpTextUI = new HelpTextUI(pd3dDevice, pd3dCommandList, 1.5, 0.25f, 0.8f, HELP_TEXT_INFO::QuestAccept);
+	/*m_HelpTextUI = new HelpTextUI(pd3dDevice, pd3dCommandList, 1.5, 0.25f, 0.8f, HELP_TEXT_INFO::QuestAccept);
 	m_HelpTextUI->SetPosition({ 0.0f, -0.8,  0 });
 	m_HelpTextUI->SetTextureIndex(0x01);
 	m_HelpTextUI->SetShader(CShaderHandler::GetInstance().GetData("UiHelpText"));
-	m_UIs.push_back(m_HelpTextUI);
+	m_UIs.push_back(m_HelpTextUI);*/
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	pUI = new Minimap(pd3dDevice, pd3dCommandList, 0.20f);
