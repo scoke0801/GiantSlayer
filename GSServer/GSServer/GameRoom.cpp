@@ -601,7 +601,7 @@ void CGameRoom::Update(float elapsedTime)
 			m_Players[i]->SetPosition(XMFLOAT3(plPos.x, -1760.0f, plPos.z));
 			m_Players[i]->UpdateCamera();
 		}
-	}
+	} 
 }
 void CGameRoom::InitAll()
 {  
@@ -2540,6 +2540,20 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 				m_Players[id]->SetATK(500);
 			}
 			break;
+			case VK_SPACE: 
+				// 몬스터 삭제부분 
+				
+				for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy])
+				{
+					if (m_Players[id]->GetPlayerExistingSector() == int(pEnemy->GetExistingSector()))
+					{
+						CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
+						thisEnemy->ChangeState(new DeathState(thisEnemy));
+						//DeleteEnemy(thisEnemy); 
+					}
+				}
+				
+				break;
 			case VK_R:
 			{ 
 				if (m_Npc_Event == true)

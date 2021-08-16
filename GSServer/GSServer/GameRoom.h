@@ -101,6 +101,7 @@ private:
 	BYTE									m_FireballIdx = 0;
 	BYTE									m_plArrowIdx = 0;
 	BYTE									m_monArrowIdx = 0;
+	bool									m_MonsterAllDie = false;
 public:
 	CGameRoom();
 	~CGameRoom() {}

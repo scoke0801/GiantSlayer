@@ -294,9 +294,9 @@ void BornState::Exit(CEnemy* enemy)
 
 void DeathState::Enter(CEnemy* enemy)
 { 
-    m_LifeTime = ENEMY_DEATH_TIME;
+    m_LifeTime = ENEMY_DEATH_TIME - 0.2f ;
     if (enemy->GetEnemyType() == EnemyType::Boss)
-        m_LifeTime = BOSS_DEAD_ANIMATION_LENGTH;
+        m_LifeTime = BOSS_DEAD_ANIMATION_LENGTH - 0.2f;
     enemy->ChangeAnimation(ObjectState::Die);
 }
 

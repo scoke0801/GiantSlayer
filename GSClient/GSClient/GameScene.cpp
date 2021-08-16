@@ -1857,8 +1857,9 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_Players[i]->pullString = p_syncUpdate.pullString[i]; 
 				m_Players[i]->m_AnimationPaused = (p_syncUpdate.animationPause[i]);
 				if (false == m_Players[i]->IsAnimationPaused()) { 
+
 					if (p_syncUpdate.pullString[i]) {
-						m_Players[i]->SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+						//m_Players[i]->SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
 					} 
 				}    
 			}
@@ -2167,13 +2168,22 @@ void CGameScene::ProcessInput()
 			p_keyboard.keyInput = VK_D;
 			processKey = true;
 		}
+
 		if (keyInput.KEY_U) {
 			p_keyboard.keyInput = VK_U;
 			processKey = true;
+			for (int i = 0; i < 5; ++i) {
+				CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
+				p->OpenDoor();
+			}
 		}
 		if (keyInput.KEY_I) {
 			p_keyboard.keyInput = VK_I;
 			processKey = true;
+			for (int i = 0; i < 5; ++i) {
+				CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
+				p->CloserDoor();
+			}
 		}
 
 		if (keyInput.KEY_3)
@@ -2232,6 +2242,12 @@ void CGameScene::ProcessInput()
 				m_Interaction = false;
 			}
 			
+		}
+		if (keyInput.KEY_SPACE)
+		{
+			p_keyboard.keyInput = VK_SPACE;
+			processKey = true;
+
 		}
 		if (keyInput.KEY_Z)
 		{

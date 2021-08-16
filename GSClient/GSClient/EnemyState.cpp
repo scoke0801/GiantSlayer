@@ -330,7 +330,7 @@ void BornState::Exit(CEnemy* enemy)
 
 void DeathState::Enter(CEnemy* enemy)
 {
-    cout << "Áê±Ý" << endl;
+    cout << "Áê±Ý" << endl; 
     m_LifeTime = ENEMY_DEATH_TIME;
 
     if (enemy->GetEnemyType() == EnemyType::Boss)

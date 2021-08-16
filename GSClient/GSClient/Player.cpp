@@ -462,6 +462,7 @@ void CPlayer::Death()
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 	m_HP = 0;
 	m_SP = 0;
+	
 	IncreaseAttackWaitingTime(m_DeathAnimLength);
 	SetAnimationType(ANIMATION_TYPE_ONCE);
 	SetAnimationSet(DEATH);
