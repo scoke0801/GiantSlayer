@@ -295,8 +295,8 @@ void CFramework::BuildScene()
 	//m_CurrentScene = new CNullScene;
 
 	//m_CurrentScene = new CGameScene; 
-	m_CurrentScene = new CNullScene;
-	//m_CurrentScene = new CTitleScene; 
+	//m_CurrentScene = new CNullScene;
+	m_CurrentScene = new CTitleScene; 
 	//m_CurrentScene->BuildCamera(m_pd3dDevice, m_pd3dCommandList,
 	//	m_nWndClientWidth, m_nWndClientHeight);
 	m_CurrentScene->Init(m_pd3dDevice, m_pd3dCommandList, m_nWndClientWidth, m_nWndClientHeight);

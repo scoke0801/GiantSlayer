@@ -318,6 +318,7 @@ namespace Matrix4x4
 #define VK_4 0x34
 #define VK_5 0x35 
 
+#define VK_R 0x52
 #define VK_U 0x55
 #define VK_I 0x49
 #define VK_O 0x4F
@@ -325,6 +326,9 @@ namespace Matrix4x4
 #define VK_J 0x4A
 #define VK_K 0x4B
 #define VK_L 0x4C 
+#define VK_M 0x4D
+#define VK_N 0x4E
+#define VK_Z 0x5A
 #include "protocol.h"
 
 extern int* g_GridHeights[25][25]; 

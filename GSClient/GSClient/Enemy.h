@@ -179,16 +179,19 @@ private:
 	bool ScaleCheck = false;
 	bool MummyScale[3] = { false,false,false };
 	bool MummyDie[3] = { false,false,false };
+
 public:
 
 	CParticle* m_Particles;
 	
 	array<vector<CGameObject*>, (int)OBJECT_LAYER::Count> m_ObjectLayers;
-public:
 
+public: 
 	CMummy();
 	~CMummy();
 
+	void Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override; 
+	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
 	void Attack(float elapsedTime) override;
 	void Update(float elapsedTime) override;
 	void AddFriends(CMummy* mummy);

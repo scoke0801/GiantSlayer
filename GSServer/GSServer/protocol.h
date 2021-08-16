@@ -23,7 +23,7 @@ constexpr float MAP_SCALE_SIZE = 1.5f;
 // 뛰기 : 100미터 16초, 1초에 6.25미터를 달린다. 625 
 // 걷기 : 100미터 60초, 1초에 1.66미터를 걷는다. 166
 // 게임이니까 1.5배정도 빠르게하자
-constexpr float PLAYER_RUN_SPEED = 650.0f;
+constexpr float PLAYER_RUN_SPEED = 850.0f;
 constexpr float PLAYER_WALK_SPEED = 250.0f;
 
 // 화살 속도, 시속 235000m, 분속 3916.66m, 391666cm, 초속 6527
@@ -273,6 +273,7 @@ enum class PACKET_PROTOCOL : short
 	S2C_INGAME_LASER_ACT,
 	S2C_INGAME_FIREBALL_ACT,
 	S2C_CHESS_OBJ_ACT,
+	S2C_BOSS_ACT,
 
 	S2C_DELETE_OBJ,
 
@@ -421,6 +422,8 @@ struct P_S2C_UPDATE_SYNC {
 	BYTE states[MAX_ROOM_PLAYER];
 	bool existance[MAX_ROOM_PLAYER];	
 	
+	bool pullString[MAX_ROOM_PLAYER];
+	bool animationPause[MAX_ROOM_PLAYER];
 	PlayerWeaponType weaponType[MAX_ROOM_PLAYER];
 };
 
@@ -530,5 +533,5 @@ struct P_S2C_DELETE_SYNC
 	// objectLayer
 	short		objType;
 	short			idx;
-};
+}; 
 #pragma pack (pop)

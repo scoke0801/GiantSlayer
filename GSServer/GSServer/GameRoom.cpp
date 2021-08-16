@@ -106,21 +106,23 @@ void CGameRoom::Update(float elapsedTime)
 		}
 	}
 
+
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
 		// 변수명 변경으로 인한 true/false 반전..
-		if (true == pArrow->IsUsable()) {
+		if (true == pArrow->IsDrawable()) {
 			continue;
 		}
 		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox])
 		{
 			if (pArrow->CollisionCheck(pEnemy)) {
+
 				pArrow->InverseDirection();
 				break;
 			}
 		}
 	}
 
-	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
 		}
@@ -129,21 +131,120 @@ void CGameRoom::Update(float elapsedTime)
 			if (false == pEnemy->CollisionCheck(m_Players[i])) {
 				continue;
 			}
+
 			if (false == m_Players[i]->IsCanAttack()) {
 				if (false == m_Players[i]->IsAleradyAttack()) {
 					pEnemy->ChangeState(ObjectState::Attacked, m_Players[i]);
-					cout << "플레이어 공격 - 몬스터\n";
 					m_Players[i]->SetAleradyAttack(true);
 				}
 			}
 			else if (m_Players[i]->Attacked(pEnemy))
 			{
-				//m_CurrentCamera->SetShake(true, 0.5f, 15);
 				m_Players[i]->FixCollision();
-				cout << "충돌 : 플레이어 - 적\n";
+			}
+
+		}
+	}
+
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+			if (false == pEnemy->CollisionCheck(m_Players[i])) {
+				continue;
+			}
+
+			if (false == m_Players[i]->IsCanAttack()) {
+				if (false == m_Players[i]->IsAleradyAttack()) {
+					CMummy* thisEnemy = reinterpret_cast<CMummy*>(pEnemy);
+
+					thisEnemy->SendDieInfotoFriends();
+
+					DeleteEnemy(thisEnemy);
+
+					m_Players[i]->SetAleradyAttack(true);
+				}
+			}
+			else if (m_Players[i]->Attacked(pEnemy))
+			{
+				m_Players[i]->FixCollision();
+
 			}
 		}
 	}
+	 
+
+	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
+		for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Obstacle]) {
+			if (false == pEnemy->IsInSameSector(pObstacle->GetExistingSector())) {
+				continue;
+			}
+			if (pObstacle->CollisionCheck(pEnemy)) {
+				CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
+				thisEnemy->FixCollision(pObstacle);
+
+			}
+		}
+
+		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+			if (false == pEnemy->CollisionCheck(m_Players[i])) {
+				continue;
+			}
+			m_Players[i]->FixCollision(pEnemy);
+
+			if (false == m_Players[i]->IsCanAttack() && pEnemy->IsCanDamaged()) {
+				if (pEnemy->CollisionCheck(m_Players[i]->m_pWeapon)) {
+					pEnemy->ChangeState(ObjectState::Attacked, m_Players[i]);
+					m_Players[i]->SetAleradyAttack(true);
+					break;
+				}
+			}
+			else if (pEnemy->GetStateInfo() == ObjectState::Attack)
+			{
+				if (pEnemy->CollisionCheck(m_Players[i])) {
+					m_Players[i]->Attacked(pEnemy);
+					m_Players[i]->FixCollision();
+				}
+			}
+		} 
+	}
+
+	for (auto pMummy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy])
+	{
+		// 왼쪽벽
+		if (pMummy->GetPosition().x < 21269)
+		{
+			m_Mummy_Reverse_Direction = true;
+		}
+		else if (pMummy->GetPosition().x > 21369)
+		{
+			m_Mummy_Reverse_Direction = false;
+		}
+		if (m_Mummy_Reverse_Direction == true)
+		{
+			pMummy->SetTargetVector(Vector3::Multifly(XMFLOAT3(180, 0, 0), 1));
+		}
+		if (pMummy->GetPosition().x > 29485)
+		{
+			m_Mummy_Reverse_Direction = true;
+		}
+		else if (pMummy->GetPosition().x < 29385)
+		{
+			m_Mummy_Reverse_Direction = false;
+		}
+		if (m_Mummy_Reverse_Direction == true)
+		{
+			pMummy->SetTargetVector(Vector3::Multifly(XMFLOAT3(180, 0, 0), -1));
+		}
+	}
+	 
+
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
 		// 변수명 변경으로 인한 true/false 반전..
 		if (true == pArrow->IsUsable()) {
@@ -206,40 +307,22 @@ void CGameRoom::Update(float elapsedTime)
 			}
 		}
 	}
+	    
+	for (auto pChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle]) {
+		if (false == pChessPuzzle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
 
-
-	//for (auto pPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::Puzzle]) {
-	//	if (false == pPuzzle->IsInSameSector(m_PlayerExistingSector)) {
-	//		continue;
-	//	}
-	//	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
-	//		if (m_Players[i]->IsExist() == false) continue;
-
-	//		if (pPuzzle->CollisionCheck(m_Players[i])) {
-	//			m_Players[i]->FixCollision(pPuzzle);
-	//			m_isPlayerBoxCollide[i] = true;
-	//			m_Players[i]->UpdateCamera();
-	//			break;
-	//		}
-	//	}
-	//}
-
-
-	//for (auto pChessPuzzle : m_ObjectLayers[(int)OBJECT_LAYER::ChessPuzzle]) {
-	//	if (false == pChessPuzzle->IsInSameSector(m_PlayerExistingSector)) {
-	//		continue;
-	//	}
-	//	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
-	//		if (m_Players[i]->IsExist() == false) continue;
-
-	//		if (pChessPuzzle->CollisionCheck(m_Players[i])) {
-	//			m_Players[i]->FixCollision(pChessPuzzle);
-	//			m_isPlayerBoxCollide[i] = true;
-	//			m_Players[i]->UpdateCamera();
-	//			break;
-	//		}
-	//	}
-	//}
+			if (pChessPuzzle->CollisionCheck(m_Players[i])) {
+				m_Players[i]->FixCollision(pChessPuzzle);
+				m_isPlayerBoxCollide[i] = true;
+				m_Players[i]->UpdateCamera();
+				break;
+			}
+		}
+	}
 
 	for (int playerIdx = 0; playerIdx < MAX_ROOM_PLAYER; ++playerIdx) {
 
@@ -357,13 +440,12 @@ void CGameRoom::Update(float elapsedTime)
 		}
 
 		// 1 킹 2 나이트 3 폰 4 룩 // 퍼즐 체크 
-
 		if ((m_Chess[King]->GetPosition().x > 18320.0f && m_Chess[King]->GetPosition().x < 18720.0f)
 			&& (m_Chess[King]->GetPosition().z > 17150.0f && m_Chess[King]->GetPosition().z < 17550.0f))
 		{
 			m_ChessPlate_Check[King] = true;
 		}
-		if ((m_Chess[Knight]->GetPosition().x > 18320.0f && m_Chess[Knight]->GetPosition().x < 18720.0f)
+		if ((m_Chess[Knight]->GetPosition().x > 18920.0f && m_Chess[Knight]->GetPosition().x < 19320.0f)
 			&& (m_Chess[Knight]->GetPosition().z > 15950.0f && m_Chess[Knight]->GetPosition().z < 16350.0f))
 		{
 			m_ChessPlate_Check[Knight] = true;
@@ -373,7 +455,8 @@ void CGameRoom::Update(float elapsedTime)
 		{
 			m_ChessPlate_Check[Pawn] = true;
 		}
-		if ((m_Chess[Rook]->GetPosition().x > 17140.0f && m_Chess[Rook]->GetPosition().x < 17520.0f)
+
+		if ((m_Chess[Rook]->GetPosition().x > 17040.0f && m_Chess[Rook]->GetPosition().x < 17520.0f)
 			&& (m_Chess[Rook]->GetPosition().z > 15950.0f && m_Chess[Rook]->GetPosition().z < 16350.0f))
 		{
 			m_ChessPlate_Check[Rook] = true;
@@ -403,7 +486,7 @@ void CGameRoom::Update(float elapsedTime)
 			float t = (plPos.z / 18509.6);
 
 			float y = Lerp(max, min, Rate(17907.7, 18509.6, plPos.z));
-			cout << "out y : " << y << "\n";
+
 			m_Players[i]->SetPosition(XMFLOAT3(plPos.x, y, plPos.z));
 			m_Players[i]->UpdateCamera();
 		}
@@ -483,8 +566,8 @@ void CGameRoom::InitPlayers()
 		m_Players[i]->Scale(200, 200, 200); 
 		m_Players[i]->SetPosition(PLAYER_START_POSITIONS[i]);
 		m_Players[i]->SetExistence(false);
-
-		//m_Players[i]->SetWeaponPointer();
+		m_Players[i]->SetWeapon(PlayerWeaponType::Sword);
+		m_Players[i]->SetWeaponPointer(); 
 	}
 }
 
@@ -514,6 +597,7 @@ void CGameRoom::InitMonsters()
 		XMFLOAT3 scale = { 120.0f, 120.0f, 120.0f };
 		CBoss* pBoss = new CBoss();
 		pBoss->SetPosition({ 17166 * MAP_SCALE_SIZE, -6070, 17166 * MAP_SCALE_SIZE });
+		pBoss->FixPositionByTerrain(g_Heights);
 		pBoss->Scale(120, 120, 120);
 		pBoss->Rotate({ 0,1,0 }, 180);
 		pBoss->ConnectPlayer(m_Players, MAX_ROOM_PLAYER);
@@ -913,7 +997,8 @@ void CGameRoom::InitObstacle()
 	m_Chess[Pawn] = new CGameObject(); 
 	m_Chess[Pawn]->Rotate({ 1,0,0 }, -90);
 	m_Chess[Pawn]->SetPosition(m_ChessPlate[3][5]); 
-	m_Chess[Pawn]->SetChess(Chess_Type::Pawn); 
+	m_Chess[Pawn]->SetChess(Chess_Type::Pawn);
+	m_Chess[Pawn]->Scale(300, 300, 300);
 	m_Chess[Pawn]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0.7), XMFLOAT3(0.25, 0.35, 0.75)));
 	m_Chess[Pawn]->SetExistingSector(SECTOR_POSITION::SECTOR_3);
 	m_ObjectLayers[(int)OBJECT_LAYER::PlayerChessPuzzle].push_back(m_Chess[Pawn]);
@@ -929,7 +1014,22 @@ void CGameRoom::InitObstacle()
 
 	 
 /////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 
+// MirrorBox----------------------------------------------------------------------
+	for (int i = 0; i < 3; i++)
+	{
+		pObject = new CGameObject();
+		  
+		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_4);
+
+		pObject->SetPosition({ float(19200 - (2200 * i)) * MAP_SCALE_SIZE , -2300, 200 * MAP_SCALE_SIZE });
+		  
+		pObject->AddBoundingBox(new BoundingBox(XMFLOAT3{ 0,0,0 }, XMFLOAT3{ 2500.0f * 0.5f * MAP_SCALE_SIZE, 2600.0f * 0.5f, 1.0f * 0.5f }));
+
+		m_ObjectLayers[(int)OBJECT_LAYER::MirrorBox].push_back(pObject);
+	}
+	
 // DoorWall----------------------------------------------------------------------
 	m_DoorStartIndex = m_ObjectLayers[(int)OBJECT_LAYER::Obstacle].size();
 	pObject = new CDoorWall(OBJECT_ID::DOOR_WALL_SEC1);
@@ -1249,6 +1349,7 @@ void CGameRoom::SendPacket(SOCKET& socket, void* p)
 void CGameRoom::SendSyncUpdatePacket()
 {
 	P_S2C_UPDATE_SYNC p_syncUpdate;
+	ZeroMemory(&p_syncUpdate, sizeof(p_syncUpdate));
 	p_syncUpdate.type = PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE;
 	p_syncUpdate.size = sizeof(p_syncUpdate);
 
@@ -1260,8 +1361,9 @@ void CGameRoom::SendSyncUpdatePacket()
 		//p_syncUpdate.Sp[i] = m_Players[i]->GetSP();
 		XMFLOAT3 pos = m_Players[i]->GetPosition();
 		XMFLOAT3 look = Vector3::Normalize(m_Players[i]->GetLook());
-		if (i == 0) { 
-			DisplayVector3(look);
+
+		if (i == 0) {
+			//DisplayVector3(look);
 		}
 		p_syncUpdate.posX[i] = FloatToInt(pos.x);
 		p_syncUpdate.posY[i] = FloatToInt(pos.y);
@@ -1273,6 +1375,12 @@ void CGameRoom::SendSyncUpdatePacket()
 
 		p_syncUpdate.weaponType[i] = m_Players[i]->GetWeaponType();
 		p_syncUpdate.states[i] = m_Players[i]->GetAnimationSet();  
+
+		if (p_syncUpdate.weaponType[i] == PlayerWeaponType::Bow) {
+			p_syncUpdate.animationPause[i] = m_Players[i]->IsAnimationPaused();
+			p_syncUpdate.pullString[i] = m_Players[i]->IsOnPullstring();
+		}
+		
 	}
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		p_syncUpdate.existance[i] = m_Players[i]->IsExist();
@@ -1295,7 +1403,8 @@ void CGameRoom::SendMonsterActPacket()
 	P_S2C_MONSTERS_UPDATE_SYNC p_monsterUpdate[MAX_MONSTER_COUNT];
 	ZeroMemory(&p_monsterUpdate, sizeof(p_monsterUpdate));
 
-	for (int i = 0; i < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++i) {
+	// 0 : boss
+	for (int i = 1; i < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++i) {
 		auto mon = m_ObjectLayers[(int)OBJECT_LAYER::Enemy][i];
 
 		XMFLOAT3 pos = mon->GetPosition();
@@ -1312,7 +1421,8 @@ void CGameRoom::SendMonsterActPacket()
 		p_monsterUpdate[i].lookX = FloatToInt(look.x);
 		p_monsterUpdate[i].lookY = FloatToInt(look.y);
 		p_monsterUpdate[i].lookZ = FloatToInt(look.z);
-		p_monsterUpdate[i].state = mon->GetAnimationType();
+
+		p_monsterUpdate[i].state = reinterpret_cast<CEnemy*>(mon)->GetAnimationSet();
 	}
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i] == nullptr) {
@@ -1324,6 +1434,50 @@ void CGameRoom::SendMonsterActPacket()
 		for (int j = 0; j < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++j) { 
 			if (m_ObjectLayers[(int)OBJECT_LAYER::Enemy][j]->IsInNearSector((SECTOR_POSITION)m_Players[i]->GetPlayerExistingSector())) {
 				SendPacket(m_Clients[i]->id, &p_monsterUpdate[j]);
+			}
+		}
+	}
+}
+
+void CGameRoom::SendBossActPacket()
+{
+	if (m_CurrentPlayerNum == 0) return;
+
+	P_S2C_MONSTERS_UPDATE_SYNC p_monsterUpdate;
+	ZeroMemory(&p_monsterUpdate, sizeof(p_monsterUpdate));
+
+	{
+		auto mon = m_ObjectLayers[(int)OBJECT_LAYER::Enemy][0];
+
+		XMFLOAT3 pos = mon->GetPosition();
+		XMFLOAT3 look = Vector3::Normalize(mon->GetLook());
+
+		p_monsterUpdate.type = PACKET_PROTOCOL::S2C_BOSS_ACT;
+		p_monsterUpdate.size = sizeof(p_monsterUpdate);
+		p_monsterUpdate.id = 0;
+
+		p_monsterUpdate.posX = FloatToInt(pos.x);
+		p_monsterUpdate.posY = FloatToInt(pos.y);
+		p_monsterUpdate.posZ = FloatToInt(pos.z);
+
+		p_monsterUpdate.lookX = FloatToInt(look.x);
+		p_monsterUpdate.lookY = FloatToInt(look.y);
+		p_monsterUpdate.lookZ = FloatToInt(look.z);
+
+		//cout << (int)reinterpret_cast<CEnemy*>(mon)->GetAnimationSet() << "\n";
+		p_monsterUpdate.state = reinterpret_cast<CEnemy*>(mon)->GetAnimationSet();
+	}
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			continue;
+		}
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
+			continue;
+		}
+		for (int j = 0; j < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++j) {
+			if (m_ObjectLayers[(int)OBJECT_LAYER::Enemy][j]->IsInNearSector((SECTOR_POSITION)m_Players[i]->GetPlayerExistingSector())) {
+				SendPacket(m_Clients[i]->id, &p_monsterUpdate);
 			}
 		}
 	}
@@ -1436,8 +1590,7 @@ void CGameRoom::SendPlayerArrowActPacket()
 		packet.lookX = FloatToInt(look.x);
 		packet.lookY = FloatToInt(look.y);
 		packet.lookZ = FloatToInt(look.z);
-
-		DisplayVector3(look);
+		 
 		packets.push_back(packet);
 		++idx;
 	}
@@ -1796,7 +1949,7 @@ void CGameRoom::ShotFireBall(OBJECT_LAYER type, CGameObject* user)
 			{
 				pFireb->SetUseable(false);
 				pFireb->SetSkill(user);
-				cout << "shot fb" << endl;
+
 			}
 			break;
 		}
@@ -2064,7 +2217,8 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 
 			m_Players[id]->SetExistence(true);
 			m_Players[id]->SetId(p_id);
-			m_Players[id]->SetWeaponType(p_login.weaponType);
+			m_Players[id]->SetWeapon((PlayerWeaponType)p_login.weaponType);
+			//m_Players[id]->SetWeaponPointer();
 			XMFLOAT3 pos = m_Players[id]->GetPosition();
 
 			p_processLogin.x = FloatToInt(pos.x);
@@ -2120,28 +2274,30 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 					m_Cameras[id]->GetRight3f(), distance));
 				break;
 			case VK_J:
-				if (m_Players[p_keyboard.id]->IsCanAttack()) {
-					switch (m_Players[p_keyboard.id]->GetWeapon())
+				if (m_Players[id]->IsCanAttack()) {
+
+					switch (m_Players[id]->GetWeapon())
 					{
 					case PlayerWeaponType::Sword:
-						m_Players[p_keyboard.id]->Attack(0);
+						m_Players[id]->Attack(0);
 						break;
 					case PlayerWeaponType::Bow:
-						m_Players[p_keyboard.id]->Attack(0);
-						m_Players[p_keyboard.id]->pullString = true;
+						m_Players[id]->Attack(0);
+						m_Players[id]->pullString = true;
 						break;
 					case PlayerWeaponType::Staff:
-						m_Players[p_keyboard.id]->Attack(0);
-						ShotFireBall(OBJECT_LAYER::FireBall, m_Players[p_keyboard.id]);
+						m_Players[id]->Attack(0);
+						ShotFireBall(OBJECT_LAYER::FireBall, m_Players[id]);
 						break;
 					}
 				}
 				else {
-					switch (m_Players[p_keyboard.id]->GetWeapon())
+					switch (m_Players[id]->GetWeapon())
 					{
 					case PlayerWeaponType::Sword:
-						if (m_Players[p_keyboard.id]->GetAttackWaitTime() < 0.5f) { 
-							m_Players[p_keyboard.id]->SetSwordAttackKeyDown(true);
+						if (m_Players[id]->GetAttackWaitTime() < 0.5f) {
+
+							m_Players[id]->SetSwordAttackKeyDown(true);
 						}
 						break;
 					}
@@ -2162,6 +2318,25 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 					pDoorWall->CloserDoor();
 				}
 				break;
+			case VK_Z:
+			{
+				m_Chess[King]->SetPosition(m_ChessPlate[5][6]);
+				m_Chess[Rook]->SetPosition(m_ChessPlate[1][4]);
+				m_ChessChangeFlag = true;
+			}
+			break; 
+			case VK_R:
+			{
+				if (m_Npc_Event == true)
+				{
+					m_Interaction = true;
+				}
+				else if (m_Npc_Event == false)
+				{
+					m_Interaction = false;
+				}
+			}
+			break;
 			case VK_F1:
 			{
 				m_Players[p_keyboard.id]->SetPosition({ 1622 * MAP_SCALE_SIZE, 0, 10772 * MAP_SCALE_SIZE });
@@ -2198,36 +2373,47 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 				m_Players[p_keyboard.id]->FixPositionByTerrain(g_Heights);
 			}
 			break;
+
+			case VK_F7:
+			{
+				DeleteEnemy(m_Mummy[0]);
+			}
+			break;
+			case VK_F8:
+			{
+				DeleteEnemy(m_Mummy[1]);
+			}
+			break;
+			case VK_F9:
+			{
+				DeleteEnemy(m_Mummy[2]);
+			}
+			break;
 			}
 		}
 		else {
 		if (p_keyboard.keyInput == VK_J) {
-			switch (m_Players[p_keyboard.id]->GetWeapon())
+			switch (m_Players[id]->GetWeapon())
 			{
 			case PlayerWeaponType::Sword: 
 				break;
 			case PlayerWeaponType::Bow:
-				if (m_Players[p_keyboard.id]->ShotAble()) {
+				if (m_Players[id]->ShotAble()) {
 					ShotPlayerArrow(id); 
 				}
 				else {
-
-					// test//
-					ShotPlayerArrow(id);
-					/// 
-
-
-
-					m_Players[p_keyboard.id]->IncreaseAttackWaitingTime(0);
-					m_Players[p_keyboard.id]->SetAnimationSet(IDLE);
+					m_Players[id]->IncreaseAttackWaitingTime(0);
+					m_Players[id]->SetAnimationSet(IDLE);
 				}
-				m_Players[p_keyboard.id]->ResetBow();
+				m_Players[id]->ResetBow();
 				break;
 			case PlayerWeaponType::Staff: 
 				break;
 			}
 		}
+		break;
 		}
+
 		P_S2C_PROCESS_KEYBOARD p_keyboardProcess;
 		p_keyboardProcess.size = sizeof(p_keyboardProcess);
 		p_keyboardProcess.type = PACKET_PROTOCOL::S2C_INGAME_KEYBOARD_INPUT;
@@ -2300,14 +2486,31 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 		for (int i = 0; i < p_mouse.inputNum; ++i) {
 			if (p_mouse.InputType[i] == MOUSE_INPUT_TYPE::M_LMOVE) {
 				float dx = IntToFloat(p_mouse.xInput[i]);
+				 
+				if (m_Players[p_mouse.id]->pullString) {
+					m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+					cameraRotateY += dx * 75;
+					//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 150);
+				}
+				else {
+					m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 80);
+					cameraRotateY += dx * 80; 
+				}
 
-				m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
-				cameraRotateY += dx * 75;
-				if (m_Players[p_mouse.id]->IsMoving())
+				if (m_Players[p_mouse.id]->IsMoving() || m_Players[p_mouse.id]->pullString)
 				{
 					playerRotateY += dx * 150;
-					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
+					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150); 
 				}
+				 
+
+				//m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+				//cameraRotateY += dx * 75; 
+				//if (m_Players[p_mouse.id]->IsMoving())
+				//{
+				//	playerRotateY += dx * 150;
+				//	m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
+				//}
 
 			}
 			else if (p_mouse.InputType[i] == MOUSE_INPUT_TYPE::M_RMOVE) {

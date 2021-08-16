@@ -27,8 +27,7 @@ class CPlayer;
 
 // 가장 초기 상태? idle 상태
 // 플레이어가 범위 안에 들어온다면? idle -> born1
-class CBoss :
-    public CEnemy
+class CBoss : public CEnemy
 {
 public: 
     CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dRootSignature);
@@ -45,6 +44,7 @@ public:
     void PlayerEnter(CPlayer* target); 
 
     void ChangeAnimation(ObjectState stateInfo) override;
+    void ChangeAnimationForServer(BOSS_ANIMATION stateInfo);
 
 private:
     static CGameObjectVer2* LoadGeometryAndAnimationFromFileForBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,

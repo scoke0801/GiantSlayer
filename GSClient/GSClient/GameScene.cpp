@@ -50,9 +50,7 @@ CGameScene::CGameScene()
 	m_SoundManager->AddSound("resources/sounds/ChessSuccess.mp3", Sound_Name::EFFECT_Chess_Success);
 	m_SoundManager->AddSound("resources/sounds/FireBall.mp3", Sound_Name::EFFECT_Fire_Ball);
 	m_SoundManager->AddSound("resources/sounds/Sword2.mp3", Sound_Name::EFFECT_Sword);
-	 
-	m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
-
+	  
 	cout << "Enter CGameScene \n";
 	m_pd3dGraphicsRootSignature = NULL;
 	m_isPlayerSelected = false;
@@ -105,6 +103,8 @@ void CGameScene::Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dC
 	BuildUIs(pd3dDevice, pd3dCommandList);
 
 	m_CreatedTime = chrono::high_resolution_clock::now();
+
+	m_SoundManager->PlayBgm(Sound_Name::BGM_MAIN_GAME);
 }
 
 void CGameScene::BuildCamera(ID3D12Device* pd3dDevice,
@@ -648,9 +648,7 @@ void CGameScene::Update(float elapsedTime)
 				break;
 			}
 		}
-	}
-
-
+	} 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
@@ -676,8 +674,7 @@ void CGameScene::Update(float elapsedTime)
 		//	//pEnemy->InverseDirection();
 		//	pEnemy->SetTargetVector(XMFLOAT3(0, 0, 150));
 		//}
-	}
-
+	} 
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser]) {
 		// 변수명 변경으로 인한 true/false 반전..
 		if (true == pArrow->IsDrawable()) {
@@ -697,9 +694,9 @@ void CGameScene::Update(float elapsedTime)
 
 				DeleteEnemy(thisEnemy);
 			}
-		}
-	}
-	
+		} 
+	}  
+	 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Mummy]) {
 		if (false == pEnemy->IsInSameSector(m_PlayerExistingSector)) {
 			continue;
@@ -1155,6 +1152,51 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 	}
 
 
+	if (m_Player->GetPlayerExistingSector() == 0)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[0] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 1)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[1] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 2)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[2] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 3)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[3] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
+	if (m_Player->GetPlayerExistingSector() == 4)
+	{
+		m_StageFontTime -= elapsedTime;
+		if (m_StageFontTime < 0.0f)
+		{
+			m_StageFont[4] = true;
+			m_StageFontTime = 3.0f;
+		}
+	}
 	if (m_CurrentCamera) m_CurrentCamera->Update(elapsedTime);
 
 	for (int i = 0; i < 3; i++)
@@ -1577,46 +1619,30 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		XMFLOAT3 look = XMFLOAT3{ IntToFloat(p_keyboardProcess.lookX),
 			IntToFloat(p_keyboardProcess.lookY),
 			IntToFloat(p_keyboardProcess.lookZ) };
-
+		 
 		m_Player->SetPosition(pos);
-
-		m_Player->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
-			look, -PLAYER_RUN_SPEED));
+		m_Player->UpdateCamera();
+		m_Player->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+		m_Player->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0), look, PLAYER_RUN_SPEED));
 	}
 	break;
 	case PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT:
 		P_S2C_PROCESS_MOUSE p_mouseProcess;
 		memcpy(&p_mouseProcess, p_buf, p_buf[0]);
 		if (p_mouseProcess.cameraOffset != 0) {
-			float offset = IntToFloat(p_mouseProcess.cameraOffset);
-			//cout << "offset : " << offset << "\n";
+			float offset = IntToFloat(p_mouseProcess.cameraOffset); 
 			m_CurrentCamera->MoveOffset(XMFLOAT3(0, 0, offset));
-		}
-		/*if (p_mouseProcess.cameraRotateX != 0) {
-			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(1, 0, 0), p_mouseProcess.cameraRotateX);
-		}*/
+		} 
 
 		if (p_mouseProcess.cameraRotateY != 0) {
-			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY);
-			//cout << "cameraRotateY : " << rotateY << "\n";
+			float rotateY = IntToFloat(p_mouseProcess.cameraRotateY); 
 			m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), rotateY);
 		}
-
-		//if (p_mouseProcess.cameraRotateZ != 0) {
-		//	m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 0, 1), p_mouseProcess.cameraRotateZ);
-		//}
-		/*if (p_mouseProcess.playerRotateX != 0) {
-			m_Player->Rotate(XMFLOAT3(1, 0, 0), p_mouseProcess.playerRotateX);
-		}*/
+		 
 		if (p_mouseProcess.playerRotateY != 0) {
-			float rotateY = IntToFloat(p_mouseProcess.playerRotateY);
-			//cout << "playerRotateY : " << rotateY << "\n";
-			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY);
-			//m_MinimapArrow->Rotate(-rotateY * 0.1f);
-		}
-		/*if (p_mouseProcess.playerRotateZ != 0) {
-			m_Player->Rotate(XMFLOAT3(0, 0, 1), p_mouseProcess.playerRotateZ);
-		}*/
+			float rotateY = IntToFloat(p_mouseProcess.playerRotateY); 
+			m_Player->Rotate(XMFLOAT3(0, 1, 0), rotateY); 
+		} 
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_MONSTER_ACT:
 	{ 
@@ -1637,6 +1663,25 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
 	}
 	break;
+	case PACKET_PROTOCOL::S2C_BOSS_ACT:
+	{
+		P_S2C_MONSTERS_UPDATE_SYNC* p_monsterUpdate = reinterpret_cast<P_S2C_MONSTERS_UPDATE_SYNC*>(p_buf);
+
+		XMFLOAT3 pos = { IntToFloat(p_monsterUpdate->posX),
+			IntToFloat(p_monsterUpdate->posY),
+			IntToFloat(p_monsterUpdate->posZ) };
+		XMFLOAT3 look = { IntToFloat(p_monsterUpdate->lookX),
+			IntToFloat(p_monsterUpdate->lookY),
+			IntToFloat(p_monsterUpdate->lookZ) };
+		int id = p_monsterUpdate->id;
+
+		m_Boss->ChangeAnimationForServer((BOSS_ANIMATION)p_monsterUpdate->state);
+		m_Boss->SetPosition(pos);
+		m_Boss->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+
+		m_Boss->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
+	}
+	break;
 	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:
 		P_S2C_UPDATE_SYNC p_syncUpdate;
 		memcpy(&p_syncUpdate, p_buf, p_buf[0]);
@@ -1649,38 +1694,61 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
 
 			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
+			
+			if (m_Players[i]->GetWeapon() != p_syncUpdate.weaponType[i]) { 
+				cout << "몬가 달라서 무기가 바뀜\n";
+				m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
+			} 
+
+			//if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
+			//	cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
+			//	m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]); 	 
+			//}
+
+			if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
+				//cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
+				switch (p_syncUpdate.states[i]) {
+				case IDLE:
+				case SWORD_IDLE:
+				case BOW_IDLE:
+				case STAFF_IDLE:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
+					break;
+				case SWORD_RUN:
+				case BOW_RUN:
+				case STAFF_RUN:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
+					break;
+				case SWORD_ATK:
+				case BOW_ATK:
+				case STAFF_ATK:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
+					break;
+				case SWORD_DEATH:
+				case BOW_DEATH:
+				case STAFF_DEATH:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
+					break;
+					 
+				default:	
+					m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]);
+					break;
+				}
+				m_Players[i]->m_AnimationPaused = false;
+			} 
+			if (p_syncUpdate.weaponType[i] == PlayerWeaponType::Bow) {
+				m_Players[i]->pullString = p_syncUpdate.pullString[i]; 
+				m_Players[i]->m_AnimationPaused = (p_syncUpdate.animationPause[i]);
+				if (false == m_Players[i]->IsAnimationPaused()) { 
+					if (p_syncUpdate.pullString[i]) {
+						m_Players[i]->SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+					} 
+				}   
+			}
 			m_Players[i]->SetPosition(pos);
 			m_Players[i]->UpdateCamera();
 			m_Players[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
-			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0),
-				look, PLAYER_RUN_SPEED)); 
-			m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
-			switch (p_syncUpdate.states[i]) {
-			case IDLE:
-			case SWORD_IDLE:
-			case BOW_IDLE:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->IDLE);
-				break;
-			case SWORD_RUN:
-			case BOW_RUN:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
-				break;
-			case SWORD_ATK:
-			case BOW_ATK:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
-				break;
-			case SWORD_DEATH:
-			case BOW_DEATH:
-				m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
-				break;
-
-			case WALK: break;
-			case DAMAGED: break;
-			case SWORD_GET:break;
-			case BOW_GET:break;
-			default:
-				break;
-			}
+			m_Players[i]->SetVelocity(Vector3::Add(XMFLOAT3(0, 0, 0), look, PLAYER_RUN_SPEED));
 		}
 
 		CFramework::GetInstance().SetFrameDirtyFlag(true);
@@ -1705,6 +1773,9 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_Mummy[i]->SetPosition(pos);
 				m_Mummy[i]->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
 				m_Mummy[i]->SetAnimationSet(packet->state[i]);
+			}
+			else {
+				m_Mummy[i]->SetDrawable(false);
 			}
 		} 
 	}
@@ -1734,10 +1805,10 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		}
 		else
 		{
-			pArrow->SetPosition(pos);
+			pArrow->SetPosition(pos); 
 			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
-		} 
-		cout << "Arrow act\n";
+		}  
+		cout << "Arrow\n";
 	}
 		break;
 	case PACKET_PROTOCOL::SC2_INGAME_MONSTER_ARROW_ACT:	
@@ -1780,8 +1851,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_MummyLaser3[i]->Rotate(XMFLOAT3(0.0f, 0.0f, 1.0f), 5.0f);
 
 			} 
-		}
-		cout << "Laser Update\n";
+		} 
 	}
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_FIREBALL_ACT:	
@@ -1803,8 +1873,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		else
 		{
 			pFireball->SetPosition(pos);
-		}
-		cout << "FBS act\n";
+		} 
 	}
 		break;
 	case PACKET_PROTOCOL::S2C_CHESS_OBJ_ACT:
@@ -1944,19 +2013,11 @@ void CGameScene::ProcessInput()
 		} 
 		if (keyInput.KEY_U) {
 			p_keyboard.keyInput = VK_U;
-			processKey = true;
-			//for (int i = 0; i < 5; ++i) {
-			//	CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
-			//	p->OpenDoor();
-			//}
+			processKey = true; 
 		}
 		if (keyInput.KEY_I) {
 			p_keyboard.keyInput = VK_I;
-			processKey = true;
-			//for (int i = 0; i < 5; ++i) {
-			//	CDoorWall* p = reinterpret_cast<CDoorWall*>(m_ObjectLayers[(int)OBJECT_LAYER::Obstacle][m_DoorIdx + i]);
-			//	p->CloserDoor();
-			//}
+			processKey = true; 
 		}
 
 		if (keyInput.KEY_3)
@@ -1986,6 +2047,33 @@ void CGameScene::ProcessInput()
 		{
 			gbWireframeOn = false;
 		}
+
+		if (keyInput.KEY_F7)
+		{
+			p_keyboard.keyInput = VK_F7;
+			processKey = true;
+		}
+		if (keyInput.KEY_F8)
+		{
+			p_keyboard.keyInput = VK_F8;
+			processKey = true;
+		}
+		if (keyInput.KEY_F9)
+		{
+			p_keyboard.keyInput = VK_F9;
+			processKey = true;
+		} 
+		if (keyInput.KEY_R)
+		{
+			p_keyboard.keyInput = VK_R;
+			processKey = true; 
+		}
+		if (keyInput.KEY_Z)
+		{
+			p_keyboard.keyInput = VK_Z;
+			processKey = true;
+		}
+		 
 		if (processKey == false) return; 
 		SendPacket(&p_keyboard);
 		return;
@@ -1993,8 +2081,7 @@ void CGameScene::ProcessInput()
 
 	if (m_CurrentCamera == nullptr) return;
 
-	float cameraSpeed = m_CurrentCamera->GetSpeed();
-	XMFLOAT3 velocity = m_Player->GetVelocity();
+	float cameraSpeed = m_CurrentCamera->GetSpeed(); 
 
 	XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
 	float distance = PLAYER_RUN_SPEED;
@@ -2181,7 +2268,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 		p_keyboard.type = PACKET_PROTOCOL::C2S_INGAME_KEYBOARD_INPUT;
 		p_keyboard.id = CFramework::GetInstance().GetPlayerId();
 		p_keyboard.keyInput = wParam;
-		p_keyboard.isKeyDown = !isKeyUp;
+		p_keyboard.isKeyDown = !isKeyUp; 
 		SendPacket(&p_keyboard);
 		return;
 	}
@@ -2204,6 +2291,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 		}
 		if (wParam == VK_J) {
 			if (m_Player->IsCanAttack()) {
+				cout << "Can Attack " << (int)m_Player ->GetAnimationSet() << "\n";
 				switch (m_Player->GetWeapon())
 				{
 				case PlayerWeaponType::Sword:
@@ -2230,13 +2318,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 					break;
 				}
 			}
-		}
-		if (wParam == VK_M) {
-			if (m_Player->IsCanAttack()) {
-				m_Player->Attack(1);
-				cout << "SKILLLLL~~" << endl;
-			}
-		}
+		} 
 	}
 	else
 	{
@@ -2854,8 +2936,7 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_Boss->SetActivityScope({ scopeSize.x, 0, scopeSize.z }, { centerPos });
 		m_Boss->SetSightBoundingBox({ scopeSize.x / scale.x, 15, scopeSize.z / scale.z });
 		m_Boss->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, scopeSize.x / scale.x, 15, scopeSize.z / scale.z, XMFLOAT3{ 0, 0.0f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(m_Boss);
-
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(m_Boss); 
 	}
 
 	CGameObjectVer2* pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
@@ -3999,17 +4080,13 @@ void CGameScene::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pfbxManager->SetIOSettings(m_pfbxIOs);*/
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Bush_1] = new CFixedMesh(pd3dDevice, pd3dCommandList, "bush-01");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Player] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Golem");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryForestRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rock"); 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DryTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dry_Tree");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stump] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stump_01");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DeadTree_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Dead_Tree");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::DesertRock] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Desert_Rock");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree] = new CFixedMesh(pd3dDevice, pd3dCommandList, "GreenTree");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_01] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t1");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Enemy_02] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Enemy_t2");
-
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Boss] = new CFixedMesh(pd3dDevice, pd3dCommandList, "babymos");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::GreenTree] = new CFixedMesh(pd3dDevice, pd3dCommandList, "GreenTree"); 
+	 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Arrow] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Arrow");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::King] = new CFixedMesh(pd3dDevice, pd3dCommandList, "king");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Rook] = new CFixedMesh(pd3dDevice, pd3dCommandList, "rook");
@@ -4018,8 +4095,7 @@ void CGameScene::LoadFbxMeshes(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Laser] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Laser");
 	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::FireBall] = new CFixedMesh(pd3dDevice, pd3dCommandList, "FireBall");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Quest] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Quest");
-	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Stair] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Stair");
+	m_LoadedFbxMesh[(int)FBX_MESH_TYPE::Quest] = new CFixedMesh(pd3dDevice, pd3dCommandList, "Quest"); 
 }
 
 void CGameScene::BuildShadowResource(ID3D12Device* pd3dDevice)
@@ -4094,7 +4170,7 @@ void CGameScene::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::FireBallParticle);
 	}
 	// 안개
-	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 10000, PARTICLE_TYPE::RadialParitcle);
+	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 1000, PARTICLE_TYPE::RadialParitcle);
 
 	// 비
 	m_Particles->AddParticle(pd3dDevice, pd3dCommandList, 100000, PARTICLE_TYPE::RainParticle);
@@ -4378,9 +4454,6 @@ void CGameScene::BuildPlayers(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 		m_Players[i]->SetDrawable(false);
 		m_Players[i]->SetWeaponPointer();
-
-		m_Players[i]->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 0.4, 1.2, 0.4, XMFLOAT3{ 0,0.6,0 });
-		m_Players[i]->AddColider(new ColliderBox(XMFLOAT3(0, 0.6, 0), XMFLOAT3(0.2, 0.6, 0.2)));
 	}
 }
 
