@@ -286,6 +286,7 @@ void CGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	BuildEnemys(pd3dDevice, pd3dCommandList);
 	BuildBoundingRegions(pd3dDevice, pd3dCommandList);
+	BuildThunderColliders(pd3dDevice, pd3dCommandList);
 
 	m_EffectsHandler = new CEffectHandler();
 	m_EffectsHandler->Init(pd3dDevice, pd3dCommandList, m_Player);
@@ -604,10 +605,26 @@ void CGameScene::Update(float elapsedTime)
 
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::TerrainBoundary]) {
 		if (pObstacle->CollisionCheck(m_Player)) {
-			m_Player->FixCollision(pObstacle);
+			m_Player->FixCollision(pObstacle); 
 		}
 	}
-	 
+
+	// ¹ø°³¶û Ãæµ¹
+	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Thunder]) {
+		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		if (pObstacle->CollisionCheck(m_Player)) {
+			m_Player->FixCollision(pObstacle); 
+			
+			if (m_Player->Attacked(pObstacle))
+			{
+				m_CurrentCamera->SetShake(true, 0.5f, 15);
+				m_Player->FixCollision();
+			}
+		}
+	}
+
 	// NPC¶û Ãæµ¹
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Npc]) {
 		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
@@ -1601,6 +1618,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 {
 	char buf[10000];
 	PACKET_PROTOCOL type = (PACKET_PROTOCOL)p_buf[1];
+	int m_prevHP = m_Player->GetHP();
 	switch (type)
 	{
 	case PACKET_PROTOCOL::S2C_LOGIN_HANDLE:
@@ -1717,6 +1735,25 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		m_Boss->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
 	}
 	break;
+
+	case PACKET_PROTOCOL::S2C_THUNDER_ACT:
+	{
+		P_S2C_THUNDER_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_THUNDER_UPDATE_SYNC*>(p_buf);
+		  
+		if (m_isThunderOn) {
+			break;
+		}
+
+		for (int i = 0; i < 7; ++i) {
+			XMFLOAT3 pos = { IntToFloat(packet->posX[i]),
+			IntToFloat(packet->posY[i]),
+			IntToFloat(packet->posZ[i]) };
+			ActiveThunder(pos, i);
+		}
+		cout << "Thunder!!\n";
+		m_isThunderOn = true;
+	}
+	break;
 	case PACKET_PROTOCOL::S2C_INGAME_UPDATE_PLAYERS_STATE:
 		P_S2C_UPDATE_SYNC p_syncUpdate;
 		memcpy(&p_syncUpdate, p_buf, p_buf[0]);
@@ -1761,7 +1798,8 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				case SWORD_DEATH:
 				case BOW_DEATH:
 				case STAFF_DEATH:
-					m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
+					//m_Players[i]->SetAnimationSet((int)m_Players[i]->DEATH);
+					m_Players[i]->Death();
 					break;
 					 
 				default:	
@@ -1966,6 +2004,9 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			// ¸ØÃç
 		}
 		break;
+	}
+	if (m_prevHP != m_Player->GetHP()) {
+		m_CurrentCamera->SetShake(true, 0.5f, 15);
 	}
 }
 
@@ -4202,6 +4243,14 @@ void CGameScene::CreateLightCamera(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pLightCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
+void CGameScene::DisableThunder()
+{
+	for (int i = 0; i < m_ObjectLayers[(int)OBJECT_LAYER::Thunder].size(); ++i) {
+		m_ObjectLayers[(int)OBJECT_LAYER::Thunder][i]->SetPosition({ -10000,-10000, -10000 });
+	}
+	m_isThunderOn = false;
+}
+
 void CGameScene::BuildParticles(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_Particles = new CParticle();
@@ -4898,4 +4947,25 @@ void CGameScene::RecvMouseProcessPacket()
 	if (type == PACKET_PROTOCOL::S2C_INGAME_MOUSE_INPUT) {
 
 	}
+}
+
+void CGameScene::BuildThunderColliders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	for (int i = 0; i < 7; ++i) {
+		CGameObject* pObject = new CGameObject();
+		pObject->SetShader(CShaderHandler::GetInstance().GetData("FBX"));
+		pObject->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Center, 150, 1500, 150, XMFLOAT3{ 0,0,0 });
+		pObject->AddColider(new ColliderBox(XMFLOAT3(0, 0, 0), XMFLOAT3(75, 750, 75)));
+		pObject->SetPosition({ 500, 50, 500 });
+		pObject->SetATK(20); 
+		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_5);
+		m_ObjectLayers[(int)OBJECT_LAYER::Thunder].push_back(pObject);
+	}
+}
+
+void CGameScene::ActiveThunder(const XMFLOAT3& pos, int index)
+{
+	m_ObjectLayers[(int)OBJECT_LAYER::Thunder][index]->SetPosition(pos);
+	UseEffects((int)EffectTypes::WarnningCircle, pos);
+	UseEffects((int)EffectTypes::Thunder, pos, 1.5f);
 }

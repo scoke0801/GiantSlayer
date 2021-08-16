@@ -96,6 +96,8 @@ public:
 
 	virtual void DeletePlayer(int playerId) {}
 	virtual void AddPlayer(int palyerId) {}
+
+	virtual void ActiveThunder(const XMFLOAT3& pos, int index) {}
 public: 
 	virtual void SendDataToNextScene(void* context) {}	
 	virtual void Init(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int width, int height) {}

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Boss.h" 
 #include "AnimationController.h"
+#include "GameRoom.h"
 
 CBoss::CBoss()  
 {
@@ -36,6 +37,11 @@ CBoss::~CBoss()
 
 void CBoss::Update(float elapsedTime)
 {
+	if (m_ThunderLifeTime > 0.0f) {
+		m_ThunderLifeTime -= elapsedTime;
+		m_ConnectedRoom->m_isOnThunderOn = false;
+		m_ConnectedRoom->DisableThunder();
+	}
 	m_State->Execute(this, elapsedTime);
 
 	m_SightBox.Transform(m_SightAABB, XMLoadFloat4x4(&m_xmf4x4World));
@@ -59,10 +65,22 @@ void CBoss::Attack(float elapsedTime)
 			m_AttackDelayTime = BOSS_ATTACK_2_ANIMATION_LENGTH + 0.3f;
 		}
 		else if (m_AttackType == EnemyAttackType::BossSkill_3) {
-			m_AttackDelayTime = BOSS_ATTACK_3_ANIMATION_LENGTH + 0.5f;
+			m_AttackDelayTime = BOSS_ATTACK_3_ANIMATION_LENGTH + 0.5f; 
 		}
 		else if (m_AttackType == EnemyAttackType::BossSkill_4) {
 			m_AttackDelayTime = BOSS_ATTACK_4_ANIMATION_LENGTH + 0.7f;
+			XMFLOAT3 targetPosition; 
+			int thunderCount = 7;
+			float thunderRange = 3700.0f;
+			for (int i = 0; i < thunderCount; ++i) {
+				targetPosition.x = (((float)rand() / (RAND_MAX)) * (thunderRange * 2)) + m_xmf3ActivityScopeCenter.x - thunderRange;
+				targetPosition.y = m_xmf3Position.y;
+				targetPosition.z = (((float)rand() / (RAND_MAX)) * (thunderRange * 2)) + m_xmf3ActivityScopeCenter.z - thunderRange;
+
+				m_ConnectedRoom->ActiveThunder(targetPosition, i);
+			}
+			m_ConnectedRoom->m_isOnThunderOn = true;
+			m_ThunderLifeTime += 1.2f;
 		}
 	}
 }
@@ -154,7 +172,6 @@ CAnimationObject* CBoss::LoadFrameHierarchyFromFileForBoss(CAnimationObject* pPa
 			nReads = (UINT)::fread(pGameObject->m_pstrFrameName, sizeof(char), nStrLength, pInFile);
 			pGameObject->m_pstrFrameName[nStrLength] = '\0';
 			//cout << pGameObject->m_pstrFrameName << endl;
-
 			BoundingBox boundingBox;
 			bool isMainPart = true;
 			vector<string> frames = {
@@ -217,7 +234,7 @@ CAnimationObject* CBoss::LoadFrameHierarchyFromFileForBoss(CAnimationObject* pPa
 				pGameObject->AddBoundingBox(new BoundingBox{ center, half });
 			}
 
-			//pGameObject->isSkinned = true;
+			pGameObject->isSkinned = true;
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
@@ -231,7 +248,7 @@ CAnimationObject* CBoss::LoadFrameHierarchyFromFileForBoss(CAnimationObject* pPa
 			{
 				for (int i = 0; i < nChilds; i++)
 				{
-					CAnimationObject* pChild = CAnimationObject::LoadFrameHierarchyFromFile(pGameObject, pInFile);
+					CAnimationObject* pChild = LoadFrameHierarchyFromFileForBoss(pGameObject, pInFile);
 					if (pChild) pGameObject->SetChild(pChild);
 #ifdef _WITH_DEBUG_FRAME_HIERARCHY
 					TCHAR pstrDebug[256] = { 0 };

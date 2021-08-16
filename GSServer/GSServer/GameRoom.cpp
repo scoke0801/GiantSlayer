@@ -33,8 +33,7 @@ void CGameRoom::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	} 
-	if (m_MummyExist[0] || m_MummyExist[1] || m_MummyExist[2]) {
-
+	if (m_MummyExist[0] || m_MummyExist[1] || m_MummyExist[2]) { 
 		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			// 미라 보고있으면 데미지
 			if (m_Players[i]->IsExist() == false) continue;
@@ -81,6 +80,31 @@ void CGameRoom::Update(float elapsedTime)
 			}
 		} 
 	}
+
+
+	// 번개랑 충돌
+	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Thunder]) {
+		if (pObstacle->IsUsable()) {
+			// 모두가 같은 상태
+			break;
+		}
+		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
+			continue;
+		}
+		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+			if (m_Players[i]->IsExist() == false) continue;
+
+			if (pObstacle->CollisionCheck(m_Players[i])) {
+				m_Players[i]->FixCollision(pObstacle);
+
+				if (m_Players[i]->Attacked(pObstacle))
+				{
+					m_Players[i]->FixCollision();
+				}
+			}
+		}
+	}
+
 	// NPC랑 충돌
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Npc]) {
 		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
@@ -567,6 +591,7 @@ void CGameRoom::InitAll()
 	InitArrows();
 	InitFireBall();
 	InitMummyLaser();
+	InitThunderColliders();
 	BuildBlockingRegionOnMap();
 
 	for (int i = 0; i < m_ObjectLayers.size(); ++i) {
@@ -878,6 +903,19 @@ void CGameRoom::InitNPCs()
 	m_Npc->ConnectPlayer(m_Players, 5);
 	m_Npc->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 	m_ObjectLayers[(int)OBJECT_LAYER::Npc].push_back(reinterpret_cast<CGameObject*>(std::move(m_Npc)));
+}
+
+void CGameRoom::InitThunderColliders()
+{
+	for (int i = 0; i < 7; ++i) {
+		CGameObject* pObject = new CGameObject();
+	 	pObject->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 0), XMFLOAT3(75, 750, 75)));
+		pObject->SetPosition({ 500, 50, 500 });
+		pObject->SetATK(20);
+		pObject->SetIsUsable(true);
+		pObject->SetExistingSector(SECTOR_POSITION::SECTOR_5);
+		m_ObjectLayers[(int)OBJECT_LAYER::Thunder].push_back(pObject);
+	}
 }
 
 void CGameRoom::InitMummyLaser()
@@ -1857,6 +1895,35 @@ void CGameRoom::SendChessObjectActPacket()
 	m_ChessChangeFlag = false;
 }
 
+void CGameRoom::SendThunderSyncPacket()
+{
+	if (m_isOnThunderOn == false) {
+		return;
+	}
+	P_S2C_THUNDER_UPDATE_SYNC packet;
+	ZeroMemory(&packet, sizeof(packet));
+	packet.size = sizeof(packet);
+	packet.type = PACKET_PROTOCOL::S2C_THUNDER_ACT;
+	 
+	for (int i = 0; i < 7; ++i) {
+		XMFLOAT3 pos = m_ObjectLayers[(int)OBJECT_LAYER::Thunder][i]->GetPosition();
+		packet.posX[i] = FloatToInt(pos.x);
+		packet.posY[i] = FloatToInt(pos.y);
+		packet.posZ[i] = FloatToInt(pos.z);
+	}
+
+	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
+		if (m_Clients[i] == nullptr) {
+			continue;
+		}
+		if (m_Clients[i]->m_state != PL_STATE::PLST_CONNECTED) {
+			continue;
+		}
+
+		SendPacket(m_Clients[i]->id, &packet);
+	}
+}
+
 void CGameRoom::SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx)
 {
 	if (false == m_ObjectDeleteFlag) {
@@ -2032,6 +2099,21 @@ void CGameRoom::ShotFireBall(OBJECT_LAYER type, CGameObject* user)
 			}
 			break;
 		}
+	}
+}
+
+void CGameRoom::ActiveThunder(const XMFLOAT3& pos, int index)
+{
+	m_ObjectLayers[(int)OBJECT_LAYER::Thunder][index]->SetIsUsable(false);
+	m_ObjectLayers[(int)OBJECT_LAYER::Thunder][index]->SetPosition(pos);
+	m_ObjectLayers[(int)OBJECT_LAYER::Thunder][index]->UpdateColliders();
+}
+
+void CGameRoom::DisableThunder()
+{
+	for (int i = 0; i < m_ObjectLayers[(int)OBJECT_LAYER::Thunder].size(); ++i) {
+		m_ObjectLayers[(int)OBJECT_LAYER::Thunder][i]->SetIsUsable(true);
+		//m_ObjectLayers[(int)OBJECT_LAYER::Thunder][i]->SetPosition({ -10000,-10000, -10000 });
 	}
 }
 

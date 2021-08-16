@@ -51,5 +51,6 @@ private:
 private:
     // 시야 범위 안에 플레이어가 없으면 깨어있지 않은 상태
     bool m_isOnAwaken = false;
+    float m_ThunderLifeTime = 0.0f;
 };
 

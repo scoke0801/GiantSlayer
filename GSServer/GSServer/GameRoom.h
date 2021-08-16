@@ -43,6 +43,10 @@ struct CLIENT {
 
 class CGameRoom
 {
+public:
+
+	bool									m_isOnThunderOn = false;
+private:
 	array <CLIENT*, MAX_ROOM_PLAYER>		m_Clients;
 	CPlayer*								m_Players[MAX_ROOM_PLAYER];
 	CCamera*								m_Cameras[MAX_ROOM_PLAYER];
@@ -116,6 +120,7 @@ public:
 	void SendFireballActPacket();
 	void SendLaserActPacket();
 	void SendChessObjectActPacket();
+	void SendThunderSyncPacket();
 
 	void SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx);
 
@@ -146,6 +151,9 @@ public:
 	void ShotMummyLaser(CMummy* pMummy, const XMFLOAT3& lookVector);
 
 	void ShotFireBall(OBJECT_LAYER type, CGameObject* user);
+	 
+	void ActiveThunder(const XMFLOAT3& pos, int index);
+	void DisableThunder();
 private:
 	void InitAll();
 	void InitPlayers();
@@ -153,6 +161,8 @@ private:
 	void InitMonsters();
 	void InitArrows();
 	void InitNPCs();
+	
+	void InitThunderColliders();
 
 	void InitMummyLaser();
 	void InitFireBall();

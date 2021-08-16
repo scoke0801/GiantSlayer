@@ -61,6 +61,7 @@ private:
 	float						m_StageFontTime = 3.0f;
 	bool m_Opendoor = false;
 
+	bool m_isThunderOn = false;
 	
 	CMummyLaser* m_MummyLaser[3];
 	CMummyLaser* m_MummyLaser2[3];
@@ -235,6 +236,9 @@ public:
 
 	void OpenDoor();
 
+	void ActiveThunder(const XMFLOAT3& pos, int index) override;
+	void DisableThunder();
+
 private:
 	void BuildBridges(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
 	void BuildDoorWall(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader);
@@ -277,7 +281,7 @@ private:
 	void MakingFog();
 	void MakingRain();
 	
-
+	void BuildThunderColliders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 private:
 	void SendMouseInputPacket();
 	void RecvMouseProcessPacket();

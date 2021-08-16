@@ -68,6 +68,7 @@ public:
 	CAnimationController*		m_pAnimationController = NULL;
 	int							m_AnimationSet = 0;
 	bool m_AnimationPaused = false;
+	bool isSkinned = false;
 };
 
 void ReadExtradataAboutTexture(FILE* pInFile);

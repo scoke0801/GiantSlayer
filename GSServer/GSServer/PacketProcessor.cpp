@@ -68,6 +68,7 @@ void PacketProcessor::Update(float elapsedTime)
 			m_Rooms[i].SendFireballActPacket();
 			m_Rooms[i].SendLaserActPacket();
 			m_Rooms[i].SendChessObjectActPacket();
+			m_Rooms[i].SendThunderSyncPacket();
 		}  
 	}
 }

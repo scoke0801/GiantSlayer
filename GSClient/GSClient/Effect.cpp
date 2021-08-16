@@ -3,7 +3,7 @@
 #include "Shader.h"
 #include "Player.h"
 #include "Terrain.h"
-
+#include "GameScene.h"
 CEffect::CEffect(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
 	CPlayer* targetPlayer, const XMFLOAT3& size)
 {
@@ -61,6 +61,10 @@ void CEffect::Update(float elapsedTime)
 	if (m_ElapsedTime > m_LifeTime) {
 		m_ElapsedTime = 0.0f;
 		m_isDrawable = false;
+
+		if (m_EffectType == EffectTypes::Thunder) {
+			(MAIN_GAME_SCENE)->DisableThunder();
+		}
 	}
 }
 

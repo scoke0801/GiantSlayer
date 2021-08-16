@@ -75,7 +75,7 @@ void CBoss::Attack(float elapsedTime)
 			//z : 29700.0 19800
 			//x : 29700.0 19800
 			//x : 21800.0 14533
-			int thunderCount = rand() % 5 + 5;
+			int thunderCount = 7;
 			auto workScene = MAIN_GAME_SCENE;
 			float thunderRange = 3700.0f;
 			for (int i = 0; i < thunderCount; ++i) {
@@ -83,8 +83,7 @@ void CBoss::Attack(float elapsedTime)
 				targetPosition.y = m_xmf3Position.y;
 				targetPosition.z = (((float)rand() / (RAND_MAX)) * (thunderRange * 2)) + m_xmf3ActivityScopeCenter.z - thunderRange;
 
-				workScene->UseEffects((int)EffectTypes::WarnningCircle, targetPosition);
-				workScene->UseEffects((int)EffectTypes::Thunder, targetPosition, 1.5f);
+				workScene->ActiveThunder(targetPosition, i);
 			}
 			cout << "공격 이펙트 생성 테스트\n";
 		}
@@ -288,7 +287,6 @@ CGameObjectVer2* CBoss::LoadFrameHierarchyFromFileForBoss(ID3D12Device* pd3dDevi
 
 			nReads = (UINT)::fread(&nFrame, sizeof(int), 1, pInFile);
 			nReads = (UINT)::fread(&nTextures, sizeof(int), 1, pInFile);
-
 
 			nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
 			nReads = (UINT)::fread(pGameObject->m_pstrFrameName, sizeof(char), nStrLength, pInFile);

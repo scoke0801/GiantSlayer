@@ -60,6 +60,7 @@ enum class OBJECT_LAYER : int {
 	PlayerChessPuzzle,
 	Obstacle,
 	TerrainBoundary,
+	Thunder,
 	MirrorBox,
 	Bridge,
 	Enemy,
@@ -274,6 +275,7 @@ enum class PACKET_PROTOCOL : short
 	S2C_INGAME_FIREBALL_ACT,
 	S2C_CHESS_OBJ_ACT,
 	S2C_BOSS_ACT,
+	S2C_THUNDER_ACT,
 
 	S2C_DELETE_OBJ,
 
@@ -524,7 +526,15 @@ struct P_S2C_CHESS_OBJ_UPDATE_SYNC
 	int				posY[4];
 	int				posZ[4]; 
 };
+struct P_S2C_THUNDER_UPDATE_SYNC
+{
+	BYTE			size;
+	PACKET_PROTOCOL type;
 
+	int				posX[7];
+	int				posY[7];
+	int				posZ[7];
+};
 struct P_S2C_DELETE_SYNC
 {
 	BYTE			size;
