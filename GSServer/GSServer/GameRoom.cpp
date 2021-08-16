@@ -33,6 +33,8 @@ void CGameRoom::Update(float elapsedTime)
 			pObject->UpdateColliders();
 		}
 	} 
+	if(m_MummyExist[0] || m_MummyExist[1] || m_MummyExist[2]){
+	
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) { 
 		// 미라 보고있으면 데미지
 		if (m_Players[i]->IsExist() == false) continue;
@@ -45,7 +47,7 @@ void CGameRoom::Update(float elapsedTime)
 			}
 		}
 	}
-
+	}
 
 	for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy]) {
 		pEnemy->FixPositionByTerrain(g_Heights);
@@ -1856,13 +1858,14 @@ void CGameRoom::SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx)
 void CGameRoom::Disconnect(int packet_id)
 { 
 	cout << "로그 아웃\n"; 
-	m_Players[packet_id]->SetExistence(false);
-	m_Clients[packet_id]->m_state = PLST_FREE;
+	int id = m_IdIndexMatcher[packet_id];
+	m_Players[id]->SetExistence(false);
+	m_Clients[id]->m_state = PLST_FREE;
 
 	P_S2C_DELETE_PLAYER p_deletePlayer;
 	p_deletePlayer.type = PACKET_PROTOCOL::S2C_DELETE_PLAYER;
 	p_deletePlayer.size = sizeof(P_S2C_DELETE_PLAYER);
-	p_deletePlayer.id = packet_id;
+	p_deletePlayer.id = id;
 
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 		if (m_Clients[i]->m_state != PLST_FREE) {
@@ -1870,7 +1873,7 @@ void CGameRoom::Disconnect(int packet_id)
 		}
 	}
 	m_CurrentPlayerNum--;
-	ResetPlayer(packet_id);
+	ResetPlayer(id);
 
 	if (m_CurrentPlayerNum <= 0) {
 		m_IsActive = false;
@@ -1922,16 +1925,26 @@ void CGameRoom::DeleteObject(CGameObject* pObject, int layerIdx)
 }
    
 void CGameRoom::RecyleObject(CGameObject* pObject, int layerIdx)
-{
-	auto res = std::find(m_ObjectLayers[layerIdx].begin(), m_ObjectLayers[layerIdx].end(), pObject);
-	
-	int idx = 0;
-	if (res != m_ObjectLayers[layerIdx].end()) {  
-		pObject->SetIsUsable(true);
-		SendDeletePacket(pObject, layerIdx, idx);
-		m_ObjectDeleteFlag = true;
-		++idx;
+{ 
+	for (int i = 0; i < m_ObjectLayers[layerIdx].size(); ++i)
+	{
+		if (m_ObjectLayers[layerIdx][i] == pObject)
+		{
+			pObject->SetIsUsable(true);
+			SendDeletePacket(pObject, layerIdx, i);
+			m_ObjectDeleteFlag = true;
+			return;
+		}
 	}
+	//auto res = std::find(m_ObjectLayers[layerIdx].begin(), m_ObjectLayers[layerIdx].end(), pObject);
+	//
+	//int idx = 0;
+	//if (res != m_ObjectLayers[layerIdx].end()) {  
+	//	pObject->SetIsUsable(true);
+	//	SendDeletePacket(pObject, layerIdx, idx);
+	//	m_ObjectDeleteFlag = true;
+	//	++idx;
+	//}
 }
 
 void CGameRoom::EnterPlayer(CLIENT& client, int weapontType)
@@ -2242,7 +2255,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 
 		P_C2S_LOGIN p_login = *reinterpret_cast<P_C2S_LOGIN*>(p_buf);
 		// p_id mean packet_id... 
-		cout << "player_id : " << p_id << " p_id : " << p_id << endl;
+		cout << "player_id : " << p_id << " p_id : " << id << endl;
 		if (m_CurrentPlayerNum > MAX_ROOM_PLAYER) {
 			p_processLogin.isSuccess = false;
 		}
@@ -2259,7 +2272,7 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 			p_processLogin.y = FloatToInt(pos.y);
 			p_processLogin.z = FloatToInt(pos.z);
 		}
-		p_processLogin.id = p_id;
+		p_processLogin.id = id;
 		for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
 			p_processLogin.existPlayer[i] = m_Players[i]->IsExist();
 		}
