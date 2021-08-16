@@ -1965,8 +1965,7 @@ void CGameScene::ProcessInput()
 
 	if (m_CurrentCamera == nullptr) return;
 
-	float cameraSpeed = m_CurrentCamera->GetSpeed();
-	XMFLOAT3 velocity = m_Player->GetVelocity();
+	float cameraSpeed = m_CurrentCamera->GetSpeed(); 
 
 	XMFLOAT3 shift = XMFLOAT3(0, 0, 0);
 	float distance = PLAYER_RUN_SPEED;
