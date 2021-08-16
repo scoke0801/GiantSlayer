@@ -85,7 +85,7 @@ DXGI_FORMAT GetDXGIFormatFromWICFormat(WICPixelFormatGUID& wicFormatGUID);
 WICPixelFormatGUID GetConvertToWICFormat(WICPixelFormatGUID& wicFormatGUID);
 int GetDXGIFormatBitsPerPixel(DXGI_FORMAT& dxgiFormat);
 
-constexpr int MAX_TEXT_NUM = 10;
+constexpr int MAX_TEXT_NUM = 12;
 
 class TextHandler
 {
