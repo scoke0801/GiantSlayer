@@ -532,6 +532,10 @@ void CGameScene::Update(float elapsedTime)
 		pMummy->FixPositionByTerrain(m_Terrain);
 	}
 
+	
+
+	
+
 	m_EffectsHandler->Update(elapsedTime);
 
 	m_Particles->Update(elapsedTime);
@@ -1161,6 +1165,21 @@ void CGameScene::Update(float elapsedTime)
 		m_Player->SetPosition(XMFLOAT3(plPos.x, -1760.0f, plPos.z));
 		m_Player->UpdateCamera();
 	} 
+
+	// 몬스터 삭제부분
+	if (m_MonsterAllDie == true)
+	{
+		for (auto pEnemy : m_ObjectLayers[(int)OBJECT_LAYER::Enemy])
+		{
+			if (m_Player->GetPlayerExistingSector() == int(pEnemy->GetExistingSector()))
+			{
+				CEnemy* thisEnemy = reinterpret_cast<CEnemy*>(pEnemy);
+				thisEnemy->ChangeState(new DeathState(thisEnemy));
+				//DeleteEnemy(thisEnemy);
+				m_MonsterAllDie = false;
+			}
+		}
+	}
 }
 
 void CGameScene::UpdateForMultiplay(float elapsedTime)
@@ -2212,11 +2231,13 @@ void CGameScene::ProcessInput()
 			{
 				m_Interaction = false;
 			}
+			
 		}
 		if (keyInput.KEY_Z)
 		{
 			p_keyboard.keyInput = VK_Z;
 			processKey = true;
+			
 		}
 		// 무적
 		if (keyInput.KEY_N)
@@ -2303,6 +2324,7 @@ void CGameScene::ProcessInput()
 	if (keyInput.KEY_SPACE)
 	{
 		DisplayVector3(m_Player->GetPosition());
+		m_MonsterAllDie = true;
 		//m_Player->Jump();
 	}
 
