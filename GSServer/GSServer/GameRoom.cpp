@@ -459,13 +459,13 @@ void CGameRoom::Update(float elapsedTime)
 		{  
 			if (
 				(
-					(m_Chess[i]->GetPosition().x + 350.0f > m_Players[playerIdx]->GetPosition().x)
-					&& (m_Chess[i]->GetPosition().x - 350.0f < m_Players[playerIdx]->GetPosition().x)
+					(m_Chess[i]->GetPosition().x + 270.0f > m_Players[playerIdx]->GetPosition().x)
+					&& (m_Chess[i]->GetPosition().x - 270.0f < m_Players[playerIdx]->GetPosition().x)
 					)
 				&&
 				(
-					(m_Chess[i]->GetPosition().z + 350.0f > m_Players[playerIdx]->GetPosition().z)
-					&& (m_Chess[i]->GetPosition().z - 350.0f < m_Players[playerIdx]->GetPosition().z)
+					(m_Chess[i]->GetPosition().z + 270.0f > m_Players[playerIdx]->GetPosition().z)
+					&& (m_Chess[i]->GetPosition().z - 270.0f < m_Players[playerIdx]->GetPosition().z)
 					)
 
 				)

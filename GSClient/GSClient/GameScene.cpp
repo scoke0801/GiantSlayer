@@ -1217,13 +1217,18 @@ void CGameScene::UpdateForMultiplay(float elapsedTime)
 		m_Npc_Event = false;
 	}
 
-	if (m_Interaction == true)
-	{
+	if (isGameEnd) {
 		m_HelpBoard->SetDrawable(true);
 	}
-	else if (m_Interaction == false)
-	{
-		m_HelpBoard->SetDrawable(false);
+	else {
+		if (m_Interaction == true)
+		{
+			m_HelpBoard->SetDrawable(true);
+		}
+		else if (m_Interaction == false)
+		{
+			m_HelpBoard->SetDrawable(false);
+		}
 	}
 
 	m_EffectsHandler->Update(elapsedTime);
@@ -1781,7 +1786,8 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 
 			m_Boss->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
 		}
-		else {
+		else { 
+			isGameEnd = true;
 			m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition({ -100000,-100000,-10000 });
 		}
 	}
