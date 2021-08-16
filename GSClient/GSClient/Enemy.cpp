@@ -340,7 +340,7 @@ CRangedEnemy::CRangedEnemy()
 	m_ATK = 10;
 	m_DEF = 0;
 
-	m_SightDistance = 3000.0f;
+	m_SightDistance = 1200.0f;
 }
  
 
@@ -379,7 +379,7 @@ CMeleeEnemy::CMeleeEnemy()
 	m_ATK = 10;
 	m_DEF = 0;
 
-	m_SightDistance = 3000.0f;
+	m_SightDistance = 800.0f;
 } 
 
 CMeleeEnemy::~CMeleeEnemy()

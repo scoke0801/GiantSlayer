@@ -504,12 +504,14 @@ void CGameScene::Update(float elapsedTime)
 	}
 	
 	// 미라 보고있으면 데미지
-	if (m_Player->GetPlayerExistingSector() == 3 && m_Opendoor==false)
+	if (m_Player->GetPlayerExistingSector() == 3 && m_Opendoor==false && m_Player->killit == false)
 	{
 		if ((m_Player->GetLook().x > -150.0f && m_Player->GetLook().x < 150.0f)&& m_Player->GetLook().z>0.0f)
 		{
-			m_Player->SetHP(m_Player->GetHP() - 0.01f);
-			cout << m_Player->GetHP() << endl;
+			if (m_Player->GetHP() > 0)
+				m_Player->SetHP(m_Player->GetHP() - 1);
+			else
+				m_Player->Death();
 		}
 	}
 

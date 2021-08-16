@@ -9,10 +9,10 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_Type = OBJ_TYPE::Player;
 
 	// Status
-	m_HP = 1;
+	m_HP = 100;
 	m_SP = 100;
 	m_ATK = 30;
-	m_DEF = 100;
+	m_DEF = 0;
 }
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
