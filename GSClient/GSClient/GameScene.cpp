@@ -504,7 +504,7 @@ void CGameScene::Update(float elapsedTime)
 	}
 	
 	// 미라 보고있으면 데미지
-	if (m_Player->GetPlayerExistingSector() == 3)
+	if (m_Player->GetPlayerExistingSector() == 3 && m_Opendoor==false)
 	{
 		if ((m_Player->GetLook().x > -150.0f && m_Player->GetLook().x < 150.0f)&& m_Player->GetLook().z>0.0f)
 		{
