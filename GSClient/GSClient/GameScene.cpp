@@ -1923,8 +1923,8 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		 
 		if (pFireball->IsCanUse()) {
 			pFireball->SetUseable(false);
-			pFireball->SetPosition(pos);
-
+			pFireball->SetPosition(pos); 
+			pFireball->SetExistingSector();
 			m_SoundManager->PlayEffect(Sound_Name::EFFECT_Fire_Ball);
 			cout << "Fb\n";
 			break;

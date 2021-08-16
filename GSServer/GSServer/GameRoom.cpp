@@ -1593,6 +1593,7 @@ void CGameRoom::SendMonsterArrowActPacket()
 	int idx = 0;
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
 		if (pArrow->IsUsable()) {
+			++idx;
 			continue;
 		}
 
@@ -1637,6 +1638,7 @@ void CGameRoom::SendPlayerArrowActPacket()
 	int idx = 0;
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
 		if (pArrow->IsUsable()) {
+			++idx;
 			continue;
 		}
 
@@ -1683,6 +1685,7 @@ void CGameRoom::SendFireballActPacket()
 	int idx = 0;
 	for (auto pFireBall : m_ObjectLayers[(int)OBJECT_LAYER::FireBall]) {
 		if (pFireBall->IsDrawable()) {
+			++idx;
 			continue;
 		}
 		P_S2C_FIREBALL_UPDATE_SYNC packet;
@@ -2000,7 +2003,7 @@ bool CGameRoom::CanEnter()
 
 void CGameRoom::ShotPlayerArrow(int p_id)
 {
-	int i = 0;
+	int i = 0; 
 	for (auto* pObj : m_ObjectLayers[(int)OBJECT_LAYER::PlayerArrow]) {
 		CArrow* pArrow = reinterpret_cast<CArrow*>(pObj);
 		if (pArrow->IsUsable()) {
@@ -2010,7 +2013,7 @@ void CGameRoom::ShotPlayerArrow(int p_id)
 			pArrow->m_startPos = pos;
 			pArrow->SetStringPower(m_Players[p_id]->GetStringPullTime()); 
 			pArrow->SetTargetVector(Vector3::Multifly(m_Players[p_id]->GetLook(), 1));
-			pArrow->SetExistingSector((SECTOR_POSITION)m_Players[p_id]->GetPlayerExistingSector()); 
+			pArrow->SetExistingSector((SECTOR_POSITION)m_Players[p_id]->GetPlayerExistingSector());  
 			break;
 		}
 		++i;

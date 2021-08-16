@@ -93,6 +93,10 @@ class CGameRoom
 	CEnemy*									m_Npc = nullptr;
 	bool									m_Npc_Event = false;
 	bool									m_Interaction = false;
+
+	BYTE									m_FireballIdx = 0;
+	BYTE									m_plArrowIdx = 0;
+	BYTE									m_monArrowIdx = 0;
 public:
 	CGameRoom();
 	~CGameRoom() {}
