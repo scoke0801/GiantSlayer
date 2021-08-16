@@ -83,7 +83,7 @@ void CPlayer::Update(float fTimeElapsed)
 				m_ComboTimer -= fTimeElapsed;
 			SetAnimationSet(IDLE);
 		}
-		else if (m_PullBox == TRUE)
+		else if (m_PullBox == true)
 		{
 			SetAnimationSet(PUSH);
 		}

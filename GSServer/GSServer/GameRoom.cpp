@@ -451,7 +451,8 @@ void CGameRoom::Update(float elapsedTime)
 			} 
 		}
 		if (distOut) {
-			m_Players[playerIdx]->Box_Pull(FALSE);
+			//cout << "푸렁야함\n";
+			m_Players[playerIdx]->Box_Pull(false);
 		}
 		// 체스 그 자체랑 충돌처리
 		for (int i = 0; i < ChessType::Count; i++)
@@ -473,7 +474,7 @@ void CGameRoom::Update(float elapsedTime)
 				m_ChessChangeFlag = true;
 			}
 			else
-			{
+			{ 
 				m_ChessCollide_Check[i] = false;
 			}
 		}
@@ -526,7 +527,7 @@ void CGameRoom::Update(float elapsedTime)
 		}
 		if (m_ChessCollide_Check[King] == false && m_ChessCollide_Check[Knight] == false && m_ChessCollide_Check[Pawn] == false && m_ChessCollide_Check[Rook] == false)
 		{
-			//m_Players[playerIdx]->Box_Pull(FALSE);
+			//m_Players[playerIdx]->Box_Pull(false);
 		}
 
 		// 1 킹 2 나이트 3 폰 4 룩 // 퍼즐 체크 
