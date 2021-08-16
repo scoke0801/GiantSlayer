@@ -59,7 +59,8 @@ private:
 	UI*							m_HelpBoard = nullptr;
 	bool						m_StageFont[5] = { false,false, false, false, false };
 	float						m_StageFontTime = 3.0f;
-	bool m_Opendoor = false;
+	bool						m_Opendoor = false;
+	bool						m_MonsterAllDie = false;
 
 	bool m_isThunderOn = false;
 	
