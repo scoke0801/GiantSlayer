@@ -31,6 +31,7 @@ CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 
 CBoss::~CBoss()
 {
+	MAIN_GAME_SCENE->isGameEnd = true;
 }
 
 void CBoss::Update(float elapsedTime)
