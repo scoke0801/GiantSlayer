@@ -350,7 +350,7 @@ void CPlayer::SetWeapon(PlayerWeaponType weaponType)
 
 		m_AttackAnimLength = 1.533333f;
 		m_SkillAnimLength = 5.0f;
-		m_AttackAnimPauseTime = 0.6f;
+		m_AttackAnimPauseTime = 0.6 - 0.2f;
 		m_DeathAnimLength = 3.866667f;
 
 		SetDrawableRecursively("sword1", false);
