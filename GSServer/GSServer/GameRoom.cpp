@@ -677,7 +677,7 @@ void CGameRoom::InitMonsters()
 	CAnimationObject* pMonsterModel;
 	XMFLOAT3 scale = { 300.0f,300.0f,300.0f };
 	{	// Monster Area1
-		for (int i = 0; i < 4; ++i) {
+		for (int i = 0; i < 3; ++i) {
 			pMonsterModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
 				"resources/FbxExported/BasicSkeleton.bin", true);
 			pEnemy = new CMeleeEnemy();
@@ -690,6 +690,19 @@ void CGameRoom::InitMonsters()
 			pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 			m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 		}
+
+		pMonsterModel = CAnimationObject::LoadGeometryAndAnimationFromFile(
+			"resources/FbxExported/Skeleton_Archer.bin", true);
+		pEnemy = new CRangedEnemy();
+		pEnemy->Scale(scale.x, scale.y, scale.z);
+		pEnemy->SetChild(pMonsterModel, true); 
+		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 2005.0f * MAP_SCALE_SIZE, 11650.0f * MAP_SCALE_SIZE), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, GetDetailHeight(g_Heights, 2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum); 
+		pEnemy->AddBoundingBox(new BoundingBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
+		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z }); 
+		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
 	}
 
 	{	
@@ -1813,9 +1826,7 @@ void CGameRoom::SendDeletePacket(CGameObject* pObj, int layerIdx, int objIdx)
 
 		SendPacket(m_Clients[i]->id, &packet);
 	}
-
-
-
+	 
 	m_ObjectDeleteFlag = false;
 } 
 

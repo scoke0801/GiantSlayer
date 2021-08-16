@@ -17,7 +17,7 @@ constexpr int I_TO_F = F_TO_I;
 
 constexpr int MAX_MOUSE_INPUT = 30;
 
-constexpr int MAX_MONSTER_COUNT = 20;
+constexpr int MAX_MONSTER_COUNT = 22;
 
 constexpr float MAP_SCALE_SIZE = 1.5f;
 // 뛰기 : 100미터 16초, 1초에 6.25미터를 달린다. 625 

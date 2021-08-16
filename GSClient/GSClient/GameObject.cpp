@@ -117,6 +117,31 @@ void CGameObject::ReleaseUploadBuffers()
 	if (m_pMesh) m_pMesh->ReleaseUploadBuffers();
 }
 
+void CGameObject::SetExistingSector()
+{
+	if (m_xmf3Position.x < 14379 && m_xmf3Position.z < 22824) {
+		m_ExistingSector = SECTOR_POSITION::SECTOR_1;
+	}
+	if (m_xmf3Position.x < 14379 && m_xmf3Position.z >= 22824) {
+		m_ExistingSector = SECTOR_POSITION::SECTOR_1;
+	}
+	if (m_xmf3Position.x >= 14379 && m_xmf3Position.x < 20422 &&
+		(m_xmf3Position.z > 10764)) {
+		m_ExistingSector = SECTOR_POSITION::SECTOR_2;
+	}
+	if ((m_xmf3Position.x >= 14379 && m_xmf3Position.x < 20422) &&
+		m_xmf3Position.z <= 10764) {
+		m_ExistingSector = SECTOR_POSITION::SECTOR_3;
+	}
+
+	if (m_xmf3Position.x >= 20422 && m_xmf3Position.z < 12077) {
+		m_ExistingSector = SECTOR_POSITION::SECTOR_3;
+	}
+	if (m_xmf3Position.x >= 20422 && m_xmf3Position.z >= 12077) {
+		m_ExistingSector = SECTOR_POSITION::SECTOR_4;
+	}
+}
+
 void CGameObject::Animate(float fTimeElapsed)
 {
 

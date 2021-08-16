@@ -1695,16 +1695,10 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 
 			m_Players[i]->SetHP(p_syncUpdate.hp[i]);
 			
-			if (m_Players[i]->GetWeapon() != p_syncUpdate.weaponType[i]) { 
-				cout << "몬가 달라서 무기가 바뀜\n";
+			if (m_Players[i]->GetWeapon() != p_syncUpdate.weaponType[i]) {  
 				m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
 			} 
-
-			//if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
-			//	cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
-			//	m_Players[i]->SetAnimationSet(p_syncUpdate.states[i]); 	 
-			//}
-
+			  
 			if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
 				//cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
 				switch (p_syncUpdate.states[i]) {
@@ -1720,8 +1714,12 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 					m_Players[i]->SetAnimationSet((int)m_Players[i]->RUN);
 					break;
 				case SWORD_ATK:
+					m_SoundManager->PlayEffect(Sound_Name::EFFECT_Sword);
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
+					break;
 				case BOW_ATK:
-				case STAFF_ATK:
+					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
+				case STAFF_ATK: 
 					m_Players[i]->SetAnimationSet((int)m_Players[i]->ATK);
 					break;
 				case SWORD_DEATH:
@@ -1798,8 +1796,9 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				pArrow->m_startPos = pos; 
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
-				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx)); 
-				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT); 
+				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
+				pArrow->SetExistingSector();
+				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);  
 			}
 			break;
 		}
@@ -3042,23 +3041,6 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
   
-		// 원거리
-		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton_Archer.bin", NULL, true);
-		pEnemy = new CRangedEnemy();
-		pEnemy->Scale(scale.x, scale.y, scale.z);
-		pEnemy->SetChild(pSkeletonModel, true);
-		pEnemy->SetShadertoAll();
-		pEnemy->SetTextureInedxToAll(0x20);
-		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
-		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
-		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
-		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
-		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
-		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
-
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
 			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
 		pEnemy = new CMeleeEnemy();
@@ -3093,22 +3075,23 @@ void CGameScene::BuildEnemys(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
 
+		// 원거리
 		pSkeletonModel = CGameObjectVer2::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList,
-			m_pd3dGraphicsRootSignature, "resources/FbxExported/BasicSkeleton.bin", NULL, true);
-		pEnemy = new CMeleeEnemy();
+			m_pd3dGraphicsRootSignature, "resources/FbxExported/Skeleton_Archer.bin", NULL, true);
+		pEnemy = new CRangedEnemy();
 		pEnemy->Scale(scale.x, scale.y, scale.z);
 		pEnemy->SetChild(pSkeletonModel, true);
 		pEnemy->SetShadertoAll();
-		pEnemy->SetTextureInedxToAll(0x40);
-		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE + 3000.0f, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
+		pEnemy->SetTextureInedxToAll(0x20);
+		pEnemy->SetPosition({ 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
 		pEnemy->SetActivityScope({ 1825, 0, 3050 }, { 2005.0f * MAP_SCALE_SIZE, m_Terrain->GetDetailHeight(2005.0f, 11650.0f), 11650.0f * MAP_SCALE_SIZE });
 		pEnemy->ConnectPlayer(m_Players, m_CurrentPlayerNum);
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1.0f, 1.5f, 0.8f, XMFLOAT3{ 0, 0.0f, 0 });
-		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, boundbox));
+		pEnemy->AddColider(new ColliderBox(XMFLOAT3{ 0, 0,0 }, XMFLOAT3(0.5f, 0.75f, 0.4f)));
 		pEnemy->SetSightBoundingBox({ 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z });
 		pEnemy->BuildBoundigBoxMesh(pd3dDevice, pd3dCommandList, PulledModel::Top, 1825 * 0.75f / scale.x, 3, 3050 * 0.75f / scale.z, XMFLOAT3{ 0,0.0f,0 });
-		pEnemy->SetExistingSector(SECTOR_POSITION::SECTOR_1);
 		m_ObjectLayers[(int)OBJECT_LAYER::Enemy].push_back(reinterpret_cast<CGameObject*>(std::move(pEnemy)));
+
 	}
 	//return;
 	{	// Monster Area1-2

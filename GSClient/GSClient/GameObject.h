@@ -191,6 +191,7 @@ public:
 
 	SECTOR_POSITION GetExistingSector() const { return m_ExistingSector; }
 	void SetExistingSector(SECTOR_POSITION sectorPos) { m_ExistingSector = sectorPos; }
+	void SetExistingSector();
 
 	virtual void Animate(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed);
