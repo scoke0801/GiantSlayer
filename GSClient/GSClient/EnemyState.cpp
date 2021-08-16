@@ -184,8 +184,7 @@ void AttackState::Enter(CEnemy* enemy)
 }
 
 void AttackState::Execute(CEnemy* enemy, float elapsedTime)
-{
-
+{ 
     m_ElapsedTime += elapsedTime; 
     if (m_LifeTime < m_ElapsedTime) { 
         enemy->ChangeState(new TraceState(enemy));

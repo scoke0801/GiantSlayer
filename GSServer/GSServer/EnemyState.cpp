@@ -125,7 +125,7 @@ void AttackState::Enter(CEnemy* enemy)
         break;
     case EnemyType::Skeleton:
         m_AttackType = (int)EnemyAttackType::Melee;
-        m_LifeTime = MELLE_ENEMY_ATTACK_TIME;
+        m_LifeTime = enemy->GetAttackAnimLength();
         break;
     case EnemyType::Mummy:
         m_AttackType = (int)enemy->GetEnemyAttackType();
@@ -177,6 +177,9 @@ void AttackState::Execute(CEnemy* enemy, float elapsedTime)
     if (m_LifeTime < m_ElapsedTime) {
         enemy->ChangeState(new TraceState(enemy));
     }
+    else if (enemy->GetTargetPlayer()->m_Alive == false) {
+        enemy->ChangeState(new PatrolState(enemy));
+    }
     else {
         enemy->ChangeAnimation(ObjectState::Attack);
         enemy->Attack(elapsedTime);
@@ -196,8 +199,8 @@ void TraceState::Enter(CEnemy* enemy)
     m_LifeTime = 0.5f;
    // cout << "TraceState::Enter \n";
     m_AttackRange = enemy->GetAttackRange();
-    m_TargetPlayer = enemy->GetTargetPlayer();
-    if (m_TargetPlayer == nullptr) {
+    m_TargetPlayer = enemy->GetTargetPlayer(); 
+    if (m_TargetPlayer == nullptr || m_TargetPlayer->m_Alive == false) {
         enemy->ChangeState(new PatrolState(enemy));
     }
 }

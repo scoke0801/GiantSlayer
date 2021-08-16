@@ -10,6 +10,7 @@ CEnemy::CEnemy() :CAnimationObject()
 {
 	m_State = new PatrolState(this);
 
+	m_AttackAnimLength = MELLE_ENEMY_ATTACK_TIME;
 	m_Type = OBJ_TYPE::Enemy;
 	m_EnemyType = EnemyType::Skeleton;
 
@@ -47,37 +48,16 @@ bool CEnemy::IsEnemyInSight() // Chase State
 	if (m_AttackDelayTime > 0.0f) {
 		return false;
 	}
-	for (auto player : m_ConnectedPlayers) { 
-		if (false == player->IsExist()) {
-			continue;
-		}
-		// 플레이어가 객체의 활동영역 안에 있는지 확인
-		auto plAABBs = player->GetAABB();
-		bool ret = false;
-		for (auto plAABB : plAABBs) {
-			if (ret = m_ActivityRegionBox.Intersects(*plAABB)) {
-				break;
-			}
-		}
+	for (auto player : m_ConnectedPlayers) {
+		if (player->m_Alive == false)
+			break;
 
-		// 추가할 코드
-		// 만약 플레이어와 몬스터의 방향이 반대라면 쳐다볼수 없어야 한다...
+		float distance = Vector3::Length(Vector3::Subtract(GetPosition(), player->GetPosition()));
 
-		if (false == ret) {
-			return false;
-		}
-
-		// 플레이어가 객체의 시야에 있는지 확인
-		for (auto plAABB : plAABBs) {
-			if (ret = m_SightAABB.Intersects(*plAABB)) {
-				// 해당 플레이어를 공격하도록 설정하자
-				cout << "공격할 대상을 찾았습니다.\n";
-
-				//m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.5f; 
-				m_TargetPlayer = player;
-				return true;
-			}
-		}
+		if (m_SightDistance >= distance) {
+			m_TargetPlayer = player;
+			return true;
+		} 
 	}
 	m_TargetPlayer = nullptr;
 	return false;
@@ -324,6 +304,8 @@ CRangedEnemy::CRangedEnemy()
 	m_SP = 100;
 	m_ATK = 15;
 	m_DEF = 0;
+
+	m_SightDistance = 1200.0f;
 }
 
 CRangedEnemy::~CRangedEnemy()
@@ -353,10 +335,15 @@ CMeleeEnemy::CMeleeEnemy()
 	m_EnemyType = EnemyType::Skeleton;
 	m_Speed = 165.0f * 2.5f;
 
+	m_AttackAnimLength = MELLE_ENEMY_ATTACK_TIME;
 	m_HP = 100;
 	m_SP = 100;
 	m_ATK = 15;
 	m_DEF = 0;
+
+	m_SightDistance = 800.0f;
+
+	m_AttackAnimLength = RANGED_ENEMY_ATTACK_TIME;
 }
 
 CMeleeEnemy::~CMeleeEnemy()

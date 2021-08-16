@@ -67,6 +67,7 @@ public:
 	bool pullString = false;
 	float m_StringPullTime = 0.0f;
 
+	bool killit = false;
 	bool m_Alive = true;
 	 
 public:
@@ -118,6 +119,8 @@ public:
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
 
 	bool ShotAble();
+
+	void Death();
 
 	bool IsAnimationPaused() const { return m_AnimationPaused; }
 	bool IsOnPullstring() const { return pullString; }

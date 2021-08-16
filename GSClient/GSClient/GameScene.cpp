@@ -605,8 +605,7 @@ void CGameScene::Update(float elapsedTime)
 			m_Player->FixCollision(pObstacle);
 		}
 	}
-	
-
+	 
 	// NPC¶û Ãæµ¹
 	for (auto pObstacle : m_ObjectLayers[(int)OBJECT_LAYER::Npc]) {
 		if (false == pObstacle->IsInSameSector(m_PlayerExistingSector)) {
@@ -1837,7 +1836,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
 				pArrow->SetExistingSector();
 				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
-				cout << "Arrow\n";
+				cout << "PL Arrow\n";
 			}
 			break;
 		}
@@ -1851,7 +1850,27 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 	case PACKET_PROTOCOL::SC2_INGAME_MONSTER_ARROW_ACT:	
 	{
 		P_S2C_MONSTER_ARROW_UPDATE_SYNC* packet = reinterpret_cast<P_S2C_MONSTER_ARROW_UPDATE_SYNC*>(p_buf);
+		auto obj = m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow][packet->id];
+		CArrow* pArrow = reinterpret_cast<CArrow*>(obj);
 
+		XMFLOAT3 pos = { IntToFloat(packet->posX), IntToFloat(packet->posY), IntToFloat(packet->posZ) };
+		XMFLOAT3 look = { IntToFloat(packet->lookX), IntToFloat(packet->lookY), IntToFloat(packet->lookZ) };
+
+		if (pArrow->IsCanUse()) { 
+			{
+				pArrow->SetUseable(false);
+				pArrow->SetPosition(pos);
+				pArrow->m_startPos = pos;  
+				pArrow->SetExistingSector(); 
+				cout << "MON Arrow\n";
+			}
+			break;
+		}
+		else
+		{
+			pArrow->SetPosition(pos);
+			pArrow->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
+		}
 	}
 		break;
 	case PACKET_PROTOCOL::S2C_INGAME_LASER_ACT:		

@@ -119,6 +119,19 @@ void CGameRoom::Update(float elapsedTime)
 				m_Players[i]->UpdateCamera();
 			}
 		}
+	} 
+
+	for (auto pPlayer : m_Players) {
+		if (pPlayer->killit == true)
+			break;
+
+		XMFLOAT3 pos = pPlayer->GetPosition();
+		if (pos.x > 1500 && pos.x < 18000 && pos.z > 24000 && pos.z < 30000 && pos.y < -1330) {
+			if (pPlayer->GetHP() > 0)
+				pPlayer->SetHP(pPlayer->GetHP() - 1);
+			else
+				pPlayer->Death();
+		}
 	}
 
 
@@ -281,6 +294,7 @@ void CGameRoom::Update(float elapsedTime)
 			if (pArrow->CollisionCheck(m_Players[i])) {
 				if (m_Players[i]->Attacked(pArrow)) {
 					pArrow->SetIsUsable(true);
+					RecyleObject(pArrow, (int)OBJECT_LAYER::MonsterArrow);
 				}
 			}
 		}
@@ -297,8 +311,8 @@ void CGameRoom::Update(float elapsedTime)
 			}
 			if (pArrow->CollisionCheck(pEnemy)) {
 				pEnemy->ChangeState(ObjectState::Attacked, pArrow);
-				pArrow->SetIsUsable(true);
-
+				//pArrow->SetIsUsable(true);
+				RecyleObject(pArrow, (int)OBJECT_LAYER::PlayerArrow);
 				//cout << "충돌 : 플레이어 화살 - 적\n";
 				break;
 			}
@@ -314,7 +328,8 @@ void CGameRoom::Update(float elapsedTime)
 			if (pFireball->CollisionCheck(pEnemy)) {
 				pEnemy->ChangeState(ObjectState::Attacked, pFireball);
 				pFireball->SetDrawable(true);
-				 
+
+				RecyleObject(pFireball, (int)OBJECT_LAYER::FireBall);
 				break;
 			}
 		}
@@ -869,15 +884,17 @@ void CGameRoom::InitMummyLaser()
 		m_MummyLaser[i]->SetLaserType(Laser_TYPE::Laser1); 
 		m_MummyLaser[i]->Scale(100.0f, 100.0f, 1000.0f);
 		m_MummyLaser[i]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 1), XMFLOAT3(0.5f, 0.5f, 1.0f)));
+		m_MummyLaser[i]->SetATK(20);
 		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(m_MummyLaser[i]);
 	}
 
 	for (int i = 0; i < 3; i++)
 	{
-		m_MummyLaser2[i] = new CMummyLaser(); 
+		m_MummyLaser2[i] = new CMummyLaser();
 		m_MummyLaser2[i]->SetLaserType(Laser_TYPE::Laser2); 
 		m_MummyLaser2[i]->Scale(100.0f, 100.0f, 1000.0f);
 		m_MummyLaser2[i]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 1), XMFLOAT3(0.5f, 0.5f, 1.0f)));
+		m_MummyLaser2[i]->SetATK(20);
 		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(m_MummyLaser2[i]);
 	}
 
@@ -887,6 +904,7 @@ void CGameRoom::InitMummyLaser()
 		m_MummyLaser3[i]->SetLaserType(Laser_TYPE::Laser3); 
 		m_MummyLaser3[i]->Scale(100.0f, 100.0f, 1000.0f);
 		m_MummyLaser3[i]->AddBoundingBox(new BoundingBox(XMFLOAT3(0, 0, 1), XMFLOAT3(0.5f, 0.5f, 1.0f)));
+		m_MummyLaser3[i]->SetATK(20);
 		m_ObjectLayers[(int)OBJECT_LAYER::Mummylaser].push_back(m_MummyLaser3[i]);
 	}
 }
@@ -1444,7 +1462,7 @@ void CGameRoom::SendMonsterActPacket()
 	// 0 : boss
 	for (int i = 1; i < m_ObjectLayers[(int)OBJECT_LAYER::Enemy].size(); ++i) {
 		auto mon = m_ObjectLayers[(int)OBJECT_LAYER::Enemy][i];
-
+		
 		XMFLOAT3 pos = mon->GetPosition();
 		XMFLOAT3 look = Vector3::Normalize(mon->GetLook());
 
@@ -1569,6 +1587,10 @@ void CGameRoom::SendMonsterArrowActPacket()
 	
 	int idx = 0;
 	for (auto pArrow : m_ObjectLayers[(int)OBJECT_LAYER::MonsterArrow]) {
+		if (pArrow->IsUsable()) {
+			continue;
+		}
+
 		P_S2C_MONSTER_ARROW_UPDATE_SYNC packet;
 		ZeroMemory(&packet, sizeof(packet));
 		packet.size = sizeof(packet);
@@ -1919,8 +1941,10 @@ void CGameRoom::DeleteObject(CGameObject* pObject, int layerIdx)
 {
 	auto res = std::find(m_ObjectLayers[layerIdx].begin(), m_ObjectLayers[layerIdx].end(), pObject);
 	if (res != m_ObjectLayers[layerIdx].end()) {
+
+		(*res)->SetIsUsable(true);
 		//cout << " 객체 삭제\n";
-		m_ObjectLayers[layerIdx].erase(res);
+		//m_ObjectLayers[layerIdx].erase(res);
 	}
 }
    

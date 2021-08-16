@@ -39,12 +39,16 @@ protected:
 	// 공격범위
 	float					m_AttackRange;
 
+	float					m_AttackAnimLength = 0.0f;
+
 	// 활동 범위
 	XMFLOAT3				m_xmf3ActivityScopeCenter;
 	XMFLOAT3				m_xmf3ActivityScope;
 
 	// 활동 범위 충돌체
 	BoundingBox				m_ActivityRegionBox;
+
+	float					m_SightDistance;
 
 	// 시야 범위 충돌체
 	BoundingBox				m_SightBox;
@@ -99,6 +103,7 @@ public:
 	EnemyAttackType GetEnemyAttackType() const { return m_AttackType; }
 
 	float GetAttackRange() const { return m_AttackRange; }
+	float GetAttackAnimLength() const { return m_AttackAnimLength; }
 
 	CPlayer* GetTargetPlayer() const { return m_TargetPlayer; }
 
