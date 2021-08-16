@@ -2486,14 +2486,31 @@ void CGameRoom::ProcessPacket(int p_id, unsigned char* p_buf)
 		for (int i = 0; i < p_mouse.inputNum; ++i) {
 			if (p_mouse.InputType[i] == MOUSE_INPUT_TYPE::M_LMOVE) {
 				float dx = IntToFloat(p_mouse.xInput[i]);
+				 
+				if (m_Players[p_mouse.id]->pullString) {
+					m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+					cameraRotateY += dx * 75;
+					//m_CurrentCamera->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 150);
+				}
+				else {
+					m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 80);
+					cameraRotateY += dx * 80; 
+				}
 
-				m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
-				cameraRotateY += dx * 75;
-				if (m_Players[p_mouse.id]->IsMoving())
+				if (m_Players[p_mouse.id]->IsMoving() || m_Players[p_mouse.id]->pullString)
 				{
 					playerRotateY += dx * 150;
-					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
+					m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150); 
 				}
+				 
+
+				//m_Cameras[p_mouse.id]->RotateAroundTarget(XMFLOAT3(0, 1, 0), dx * 75);
+				//cameraRotateY += dx * 75; 
+				//if (m_Players[p_mouse.id]->IsMoving())
+				//{
+				//	playerRotateY += dx * 150;
+				//	m_Players[p_mouse.id]->Rotate(XMFLOAT3(0, 1, 0), dx * 150);
+				//}
 
 			}
 			else if (p_mouse.InputType[i] == MOUSE_INPUT_TYPE::M_RMOVE) {

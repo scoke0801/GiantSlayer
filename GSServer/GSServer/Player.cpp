@@ -34,8 +34,7 @@ void CPlayer::Update(float fTimeElapsed)
 		case PlayerWeaponType::Sword: {
 		}break;
 
-		case PlayerWeaponType::Bow: {
-			cout << "bow up\n";
+		case PlayerWeaponType::Bow: { 
 			if (pullString) {
 				if (m_AttackWaitingTime < 1.2f)
 					SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);

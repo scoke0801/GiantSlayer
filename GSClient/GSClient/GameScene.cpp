@@ -1699,19 +1699,13 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				m_Players[i]->m_AnimationPaused = false;
 			} 
 			if (p_syncUpdate.weaponType[i] == PlayerWeaponType::Bow) {
+				m_Players[i]->pullString = p_syncUpdate.pullString[i]; 
+				m_Players[i]->m_AnimationPaused = (p_syncUpdate.animationPause[i]);
 				if (false == m_Players[i]->IsAnimationPaused()) { 
 					if (p_syncUpdate.pullString[i]) {
 						m_Players[i]->SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
 					} 
-				} 
-				else {
-					m_Players[i]->m_AnimationPaused = false;
-				}
-				if (false == m_Players[i]->IsOnPullstring()) {
-					if (p_syncUpdate.animationPause[i]) {
-						m_Players[i]->m_AnimationPaused = true;
-					}
-				}
+				}   
 			}
 			m_Players[i]->SetPosition(pos);
 			m_Players[i]->UpdateCamera();
