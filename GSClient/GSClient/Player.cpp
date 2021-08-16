@@ -140,10 +140,21 @@ void CPlayer::Update(float fTimeElapsed)
 
 void CPlayer::UpdateOnServer(float fTimeElapsed)
 {
-	UpdateCamera();
+	if (killit) {
+		m_AttackWaitingTime -= fTimeElapsed;
+		if (m_AttackWaitingTime <= 0.0f) {
+			m_AttackWaitingTime = 0.0f;
+		}
+	}
 
-	CGameObjectVer2::Animate(fTimeElapsed);
-	UpdateTransform(NULL);
+	if (killit && (m_AttackWaitingTime <= 0.05f)) { 
+	}
+	else {
+		UpdateCamera();
+
+		CGameObjectVer2::Animate(fTimeElapsed);
+		UpdateTransform(NULL);
+	}
 }
 
 void CPlayer::UpdateCamera()

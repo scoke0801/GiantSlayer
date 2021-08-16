@@ -1771,8 +1771,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			IntToFloat(packet->posY[i]),
 			IntToFloat(packet->posZ[i]) };
 			ActiveThunder(pos, i);
-		}
-		cout << "Thunder!!\n";
+		} 
 		m_isThunderOn = true;
 	}
 	break;
@@ -1786,10 +1785,10 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 
 			XMFLOAT3 pos = { IntToFloat(p_syncUpdate.posX[i]), IntToFloat(p_syncUpdate.posY[i]), IntToFloat(p_syncUpdate.posZ[i]) };
 			XMFLOAT3 look = { IntToFloat(p_syncUpdate.lookX[i]), IntToFloat(p_syncUpdate.lookY[i]), IntToFloat(p_syncUpdate.lookZ[i]) };
-
-			if (m_Players[i]->GetWeapon() != p_syncUpdate.weaponType[i]) {  
+			m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
+			/*if (m_Players[i]->GetWeapon() != p_syncUpdate.weaponType[i]) {  
 				m_Players[i]->SetWeapon(p_syncUpdate.weaponType[i]);
-			} 
+			} */
 			  
 			if (m_Players[i]->GetAnimationSet() != (int)p_syncUpdate.states[i]) {
 				//cout << "몬가 달라서 애니메이션이 바뀜 " << m_Players[i]->GetAnimationSet() << " vs " << (int)p_syncUpdate.states[i] << "\n";
@@ -1893,18 +1892,23 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		XMFLOAT3 look = { IntToFloat(packet->lookX), IntToFloat(packet->lookY), IntToFloat(packet->lookZ) };
 
 		if (pArrow->IsCanUse()) {
-			//int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
-			//if (-1 != idx) { 
-			{
-				pArrow->SetUseable(false); 
-				pArrow->SetPosition(pos);
-				pArrow->m_startPos = pos; 
-				//m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
-				//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
-				//pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
-				pArrow->SetExistingSector();
-				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
-				cout << "PL Arrow\n";
+			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
+			if (-1 != idx) {
+				{
+					ShotPlayerArrow();
+					pArrow->SetUseable(false);
+					pArrow->SetPosition(pos);
+					pArrow->m_startPos = pos;
+					m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+					m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
+					pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
+					pArrow->SetExistingSector();
+					m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
+					cout << idx << "PL Arrow\n";
+				}
+			}
+			else {
+				cout << "부족해요\n";
 			}
 			break;
 		}
@@ -3646,6 +3650,9 @@ void CGameScene::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	for (int i = 0; i < 5; i++)
 	{
+		if (i == 0) {
+			continue;
+		}
 		pBillboardObject = new CGameObject();
 
 		pBillboardObject->SetMesh(pBillboardMesh);
@@ -4726,8 +4733,7 @@ void CGameScene::DeleteEnemy(CEnemy* pEmeny)
 			m_One_Mira_Die = true;
 			m_One_Mira_Die_Laser = true;
 			if (m_All_Die == true)
-			{
-				cout << "dd" << endl;
+			{ 
 				OpenDoor();
 			}
 		}

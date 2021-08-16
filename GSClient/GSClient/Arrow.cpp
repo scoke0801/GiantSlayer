@@ -67,8 +67,11 @@ void CArrow::UpdateOnServer(float fTimeElapsed)
 			m_ConnectedParticle->SetPosition(m_xmf3Position);
 		}
 		m_ElapsedTime += fTimeElapsed;
-		if (m_ElapsedTime > ARROW_LIFE_TIME) {
-			m_ConnectedParticle->SetDrawable(false); 
+		if (m_ElapsedTime + 0.1f > ARROW_LIFE_TIME) {
+			m_ElapsedTime = 0.0f;
+			if (m_ConnectedParticle != nullptr) {
+				m_ConnectedParticle->SetDrawable(false);
+			}
 		}
 	}
 }

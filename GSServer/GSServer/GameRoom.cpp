@@ -1985,8 +1985,12 @@ void CGameRoom::Disconnect(int packet_id)
 	cout << "·Î±× ¾Æ¿ô\n"; 
 	int id = m_IdIndexMatcher[packet_id];
 	m_Players[id]->SetExistence(false);
-	m_Clients[id]->m_state = PLST_FREE;
-
+	if (m_Clients[id] != nullptr) {
+		m_Clients[id]->m_state = PLST_FREE;
+	}
+	else {
+		return;
+	}
 	P_S2C_DELETE_PLAYER p_deletePlayer;
 	p_deletePlayer.type = PACKET_PROTOCOL::S2C_DELETE_PLAYER;
 	p_deletePlayer.size = sizeof(P_S2C_DELETE_PLAYER);

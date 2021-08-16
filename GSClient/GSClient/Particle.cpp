@@ -16,7 +16,7 @@ void ParticleObject::Update(float fTimeElapsed)
 	}
 	m_elapsedTime += fTimeElapsed;
 	if (m_Type == PARTICLE_TYPE::ArrowParticle) {
-		if (m_elapsedTime > ARROW_PARTICLE_LIFE_TIME) {
+		if (m_elapsedTime + 1.0f > ARROW_PARTICLE_LIFE_TIME) {
 			m_IsCanUse = false; 
 			m_elapsedTime = 0.0f;
 			SetParticleParameter(0, -1.0f);

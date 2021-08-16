@@ -582,6 +582,7 @@ bool CGameObjectVer2::CollisionCheck(CGameObject* other)
 
 void CGameObjectVer2::SetAnimationSet(int nAnimationSet)
 {
+	//cout << "애니메이션 바뀜\n";
 	m_AnimationSet = nAnimationSet;
 	if (m_pAnimationController) m_pAnimationController->SetAnimationSet(nAnimationSet);
 
