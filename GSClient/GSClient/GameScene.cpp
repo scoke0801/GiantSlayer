@@ -1888,15 +1888,15 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 		XMFLOAT3 look = { IntToFloat(packet->lookX), IntToFloat(packet->lookY), IntToFloat(packet->lookZ) };
 
 		if (pArrow->IsCanUse()) {
-			int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
-			if (-1 != idx) { 
+			//int idx = m_Particles->GetCanUseableParticle(PARTICLE_TYPE::ArrowParticle);
+			//if (-1 != idx) { 
+			{
 				pArrow->SetUseable(false); 
 				pArrow->SetPosition(pos);
 				pArrow->m_startPos = pos; 
-				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
-				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
-				m_Particles->GetParticleObj(idx)->SetDrawable(true);
-				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
+				//m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
+				//m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
+				//pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
 				pArrow->SetExistingSector();
 				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 				cout << "PL Arrow\n";
