@@ -1740,11 +1740,16 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 			IntToFloat(p_monsterUpdate->lookZ) };
 		int id = p_monsterUpdate->id;
 
-		m_Boss->ChangeAnimationForServer((BOSS_ANIMATION)p_monsterUpdate->state);
-		m_Boss->SetPosition(pos);
-		m_Boss->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 }); 
+		if (p_monsterUpdate->alive) {
+			m_Boss->ChangeAnimationForServer((BOSS_ANIMATION)p_monsterUpdate->state);
+			m_Boss->SetPosition(pos);
+			m_Boss->LookAt(pos, Vector3::Multifly(look, 15000.0f), { 0,1,0 });
 
-		m_Boss->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
+			m_Boss->LookAtDirection(Vector3::Add(XMFLOAT3(0, 0, 0), look, 15000.0f), nullptr);
+		}
+		else {
+			m_ObjectLayers[(int)OBJECT_LAYER::Enemy][id]->SetPosition({ -100000,-100000,-10000 });
+		}
 	}
 	break;
 
@@ -1890,6 +1895,7 @@ void CGameScene::ProcessPacket(unsigned char* p_buf)
 				pArrow->m_startPos = pos; 
 				m_Particles->UseParticle(idx, pArrow->GetPosition(), XMFLOAT3(0.0f, 0.0f, -1.0f));
 				m_Particles->SetDirection(idx, Vector3::Multifly(Vector3::Normalize(look), -1));
+				m_Particles->GetParticleObj(idx)->SetDrawable(true);
 				pArrow->ConnectParticle(m_Particles->GetParticleObj(idx));
 				pArrow->SetExistingSector();
 				m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);

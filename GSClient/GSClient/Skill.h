@@ -13,6 +13,8 @@ public:
 	void Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) override;
 	void Update(float fTimeElapsed) override;
 
+	void UpdateOnServer(float fTimeElapsed) override;
+
 	void SetSkill(CGameObject* owner);
 	void TrackingTarget(CGameObject target);
 	void SetTargetPosition(const XMFLOAT3& targetPos);

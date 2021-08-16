@@ -1573,6 +1573,7 @@ void CGameRoom::SendBossActPacket()
 
 		//cout << (int)reinterpret_cast<CEnemy*>(mon)->GetAnimationSet() << "\n";
 		p_monsterUpdate.state = reinterpret_cast<CEnemy*>(mon)->GetAnimationSet();
+		p_monsterUpdate.alive = mon->IsUsable();
 	}
 
 	for (int i = 0; i < MAX_ROOM_PLAYER; ++i) {
@@ -2042,8 +2043,8 @@ void CGameRoom::RecyleObject(CGameObject* pObject, int layerIdx)
 		if (m_ObjectLayers[layerIdx][i] == pObject)
 		{
 			pObject->SetIsUsable(true);
-			SendDeletePacket(pObject, layerIdx, i);
 			m_ObjectDeleteFlag = true;
+			SendDeletePacket(pObject, layerIdx, i); 
 			return;
 		}
 	}

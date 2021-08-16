@@ -259,15 +259,9 @@ bool CPlayer::Attacked(CGameObject* pObject)
 		m_AttackedDelay += 0.6666667f;
 		SetAnimationSet(AnimationType::DAMAGED);
 	}
-	else {
-		m_Alive = false;
-		m_HP = 0;
-		m_SP = 0;
-		m_AttackedDelay += m_DeathAnimLength;
-		SetAnimationType(ANIMATION_TYPE_ONCE);
-		SetAnimationSet(DEATH);
+	else if (killit == false) {
+		Death();
 	}
-
 	return true;
 }
 

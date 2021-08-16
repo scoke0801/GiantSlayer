@@ -13,6 +13,7 @@ public:
 
 	void Update(float fTimeElapsed) override;
 
+	void UpdateOnServer(float fTimeElapsed);
 public:
 	void SetTargetPosition(const XMFLOAT3& targetPos);
 	void SetTargetVector(const XMFLOAT3& playerLookAt); 

@@ -60,6 +60,19 @@ void CArrow::Update(float fTimeElapsed)
 	else return; 
 }
 
+void CArrow::UpdateOnServer(float fTimeElapsed)
+{
+	if (false == m_isDrawable) {
+		if (m_ConnectedParticle != nullptr) {
+			m_ConnectedParticle->SetPosition(m_xmf3Position);
+		}
+		m_ElapsedTime += fTimeElapsed;
+		if (m_ElapsedTime > ARROW_LIFE_TIME) {
+			m_ConnectedParticle->SetDrawable(false); 
+		}
+	}
+}
+
 void CArrow::SetTargetPosition(const XMFLOAT3& targetPos)
 {	
 	XMFLOAT3 dirVector = Vector3::Normalize(Vector3::Subtract(targetPos, m_xmf3Position));
@@ -85,4 +98,4 @@ void CArrow::SetDrawable(bool drawable)
 			m_ConnectedParticle->SetDrawable(false);
 		}
 	}
-}
+} 

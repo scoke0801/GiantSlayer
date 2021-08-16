@@ -59,6 +59,11 @@ void CFireBall::Update(float fTimeElapsed)
 	}
 }
 
+void CFireBall::UpdateOnServer(float fTimeElapsed)
+{
+	Rotate(XMFLOAT3(0.3f, 1.0f, 0.0f), 360.0f * fTimeElapsed);
+}
+
 void CFireBall::SetSkill(CGameObject* owner)
 {
 	m_Owner = owner;

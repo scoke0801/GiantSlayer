@@ -550,7 +550,7 @@ void CMummy::Update(float elapsedTime)
 						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x - 60.0f, this->GetLook().y, this->GetLook().z), -1));
 					}
 
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200, -2500 });
 					Laser->SetPosition(pos);
 				}
 			}
@@ -595,7 +595,7 @@ void CMummy::Update(float elapsedTime)
 				{ 
 					m_ConnectedRoom->RecyleObject(Laser, (int)OBJECT_LAYER::Mummylaser);
 					Laser->SetDrawable(true);
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200, -2500 });
 					Laser->SetPosition(pos);
 				}
 
@@ -633,7 +633,7 @@ void CMummy::Update(float elapsedTime)
 						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x - 30.0f, this->GetLook().y, this->GetLook().z), -1));
 					}
 
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200, -2500 });
 					Laser->SetPosition(pos);
 				}
 
@@ -676,7 +676,7 @@ void CMummy::Update(float elapsedTime)
 				{
 					m_ConnectedRoom->RecyleObject(Laser, (int)OBJECT_LAYER::Mummylaser);
 					Laser->SetDrawable(true);
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200, -2500 });
 					Laser->SetPosition(pos);
 				} 
 			}
@@ -713,7 +713,7 @@ void CMummy::Update(float elapsedTime)
 						Laser->LookAtDirections(Vector3::Multifly(XMFLOAT3(this->GetLook().x + 60.0f, this->GetLook().y, this->GetLook().z), -1));
 					}
 
-					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200,0 });
+					XMFLOAT3 pos = Vector3::Add(XMFLOAT3{ this->GetPosition() }, { 0,200, -2500 });
 					Laser->SetPosition(pos);
 				}
 
