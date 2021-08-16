@@ -31,6 +31,7 @@ CBoss::CBoss(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 
 CBoss::~CBoss()
 {
+	cout << "보스 소멸자 호출\n";
 	MAIN_GAME_SCENE->isGameEnd = true;
 }
 

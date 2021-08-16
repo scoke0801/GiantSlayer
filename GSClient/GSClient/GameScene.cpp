@@ -1522,7 +1522,7 @@ void CGameScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 	if (isGameEnd)
 	{
-		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"게임 클리어!"), 10, //텍스트 인덱스추가하면 다음줄 위치를 
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"보스를 쓰러트리자 세상에 평화가 찾아왔다\n\n 게임 클리어!"), 10, //텍스트 인덱스추가하면 다음줄 위치를 
 			XMFLOAT2(0.2f, 0.31f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
 
 	}
