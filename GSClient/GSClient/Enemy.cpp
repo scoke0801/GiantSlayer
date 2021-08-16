@@ -766,11 +766,23 @@ void CMummy::Update(float elapsedTime)
 			
 		}
 	}
-
-	
-	
+	 
 	CGameObjectVer2::Animate(elapsedTime);
 	UpdateTransform(NULL);
+}
+
+void CMummy::Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (!m_isDrawable) return;
+
+	CGameObjectVer2::Draw_Shadow(pd3dCommandList, pCamera);
+}
+
+void CMummy::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (!m_isDrawable) return;
+
+	CGameObjectVer2::Draw(pd3dCommandList, pCamera);
 }
 
 void CMummy::Attack(float elapsedTime)
