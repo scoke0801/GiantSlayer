@@ -9,7 +9,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_Type = OBJ_TYPE::Player;
 
 	// Status
-	m_HP = 100;
+	m_HP = 1;
 	m_SP = 100;
 	m_ATK = 30;
 	m_DEF = 100;
@@ -27,11 +27,13 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float fTimeElapsed)
 {
-	if (m_HP <= 0 && m_AttackedDelay <= 0.1f) {
-		return;
-	}
+	/*if (m_HP <= 0 && m_AttackedDelay <= 0.1f)
+		return;*/
 
-	DisplayVector3(GetLook());
+	if (m_Alive == false)
+		return;
+
+	//DisplayVector3(m_xmf3Position);
 
 	if (m_IsCanAttack == false) {
 		if (!m_AnimationPaused)
@@ -51,7 +53,7 @@ void CPlayer::Update(float fTimeElapsed)
 					m_AnimationPaused = true;
 
 				m_StringPullTime += fTimeElapsed;
-				m_SP -= fTimeElapsed;
+				//m_SP -= fTimeElapsed;
 			}
 		}break;
 
@@ -60,7 +62,7 @@ void CPlayer::Update(float fTimeElapsed)
 		}break;
 		}
 
-		if (m_AttackWaitingTime < 0.0f) {
+		if (m_AttackWaitingTime <= 0.0f) {
 			ResetAttack();
 			m_ComboTimer = 0.2f;
 			if (m_AttackKeyDown) {
@@ -69,6 +71,12 @@ void CPlayer::Update(float fTimeElapsed)
 			}
 			else
 				m_LastAttackAnim = 0;
+
+			if (killit == true) {
+				m_Alive = false;
+				SetDrawable(false);
+				m_IsCanAttack = true;
+			}
 		}
 	}
 	else if (m_AttackedDelay > 0.0f) {
@@ -79,6 +87,8 @@ void CPlayer::Update(float fTimeElapsed)
 		}
 	}
 	else {
+		if (m_SP < 100.0f)
+			m_SP += 1.0f;
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0) {
 			if (m_ComboTimer > 0)
 				m_ComboTimer -= fTimeElapsed;
@@ -359,12 +369,7 @@ bool CPlayer::Attacked(CGameObject* pObject)
 		SetAnimationSet(AnimationType::DAMAGED);
 	}
 	else {
-		m_Alive = false;
-		m_HP = 0;
-		m_SP = 0;
-		m_AttackedDelay += m_DeathAnimLength;
-		SetAnimationType(ANIMATION_TYPE_ONCE);
-		SetAnimationSet(DEATH);
+		Death();
 	}
 
 	return true;
@@ -432,4 +437,16 @@ bool CPlayer::ShotAble()
 		return true;
 
 	return false;
+}
+
+void CPlayer::Death()
+{
+	killit = true;
+	m_IsCanAttack = false;
+	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
+	m_HP = 0;
+	m_SP = 0;
+	IncreaseAttackWaitingTime(m_DeathAnimLength);
+	SetAnimationType(ANIMATION_TYPE_ONCE);
+	SetAnimationSet(DEATH);
 }

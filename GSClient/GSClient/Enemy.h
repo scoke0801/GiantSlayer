@@ -54,6 +54,7 @@ protected:
 
 	// 공격범위
 	float					m_AttackRange;
+	float					m_SightDistance;
 
 	// 활동 범위
 	XMFLOAT3				m_xmf3ActivityScopeCenter;
@@ -67,6 +68,7 @@ protected:
 	BoundingBox				m_SightAABB;
 
 	float					m_AttackDelayTime = 0.0f;
+	float					m_AttackAnimLength = 0.0f;
 
 	float					m_Speed;
 
@@ -126,6 +128,7 @@ public:
 	EnemyAttackType GetEnemyAttackType() const { return m_AttackType; } 
 
 	float GetAttackRange() const { return m_AttackRange; }
+	float GetAttackAnimLength() const { return m_AttackAnimLength; }
 
 	void SetTargetPlayer(CPlayer* target) { m_TargetPlayer = target; }
 	CPlayer* GetTargetPlayer() const { return m_TargetPlayer; }
@@ -134,6 +137,7 @@ public:
 	 
 	EnemyType GetEnemyType() const { return m_EnemyType; }
 	void SetEnemyType(EnemyType enemyType) { m_EnemyType = enemyType; } 
+	void SetStatus(float hp, float def, float atk) { m_HP = hp; m_DEF = def; m_ATK = m_ATK; }
 };
 
 class CMeleeEnemy : public CEnemy

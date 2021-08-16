@@ -38,23 +38,24 @@ void CArrow::Update(float fTimeElapsed)
 		if (m_ElapsedTime > ARROW_LIFE_TIME) {
 			m_ElapsedTime = 0.0f;
 			m_isDrawable = true;
+			m_ConnectedParticle->SetDrawable(false);
 			//m_ConnectedParticle = nullptr;
 		}
 
 		// 
-		if (m_xmf3Position.y >= m_startPos.y + 50) {
-			falldown = true;
-		}
-		if (!falldown) {
-			m_xmf3Position = Vector3::Add(m_xmf3Position, { 0.0f, 3.0f, 0.0f });
-			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), -10.0f * fTimeElapsed);
-		}
-		else {
-			//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), 20.0f * fTimeElapsed);
-		}
+		//if (m_xmf3Position.y >= m_startPos.y + 50) {
+		//	falldown = true;
+		//}
+		//if (!falldown) {
+		//	m_xmf3Position = Vector3::Add(m_xmf3Position, { 0.0f, 3.0f, 0.0f });
+		//	//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), -10.0f * fTimeElapsed);
+		//}
+		//else {
+		//	//Rotate(XMFLOAT3(1.0f, 0.0f, 0.0f), 20.0f * fTimeElapsed);
+		//}
 
-		m_xmf3Velocity = Vector3::Subtract(m_xmf3Velocity, Vector3::Multifly(m_xmf3Velocity, AIR_RESISTANCE));
-		m_xmf3Position = Vector3::Subtract(m_xmf3Position, { 0.0f, GRAVITY * m_ElapsedTime, 0.0f });
+		//m_xmf3Velocity = Vector3::Subtract(m_xmf3Velocity, Vector3::Multifly(m_xmf3Velocity, AIR_RESISTANCE));
+		//m_xmf3Position = Vector3::Subtract(m_xmf3Position, { 0.0f, GRAVITY * m_ElapsedTime, 0.0f });
 	}
 	else return; 
 }

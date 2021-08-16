@@ -8,6 +8,7 @@ CEnemy::CEnemy() : CGameObjectVer2()
 {
 	m_Type = OBJ_TYPE::Enemy;
 	m_EnemyType = EnemyType::Skeleton;
+	m_AttackAnimLength = MELLE_ENEMY_ATTACK_TIME;
 
 	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this); 
@@ -52,37 +53,48 @@ bool CEnemy::IsEnemyInSight() // Chase State
 	if (m_AttackDelayTime > 0.0f) { 
 		return false;
 	}
-	for (auto player : m_ConnectedPlayers) { 
-		if (false == player->IsDrawable()) {
-			continue;
-		}
-		// 플레이어가 객체의 활동영역 안에 있는지 확인
-		auto plAABBs = player->GetAABB();
-		bool ret = false;
-		for (auto plAABB : plAABBs) {
-			if (ret = m_ActivityRegionBox.Intersects(plAABB->GetBox())) {
-				break;
-			}
-		}
-		
-		// 추가할 코드
-		// 만약 플레이어와 몬스터의 방향이 반대라면 쳐다볼수 없어야 한다...
+	for (auto player : m_ConnectedPlayers) {
+		if (player->m_Alive == false)
+			break;
 
-		if (false == ret) { 
-			return false;
-		}
+		float distance = Vector3::Length(Vector3::Subtract(GetPosition(), player->GetPosition()));
 
-		// 플레이어가 객체의 시야에 있는지 확인
-		for (auto plAABB : plAABBs) {
-			if (ret = m_SightAABB.Intersects(plAABB->GetBox())) {
-				// 해당 플레이어를 공격하도록 설정하자
-				//cout << "공격할 대상을 찾았습니다.\n";
-				 
-				//m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.5f; 
-				m_TargetPlayer = player;
-				return true;
-			}
+		if (m_SightDistance >= distance) {
+			m_TargetPlayer = player;
+			return true;
 		}
+		//if (false == player->IsDrawable()) {
+		//	continue;
+		//}
+		//// 플레이어가 객체의 활동영역 안에 있는지 확인
+		//auto plAABBs = player->GetAABB();
+		//bool ret = false;
+		//for (auto plAABB : plAABBs) {
+		//	if (ret = m_ActivityRegionBox.Intersects(plAABB->GetBox())) {
+		//		cout << "플레이어가 ActivityRegion에 들어옴" << endl;
+		//		break;
+		//	}
+		//}
+		//
+		//// 추가할 코드
+		//// 만약 플레이어와 몬스터의 방향이 반대라면 쳐다볼수 없어야 한다...
+
+		//if (false == ret) { 
+		//	return false;
+		//}
+
+		//// 플레이어가 객체의 시야에 있는지 확인
+		//for (auto plAABB : plAABBs) {
+		//	if (ret = m_SightAABB.Intersects(plAABB->GetBox())) {
+		//		// 해당 플레이어를 공격하도록 설정하자
+		//		//cout << "공격할 대상을 찾았습니다.\n";
+		//		 
+		//		//m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.5f; 
+		//		m_TargetPlayer = player;
+		//		cout << "타겟 플레이어 등록 성공" << endl;
+		//		return true;
+		//	}
+		//}
 	}
 	m_TargetPlayer = nullptr;
 	return false;
@@ -316,16 +328,19 @@ CRangedEnemy::CRangedEnemy()
 	m_AttackType = EnemyAttackType::Ranged;
 
 	m_EnemyType = EnemyType::Skeleton;
+	m_AttackAnimLength = RANGED_ENEMY_ATTACK_TIME;
 
 	m_AttackRange = 1200.0f;
 	//m_HeightFromTerrain = 150.0f; 
 	m_State = new PatrolState(this);
 	m_Speed = 165.0f * 2.5f;
 
-	m_HP = 100;
+	m_HP = 80;
 	m_SP = 100;
-	m_ATK = 15;
+	m_ATK = 10;
 	m_DEF = 0;
+
+	m_SightDistance = 3000.0f;
 }
  
 
@@ -339,7 +354,7 @@ void CRangedEnemy::Attack(float elapsedTime)
 	if (m_AttackDelayTime <= 0.0f) {
 		// 실제 공격!
 		cout << "원거리 몬스터 화살 발사\n"; 
-		m_AttackDelayTime = RANGED_ENEMY_ATTACK_TIME + 1.0f;
+		m_AttackDelayTime = m_AttackAnimLength;
 		MAIN_GAME_SCENE->ShotMonsterArrow(this, GetLook());
 	}
 }
@@ -361,8 +376,10 @@ CMeleeEnemy::CMeleeEnemy()
 
 	m_HP = 100;
 	m_SP = 100;
-	m_ATK = 15;
+	m_ATK = 10;
 	m_DEF = 0;
+
+	m_SightDistance = 3000.0f;
 } 
 
 CMeleeEnemy::~CMeleeEnemy()
@@ -373,7 +390,7 @@ void CMeleeEnemy::Attack(float elapsedTime)
 {
 	if (m_AttackDelayTime <= 0.0f) {
 		// 실제 공격!  
-		m_AttackDelayTime = MELLE_ENEMY_ATTACK_TIME + 1.0f; 
+		m_AttackDelayTime = m_AttackAnimLength + 1.0f;
 	}
 }
 

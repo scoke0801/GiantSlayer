@@ -95,13 +95,13 @@ void PatrolState::Enter(CEnemy* enemy)
 void PatrolState::Execute(CEnemy* enemy, float elapsedTime)
 {
     enemy->ChangeAnimation(ObjectState::Patrol);
-	if (false == enemy->IsOnMoving()) {
-		enemy->FindNextPosition();
-		enemy->SetIsOnMoving(true);
-	}
-	else {
+    if (false == enemy->IsOnMoving()) {
+        enemy->FindNextPosition();
+        enemy->SetIsOnMoving(true);
+    }
+    else {
         enemy->MoveToNextPosition(elapsedTime);
-	}
+    }
 
     if (enemy->IsEnemyInSight()) {
         if (enemy->GetEnemyType() == EnemyType::Boss) {
@@ -138,7 +138,8 @@ void AttackState::Enter(CEnemy* enemy)
         break;
     case EnemyType::Skeleton:
         m_AttackType = (int)EnemyAttackType::Melee;
-        m_LifeTime = MELLE_ENEMY_ATTACK_TIME;
+        //m_LifeTime = MELLE_ENEMY_ATTACK_TIME;
+        m_LifeTime = enemy->GetAttackAnimLength();
         break;
     case EnemyType::Mummy:
         m_AttackType = (int)enemy->GetEnemyAttackType();
@@ -158,6 +159,8 @@ void AttackState::Enter(CEnemy* enemy)
     case EnemyType::Boss: 
         // 일단 랜덤하게 테스트를 해보는 방향으로
     {
+        CBoss* pBoss = reinterpret_cast<CBoss*>(enemy);
+        pBoss->CalcNextAttackType();
         m_AttackType = (int)enemy->GetEnemyAttackType(); 
         if (m_AttackType == (int)EnemyAttackType::BossSkill_1) { 
             m_LifeTime = BOSS_ATTACK_1_ANIMATION_LENGTH;
@@ -189,6 +192,9 @@ void AttackState::Execute(CEnemy* enemy, float elapsedTime)
     if (m_LifeTime < m_ElapsedTime) { 
         enemy->ChangeState(new TraceState(enemy));
     }
+    else if (enemy->GetTargetPlayer()->m_Alive == false) {
+        enemy->ChangeState(new PatrolState(enemy));
+    }
     else {
         enemy->ChangeAnimation(ObjectState::Attack);
         enemy->Attack(elapsedTime);
@@ -211,7 +217,7 @@ void TraceState::Enter(CEnemy* enemy)
  //   cout << "TraceState::Enter \n";
     m_AttackRange = enemy->GetAttackRange();
     m_TargetPlayer = enemy->GetTargetPlayer();
-    if (m_TargetPlayer == nullptr) {
+    if (m_TargetPlayer == nullptr || m_TargetPlayer->m_Alive == false) {
         enemy->ChangeState(new PatrolState(enemy));
     }
 }

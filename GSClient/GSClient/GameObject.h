@@ -310,6 +310,7 @@ public:
 	void SetSP(UINT SP) { m_SP = SP; }
 	UINT GetSP() const { return m_SP; }
 
+
 	void SetATK(UINT ATK) { m_ATK = ATK; }
 	UINT GetATK() const { return m_ATK; }
 

@@ -60,6 +60,7 @@ private:
 	float m_ComboTimer = 0.2f;
 
 public:
+	bool killit = false;
 	bool m_Alive = true;
 
 	bool pullString = false;
@@ -121,4 +122,6 @@ public:
 	void SetAleradyAttack(bool info) { m_IsAlreadyAttack = info; }
 
 	bool ShotAble();
+
+	void Death();
 };

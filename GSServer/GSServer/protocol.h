@@ -38,8 +38,8 @@ constexpr float FIREBALL_SPEED = 1000.0f;
 constexpr float PLAYER_JUMP_HEIGHT = 165.0 * 1.75f;
 constexpr float TO_JUMP_TIME = 1.0f;
 
-constexpr float MELLE_ENEMY_ATTACK_TIME = 2.7f;
-constexpr float RANGED_ENEMY_ATTACK_TIME = 2.0f;
+constexpr float MELLE_ENEMY_ATTACK_TIME = 2.766667;
+constexpr float RANGED_ENEMY_ATTACK_TIME = 1.666667;
 constexpr float ENEMY_DEATH_TIME = 1.66666f;
 
 constexpr float MELLE_MUMMY_ATTACK_TIME = 2.7f;
