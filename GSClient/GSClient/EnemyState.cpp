@@ -343,6 +343,8 @@ void DeathState::Execute(CEnemy* enemy, float elapsedTime)
 {
     m_ElapsedTime += elapsedTime;
     if (m_ElapsedTime > m_LifeTime) {
+        if (enemy->GetEnemyType() == EnemyType::Boss)
+            MAIN_GAME_SCENE->isGameEnd = true;
         MAIN_GAME_SCENE->DeleteEnemy(enemy);
     }
 }

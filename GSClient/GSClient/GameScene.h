@@ -165,6 +165,7 @@ private: // for server mouse input process
 private:
 	CSoundManager*				m_SoundManager;
 public:
+	bool isGameEnd = false;
 	CGameScene();
 	~CGameScene();
 

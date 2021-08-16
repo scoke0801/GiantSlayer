@@ -1180,6 +1180,10 @@ void CGameScene::Update(float elapsedTime)
 			}
 		}
 	}
+
+	if (isGameEnd) {
+		m_HelpBoard->SetDrawable(true);
+	}
 }
 
 void CGameScene::UpdateForMultiplay(float elapsedTime)
@@ -1513,6 +1517,12 @@ void CGameScene::DrawFont(ID3D12GraphicsCommandList* pd3dCommandList)
 	if (m_Interaction == true)
 	{
 		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"거대한 지옥의 사냥개가 자연을 파괴하고있네\n 녀석을 해치워서 자연을 회복시켜주게"), 10, //텍스트 인덱스추가하면 다음줄 위치를 
+			XMFLOAT2(0.2f, 0.31f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
+
+	}
+	if (isGameEnd)
+	{
+		TextHandler::GetInstance().Render(pd3dCommandList, std::wstring(L"보스를 쓰러트리자 세상에 평화가 찾아왔다\n\n 게임 클리어!"), 10, //텍스트 인덱스추가하면 다음줄 위치를 
 			XMFLOAT2(0.2f, 0.31f), XMFLOAT2(2.0f, 2.0f)); // 포지션 // 스케일값
 
 	}
