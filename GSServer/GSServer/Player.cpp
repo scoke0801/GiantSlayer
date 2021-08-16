@@ -81,7 +81,10 @@ void CPlayer::Update(float fTimeElapsed)
 		if (m_xmf3Velocity.x == 0 && m_xmf3Velocity.z == 0) {
 			if (m_ComboTimer > 0)
 				m_ComboTimer -= fTimeElapsed;
-			SetAnimationSet(IDLE);
+			if (false == m_PullBox)
+			{
+				SetAnimationSet(IDLE);
+			}
 		}
 		else if (m_PullBox == true)
 		{
