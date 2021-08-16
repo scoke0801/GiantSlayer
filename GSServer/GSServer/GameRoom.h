@@ -183,5 +183,7 @@ private:
 	void DoRecv(int c_id);
 
 	void SendPacket(int p_id, void* p);
+
+	bool m_Interactions[5] = { false, };
 }; 
 

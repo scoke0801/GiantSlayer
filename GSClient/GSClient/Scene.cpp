@@ -91,4 +91,4 @@ void CNullScene::ProcessInput()
 	{
 		ChangeScene<CGameScene>(nullptr);
 	}
-}
+} 
