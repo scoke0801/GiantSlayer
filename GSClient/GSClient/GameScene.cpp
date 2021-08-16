@@ -932,18 +932,38 @@ void CGameScene::Update(float elapsedTime)
 			if (m_Chess[King]->CollisionCheck(m_Chess[i])&& i!=0 )
 			{
 				m_Player->Box_Pull(TRUE);
+				m_Chess[King]->SetPosition({
+										m_Chess[King]->GetPosition().x + Final_Vec.x,
+										m_Chess[King]->GetPosition().y ,
+										m_Chess[King]->GetPosition().z + Final_Vec.z
+					});
 			}
-			if (m_Chess[Knight]->CollisionCheck(m_Chess[i]) && i != 1)
+			else if (m_Chess[Knight]->CollisionCheck(m_Chess[i]) && i != 1)
 			{
 				m_Player->Box_Pull(TRUE);
+				m_Chess[Knight]->SetPosition({
+										m_Chess[Knight]->GetPosition().x + Final_Vec.x,
+										m_Chess[Knight]->GetPosition().y ,
+										m_Chess[Knight]->GetPosition().z + Final_Vec.z
+					});
 			}
-			if (m_Chess[Pawn]->CollisionCheck(m_Chess[i]) && i != 2)
+			else if (m_Chess[Pawn]->CollisionCheck(m_Chess[i]) && i != 2)
 			{
 				m_Player->Box_Pull(TRUE);
+				m_Chess[Pawn]->SetPosition({
+										m_Chess[Pawn]->GetPosition().x + Final_Vec.x,
+										m_Chess[Pawn]->GetPosition().y ,
+										m_Chess[Pawn]->GetPosition().z + Final_Vec.z
+					});
 			}
-			if (m_Chess[Rook]->CollisionCheck(m_Chess[i]) && i != 3)
+			else if (m_Chess[Rook]->CollisionCheck(m_Chess[i]) && i != 3)
 			{
 				m_Player->Box_Pull(TRUE);
+				m_Chess[Rook]->SetPosition({
+										m_Chess[Rook]->GetPosition().x + Final_Vec.x,
+										m_Chess[Rook]->GetPosition().y ,
+										m_Chess[Rook]->GetPosition().z + Final_Vec.z
+					});
 			}
 			else
 			{
@@ -3435,8 +3455,14 @@ void CGameScene::BuildMapSector1(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		z_Tree = 4000.0f + (600 * i);
 		x_Tree *= MAP_SCALE_SIZE;
 		z_Tree *= MAP_SCALE_SIZE;
-		pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f, z_Tree });
-
+		if (i == 1)
+		{
+			pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 340.0f,  z_Tree });
+		}
+		if (i == 0)
+		{
+			pBillboardObject->SetPosition({ x_Tree , m_Terrain->GetDetailHeight(x_Tree,z_Tree) + 640.0f,  z_Tree });
+		}
 		pBillboardObject->SetTextureIndex(0x010);
 		pBillboardObject->SetShader(CShaderHandler::GetInstance().GetData("Billboard"));
 		m_ObjectLayers[(int)OBJECT_LAYER::Billboard].push_back(pBillboardObject);
