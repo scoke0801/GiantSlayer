@@ -1635,7 +1635,6 @@ void CGameScene::DrawShadow(ID3D12GraphicsCommandList* pd3dCommandList)
 			}
 		}
 
-
 		for (auto player : m_Players) {
 			if (!player->IsDrawable()) continue;
 			player->Draw_Shadow(pd3dCommandList, m_pLightCamera);
