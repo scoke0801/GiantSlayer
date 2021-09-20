@@ -46,15 +46,24 @@ void CPlayer::Update(float fTimeElapsed)
 
 		case PlayerWeaponType::Bow: {
 			if (pullString) {
-				if (m_AttackWaitingTime < 1.2f)
-					SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
-
-				if (m_AttackWaitingTime < m_AttackAnimPauseTime)
+				if (m_AttackWaitingTime <= 0.02f)
 					m_AnimationPaused = true;
 
 				m_StringPullTime += fTimeElapsed;
-				//m_SP -= fTimeElapsed;
 			}
+
+			//if (pullString) {
+			//	//if (m_AttackWaitingTime < 1.2f)
+			//	if (m_AttackWaitingTime < 0.7f) {
+			//		SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
+			//		//SetAnimationSet(AnimationType::BOW_SHOT);
+			//	}
+			//	if (m_AttackWaitingTime < m_AttackAnimPauseTime)
+			//		m_AnimationPaused = true;
+
+			//	m_StringPullTime += fTimeElapsed;
+			//	//m_SP -= fTimeElapsed;
+			//}
 		}break;
 
 		case PlayerWeaponType::Staff: {
@@ -165,7 +174,7 @@ void CPlayer::UpdateCamera()
 			m_Camera->UpdateAimMode(m_xmf3Position);
 			auto lookVec = GetLook();
 			m_Camera->LookAt(m_Camera->GetPosition3f(), Vector3::Multifly(lookVec, 15000.0f), GetUp());
-			m_Camera->Strafe(-20);
+			m_Camera->Strafe(10);
 		}
 		else
 		{
@@ -298,13 +307,16 @@ void CPlayer::SetWeapon(PlayerWeaponType weaponType)
 	else if (weaponType == PlayerWeaponType::Bow) {
 		IDLE = AnimationType::BOW_IDLE;
 		RUN = AnimationType::BOW_RUN;
-		ATK = AnimationType::BOW_ATK;
+		ATK = AnimationType::BOW_PULL;
 		SKILL = AnimationType::BOW_SKILL;
 		DEATH = AnimationType::BOW_DEATH;
 
-		m_AttackAnimLength = 1.533333f;
+		//m_AttackAnimLength = 1.533333f;
+		m_AttackAnimLength = 1.033333f;
+		m_ShotAnimLength = 0.7f;
 		m_SkillAnimLength = 5.0f;
-		m_AttackAnimPauseTime = 0.6f;
+		//m_AttackAnimPauseTime = 0.6f;
+		m_AttackAnimPauseTime = 0.7f;
 		m_DeathAnimLength = 3.866667f;
 
 		SetDrawBow();
@@ -424,6 +436,10 @@ void CPlayer::Attack(int type)
 	else if (type == 1) {
 		IncreaseAttackWaitingTime(m_SkillAnimLength);
 		SetAnimationSet(SKILL);
+	}
+	else if (type == 2) {
+		IncreaseAttackWaitingTime(m_ShotAnimLength);
+		SetAnimationSet(SHOT);
 	}
 }
 

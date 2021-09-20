@@ -22,6 +22,7 @@ public:
 	AnimationType ATK = AnimationType::SWORD_ATK;
 	AnimationType ATK2 = AnimationType::SWORD_ATK2;
 	AnimationType ATK3 = AnimationType::SWORD_ATK3;
+	AnimationType SHOT = AnimationType::BOW_SHOT;
 	AnimationType SKILL = AnimationType::SWORD_SKILL;
 	AnimationType DEATH = AnimationType::SWORD_DEATH;
 	AnimationType CHANGEWEAPON = AnimationType::BOW_GET;
@@ -42,6 +43,7 @@ private:
 	float m_SwordAnim1Length = 0.0f;
 	float m_SwordAnim2Length = 0.0f;
 	float m_SwordAnim3Length = 0.0f;
+	float m_ShotAnimLength = 0.0f;
 	float m_SkillAnimLength = 0.0f;
 	float m_DeathAnimLength = 0.0f;
 	float m_AttackWaitingTime = 0.0f;

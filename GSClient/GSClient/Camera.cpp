@@ -88,7 +88,7 @@ void CCamera::UpdateAimMode(const XMFLOAT3& xmf3LookAt)
 
 	XMFLOAT3 dirVector = Vector3::Normalize(m_TargetPlayer->GetLook());
 
-	m_xmf3Position = Vector3::Subtract(m_TargetPlayer->GetPosition(), Vector3::Multifly(dirVector, -5));
+	m_xmf3Position = Vector3::Subtract(m_TargetPlayer->GetPosition(), Vector3::Multifly(dirVector, -35));
 	m_xmf3Position.y += 200;
 }
 

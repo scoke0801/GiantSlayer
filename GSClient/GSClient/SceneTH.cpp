@@ -1830,6 +1830,7 @@ void CSceneTH::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 				break;
 			case PlayerWeaponType::Bow:
 				if (m_Player->ShotAble()) {
+					m_Player->SetAnimationSet(AnimationType::BOW_SHOT);
 					ShotPlayerArrow();
 					m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 				}

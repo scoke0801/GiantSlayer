@@ -109,7 +109,10 @@ enum AnimationType
 	STAFF_SKILL,
 	STAFF_DEATH,
 	// ¹Ú½º==============
-	BOX_PUSH
+	BOX_PUSH,
+	// È°2
+	BOW_SHOT,
+	BOW_PULL
 	//BOX_WALK,
 	//BOX_PICK,
 	//BOX_DOWN

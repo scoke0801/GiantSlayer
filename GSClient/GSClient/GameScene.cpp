@@ -2522,6 +2522,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 					if (m_Player->GetSP() > 20.0f) {
 						m_Player->SetSP(m_Player->GetSP() - 20);
 						m_Player->Attack(0);
+						m_Player->SetDrawableRecursively("bow_arrow_RightHandMiddle1", true);
 						m_Player->pullString = true;
 					}
 					break;
@@ -2558,6 +2559,7 @@ void CGameScene::ProcessWindowKeyboard(WPARAM wParam, bool isKeyUp)
 			case PlayerWeaponType::Bow:
 				if (m_Player->ShotAble()) {
 					ShotPlayerArrow();
+					m_Player->Attack(2);
 					m_SoundManager->PlayEffect(Sound_Name::EFFECT_ARROW_SHOT);
 				}
 				else {
