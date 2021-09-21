@@ -5,10 +5,10 @@
 #pragma warning(disable  : 4996)    // mbstowcs unsafe###
 #define SERVER_ROOP   "127.0.0.1"		 // 루프백
 //#define SERVERIP   "127.0.0.1"		 // 루프백 
-//#define SERVERIP   "14.38.225.24"// 종현 
+#define SERVERIP   "14.38.225.24"// 종현 
 //#define SERVERIP	 "192.168.35.229"// 태훈?
 //#define SERVERIP   "192.168.0.15"  // 영진 
-#define SERVERIP   "14.51.123.108"  // 영진 
+//#define SERVERIP   "14.51.123.108"  // 영진 
 //#define SERVERIP   "172.30.1.39"	 // 루프백  
 
 //#define SERVERIP   "119.207.200.191"	 // 루프백 
@@ -35,17 +35,17 @@
 
 // 캡션 FPS 출력 여부 -------------------
 // 항상 캡션에 FPS를 출력		(0 : 비활성 | 1 : 활성)
-#define USE_CAPTIONFPS_ALWAYS	 0
+//#define USE_CAPTIONFPS_ALWAYS	 0
 
 #if USE_CAPTIONFPS_ALWAYS
 	//#define SHOW_CAPTIONFPS 
 #elif _DEBUG	// Debug에서는 항상 실행
-	#define SHOW_CAPTIONFPS 
+	//#define SHOW_CAPTIONFPS 
 #endif
 
-#define SHOW_CAPTIONFPS
+//#define SHOW_CAPTIONFPS
 #if defined(SHOW_CAPTIONFPS)
-	#define MAX_UPDATE_FPS 1.0f / 5.0f
+	//#define MAX_UPDATE_FPS 1.0f / 5.0f
 #endif 
 
 //-------------------------------------------------------------------

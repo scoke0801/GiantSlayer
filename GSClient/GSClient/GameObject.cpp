@@ -238,8 +238,11 @@ void CGameObject::Draw(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 }
 void CGameObject::Draw_Shadow(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	OnPrepareRender();
+	CGameObject::Draw(pd3dCommandList, pCamera);
+	return;
 
+
+	OnPrepareRender();
 	if (m_pShader)
 	{
 		//게임 객체의 월드 변환 행렬을 셰이더의 상수 버퍼로 전달(복사)한다.

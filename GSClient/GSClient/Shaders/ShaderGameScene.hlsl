@@ -810,9 +810,7 @@ DS_TERRAIN_TESSELLATION_OUTPUT DSTerrainTessellation(
 
 	return(output);
 }
-
-
-
+ 
 // PS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1136,13 +1134,13 @@ float4 PSDoorWall(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_Prim
 	{
 		cColor = gtxtDoor.Sample(gssWrap, input.uv);
 	}
-	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
+	//float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	//shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
-	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
-
-	return(cColor * cIllumination);
+	//input.normalW = normalize(input.normalW);
+	//float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
+	//return(cColor * cIllumination);
+	return(cColor);
 }
 
 float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
@@ -1168,13 +1166,13 @@ float4 PSBridgeLight(VS_TEXTURED_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_P
 	{
 		cColor = gtxtBox.Sample(gssClamp, uvw);
 	}
-	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-	shadowFactor = CalcShadowFactor_t(input.shadowPosH);
+	//float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	//shadowFactor = CalcShadowFactor_t(input.shadowPosH);
 
-	input.normalW = normalize(input.normalW);
-	float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
-
-	return(cColor * cIllumination);	 
+	//input.normalW = normalize(input.normalW);
+	//float4 cIllumination = Lighting_Shadow(input.positionW, input.normalW, gnMaterialID, shadowFactor);
+	//return(cColor * cIllumination);
+	return(cColor);
 }
 
 
